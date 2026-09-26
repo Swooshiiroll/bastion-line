@@ -53,12 +53,20 @@ static var _font: Font = null
 
 
 ## Bahnschrift ships with Windows 10+; falls back to Segoe UI / Arial elsewhere.
+## The UI font: Windows' Bahnschrift where it exists, else the bundled Barlow (SIL OFL, in fonts/),
+## a similar DIN-style face, so Linux and other systems look the same everywhere.
+## `--bundled-font` forces Barlow on Windows too, to preview it.
 static func font() -> Font:
 	if _font == null:
-		var f := SystemFont.new()
-		f.font_names = PackedStringArray(["Bahnschrift", "Segoe UI", "Arial"])
-		f.antialiasing = TextServer.FONT_ANTIALIASING_GRAY
-		_font = f
+		if OS.has_feature("windows") and not ("--bundled-font" in OS.get_cmdline_user_args()):
+			var f := SystemFont.new()
+			f.font_names = PackedStringArray(["Bahnschrift", "Segoe UI", "Arial"])
+			f.antialiasing = TextServer.FONT_ANTIALIASING_GRAY
+			_font = f
+		else:
+			var b: FontFile = load("res://fonts/Barlow-Medium.ttf")
+			b.antialiasing = TextServer.FONT_ANTIALIASING_GRAY
+			_font = b
 	return _font
 
 

@@ -16,13 +16,18 @@ A sci-fi tower defense game built in Godot 4.7 (GDScript).
 - **Saves:** save and continue.
 
 All art is drawn procedurally and all sound and music is synthesized at startup, so the project
-ships no asset files. The glow comes from additive blending, and UI text uses Windows' Bahnschrift font.
+ships no art or sound files. The glow comes from additive blending. UI text uses Windows' Bahnschrift font; on
+Linux and other systems it uses the bundled Barlow font (`fonts/`, SIL Open Font License), a similar
+DIN-style face.
 
 ## Playing
 
 - **Standalone:** `build\BastionLine.exe` (about 110 MB, game data embedded). It doesn't need Godot installed,
   so you can copy it to any 64-bit Windows PC.
-- **From source:** double-click `Play.cmd`, or run `godot --path "C:\Users\anode admin\Documents\TowerDefense"`.
+- **Linux:** `build/linux/BastionLine.x86_64` (about 74 MB, x86_64, game data embedded). Mark it
+  executable (`chmod +x`) and run it. Tested on Nobara Linux 44 (KDE). Saves go to
+  `~/.local/share/godot/app_userdata/Bastion Line/`.
+- **From source:** double-click `Play.cmd` (Windows) or run `./Play.sh` (Linux), or run `godot --path "C:\Users\anode admin\Documents\TowerDefense"`.
 - **To edit:** `godot --path "C:\Users\anode admin\Documents\TowerDefense" --editor`, then press F5 to run.
 
 Both the exe and the source build share the same saves and profile.
@@ -41,14 +46,16 @@ Both the exe and the source build share the same saves and profile.
 - **Title screen:** a drawn scene rather than a live game. It shows the Bastion core on a planet's
   horizon, a ridge of mastered towers firing up at a Leviathan and its escorts, and the menu.
 
-### Rebuilding the exe
+### Rebuilding the builds
 
-The Windows export templates for 4.7.2 are installed in `%APPDATA%\Godot\export_templates\4.7.2.stable`.
-They were extracted from the official release archive after checking it against the release's SHA512-SUMS.
-The preset lives in `export_presets.cfg` and leaves out `screenshots/` and `tests/`.
+The Windows and Linux (x86_64) export templates for 4.7.2 are installed in
+`%APPDATA%\Godot\export_templates\4.7.2.stable`. They were extracted from the official release
+archive after checking it against the release's SHA512-SUMS. The presets live in
+`export_presets.cfg` and leave out `screenshots/` and `tests/`.
 
 ```
 godot_console --headless --path . --export-release "Windows Desktop" build/BastionLine.exe
+godot_console --headless --path . --export-release "Linux" build/linux/BastionLine.x86_64
 ```
 
 ### Controls
