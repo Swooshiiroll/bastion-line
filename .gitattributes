@@ -1,0 +1,5 @@
+# Keep the files as written (LF); Windows batch files need CRLF.
+* text=auto eol=lf
+*.cmd text eol=crlf
+*.png binary
+*.pdf binary

@@ -1,0 +1,2276 @@
+<title>Bastion Line Upgrade Trees</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    color-scheme: dark;
+    --ground: #070b10; --panel: #0d1620; --panel-2: #111e2a; --rule: #1d3a4b; --wire: #2a5a70;
+    --text: #dcedf7; --dim: #86a0b1; --faint: #4f6a7b; --accent: #4de1ff; --gold: #ffc85a; --new: #6dffa0;
+    --pa: #6fb8ff; --pb: #ff9e5e; --pc: #7dffb0;
+    --display: "Chakra Petch", "Bahnschrift", "Segoe UI", sans-serif;
+    --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", "Consolas", monospace;
+  }
+  * { box-sizing: border-box; }
+  body { color: var(--text); font: 14px/1.5 var(--body); padding-inline: 16px; padding-block: 0 48px;
+    background: var(--ground) radial-gradient(circle at 1px 1px, #10202b 1px, transparent 1.5px) 0 0 / 24px 24px; }
+  .wrap { max-width: 1640px; margin: 0 auto; }
+  code, kbd { font-family: var(--mono); font-size: .92em; }
+  kbd { border: 1px solid var(--wire); border-bottom-width: 2px; padding: 0 .4em; border-radius: 3px; color: var(--text); background: var(--panel-2); }
+  .top { padding-block: 40px 20px; display: grid; gap: 14px; }
+  .eyebrow { font: 600 12px/1 var(--display); letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
+  h1 { font: 700 clamp(28px, 4.2vw, 44px)/1.05 var(--display); margin: 0; text-wrap: balance; letter-spacing: .01em; }
+  .lede { color: var(--dim); max-width: 68ch; margin: 0; }
+  .counts { display: flex; flex-wrap: wrap; gap: 8px 22px; font: 500 13px var(--mono); color: var(--dim); font-variant-numeric: tabular-nums; }
+  .counts b { color: var(--text); font-weight: 500; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 18px; align-items: center; font-size: 12.5px; color: var(--dim); }
+  .legend span { display: inline-flex; align-items: center; gap: 7px; }
+  .dot { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+  .bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: color-mix(in srgb, var(--ground) 92%, transparent);
+    backdrop-filter: blur(6px); border-bottom: 1px solid var(--rule); padding-block: 10px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .chip { font: 600 12px var(--display); letter-spacing: .04em; color: var(--text); text-decoration: none; padding: 5px 10px; border: 1px solid var(--rule);
+    border-radius: 3px; display: inline-flex; gap: 7px; align-items: center; background: var(--panel); }
+  .chip i { width: 8px; height: 8px; border-radius: 1px; background: var(--tw); }
+  .chip:hover, .chip:focus-visible { border-color: var(--tw); outline: none; }
+  .toggle { margin-left: auto; font: 600 12px var(--display); letter-spacing: .04em; color: var(--new); background: transparent; border: 1px solid color-mix(in srgb, var(--new) 45%, transparent);
+    padding: 5px 12px; border-radius: 3px; cursor: pointer; }
+  .toggle[aria-pressed="true"] { background: color-mix(in srgb, var(--new) 16%, transparent); }
+  .toggle:focus-visible { outline: 2px solid var(--new); outline-offset: 2px; }
+  .panels { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 560px), 1fr)); gap: 12px; margin-top: 18px; align-items: start; }
+  .questions { border: 1px solid var(--rule); border-left: 3px solid var(--gold); background: var(--panel); padding: 12px 16px; border-radius: 2px; }
+  .questions h2 { font: 600 13px var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--gold); margin: 0 0 6px; }
+  .questions ul { margin: 0; padding-left: 18px; color: var(--dim); display: grid; gap: 3px; }
+  .tower { margin-top: 34px; scroll-margin-top: 64px; }
+  .tower-head { display: grid; grid-template-columns: 1fr auto; gap: 4px 24px; align-items: end; border-bottom: 1px solid var(--rule); padding-bottom: 10px; margin-bottom: 14px; }
+  .tower-name { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .swatch { width: 14px; height: 14px; background: var(--tw); clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%); box-shadow: 0 0 12px var(--tw); }
+  h3 { font: 700 22px/1.1 var(--display); margin: 0; color: var(--tw); letter-spacing: .02em; }
+  .role { grid-column: 1; margin: 0; color: var(--dim); }
+  .meta { grid-column: 2; grid-row: 1 / 3; display: flex; flex-wrap: wrap; gap: 4px 18px; margin: 0; font-size: 12px; justify-content: flex-end; }
+  .meta div { display: grid; gap: 1px; }
+  .meta dt { color: var(--faint); font: 600 10.5px var(--display); letter-spacing: .12em; text-transform: uppercase; }
+  .meta dd { margin: 0; font-family: var(--mono); font-variant-numeric: tabular-nums; color: var(--text); }
+  .new { font: 600 10.5px/1 var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--ground); background: var(--new); padding: 3px 6px; border-radius: 2px; }
+  .new.big { font-size: 11px; padding: 4px 8px; }
+  .tree-scroll { overflow-x: auto; padding-bottom: 4px; }
+  .tree { display: grid; min-width: 1320px; grid-template-columns: 150px 20px 150px 28px 1fr; grid-template-rows: auto auto auto; }
+  .cell { display: flex; align-items: center; padding-block: 6px; }
+  .cell > .card { width: 100%; }
+  .t1 { grid-column: 1; grid-row: 1 / 4; }
+  .t2 { grid-column: 3; grid-row: 1 / 4; }
+  .base1 { grid-column: 2; grid-row: 1 / 4; }
+  .base2 { grid-column: 4; grid-row: 1 / 4; }
+  .fork { grid-column: 4; }
+  .branch { grid-column: 5; display: grid; grid-template-columns: 1.3fr repeat(3, 1fr) 1.35fr; gap: 0 18px; padding-block: 6px; align-items: stretch; }
+  .r1 { grid-row: 1; } .r2 { grid-row: 2; } .r3 { grid-row: 3; }
+  .link, .fork { position: relative; }
+  .link::before, .fork::before, .fork::after { content: ""; position: absolute; background: var(--wire); }
+  .link::before { left: 0; right: 0; top: 50%; height: 2px; margin-top: -1px; }
+  .base2::before { right: 50%; }
+  .fork::before { left: 50%; right: 0; top: 50%; height: 2px; margin-top: -1px; }
+  .fork::after { left: 50%; width: 2px; margin-left: -1px; top: 0; bottom: 0; }
+  .fork.r1::after { top: 50%; } .fork.r3::after { bottom: 50%; }
+  .branch > .card:not(:last-child)::after { content: ""; position: absolute; top: 50%; right: -19px; width: 18px; height: 2px; margin-top: -1px; background: var(--wire); }
+  .fork.r3::before, .branch.r3 > .card:not(:last-child)::after { background: color-mix(in srgb, var(--pc) 55%, var(--wire)); }
+  .card.step { padding: 8px 10px 9px; gap: 4px; }
+  .card.step h4 { font-size: 14px; }
+  .card.step .fx { font-size: 12px; }
+  .card.spec h4, .card.mastery h4 { font-size: 16.5px; }
+  .card { background: var(--panel); border: 1px solid var(--rule); border-radius: 3px; padding: 10px 12px 11px; display: grid; gap: 5px; position: relative; transition: opacity .2s; }
+  .card::before { content: ""; position: absolute; left: -1px; top: -1px; bottom: -1px; width: 3px; background: var(--edge, var(--tw)); border-radius: 3px 0 0 3px; }
+  .card.path-a { --edge: var(--pa); } .card.path-b { --edge: var(--pb); } .card.path-c { --edge: var(--pc); }
+  .card.spec { border-color: color-mix(in srgb, var(--edge) 35%, var(--rule)); }
+  .card.mastery { background: linear-gradient(180deg, color-mix(in srgb, var(--gold) 7%, var(--panel)), var(--panel)); border-color: color-mix(in srgb, var(--gold) 40%, var(--rule)); }
+  .card.is-new { border-color: color-mix(in srgb, var(--new) 45%, var(--rule)); }
+  .card header { display: flex; align-items: center; gap: 8px; }
+  .tag { font: 600 10.5px var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
+  .mastery .tag { color: var(--gold); }
+  .cost { margin-left: auto; font: 500 12px var(--mono); color: var(--gold); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .card h4 { margin: 0; font: 600 16px/1.2 var(--display); letter-spacing: .01em; }
+  .stats { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 3px 5px; }
+  .stats li { font: 400 11.5px/1.35 var(--mono); color: var(--text); background: var(--panel-2); border: 1px solid var(--rule); padding: 1px 5px; border-radius: 2px; }
+  .fx { margin: 0; color: var(--dim); font-size: 12.5px; line-height: 1.45; }
+  .missing { color: var(--faint); font-style: italic; }
+  .sec { margin-top: 3px; padding: 6px 8px 7px; border: 1px dashed var(--wire); border-radius: 2px; display: grid; gap: 4px; background: color-mix(in srgb, var(--edge) 5%, transparent); }
+  .stats li.down { color: var(--pb); border-color: color-mix(in srgb, var(--pb) 35%, var(--rule)); }
+  .sec-tag { font: 600 10px var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--edge); }
+  .cap { justify-self: start; font: 600 10px var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--dim); border: 1px dashed var(--wire); padding: 2px 6px; border-radius: 2px; }
+  .panel-rules { border-left-color: var(--accent); } .panel-rules h2 { color: var(--accent); }
+  .panel-combinations { border-left-color: var(--pb); } .panel-combinations h2 { color: var(--pb); }
+  .panel-research { border-left-color: var(--new); } .panel-research h2 { color: var(--new); }
+  .panel-open-questions { border-left-color: var(--faint); } .panel-open-questions h2 { color: var(--dim); }
+  body.focus-new .card.is-old { opacity: .32; }
+  footer { margin-top: 44px; color: var(--faint); font-size: 12px; border-top: 1px solid var(--rule); padding-top: 12px; }
+  @media (max-width: 760px) {
+    .tower-head { grid-template-columns: 1fr; } .meta { grid-column: 1; grid-row: auto; justify-content: flex-start; }
+    .tree { display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+    .link, .fork { display: none; }
+    .cell { padding: 0; }
+    .branch { display: flex; flex-direction: column; gap: 6px; padding: 0 0 0 14px; border-left: 2px solid var(--wire); }
+    .branch > .card::after { display: none; }
+    .toggle { margin-left: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) { .card { transition: none; } }
+</style>
+<div class="wrap">
+  <div class="top">
+    <span class="eyebrow">Bastion Line · design draft</span>
+    <h1>Bastion Line upgrade trees</h1>
+    <p class="lede">Every tower's upgrade tree: a two-tier trunk, then three branches (A, B and the new C). Each branch is four upgrades, starting with the specialization you pick, and ends in a mastery. A tower can also take the first two upgrades of one other branch as a secondary, with their full effects. Green marks new content. The page is built from <code>design/upgrade_trees.md</code>.</p>
+    <div class="counts"><span><b>15</b> towers</span><span><b>4</b> new towers</span><span><b>45</b> branches</span><span><b>255</b> upgrade nodes</span><span><b>189</b> new nodes</span><span><b>22</b> changed</span></div>
+    <div class="legend">
+      <span><i class="dot" style="background:var(--pa)"></i>Path A</span>
+      <span><i class="dot" style="background:var(--pb)"></i>Path B</span>
+      <span><i class="dot" style="background:var(--pc)"></i>Path C</span>
+      <span><i class="dot" style="background:var(--gold)"></i>Mastery (needs research)</span>
+      <span><span class="new">new</span>New node</span>
+    </div>
+    <div class="panels"><div class="questions panel-rules"><h2>Rules</h2><ul><li>After Tier 2 a tower can climb up to two branches, in any order and switching between them freely, up to two upgrades on each. Once two branches are started, the third is locked.</li><li>Buying the third upgrade on either branch makes it the primary: it can go on to its mastery, and the other branch (the secondary) is blocked where it is, at one or two upgrades.</li><li>A secondary branch works exactly as it would as a primary: its specialization and the step after it give their full effects. The branch is just capped at two upgrades.</li><li>So that two branches stack, the game applies every upgrade as its difference from the node before it (a specialization as its difference from Tier 2). The tower's stats are Tier 2 plus every upgrade it owns. Each specialization card on the page shows what it adds this way.</li><li>A secondary's stat changes apply in full, downsides included: Supernova as a secondary adds +70 damage but also slows the waves by 0.15/s.</li><li>Specializations that change how the tower attacks (marked <code>attack:</code> in a tower's metadata) don't bring their stat line as a secondary. They add their attack alongside the primary's instead (see Combinations).</li><li>All three branches are open from the start. Masteries still need research: one node per tower unlocks all three of its masteries.</li><li>Keys: <code>U</code>, <code>I</code> and <code>O</code> buy the next upgrade on branches A, B and C. The new towers are built with <code>=</code>, <code>[</code> and <code>]</code>.</li><li>A mastery costs 1.35× its v3.0 price, and never less than 12% above the upgrade before it.</li><li>Selling refunds the whole tower as today; there's no respec.</li></ul></div><div class="questions panel-combinations"><h2>Combinations</h2><ul><li>Some specializations change how a tower attacks. When one of those is the secondary, the primary keeps its attack and the secondary's attack is added alongside it:</li><li>Pulse Turret: a Flechette secondary fires a flechette cone every third volley.</li><li>Arc Coil: an Ion Storm secondary leaves a storm field where each discharge lands; with an Ion Storm primary, Overload makes the storm's ticks stun and Storm Coil makes it arc to 2 nearby enemies.</li><li>Laser Lance: a Sweeper secondary makes a locked beam sweep 25° around its target; with a Sweeper primary, Focus Lens ramps damage on enemies the beam crosses repeatedly, and Prism Array adds beams.</li><li>Graviton Projector: a Gravity Well secondary makes every second pulse pull instead of shove; with a Gravity Well primary, Repulsor adds a shove on the pulse that releases, and Crush Field adds its stun.</li><li>Nova Reactor: branches stack as numbers, since every branch keeps the shockwave.</li><li>Drone Bay: secondaries add their drones to the primary's wing (a Bomber Wing secondary adds 2 bombers).</li><li>Other specializations stack as numbers (Cluster Munitions adds its bomblets, Dual Purpose its ground hits).</li></ul></div><div class="questions panel-research"><h2>Research</h2><ul><li>The three new towers each get a Research Lab tree in the same shape as the others (8 RP): a root node, a range branch, a signature branch and the Mastery.</li><li>Nullifier: Null Coils (+6% barrier strip) → Wide Emitters (+10% field) and Rapid Discharge (−10% pulse interval) → Nullifier Mastery.</li><li>Nova Reactor: Reactor Tuning (+6% damage) → Shock Lensing (+8% radius) and Fusion Stability (+10% wave rate) → Nova Mastery.</li><li>Drone Bay: Drone Firmware (+6% damage) → Long-Range Uplink (+10% drone speed) and Spare Airframes (+1 drone) → Drone Bay Mastery.</li><li>The whole lab goes from 98 to 122 RP. The records can still earn 150, so it can be maxed.</li></ul></div><div class="questions panel-open-questions"><h2>Open questions</h2><ul><li>All numbers on new nodes are placeholders until the balance probe has run with them in the game.</li><li>Pairs with opposite trade-offs are the strongest combinations (Pulse Reactor with Supernova, Sky Shredder with Proximity Burst, Gatling Pulse with Shredder). Watch them first when probing.</li></ul></div></div>
+  </div>
+  <nav class="bar" aria-label="Towers">
+    <a class="chip" href="#arrow" style="--tw:#4de6ff"><i></i>Pulse Turret</a><a class="chip" href="#cannon" style="--tw:#ff8c33"><i></i>Plasma Mortar</a><a class="chip" href="#frost" style="--tw:#8cd9ff"><i></i>Cryo Emitter</a><a class="chip" href="#sniper" style="--tw:#73ff8c"><i></i>Railgun</a><a class="chip" href="#tesla" style="--tw:#bf80ff"><i></i>Arc Coil</a><a class="chip" href="#laser" style="--tw:#ff4d59"><i></i>Laser Lance</a><a class="chip" href="#missile" style="--tw:#ffd94d"><i></i>Missile Battery</a><a class="chip" href="#amp" style="--tw:#ff66d9"><i></i>Amplifier Pylon</a><a class="chip" href="#flak" style="--tw:#d9ff73"><i></i>Flak Battery</a><a class="chip" href="#sensor" style="--tw:#59ffd9"><i></i>Sensor Array</a><a class="chip" href="#gravity" style="--tw:#9973ff"><i></i>Graviton Projector</a><a class="chip" href="#nullifier" style="--tw:#c8b6ff"><i></i>Nullifier</a><a class="chip" href="#nova" style="--tw:#ffb347"><i></i>Nova Reactor</a><a class="chip" href="#drones" style="--tw:#9fe870"><i></i>Drone Bay</a><a class="chip" href="#scrap" style="--tw:#f2b86b"><i></i>Scrapyard</a>
+    <button class="toggle" id="focus-new" type="button" aria-pressed="false">Highlight new</button>
+  </nav>
+  <section class="tower" id="arrow" style="--tw:#4de6ff">
+    <header class="tower-head">
+      <div class="tower-name"><span class="swatch"></span><h3>Pulse Turret</h3></div>
+      <p class="role">Rapid single-target bolts.</p>
+      <dl class="meta">
+        <div><dt>Key</dt><dd><kbd>1</kbd></dd></div>
+        <div><dt>Hits</dt><dd>air + ground</dd></div>
+        <div><dt>Maxed</dt><dd>A 1340 · B 1340 · C 1340 cr</dd></div>
+        <div><dt>New nodes</dt><dd>13 of 17</dd></div>
+      </dl>
+    </header>
+    <div class="tree-scroll"><div class="tree">
+      <div class="cell t1"><article class="card trunk is-old path-base" style="--tw:#4de6ff">
+    <header><span class="tag">Tier 1</span><span class="cost">50 cr</span></header>
+    <h4>Pulse Turret</h4>
+    <ul class="stats"><li>9 dmg</li><li>140 range</li><li>2.0/s</li></ul>
+    <p class="fx">A compact turret that fires rapid energy bolts at one target, air or ground.</p>
+    
+    
+  </article></div>
+      <div class="link base1" aria-hidden="true"></div>
+      <div class="cell t2"><article class="card trunk is-old path-base" style="--tw:#4de6ff">
+    <header><span class="tag">Tier 2</span><span class="cost">70 cr</span></header>
+    <h4>Tier 2</h4>
+    <ul class="stats"><li>15 dmg</li><li>152 range</li><li>2.4/s</li></ul>
+    <p class="fx">Twin emitters: harder-hitting bolts, fired faster and a little further.</p>
+    
+    
+  </article></div>
+      <div class="link base2" aria-hidden="true"></div>
+      <div class="fork r1" aria-hidden="true"></div>
+      <div class="branch r1"><article class="card spec is-old path-a" style="--tw:#4de6ff">
+    <header><span class="tag">A1 · specialization</span><span class="cost">140 cr</span></header>
+    <h4>Gatling Pulse</h4>
+    <ul class="stats"><li>16 dmg</li><li>160 range</li><li>5.0/s</li></ul>
+    <p class="fx">Four spinning barrels: double the rate of fire.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">+1 dmg</li><li class="">+8 range</li><li class="">+2.6/s</li></ul></div>
+    
+  </article><article class="card step is-new path-a" style="--tw:#4de6ff">
+    <header><span class="tag">A2</span><span class="new">new</span><span class="cost">170 cr</span></header>
+    <h4>Cooled Barrels</h4>
+    <ul class="stats"><li>+0.4/s</li></ul>
+    <p class="fx">Liquid cooling keeps the barrels spinning.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-a" style="--tw:#4de6ff">
+    <header><span class="tag">A3</span><span class="new">new</span><span class="cost">200 cr</span></header>
+    <h4>Hardened Bolts</h4>
+    <ul class="stats"><li>+3 dmg</li></ul>
+    <p class="fx">Denser bolt casings that hit harder on every one of the many shots.</p>
+    
+    
+  </article><article class="card step is-new path-a" style="--tw:#4de6ff">
+    <header><span class="tag">A4</span><span class="new">new</span><span class="cost">300 cr</span></header>
+    <h4>Belt Feed</h4>
+    <ul class="stats"><li>+10 range</li><li>+0.6/s</li><li>+2 dmg</li></ul>
+    <p class="fx">A continuous ammo belt and a raised mount: faster fire, more damage and longer reach.</p>
+    
+    
+  </article><article class="card mastery is-new path-a" style="--tw:#4de6ff">
+    <header><span class="tag">A · mastery</span><span class="new">changed</span><span class="cost">410 cr</span></header>
+    <h4>Storm Gatling</h4>
+    <ul class="stats"><li>24 dmg</li><li>175 range</li><li>7.0/s</li><li>2 targets</li></ul>
+    <p class="fx">Twin ammo feeds: every volley also fires at a second target.</p>
+    
+    
+  </article></div>
+      <div class="fork r2" aria-hidden="true"></div>
+      <div class="branch r2"><article class="card spec is-old path-b" style="--tw:#4de6ff">
+    <header><span class="tag">B1 · specialization</span><span class="cost">140 cr</span></header>
+    <h4>Shredder</h4>
+    <ul class="stats"><li>28 dmg</li><li>165 range</li><li>3.0/s</li><li>shred 1 (max 8)</li></ul>
+    <p class="fx">Each hit permanently strips 1 armor.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">+13 dmg</li><li class="">+13 range</li><li class="">+0.6/s</li><li class="">shred 1 (max 8)</li></ul></div>
+    
+  </article><article class="card step is-new path-b" style="--tw:#4de6ff">
+    <header><span class="tag">B2</span><span class="new">new</span><span class="cost">170 cr</span></header>
+    <h4>Serrated Rounds</h4>
+    <ul class="stats"><li>+4 dmg</li></ul>
+    <p class="fx">Saw-toothed rounds that bite deeper into the plating they've already stripped.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-b" style="--tw:#4de6ff">
+    <header><span class="tag">B3</span><span class="new">new</span><span class="cost">200 cr</span></header>
+    <h4>Tungsten Core</h4>
+    <ul class="stats"><li>shred max +2</li></ul>
+    <p class="fx">Strips up to 10 armor.</p>
+    
+    
+  </article><article class="card step is-new path-b" style="--tw:#4de6ff">
+    <header><span class="tag">B4</span><span class="new">new</span><span class="cost">300 cr</span></header>
+    <h4>Fracture Rounds</h4>
+    <ul class="stats"><li>+0.3/s</li><li>+6 dmg</li><li>+10 range</li></ul>
+    <p class="fx">Rounds that shatter on impact: more damage, faster cycling and a longer reach.</p>
+    
+    
+  </article><article class="card mastery is-new path-b" style="--tw:#4de6ff">
+    <header><span class="tag">B · mastery</span><span class="new">changed</span><span class="cost">410 cr</span></header>
+    <h4>Disintegrator</h4>
+    <ul class="stats"><li>52 dmg</li><li>180 range</li><li>3.6/s</li><li>shred 2 (max 14)</li></ul>
+    <p class="fx">Each hit strips 2 armor. Dreadnoughts come apart.</p>
+    
+    
+  </article></div>
+      <div class="fork r3" aria-hidden="true"></div>
+      <div class="branch r3"><article class="card spec is-new path-c" style="--tw:#4de6ff">
+    <header><span class="tag">C1 · specialization</span><span class="new">new</span><span class="cost">140 cr</span></header>
+    <h4>Flechette</h4>
+    <ul class="stats"><li>11 dmg × 6</li><li>130 range</li><li>1.6/s</li><li>45° cone</li></ul>
+    <p class="fx">Fires a cone of flechettes that hits every enemy in the arc, air and ground.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><p class="fx">Adds its attack alongside the primary's (see Combinations).</p></div>
+    
+  </article><article class="card step is-new path-c" style="--tw:#4de6ff">
+    <header><span class="tag">C2</span><span class="new">new</span><span class="cost">170 cr</span></header>
+    <h4>Wider Choke</h4>
+    <ul class="stats"><li>+5° cone</li></ul>
+    <p class="fx">A wider choke spreads the flechettes over a broader arc.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-c" style="--tw:#4de6ff">
+    <header><span class="tag">C3</span><span class="new">new</span><span class="cost">200 cr</span></header>
+    <h4>Dense Pack</h4>
+    <ul class="stats"><li>+1 flechette</li></ul>
+    <p class="fx">Packs one more flechette into every shell.</p>
+    
+    
+  </article><article class="card step is-new path-c" style="--tw:#4de6ff">
+    <header><span class="tag">C4</span><span class="new">new</span><span class="cost">300 cr</span></header>
+    <h4>Rapid Pump</h4>
+    <ul class="stats"><li>+3 dmg</li><li>+0.3/s</li></ul>
+    <p class="fx">A pump-action loader and heavier darts: faster volleys that hit harder.</p>
+    
+    
+  </article><article class="card mastery is-new path-c" style="--tw:#4de6ff">
+    <header><span class="tag">C · mastery</span><span class="new">new</span><span class="cost">410 cr</span></header>
+    <h4>Hailstorm</h4>
+    <ul class="stats"><li>16 dmg × 9</li><li>145 range</li><li>2.0/s</li><li>60° cone</li><li>bypasses barriers</li></ul>
+    <p class="fx">A wider cone, and flechettes slip past barriers to hit the hull directly.</p>
+    
+    
+  </article></div>
+    </div></div>
+  </section><section class="tower" id="cannon" style="--tw:#ff8c33">
+    <header class="tower-head">
+      <div class="tower-name"><span class="swatch"></span><h3>Plasma Mortar</h3></div>
+      <p class="role">Splash damage, ground only.</p>
+      <dl class="meta">
+        <div><dt>Key</dt><dd><kbd>2</kbd></dd></div>
+        <div><dt>Hits</dt><dd>ground</dd></div>
+        <div><dt>Maxed</dt><dd>A 1930 · B 1930 · C 1930 cr</dd></div>
+        <div><dt>New nodes</dt><dd>13 of 17</dd></div>
+      </dl>
+    </header>
+    <div class="tree-scroll"><div class="tree">
+      <div class="cell t1"><article class="card trunk is-old path-base" style="--tw:#ff8c33">
+    <header><span class="tag">Tier 1</span><span class="cost">90 cr</span></header>
+    <h4>Plasma Mortar</h4>
+    <ul class="stats"><li>22 dmg</li><li>130 range</li><li>0.7/s</li><li>55 blast</li></ul>
+    <p class="fx">Lobs plasma shells that burst over an area, hitting every ground enemy in the blast.</p>
+    
+    
+  </article></div>
+      <div class="link base1" aria-hidden="true"></div>
+      <div class="cell t2"><article class="card trunk is-old path-base" style="--tw:#ff8c33">
+    <header><span class="tag">Tier 2</span><span class="cost">120 cr</span></header>
+    <h4>Tier 2</h4>
+    <ul class="stats"><li>40 dmg</li><li>140 range</li><li>0.75/s</li><li>65 blast</li></ul>
+    <p class="fx">Bigger shells: more damage, a wider blast and a little more range.</p>
+    
+    
+  </article></div>
+      <div class="link base2" aria-hidden="true"></div>
+      <div class="fork r1" aria-hidden="true"></div>
+      <div class="branch r1"><article class="card spec is-old path-a" style="--tw:#ff8c33">
+    <header><span class="tag">A1 · specialization</span><span class="cost">210 cr</span></header>
+    <h4>Siege Mortar</h4>
+    <ul class="stats"><li>80 dmg</li><li>165 range</li><li>0.8/s</li><li>90 blast</li></ul>
+    <p class="fx">Heavier shells, a much bigger blast and longer range.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">+40 dmg</li><li class="">+25 range</li><li class="">+0.05/s</li><li class="">+25 blast</li></ul></div>
+    
+  </article><article class="card step is-new path-a" style="--tw:#ff8c33">
+    <header><span class="tag">A2</span><span class="new">new</span><span class="cost">250 cr</span></header>
+    <h4>Long Barrel</h4>
+    <ul class="stats"><li>+10 range</li></ul>
+    <p class="fx">A longer barrel reaches further down the lane.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-a" style="--tw:#ff8c33">
+    <header><span class="tag">A3</span><span class="new">new</span><span class="cost">300 cr</span></header>
+    <h4>Heavy Payload</h4>
+    <ul class="stats"><li>+20 dmg</li></ul>
+    <p class="fx">Heavier shells for much bigger hits.</p>
+    
+    
+  </article><article class="card step is-new path-a" style="--tw:#ff8c33">
+    <header><span class="tag">A4</span><span class="new">new</span><span class="cost">450 cr</span></header>
+    <h4>Auto-Loader</h4>
+    <ul class="stats"><li>+8 blast</li><li>+0.1/s</li></ul>
+    <p class="fx">An automatic loader and wider-dispersal shells: faster fire and a bigger blast.</p>
+    
+    
+  </article><article class="card mastery is-new path-a" style="--tw:#ff8c33">
+    <header><span class="tag">A · mastery</span><span class="new">changed</span><span class="cost">510 cr</span></header>
+    <h4>Earthshaker</h4>
+    <ul class="stats"><li>150 dmg</li><li>190 range</li><li>0.95/s</li><li>110 blast</li><li>0.4 s stun</li></ul>
+    <p class="fx">Shockwave shells stun everything in the blast (bosses 0.12 s).</p>
+    
+    
+  </article></div>
+      <div class="fork r2" aria-hidden="true"></div>
+      <div class="branch r2"><article class="card spec is-old path-b" style="--tw:#ff8c33">
+    <header><span class="tag">B1 · specialization</span><span class="cost">210 cr</span></header>
+    <h4>Plasma Burn</h4>
+    <ul class="stats"><li>55 dmg</li><li>150 range</li><li>70 blast</li><li>32 burn/s for 3 s</li></ul>
+    <p class="fx">Leaves a plasma pool that burns ground enemies, ignoring armor.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">+15 dmg</li><li class="">+10 range</li><li class="">+5 blast</li><li class="">32 burn/s for 3 s</li></ul></div>
+    
+  </article><article class="card step is-new path-b" style="--tw:#ff8c33">
+    <header><span class="tag">B2</span><span class="new">new</span><span class="cost">250 cr</span></header>
+    <h4>Hotter Plasma</h4>
+    <ul class="stats"><li>+8 burn/s</li></ul>
+    <p class="fx">Hotter plasma: the pools burn harder.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-b" style="--tw:#ff8c33">
+    <header><span class="tag">B3</span><span class="new">new</span><span class="cost">300 cr</span></header>
+    <h4>Sticky Gel</h4>
+    <ul class="stats"><li>+1 s burn</li></ul>
+    <p class="fx">A sticky gel binder keeps the pools burning for an extra second.</p>
+    
+    
+  </article><article class="card step is-new path-b" style="--tw:#ff8c33">
+    <header><span class="tag">B4</span><span class="new">new</span><span class="cost">450 cr</span></header>
+    <h4>Pressurized Tanks</h4>
+    <ul class="stats"><li>+6 blast</li><li>+15 dmg</li><li>+8 burn/s</li></ul>
+    <p class="fx">Pressurized tanks: bigger shells, wider pools and hotter burns.</p>
+    
+    
+  </article><article class="card mastery is-new path-b" style="--tw:#ff8c33">
+    <header><span class="tag">B · mastery</span><span class="new">changed</span><span class="cost">510 cr</span></header>
+    <h4>Inferno Mortar</h4>
+    <ul class="stats"><li>90 dmg</li><li>165 range</li><li>85 blast</li><li>65 burn/s for 5 s</li></ul>
+    <p class="fx">White-hot pools that burn longer and hotter.</p>
+    
+    
+  </article></div>
+      <div class="fork r3" aria-hidden="true"></div>
+      <div class="branch r3"><article class="card spec is-new path-c" style="--tw:#ff8c33">
+    <header><span class="tag">C1 · specialization</span><span class="new">new</span><span class="cost">210 cr</span></header>
+    <h4>Bunker Buster</h4>
+    <ul class="stats"><li>70 dmg</li><li>150 range</li><li>0.7/s</li><li>60 blast</li><li>−3 armor for 4 s</li><li>hits burrowed</li></ul>
+    <p class="fx">Delayed-fuse shells detonate underground: they hit burrowed enemies and strip armor from everything in the blast.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">+30 dmg</li><li class="">+10 range</li><li class="down">−0.05/s</li><li class="down">−5 blast</li><li class="down">−3 armor for 4 s</li><li class="">hits burrowed</li></ul></div>
+    
+  </article><article class="card step is-new path-c" style="--tw:#ff8c33">
+    <header><span class="tag">C2</span><span class="new">new</span><span class="cost">250 cr</span></header>
+    <h4>Deep Fuse</h4>
+    <ul class="stats"><li>+10 dmg</li></ul>
+    <p class="fx">A deeper fuse drives the shell further before it goes off, for more damage.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-c" style="--tw:#ff8c33">
+    <header><span class="tag">C3</span><span class="new">new</span><span class="cost">300 cr</span></header>
+    <h4>Penetrator Tip</h4>
+    <ul class="stats"><li>−1 more armor</li></ul>
+    <p class="fx">Penetrator tips strip one more point of armor from everything in the blast.</p>
+    
+    
+  </article><article class="card step is-new path-c" style="--tw:#ff8c33">
+    <header><span class="tag">C4</span><span class="new">new</span><span class="cost">450 cr</span></header>
+    <h4>Twin Charges</h4>
+    <ul class="stats"><li>+8 blast</li><li>+0.1/s</li></ul>
+    <p class="fx">Two charges per shell: faster fire and a wider shockwave underground.</p>
+    
+    
+  </article><article class="card mastery is-new path-c" style="--tw:#ff8c33">
+    <header><span class="tag">C · mastery</span><span class="new">new</span><span class="cost">510 cr</span></header>
+    <h4>Seismic Charge</h4>
+    <ul class="stats"><li>130 dmg</li><li>165 range</li><li>0.85/s</li><li>80 blast</li><li>−6 armor for 5 s</li><li>hits burrowed</li><li>unearths for 4 s</li></ul>
+    <p class="fx">Collapses tunnels: burrowed enemies in the blast are forced up and can't dig again for 4 s.</p>
+    
+    
+  </article></div>
+    </div></div>
+  </section><section class="tower" id="frost" style="--tw:#8cd9ff">
+    <header class="tower-head">
+      <div class="tower-name"><span class="swatch"></span><h3>Cryo Emitter</h3></div>
+      <p class="role">Area slow plus light damage.</p>
+      <dl class="meta">
+        <div><dt>Key</dt><dd><kbd>3</kbd></dd></div>
+        <div><dt>Hits</dt><dd>air + ground</dd></div>
+        <div><dt>Maxed</dt><dd>A 1410 · B 1410 · C 1410 cr</dd></div>
+        <div><dt>New nodes</dt><dd>13 of 17</dd></div>
+      </dl>
+    </header>
+    <div class="tree-scroll"><div class="tree">
+      <div class="cell t1"><article class="card trunk is-old path-base" style="--tw:#8cd9ff">
+    <header><span class="tag">Tier 1</span><span class="cost">70 cr</span></header>
+    <h4>Cryo Emitter</h4>
+    <ul class="stats"><li>3 dmg</li><li>105 range</li><li>35% slow</li></ul>
+    <p class="fx">Pulses a freezing field that slows every enemy in range and deals light damage.</p>
+    
+    
+  </article></div>
+      <div class="link base1" aria-hidden="true"></div>
+      <div class="cell t2"><article class="card trunk is-old path-base" style="--tw:#8cd9ff">
+    <header><span class="tag">Tier 2</span><span class="cost">90 cr</span></header>
+    <h4>Tier 2</h4>
+    <ul class="stats"><li>6 dmg</li><li>118 range</li><li>45% slow</li></ul>
+    <p class="fx">A stronger coolant loop: a deeper slow over a wider field.</p>
+    
+    
+  </article></div>
+      <div class="link base2" aria-hidden="true"></div>
+      <div class="fork r1" aria-hidden="true"></div>
+      <div class="branch r1"><article class="card spec is-old path-a" style="--tw:#8cd9ff">
+    <header><span class="tag">A1 · specialization</span><span class="cost">150 cr</span></header>
+    <h4>Stasis Field</h4>
+    <ul class="stats"><li>10 dmg</li><li>145 range</li><li>65% slow</li></ul>
+    <p class="fx">Near-freezing slow over a wide area.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">+4 dmg</li><li class="">+27 range</li><li class="">+20% slow</li></ul></div>
+    
+  </article><article class="card step is-new path-a" style="--tw:#8cd9ff">
+    <header><span class="tag">A2</span><span class="new">new</span><span class="cost">180 cr</span></header>
+    <h4>Wider Coils</h4>
+    <ul class="stats"><li>+10 range</li></ul>
+    <p class="fx">Wider emitter coils stretch the stasis field.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-a" style="--tw:#8cd9ff">
+    <header><span class="tag">A3</span><span class="new">new</span><span class="cost">220 cr</span></header>
+    <h4>Deep Chill</h4>
+    <ul class="stats"><li>+0.3 s slow duration</li></ul>
+    <p class="fx">A deeper chill: enemies stay slowed 0.3 s longer after each pulse.</p>
+    
+    
+  </article><article class="card step is-new path-a" style="--tw:#8cd9ff">
+    <header><span class="tag">A4</span><span class="new">new</span><span class="cost">320 cr</span></header>
+    <h4>Cryo Pumps</h4>
+    <ul class="stats"><li>+4 dmg</li><li>+15 range</li></ul>
+    <p class="fx">Upgraded cryo pumps: a much wider field and ice spikes that hurt a little more.</p>
+    
+    
+  </article><article class="card mastery is-new path-a" style="--tw:#8cd9ff">
+    <header><span class="tag">A · mastery</span><span class="new">changed</span><span class="cost">380 cr</span></header>
+    <h4>Absolute Zero</h4>
+    <ul class="stats"><li>22 dmg</li><li>185 range</li><li>70% slow</li></ul>
+    <p class="fx">The maximum slow over the widest field in the arsenal.</p>
+    
+    
+  </article></div>
+      <div class="fork r2" aria-hidden="true"></div>
+      <div class="branch r2"><article class="card spec is-old path-b" style="--tw:#8cd9ff">
+    <header><span class="tag">B1 · specialization</span><span class="cost">150 cr</span></header>
+    <h4>Shatter Field</h4>
+    <ul class="stats"><li>12 dmg</li><li>132 range</li><li>50% slow</li><li>+25% damage taken</li></ul>
+    <p class="fx">Chilled enemies take more damage from every source.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">+6 dmg</li><li class="">+14 range</li><li class="">+5% slow</li><li class="">+25% damage taken</li></ul></div>
+    
+  </article><article class="card step is-new path-b" style="--tw:#8cd9ff">
+    <header><span class="tag">B2</span><span class="new">new</span><span class="cost">180 cr</span></header>
+    <h4>Brittle Frost</h4>
+    <ul class="stats"><li>+5% damage taken</li></ul>
+    <p class="fx">Brittle frost makes chilled enemies take 5% more damage from everything.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-b" style="--tw:#8cd9ff">
+    <header><span class="tag">B3</span><span class="new">new</span><span class="cost">220 cr</span></header>
+    <h4>Fast Freeze</h4>
+    <ul class="stats"><li>+0.15/s pulses</li></ul>
+    <p class="fx">Faster freezing cycles: the field pulses more often.</p>
+    
+    
+  </article><article class="card step is-new path-b" style="--tw:#8cd9ff">
+    <header><span class="tag">B4</span><span class="new">new</span><span class="cost">320 cr</span></header>
+    <h4>Crystal Lattice</h4>
+    <ul class="stats"><li>+8 range</li><li>+5% damage taken</li><li>+3 dmg</li></ul>
+    <p class="fx">A crystal lattice: wider reach, harder hits and even more damage taken.</p>
+    
+    
+  </article><article class="card mastery is-new path-b" style="--tw:#8cd9ff">
+    <header><span class="tag">B · mastery</span><span class="new">changed</span><span class="cost">380 cr</span></header>
+    <h4>Cryo Fracture</h4>
+    <ul class="stats"><li>24 dmg</li><li>150 range</li><li>55% slow</li><li>+45% damage taken</li></ul>
+    <p class="fx">Chilled enemies take far more damage from every source.</p>
+    
+    
+  </article></div>
+      <div class="fork r3" aria-hidden="true"></div>
+      <div class="branch r3"><article class="card spec is-new path-c" style="--tw:#8cd9ff">
+    <header><span class="tag">C1 · specialization</span><span class="new">new</span><span class="cost">150 cr</span></header>
+    <h4>Cryo Lock</h4>
+    <ul class="stats"><li>8 dmg</li><li>130 range</li><li>45% slow</li><li>blocks repair</li></ul>
+    <p class="fx">Freezes repair systems: enemies in the field can't regenerate or be healed.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">+2 dmg</li><li class="">+12 range</li><li class="">blocks repair</li></ul></div>
+    
+  </article><article class="card step is-new path-c" style="--tw:#8cd9ff">
+    <header><span class="tag">C2</span><span class="new">new</span><span class="cost">180 cr</span></header>
+    <h4>Circuit Frost</h4>
+    <ul class="stats"><li>+10 range</li></ul>
+    <p class="fx">Frost creeps into circuits further out: a wider lock field.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-c" style="--tw:#8cd9ff">
+    <header><span class="tag">C3</span><span class="new">new</span><span class="cost">220 cr</span></header>
+    <h4>Lingering Lock</h4>
+    <ul class="stats"><li>lock lasts 1 s after leaving</li></ul>
+    <p class="fx">The lock lingers: repairs stay frozen for 1 s after an enemy leaves the field.</p>
+    
+    
+  </article><article class="card step is-new path-c" style="--tw:#8cd9ff">
+    <header><span class="tag">C4</span><span class="new">new</span><span class="cost">320 cr</span></header>
+    <h4>Iced Relays</h4>
+    <ul class="stats"><li>+5% slow</li><li>+10 range</li><li>+4 dmg</li></ul>
+    <p class="fx">Iced relays: a deeper slow, a wider field and harder frost.</p>
+    
+    
+  </article><article class="card mastery is-new path-c" style="--tw:#8cd9ff">
+    <header><span class="tag">C · mastery</span><span class="new">new</span><span class="cost">380 cr</span></header>
+    <h4>Permafrost</h4>
+    <ul class="stats"><li>16 dmg</li><li>160 range</li><li>55% slow</li><li>+15% damage taken</li><li>blocks repair</li><li>blocks barrier recharge</li></ul>
+    <p class="fx">Barriers stop recharging too, and locked enemies take extra damage.</p>
+    
+    
+  </article></div>
+    </div></div>
+  </section><section class="tower" id="sniper" style="--tw:#73ff8c">
+    <header class="tower-head">
+      <div class="tower-name"><span class="swatch"></span><h3>Railgun</h3></div>
+      <p class="role">Huge range, ignores armor.</p>
+      <dl class="meta">
+        <div><dt>Key</dt><dd><kbd>4</kbd></dd></div>
+        <div><dt>Hits</dt><dd>air + ground</dd></div>
+        <div><dt>Maxed</dt><dd>A 2410 · B 2410 · C 2410 cr</dd></div>
+        <div><dt>New nodes</dt><dd>13 of 17</dd></div>
+      </dl>
+    </header>
+    <div class="tree-scroll"><div class="tree">
+      <div class="cell t1"><article class="card trunk is-old path-base" style="--tw:#73ff8c">
+    <header><span class="tag">Tier 1</span><span class="cost">120 cr</span></header>
+    <h4>Railgun</h4>
+    <ul class="stats"><li>55 dmg</li><li>290 range</li><li>0.45/s</li></ul>
+    <p class="fx">Fires a magnetic slug at extreme range that ignores armor.</p>
+    
+    
+  </article></div>
+      <div class="link base1" aria-hidden="true"></div>
+      <div class="cell t2"><article class="card trunk is-old path-base" style="--tw:#73ff8c">
+    <header><span class="tag">Tier 2</span><span class="cost">150 cr</span></header>
+    <h4>Tier 2</h4>
+    <ul class="stats"><li>105 dmg</li><li>330 range</li><li>0.5/s</li></ul>
+    <p class="fx">Longer rails: much heavier slugs with even more range.</p>
+    
+    
+  </article></div>
+      <div class="link base2" aria-hidden="true"></div>
+      <div class="fork r1" aria-hidden="true"></div>
+      <div class="branch r1"><article class="card spec is-old path-a" style="--tw:#73ff8c">
+    <header><span class="tag">A1 · specialization</span><span class="cost">260 cr</span></header>
+    <h4>Deadeye</h4>
+    <ul class="stats"><li>170 dmg</li><li>420 range</li><li>0.6/s</li><li>2× vs bosses</li></ul>
+    <p class="fx">Longest range in the arsenal.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">+65 dmg</li><li class="">+90 range</li><li class="">+0.1/s</li><li class="">2× vs bosses</li></ul></div>
+    
+  </article><article class="card step is-new path-a" style="--tw:#73ff8c">
+    <header><span class="tag">A2</span><span class="new">new</span><span class="cost">310 cr</span></header>
+    <h4>Match Slugs</h4>
+    <ul class="stats"><li>+25 dmg</li></ul>
+    <p class="fx">Precision-machined slugs for bigger hits.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-a" style="--tw:#73ff8c">
+    <header><span class="tag">A3</span><span class="new">new</span><span class="cost">380 cr</span></header>
+    <h4>Stabilized Rails</h4>
+    <ul class="stats"><li>+20 range</li></ul>
+    <p class="fx">Stabilized rails hold their aim at even longer range.</p>
+    
+    
+  </article><article class="card step is-new path-a" style="--tw:#73ff8c">
+    <header><span class="tag">A4</span><span class="new">new</span><span class="cost">560 cr</span></header>
+    <h4>Weak-Point Scan</h4>
+    <ul class="stats"><li>+0.05/s</li><li>2.3× vs bosses</li></ul>
+    <p class="fx">A weak-point scanner and faster capacitors: bosses take 2.3× damage and shots come quicker.</p>
+    
+    
+  </article><article class="card mastery is-new path-a" style="--tw:#73ff8c">
+    <header><span class="tag">A · mastery</span><span class="new">changed</span><span class="cost">630 cr</span></header>
+    <h4>Executioner</h4>
+    <ul class="stats"><li>280 dmg</li><li>470 range</li><li>0.7/s</li><li>2.5× vs bosses</li></ul>
+    <p class="fx">Destroys any non-boss target left under 20% health.</p>
+    
+    
+  </article></div>
+      <div class="fork r2" aria-hidden="true"></div>
+      <div class="branch r2"><article class="card spec is-old path-b" style="--tw:#73ff8c">
+    <header><span class="tag">B1 · specialization</span><span class="cost">260 cr</span></header>
+    <h4>Piercing Rail</h4>
+    <ul class="stats"><li>130 dmg</li><li>380 range</li><li>0.6/s</li></ul>
+    <p class="fx">The slug punches through every enemy in a straight line.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">+25 dmg</li><li class="">+50 range</li><li class="">+0.1/s</li></ul></div>
+    
+  </article><article class="card step is-new path-b" style="--tw:#73ff8c">
+    <header><span class="tag">B2</span><span class="new">new</span><span class="cost">310 cr</span></header>
+    <h4>Denser Slug</h4>
+    <ul class="stats"><li>+20 dmg</li></ul>
+    <p class="fx">A denser slug keeps more of its punch as it tears through the line.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-b" style="--tw:#73ff8c">
+    <header><span class="tag">B3</span><span class="new">new</span><span class="cost">380 cr</span></header>
+    <h4>Longer Rails</h4>
+    <ul class="stats"><li>+20 range</li></ul>
+    <p class="fx">Longer rails extend the line of fire.</p>
+    
+    
+  </article><article class="card step is-new path-b" style="--tw:#73ff8c">
+    <header><span class="tag">B4</span><span class="new">new</span><span class="cost">560 cr</span></header>
+    <h4>Wide Bore</h4>
+    <ul class="stats"><li>+0.05/s</li><li>14 px line</li></ul>
+    <p class="fx">A wider bore and quicker charging: the line hits everything within 14 px and fires faster.</p>
+    
+    
+  </article><article class="card mastery is-new path-b" style="--tw:#73ff8c">
+    <header><span class="tag">B · mastery</span><span class="new">changed</span><span class="cost">630 cr</span></header>
+    <h4>Ion Lance</h4>
+    <ul class="stats"><li>220 dmg</li><li>430 range</li><li>0.75/s</li><li>22 px line</li></ul>
+    <p class="fx">The line hits everything within 22 px of it.</p>
+    
+    
+  </article></div>
+      <div class="fork r3" aria-hidden="true"></div>
+      <div class="branch r3"><article class="card spec is-new path-c" style="--tw:#73ff8c">
+    <header><span class="tag">C1 · specialization</span><span class="new">new</span><span class="cost">260 cr</span></header>
+    <h4>Null Slug</h4>
+    <ul class="stats"><li>150 dmg</li><li>360 range</li><li>0.55/s</li><li>4 s suppression</li><li>strips barrier</li></ul>
+    <p class="fx">Deletes the target's barrier and shuts off its abilities: healing, EMP, auras, spawns, blinking, burrowing and regeneration.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">+45 dmg</li><li class="">+30 range</li><li class="">+0.05/s</li><li class="">4 s suppression</li><li class="">strips barrier</li></ul></div>
+    
+  </article><article class="card step is-new path-c" style="--tw:#73ff8c">
+    <header><span class="tag">C2</span><span class="new">new</span><span class="cost">310 cr</span></header>
+    <h4>Longer Jam</h4>
+    <ul class="stats"><li>+1 s suppression</li></ul>
+    <p class="fx">The jamming charge lasts a second longer.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-c" style="--tw:#73ff8c">
+    <header><span class="tag">C3</span><span class="new">new</span><span class="cost">380 cr</span></header>
+    <h4>Hardened Slug</h4>
+    <ul class="stats"><li>+25 dmg</li></ul>
+    <p class="fx">A hardened core for more damage per slug.</p>
+    
+    
+  </article><article class="card step is-new path-c" style="--tw:#73ff8c">
+    <header><span class="tag">C4</span><span class="new">new</span><span class="cost">560 cr</span></header>
+    <h4>Wide Jam</h4>
+    <ul class="stats"><li>+0.05/s</li><li>suppression splashes 30 px</li></ul>
+    <p class="fx">The jam bursts on impact, suppressing enemies within 30 px too, and the rails recharge faster.</p>
+    
+    
+  </article><article class="card mastery is-new path-c" style="--tw:#73ff8c">
+    <header><span class="tag">C · mastery</span><span class="new">new</span><span class="cost">630 cr</span></header>
+    <h4>Void Round</h4>
+    <ul class="stats"><li>240 dmg</li><li>400 range</li><li>0.65/s</li><li>8 s suppression</li><li>60 px spread</li><li>strips barrier</li><li>exposes</li></ul>
+    <p class="fx">Suppression lasts longer, spreads to nearby enemies, and strips crowd-control immunity.</p>
+    
+    
+  </article></div>
+    </div></div>
+  </section><section class="tower" id="tesla" style="--tw:#bf80ff">
+    <header class="tower-head">
+      <div class="tower-name"><span class="swatch"></span><h3>Arc Coil</h3></div>
+      <p class="role">Chain lightning; double damage to barriers.</p>
+      <dl class="meta">
+        <div><dt>Key</dt><dd><kbd>5</kbd></dd></div>
+        <div><dt>Hits</dt><dd>air + ground</dd></div>
+        <div><dt>Maxed</dt><dd>A 2570 · B 2570 · C 2570 cr</dd></div>
+        <div><dt>New nodes</dt><dd>13 of 17</dd></div>
+      </dl>
+    </header>
+    <div class="tree-scroll"><div class="tree">
+      <div class="cell t1"><article class="card trunk is-old path-base" style="--tw:#bf80ff">
+    <header><span class="tag">Tier 1</span><span class="cost">130 cr</span></header>
+    <h4>Arc Coil</h4>
+    <ul class="stats"><li>16 dmg</li><li>118 range</li><li>3 chains</li></ul>
+    <p class="fx">Discharges lightning that leaps between nearby enemies. Barriers take double damage.</p>
+    
+    
+  </article></div>
+      <div class="link base1" aria-hidden="true"></div>
+      <div class="cell t2"><article class="card trunk is-old path-base" style="--tw:#bf80ff">
+    <header><span class="tag">Tier 2</span><span class="cost">160 cr</span></header>
+    <h4>Tier 2</h4>
+    <ul class="stats"><li>26 dmg</li><li>128 range</li><li>4 chains</li></ul>
+    <p class="fx">A stronger coil: harder arcs that jump to one more target.</p>
+    
+    
+  </article></div>
+      <div class="link base2" aria-hidden="true"></div>
+      <div class="fork r1" aria-hidden="true"></div>
+      <div class="branch r1"><article class="card spec is-old path-a" style="--tw:#bf80ff">
+    <header><span class="tag">A1 · specialization</span><span class="cost">280 cr</span></header>
+    <h4>Storm Coil</h4>
+    <ul class="stats"><li>36 dmg</li><li>145 range</li><li>9 chains</li></ul>
+    <p class="fx">Arcs leap further and lose less power per jump.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">+10 dmg</li><li class="">+17 range</li><li class="">+5 chains</li></ul></div>
+    
+  </article><article class="card step is-new path-a" style="--tw:#bf80ff">
+    <header><span class="tag">A2</span><span class="new">new</span><span class="cost">340 cr</span></header>
+    <h4>Extra Toroid</h4>
+    <ul class="stats"><li>+1 chain</li></ul>
+    <p class="fx">An extra toroid ring lets each arc jump to one more enemy.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-a" style="--tw:#bf80ff">
+    <header><span class="tag">A3</span><span class="new">new</span><span class="cost">410 cr</span></header>
+    <h4>Conductive Air</h4>
+    <ul class="stats"><li>+10 chain range</li></ul>
+    <p class="fx">Ionized air: arcs can leap 10 px further between targets.</p>
+    
+    
+  </article><article class="card step is-new path-a" style="--tw:#bf80ff">
+    <header><span class="tag">A4</span><span class="new">new</span><span class="cost">590 cr</span></header>
+    <h4>Twin Spires</h4>
+    <ul class="stats"><li>+5 dmg</li><li>+2 chains</li></ul>
+    <p class="fx">Twin spires: arcs hit harder and chain to two more enemies.</p>
+    
+    
+  </article><article class="card mastery is-new path-a" style="--tw:#bf80ff">
+    <header><span class="tag">A · mastery</span><span class="new">changed</span><span class="cost">660 cr</span></header>
+    <h4>Tempest Coil</h4>
+    <ul class="stats"><li>55 dmg</li><li>160 range</li><li>15 chains</li></ul>
+    <p class="fx">Arcs barely weaken between jumps.</p>
+    
+    
+  </article></div>
+      <div class="fork r2" aria-hidden="true"></div>
+      <div class="branch r2"><article class="card spec is-old path-b" style="--tw:#bf80ff">
+    <header><span class="tag">B1 · specialization</span><span class="cost">280 cr</span></header>
+    <h4>Overload</h4>
+    <ul class="stats"><li>42 dmg</li><li>140 range</li><li>5 chains</li><li>0.5 s stun</li></ul>
+    <p class="fx">Every arc stuns its targets (bosses 0.15 s).</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">+16 dmg</li><li class="">+12 range</li><li class="">+1 chains</li><li class="">0.5 s stun</li></ul></div>
+    
+  </article><article class="card step is-new path-b" style="--tw:#bf80ff">
+    <header><span class="tag">B2</span><span class="new">new</span><span class="cost">340 cr</span></header>
+    <h4>Capacitor Bank</h4>
+    <ul class="stats"><li>+6 dmg</li></ul>
+    <p class="fx">A larger capacitor bank puts more power behind every arc.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-b" style="--tw:#bf80ff">
+    <header><span class="tag">B3</span><span class="new">new</span><span class="cost">410 cr</span></header>
+    <h4>Stun Tuning</h4>
+    <ul class="stats"><li>+0.1 s stun</li></ul>
+    <p class="fx">Tuned discharges keep their targets stunned 0.1 s longer.</p>
+    
+    
+  </article><article class="card step is-new path-b" style="--tw:#bf80ff">
+    <header><span class="tag">B4</span><span class="new">new</span><span class="cost">590 cr</span></header>
+    <h4>Faster Discharge</h4>
+    <ul class="stats"><li>+1 chain</li><li>+0.1/s</li></ul>
+    <p class="fx">Faster discharge cycles and one more jump per arc.</p>
+    
+    
+  </article><article class="card mastery is-new path-b" style="--tw:#bf80ff">
+    <header><span class="tag">B · mastery</span><span class="new">changed</span><span class="cost">660 cr</span></header>
+    <h4>Supercharger</h4>
+    <ul class="stats"><li>64 dmg</li><li>155 range</li><li>7 chains</li><li>0.8 s stun</li></ul>
+    <p class="fx">Longer stuns and harder hits.</p>
+    
+    
+  </article></div>
+      <div class="fork r3" aria-hidden="true"></div>
+      <div class="branch r3"><article class="card spec is-new path-c" style="--tw:#bf80ff">
+    <header><span class="tag">C1 · specialization</span><span class="new">new</span><span class="cost">280 cr</span></header>
+    <h4>Ion Storm</h4>
+    <ul class="stats"><li>24 dmg per tick</li><li>130 field</li><li>2 ticks/s</li></ul>
+    <p class="fx">Instead of chaining, charges a storm field that damages everything inside, air and ground. Double damage to barriers.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><p class="fx">Adds its attack alongside the primary's (see Combinations).</p></div>
+    
+  </article><article class="card step is-new path-c" style="--tw:#bf80ff">
+    <header><span class="tag">C2</span><span class="new">new</span><span class="cost">340 cr</span></header>
+    <h4>Denser Ions</h4>
+    <ul class="stats"><li>+4 dmg per tick</li></ul>
+    <p class="fx">Denser ions: the storm hits harder with every tick.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-c" style="--tw:#bf80ff">
+    <header><span class="tag">C3</span><span class="new">new</span><span class="cost">410 cr</span></header>
+    <h4>Wider Front</h4>
+    <ul class="stats"><li>+8 field</li></ul>
+    <p class="fx">A wider storm front covers more of the lane.</p>
+    
+    
+  </article><article class="card step is-new path-c" style="--tw:#bf80ff">
+    <header><span class="tag">C4</span><span class="new">new</span><span class="cost">590 cr</span></header>
+    <h4>Storm Front</h4>
+    <ul class="stats"><li>+15% damage after 2 s inside</li><li>+4 dmg per tick</li><li>+6 field</li></ul>
+    <p class="fx">Static builds up: a wider, stronger storm, and enemies that stay 2 s take 15% more damage.</p>
+    
+    
+  </article><article class="card mastery is-new path-c" style="--tw:#bf80ff">
+    <header><span class="tag">C · mastery</span><span class="new">new</span><span class="cost">660 cr</span></header>
+    <h4>Maelstrom</h4>
+    <ul class="stats"><li>42 dmg per tick</li><li>160 field</li><li>2 ticks/s</li><li>blocks barrier grants</li></ul>
+    <p class="fx">A wider, stronger storm. Enemies inside can't receive Bulwark barriers.</p>
+    
+    
+  </article></div>
+    </div></div>
+  </section><section class="tower" id="laser" style="--tw:#ff4d59">
+    <header class="tower-head">
+      <div class="tower-name"><span class="swatch"></span><h3>Laser Lance</h3></div>
+      <p class="role">Continuous beam that ignores armor and ramps up on one target.</p>
+      <dl class="meta">
+        <div><dt>Key</dt><dd><kbd>6</kbd></dd></div>
+        <div><dt>Hits</dt><dd>air + ground</dd></div>
+        <div><dt>Maxed</dt><dd>A 2750 · B 2750 · C 2750 cr</dd></div>
+        <div><dt>New nodes</dt><dd>13 of 17</dd></div>
+      </dl>
+    </header>
+    <div class="tree-scroll"><div class="tree">
+      <div class="cell t1"><article class="card trunk is-old path-base" style="--tw:#ff4d59">
+    <header><span class="tag">Tier 1</span><span class="cost">140 cr</span></header>
+    <h4>Laser Lance</h4>
+    <ul class="stats"><li>22 dps</li><li>125 range</li><li>ramps to 2×</li></ul>
+    <p class="fx">A continuous beam that ignores armor and grows stronger the longer it holds one target.</p>
+    
+    
+  </article></div>
+      <div class="link base1" aria-hidden="true"></div>
+      <div class="cell t2"><article class="card trunk is-old path-base" style="--tw:#ff4d59">
+    <header><span class="tag">Tier 2</span><span class="cost">150 cr</span></header>
+    <h4>Tier 2</h4>
+    <ul class="stats"><li>36 dps</li><li>135 range</li><li>ramps to 2.5×</li></ul>
+    <p class="fx">A brighter emitter: more damage, more range and a higher ramp.</p>
+    
+    
+  </article></div>
+      <div class="link base2" aria-hidden="true"></div>
+      <div class="fork r1" aria-hidden="true"></div>
+      <div class="branch r1"><article class="card spec is-old path-a" style="--tw:#ff4d59">
+    <header><span class="tag">A1 · specialization</span><span class="cost">300 cr</span></header>
+    <h4>Prism Array</h4>
+    <ul class="stats"><li>38 dps</li><li>145 range</li><li>3 beams</li></ul>
+    <p class="fx">Splits into three beams (extra beams at 60% power).</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">+2 dps</li><li class="">+10 range</li><li class="">3 beams</li></ul></div>
+    
+  </article><article class="card step is-new path-a" style="--tw:#ff4d59">
+    <header><span class="tag">A2</span><span class="new">new</span><span class="cost">360 cr</span></header>
+    <h4>Focusing Optics</h4>
+    <ul class="stats"><li>+5 dps</li></ul>
+    <p class="fx">Focusing optics make every beam burn hotter.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-a" style="--tw:#ff4d59">
+    <header><span class="tag">A3</span><span class="new">new</span><span class="cost">440 cr</span></header>
+    <h4>Fourth Facet</h4>
+    <ul class="stats"><li>+1 beam</li></ul>
+    <p class="fx">A fourth facet splits off another beam.</p>
+    
+    
+  </article><article class="card step is-new path-a" style="--tw:#ff4d59">
+    <header><span class="tag">A4</span><span class="new">new</span><span class="cost">640 cr</span></header>
+    <h4>Brighter Split</h4>
+    <ul class="stats"><li>−0.5 s ramp time</li><li>extra beams at 70%</li></ul>
+    <p class="fx">Brighter splits: the extra beams reach 70% power and ramp up faster.</p>
+    
+    
+  </article><article class="card mastery is-new path-a" style="--tw:#ff4d59">
+    <header><span class="tag">A · mastery</span><span class="new">changed</span><span class="cost">720 cr</span></header>
+    <h4>Refraction Grid</h4>
+    <ul class="stats"><li>56 dps</li><li>160 range</li><li>6 beams</li></ul>
+    <p class="fx">Six beams on six targets.</p>
+    
+    
+  </article></div>
+      <div class="fork r2" aria-hidden="true"></div>
+      <div class="branch r2"><article class="card spec is-old path-b" style="--tw:#ff4d59">
+    <header><span class="tag">B1 · specialization</span><span class="cost">300 cr</span></header>
+    <h4>Focus Lens</h4>
+    <ul class="stats"><li>50 dps</li><li>150 range</li><li>ramps to 4×</li></ul>
+    <p class="fx">Boss killer.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">+14 dps</li><li class="">+15 range</li><li class="">ramps to 4×</li></ul></div>
+    
+  </article><article class="card step is-new path-b" style="--tw:#ff4d59">
+    <header><span class="tag">B2</span><span class="new">new</span><span class="cost">360 cr</span></header>
+    <h4>Cooled Lens</h4>
+    <ul class="stats"><li>+6 dps</li></ul>
+    <p class="fx">A cooled lens takes a hotter beam.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-b" style="--tw:#ff4d59">
+    <header><span class="tag">B3</span><span class="new">new</span><span class="cost">440 cr</span></header>
+    <h4>Quick Lock</h4>
+    <ul class="stats"><li>−0.5 s ramp time</li></ul>
+    <p class="fx">Quicker lock-on: the beam reaches full power half a second sooner.</p>
+    
+    
+  </article><article class="card step is-new path-b" style="--tw:#ff4d59">
+    <header><span class="tag">B4</span><span class="new">new</span><span class="cost">640 cr</span></header>
+    <h4>Overdrive Lens</h4>
+    <ul class="stats"><li>+10 range</li><li>ramps to 5×</li></ul>
+    <p class="fx">An overdrive lens ramps up to 5× on a single target and reaches further.</p>
+    
+    
+  </article><article class="card mastery is-new path-b" style="--tw:#ff4d59">
+    <header><span class="tag">B · mastery</span><span class="new">changed</span><span class="cost">720 cr</span></header>
+    <h4>Singularity Lens</h4>
+    <ul class="stats"><li>72 dps</li><li>170 range</li><li>ramps to 7×</li></ul>
+    <p class="fx">Nothing survives a long lock.</p>
+    
+    
+  </article></div>
+      <div class="fork r3" aria-hidden="true"></div>
+      <div class="branch r3"><article class="card spec is-new path-c" style="--tw:#ff4d59">
+    <header><span class="tag">C1 · specialization</span><span class="new">new</span><span class="cost">300 cr</span></header>
+    <h4>Sweeper</h4>
+    <ul class="stats"><li>30 dps</li><li>140 range</li><li>70° sweep</li><li>no ramp</li></ul>
+    <p class="fx">The beam sweeps back and forth across an arc, burning every enemy it crosses.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><p class="fx">Adds its attack alongside the primary's (see Combinations).</p></div>
+    
+  </article><article class="card step is-new path-c" style="--tw:#ff4d59">
+    <header><span class="tag">C2</span><span class="new">new</span><span class="cost">360 cr</span></header>
+    <h4>Wider Sweep</h4>
+    <ul class="stats"><li>+15° arc</li></ul>
+    <p class="fx">The sweep covers 15° more of the lane.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-c" style="--tw:#ff4d59">
+    <header><span class="tag">C3</span><span class="new">new</span><span class="cost">440 cr</span></header>
+    <h4>Hotter Beam</h4>
+    <ul class="stats"><li>+6 dps</li></ul>
+    <p class="fx">A hotter beam burns harder as it sweeps.</p>
+    
+    
+  </article><article class="card step is-new path-c" style="--tw:#ff4d59">
+    <header><span class="tag">C4</span><span class="new">new</span><span class="cost">640 cr</span></header>
+    <h4>Lingering Burn</h4>
+    <ul class="stats"><li>sweeps 30% faster</li><li>crossed enemies burn 10 dps for 1 s</li></ul>
+    <p class="fx">Faster sweeps, and every enemy the beam crosses keeps burning for a second.</p>
+    
+    
+  </article><article class="card mastery is-new path-c" style="--tw:#ff4d59">
+    <header><span class="tag">C · mastery</span><span class="new">new</span><span class="cost">720 cr</span></header>
+    <h4>Scythe Array</h4>
+    <ul class="stats"><li>48 dps</li><li>155 range</li><li>2 beams</li><li>120° sweep</li><li>2× vs barriers</li></ul>
+    <p class="fx">Two counter-sweeping beams that burn through barriers at double rate.</p>
+    
+    
+  </article></div>
+    </div></div>
+  </section><section class="tower" id="missile" style="--tw:#ffd94d">
+    <header class="tower-head">
+      <div class="tower-name"><span class="swatch"></span><h3>Missile Battery</h3></div>
+      <p class="role">Homing salvos with a small blast; double damage to flyers.</p>
+      <dl class="meta">
+        <div><dt>Key</dt><dd><kbd>7</kbd></dd></div>
+        <div><dt>Hits</dt><dd>air + ground</dd></div>
+        <div><dt>Maxed</dt><dd>A 2390 · B 2390 · C 2390 cr</dd></div>
+        <div><dt>New nodes</dt><dd>13 of 17</dd></div>
+      </dl>
+    </header>
+    <div class="tree-scroll"><div class="tree">
+      <div class="cell t1"><article class="card trunk is-old path-base" style="--tw:#ffd94d">
+    <header><span class="tag">Tier 1</span><span class="cost">110 cr</span></header>
+    <h4>Missile Battery</h4>
+    <ul class="stats"><li>18 dmg</li><li>190 range</li><li>2 missiles</li></ul>
+    <p class="fx">Fires homing missiles with a small blast. Flyers take double damage.</p>
+    
+    
+  </article></div>
+      <div class="link base1" aria-hidden="true"></div>
+      <div class="cell t2"><article class="card trunk is-old path-base" style="--tw:#ffd94d">
+    <header><span class="tag">Tier 2</span><span class="cost">140 cr</span></header>
+    <h4>Tier 2</h4>
+    <ul class="stats"><li>26 dmg</li><li>200 range</li><li>3 missiles</li></ul>
+    <p class="fx">A third launch tube and stronger warheads.</p>
+    
+    
+  </article></div>
+      <div class="link base2" aria-hidden="true"></div>
+      <div class="fork r1" aria-hidden="true"></div>
+      <div class="branch r1"><article class="card spec is-old path-a" style="--tw:#ffd94d">
+    <header><span class="tag">A1 · specialization</span><span class="cost">260 cr</span></header>
+    <h4>Swarm Pods</h4>
+    <ul class="stats"><li>24 dmg</li><li>210 range</li><li>5 missiles</li></ul>
+    <p class="fx">Salvos spread across targets.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="down">−2 dmg</li><li class="">+10 range</li><li class="">+2 missiles</li></ul></div>
+    
+  </article><article class="card step is-new path-a" style="--tw:#ffd94d">
+    <header><span class="tag">A2</span><span class="new">new</span><span class="cost">310 cr</span></header>
+    <h4>Sixth Tube</h4>
+    <ul class="stats"><li>+1 missile</li></ul>
+    <p class="fx">A sixth tube adds another missile to every salvo.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-a" style="--tw:#ffd94d">
+    <header><span class="tag">A3</span><span class="new">new</span><span class="cost">380 cr</span></header>
+    <h4>Better Seekers</h4>
+    <ul class="stats"><li>+10 range</li></ul>
+    <p class="fx">Better seekers lock on from further away.</p>
+    
+    
+  </article><article class="card step is-new path-a" style="--tw:#ffd94d">
+    <header><span class="tag">A4</span><span class="new">new</span><span class="cost">560 cr</span></header>
+    <h4>Quick Reload</h4>
+    <ul class="stats"><li>+3 dmg</li><li>+0.1/s</li></ul>
+    <p class="fx">Quicker reloads and shaped charges: faster salvos that hit harder.</p>
+    
+    
+  </article><article class="card mastery is-new path-a" style="--tw:#ffd94d">
+    <header><span class="tag">A · mastery</span><span class="new">changed</span><span class="cost">630 cr</span></header>
+    <h4>Locust Swarm</h4>
+    <ul class="stats"><li>30 dmg</li><li>230 range</li><li>8 missiles</li></ul>
+    <p class="fx">Eight missiles per salvo.</p>
+    
+    
+  </article></div>
+      <div class="fork r2" aria-hidden="true"></div>
+      <div class="branch r2"><article class="card spec is-old path-b" style="--tw:#ffd94d">
+    <header><span class="tag">B1 · specialization</span><span class="cost">260 cr</span></header>
+    <h4>Hellfire</h4>
+    <ul class="stats"><li>65 dmg</li><li>215 range</li><li>2 missiles</li><li>50 blast</li><li>3× vs flyers</li></ul>
+    <p class="fx">Heavy warheads with a big blast.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">+39 dmg</li><li class="">+15 range</li><li class="down">−1 missiles</li><li class="">50 blast</li><li class="">3× vs flyers</li></ul></div>
+    
+  </article><article class="card step is-new path-b" style="--tw:#ffd94d">
+    <header><span class="tag">B2</span><span class="new">new</span><span class="cost">310 cr</span></header>
+    <h4>Bigger Warheads</h4>
+    <ul class="stats"><li>+12 dmg</li></ul>
+    <p class="fx">Bigger warheads for much heavier hits.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-b" style="--tw:#ffd94d">
+    <header><span class="tag">B3</span><span class="new">new</span><span class="cost">380 cr</span></header>
+    <h4>Wide Blast</h4>
+    <ul class="stats"><li>+5 blast</li></ul>
+    <p class="fx">A wider blast radius on every warhead.</p>
+    
+    
+  </article><article class="card step is-new path-b" style="--tw:#ffd94d">
+    <header><span class="tag">B4</span><span class="new">new</span><span class="cost">560 cr</span></header>
+    <h4>Proximity Fuses</h4>
+    <ul class="stats"><li>+1 missile</li><li>+5 blast</li></ul>
+    <p class="fx">Proximity fuses and a third tube: one more missile per salvo and a wider blast.</p>
+    
+    
+  </article><article class="card mastery is-new path-b" style="--tw:#ffd94d">
+    <header><span class="tag">B · mastery</span><span class="new">changed</span><span class="cost">630 cr</span></header>
+    <h4>Doomsday Warheads</h4>
+    <ul class="stats"><li>115 dmg</li><li>235 range</li><li>3 missiles</li><li>70 blast</li><li>3× vs flyers</li></ul>
+    <p class="fx">Colossal warheads.</p>
+    
+    
+  </article></div>
+      <div class="fork r3" aria-hidden="true"></div>
+      <div class="branch r3"><article class="card spec is-new path-c" style="--tw:#ffd94d">
+    <header><span class="tag">C1 · specialization</span><span class="new">new</span><span class="cost">260 cr</span></header>
+    <h4>Cluster Munitions</h4>
+    <ul class="stats"><li>20 dmg</li><li>205 range</li><li>3 missiles</li><li>4 bomblets (26 blast)</li></ul>
+    <p class="fx">Each missile bursts into bomblets that carpet the target area.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="down">−6 dmg</li><li class="">+5 range</li><li class="">4 bomblets (26 blast)</li></ul></div>
+    
+  </article><article class="card step is-new path-c" style="--tw:#ffd94d">
+    <header><span class="tag">C2</span><span class="new">new</span><span class="cost">310 cr</span></header>
+    <h4>Fifth Bomblet</h4>
+    <ul class="stats"><li>+1 bomblet</li></ul>
+    <p class="fx">Each missile carries one more bomblet.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-c" style="--tw:#ffd94d">
+    <header><span class="tag">C3</span><span class="new">new</span><span class="cost">380 cr</span></header>
+    <h4>Wider Scatter</h4>
+    <ul class="stats"><li>+4 bomblet blast</li></ul>
+    <p class="fx">Bomblets scatter wider and burst bigger.</p>
+    
+    
+  </article><article class="card step is-new path-c" style="--tw:#ffd94d">
+    <header><span class="tag">C4</span><span class="new">new</span><span class="cost">560 cr</span></header>
+    <h4>Hot Bomblets</h4>
+    <ul class="stats"><li>+1 missile</li><li>+3 dmg</li></ul>
+    <p class="fx">Hot bomblets and a fourth tube: one more missile per salvo, hitting harder.</p>
+    
+    
+  </article><article class="card mastery is-new path-c" style="--tw:#ffd94d">
+    <header><span class="tag">C · mastery</span><span class="new">new</span><span class="cost">630 cr</span></header>
+    <h4>Carpet Bomber</h4>
+    <ul class="stats"><li>26 dmg</li><li>225 range</li><li>4 missiles</li><li>7 bomblets (32 blast)</li><li>pierces armor</li></ul>
+    <p class="fx">More bomblets, and they ignore armor.</p>
+    
+    
+  </article></div>
+    </div></div>
+  </section><section class="tower" id="amp" style="--tw:#ff66d9">
+    <header class="tower-head">
+      <div class="tower-name"><span class="swatch"></span><h3>Amplifier Pylon</h3></div>
+      <p class="role">Boosts the damage of nearby towers (the best pylon applies; they don't stack).</p>
+      <dl class="meta">
+        <div><dt>Key</dt><dd><kbd>8</kbd></dd></div>
+        <div><dt>Hits</dt><dd>support</dd></div>
+        <div><dt>Maxed</dt><dd>A 2020 · B 2020 · C 2020 cr</dd></div>
+        <div><dt>New nodes</dt><dd>13 of 17</dd></div>
+      </dl>
+    </header>
+    <div class="tree-scroll"><div class="tree">
+      <div class="cell t1"><article class="card trunk is-old path-base" style="--tw:#ff66d9">
+    <header><span class="tag">Tier 1</span><span class="cost">100 cr</span></header>
+    <h4>Amplifier Pylon</h4>
+    <ul class="stats"><li>100 field</li><li>+15% damage</li></ul>
+    <p class="fx">Broadcasts a power field that boosts the damage of towers inside it.</p>
+    
+    
+  </article></div>
+      <div class="link base1" aria-hidden="true"></div>
+      <div class="cell t2"><article class="card trunk is-old path-base" style="--tw:#ff66d9">
+    <header><span class="tag">Tier 2</span><span class="cost">120 cr</span></header>
+    <h4>Tier 2</h4>
+    <ul class="stats"><li>115 field</li><li>+25% damage</li></ul>
+    <p class="fx">A stronger broadcast over a wider field.</p>
+    
+    
+  </article></div>
+      <div class="link base2" aria-hidden="true"></div>
+      <div class="fork r1" aria-hidden="true"></div>
+      <div class="branch r1"><article class="card spec is-old path-a" style="--tw:#ff66d9">
+    <header><span class="tag">A1 · specialization</span><span class="cost">220 cr</span></header>
+    <h4>Overclock Pylon</h4>
+    <ul class="stats"><li>125 field</li><li>+30% damage</li><li>+25% speed</li></ul>
+    <p class="fx">Nearby towers hit harder and faster.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">+10 field</li><li class="">+5% damage</li><li class="">+25% speed</li></ul></div>
+    
+  </article><article class="card step is-new path-a" style="--tw:#ff66d9">
+    <header><span class="tag">A2</span><span class="new">new</span><span class="cost">260 cr</span></header>
+    <h4>Tuned Relays</h4>
+    <ul class="stats"><li>+5% speed</li></ul>
+    <p class="fx">Tuned relays make boosted towers fire 5% faster.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-a" style="--tw:#ff66d9">
+    <header><span class="tag">A3</span><span class="new">new</span><span class="cost">320 cr</span></header>
+    <h4>Wider Broadcast</h4>
+    <ul class="stats"><li>+5 field</li></ul>
+    <p class="fx">A wider broadcast reaches more towers.</p>
+    
+    
+  </article><article class="card step is-new path-a" style="--tw:#ff66d9">
+    <header><span class="tag">A4</span><span class="new">new</span><span class="cost">470 cr</span></header>
+    <h4>Heat Sinks</h4>
+    <ul class="stats"><li>+5% damage</li><li>+5% speed</li></ul>
+    <p class="fx">Heat sinks let boosted towers run hotter: +5% damage and +5% speed.</p>
+    
+    
+  </article><article class="card mastery is-new path-a" style="--tw:#ff66d9">
+    <header><span class="tag">A · mastery</span><span class="new">changed</span><span class="cost">530 cr</span></header>
+    <h4>Hypercore Pylon</h4>
+    <ul class="stats"><li>140 field</li><li>+45% damage</li><li>+40% speed</li></ul>
+    <p class="fx">A hypercore overdrives every tower in the field: the biggest damage and speed boost in the arsenal.</p>
+    
+    
+  </article></div>
+      <div class="fork r2" aria-hidden="true"></div>
+      <div class="branch r2"><article class="card spec is-old path-b" style="--tw:#ff66d9">
+    <header><span class="tag">B1 · specialization</span><span class="cost">220 cr</span></header>
+    <h4>Targeting Array</h4>
+    <ul class="stats"><li>125 field</li><li>+25% damage</li><li>+25% range</li></ul>
+    <p class="fx">Nearby towers hit harder and reach further.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">+10 field</li><li class="">+25% range</li></ul></div>
+    
+  </article><article class="card step is-new path-b" style="--tw:#ff66d9">
+    <header><span class="tag">B2</span><span class="new">new</span><span class="cost">260 cr</span></header>
+    <h4>Better Optics</h4>
+    <ul class="stats"><li>+5% range</li></ul>
+    <p class="fx">Better optics give boosted towers 5% more range.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-b" style="--tw:#ff66d9">
+    <header><span class="tag">B3</span><span class="new">new</span><span class="cost">320 cr</span></header>
+    <h4>Wider Broadcast</h4>
+    <ul class="stats"><li>+5 field</li></ul>
+    <p class="fx">A wider broadcast reaches more towers.</p>
+    
+    
+  </article><article class="card step is-new path-b" style="--tw:#ff66d9">
+    <header><span class="tag">B4</span><span class="new">new</span><span class="cost">470 cr</span></header>
+    <h4>Range Finders</h4>
+    <ul class="stats"><li>+5% damage</li><li>+5% range</li></ul>
+    <p class="fx">Range finders sharpen the fire control: +5% damage and +5% range.</p>
+    
+    
+  </article><article class="card mastery is-new path-b" style="--tw:#ff66d9">
+    <header><span class="tag">B · mastery</span><span class="new">changed</span><span class="cost">530 cr</span></header>
+    <h4>Command Array</h4>
+    <ul class="stats"><li>145 field</li><li>+40% damage</li><li>+40% range</li></ul>
+    <p class="fx">A full command array: towers in the field hit far harder and reach far further.</p>
+    
+    
+  </article></div>
+      <div class="fork r3" aria-hidden="true"></div>
+      <div class="branch r3"><article class="card spec is-new path-c" style="--tw:#ff66d9">
+    <header><span class="tag">C1 · specialization</span><span class="new">new</span><span class="cost">220 cr</span></header>
+    <h4>Suppression Pylon</h4>
+    <ul class="stats"><li>125 field</li><li>+25% damage</li><li>jams support</li></ul>
+    <p class="fx">Jams enemy support inside its field: Rally haste, Bulwark barriers and Repair Bot heals don't work there.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">+10 field</li><li class="">jams support</li></ul></div>
+    
+  </article><article class="card step is-new path-c" style="--tw:#ff66d9">
+    <header><span class="tag">C2</span><span class="new">new</span><span class="cost">260 cr</span></header>
+    <h4>Stronger Jam</h4>
+    <ul class="stats"><li>+5 field</li></ul>
+    <p class="fx">A stronger jammer covers a wider field.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-c" style="--tw:#ff66d9">
+    <header><span class="tag">C3</span><span class="new">new</span><span class="cost">320 cr</span></header>
+    <h4>Signal Noise</h4>
+    <ul class="stats"><li>enemies inside move 10% slower</li></ul>
+    <p class="fx">Signal noise scrambles enemy drives: enemies in the field move 10% slower.</p>
+    
+    
+  </article><article class="card step is-new path-c" style="--tw:#ff66d9">
+    <header><span class="tag">C4</span><span class="new">new</span><span class="cost">470 cr</span></header>
+    <h4>Wide Jam</h4>
+    <ul class="stats"><li>+5% damage</li><li>+10 field</li></ul>
+    <p class="fx">A wider jamming field, and boosted towers hit 5% harder.</p>
+    
+    
+  </article><article class="card mastery is-new path-c" style="--tw:#ff66d9">
+    <header><span class="tag">C · mastery</span><span class="new">new</span><span class="cost">530 cr</span></header>
+    <h4>Silence Pylon</h4>
+    <ul class="stats"><li>150 field</li><li>+35% damage</li><li>jams everything</li></ul>
+    <p class="fx">Also shuts down Jammer EMPs and Overmind or Leviathan launches inside the field.</p>
+    
+    
+  </article></div>
+    </div></div>
+  </section><section class="tower" id="flak" style="--tw:#d9ff73">
+    <header class="tower-head">
+      <div class="tower-name"><span class="swatch"></span><h3>Flak Battery</h3></div>
+      <p class="role">Anti-air airbursts that hit every flyer in the blast.</p>
+      <dl class="meta">
+        <div><dt>Key</dt><dd><kbd>9</kbd></dd></div>
+        <div><dt>Hits</dt><dd>air</dd></div>
+        <div><dt>Maxed</dt><dd>A 1730 · B 1730 · C 1730 cr</dd></div>
+        <div><dt>New nodes</dt><dd>13 of 17</dd></div>
+      </dl>
+    </header>
+    <div class="tree-scroll"><div class="tree">
+      <div class="cell t1"><article class="card trunk is-old path-base" style="--tw:#d9ff73">
+    <header><span class="tag">Tier 1</span><span class="cost">80 cr</span></header>
+    <h4>Flak Battery</h4>
+    <ul class="stats"><li>16 dmg</li><li>175 range</li><li>1.4/s</li><li>38 burst</li></ul>
+    <p class="fx">Anti-air cannon whose airbursts hit every flyer in the blast.</p>
+    
+    
+  </article></div>
+      <div class="link base1" aria-hidden="true"></div>
+      <div class="cell t2"><article class="card trunk is-old path-base" style="--tw:#d9ff73">
+    <header><span class="tag">Tier 2</span><span class="cost">100 cr</span></header>
+    <h4>Tier 2</h4>
+    <ul class="stats"><li>28 dmg</li><li>190 range</li><li>1.5/s</li><li>42 burst</li></ul>
+    <p class="fx">Heavier shells, faster fire and a wider burst.</p>
+    
+    
+  </article></div>
+      <div class="link base2" aria-hidden="true"></div>
+      <div class="fork r1" aria-hidden="true"></div>
+      <div class="branch r1"><article class="card spec is-old path-a" style="--tw:#d9ff73">
+    <header><span class="tag">A1 · specialization</span><span class="cost">190 cr</span></header>
+    <h4>Sky Shredder</h4>
+    <ul class="stats"><li>30 dmg</li><li>200 range</li><li>3.2/s</li></ul>
+    <p class="fx">Twin autocannons: more than double the rate of fire.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">+2 dmg</li><li class="">+10 range</li><li class="">+1.7/s</li></ul></div>
+    
+  </article><article class="card step is-new path-a" style="--tw:#d9ff73">
+    <header><span class="tag">A2</span><span class="new">new</span><span class="cost">230 cr</span></header>
+    <h4>Faster Feed</h4>
+    <ul class="stats"><li>+0.3/s</li></ul>
+    <p class="fx">A faster ammo feed keeps the cannons firing.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-a" style="--tw:#d9ff73">
+    <header><span class="tag">A3</span><span class="new">new</span><span class="cost">280 cr</span></header>
+    <h4>Better Fuses</h4>
+    <ul class="stats"><li>+4 burst</li></ul>
+    <p class="fx">Better fuses widen each airburst.</p>
+    
+    
+  </article><article class="card step is-new path-a" style="--tw:#d9ff73">
+    <header><span class="tag">A4</span><span class="new">new</span><span class="cost">400 cr</span></header>
+    <h4>Third Cannon</h4>
+    <ul class="stats"><li>+10 range</li><li>+0.5/s</li></ul>
+    <p class="fx">A third cannon and a tracking radar: much faster fire at longer range.</p>
+    
+    
+  </article><article class="card mastery is-new path-a" style="--tw:#d9ff73">
+    <header><span class="tag">A · mastery</span><span class="new">changed</span><span class="cost">450 cr</span></header>
+    <h4>Aerial Denial</h4>
+    <ul class="stats"><li>40 dmg</li><li>225 range</li><li>4.6/s</li></ul>
+    <p class="fx">Four autocannons saturate the sky.</p>
+    
+    
+  </article></div>
+      <div class="fork r2" aria-hidden="true"></div>
+      <div class="branch r2"><article class="card spec is-old path-b" style="--tw:#d9ff73">
+    <header><span class="tag">B1 · specialization</span><span class="cost">190 cr</span></header>
+    <h4>Proximity Burst</h4>
+    <ul class="stats"><li>80 dmg</li><li>210 range</li><li>1.2/s</li><li>70 burst</li></ul>
+    <p class="fx">Heavy shells with a huge airburst.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">+52 dmg</li><li class="">+20 range</li><li class="down">−0.3/s</li><li class="">+28 burst</li></ul></div>
+    
+  </article><article class="card step is-new path-b" style="--tw:#d9ff73">
+    <header><span class="tag">B2</span><span class="new">new</span><span class="cost">230 cr</span></header>
+    <h4>Heavier Shells</h4>
+    <ul class="stats"><li>+15 dmg</li></ul>
+    <p class="fx">Heavier shells for bigger airbursts.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-b" style="--tw:#d9ff73">
+    <header><span class="tag">B3</span><span class="new">new</span><span class="cost">280 cr</span></header>
+    <h4>Wider Burst</h4>
+    <ul class="stats"><li>+5 burst</li></ul>
+    <p class="fx">Wider bursts catch more of a swarm.</p>
+    
+    
+  </article><article class="card step is-new path-b" style="--tw:#d9ff73">
+    <header><span class="tag">B4</span><span class="new">new</span><span class="cost">400 cr</span></header>
+    <h4>Auto-Loader</h4>
+    <ul class="stats"><li>+10 range</li><li>+0.1/s</li></ul>
+    <p class="fx">An auto-loader and a tracking radar: faster fire at longer range.</p>
+    
+    
+  </article><article class="card mastery is-new path-b" style="--tw:#d9ff73">
+    <header><span class="tag">B · mastery</span><span class="new">changed</span><span class="cost">450 cr</span></header>
+    <h4>Thunderhead</h4>
+    <ul class="stats"><li>150 dmg</li><li>240 range</li><li>1.4/s</li><li>90 burst</li><li>0.5 s stun</li></ul>
+    <p class="fx">Massive airbursts that also stun flyers.</p>
+    
+    
+  </article></div>
+      <div class="fork r3" aria-hidden="true"></div>
+      <div class="branch r3"><article class="card spec is-new path-c" style="--tw:#d9ff73">
+    <header><span class="tag">C1 · specialization</span><span class="new">new</span><span class="cost">190 cr</span></header>
+    <h4>Dual Purpose</h4>
+    <ul class="stats"><li>34 dmg</li><li>195 range</li><li>1.3/s</li><li>45 burst</li><li>60% vs ground</li></ul>
+    <p class="fx">Timed fuses: airbursts also hit ground enemies at reduced damage.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">+6 dmg</li><li class="">+5 range</li><li class="down">−0.2/s</li><li class="">+3 burst</li><li class="">60% vs ground</li></ul></div>
+    
+  </article><article class="card step is-new path-c" style="--tw:#d9ff73">
+    <header><span class="tag">C2</span><span class="new">new</span><span class="cost">230 cr</span></header>
+    <h4>Ground Fuses</h4>
+    <ul class="stats"><li>70% vs ground</li></ul>
+    <p class="fx">Better ground fuses: airbursts hit ground enemies at 70%.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-c" style="--tw:#d9ff73">
+    <header><span class="tag">C3</span><span class="new">new</span><span class="cost">280 cr</span></header>
+    <h4>Bigger Shells</h4>
+    <ul class="stats"><li>+6 dmg</li></ul>
+    <p class="fx">Bigger shells hit harder in the air and on the ground.</p>
+    
+    
+  </article><article class="card step is-new path-c" style="--tw:#d9ff73">
+    <header><span class="tag">C4</span><span class="new">new</span><span class="cost">400 cr</span></header>
+    <h4>Rapid Feed</h4>
+    <ul class="stats"><li>+6 burst</li><li>+0.2/s</li><li>80% vs ground</li></ul>
+    <p class="fx">A rapid feed and wider bursts: faster fire, and ground enemies take 80%.</p>
+    
+    
+  </article><article class="card mastery is-new path-c" style="--tw:#d9ff73">
+    <header><span class="tag">C · mastery</span><span class="new">new</span><span class="cost">450 cr</span></header>
+    <h4>Flak Curtain</h4>
+    <ul class="stats"><li>54 dmg</li><li>215 range</li><li>1.6/s</li><li>64 burst</li><li>shred 2</li><li>100% vs ground</li></ul>
+    <p class="fx">Full damage to ground targets, and every burst shreds 2 armor.</p>
+    
+    
+  </article></div>
+    </div></div>
+  </section><section class="tower" id="sensor" style="--tw:#59ffd9">
+    <header class="tower-head">
+      <div class="tower-name"><span class="swatch"></span><h3>Sensor Array</h3></div>
+      <p class="role">Reveals cloaked enemies and marks targets to take extra damage.</p>
+      <dl class="meta">
+        <div><dt>Key</dt><dd><kbd>0</kbd></dd></div>
+        <div><dt>Hits</dt><dd>support</dd></div>
+        <div><dt>Maxed</dt><dd>A 1465 · B 1465 · C 1465 cr</dd></div>
+        <div><dt>New nodes</dt><dd>13 of 17</dd></div>
+      </dl>
+    </header>
+    <div class="tree-scroll"><div class="tree">
+      <div class="cell t1"><article class="card trunk is-old path-base" style="--tw:#59ffd9">
+    <header><span class="tag">Tier 1</span><span class="cost">75 cr</span></header>
+    <h4>Sensor Array</h4>
+    <ul class="stats"><li>130 field</li><li>+8% mark</li></ul>
+    <p class="fx">A radar dish that reveals cloaked enemies in its field and marks them to take extra damage.</p>
+    
+    
+  </article></div>
+      <div class="link base1" aria-hidden="true"></div>
+      <div class="cell t2"><article class="card trunk is-old path-base" style="--tw:#59ffd9">
+    <header><span class="tag">Tier 2</span><span class="cost">90 cr</span></header>
+    <h4>Tier 2</h4>
+    <ul class="stats"><li>150 field</li><li>+12% mark</li></ul>
+    <p class="fx">A bigger dish: a wider field and a stronger mark.</p>
+    
+    
+  </article></div>
+      <div class="link base2" aria-hidden="true"></div>
+      <div class="fork r1" aria-hidden="true"></div>
+      <div class="branch r1"><article class="card spec is-old path-a" style="--tw:#59ffd9">
+    <header><span class="tag">A1 · specialization</span><span class="cost">160 cr</span></header>
+    <h4>Deep Scan</h4>
+    <ul class="stats"><li>210 field</li><li>+14% mark</li></ul>
+    <p class="fx">The widest reveal field.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">+60 field</li><li class="">+2% mark</li></ul></div>
+    
+  </article><article class="card step is-new path-a" style="--tw:#59ffd9">
+    <header><span class="tag">A2</span><span class="new">new</span><span class="cost">190 cr</span></header>
+    <h4>Bigger Dish</h4>
+    <ul class="stats"><li>+15 field</li></ul>
+    <p class="fx">A bigger dish scans a wider field.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-a" style="--tw:#59ffd9">
+    <header><span class="tag">A3</span><span class="new">new</span><span class="cost">230 cr</span></header>
+    <h4>Signal Boost</h4>
+    <ul class="stats"><li>+1% mark</li></ul>
+    <p class="fx">A signal booster strengthens the mark.</p>
+    
+    
+  </article><article class="card step is-new path-a" style="--tw:#59ffd9">
+    <header><span class="tag">A4</span><span class="new">new</span><span class="cost">340 cr</span></header>
+    <h4>Dual Dish</h4>
+    <ul class="stats"><li>+15 field</li><li>+2% mark</li></ul>
+    <p class="fx">A second dish: a much wider field and a stronger mark.</p>
+    
+    
+  </article><article class="card mastery is-new path-a" style="--tw:#59ffd9">
+    <header><span class="tag">A · mastery</span><span class="new">changed</span><span class="cost">380 cr</span></header>
+    <h4>Omniscient Grid</h4>
+    <ul class="stats"><li>280 field</li><li>+20% mark</li></ul>
+    <p class="fx">Sees nearly half the sector at once.</p>
+    
+    
+  </article></div>
+      <div class="fork r2" aria-hidden="true"></div>
+      <div class="branch r2"><article class="card spec is-old path-b" style="--tw:#59ffd9">
+    <header><span class="tag">B1 · specialization</span><span class="cost">160 cr</span></header>
+    <h4>Target Painter</h4>
+    <ul class="stats"><li>160 field</li><li>+25% mark</li></ul>
+    <p class="fx">Laser designators: marked enemies take more damage.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">+10 field</li><li class="">+13% mark</li></ul></div>
+    
+  </article><article class="card step is-new path-b" style="--tw:#59ffd9">
+    <header><span class="tag">B2</span><span class="new">new</span><span class="cost">190 cr</span></header>
+    <h4>Brighter Lasers</h4>
+    <ul class="stats"><li>+3% mark</li></ul>
+    <p class="fx">Brighter lasers make marked enemies take 3% more damage.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-b" style="--tw:#59ffd9">
+    <header><span class="tag">B3</span><span class="new">new</span><span class="cost">230 cr</span></header>
+    <h4>Wider Beam</h4>
+    <ul class="stats"><li>+5 field</li></ul>
+    <p class="fx">A wider painting beam covers more of the lane.</p>
+    
+    
+  </article><article class="card step is-new path-b" style="--tw:#59ffd9">
+    <header><span class="tag">B4</span><span class="new">new</span><span class="cost">340 cr</span></header>
+    <h4>Twin Designators</h4>
+    <ul class="stats"><li>marks last 1 s after leaving</li><li>+4% mark</li></ul>
+    <p class="fx">Twin designators: a stronger mark that stays on for 1 s after an enemy leaves the field.</p>
+    
+    
+  </article><article class="card mastery is-new path-b" style="--tw:#59ffd9">
+    <header><span class="tag">B · mastery</span><span class="new">changed</span><span class="cost">380 cr</span></header>
+    <h4>Kill Beacon</h4>
+    <ul class="stats"><li>175 field</li><li>+40% mark</li></ul>
+    <p class="fx">Marked enemies take far more damage from everything.</p>
+    
+    
+  </article></div>
+      <div class="fork r3" aria-hidden="true"></div>
+      <div class="branch r3"><article class="card spec is-new path-c" style="--tw:#59ffd9">
+    <header><span class="tag">C1 · specialization</span><span class="new">new</span><span class="cost">160 cr</span></header>
+    <h4>Disruptor</h4>
+    <ul class="stats"><li>150 field</li><li>+12% mark</li><li>disrupts</li></ul>
+    <p class="fx">Jams movement tricks in its field: no burrowing, no blinking, and cloaks fail.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">disrupts</li></ul></div>
+    
+  </article><article class="card step is-new path-c" style="--tw:#59ffd9">
+    <header><span class="tag">C2</span><span class="new">new</span><span class="cost">190 cr</span></header>
+    <h4>Wider Jam</h4>
+    <ul class="stats"><li>+10 field</li></ul>
+    <p class="fx">The jamming field reaches further.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-c" style="--tw:#59ffd9">
+    <header><span class="tag">C3</span><span class="new">new</span><span class="cost">230 cr</span></header>
+    <h4>Echo Scan</h4>
+    <ul class="stats"><li>cloaks stay revealed 1 s after leaving</li></ul>
+    <p class="fx">Echo scans keep cloaked enemies revealed for 1 s after they leave the field.</p>
+    
+    
+  </article><article class="card step is-new path-c" style="--tw:#59ffd9">
+    <header><span class="tag">C4</span><span class="new">new</span><span class="cost">340 cr</span></header>
+    <h4>Long Jam</h4>
+    <ul class="stats"><li>+3% mark</li><li>+15 field</li></ul>
+    <p class="fx">A long-range jammer: a much wider field and a stronger mark.</p>
+    
+    
+  </article><article class="card mastery is-new path-c" style="--tw:#59ffd9">
+    <header><span class="tag">C · mastery</span><span class="new">new</span><span class="cost">380 cr</span></header>
+    <h4>Blackout Grid</h4>
+    <ul class="stats"><li>200 field</li><li>+18% mark</li><li>disrupts</li><li>exposes</li></ul>
+    <p class="fx">Also strips crowd-control immunity (Rampart, Colossus) inside the field.</p>
+    
+    
+  </article></div>
+    </div></div>
+  </section><section class="tower" id="gravity" style="--tw:#9973ff">
+    <header class="tower-head">
+      <div class="tower-name"><span class="swatch"></span><h3>Graviton Projector</h3></div>
+      <p class="role">Gravity pulses that move ground enemies along the lane (bosses 25%).</p>
+      <dl class="meta">
+        <div><dt>Key</dt><dd><kbd>-</kbd></dd></div>
+        <div><dt>Hits</dt><dd>ground</dd></div>
+        <div><dt>Maxed</dt><dd>A 2680 · B 2680 · C 2680 cr</dd></div>
+        <div><dt>New nodes</dt><dd>13 of 17</dd></div>
+      </dl>
+    </header>
+    <div class="tree-scroll"><div class="tree">
+      <div class="cell t1"><article class="card trunk is-old path-base" style="--tw:#9973ff">
+    <header><span class="tag">Tier 1</span><span class="cost">150 cr</span></header>
+    <h4>Graviton Projector</h4>
+    <ul class="stats"><li>12 dmg</li><li>105 range</li><li>40 px shove</li></ul>
+    <p class="fx">Gravity pulses shove ground enemies back down the lane and crush them.</p>
+    
+    
+  </article></div>
+      <div class="link base1" aria-hidden="true"></div>
+      <div class="cell t2"><article class="card trunk is-old path-base" style="--tw:#9973ff">
+    <header><span class="tag">Tier 2</span><span class="cost">160 cr</span></header>
+    <h4>Tier 2</h4>
+    <ul class="stats"><li>22 dmg</li><li>115 range</li><li>52 px shove</li></ul>
+    <p class="fx">A stronger core: bigger shoves and harder pulses.</p>
+    
+    
+  </article></div>
+      <div class="link base2" aria-hidden="true"></div>
+      <div class="fork r1" aria-hidden="true"></div>
+      <div class="branch r1"><article class="card spec is-old path-a" style="--tw:#9973ff">
+    <header><span class="tag">A1 · specialization</span><span class="cost">290 cr</span></header>
+    <h4>Repulsor</h4>
+    <ul class="stats"><li>30 dmg</li><li>125 range</li><li>85 px shove</li></ul>
+    <p class="fx">Violent pulses hurl enemies back down the lane.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">+8 dmg</li><li class="">+10 range</li><li class="">+33 px shove</li></ul></div>
+    
+  </article><article class="card step is-new path-a" style="--tw:#9973ff">
+    <header><span class="tag">A2</span><span class="new">new</span><span class="cost">350 cr</span></header>
+    <h4>Denser Core</h4>
+    <ul class="stats"><li>+10 px shove</li></ul>
+    <p class="fx">A denser core throws enemies 10 px further.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-a" style="--tw:#9973ff">
+    <header><span class="tag">A3</span><span class="new">new</span><span class="cost">420 cr</span></header>
+    <h4>Wider Field</h4>
+    <ul class="stats"><li>+5 range</li></ul>
+    <p class="fx">A wider field catches more of the lane.</p>
+    
+    
+  </article><article class="card step is-new path-a" style="--tw:#9973ff">
+    <header><span class="tag">A4</span><span class="new">new</span><span class="cost">620 cr</span></header>
+    <h4>Faster Pulses</h4>
+    <ul class="stats"><li>+8 dmg</li><li>+0.03/s</li></ul>
+    <p class="fx">Faster pulses that also crush harder.</p>
+    
+    
+  </article><article class="card mastery is-new path-a" style="--tw:#9973ff">
+    <header><span class="tag">A · mastery</span><span class="new">changed</span><span class="cost">690 cr</span></header>
+    <h4>Singularity Engine</h4>
+    <ul class="stats"><li>55 dmg</li><li>140 range</li><li>0.36/s</li><li>130 px shove</li></ul>
+    <p class="fx">Throws whole columns of enemies back.</p>
+    
+    
+  </article></div>
+      <div class="fork r2" aria-hidden="true"></div>
+      <div class="branch r2"><article class="card spec is-old path-b" style="--tw:#9973ff">
+    <header><span class="tag">B1 · specialization</span><span class="cost">290 cr</span></header>
+    <h4>Crush Field</h4>
+    <ul class="stats"><li>75 dmg</li><li>120 range</li><li>30 px shove</li><li>0.6 s stun</li></ul>
+    <p class="fx">Crushing gravity: heavy damage and a stun.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">+53 dmg</li><li class="">+5 range</li><li class="down">−22 px shove</li><li class="">0.6 s stun</li></ul></div>
+    
+  </article><article class="card step is-new path-b" style="--tw:#9973ff">
+    <header><span class="tag">B2</span><span class="new">new</span><span class="cost">350 cr</span></header>
+    <h4>Heavier Field</h4>
+    <ul class="stats"><li>+12 dmg</li></ul>
+    <p class="fx">A heavier field crushes harder.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-b" style="--tw:#9973ff">
+    <header><span class="tag">B3</span><span class="new">new</span><span class="cost">420 cr</span></header>
+    <h4>Lasting Pin</h4>
+    <ul class="stats"><li>+0.1 s stun</li></ul>
+    <p class="fx">A lasting pin keeps enemies stunned 0.1 s longer.</p>
+    
+    
+  </article><article class="card step is-new path-b" style="--tw:#9973ff">
+    <header><span class="tag">B4</span><span class="new">new</span><span class="cost">620 cr</span></header>
+    <h4>Faster Pulses</h4>
+    <ul class="stats"><li>+5 range</li><li>+0.03/s</li></ul>
+    <p class="fx">Faster pulses over a wider field.</p>
+    
+    
+  </article><article class="card mastery is-new path-b" style="--tw:#9973ff">
+    <header><span class="tag">B · mastery</span><span class="new">changed</span><span class="cost">690 cr</span></header>
+    <h4>Event Horizon</h4>
+    <ul class="stats"><li>135 dmg</li><li>135 range</li><li>0.5/s</li><li>1 s stun</li></ul>
+    <p class="fx">Pins everything in the field and crushes it.</p>
+    
+    
+  </article></div>
+      <div class="fork r3" aria-hidden="true"></div>
+      <div class="branch r3"><article class="card spec is-new path-c" style="--tw:#9973ff">
+    <header><span class="tag">C1 · specialization</span><span class="new">new</span><span class="cost">290 cr</span></header>
+    <h4>Gravity Well</h4>
+    <ul class="stats"><li>25 dmg</li><li>125 range</li><li>50 px pull</li><li>20% slow</li></ul>
+    <p class="fx">Pulls enemies toward one point on the lane, bunching them up for splash towers.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><p class="fx">Adds its attack alongside the primary's (see Combinations).</p></div>
+    
+  </article><article class="card step is-new path-c" style="--tw:#9973ff">
+    <header><span class="tag">C2</span><span class="new">new</span><span class="cost">350 cr</span></header>
+    <h4>Deeper Well</h4>
+    <ul class="stats"><li>+10 px pull</li></ul>
+    <p class="fx">A deeper well pulls enemies 10 px further.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-c" style="--tw:#9973ff">
+    <header><span class="tag">C3</span><span class="new">new</span><span class="cost">420 cr</span></header>
+    <h4>Heavier Hold</h4>
+    <ul class="stats"><li>+5% slow</li></ul>
+    <p class="fx">A heavier hold slows held enemies 5% more.</p>
+    
+    
+  </article><article class="card step is-new path-c" style="--tw:#9973ff">
+    <header><span class="tag">C4</span><span class="new">new</span><span class="cost">620 cr</span></header>
+    <h4>Crushing Grip</h4>
+    <ul class="stats"><li>+5 range</li><li>+10 dmg</li></ul>
+    <p class="fx">A crushing grip over a wider well: held enemies take more damage.</p>
+    
+    
+  </article><article class="card mastery is-new path-c" style="--tw:#9973ff">
+    <header><span class="tag">C · mastery</span><span class="new">new</span><span class="cost">690 cr</span></header>
+    <h4>Collapse Point</h4>
+    <ul class="stats"><li>45 dmg</li><li>140 range</li><li>75 px pull</li><li>implodes every 3rd pulse for 6% max HP</li></ul>
+    <p class="fx">Every third pulse implodes for 6% of max HP on everything held (bosses 1.5%).</p>
+    
+    
+  </article></div>
+    </div></div>
+  </section><section class="tower" id="nullifier" style="--tw:#c8b6ff">
+    <header class="tower-head">
+      <div class="tower-name"><span class="swatch"></span><h3>Nullifier</h3><span class="new big">new tower</span></div>
+      <p class="role">A dampening pulse that strips enemy defences: barriers, armor and immunities.</p>
+      <dl class="meta">
+        <div><dt>Key</dt><dd><kbd>=</kbd></dd></div>
+        <div><dt>Hits</dt><dd>air + ground</dd></div>
+        <div><dt>Maxed</dt><dd>A 2210 · B 2210 · C 2210 cr</dd></div>
+        <div><dt>New nodes</dt><dd>17 of 17</dd></div>
+      </dl>
+    </header>
+    <div class="tree-scroll"><div class="tree">
+      <div class="cell t1"><article class="card trunk is-new path-base" style="--tw:#c8b6ff">
+    <header><span class="tag">Tier 1</span><span class="new">new</span><span class="cost">120 cr</span></header>
+    <h4>Nullifier</h4>
+    <ul class="stats"><li>5 dmg</li><li>110 field</li><li>pulse every 2 s</li><li>strips 40% of barriers</li></ul>
+    <p class="fx">Pulses a dampening field that strips away part of every enemy barrier inside it.</p>
+    
+    
+  </article></div>
+      <div class="link base1" aria-hidden="true"></div>
+      <div class="cell t2"><article class="card trunk is-new path-base" style="--tw:#c8b6ff">
+    <header><span class="tag">Tier 2</span><span class="new">new</span><span class="cost">130 cr</span></header>
+    <h4>Tier 2</h4>
+    <ul class="stats"><li>8 dmg</li><li>120 field</li><li>pulse every 1.7 s</li><li>strips 60% of barriers</li><li>exposes</li></ul>
+    <p class="fx">Enemies in the field lose crowd-control immunity.</p>
+    
+    
+  </article></div>
+      <div class="link base2" aria-hidden="true"></div>
+      <div class="fork r1" aria-hidden="true"></div>
+      <div class="branch r1"><article class="card spec is-new path-a" style="--tw:#c8b6ff">
+    <header><span class="tag">A1 · specialization</span><span class="new">new</span><span class="cost">240 cr</span></header>
+    <h4>Purge Emitter</h4>
+    <ul class="stats"><li>10 dmg</li><li>130 field</li><li>strips 100% of barriers</li><li>−3 armor inside</li><li>exposes</li></ul>
+    <p class="fx">Wipes barriers clean and weakens armor while enemies stay in the field.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">+2 dmg</li><li class="">+10 field</li><li class="">strips 100% of barriers</li><li class="down">−3 armor inside</li><li class="">exposes</li></ul></div>
+    
+  </article><article class="card step is-new path-a" style="--tw:#c8b6ff">
+    <header><span class="tag">A2</span><span class="new">new</span><span class="cost">290 cr</span></header>
+    <h4>Wider Emitter</h4>
+    <ul class="stats"><li>+8 field</li></ul>
+    <p class="fx">A wider emitter covers more of the lane.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-a" style="--tw:#c8b6ff">
+    <header><span class="tag">A3</span><span class="new">new</span><span class="cost">350 cr</span></header>
+    <h4>Deep Purge</h4>
+    <ul class="stats"><li>−1 more armor</li></ul>
+    <p class="fx">A deeper purge strips one more point of armor inside the field.</p>
+    
+    
+  </article><article class="card step is-new path-a" style="--tw:#c8b6ff">
+    <header><span class="tag">A4</span><span class="new">new</span><span class="cost">510 cr</span></header>
+    <h4>Long Emitter</h4>
+    <ul class="stats"><li>pulse every 1.4 s</li><li>+8 field</li></ul>
+    <p class="fx">A faster cycle and a longer emitter: pulses every 1.4 s over a wider field.</p>
+    
+    
+  </article><article class="card mastery is-new path-a" style="--tw:#c8b6ff">
+    <header><span class="tag">A · mastery</span><span class="new">new</span><span class="cost">570 cr</span></header>
+    <h4>Absolute Null</h4>
+    <ul class="stats"><li>16 dmg</li><li>155 field</li><li>−7 armor inside</li><li>exposes</li><li>blocks barrier recharge</li></ul>
+    <p class="fx">Barriers can't re-form inside the field at all.</p>
+    
+    
+  </article></div>
+      <div class="fork r2" aria-hidden="true"></div>
+      <div class="branch r2"><article class="card spec is-new path-b" style="--tw:#c8b6ff">
+    <header><span class="tag">B1 · specialization</span><span class="new">new</span><span class="cost">240 cr</span></header>
+    <h4>Dampener</h4>
+    <ul class="stats"><li>8 dmg</li><li>130 field</li><li>suppresses abilities inside</li><li>exposes</li></ul>
+    <p class="fx">Shuts off every enemy ability in the field: healing, auras, EMP, spawns, blinking, burrowing, regeneration.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">+10 field</li><li class="">suppresses abilities inside</li><li class="">exposes</li></ul></div>
+    
+  </article><article class="card step is-new path-b" style="--tw:#c8b6ff">
+    <header><span class="tag">B2</span><span class="new">new</span><span class="cost">290 cr</span></header>
+    <h4>Wider Dampening</h4>
+    <ul class="stats"><li>+8 field</li></ul>
+    <p class="fx">A wider dampening field silences more enemies.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-b" style="--tw:#c8b6ff">
+    <header><span class="tag">B3</span><span class="new">new</span><span class="cost">350 cr</span></header>
+    <h4>Lingering Silence</h4>
+    <ul class="stats"><li>suppression lingers 1 s</li></ul>
+    <p class="fx">Silence lingers on enemies for 1 s after they leave the field.</p>
+    
+    
+  </article><article class="card step is-new path-b" style="--tw:#c8b6ff">
+    <header><span class="tag">B4</span><span class="new">new</span><span class="cost">510 cr</span></header>
+    <h4>Long Dampening</h4>
+    <ul class="stats"><li>pulse every 1.4 s</li><li>+8 field</li></ul>
+    <p class="fx">A faster cycle and a longer reach: pulses every 1.4 s over a wider field.</p>
+    
+    
+  </article><article class="card mastery is-new path-b" style="--tw:#c8b6ff">
+    <header><span class="tag">B · mastery</span><span class="new">new</span><span class="cost">570 cr</span></header>
+    <h4>Silence Engine</h4>
+    <ul class="stats"><li>14 dmg</li><li>155 field</li><li>suppression lingers 3 s</li><li>exposes</li><li>suppresses bosses at half</li></ul>
+    <p class="fx">Suppression follows enemies out of the field, and works on bosses at half strength.</p>
+    
+    
+  </article></div>
+      <div class="fork r3" aria-hidden="true"></div>
+      <div class="branch r3"><article class="card spec is-new path-c" style="--tw:#c8b6ff">
+    <header><span class="tag">C1 · specialization</span><span class="new">new</span><span class="cost">240 cr</span></header>
+    <h4>Feedback Loop</h4>
+    <ul class="stats"><li>8 dmg</li><li>125 field</li><li>strips 60% of barriers</li><li>exposes</li><li>returns 100% of the stripped barrier</li></ul>
+    <p class="fx">Barrier it strips is dealt back to the enemy's hull as damage.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">+5 field</li><li class="">strips 60% of barriers</li><li class="">exposes</li><li class="">returns 100% of the stripped barrier</li></ul></div>
+    
+  </article><article class="card step is-new path-c" style="--tw:#c8b6ff">
+    <header><span class="tag">C2</span><span class="new">new</span><span class="cost">290 cr</span></header>
+    <h4>Stronger Pull</h4>
+    <ul class="stats"><li>strips 70% of barriers</li></ul>
+    <p class="fx">A stronger pull strips 70% of each barrier.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-c" style="--tw:#c8b6ff">
+    <header><span class="tag">C3</span><span class="new">new</span><span class="cost">350 cr</span></header>
+    <h4>Amplified Return</h4>
+    <ul class="stats"><li>returns 125% of the stripped barrier</li></ul>
+    <p class="fx">Amplified feedback returns 125% of each stripped barrier as damage.</p>
+    
+    
+  </article><article class="card step is-new path-c" style="--tw:#c8b6ff">
+    <header><span class="tag">C4</span><span class="new">new</span><span class="cost">510 cr</span></header>
+    <h4>Wider Loop</h4>
+    <ul class="stats"><li>pulse every 1.4 s</li><li>+10 field</li></ul>
+    <p class="fx">A faster, wider loop: pulses every 1.4 s over a bigger field.</p>
+    
+    
+  </article><article class="card mastery is-new path-c" style="--tw:#c8b6ff">
+    <header><span class="tag">C · mastery</span><span class="new">new</span><span class="cost">570 cr</span></header>
+    <h4>Overload Cascade</h4>
+    <ul class="stats"><li>14 dmg</li><li>145 field</li><li>strips 85% of barriers</li><li>exposes</li><li>returns 125% of the stripped barrier</li><li>cascades 50% in 60 px</li></ul>
+    <p class="fx">Stripped barriers also detonate for 50% as splash (60 px).</p>
+    
+    
+  </article></div>
+    </div></div>
+  </section><section class="tower" id="nova" style="--tw:#ffb347">
+    <header class="tower-head">
+      <div class="tower-name"><span class="swatch"></span><h3>Nova Reactor</h3><span class="new big">new tower</span></div>
+      <p class="role">A 360° shockwave that hits everything around it, air and ground.</p>
+      <dl class="meta">
+        <div><dt>Key</dt><dd><kbd>[</kbd></dd></div>
+        <div><dt>Hits</dt><dd>air + ground</dd></div>
+        <div><dt>Maxed</dt><dd>A 2790 · B 2790 · C 2790 cr</dd></div>
+        <div><dt>New nodes</dt><dd>17 of 17</dd></div>
+      </dl>
+    </header>
+    <div class="tree-scroll"><div class="tree">
+      <div class="cell t1"><article class="card trunk is-new path-base" style="--tw:#ffb347">
+    <header><span class="tag">Tier 1</span><span class="new">new</span><span class="cost">160 cr</span></header>
+    <h4>Nova Reactor</h4>
+    <ul class="stats"><li>30 dmg</li><li>100 radius</li><li>0.5/s</li></ul>
+    <p class="fx">A reactor that releases a shockwave all around it, hitting every enemy in range, air and ground.</p>
+    
+    
+  </article></div>
+      <div class="link base1" aria-hidden="true"></div>
+      <div class="cell t2"><article class="card trunk is-new path-base" style="--tw:#ffb347">
+    <header><span class="tag">Tier 2</span><span class="new">new</span><span class="cost">170 cr</span></header>
+    <h4>Tier 2</h4>
+    <ul class="stats"><li>50 dmg</li><li>110 radius</li><li>0.55/s</li></ul>
+    <p class="fx">A hotter core: stronger, wider and slightly faster waves.</p>
+    
+    
+  </article></div>
+      <div class="link base2" aria-hidden="true"></div>
+      <div class="fork r1" aria-hidden="true"></div>
+      <div class="branch r1"><article class="card spec is-new path-a" style="--tw:#ffb347">
+    <header><span class="tag">A1 · specialization</span><span class="new">new</span><span class="cost">300 cr</span></header>
+    <h4>Supernova</h4>
+    <ul class="stats"><li>120 dmg</li><li>125 radius</li><li>0.4/s</li></ul>
+    <p class="fx">Slow, devastating shockwaves.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">+70 dmg</li><li class="">+15 radius</li><li class="down">−0.15/s</li></ul></div>
+    
+  </article><article class="card step is-new path-a" style="--tw:#ffb347">
+    <header><span class="tag">A2</span><span class="new">new</span><span class="cost">360 cr</span></header>
+    <h4>Denser Core</h4>
+    <ul class="stats"><li>+20 dmg</li></ul>
+    <p class="fx">A denser core puts more power into each wave.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-a" style="--tw:#ffb347">
+    <header><span class="tag">A3</span><span class="new">new</span><span class="cost">440 cr</span></header>
+    <h4>Wider Wave</h4>
+    <ul class="stats"><li>+8 radius</li></ul>
+    <p class="fx">Each wave reaches further.</p>
+    
+    
+  </article><article class="card step is-new path-a" style="--tw:#ffb347">
+    <header><span class="tag">A4</span><span class="new">new</span><span class="cost">640 cr</span></header>
+    <h4>Overcharged Core</h4>
+    <ul class="stats"><li>+0.05/s</li><li>+30 dmg</li></ul>
+    <p class="fx">An overcharged core: much stronger waves, released a little faster.</p>
+    
+    
+  </article><article class="card mastery is-new path-a" style="--tw:#ffb347">
+    <header><span class="tag">A · mastery</span><span class="new">new</span><span class="cost">720 cr</span></header>
+    <h4>Hypernova</h4>
+    <ul class="stats"><li>220 dmg</li><li>150 radius</li><li>0.45/s</li><li>strips 50% of barriers</li></ul>
+    <p class="fx">Each wave also shatters half of every barrier it hits.</p>
+    
+    
+  </article></div>
+      <div class="fork r2" aria-hidden="true"></div>
+      <div class="branch r2"><article class="card spec is-new path-b" style="--tw:#ffb347">
+    <header><span class="tag">B1 · specialization</span><span class="new">new</span><span class="cost">300 cr</span></header>
+    <h4>Pulse Reactor</h4>
+    <ul class="stats"><li>34 dmg</li><li>110 radius</li><li>1.2/s</li></ul>
+    <p class="fx">Rapid low-power rings that shred swarms.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="down">−16 dmg</li><li class="">+0.65/s</li></ul></div>
+    
+  </article><article class="card step is-new path-b" style="--tw:#ffb347">
+    <header><span class="tag">B2</span><span class="new">new</span><span class="cost">360 cr</span></header>
+    <h4>Faster Cycling</h4>
+    <ul class="stats"><li>+0.15/s</li></ul>
+    <p class="fx">Faster cycling releases more rings per second.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-b" style="--tw:#ffb347">
+    <header><span class="tag">B3</span><span class="new">new</span><span class="cost">440 cr</span></header>
+    <h4>Stronger Rings</h4>
+    <ul class="stats"><li>+5 dmg</li></ul>
+    <p class="fx">Each ring hits harder.</p>
+    
+    
+  </article><article class="card step is-new path-b" style="--tw:#ffb347">
+    <header><span class="tag">B4</span><span class="new">new</span><span class="cost">640 cr</span></header>
+    <h4>Overclocked Cycling</h4>
+    <ul class="stats"><li>+6 radius</li><li>+0.15/s</li></ul>
+    <p class="fx">Overclocked cycling: faster rings that reach further.</p>
+    
+    
+  </article><article class="card mastery is-new path-b" style="--tw:#ffb347">
+    <header><span class="tag">B · mastery</span><span class="new">new</span><span class="cost">720 cr</span></header>
+    <h4>Chain Reactor</h4>
+    <ul class="stats"><li>48 dmg</li><li>120 radius</li><li>1.7/s</li><li>40 px mini-novas</li></ul>
+    <p class="fx">Every kill sets off a 40 px mini-nova.</p>
+    
+    
+  </article></div>
+      <div class="fork r3" aria-hidden="true"></div>
+      <div class="branch r3"><article class="card spec is-new path-c" style="--tw:#ffb347">
+    <header><span class="tag">C1 · specialization</span><span class="new">new</span><span class="cost">300 cr</span></header>
+    <h4>Solar Flare</h4>
+    <ul class="stats"><li>50 dmg</li><li>115 radius</li><li>0.55/s</li><li>20 burn/s for 2 s</li></ul>
+    <p class="fx">Waves leave the ground burning, ignoring armor.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">+5 radius</li><li class="">20 burn/s for 2 s</li></ul></div>
+    
+  </article><article class="card step is-new path-c" style="--tw:#ffb347">
+    <header><span class="tag">C2</span><span class="new">new</span><span class="cost">360 cr</span></header>
+    <h4>Hotter Flares</h4>
+    <ul class="stats"><li>+6 burn/s</li></ul>
+    <p class="fx">Hotter flares make the burning ground hurt more.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-c" style="--tw:#ffb347">
+    <header><span class="tag">C3</span><span class="new">new</span><span class="cost">440 cr</span></header>
+    <h4>Longer Burn</h4>
+    <ul class="stats"><li>+1 s burn</li></ul>
+    <p class="fx">The ground keeps burning for an extra second.</p>
+    
+    
+  </article><article class="card step is-new path-c" style="--tw:#ffb347">
+    <header><span class="tag">C4</span><span class="new">new</span><span class="cost">640 cr</span></header>
+    <h4>Plasma Core</h4>
+    <ul class="stats"><li>+6 radius</li><li>+10 dmg</li><li>+6 burn/s</li></ul>
+    <p class="fx">A plasma core: stronger, wider waves and hotter flames.</p>
+    
+    
+  </article><article class="card mastery is-new path-c" style="--tw:#ffb347">
+    <header><span class="tag">C · mastery</span><span class="new">new</span><span class="cost">720 cr</span></header>
+    <h4>Corona</h4>
+    <ul class="stats"><li>65 dmg</li><li>130 radius</li><li>0.55/s</li><li>45 burn/s aura</li></ul>
+    <p class="fx">A constant burning aura around the reactor, on top of its waves.</p>
+    
+    
+  </article></div>
+    </div></div>
+  </section><section class="tower" id="drones" style="--tw:#9fe870">
+    <header class="tower-head">
+      <div class="tower-name"><span class="swatch"></span><h3>Drone Bay</h3><span class="new big">new tower</span></div>
+      <p class="role">Launches hunter drones that chase enemies anywhere on the map.</p>
+      <dl class="meta">
+        <div><dt>Key</dt><dd><kbd>]</kbd></dd></div>
+        <div><dt>Hits</dt><dd>air + ground</dd></div>
+        <div><dt>Maxed</dt><dd>A 2810 · B 2810 · C 2810 cr</dd></div>
+        <div><dt>New nodes</dt><dd>17 of 17</dd></div>
+      </dl>
+    </header>
+    <div class="tree-scroll"><div class="tree">
+      <div class="cell t1"><article class="card trunk is-new path-base" style="--tw:#9fe870">
+    <header><span class="tag">Tier 1</span><span class="new">new</span><span class="cost">180 cr</span></header>
+    <h4>Drone Bay</h4>
+    <ul class="stats"><li>2 drones</li><li>12 dmg</li><li>3 shots/s</li><li>160 speed</li></ul>
+    <p class="fx">Launches combat drones that hunt enemies anywhere on the map.</p>
+    
+    
+  </article></div>
+      <div class="link base1" aria-hidden="true"></div>
+      <div class="cell t2"><article class="card trunk is-new path-base" style="--tw:#9fe870">
+    <header><span class="tag">Tier 2</span><span class="new">new</span><span class="cost">170 cr</span></header>
+    <h4>Tier 2</h4>
+    <ul class="stats"><li>3 drones</li><li>16 dmg</li><li>3 shots/s</li><li>170 speed</li></ul>
+    <p class="fx">A bigger hangar: one more drone, and all of them hit harder.</p>
+    
+    
+  </article></div>
+      <div class="link base2" aria-hidden="true"></div>
+      <div class="fork r1" aria-hidden="true"></div>
+      <div class="branch r1"><article class="card spec is-new path-a" style="--tw:#9fe870">
+    <header><span class="tag">A1 · specialization</span><span class="new">new</span><span class="cost">300 cr</span></header>
+    <h4>Interceptor Wing</h4>
+    <ul class="stats"><li>5 drones</li><li>16 dmg</li><li>4 shots/s</li><li>220 speed</li><li>2× vs flyers</li></ul>
+    <p class="fx">Fast interceptors that hunt flyers first.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">+2 drones</li><li class="">+1 shots/s</li><li class="">+50 speed</li><li class="">2× vs flyers</li></ul></div>
+    
+  </article><article class="card step is-new path-a" style="--tw:#9fe870">
+    <header><span class="tag">A2</span><span class="new">new</span><span class="cost">360 cr</span></header>
+    <h4>Sixth Drone</h4>
+    <ul class="stats"><li>+1 drone</li></ul>
+    <p class="fx">A sixth interceptor joins the wing.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-a" style="--tw:#9fe870">
+    <header><span class="tag">A3</span><span class="new">new</span><span class="cost">440 cr</span></header>
+    <h4>Afterburners</h4>
+    <ul class="stats"><li>+30 speed</li></ul>
+    <p class="fx">Afterburners get the interceptors to their targets faster.</p>
+    
+    
+  </article><article class="card step is-new path-a" style="--tw:#9fe870">
+    <header><span class="tag">A4</span><span class="new">new</span><span class="cost">640 cr</span></header>
+    <h4>Seventh Drone</h4>
+    <ul class="stats"><li>+3 dmg</li><li>+1 drone</li></ul>
+    <p class="fx">A seventh interceptor, and better guns for the whole wing.</p>
+    
+    
+  </article><article class="card mastery is-new path-a" style="--tw:#9fe870">
+    <header><span class="tag">A · mastery</span><span class="new">new</span><span class="cost">720 cr</span></header>
+    <h4>Swarm Carrier</h4>
+    <ul class="stats"><li>9 drones</li><li>20 dmg</li><li>4.5 shots/s</li><li>250 speed</li><li>2× vs flyers</li></ul>
+    <p class="fx">A full carrier deck: nine interceptors that shred flyers anywhere on the map.</p>
+    
+    
+  </article></div>
+      <div class="fork r2" aria-hidden="true"></div>
+      <div class="branch r2"><article class="card spec is-new path-b" style="--tw:#9fe870">
+    <header><span class="tag">B1 · specialization</span><span class="new">new</span><span class="cost">300 cr</span></header>
+    <h4>Bomber Wing</h4>
+    <ul class="stats"><li>2 bombers</li><li>60 dmg bombs</li><li>40 blast</li><li>ground only</li></ul>
+    <p class="fx">Heavy drones that carpet ground enemies.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><p class="fx">Adds its attack alongside the primary's (see Combinations).</p></div>
+    
+  </article><article class="card step is-new path-b" style="--tw:#9fe870">
+    <header><span class="tag">B2</span><span class="new">new</span><span class="cost">360 cr</span></header>
+    <h4>Bigger Bombs</h4>
+    <ul class="stats"><li>+15 bomb dmg</li></ul>
+    <p class="fx">Bigger bombs for heavier hits.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-b" style="--tw:#9fe870">
+    <header><span class="tag">B3</span><span class="new">new</span><span class="cost">440 cr</span></header>
+    <h4>Wider Blast</h4>
+    <ul class="stats"><li>+5 blast</li></ul>
+    <p class="fx">A wider blast from every bomb.</p>
+    
+    
+  </article><article class="card step is-new path-b" style="--tw:#9fe870">
+    <header><span class="tag">B4</span><span class="new">new</span><span class="cost">640 cr</span></header>
+    <h4>Faster Rearm</h4>
+    <ul class="stats"><li>+1 bomber</li><li>drops 25% more often</li></ul>
+    <p class="fx">A third bomber, and faster rearming for the whole wing.</p>
+    
+    
+  </article><article class="card mastery is-new path-b" style="--tw:#9fe870">
+    <header><span class="tag">B · mastery</span><span class="new">new</span><span class="cost">720 cr</span></header>
+    <h4>Strike Wing</h4>
+    <ul class="stats"><li>4 bombers</li><li>100 dmg bombs</li><li>52 blast</li><li>hits burrowed</li></ul>
+    <p class="fx">Bombs also hit burrowed enemies.</p>
+    
+    
+  </article></div>
+      <div class="fork r3" aria-hidden="true"></div>
+      <div class="branch r3"><article class="card spec is-new path-c" style="--tw:#9fe870">
+    <header><span class="tag">C1 · specialization</span><span class="new">new</span><span class="cost">300 cr</span></header>
+    <h4>Hunter-Killer</h4>
+    <ul class="stats"><li>3 drones</li><li>20 dmg</li><li>marks +20%</li><li>hunts specialists</li></ul>
+    <p class="fx">Hunts specialists first (Stalker, Rally Beacon, Bulwark, Mender, Jammer, Repair Bot) and marks them.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">+4 dmg</li><li class="">marks +20%</li><li class="">hunts specialists</li></ul></div>
+    
+  </article><article class="card step is-new path-c" style="--tw:#9fe870">
+    <header><span class="tag">C2</span><span class="new">new</span><span class="cost">360 cr</span></header>
+    <h4>Fourth Drone</h4>
+    <ul class="stats"><li>+1 drone</li></ul>
+    <p class="fx">A fourth hunter-killer joins the pack.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-c" style="--tw:#9fe870">
+    <header><span class="tag">C3</span><span class="new">new</span><span class="cost">440 cr</span></header>
+    <h4>Target Database</h4>
+    <ul class="stats"><li>also hunts Phantoms and Gunships first</li></ul>
+    <p class="fx">An updated target database: the drones also go for Phantoms and Gunships first.</p>
+    
+    
+  </article><article class="card step is-new path-c" style="--tw:#9fe870">
+    <header><span class="tag">C4</span><span class="new">new</span><span class="cost">640 cr</span></header>
+    <h4>Stronger Marks</h4>
+    <ul class="stats"><li>+4 dmg</li><li>marks +25%</li></ul>
+    <p class="fx">Stronger marks and better guns: marked enemies take 25% more damage.</p>
+    
+    
+  </article><article class="card mastery is-new path-c" style="--tw:#9fe870">
+    <header><span class="tag">C · mastery</span><span class="new">new</span><span class="cost">720 cr</span></header>
+    <h4>Assassin Protocol</h4>
+    <ul class="stats"><li>5 drones</li><li>30 dmg</li><li>marks +30%</li><li>hunts specialists</li><li>suppresses target</li></ul>
+    <p class="fx">A drone locked on a target also suppresses its abilities.</p>
+    
+    
+  </article></div>
+    </div></div>
+  </section><section class="tower" id="scrap" style="--tw:#f2b86b">
+    <header class="tower-head">
+      <div class="tower-name"><span class="swatch"></span><h3>Scrapyard</h3><span class="new big">new tower</span></div>
+      <p class="role">Economy: turns wreckage into credits instead of fighting.</p>
+      <dl class="meta">
+        <div><dt>Key</dt><dd><kbd>\</kbd></dd></div>
+        <div><dt>Hits</dt><dd>none (economy)</dd></div>
+        <div><dt>Maxed</dt><dd>A 2705 · B 2535 · C 2535 cr</dd></div>
+        <div><dt>New nodes</dt><dd>17 of 17</dd></div>
+      </dl>
+    </header>
+    <div class="tree-scroll"><div class="tree">
+      <div class="cell t1"><article class="card trunk is-new path-base" style="--tw:#f2b86b">
+    <header><span class="tag">Tier 1</span><span class="new">new</span><span class="cost">150 cr</span></header>
+    <h4>Scrapyard</h4>
+    <ul class="stats"><li>25 cr per round</li></ul>
+    <p class="fx">A salvage yard that strips wrecks for parts and pays out credits every time a round is cleared.</p>
+    
+    
+  </article></div>
+      <div class="link base1" aria-hidden="true"></div>
+      <div class="cell t2"><article class="card trunk is-new path-base" style="--tw:#f2b86b">
+    <header><span class="tag">Tier 2</span><span class="new">new</span><span class="cost">175 cr</span></header>
+    <h4>Tier 2</h4>
+    <ul class="stats"><li>55 cr per round</li></ul>
+    <p class="fx">A second crusher line more than doubles the payout.</p>
+    
+    
+  </article></div>
+      <div class="link base2" aria-hidden="true"></div>
+      <div class="fork r1" aria-hidden="true"></div>
+      <div class="branch r1"><article class="card spec is-new path-a" style="--tw:#f2b86b">
+    <header><span class="tag">A1 · specialization</span><span class="new">new</span><span class="cost">300 cr</span></header>
+    <h4>Credit Mint</h4>
+    <ul class="stats"><li>110 cr per round</li></ul>
+    <p class="fx">Presses salvage straight into credits: the biggest steady income.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">+55 cr per round</li></ul></div>
+    
+  </article><article class="card step is-new path-a" style="--tw:#f2b86b">
+    <header><span class="tag">A2</span><span class="new">new</span><span class="cost">320 cr</span></header>
+    <h4>Stamping Press</h4>
+    <ul class="stats"><li>+25 cr per round</li></ul>
+    <p class="fx">A faster press turns out more credits each round.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-a" style="--tw:#f2b86b">
+    <header><span class="tag">A3</span><span class="new">new</span><span class="cost">380 cr</span></header>
+    <h4>Vault Doors</h4>
+    <ul class="stats"><li>+30 cr per round</li></ul>
+    <p class="fx">Secure storage lets the mint run larger batches.</p>
+    
+    
+  </article><article class="card step is-new path-a" style="--tw:#f2b86b">
+    <header><span class="tag">A4</span><span class="new">new</span><span class="cost">480 cr</span></header>
+    <h4>Treasury Link</h4>
+    <ul class="stats"><li>+40 cr per round</li></ul>
+    <p class="fx">A direct line to command's treasury raises every payout.</p>
+    
+    
+  </article><article class="card mastery is-new path-a" style="--tw:#f2b86b">
+    <header><span class="tag">A · mastery</span><span class="new">new</span><span class="cost">900 cr</span></header>
+    <h4>Reserve Bank</h4>
+    <ul class="stats"><li>250 cr per round</li><li>3% interest (max 300)</li></ul>
+    <p class="fx">Also pays 3% interest on your banked credits at each round clear, up to 300.</p>
+    
+    
+  </article></div>
+      <div class="fork r2" aria-hidden="true"></div>
+      <div class="branch r2"><article class="card spec is-new path-b" style="--tw:#f2b86b">
+    <header><span class="tag">B1 · specialization</span><span class="new">new</span><span class="cost">280 cr</span></header>
+    <h4>Scrap Collector</h4>
+    <ul class="stats"><li>150 field</li><li>+25% kill credits</li></ul>
+    <p class="fx">Magnet cranes sweep the lane: enemies destroyed in its field pay 25% more credits.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">150 field</li><li class="">+25% kill credits</li></ul></div>
+    
+  </article><article class="card step is-new path-b" style="--tw:#f2b86b">
+    <header><span class="tag">B2</span><span class="new">new</span><span class="cost">300 cr</span></header>
+    <h4>Magnet Cranes</h4>
+    <ul class="stats"><li>+25 field</li></ul>
+    <p class="fx">Longer crane arms reach further down the lane.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-b" style="--tw:#f2b86b">
+    <header><span class="tag">B3</span><span class="new">new</span><span class="cost">320 cr</span></header>
+    <h4>Sorting Line</h4>
+    <ul class="stats"><li>+10% kill credits</li></ul>
+    <p class="fx">Sorts the wreckage for the valuable parts.</p>
+    
+    
+  </article><article class="card step is-new path-b" style="--tw:#f2b86b">
+    <header><span class="tag">B4</span><span class="new">new</span><span class="cost">460 cr</span></header>
+    <h4>Smelter</h4>
+    <ul class="stats"><li>+10% kill credits</li><li>+25 field</li></ul>
+    <p class="fx">Melts scrap down on site: more credits from a wider field.</p>
+    
+    
+  </article><article class="card mastery is-new path-b" style="--tw:#f2b86b">
+    <header><span class="tag">B · mastery</span><span class="new">new</span><span class="cost">850 cr</span></header>
+    <h4>Reclamation Plant</h4>
+    <ul class="stats"><li>200 field</li><li>+60% kill credits</li><li>bosses pay double</li></ul>
+    <p class="fx">Enemies destroyed in its field pay 60% more, and bosses pay double.</p>
+    
+    
+  </article></div>
+      <div class="fork r3" aria-hidden="true"></div>
+      <div class="branch r3"><article class="card spec is-new path-c" style="--tw:#f2b86b">
+    <header><span class="tag">C1 · specialization</span><span class="new">new</span><span class="cost">280 cr</span></header>
+    <h4>Supply Depot</h4>
+    <ul class="stats"><li>140 field</li><li>10% off upgrades</li></ul>
+    <p class="fx">Stockpiled parts: towers in its field upgrade for 10% less.</p>
+    <div class="sec"><span class="sec-tag">As a secondary</span><ul class="stats"><li class="">140 field</li><li class="">10% off upgrades</li></ul></div>
+    
+  </article><article class="card step is-new path-c" style="--tw:#f2b86b">
+    <header><span class="tag">C2</span><span class="new">new</span><span class="cost">300 cr</span></header>
+    <h4>Bulk Orders</h4>
+    <ul class="stats"><li>+5% off upgrades</li></ul>
+    <p class="fx">Buying in bulk cuts upgrade prices further.</p>
+    
+    <span class="cap">Secondary stops here</span>
+  </article><article class="card step is-new path-c" style="--tw:#f2b86b">
+    <header><span class="tag">C3</span><span class="new">new</span><span class="cost">320 cr</span></header>
+    <h4>Freight Rail</h4>
+    <ul class="stats"><li>+30 field</li></ul>
+    <p class="fx">A rail spur delivers parts to more of the line.</p>
+    
+    
+  </article><article class="card step is-new path-c" style="--tw:#f2b86b">
+    <header><span class="tag">C4</span><span class="new">new</span><span class="cost">460 cr</span></header>
+    <h4>Procurement Office</h4>
+    <ul class="stats"><li>+5% off upgrades</li><li>+20 field</li></ul>
+    <p class="fx">Better contracts and a wider delivery area.</p>
+    
+    
+  </article><article class="card mastery is-new path-c" style="--tw:#f2b86b">
+    <header><span class="tag">C · mastery</span><span class="new">new</span><span class="cost">850 cr</span></header>
+    <h4>Forward Command</h4>
+    <ul class="stats"><li>200 field</li><li>25% off upgrades</li><li>100% sell refund</li></ul>
+    <p class="fx">Towers in its field upgrade for 25% less and sell back for everything spent on them.</p>
+    
+    
+  </article></div>
+    </div></div>
+  </section>
+  <footer>Costs are per upgrade; "Maxed" is the total from Tier 1 to each branch's mastery. Upgrades after the specialization list what they add. New-node numbers are first-pass values for the balance probe.</footer>
+</div>
+<script>
+  (function () {
+    var btn = document.getElementById("focus-new");
+    var on = false;
+    try { on = localStorage.getItem("trees-focus-new") === "1"; } catch (e) {}
+    function apply() { document.body.classList.toggle("focus-new", on); btn.setAttribute("aria-pressed", on ? "true" : "false"); }
+    btn.addEventListener("click", function () { on = !on; apply(); try { localStorage.setItem("trees-focus-new", on ? "1" : "0"); } catch (e) {} });
+    apply();
+  })();
+</script>

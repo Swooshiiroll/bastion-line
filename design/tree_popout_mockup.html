@@ -1,0 +1,166 @@
+<title>Upgrade Pop-out Mockup</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    color-scheme: dark;
+    --ground: #06090e; --field: #0b1016; --panel: #08111a; --panel-2: #0d1a25; --rule: #1d3a4b; --wire: #2a5a70;
+    --text: #dcedf7; --dim: #86a0b1; --faint: #4f6a7b; --accent: #4de1ff; --gold: #ffc85a; --good: #66ff99; --bad: #ff5c66;
+    --pa: #6fb8ff; --pb: #ff9e5e; --pc: #7dffb0;
+    --display: "Chakra Petch", "Bahnschrift", "Segoe UI", sans-serif;
+    --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { background: var(--ground); color: var(--text); font: 14px/1.5 var(--body); padding-inline: 16px; padding-block: 28px 48px; }
+  .wrap { max-width: 1180px; margin: 0 auto; display: grid; gap: 18px; }
+  .eyebrow { font: 600 12px var(--display); letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
+  h1 { font: 700 30px/1.1 var(--display); margin: 0; }
+  p.note { margin: 0; color: var(--dim); max-width: 75ch; }
+  .stage { overflow-x: auto; }
+  .panel { width: 1100px; border: 1px solid var(--accent); border-radius: 14px 2px 14px 2px; background: var(--panel);
+    box-shadow: 0 0 22px rgba(77,225,255,.14); }
+  .ph { display: flex; align-items: center; padding: 12px 18px; border-bottom: 1px solid var(--rule); gap: 14px; }
+  .ph h2 { margin: 0; font: 600 17px var(--display); color: var(--accent); letter-spacing: .04em; }
+  .ph .x { margin-left: auto; border: 1px solid var(--rule); width: 30px; height: 30px; display: grid; place-items: center; color: var(--dim); border-radius: 3px; }
+  .status { display: flex; gap: 10px; font: 600 11px var(--display); letter-spacing: .1em; text-transform: uppercase; }
+  .status span { padding: 3px 8px; border-radius: 2px; border: 1px solid var(--rule); }
+  .s-a { color: var(--pa); border-color: color-mix(in srgb, var(--pa) 50%, var(--rule)) !important; }
+  .s-b { color: var(--pb); border-color: color-mix(in srgb, var(--pb) 50%, var(--rule)) !important; }
+  .s-c { color: var(--faint); }
+  svg { display: block; }
+  .detail { display: grid; grid-template-columns: 1fr 330px; gap: 24px; padding: 14px 20px 18px; border-top: 1px solid var(--rule); }
+  .detail h3 { margin: 0; font: 600 18px var(--display); color: var(--pa); }
+  .detail .meta { font: 600 11px var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--faint); margin-top: 2px; }
+  .detail p { margin: 6px 0 0; color: var(--text); }
+  .grid { display: grid; grid-template-columns: auto auto auto; gap: 2px 14px; font: 12.5px var(--mono); font-variant-numeric: tabular-nums; align-content: start; }
+  .grid .k { color: var(--dim); } .grid .up { color: var(--good); }
+  .buy { margin-top: 10px; display: inline-block; font: 600 14px var(--display); padding: 8px 16px; border: 1px solid var(--accent); color: var(--text);
+    border-radius: 10px 2px 10px 2px; background: #0b1a24; }
+  .keys { font: 12px var(--mono); color: var(--dim); }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 12.5px; color: var(--dim); }
+  .legend span { display: inline-flex; gap: 8px; align-items: center; }
+  .notes { display: grid; gap: 6px; color: var(--dim); max-width: 90ch; }
+  .notes b { color: var(--text); font-weight: 500; }
+  kbd { font: 12px var(--mono); border: 1px solid var(--wire); border-bottom-width: 2px; padding: 0 .4em; border-radius: 3px; color: var(--text); background: var(--panel-2); }
+</style>
+<div class="wrap">
+  <span class="eyebrow">Bastion Line v3.1 · mockup</span>
+  <h1>Upgrade tree pop-out</h1>
+  <p class="note">Opens with <kbd>E</kbd>, the Tree button or a double-click on a tower. Example state: a Pulse Turret with branch A (Gatling Pulse) as its primary at 3 of 4, branch B (Shredder) as its secondary at its cap of 2, and branch C locked. The cursor is over the next upgrade on A.</p>
+  <div class="stage">
+  <div class="panel">
+    <div class="ph">
+      <h2>PULSE TURRET · UPGRADE TREE</h2>
+      <div class="status"><span class="s-a">Primary · A 3/4</span><span class="s-b">Secondary · B 2/2</span><span class="s-c">C locked</span></div>
+      <div class="x">×</div>
+    </div>
+    <svg viewBox="0 0 1100 350" width="1100" height="350" role="img" aria-label="Pulse Turret upgrade tree">
+      <defs>
+        <polygon id="hex" points="0,-27 23.4,-13.5 23.4,13.5 0,27 -23.4,13.5 -23.4,-13.5"/>
+        <polygon id="hexm" points="0,-32 27.7,-16 27.7,16 0,32 -27.7,16 -27.7,-16"/>
+      </defs>
+      <!-- wires: trunk -->
+      <g stroke="#ffc85a" stroke-width="3" fill="none">
+        <line x1="84" y1="175" x2="186" y2="175"/>
+        <path d="M214 175 H262 V70 H316"/>
+        <path d="M262 175 H316"/>
+        <line x1="344" y1="70" x2="486" y2="70"/>
+        <line x1="514" y1="70" x2="656" y2="70"/>
+        <line x1="344" y1="175" x2="486" y2="175"/>
+      </g>
+      <g stroke="#2a5a70" stroke-width="2" fill="none">
+        <line x1="684" y1="70" x2="826" y2="70"/>
+        <line x1="854" y1="70" x2="996" y2="70"/>
+        <line x1="514" y1="175" x2="656" y2="175" stroke-dasharray="5 5"/>
+        <line x1="684" y1="175" x2="826" y2="175" stroke-dasharray="5 5"/>
+        <line x1="854" y1="175" x2="996" y2="175" stroke-dasharray="5 5"/>
+        <path d="M262 175 V280 H316" stroke-dasharray="5 5"/>
+        <line x1="344" y1="280" x2="996" y2="280" stroke-dasharray="5 5"/>
+      </g>
+      <!-- cap marker on B -->
+      <g>
+        <line x1="585" y1="148" x2="585" y2="202" stroke="#ff9e5e" stroke-width="2"/>
+        <text x="592" y="146" fill="#ff9e5e" font-family="Chakra Petch, sans-serif" font-size="11" letter-spacing="1">SECONDARY CAP</text>
+      </g>
+      <!-- row labels -->
+      <g font-family="Chakra Petch, sans-serif" font-size="12" font-weight="600" letter-spacing="1.5">
+        <text x="330" y="32" fill="#6fb8ff" text-anchor="middle">A</text>
+        <text x="330" y="137" fill="#ff9e5e" text-anchor="middle">B</text>
+        <text x="330" y="242" fill="#4f6a7b" text-anchor="middle">C</text>
+      </g>
+      <!-- node helper: owned = filled accent; next = cyan ring; locked = dim -->
+      <g font-family="Chakra Petch, sans-serif" text-anchor="middle">
+        <!-- trunk -->
+        <g transform="translate(70,175)"><use href="#hex" fill="#123a44" stroke="#ffc85a" stroke-width="2.5"/><circle r="7" fill="#4de6ff"/></g>
+        <text x="70" y="221" fill="#dcedf7" font-size="12">Pulse Turret</text><text x="70" y="236" fill="#ffc85a" font-size="10.5">OWNED</text>
+        <g transform="translate(200,175)"><use href="#hex" fill="#123a44" stroke="#ffc85a" stroke-width="2.5"/><circle r="7" fill="#4de6ff"/></g>
+        <text x="200" y="221" fill="#dcedf7" font-size="12">Tier 2</text><text x="200" y="236" fill="#ffc85a" font-size="10.5">OWNED</text>
+        <!-- A row -->
+        <g transform="translate(330,70)"><use href="#hex" fill="#122a44" stroke="#ffc85a" stroke-width="2.5"/><circle r="7" fill="#6fb8ff"/></g>
+        <text x="330" y="116" fill="#dcedf7" font-size="12">Gatling Pulse</text><text x="330" y="131" fill="#ffc85a" font-size="10.5">OWNED</text>
+        <g transform="translate(500,70)"><use href="#hex" fill="#122a44" stroke="#ffc85a" stroke-width="2.5"/><circle r="7" fill="#6fb8ff"/></g>
+        <text x="500" y="116" fill="#dcedf7" font-size="12">Cooled Barrels</text><text x="500" y="131" fill="#ffc85a" font-size="10.5">OWNED</text>
+        <g transform="translate(670,70)"><use href="#hex" fill="#122a44" stroke="#ffc85a" stroke-width="2.5"/><circle r="7" fill="#6fb8ff"/></g>
+        <text x="670" y="116" fill="#dcedf7" font-size="12">Hardened Bolts</text><text x="670" y="131" fill="#ffc85a" font-size="10.5">OWNED</text>
+        <g transform="translate(840,70)"><use href="#hex" fill="#0d1a25" stroke="#4de1ff" stroke-width="3"/><circle r="36" fill="none" stroke="#4de1ff" stroke-opacity=".35" stroke-width="2"/><text y="5" fill="#4de1ff" font-size="15" font-weight="700">U</text></g>
+        <text x="840" y="116" fill="#dcedf7" font-size="12">Belt Feed</text><text x="840" y="131" fill="#4de1ff" font-size="10.5">300 CR</text>
+        <g transform="translate(1010,70)"><use href="#hexm" fill="#1a1608" stroke="#8a6d2c" stroke-width="2.5"/><circle r="40" fill="none" stroke="#ffc85a" stroke-opacity=".25" stroke-width="2"/><text y="4" fill="#8a6d2c" font-size="11">4</text></g>
+        <text x="1010" y="120" fill="#dcedf7" font-size="12">Storm Gatling</text><text x="1010" y="135" fill="#ffc85a" font-size="10.5">MASTERY · 410 CR</text>
+        <!-- B row -->
+        <g transform="translate(330,175)"><use href="#hex" fill="#2e1d12" stroke="#ffc85a" stroke-width="2.5"/><circle r="7" fill="#ff9e5e"/></g>
+        <text x="330" y="221" fill="#dcedf7" font-size="12">Shredder</text><text x="330" y="236" fill="#ffc85a" font-size="10.5">OWNED</text>
+        <g transform="translate(500,175)"><use href="#hex" fill="#2e1d12" stroke="#ffc85a" stroke-width="2.5"/><circle r="7" fill="#ff9e5e"/></g>
+        <text x="500" y="221" fill="#dcedf7" font-size="12">Serrated Rounds</text><text x="500" y="236" fill="#ffc85a" font-size="10.5">OWNED</text>
+        <g transform="translate(670,175)" opacity=".38"><use href="#hex" fill="#0d1a25" stroke="#2a5a70" stroke-width="2"/><path d="M-6 2 h12 v9 h-12 z M-4 2 v-4 a4 4 0 0 1 8 0 v4" fill="none" stroke="#86a0b1" stroke-width="1.8"/></g>
+        <text x="670" y="221" fill="#4f6a7b" font-size="12">Tungsten Core</text><text x="670" y="236" fill="#4f6a7b" font-size="10.5">BLOCKED</text>
+        <g transform="translate(840,175)" opacity=".38"><use href="#hex" fill="#0d1a25" stroke="#2a5a70" stroke-width="2"/></g>
+        <text x="840" y="221" fill="#4f6a7b" font-size="12">Fracture Rounds</text>
+        <g transform="translate(1010,175)" opacity=".38"><use href="#hexm" fill="#0d1a25" stroke="#2a5a70" stroke-width="2"/></g>
+        <text x="1010" y="225" fill="#4f6a7b" font-size="12">Disintegrator</text>
+        <!-- C row -->
+        <g opacity=".3">
+          <g transform="translate(330,280)"><use href="#hex" fill="#0d1a25" stroke="#2a5a70" stroke-width="2"/><path d="M-6 2 h12 v9 h-12 z M-4 2 v-4 a4 4 0 0 1 8 0 v4" fill="none" stroke="#86a0b1" stroke-width="1.8"/></g>
+          <g transform="translate(500,280)"><use href="#hex" fill="#0d1a25" stroke="#2a5a70" stroke-width="2"/></g>
+          <g transform="translate(670,280)"><use href="#hex" fill="#0d1a25" stroke="#2a5a70" stroke-width="2"/></g>
+          <g transform="translate(840,280)"><use href="#hex" fill="#0d1a25" stroke="#2a5a70" stroke-width="2"/></g>
+          <g transform="translate(1010,280)"><use href="#hexm" fill="#0d1a25" stroke="#2a5a70" stroke-width="2"/></g>
+        </g>
+        <text x="330" y="326" fill="#4f6a7b" font-size="12">Flechette</text><text x="330" y="341" fill="#4f6a7b" font-size="10.5">LOCKED · TWO BRANCHES STARTED</text>
+        <text x="500" y="326" fill="#4f6a7b" font-size="12">Wider Choke</text>
+        <text x="670" y="326" fill="#4f6a7b" font-size="12">Dense Pack</text>
+        <text x="840" y="326" fill="#4f6a7b" font-size="12">Rapid Pump</text>
+        <text x="1010" y="330" fill="#4f6a7b" font-size="12">Hailstorm</text>
+      </g>
+    </svg>
+    <div class="detail">
+      <div>
+        <h3>BELT FEED</h3>
+        <div class="meta">Branch A · upgrade 4 of 4 · 300 cr</div>
+        <p>A continuous ammo belt and a raised mount: faster fire, more damage and longer reach.</p>
+        <span class="buy">Buy for 300 cr  [U]</span>
+        <div class="keys" style="margin-top:8px"><kbd>U</kbd> next on A · <kbd>I</kbd> next on B (capped) · <kbd>O</kbd> C (locked)</div>
+      </div>
+      <div class="grid">
+        <span class="k">Damage</span><span>35</span><span class="up">→ 37</span>
+        <span class="k">Range</span><span>173</span><span class="up">→ 183</span>
+        <span class="k">Attacks/s</span><span>5.6</span><span class="up">→ 6.2</span>
+        <span class="k">Shred</span><span>1 (max 8)</span><span></span>
+        <span class="k">Kills</span><span>84</span><span></span>
+      </div>
+    </div>
+  </div>
+  </div>
+  <div class="legend">
+    <span><svg width="16" height="16" viewBox="-14 -14 28 28"><polygon points="0,-12 10.4,-6 10.4,6 0,12 -10.4,6 -10.4,-6" fill="#123a44" stroke="#ffc85a" stroke-width="2"/></svg>Owned (gold wire)</span>
+    <span><svg width="16" height="16" viewBox="-14 -14 28 28"><polygon points="0,-12 10.4,-6 10.4,6 0,12 -10.4,6 -10.4,-6" fill="#0d1a25" stroke="#4de1ff" stroke-width="2.5"/></svg>Next to buy, with its key</span>
+    <span><svg width="16" height="16" viewBox="-14 -14 28 28" opacity=".45"><polygon points="0,-12 10.4,-6 10.4,6 0,12 -10.4,6 -10.4,-6" fill="#0d1a25" stroke="#2a5a70" stroke-width="2"/></svg>Blocked or locked</span>
+    <span><svg width="16" height="16" viewBox="-14 -14 28 28"><polygon points="0,-12 10.4,-6 10.4,6 0,12 -10.4,6 -10.4,-6" fill="#1a1608" stroke="#8a6d2c" stroke-width="2"/></svg>Mastery (needs research)</span>
+  </div>
+  <div class="notes">
+    <div><b>Layout.</b> The trunk sits on the left; the three branches run left to right as rows, each ending in its mastery. The panel grows from 700 to 1100 px wide to fit five nodes per branch.</div>
+    <div><b>Status strip.</b> The header says which branch is primary and how far along each one is, so the lock-in rule is visible before you commit.</div>
+    <div><b>Secondary cap.</b> A marker after the second upgrade shows where a secondary stops. Once a branch reaches its third upgrade, the other started branch greys out beyond what it owns.</div>
+    <div><b>Details.</b> Hovering any node shows its description and the tower's stats before and after, including what the other branch contributes.</div>
+    <div><b>Bottom bar.</b> The selected-tower card shows the same three branches as a compact strip (A ●●●○ M, B ●● cap, C locked), and its buttons buy the next upgrade on each branch.</div>
+  </div>
+</div>
