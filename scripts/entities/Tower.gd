@@ -17,6 +17,8 @@ const Research = preload("res://scripts/core/Research.gd")
 
 enum Mode { FIRST, LAST, STRONG, CLOSE }
 const MODE_NAMES := ["First", "Last", "Strongest", "Closest"]
+## Which kind of enemy a tower that hits both air and ground prefers (it falls back to the other).
+const PRIORITY_NAMES := ["Any", "Air", "Ground"]
 const BRANCHES := ["a", "b", "c"]
 const BRANCH_STEPS := 4
 const SECONDARY_CAP := 2
@@ -40,9 +42,13 @@ const NON_STATS := ["name", "cost", "blurb", "mastery", "specs", "spec_order"]
 
 var type := ""
 var def: Dictionary
+## Tiles along each side of the footprint: 1, or 2 for the Scrapyard and Drone Bay. `cell` is the
+## top-left tile and `pos` the footprint's centre.
+var size := 1
 var cell := Vector2i.ZERO
 var pos := Vector2.ZERO
 var mode := 0
+var priority := 0
 var kills := 0
 var spent := 0
 var cooldown := 0.0
@@ -94,6 +100,12 @@ var spec: String:
 		var p := primary()
 		return str(branch(p).id) if p != "" else ""
 
+## The specialization shown in the tower's name and colour: stock until the primary locks in at
+## its third upgrade (the model still shows branch details from the first).
+var shown_spec: String:
+	get:
+		return spec if locked_in() else ""
+
 var _cache := {}
 var _dirty := true
 
@@ -103,6 +115,7 @@ static var _lines := {}
 func setup(tower_type: String, at_cell: Vector2i, at_pos: Vector2, research_mods := {}) -> void:
 	type = tower_type
 	def = Towers.TOWERS[tower_type]
+	size = int(def.get("size", 1))
 	cell = at_cell
 	pos = at_pos
 	mods = research_mods
@@ -220,7 +233,7 @@ func locked_in() -> bool:
 ## Why branch `key` can't take its next upgrade right now ("" if it can).
 func block_reason(key: String) -> String:
 	if trunk < 2:
-		return "Upgrade to tier 2 first"
+		return "Retrofit it first"
 	if not depth.has(key):
 		return "No such branch"
 	var d: int = depth[key]
@@ -357,9 +370,14 @@ func next_stats(id_or_key := "") -> Dictionary:
 	return Research.apply(compose(trunk, nd, ns, nm), mods)
 
 
+## Player-facing names for the trunk: the tower as built, then its one trunk upgrade.
+static func trunk_name(trunk_tier: int) -> String:
+	return "Stock" if trunk_tier <= 1 else "Retrofit"
+
+
 func display_name() -> String:
 	var p := primary()
-	if p == "":
+	if p == "" or not locked_in():
 		return str(def.name)
 	var b := branch(p)
 	return str(b.mastery.name) if mastered else str(b.nodes[0].name)

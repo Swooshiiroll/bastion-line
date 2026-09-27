@@ -81,7 +81,7 @@ Rapid single-target bolts.
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
 | 1 | base | Pulse Turret | 50 | 9 dmg · 140 range · 2.0/s | A compact turret that fires rapid energy bolts at one target, air or ground. | existing |
-| 2 | base | Tier 2 | 70 | 15 dmg · 152 range · 2.4/s | Twin emitters: harder-hitting bolts, fired faster and a little further. | existing |
+| 2 | base | Retrofit | 70 | 15 dmg · 152 range · 2.4/s | Twin emitters: harder-hitting bolts, fired faster and a little further. | existing |
 | 3 | A | Gatling Pulse | 140 | 16 dmg · 160 range · 5.0/s | Four spinning barrels: double the rate of fire. | existing |
 | 4 | A | Cooled Barrels | 170 | +0.4/s | Liquid cooling keeps the barrels spinning. | new |
 | 5 | A | Hardened Bolts | 200 | +3 dmg | Denser bolt casings that hit harder on every one of the many shots. | new |
@@ -105,7 +105,7 @@ Splash damage, ground only.
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
 | 1 | base | Plasma Mortar | 90 | 22 dmg · 130 range · 0.7/s · 55 blast | Lobs plasma shells that burst over an area, hitting every ground enemy in the blast. | existing |
-| 2 | base | Tier 2 | 120 | 40 dmg · 140 range · 0.75/s · 65 blast | Bigger shells: more damage, a wider blast and a little more range. | existing |
+| 2 | base | Retrofit | 120 | 40 dmg · 140 range · 0.75/s · 65 blast | Bigger shells: more damage, a wider blast and a little more range. | existing |
 | 3 | A | Siege Mortar | 210 | 80 dmg · 165 range · 0.8/s · 90 blast | Heavier shells, a much bigger blast and longer range. | existing |
 | 4 | A | Long Barrel | 250 | +10 range | A longer barrel reaches further down the lane. | new |
 | 5 | A | Heavy Payload | 300 | +20 dmg | Heavier shells for much bigger hits. | new |
@@ -129,7 +129,7 @@ Area slow plus light damage.
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
 | 1 | base | Cryo Emitter | 70 | 3 dmg · 105 range · 35% slow | Pulses a freezing field that slows every enemy in range and deals light damage. | existing |
-| 2 | base | Tier 2 | 90 | 6 dmg · 118 range · 45% slow | A stronger coolant loop: a deeper slow over a wider field. | existing |
+| 2 | base | Retrofit | 90 | 6 dmg · 118 range · 45% slow | A stronger coolant loop: a deeper slow over a wider field. | existing |
 | 3 | A | Stasis Field | 150 | 10 dmg · 145 range · 65% slow | Near-freezing slow over a wide area. | existing |
 | 4 | A | Wider Coils | 180 | +10 range | Wider emitter coils stretch the stasis field. | new |
 | 5 | A | Deep Chill | 220 | +0.3 s slow duration | A deeper chill: enemies stay slowed 0.3 s longer after each pulse. | new |
@@ -153,7 +153,7 @@ Huge range, ignores armor.
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
 | 1 | base | Railgun | 120 | 55 dmg · 290 range · 0.45/s | Fires a magnetic slug at extreme range that ignores armor. | existing |
-| 2 | base | Tier 2 | 150 | 105 dmg · 330 range · 0.5/s | Longer rails: much heavier slugs with even more range. | existing |
+| 2 | base | Retrofit | 150 | 105 dmg · 330 range · 0.5/s | Longer rails: much heavier slugs with even more range. | existing |
 | 3 | A | Deadeye | 260 | 170 dmg · 420 range · 0.6/s · 2× vs bosses | Longest range in the arsenal. | existing |
 | 4 | A | Match Slugs | 310 | +25 dmg | Precision-machined slugs for bigger hits. | new |
 | 5 | A | Stabilized Rails | 380 | +20 range | Stabilized rails hold their aim at even longer range. | new |
@@ -177,7 +177,7 @@ Chain lightning; double damage to barriers.
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
 | 1 | base | Arc Coil | 130 | 16 dmg · 118 range · 3 chains | Discharges lightning that leaps between nearby enemies. Barriers take double damage. | existing |
-| 2 | base | Tier 2 | 160 | 26 dmg · 128 range · 4 chains | A stronger coil: harder arcs that jump to one more target. | existing |
+| 2 | base | Retrofit | 160 | 26 dmg · 128 range · 4 chains | A stronger coil: harder arcs that jump to one more target. | existing |
 | 3 | A | Storm Coil | 280 | 36 dmg · 145 range · 9 chains | Arcs leap further and lose less power per jump. | existing |
 | 4 | A | Extra Toroid | 340 | +1 chain | An extra toroid ring lets each arc jump to one more enemy. | new |
 | 5 | A | Conductive Air | 410 | +10 chain range | Ionized air: arcs can leap 10 px further between targets. | new |
@@ -201,7 +201,7 @@ Continuous beam that ignores armor and ramps up on one target.
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
 | 1 | base | Laser Lance | 140 | 22 dps · 125 range · ramps to 2× | A continuous beam that ignores armor and grows stronger the longer it holds one target. | existing |
-| 2 | base | Tier 2 | 150 | 36 dps · 135 range · ramps to 2.5× | A brighter emitter: more damage, more range and a higher ramp. | existing |
+| 2 | base | Retrofit | 150 | 36 dps · 135 range · ramps to 2.5× | A brighter emitter: more damage, more range and a higher ramp. | existing |
 | 3 | A | Prism Array | 300 | 38 dps · 145 range · 3 beams | Splits into three beams (extra beams at 60% power). | existing |
 | 4 | A | Focusing Optics | 360 | +5 dps | Focusing optics make every beam burn hotter. | new |
 | 5 | A | Fourth Facet | 440 | +1 beam | A fourth facet splits off another beam. | new |
@@ -225,7 +225,7 @@ Homing salvos with a small blast; double damage to flyers.
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
 | 1 | base | Missile Battery | 110 | 18 dmg · 190 range · 2 missiles | Fires homing missiles with a small blast. Flyers take double damage. | existing |
-| 2 | base | Tier 2 | 140 | 26 dmg · 200 range · 3 missiles | A third launch tube and stronger warheads. | existing |
+| 2 | base | Retrofit | 140 | 26 dmg · 200 range · 3 missiles | A third launch tube and stronger warheads. | existing |
 | 3 | A | Swarm Pods | 260 | 24 dmg · 210 range · 5 missiles | Salvos spread across targets. | existing |
 | 4 | A | Sixth Tube | 310 | +1 missile | A sixth tube adds another missile to every salvo. | new |
 | 5 | A | Better Seekers | 380 | +10 range | Better seekers lock on from further away. | new |
@@ -249,7 +249,7 @@ Boosts the damage of nearby towers (the best pylon applies; they don't stack).
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
 | 1 | base | Amplifier Pylon | 100 | 100 field · +15% damage | Broadcasts a power field that boosts the damage of towers inside it. | existing |
-| 2 | base | Tier 2 | 120 | 115 field · +25% damage | A stronger broadcast over a wider field. | existing |
+| 2 | base | Retrofit | 120 | 115 field · +25% damage | A stronger broadcast over a wider field. | existing |
 | 3 | A | Overclock Pylon | 220 | 125 field · +30% damage · +25% speed | Nearby towers hit harder and faster. | existing |
 | 4 | A | Tuned Relays | 260 | +5% speed | Tuned relays make boosted towers fire 5% faster. | new |
 | 5 | A | Wider Broadcast | 320 | +5 field | A wider broadcast reaches more towers. | new |
@@ -273,7 +273,7 @@ Anti-air airbursts that hit every flyer in the blast.
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
 | 1 | base | Flak Battery | 80 | 16 dmg · 175 range · 1.4/s · 38 burst | Anti-air cannon whose airbursts hit every flyer in the blast. | existing |
-| 2 | base | Tier 2 | 100 | 28 dmg · 190 range · 1.5/s · 42 burst | Heavier shells, faster fire and a wider burst. | existing |
+| 2 | base | Retrofit | 100 | 28 dmg · 190 range · 1.5/s · 42 burst | Heavier shells, faster fire and a wider burst. | existing |
 | 3 | A | Sky Shredder | 190 | 30 dmg · 200 range · 3.2/s | Twin autocannons: more than double the rate of fire. | existing |
 | 4 | A | Faster Feed | 230 | +0.3/s | A faster ammo feed keeps the cannons firing. | new |
 | 5 | A | Better Fuses | 280 | +4 burst | Better fuses widen each airburst. | new |
@@ -297,7 +297,7 @@ Reveals cloaked enemies and marks targets to take extra damage.
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
 | 1 | base | Sensor Array | 75 | 130 field · +8% mark | A radar dish that reveals cloaked enemies in its field and marks them to take extra damage. | existing |
-| 2 | base | Tier 2 | 90 | 150 field · +12% mark | A bigger dish: a wider field and a stronger mark. | existing |
+| 2 | base | Retrofit | 90 | 150 field · +12% mark | A bigger dish: a wider field and a stronger mark. | existing |
 | 3 | A | Deep Scan | 160 | 210 field · +14% mark | The widest reveal field. | existing |
 | 4 | A | Bigger Dish | 190 | +15 field | A bigger dish scans a wider field. | new |
 | 5 | A | Signal Boost | 230 | +1% mark | A signal booster strengthens the mark. | new |
@@ -321,7 +321,7 @@ Gravity pulses that move ground enemies along the lane (bosses 25%).
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
 | 1 | base | Graviton Projector | 150 | 12 dmg · 105 range · 40 px shove | Gravity pulses shove ground enemies back down the lane and crush them. | existing |
-| 2 | base | Tier 2 | 160 | 22 dmg · 115 range · 52 px shove | A stronger core: bigger shoves and harder pulses. | existing |
+| 2 | base | Retrofit | 160 | 22 dmg · 115 range · 52 px shove | A stronger core: bigger shoves and harder pulses. | existing |
 | 3 | A | Repulsor | 290 | 30 dmg · 125 range · 85 px shove | Violent pulses hurl enemies back down the lane. | existing |
 | 4 | A | Denser Core | 350 | +10 px shove | A denser core throws enemies 10 px further. | new |
 | 5 | A | Wider Field | 420 | +5 range | A wider field catches more of the lane. | new |
@@ -345,7 +345,7 @@ A dampening pulse that strips enemy defences: barriers, armor and immunities.
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
 | 1 | base | Nullifier | 120 | 5 dmg · 110 field · pulse every 2 s · strips 40% of barriers | Pulses a dampening field that strips away part of every enemy barrier inside it. | new |
-| 2 | base | Tier 2 | 130 | 8 dmg · 120 field · pulse every 1.7 s · strips 60% of barriers · exposes | Enemies in the field lose crowd-control immunity. | new |
+| 2 | base | Retrofit | 130 | 8 dmg · 120 field · pulse every 1.7 s · strips 60% of barriers · exposes | Enemies in the field lose crowd-control immunity. | new |
 | 3 | A | Purge Emitter | 240 | 10 dmg · 130 field · strips 100% of barriers · −3 armor inside · exposes | Wipes barriers clean and weakens armor while enemies stay in the field. | new |
 | 4 | A | Wider Emitter | 290 | +8 field | A wider emitter covers more of the lane. | new |
 | 5 | A | Deep Purge | 350 | −1 more armor | A deeper purge strips one more point of armor inside the field. | new |
@@ -369,7 +369,7 @@ A 360° shockwave that hits everything around it, air and ground.
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
 | 1 | base | Nova Reactor | 160 | 30 dmg · 100 radius · 0.5/s | A reactor that releases a shockwave all around it, hitting every enemy in range, air and ground. | new |
-| 2 | base | Tier 2 | 170 | 50 dmg · 110 radius · 0.55/s | A hotter core: stronger, wider and slightly faster waves. | new |
+| 2 | base | Retrofit | 170 | 50 dmg · 110 radius · 0.55/s | A hotter core: stronger, wider and slightly faster waves. | new |
 | 3 | A | Supernova | 300 | 120 dmg · 125 radius · 0.4/s | Slow, devastating shockwaves. | new |
 | 4 | A | Denser Core | 360 | +20 dmg | A denser core puts more power into each wave. | new |
 | 5 | A | Wider Wave | 440 | +8 radius | Each wave reaches further. | new |
@@ -393,7 +393,7 @@ Launches hunter drones that chase enemies anywhere on the map.
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
 | 1 | base | Drone Bay | 180 | 2 drones · 12 dmg · 3 shots/s · 160 speed | Launches combat drones that hunt enemies anywhere on the map. | new |
-| 2 | base | Tier 2 | 170 | 3 drones · 16 dmg · 3 shots/s · 170 speed | A bigger hangar: one more drone, and all of them hit harder. | new |
+| 2 | base | Retrofit | 170 | 3 drones · 16 dmg · 3 shots/s · 170 speed | A bigger hangar: one more drone, and all of them hit harder. | new |
 | 3 | A | Interceptor Wing | 300 | 5 drones · 16 dmg · 4 shots/s · 220 speed · 2× vs flyers | Fast interceptors that hunt flyers first. | new |
 | 4 | A | Sixth Drone | 360 | +1 drone | A sixth interceptor joins the wing. | new |
 | 5 | A | Afterburners | 440 | +30 speed | Afterburners get the interceptors to their targets faster. | new |
@@ -417,7 +417,7 @@ Economy: turns wreckage into credits instead of fighting.
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
 | 1 | base | Scrapyard | 150 | 25 cr per round | A salvage yard that strips wrecks for parts and pays out credits every time a round is cleared. | new |
-| 2 | base | Tier 2 | 175 | 55 cr per round | A second crusher line more than doubles the payout. | new |
+| 2 | base | Retrofit | 175 | 55 cr per round | A second crusher line more than doubles the payout. | new |
 | 3 | A | Credit Mint | 300 | 110 cr per round | Presses salvage straight into credits: the biggest steady income. | new |
 | 4 | A | Stamping Press | 320 | +25 cr per round | A faster press turns out more credits each round. | new |
 | 5 | A | Vault Doors | 380 | +30 cr per round | Secure storage lets the mint run larger batches. | new |

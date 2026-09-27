@@ -497,6 +497,35 @@ func _popout_checks() -> void:
 	var g = screen.game
 	var hud = screen.hud
 	await _shot("16_hud_idle")
+	# Zoom and pan the battlefield.
+	var fpos: Vector2 = screen.world.base_pos + Grid.cell_center(Vector2i(16, 8))
+	await _wheel(fpos, true)
+	await _wheel(fpos, true)
+	fails += _expect(screen.world.zoom > 1.2, "the mouse wheel zooms the battlefield (%.2f)" % screen.world.zoom)
+	var pan0: Vector2 = screen.world.pan
+	await _hold_key(KEY_RIGHT, 0.3)
+	fails += _expect(screen.world.pan.x < pan0.x, "the arrow keys pan the zoomed battlefield")
+	await _wait(0.2)
+	await _shot("16h_zoomed")
+	await _key(KEY_HOME)
+	fails += _expect(is_equal_approx(screen.world.zoom, 1.0) and screen.world.pan == Vector2.ZERO, "Home resets the view")
+	# A 2x2 Scrapyard builds on the block centred on the cursor.
+	g.gold += 2000
+	await _key(KEY_BACKSLASH)
+	await _click(screen.world.base_pos + Vector2(3 * 48, 6 * 48))
+	var yard = g.tower_at.get(Vector2i(2, 5))
+	fails += _expect(yard != null and yard.type == "scrap" and g.tower_at.get(Vector2i(3, 6)) == yard, "a Scrapyard takes the 2x2 block under the cursor")
+	await _key(KEY_ESCAPE)
+	# Target priority on a tower that hits both.
+	var coil = g.place_tower("tesla", Vector2i(6, 3))
+	screen.world.selected_tower = coil
+	await _wait(0.2)
+	fails += _expect(_button_in(hud.bottom, "Priority: Any  [G]") != null, "a tower that hits air and ground shows a Priority button")
+	await _key(KEY_G)
+	fails += _expect(coil.priority == 1, "G sets it to prefer flyers")
+	await _wait(0.2)
+	await _shot("16i_priority")
+	await _key(KEY_ESCAPE)
 	# A late round lists many enemy types: the NEXT strip must fit its button.
 	g.wave = 59
 	await _wait(0.2)
@@ -561,7 +590,7 @@ func _popout_checks() -> void:
 	await _key(KEY_ESCAPE)
 	screen.world.selected_tower = sa
 	await _key(KEY_E)
-	await _wait(0.3)
+	await _wait(0.6)
 	var stree = hud.popout("tree")
 	await _click(stree.node_buttons["c2"].get_global_rect().get_center())
 	fails += _expect(int(sa.depth.c) == 2 and sa.locked_in(), "the tree buys the secondary's second upgrade after the primary locks in")
@@ -622,7 +651,7 @@ func _research_checks() -> void:
 	SaveManager.record_run("meadow", "easy", 40, true, false)
 	SaveManager.record_run("crossroads", "medium", 60, true, false)
 	SaveManager.record_run("canyon", "nightmare", 100, true, false)
-	for id in ["cmd_funds", "cmd_core", "arrow_1", "arrow_2a", "arrow_m", "sniper_1", "sniper_2b", "tesla_1", "laser_1"]:
+	for id in ["cmd_funds", "cmd_core", "arrow_1", "arrow_2a", "arrow_2b", "arrow_m", "sniper_1", "sniper_2b", "tesla_1", "laser_1"]:
 		SaveManager.buy_research(id)
 	app.show_menu()
 	await _wait(0.6)
@@ -645,6 +674,20 @@ func _research_checks() -> void:
 	await _click(locked.get_global_rect().get_center())
 	await _key(KEY_ENTER)
 	fails += _expect(not SaveManager.research_owned().has("cannon_m"), "Enter can't buy a locked node")
+	var f0: int = lab.panel.focus
+	await _key(KEY_RIGHT)
+	fails += _expect(lab.panel.focus == f0 + 1, "Right moves the lab to the next tree")
+	await _key(KEY_LEFT)
+	fails += _expect(lab.panel.focus == f0, "Left moves back")
+	lab.panel.focus_tree("laser")
+	await _wait(0.3)
+	await _key(KEY_DOWN)
+	await _key(KEY_UP)
+	await _key(KEY_DOWN)
+	await _key(KEY_ENTER)
+	fails += _expect(SaveManager.research_owned().has("laser_2b") and not SaveManager.research_owned().has("laser_2a"), "Up/Down pick a node in the focused tree and Enter researches it")
+	lab.panel.focus_tree("sniper")
+	await _wait(0.4)
 	# Hover the Railgun Mastery node so the detail panel shows its two tier-4 upgrades.
 	var hover_at: Vector2 = get_viewport().get_final_transform() * (lab.panel.node_buttons["sniper_m"].get_global_rect().get_center() + UiKit.view_offset())
 	var motion := InputEventMouseMotion.new()
@@ -653,6 +696,17 @@ func _research_checks() -> void:
 	Input.parse_input_event(motion)
 	await _wait(0.5)
 	await _shot("13_research_lab")
+	var sp_layer := CanvasLayer.new()
+	sp_layer.layer = 40
+	app.add_child(sp_layer)
+	var sp = load("res://scripts/ui/SettingsPanel.gd").new(func(): pass)
+	sp_layer.add_child(sp)
+	await _wait(0.3)
+	var labels: Array = sp.find_children("*", "Button", true, false).map(func(b): return (b as Button).text)
+	fails += _expect(labels.has("VSync") and labels.has("Screen shake") and labels.has("Show FPS  [F3]") and sp.find_children("*", "OptionButton", true, false).size() >= 3, "Settings has VSync, frame cap, effects, shake and FPS options")
+	await _shot("13b_settings")
+	sp_layer.queue_free()
+	await _wait(0.1)
 	# Move off the node first: an open tooltip would take the first Esc.
 	var away := InputEventMouseMotion.new()
 	away.position = get_viewport().get_final_transform() * (Vector2(800, 90) + UiKit.view_offset())
@@ -692,6 +746,43 @@ func _button_in(root: Node, text: String) -> Button:
 func _expect(cond: bool, what: String) -> int:
 	print("  %s %s" % ["ok  " if cond else "FAIL", what])
 	return 0 if cond else 1
+
+
+func _wheel(canvas_pos: Vector2, up: bool) -> void:
+	var p: Vector2 = get_viewport().get_final_transform() * (canvas_pos + UiKit.view_offset())
+	var mv := InputEventMouseMotion.new()
+	mv.position = p
+	mv.global_position = p
+	Input.parse_input_event(mv)
+	await get_tree().process_frame
+	var ev := InputEventMouseButton.new()
+	ev.button_index = MOUSE_BUTTON_WHEEL_UP if up else MOUSE_BUTTON_WHEEL_DOWN
+	ev.pressed = true
+	ev.position = p
+	ev.global_position = p
+	Input.parse_input_event(ev)
+	var rel := InputEventMouseButton.new()
+	rel.button_index = ev.button_index
+	rel.pressed = false
+	rel.position = p
+	rel.global_position = p
+	Input.parse_input_event(rel)
+	await get_tree().process_frame
+	await get_tree().process_frame
+
+
+func _hold_key(code: Key, secs: float) -> void:
+	var ev := InputEventKey.new()
+	ev.keycode = code
+	ev.physical_keycode = code
+	ev.pressed = true
+	Input.parse_input_event(ev)
+	await _wait(secs)
+	var up := InputEventKey.new()
+	up.keycode = code
+	up.physical_keycode = code
+	Input.parse_input_event(up)
+	await get_tree().process_frame
 
 
 func _key(code: Key) -> void:

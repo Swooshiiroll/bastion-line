@@ -22,7 +22,7 @@ func _ready() -> void:
 	title.position = Vector2(0, 70)
 	title.size = Vector2(1600, 56)
 	root.add_child(title)
-	var sub := UiKit.label("Permanent upgrades for every run you start. Mastery research unlocks a tower's tier-4 upgrades.", 14, UiKit.DIM, HORIZONTAL_ALIGNMENT_CENTER)
+	var sub := UiKit.label("Permanent upgrades for every run you start. A tower's Mastery research, after the rest of its tree, unlocks its three masteries. Left / Right or the wheel browse the trees.", 14, UiKit.DIM, HORIZONTAL_ALIGNMENT_CENTER)
 	sub.position = Vector2(0, 124)
 	sub.size = Vector2(1600, 20)
 	root.add_child(sub)

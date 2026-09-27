@@ -1,7 +1,9 @@
 extends Control
-## The Research Lab's content as a reusable panel (1232×552): one column per tree (Command + each
-## tower), hex nodes joined by circuit lines, a detail strip with Research / Reset. Hover or click a
-## node for details; research it with the button, Enter, or a second click on the selected node.
+## The Research Lab's content as a reusable panel (1552×552): a carousel of trees (Command + each
+## tower), the focused one centred at full size with its neighbours smaller on either side; hex
+## nodes joined by circuit lines, and a detail strip with Research / Reset. Left/Right or the mouse
+## wheel change the focused tree, Up/Down pick a node in it, Enter researches it (as does the button
+## or a second click on the selected node). Clicking a node in a side tree focuses that tree.
 ## Used full-screen from the main menu (ResearchLab.gd) and as an in-battle pop-out.
 
 const UiKit = preload("res://scripts/ui/UiKit.gd")
@@ -23,6 +25,10 @@ const ROW_Y := [82.0, 168.0, 254.0]
 const SLOT_DX := 28.0
 const NODE_R := 17.0
 const BTN := Vector2(44, 44)
+## Carousel: side trees are drawn at SIDE_SCALE, spaced SPACING apart; the focused one at full size.
+const SIDE_SCALE := 0.72
+const SPACING := 78.0
+const STRIP_H := 388.0
 ## Column headers are narrow; full names are in each node's details.
 const SHORT_NAMES := {
 	"command": "COMMAND", "arrow": "PULSE", "cannon": "MORTAR", "frost": "CRYO", "sniper": "RAILGUN",
@@ -43,6 +49,10 @@ var _selected := "cmd_funds"
 var _armed := ""
 var _hovered := ""
 var _shown := "?"
+var _strip: Control
+## The focused tree (index into Data.TREE_ORDER) and its animated position.
+var focus := 0
+var _focus_f := 0.0
 
 
 func _init(note_text := "") -> void:
@@ -64,9 +74,16 @@ func _ready() -> void:
 	_rp_label.position = Vector2(SIZE.x - 420, 0)
 	_rp_label.size = Vector2(412, 26)
 	add_child(_rp_label)
-	var x0 := (SIZE.x - COL_W * Data.TREE_ORDER.size()) / 2.0
+	_strip = Control.new()
+	_strip.position = Vector2(0, 0)
+	_strip.size = Vector2(SIZE.x, STRIP_H)
+	_strip.clip_contents = true
+	_strip.mouse_filter = Control.MOUSE_FILTER_PASS
+	_strip.gui_input.connect(_on_strip_input)
+	add_child(_strip)
 	for i in Data.TREE_ORDER.size():
-		_column(Data.TREE_ORDER[i], x0 + COL_W * i)
+		_column(Data.TREE_ORDER[i], 0.0)
+	_layout(true)
 
 	var panel := UiKit.panel(Rect2(0, 392, SIZE.x, 160), UiKit.BG, 10)
 	add_child(panel)
@@ -93,7 +110,8 @@ func _ready() -> void:
 
 func _column(tree: String, x: float) -> void:
 	var col := UiKit.panel(Rect2(x + 3, COL_TOP, COL_W - 6, COL_H), Color(0.03, 0.045, 0.07, 0.88), 8)
-	add_child(col)
+	col.pivot_offset = Vector2((COL_W - 6.0) / 2.0, 0.0)
+	_strip.add_child(col)
 	var cx := COL_W / 2.0 - 3.0
 	var acc := _tree_color(tree)
 	var icon := DrawControl.new(func(ci):
@@ -135,9 +153,10 @@ func _column(tree: String, x: float) -> void:
 				_hovered = ""
 		)
 		b.pressed.connect(func(): _on_node_pressed(node_id))
+		b.gui_input.connect(_on_strip_input)
 		node_buttons[node_id] = b
 		col.add_child(b)
-	_cols.append([tree, prog])
+	_cols.append([tree, prog, col])
 
 
 func _tree_color(tree: String) -> Color:
@@ -198,7 +217,10 @@ func _draw_node(ci: Control, id: String, acc: Color) -> void:
 		Draw.outline(ci, c, Draw.ngon(6, 1.0, PI / 6.0), Color(1, 1, 1, 0.85), 1.2, 0.0, r + 5.0)
 
 
-func _process(_delta: float) -> void:
+func _process(delta: float) -> void:
+	if not is_equal_approx(_focus_f, float(focus)):
+		_focus_f = move_toward(_focus_f, float(focus), maxf(0.05, absf(float(focus) - _focus_f)) * delta * 10.0)
+		_layout()
 	var want := _hovered if _hovered != "" else _selected
 	if want != _shown:
 		_show_detail(want)
@@ -207,16 +229,100 @@ func _process(_delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if _modal != null or not is_visible_in_tree() or not (event is InputEventKey) or not event.pressed or event.echo:
 		return
-	if event.keycode == KEY_ENTER or event.keycode == KEY_KP_ENTER:
-		_buy_current()
-		get_viewport().set_input_as_handled()
+	match event.keycode:
+		KEY_ENTER, KEY_KP_ENTER:
+			_buy_current()
+		KEY_LEFT:
+			set_focus(focus - 1)
+		KEY_RIGHT:
+			set_focus(focus + 1)
+		KEY_UP:
+			_step_node(-1)
+		KEY_DOWN:
+			_step_node(1)
+		_:
+			return
+	get_viewport().set_input_as_handled()
 
+
+## Places the tree columns around the focused one: full size in the middle, smaller and dimmer with
+## distance on either side.
+func _layout(snap := false) -> void:
+	if snap:
+		_focus_f = float(focus)
+	for i in _cols.size():
+		var col: Control = _cols[i][2]
+		var d := float(i) - _focus_f
+		var k := clampf(absf(d), 0.0, 1.0)
+		var s := lerpf(1.0, SIDE_SCALE, k)
+		var cx := SIZE.x / 2.0 + d * SPACING + signf(d) * k * (COL_W - SPACING) * 0.5
+		col.scale = Vector2(s, s)
+		col.position = Vector2(cx - (COL_W - 6.0) / 2.0, COL_TOP + (1.0 - s) * COL_H * 0.5)
+		col.modulate = Color(1, 1, 1, clampf(1.0 - 0.13 * absf(d), 0.3, 1.0))
+		col.z_index = 10 - int(absf(d))
+
+
+## Focuses a tree by index (clamped) and selects its first node still to research.
+func set_focus(i: int) -> void:
+	var want := clampi(i, 0, Data.TREE_ORDER.size() - 1)
+	if want == focus:
+		return
+	focus = want
+	var owned := SaveManager.research_owned()
+	var ids := _ordered_nodes(Data.TREE_ORDER[focus])
+	_selected = ids[0]
+	for id in ids:
+		if not owned.has(id):
+			_selected = id
+			break
+	_armed = ""
+	_shown = "?"
+
+
+## Focuses a tree by id (the tour and callers use this).
+func focus_tree(tree: String) -> void:
+	set_focus(Data.TREE_ORDER.find(tree))
+	_layout(true)
+
+
+## A tree's nodes from the root down, left to right.
+func _ordered_nodes(tree: String) -> Array:
+	var ids := Research.tree_nodes(tree)
+	ids.sort_custom(func(a, b):
+		var sa: Vector2i = Data.NODES[a].slot
+		var sb: Vector2i = Data.NODES[b].slot
+		return sa.y < sb.y or (sa.y == sb.y and sa.x < sb.x))
+	return ids
+
+
+## Up/Down: the previous or next node in the focused tree.
+func _step_node(dir: int) -> void:
+	var ids := _ordered_nodes(Data.TREE_ORDER[focus])
+	var i := ids.find(_selected)
+	_selected = ids[clampi((0 if i < 0 else i + dir), 0, ids.size() - 1)]
+	_armed = _selected
+	_hovered = ""
+	_shown = "?"
+
+
+## The mouse wheel over the trees scrolls the carousel.
+func _on_strip_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton and event.pressed:
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP:
+			set_focus(focus - 1)
+			get_viewport().set_input_as_handled()
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			set_focus(focus + 1)
+			get_viewport().set_input_as_handled()
 
 func has_modal() -> bool:
 	return _modal != null
 
 
 func _on_node_pressed(id: String) -> void:
+	var ti := Data.TREE_ORDER.find(str(Data.NODES[id].tree))
+	if ti != focus:
+		focus = ti
 	if _armed == id and _state(id) == "ready":
 		_buy(id)
 		return

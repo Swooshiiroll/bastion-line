@@ -181,4 +181,9 @@ static func _migrate(data: Dictionary, from_version: int) -> Dictionary:
 				entry.erase("tier")
 				entry.erase("spec")
 		d["version"] = 8
+	if from_version < 9:
+		# v9 (game v3.4) made the Scrapyard and Drone Bay 2x2 (their col/row is the top-left tile) and
+		# added a per-tower target priority. Nothing to convert here: loading keeps an old 1x1 one if
+		# its 2x2 footprint fits and refunds it otherwise, and a missing priority means "Any".
+		d["version"] = 9
 	return d

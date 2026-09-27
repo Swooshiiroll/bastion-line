@@ -26,7 +26,9 @@ func _ready() -> void:
 
 
 func burst(pos: Vector2, color: Color, count: int, speed := 90.0, size := 2.5, life := 0.5, gravity := 0.0) -> void:
-	for i in count:
+	# The Effects setting (Low / Medium / High) thins out particles.
+	var n := maxi(1, roundi(float(count) * float(SaveManager.setting("vfx"))))
+	for i in n:
 		if particles.size() >= MAX_PARTICLES:
 			return
 		var v := Vector2.from_angle(randf() * TAU) * speed * randf_range(0.3, 1.0)

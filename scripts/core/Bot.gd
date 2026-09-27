@@ -187,6 +187,8 @@ func pylon_value(c: Vector2i, r: float) -> int:
 
 
 func best_cell(type: String):
+	# 2x2 towers need their whole footprint free (the cell is the top-left tile).
+	var big: bool = Game.size_of(type) > 1
 	# Scrapyards go among the towers, where Supply Depots and Scrap Collectors have the most to work on.
 	if Towers.TOWERS[type].get("economy", false):
 		var best_e = null
@@ -195,6 +197,8 @@ func best_cell(type: String):
 			for x in Grid.COLS:
 				var ec := Vector2i(x, y)
 				if not game.grid.is_buildable(ec) or game.tower_at.has(ec):
+					continue
+				if big and game.placement_error(type, ec) != "":
 					continue
 				var en := pylon_value(ec, 140.0)
 				if en > best_en:
@@ -222,6 +226,8 @@ func best_cell(type: String):
 		for x in Grid.COLS:
 			var c := Vector2i(x, y)
 			if not cov.has(c) or game.tower_at.has(c):
+				continue
+			if big and game.placement_error(type, c) != "":
 				continue
 			var sc: float = cov[c]
 			if game.grid.tile_at(c) in ["H", "P"]:

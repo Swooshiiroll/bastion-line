@@ -1,5 +1,6 @@
 extends Control
-## Settings overlay (volume, damage numbers, fullscreen, window size). Values persist in the profile.
+## Settings overlay: volume, damage numbers, and display (fullscreen, window size, VSync, frame cap,
+## effects level, screen shake, FPS counter). Values persist in the profile.
 
 const UiKit = preload("res://scripts/ui/UiKit.gd")
 
@@ -56,12 +57,53 @@ func _ready() -> void:
 	hint.custom_minimum_size = Vector2(380, 0)
 	v.add_child(hint)
 
+	var vs := CheckBox.new()
+	vs.text = "VSync"
+	vs.button_pressed = bool(SaveManager.setting("vsync"))
+	vs.toggled.connect(func(on: bool): SaveManager.set_setting("vsync", on))
+	v.add_child(vs)
+	var caps: Array = SaveManager.FPS_CAPS.map(func(c): return "No cap" if int(c) == 0 else "%d FPS" % int(c))
+	v.add_child(_option_row("Frame cap", caps, maxi(0, SaveManager.FPS_CAPS.find(int(SaveManager.setting("max_fps")))),
+		func(i: int): SaveManager.set_setting("max_fps", SaveManager.FPS_CAPS[i])))
+	var levels: Array = SaveManager.VFX_LEVELS.map(func(l): return str(l[0]))
+	var cur_vfx := 0
+	for i in SaveManager.VFX_LEVELS.size():
+		if is_equal_approx(float(SaveManager.VFX_LEVELS[i][1]), float(SaveManager.setting("vfx"))):
+			cur_vfx = i
+	v.add_child(_option_row("Visual FX", levels, cur_vfx,
+		func(i: int): SaveManager.set_setting("vfx", float(SaveManager.VFX_LEVELS[i][1]))))
+	var shake := CheckBox.new()
+	shake.text = "Screen shake"
+	shake.button_pressed = bool(SaveManager.setting("screen_shake"))
+	shake.toggled.connect(func(on: bool): SaveManager.set_setting("screen_shake", on))
+	v.add_child(shake)
+	var fps := CheckBox.new()
+	fps.text = "Show FPS  [F3]"
+	fps.button_pressed = bool(SaveManager.setting("show_fps"))
+	fps.toggled.connect(func(on: bool): SaveManager.set_setting("show_fps", on))
+	v.add_child(fps)
+
 	var spacer := Control.new()
 	spacer.custom_minimum_size = Vector2(0, 8)
 	v.add_child(spacer)
 	var close := UiKit.button("Back", func(): on_close.call(), Vector2(0, 42), true)
 	v.add_child(close)
 	close.grab_focus.call_deferred()
+
+
+func _option_row(title: String, items: Array, selected: int, on_pick: Callable) -> HBoxContainer:
+	var row := UiKit.hbox(12)
+	var l := UiKit.label(title, 16)
+	l.custom_minimum_size = Vector2(80, 0)
+	row.add_child(l)
+	var ob := OptionButton.new()
+	ob.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	for it in items:
+		ob.add_item(str(it))
+	ob.selected = selected
+	ob.item_selected.connect(on_pick)
+	row.add_child(ob)
+	return row
 
 
 func _volume_row(title: String, key: String, ping: bool) -> HBoxContainer:

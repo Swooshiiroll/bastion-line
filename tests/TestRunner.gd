@@ -91,6 +91,9 @@ func _run() -> void:
 		"test_mastery_upgrades",
 		"test_branch_rules",
 		"test_laser_charge_stat",
+		"test_footprint",
+		"test_target_priority",
+		"test_mastery_needs_all_research",
 		"test_scrapyard",
 		"test_mastery_mechanics",
 		"test_save_research_v4",
@@ -870,7 +873,7 @@ func test_economy() -> void:
 	check(not g.upgrade_tower(t, "bogus"), "tier 3 upgrade with an unknown spec is refused")
 	check(t.upgrade_cost() == 140 and t.upgrade_cost("shredder") == 140, "spec costs reported")
 	check(g.upgrade_tower(t, "shredder"), "tier 3 upgrade with a spec succeeds")
-	check(t.tier == 3 and t.spec == "shredder" and t.display_name() == "Shredder", "spec applied")
+	check(t.tier == 3 and t.spec == "shredder" and t.display_name() == "Pulse Turret", "spec applied (the name stays stock until the primary locks in)")
 	check(g.gold == 1000 - 140, "spec cost deducted")
 	check(t.upgrade_cost() == 170, "the next Shredder upgrade costs 170 (%d)" % t.upgrade_cost())
 	check(g.upgrade_tower(t, "gatling") and t.started == ["b", "a"], "a second branch can be started")
@@ -1181,7 +1184,7 @@ func test_scrapyard() -> void:
 	var want := roundi(110.0 * Waves.bounty_scale(40))
 	check(g.gold - before == want, "Credit Mint pays 110 scaled like kill credits at round 40 (%d of %d)" % [g.gold - before, want])
 	# Scrap Collector: kills in its field pay more; bosses double on the Reclamation Plant.
-	var col = g.place_tower("scrap", Vector2i(20, 12))
+	var col = g.place_tower("scrap", Vector2i(21, 11))
 	g.upgrade_tower(col)
 	g.upgrade_tower(col, "collector")
 	var e = put(g, "grunt", 40.0)
@@ -1194,10 +1197,10 @@ func test_scrapyard() -> void:
 	g.damage_enemy(e, 1e9, true, null)
 	check(g.gold - b0 == int(floor(4.0 * 1.25)), "the bonus is paid on the kill (%d)" % (g.gold - b0))
 	# Supply Depot: cheaper upgrades for towers in its field; Forward Command refunds everything.
-	var arrow = g.place_tower("arrow", Vector2i(3, 4))
+	var arrow = g.place_tower("arrow", Vector2i(5, 3))
 	var far = g.place_tower("arrow", Vector2i(12, 1))
 	check(arrow.upgrade_cost() == 70, "no depot, full upgrade price")
-	var depot = g.place_tower("scrap", Vector2i(2, 4))
+	var depot = g.place_tower("scrap", Vector2i(6, 2))
 	g.upgrade_tower(depot)
 	g.upgrade_tower(depot, "depot")
 	check(near(arrow.discount, 0.10) and arrow.upgrade_cost() == 63 and far.upgrade_cost() == 70, "towers in a Supply Depot field upgrade 10% cheaper")
@@ -1227,7 +1230,7 @@ func test_scrapyard() -> void:
 	var cmd = fc.place_tower("scrap", Vector2i(2, 4))
 	for k in "Tccccc":
 		fc.upgrade_tower(cmd, "" if k == "T" else k)
-	var fa = fc.place_tower("arrow", Vector2i(3, 4))
+	var fa = fc.place_tower("arrow", Vector2i(5, 4))
 	check(cmd.display_name() == "Forward Command" and fc.sell_value(fa) == fa.spent, "Forward Command: towers in its field sell back for everything")
 	check(not Bot.is_pylon("scrap"), "the bot doesn't treat Scrapyards as pylons")
 
@@ -1621,7 +1624,8 @@ func test_research_data() -> void:
 
 
 	check(Research.sanitize(["arrow_m", "bogus", "arrow_1", "arrow_1", 7]) == ["arrow_1"], "sanitize drops unknown, duplicate and orphaned nodes")
-	check(Research.sanitize(["arrow_2b", "arrow_1", "arrow_m"]) == ["arrow_1", "arrow_2b", "arrow_m"], "sanitize keeps a valid chain in canonical order")
+	check(Research.sanitize(["arrow_2b", "arrow_1", "arrow_m", "arrow_2a"]) == ["arrow_1", "arrow_2a", "arrow_2b", "arrow_m"], "sanitize keeps a valid chain in canonical order")
+	check(Research.sanitize(["arrow_2b", "arrow_1", "arrow_m"]) == ["arrow_1", "arrow_2b"], "a mastery without both branches is dropped (it needs the whole tree)")
 	check(Research.sanitize("nope").is_empty(), "sanitize tolerates garbage")
 
 
@@ -1661,11 +1665,12 @@ func test_research_profile() -> void:
 	check(SaveManager.buy_research("nope") != "", "unknown node refused")
 	check(SaveManager.buy_research("arrow_1") == "", "root node bought")
 	check(SaveManager.buy_research("arrow_1") != "", "can't buy twice")
-	check(SaveManager.buy_research("arrow_2b") == "" and SaveManager.buy_research("arrow_m") == "", "branch and mastery bought")
-	check(SaveManager.research_available() == 1, "7 - 1 - 2 - 3 = 1 RP left (%d)" % SaveManager.research_available())
+	check(SaveManager.buy_research("arrow_2b") == "" and SaveManager.buy_research("arrow_m").contains("everything else"), "one branch isn't enough for the mastery")
+	check(SaveManager.buy_research("arrow_2a") == "" and SaveManager.buy_research("arrow_m").contains("research points"), "with both branches the mastery only waits on RP")
+	check(SaveManager.research_available() == 2, "7 - 1 - 2 - 2 = 2 RP left (%d)" % SaveManager.research_available())
 	check(SaveManager.buy_research("cannon_1") == "" and SaveManager.buy_research("cannon_2a").contains("research points"), "runs out of RP")
 	SaveManager.load_profile()
-	check(SaveManager.research_owned() == ["arrow_1", "arrow_2b", "arrow_m", "cannon_1"], "research persists (%s)" % str(SaveManager.research_owned()))
+	check(SaveManager.research_owned() == ["arrow_1", "arrow_2a", "arrow_2b", "cannon_1"], "research persists (%s)" % str(SaveManager.research_owned()))
 	SaveManager.reset_research()
 	SaveManager.load_profile()
 	check(SaveManager.research_owned().is_empty() and SaveManager.research_available() == 7, "reset refunds everything")
@@ -1733,7 +1738,7 @@ func test_mastery_upgrades() -> void:
 	check(t.tier == 3 and t.depth.a == 4 and t.upgrade_cost() == 0, "no research: the branch stops before its mastery")
 	check(t.block_reason("a").contains("research"), "the reason names the missing research")
 	check(not g.upgrade_tower(t), "mastery refused without research")
-	var r = research_game(["arrow_1", "arrow_2a", "arrow_m"])
+	var r = research_game(["arrow_1", "arrow_2a", "arrow_2b", "arrow_m"])
 	var gat = build_to(r, "arrow", Vector2i(2, 3), "gatling", 3)
 	check(gat.depth.a == 1 and gat.upgrade_cost() == 170, "the next Gatling upgrade costs 170 (%d)" % gat.upgrade_cost())
 	while gat.depth.a < Tower.BRANCH_STEPS:
@@ -1761,6 +1766,69 @@ func test_mastery_upgrades() -> void:
 	check(r.level_stats("cannon", 4, "siege").has("stun"), "level_stats reaches the mastery")
 
 
+func test_footprint() -> void:
+	var g = new_game()
+	g.gold = 100000
+	check(Game.size_of("scrap") == 2 and Game.size_of("drones") == 2 and Game.size_of("arrow") == 1, "the Scrapyard and Drone Bay are 2x2, the rest 1x1")
+	var y = g.place_tower("scrap", Vector2i(2, 5))
+	check(y != null and y.size == 2, "a Scrapyard builds on a clear 2x2 block")
+	var covered := [Vector2i(2, 5), Vector2i(3, 5), Vector2i(2, 6), Vector2i(3, 6)]
+	check(covered.all(func(c): return g.tower_at.get(c) == y), "it fills all four tiles")
+	check(y.pos == Vector2(144, 288), "it stands at the centre of its footprint (%s)" % str(y.pos))
+	check(g.placement_error("arrow", Vector2i(3, 6)).contains("already has a tower"), "its other tiles are taken")
+	check(g.placement_error("drones", Vector2i(3, 4)).contains("lane"), "a 2x2 block can't overlap the lane")
+	check(g.placement_error("drones", Vector2i(31, 15)) == "Out of bounds", "or run off the grid")
+	g.sell_tower(y)
+	check(covered.all(func(c): return not g.tower_at.has(c)), "selling frees all four tiles")
+	var hg = g.place_tower("drones", Vector2i(11, 5))
+	check(hg != null and hg.site == "H", "a 2x2 tower on high ground gets the high-ground bonus")
+	var pn = g.place_tower("scrap", Vector2i(6, 5))
+	check(pn != null and pn.site == "P", "one power-node tile under it is enough for the power bonus")
+	# Save and load keep the footprint.
+	var res := SaveCodec.decode(JSON.parse_string(JSON.stringify(SaveCodec.encode(g))))
+	check(res.has("game"), "a game with 2x2 towers saves and loads")
+	if res.has("game"):
+		var lg = res.game
+		check(lg.tower_at.get(Vector2i(12, 6)) != null and lg.tower_at.get(Vector2i(12, 6)).type == "drones", "loading restores all four tiles")
+	# An old 1x1 Drone Bay whose 2x2 block no longer fits is refunded.
+	var old: Dictionary = SaveCodec.encode(new_game())
+	old["version"] = 8
+	old["gold"] = 100
+	old["towers"] = [{"type": "drones", "col": 3, "row": 5, "trunk": 1, "depth": {"a": 0, "b": 0, "c": 0}, "started": [], "mastery": false, "mode": 0, "kills": 0, "spent": 180}]
+	var ro := SaveCodec.decode(JSON.parse_string(JSON.stringify(old)))
+	check(ro.has("game") and ro.game.towers.is_empty() and ro.game.gold == 280, "an old 1x1 Drone Bay that no longer fits is refunded (%s)" % str(ro.get("error", "")))
+
+
+func test_target_priority() -> void:
+	var g = new_game()
+	g.gold = 10000
+	var t = g.place_tower("tesla", Vector2i(6, 3))
+	check(t.hits_air() and t.hits_ground() and t.priority == 0, "an Arc Coil hits both and starts on Any")
+	var walker = put(g, "grunt", 300.0)
+	var flyer = g.spawn_enemy("bat", 0, 0.0, 1.0, -1)
+	g.enemies.append(flyer)
+	flyer.pos = t.pos + Vector2(40, 0)
+	walker.pos = t.pos + Vector2(-30, 0)
+	g.cycle_priority(t)
+	check(t.priority == 1 and g.pick_target(t) == flyer, "Air picks the flyer")
+	g.cycle_priority(t)
+	check(t.priority == 2 and g.pick_target(t) == walker, "Ground picks the walker")
+	walker.alive = false
+	check(g.pick_target(t) == flyer, "with no walker in range, a Ground tower still shoots the flyer")
+	g.cycle_priority(t)
+	check(t.priority == 0, "the priority cycles back to Any")
+	t.priority = 1
+	var res := SaveCodec.decode(JSON.parse_string(JSON.stringify(SaveCodec.encode(g))))
+	check(res.has("game") and res.game.tower_at[Vector2i(6, 3)].priority == 1, "the priority is saved")
+
+
+func test_mastery_needs_all_research() -> void:
+	check(not Research.prerequisites_met(["arrow_1", "arrow_2a"], "arrow_m"), "a mastery needs both branches")
+	check(Research.prerequisites_met(["arrow_1", "arrow_2a", "arrow_2b"], "arrow_m"), "with the whole tree it's open")
+	check(Research.prerequisites_met(["arrow_1"], "arrow_2a") and Research.prerequisites_met(["arrow_1"], "arrow_2b"), "branch nodes still need only the root")
+	check(Research.buy_block_reason(["arrow_1", "arrow_2b"], "arrow_m", 99).contains("everything else"), "the reason says what's missing")
+
+
 func test_laser_charge_stat() -> void:
 	for lv in [Tower.lines("laser").t1, Tower.lines("laser").t2, Tower.lines("laser").a[1], Tower.lines("laser").b[1]]:
 		check(float(lv.get("ramp_time", 0.0)) > 0.0, "laser levels carry a charge time (ramp_time)")
@@ -1776,7 +1844,9 @@ func test_branch_rules() -> void:
 	check(t.block_reason("c").contains("Locked"), "the third branch locks once two are started")
 	check(g.upgrade_tower(t, "b") and g.upgrade_tower(t, "a"), "both branches can reach two upgrades")
 	check(t.primary() == "a" and not t.locked_in(), "nothing is locked in at 2 and 2 (the first started leads)")
+	check(t.display_name() == "Pulse Turret" and t.shown_spec == "", "until the primary locks in, the tower keeps its stock name and colour")
 	check(g.upgrade_tower(t, "a") and t.primary() == "a" and t.locked_in(), "the first third upgrade makes the primary")
+	check(t.display_name() == "Gatling Pulse" and t.shown_spec == "gatling", "then it takes its specialization's name and colour")
 	check(not g.upgrade_tower(t, "b") and t.block_reason("b").contains("Blocked"), "a secondary already at its cap of 2 is then blocked")
 	check(g.upgrade_tower(t, "a") and t.depth.a == 4, "the primary climbs on")
 	check(g.upgrade_tower(t, "a") and t.mastered and t.tier == 4, "and takes its mastery")
@@ -1896,7 +1966,7 @@ func test_mastery_mechanics() -> void:
 
 
 func test_save_research_v4() -> void:
-	var owned := ["cmd_funds", "cmd_core", "sniper_1", "sniper_2b", "sniper_m"]
+	var owned := ["cmd_funds", "cmd_core", "sniper_1", "sniper_2a", "sniper_2b", "sniper_m"]
 	var g = research_game(owned, "canyon", 777)
 	var ex = build_to(g, "sniper", Vector2i(9, 2), "deadeye", 4)
 	g.gold = 321

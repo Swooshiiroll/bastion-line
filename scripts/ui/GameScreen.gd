@@ -68,6 +68,8 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	world.damage_numbers = bool(SaveManager.setting("damage_numbers"))
+	# Arrow keys pan the battlefield unless a menu is using them.
+	world.keys_enabled = modal == null and not hud.is_open("research") and not hud.is_open("tree")
 	if not paused:
 		for ev in world.simulate(delta, speed):
 			_handle_event(ev)
@@ -315,9 +317,10 @@ func _on_field_clicked(cell: Vector2i, button: int, shift: bool, pos: Vector2) -
 			hud.toast(game.ability_block_reason("meteor"), UiKit.BAD)
 		return
 	if world.build_type != "":
-		var err: String = game.placement_error(world.build_type, cell)
+		var at: Vector2i = World.anchor_for(world.build_type, cell, pos)
+		var err: String = game.placement_error(world.build_type, at)
 		if err == "":
-			var t = game.place_tower(world.build_type, cell)
+			var t = game.place_tower(world.build_type, at)
 			if not shift:
 				world.build_type = ""
 				world.selected_tower = t
@@ -405,6 +408,17 @@ func cycle_target() -> void:
 	var t = world.selected_tower
 	if t != null and not t.is_support() and not (t.type in ["frost", "gravity"]):
 		game.cycle_mode(t)
+
+
+## Only for towers that hit both air and ground (G).
+func cycle_priority() -> void:
+	var t = world.selected_tower
+	if t != null and has_priority(t):
+		game.cycle_priority(t)
+
+
+static func has_priority(t) -> bool:
+	return t.hits_air() and t.hits_ground() and not t.is_support()
 
 
 func use_ability(id: String) -> void:
@@ -607,6 +621,12 @@ func _unhandled_input(event: InputEvent) -> void:
 			sell_selected()
 		KEY_T:
 			cycle_target()
+		KEY_G:
+			cycle_priority()
+		KEY_HOME:
+			world.reset_view()
+		KEY_F3:
+			SaveManager.set_setting("show_fps", not bool(SaveManager.setting("show_fps")))
 		KEY_F:
 			toggle_speed()
 		KEY_A:

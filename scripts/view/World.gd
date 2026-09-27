@@ -31,6 +31,18 @@ var fx
 var overlay
 
 var base_pos := Vector2(0, 48)
+## Battlefield zoom (1x shows the whole field) and pan. The zoomed field always fills its window.
+const ZOOM_MIN := 1.0
+const ZOOM_MAX := 2.5
+const ZOOM_STEP := 1.15
+const PAN_SPEED := 700.0
+var zoom := 1.0
+var pan := Vector2.ZERO
+## Arrow-key panning; the game screen turns it off while a menu owns the keys.
+var keys_enabled := true
+var _dragging := false
+var _drag_last := Vector2.ZERO
+var _last_mouse: InputEvent = null
 var interactive := true
 var damage_numbers := true
 var build_type := ""
@@ -109,6 +121,12 @@ func _process(delta: float) -> void:
 	if game == null:
 		return
 	if interactive:
+		if _last_mouse != null:
+			_mouse = make_input_local(_last_mouse).position
+		if keys_enabled:
+			var dir := Vector2(float(Input.is_key_pressed(KEY_LEFT)) - float(Input.is_key_pressed(KEY_RIGHT)), float(Input.is_key_pressed(KEY_UP)) - float(Input.is_key_pressed(KEY_DOWN)))
+			if dir != Vector2.ZERO:
+				set_pan(pan + dir * PAN_SPEED * delta)
 		var m := _mouse
 		mouse_in_field = Rect2(Vector2.ZERO, Grid.field_size()).has_point(m) and not _over_ui()
 		hover_pos = m
@@ -134,16 +152,52 @@ func _process(delta: float) -> void:
 			fx.burst(p.pos, Color(1.0, 0.6, 0.25), 1, 20.0, 1.6, 0.18)
 	if shake > 0.0:
 		shake = maxf(0.0, shake - delta * 2.5)
-		position = base_pos + Vector2(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)) * shake * 7.0
+		position = base_pos + pan + Vector2(randf_range(-1.0, 1.0), randf_range(-1.0, 1.0)) * shake * 7.0 * float(bool(SaveManager.setting("screen_shake")))
 	else:
-		position = base_pos
+		position = base_pos + pan
+	scale = Vector2(zoom, zoom)
 	entities.queue_redraw()
 	overlay.refresh()
 
 
+## Zooms by `factor` keeping the field point `at` (field coordinates) under the cursor.
+func zoom_at(at: Vector2, factor: float) -> void:
+	var screen_p := pan + at * zoom
+	zoom = clampf(zoom * factor, ZOOM_MIN, ZOOM_MAX)
+	set_pan(screen_p - at * zoom)
+
+
+## Pans, keeping the zoomed field covering its whole window.
+func set_pan(p: Vector2) -> void:
+	var f := Grid.field_size()
+	pan = Vector2(clampf(p.x, f.x * (1.0 - zoom), 0.0), clampf(p.y, f.y * (1.0 - zoom), 0.0))
+
+
+func reset_view() -> void:
+	zoom = 1.0
+	pan = Vector2.ZERO
+
+## Where a tower of `type` would go for a cursor at `p` (field coordinates) over `cell`: that tile, or
+## for a 2x2 tower the top-left tile of the block centred on the cursor.
+static func anchor_for(type: String, cell: Vector2i, p: Vector2) -> Vector2i:
+	if type == "" or Game.size_of(type) == 1:
+		return cell
+	return Grid.world_to_cell(p - Vector2.ONE * Grid.TILE * 0.5)
+
+
+## The anchor the build ghost is showing.
+func build_anchor() -> Vector2i:
+	return anchor_for(build_type, hover_cell, hover_pos)
+
 func _input(event: InputEvent) -> void:
 	if event is InputEventMouseMotion or event is InputEventMouseButton:
+		_last_mouse = event
 		_mouse = make_input_local(event).position
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_MIDDLE and not event.pressed:
+		_dragging = false
+	if event is InputEventMouseMotion and _dragging:
+		set_pan(pan + (event.position - _drag_last))
+		_drag_last = event.position
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -151,9 +205,19 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if event is InputEventMouseButton and event.pressed:
 		var m: Vector2 = make_input_local(event).position
-		if Rect2(Vector2.ZERO, Grid.field_size()).has_point(m):
-			field_clicked.emit(Grid.world_to_cell(m), event.button_index, event.shift_pressed, m)
+		if not Rect2(Vector2.ZERO, Grid.field_size()).has_point(m):
+			return
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP or event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			zoom_at(m, ZOOM_STEP if event.button_index == MOUSE_BUTTON_WHEEL_UP else 1.0 / ZOOM_STEP)
 			get_viewport().set_input_as_handled()
+			return
+		if event.button_index == MOUSE_BUTTON_MIDDLE:
+			_dragging = true
+			_drag_last = event.position
+			get_viewport().set_input_as_handled()
+			return
+		field_clicked.emit(Grid.world_to_cell(m), event.button_index, event.shift_pressed, m)
+		get_viewport().set_input_as_handled()
 
 
 func _visual(ev: Dictionary) -> void:

@@ -108,7 +108,8 @@ function enemyCard(e) {
 }
 
 // --- Tower pages ---------------------------------------------------------------------------------
-const STEP = { 3: "Specialization", 4: "Upgrade 2", 5: "Upgrade 3", 6: "Upgrade 4", M: "Mastery" };
+const STEP = { 3: "T1 · Specialization", 4: "T2", 5: "T3", 6: "T4", M: "Mastery" };
+const TRUNK = { 1: "Stock", 2: "Retrofit" };
 function towerPage(t) {
   const tr = trees[t.id];
   const trunk = tr.rows.filter((r) => r.path === "base");
@@ -141,12 +142,12 @@ function towerPage(t) {
       <img src="icons/t_${t.id}_1.png"><img src="icons/t_${t.id}_2.png">
       <div>
         <h2>${esc(t.name)}</h2>
-        <div class="tmeta">Build key <code>${esc(t.key)}</code> · ${num(trunk[0].cost)} cr · ${reach}</div>
+        <div class="tmeta">Build key <code>${esc(t.key)}</code> · ${num(trunk[0].cost)} cr · ${reach}${t.size > 1 ? " · takes 2×2 tiles" : ""}</div>
         <p class="role">${esc(tr.role)}</p>
       </div>
     </div>
     <table class="nodes trunk">
-      ${trunk.map((r) => `<tr><td class="st">Tier ${r.tier}</td><td class="nm">${esc(r.name)}</td><td class="cs">${num(r.cost)}</td><td class="sx">${esc(r.stats)}</td><td class="fx">${esc(r.effect)}</td></tr>`).join("")}
+      ${trunk.map((r) => `<tr><td class="st">${TRUNK[r.tier]}</td><td class="nm">${esc(r.name)}</td><td class="cs">${num(r.cost)}</td><td class="sx">${esc(r.stats)}</td><td class="fx">${esc(r.effect)}</td></tr>`).join("")}
     </table>
     ${branches}
     ${comboText[t.name] ? `<p class="combo"><b>Combinations:</b> ${esc(comboText[t.name])}</p>` : ""}
@@ -245,11 +246,12 @@ table { border-collapse: collapse; width: 100%; }
 <div>
 <h3>Upgrade trees</h3>
 <ul>
-<li><b>Trunk:</b> every tower is built at Tier 1 and upgraded once to Tier 2.</li>
-<li><b>Three branches (A, B, C)</b> open at Tier 2. Each is a <b>specialization</b> (it changes how the tower works), three more upgrades, then a <b>mastery</b>. <code>U</code>, <code>I</code> and <code>O</code> buy the next upgrade on A, B and C; <code>E</code> opens the tree.</li>
+<li><b>Trunk:</b> every tower is built as its <b>Stock</b> model and upgraded once to its <b>Retrofit</b>.</li>
+<li><b>Three branches (A, B, C)</b> open at the Retrofit. Each runs <b>T1 to T4</b>: T1 is the <b>specialization</b> (it changes how the tower works), three more upgrades, then a <b>mastery</b>. <code>U</code>, <code>I</code> and <code>O</code> buy the next upgrade on A, B and C; <code>E</code> opens the tree.</li>
 <li><b>Primary and secondary:</b> you can climb two branches freely, up to two upgrades on each. The first to get its <b>third</b> upgrade becomes the primary and can go on to its mastery; the other is capped where it is. The third branch locks as soon as two are started.</li>
 <li><b>A secondary keeps its full effects,</b> downsides included: its upgrades add their differences on top of the primary. A branch marked <b>changes the attack</b> adds its attack alongside the primary's instead (see each tower's Combinations note).</li>
-<li><b>Masteries</b> need that tower's Mastery research in the Research Lab; one node unlocks all three.</li>
+<li><b>Masteries</b> need that tower's Mastery research in the Research Lab, which needs the rest of its tree first; one node unlocks all three.</li>
+<li>A tower keeps its stock name and colour until its primary locks in at T3. Towers that hit air and ground can be set to prefer one (<code>G</code>). The Scrapyard and Drone Bay take 2×2 tiles.</li>
 </ul>
 <h3>Reading the upgrade tables</h3>
 <ul>

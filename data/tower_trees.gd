@@ -25,7 +25,7 @@ const TREES := {
 				"add": {},
 			},
 			{
-				"name": "Tier 2",
+				"name": "Retrofit",
 				"cost": 70,
 				"blurb": "Twin emitters: harder-hitting bolts, fired faster and a little further.",
 				"set": {
@@ -239,7 +239,7 @@ const TREES := {
 				"add": {},
 			},
 			{
-				"name": "Tier 2",
+				"name": "Retrofit",
 				"cost": 120,
 				"blurb": "Bigger shells: more damage, a wider blast and a little more range.",
 				"set": {
@@ -458,7 +458,7 @@ const TREES := {
 				"add": {},
 			},
 			{
-				"name": "Tier 2",
+				"name": "Retrofit",
 				"cost": 90,
 				"blurb": "A stronger coolant loop: a deeper slow over a wider field.",
 				"set": {
@@ -667,7 +667,7 @@ const TREES := {
 				"add": {},
 			},
 			{
-				"name": "Tier 2",
+				"name": "Retrofit",
 				"cost": 150,
 				"blurb": "Longer rails: much heavier slugs with even more range.",
 				"set": {
@@ -880,7 +880,7 @@ const TREES := {
 				"add": {},
 			},
 			{
-				"name": "Tier 2",
+				"name": "Retrofit",
 				"cost": 160,
 				"blurb": "A stronger coil: harder arcs that jump to one more target.",
 				"set": {
@@ -1085,7 +1085,7 @@ const TREES := {
 				"add": {},
 			},
 			{
-				"name": "Tier 2",
+				"name": "Retrofit",
 				"cost": 150,
 				"blurb": "A brighter emitter: more damage, more range and a higher ramp.",
 				"set": {
@@ -1293,7 +1293,7 @@ const TREES := {
 				"add": {},
 			},
 			{
-				"name": "Tier 2",
+				"name": "Retrofit",
 				"cost": 140,
 				"blurb": "A third launch tube and stronger warheads.",
 				"set": {
@@ -1502,7 +1502,7 @@ const TREES := {
 				"add": {},
 			},
 			{
-				"name": "Tier 2",
+				"name": "Retrofit",
 				"cost": 120,
 				"blurb": "A stronger broadcast over a wider field.",
 				"set": {
@@ -1703,7 +1703,7 @@ const TREES := {
 				"add": {},
 			},
 			{
-				"name": "Tier 2",
+				"name": "Retrofit",
 				"cost": 100,
 				"blurb": "Heavier shells, faster fire and a wider burst.",
 				"set": {
@@ -1915,7 +1915,7 @@ const TREES := {
 				"add": {},
 			},
 			{
-				"name": "Tier 2",
+				"name": "Retrofit",
 				"cost": 90,
 				"blurb": "A bigger dish: a wider field and a stronger mark.",
 				"set": {
@@ -2113,7 +2113,7 @@ const TREES := {
 				"add": {},
 			},
 			{
-				"name": "Tier 2",
+				"name": "Retrofit",
 				"cost": 160,
 				"blurb": "A stronger core: bigger shoves and harder pulses.",
 				"set": {
@@ -2321,7 +2321,7 @@ const TREES := {
 				"add": {},
 			},
 			{
-				"name": "Tier 2",
+				"name": "Retrofit",
 				"cost": 130,
 				"blurb": "Enemies in the field lose crowd-control immunity.",
 				"set": {
@@ -2540,7 +2540,7 @@ const TREES := {
 				"add": {},
 			},
 			{
-				"name": "Tier 2",
+				"name": "Retrofit",
 				"cost": 170,
 				"blurb": "A hotter core: stronger, wider and slightly faster waves.",
 				"set": {
@@ -2748,7 +2748,7 @@ const TREES := {
 				"add": {},
 			},
 			{
-				"name": "Tier 2",
+				"name": "Retrofit",
 				"cost": 170,
 				"blurb": "A bigger hangar: one more drone, and all of them hit harder.",
 				"set": {
@@ -2958,7 +2958,7 @@ const TREES := {
 				"add": {},
 			},
 			{
-				"name": "Tier 2",
+				"name": "Retrofit",
 				"cost": 175,
 				"blurb": "A second crusher line more than doubles the payout.",
 				"set": {

@@ -132,7 +132,7 @@ func refresh(_delta: float) -> void:
 	if w.ability_target == "meteor":
 		key = "meteor"
 	elif t != null:
-		key = "t:%d:%d:%s:%s:%d:%.2f%.2f%.2f%.2f%.2f" % [t.get_instance_id(), t.trunk, str(t.depth), t.mastered, t.mode, t.buff_dmg, t.buff_rate, t.buff_range, t.discount, t.refund_field]
+		key = "t:%d:%d:%s:%s:%d:%d:%.2f%.2f%.2f%.2f%.2f" % [t.get_instance_id(), t.trunk, str(t.depth), t.mastered, t.mode, t.priority, t.buff_dmg, t.buff_rate, t.buff_range, t.discount, t.refund_field]
 	elif build != "":
 		key = "b:" + build
 	elif w.hover_enemy != null and w.hover_enemy.alive:
@@ -195,7 +195,7 @@ func _rebuild(key: String) -> void:
 		_tile_card(w.hover_cell)
 	elif key.begins_with("h:"):
 		var ht = g.tower_at[w.hover_cell]
-		_hint(["%s (tier %d): %d kills." % [ht.display_name(), ht.tier, ht.kills], "Click to select it."])
+		_hint(["%s: %d kills." % [ht.display_name(), ht.kills], "Click to select it."])
 	else:
 		_hint(["B  open the shop", "Space  launch the round", "Click a tower for its details and upgrades", "Esc  menu"])
 
@@ -280,15 +280,17 @@ func _tower_card(t) -> void:
 	var type: String = t.type
 	var tier: int = t.tier
 	var spec: String = t.spec
-	var acc: Color = Draw.accent(type, spec)
-	var icon := DrawControl.new(func(ci): Draw.tower(ci, type, tier, ci.size / 2.0, -PI / 2.0, 1.15, Time.get_ticks_msec() / 1000.0, 0.0, spec), Vector2(58, 58), true)
+	# Name and colour stay stock until the primary locks in; the model already shows the branch.
+	var shown: String = t.shown_spec
+	var acc: Color = Draw.accent(type, shown)
+	var icon := DrawControl.new(func(ci): Draw.tower(ci, type, tier, ci.size / 2.0, -PI / 2.0, 1.15, Time.get_ticks_msec() / 1000.0, 0.0, spec, shown), Vector2(58, 58), true)
 	icon.position = Vector2(0, 18)
 	ctx.add_child(icon)
 	var id_box := UiKit.vbox(0)
 	id_box.position = Vector2(64, 4)
 	id_box.size = Vector2(250, 86)
-	id_box.add_child(UiKit.label(t.display_name().to_upper(), 20, acc if spec != "" else UiKit.TEXT))
-	var sub := "Tier %d  ·  %s" % [t.trunk, d.name] if t.started.is_empty() else "%s  ·  %s" % [" + ".join(PackedStringArray(t.started.map(func(b): return "%s%d" % [b.to_upper(), t.depth[b]]))), d.name]
+	id_box.add_child(UiKit.label(t.display_name().to_upper(), 20, acc if shown != "" else UiKit.TEXT))
+	var sub := "%s  ·  %s" % [Tower.trunk_name(t.trunk), d.name] if t.started.is_empty() else "%s  ·  %s" % [" + ".join(PackedStringArray(t.started.map(func(b): return "%s·T%d" % [b.to_upper(), t.depth[b]]))), d.name]
 	if tier >= Tower.MASTERY_TIER:
 		sub = "MASTERY  ·  %s" % d.name
 	id_box.add_child(UiKit.label(sub, 12, UiKit.GOLD if tier >= 3 else UiKit.DIM))
@@ -320,12 +322,12 @@ func _tower_card(t) -> void:
 	var strip := UiKit.hbox(5)
 	strip.position = Vector2(326, 10)
 	strip.add_child(UiKit.label("PATH", 11, UiKit.DIM))
-	strip.add_child(_chip("T1", "own"))
+	strip.add_child(_chip(Tower.trunk_name(1), "own"))
 	strip.add_child(_arrow())
 	if t.trunk < 2:
-		strip.add_child(_chip("T2 · %d cr" % t.upgrade_cost(), "next"))
+		strip.add_child(_chip("%s · %d cr" % [Tower.trunk_name(2), t.upgrade_cost()], "next"))
 	else:
-		strip.add_child(_chip("T2", "own"))
+		strip.add_child(_chip(Tower.trunk_name(2), "own"))
 	for b in Tower.BRANCHES:
 		strip.add_child(_arrow())
 		var br: Dictionary = t.branch(b)
@@ -338,7 +340,7 @@ func _tower_card(t) -> void:
 			state = "cur"
 		elif dep > 0:
 			var cap := Tower.SECONDARY_CAP if (t.locked_in() and b != t.primary()) else Tower.BRANCH_STEPS
-			label += " %d/%d" % [dep, cap]
+			label += " T%d/%d" % [dep, cap]
 			state = "cur" if b == t.primary() else "own"
 		elif t.trunk >= 2 and why == "":
 			state = "next"
@@ -352,7 +354,7 @@ func _tower_card(t) -> void:
 	row.position = Vector2(326, 44)
 	if t.trunk < 2:
 		var c1: int = t.upgrade_cost()
-		var up := UiKit.button("Upgrade to tier 2  ·  %d cr  [U]" % c1, Callable(screen, "upgrade_selected").bind(0), Vector2(0, 34))
+		var up := UiKit.button("%s  ·  %d cr  [U]" % [Tower.trunk_name(2), c1], Callable(screen, "upgrade_selected").bind(0), Vector2(0, 34))
 		row.add_child(up)
 		_cost_buttons.append([up, c1])
 	else:
@@ -380,6 +382,10 @@ func _tower_card(t) -> void:
 		var tb := UiKit.button("Target: %s  [T]" % Tower.MODE_NAMES[t.mode], Callable(screen, "cycle_target"), Vector2(0, 34))
 		tb.tooltip_text = "Which enemy in range this tower attacks"
 		row.add_child(tb)
+	if screen.has_priority(t):
+		var pb := UiKit.button("Priority: %s  [G]" % Tower.PRIORITY_NAMES[t.priority], Callable(screen, "cycle_priority"), Vector2(0, 34))
+		pb.tooltip_text = "Prefer flyers or ground enemies when both are in range (it still shoots the other kind when that's all there is)"
+		row.add_child(pb)
 	_sell_btn = UiKit.button("Sell +%d  [X]" % g.sell_value(t), Callable(screen, "sell_selected"), Vector2(0, 34))
 	row.add_child(_sell_btn)
 	for b in row.get_children():

@@ -46,6 +46,8 @@ Both the exe and the source build share the same saves and profile.
 - **Settings:** Fullscreen, or a window size. Auto (the default) opens the largest 16:9 window that
   fits 90% of the screen; the fixed choices run from 1280 × 720 to 3840 × 2160, never larger than the
   screen. The window can also be resized freely by dragging its edges.
+- **Graphics options** (Settings): VSync, a frame cap (30 / 60 / 120 / 144 / 240 or none), visual effects level
+  (Low / Medium / High thins out particles), screen shake on or off, and an FPS counter (also F3).
 - **Title screen:** a drawn scene rather than a live game. It shows the Bastion core on a planet's
   horizon, a ridge of mastered towers firing up at a Leviathan and its escorts, and the menu.
 
@@ -71,10 +73,13 @@ godot_console --headless --path . --export-release "Linux" build/linux/BastionLi
 | Left-click rubble / a switch gate | Clear the rubble (40 cr) / switch which branch arriving enemies take |
 | Left-click a tower | Select it: the bottom bar shows its tier, kills, upgrade path, actions and any boosts (pylon, high ground, power node, Supply Depot) as percentages. Double-click opens its upgrade tree |
 | Right-click | Cancel build mode, targeting or selection |
-| `U` | Upgrade the selected tower to tier 2, then buy the next upgrade on branch A (the mastery after its 4th upgrade) |
+| `U` | Retrofit the selected tower, then buy the next upgrade on branch A (the mastery after its T4) |
 | `I` / `O` | Buy the next upgrade on branch B / branch C |
 | `X` | Sell the selected tower (refunds 70% of everything spent on it) |
 | `T` | Cycle the selected tower's targeting: First, Last, Strongest, Closest |
+| `G` | Target priority for towers that hit air and ground: Any, Air or Ground (it still shoots the other kind when that's all that's in range) |
+| Mouse wheel, middle-drag, arrow keys, `Home` | Zoom the battlefield (up to 2.5×), pan it, reset the view |
+| `F3` | Show or hide the FPS counter |
 | `E` | Upgrade tree for the selected tower: the trunk, all three branches and their masteries, with before/after stats; click a lit node to buy it |
 | `R` | Research Lab in battle (pauses; purchases apply from your next run) |
 | `N` or click NEXT | Intel on the next round: enemies, counts, traits, HP and speed scale, bonuses |
@@ -91,10 +96,13 @@ godot_console --headless --path . --export-release "Linux" build/linux/BastionLi
 Every tower has the same tree shape (the full design, with every node's stats and description,
 lives in `design/upgrade_trees.md` and its rendered view `design/upgrade_trees.html`):
 
-- **Trunk:** tier 1 (the build) and tier 2.
-- **Three branches (A, B, C)** from tier 2, each four upgrades plus a mastery. A branch's first
-  upgrade is its **specialization**, which changes how the tower works; the mastery needs that
-  tower's Mastery research.
+- **Trunk:** the **Stock** tower as built, then its **Retrofit**.
+- **Three branches (A, B, C)** from the Retrofit, each **T1 to T4** plus a mastery. T1 is the branch's
+  **specialization**, which changes how the tower works; the mastery needs that tower's Mastery research.
+- A tower keeps its stock name and colour until its primary locks in at T3 (its model already shows the
+  branch from T1).
+- The **Scrapyard and Drone Bay take 2×2 tiles**; the build preview centres the block on the cursor. A
+  2×2 tower gets a high-ground or power-node bonus if any of its four tiles has one.
 - **A primary and a secondary.** You can climb two branches freely until one of them gets its
   **3rd** upgrade. That branch becomes the primary; the other is capped where it is (at most 2),
   and the third branch is locked as soon as two are started.
@@ -152,10 +160,14 @@ A mastered tower has a gold ring around its pad.
 
 ### Research Lab
 
-Open it from the main menu (or the end-of-run screen). Every tree is a small diamond: a root
-node, two branch nodes, and a capstone that needs either branch. Research is bought with research
+Open it from the main menu (or the end-of-run screen). The trees sit side by side in a carousel: Left / Right or
+the mouse wheel move to the previous or next tree (the focused one is centred and full size), Up / Down
+pick a node in it, and Enter researches it. Every tree is a small diamond: a root
+node, two branch nodes, and a Mastery capstone that needs everything else in its tree. Research is bought with research
 points (RP) and applies to every run you start afterwards. A saved run keeps the research it
 started with. Reset Research refunds everything for free.
+Since v3.4 a Mastery needs every other node in its tree. A profile that bought a Mastery with only one
+branch gets that Mastery's RP refunded on load, to spend again once both branches are done.
 
 - **Earning RP.** RP is worked out from your records, so it can't be farmed or lost:
   - each medal pays its mode's RP (Easy 1, Medium 2, Hard 3, Nightmare 4, Cataclysm 5)
@@ -326,6 +338,9 @@ Hovering any special tile explains it in the bottom bar.
   - v8 (game v3.1) stores each tower's upgrade state as trunk, per-branch depth, the order the branches
     were started, and whether it's mastered. A v7 tier-3 tower becomes the first upgrade of its branch;
     a tier-4 tower is mastered at the end of that branch.
+  - v9 (game v3.4) made the Scrapyard and Drone Bay 2×2 (a tower's col/row is its top-left tile) and
+    added each tower's target priority. Loading an older save keeps a 1×1 Scrapyard or Drone Bay if its
+    2×2 block fits and refunds it otherwise.
 - `profile.json` in the same folder holds:
   - per-sector, per-mode records (best round, medal, best endless round)
   - legacy RP carried over from pre-v3.0 records

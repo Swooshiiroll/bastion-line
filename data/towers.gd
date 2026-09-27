@@ -1,5 +1,6 @@
 extends RefCounted
-## Tower definitions: name, blurb and flags (air, ground, support, sensor, economy, beam, pulse, drones).
+## Tower definitions: name, blurb and flags (air, ground, support, sensor, economy, beam, pulse, drones),
+## plus `size` (tiles per side, default 1; the Scrapyard and Drone Bay are 2x2).
 ## Upgrade trees and their numbers live in data/tower_trees.gd (generated from
 ## design/upgrade_trees.md). The `tiers` and `specs` here only supply values the design file doesn't
 ## list (projectile speeds, chain falloff, laser ramp time...) for the original branches A and B.
@@ -353,6 +354,7 @@ const TOWERS := {
 	},
 	"drones": {
 		"name": "Drone Bay",
+		"size": 2,
 		"blurb": "Launches combat drones that hunt enemies anywhere on the map.",
 		"air": true,
 		"drones": true,
@@ -360,6 +362,7 @@ const TOWERS := {
 	},
 	"scrap": {
 		"name": "Scrapyard",
+		"size": 2,
 		"blurb": "Economy. Doesn't attack: pays out credits every time a round is cleared, and its branches add kill credits or cheaper upgrades in its field.",
 		"air": false,
 		"ground": false,

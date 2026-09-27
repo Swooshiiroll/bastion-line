@@ -21,6 +21,8 @@ var next_btn: Button
 var next_box: HBoxContainer
 var speed_btn: Button
 var auto_btn: Button
+var fps_label: Label
+
 ## Enemy types shown in the NEXT strip before it collapses the rest into "+N".
 const NEXT_TYPES := 4
 
@@ -85,6 +87,10 @@ func _ready() -> void:
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(spacer)
+	fps_label = UiKit.label("", 12, UiKit.DIM)
+	fps_label.custom_minimum_size = Vector2(56, 0)
+	fps_label.tooltip_text = "Frames per second (F3 or Settings to hide)"
+	row.add_child(fps_label)
 	speed_btn = UiKit.button("", Callable(screen, "toggle_speed"), Vector2(58, 30))
 	speed_btn.tooltip_text = "Game speed"
 	auto_btn = UiKit.button("", Callable(screen, "toggle_auto"), Vector2(96, 30))
@@ -116,6 +122,9 @@ func _icon_value(fn: Callable, which: String) -> HBoxContainer:
 
 func refresh(_delta: float) -> void:
 	var g = screen.game
+	fps_label.visible = bool(SaveManager.setting("show_fps"))
+	if fps_label.visible:
+		fps_label.text = "%d FPS" % roundi(Engine.get_frames_per_second())
 	wave_label.text = ("ROUND %d  ENDLESS" % g.wave) if g.endless else ("ROUND %d / %d" % [g.wave, g.final_round()])
 	lives_label.text = str(g.lives)
 	lives_label.modulate = Color(1, 1, 1).lerp(Color(1, 0.3, 0.3), clampf(hud.lives_flash / 0.3, 0.0, 1.0))

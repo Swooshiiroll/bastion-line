@@ -15,11 +15,19 @@ const DEFAULT_SETTINGS := {
 	"damage_numbers": true,
 	"fullscreen": false,
 	"window_size": "auto",
+	"vsync": true,
+	"max_fps": 0,
+	"vfx": 1.0,
+	"screen_shake": true,
+	"show_fps": false,
 	"difficulty": "medium",
 }
 ## Window sizes offered in Settings ("auto" fits the screen). The game fills any window shape, so
 ## these are only starting points: the window can also be resized freely.
 const WINDOW_SIZES := ["auto", "1280x720", "1600x900", "1920x1080", "2560x1440", "3840x2160"]
+## Frame caps offered in Settings (0 = no cap), and the effects levels (particle multipliers).
+const FPS_CAPS := [0, 30, 60, 120, 144, 240]
+const VFX_LEVELS := [["Low", 0.4], ["Medium", 0.7], ["High", 1.0]]
 const BUS_SFX := "SFX"
 const BUS_MUSIC := "Music"
 
@@ -234,8 +242,10 @@ func apply_settings(window_changed := true) -> void:
 	ensure_buses()
 	_set_bus_volume(BUS_SFX, float(setting("sfx_volume")))
 	_set_bus_volume(BUS_MUSIC, float(setting("music_volume")))
+	Engine.max_fps = maxi(0, int(setting("max_fps")))
 	if DisplayServer.get_name() == "headless":
 		return
+	DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_ENABLED if bool(setting("vsync")) else DisplayServer.VSYNC_DISABLED)
 	var want_full := bool(setting("fullscreen"))
 	var mode := DisplayServer.window_get_mode()
 	var is_full := mode == DisplayServer.WINDOW_MODE_FULLSCREEN or mode == DisplayServer.WINDOW_MODE_EXCLUSIVE_FULLSCREEN

@@ -66,7 +66,7 @@ func _write_data() -> void:
 		towers.append({
 			"id": type, "name": TowerTrees.TREES[type].name, "key": TowerTrees.TREES[type].key,
 			"color": Draw.accent(type).to_html(false), "air": bool(td.get("air", false)),
-			"ground": bool(td.get("ground", true)), "support": bool(td.get("support", false)), "economy": bool(td.get("economy", false)), "branches": branches,
+			"ground": bool(td.get("ground", true)), "support": bool(td.get("support", false)), "economy": bool(td.get("economy", false)), "size": int(td.get("size", 1)), "branches": branches,
 		})
 	var modes: Array = []
 	for m in Difficulty.ORDER:

@@ -122,10 +122,14 @@ static func spent(owned: Array) -> int:
 	return n
 
 
+## A node needs any one of its `requires`, except a Mastery, which needs every node before it in
+## its tree.
 static func prerequisites_met(owned: Array, id: String) -> bool:
 	var req: Array = Data.NODES[id].requires
 	if req.is_empty():
 		return true
+	if bool(Data.NODES[id].effects.get("mastery", false)):
+		return req.all(func(r): return owned.has(r))
 	for r in req:
 		if owned.has(r):
 			return true
@@ -139,6 +143,8 @@ static func buy_block_reason(owned: Array, id: String, available: int) -> String
 	if owned.has(id):
 		return "Already researched."
 	if not prerequisites_met(owned, id):
+		if bool(Data.NODES[id].effects.get("mastery", false)):
+			return "Research everything else in this tree first."
 		return "Research a connected node above it first."
 	if available < int(Data.NODES[id].cost):
 		return "Needs %d research points." % int(Data.NODES[id].cost)

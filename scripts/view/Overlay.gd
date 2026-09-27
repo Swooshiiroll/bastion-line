@@ -2,6 +2,7 @@ extends Node2D
 ## Interaction overlay: buildable-tile grid, placement preview with range, selection and hover rings.
 
 const Grid = preload("res://scripts/core/Grid.gd")
+const Game = preload("res://scripts/core/Game.gd")
 const Draw = preload("res://scripts/view/Draw.gd")
 const Towers = preload("res://data/towers.gd")
 const DrawNode = preload("res://scripts/view/DrawNode.gd")
@@ -52,22 +53,24 @@ func _draw() -> void:
 				elif g.has_rubble(c):
 					draw_rect(Grid.cell_rect(c).grow(-2.0), Color(1.0, 0.5, 0.25, 0.08))
 		if world.mouse_in_field:
-			var cell: Vector2i = world.hover_cell
+			var cell: Vector2i = world.build_anchor()
 			var ok: bool = g.placement_error(build, cell) == ""
 			var col := OK_COLOR if ok else BAD_COLOR
+			var site: String = g.footprint_site(build, cell)
+			var ctr := Game.footprint_center(build, cell)
 			var r: float = float(g.level_stats(build, 1).get("range", 0.0))
-			if g.grid.tile_at(cell) == "H":
+			if site == "H":
 				r *= 1.0 + Tower.SITE_RANGE
-			_range(Grid.cell_center(cell), r, col)
-			draw_rect(Grid.cell_rect(cell).grow(-1.0), Color(col, 0.9), false, 2.0)
-			if g.has_rubble(cell):
-				_tag(Grid.cell_center(cell) + Vector2(0, -30), "clear first: %d cr" % g.rubble_cost(), BAD_COLOR)
-			elif ok and g.grid.tile_at(cell) in ["H", "P"]:
-				_tag(Grid.cell_center(cell) + Vector2(0, -30), "+15% range" if g.grid.tile_at(cell) == "H" else "+15% damage", Color(1.0, 0.85, 0.4))
+			_range(ctr, r, col)
+			draw_rect(_footprint_rect(build, cell).grow(-1.0), Color(col, 0.9), false, 2.0)
+			if Game.footprint(build, cell).any(func(c): return g.has_rubble(c)):
+				_tag(ctr + Vector2(0, -30.0 * Game.size_of(build)), "clear first: %d cr" % g.rubble_cost(), BAD_COLOR)
+			elif ok and site != "":
+				_tag(ctr + Vector2(0, -30.0 * Game.size_of(build)), "+15% range" if site == "H" else "+15% damage", Color(1.0, 0.85, 0.4))
 	var sel = world.selected_tower
 	if sel != null:
 		_range(sel.pos, _reach(sel), SELECT_COLOR)
-		draw_rect(Grid.cell_rect(sel.cell).grow(-1.0), Color(SELECT_COLOR, 0.9), false, 2.0)
+		draw_rect(_footprint_rect(sel.type, sel.cell).grow(-1.0), Color(SELECT_COLOR, 0.9), false, 2.0)
 	elif build == "" and world.mouse_in_field:
 		var hc: Vector2i = world.hover_cell
 		if g.tower_at.has(hc):
@@ -127,6 +130,17 @@ func _range(center: Vector2, r: float, col: Color) -> void:
 	draw_arc(center, r, 0.0, TAU, 72, Color(col, 0.75), 2.0, true)
 
 
+## The rectangle a tower of `type` at `anchor` covers.
+static func _footprint_rect(type: String, anchor: Vector2i) -> Rect2:
+	return Rect2(Grid.cell_rect(anchor).position, Vector2.ONE * Grid.TILE * float(Game.size_of(type)))
+
+
+## Drawing scale for a tower of `size` tiles per side.
+static func tower_scale(size: int) -> float:
+	return 1.0 if size <= 1 else 1.8
+
+
 func _draw_ghost(ci: CanvasItem) -> void:
 	if world.interactive and world.build_type != "" and world.mouse_in_field:
-		Draw.tower(ci, world.build_type, 1, Grid.cell_center(world.hover_cell), -PI / 2.0, 1.0, world.anim_t, 0.0)
+		var a: Vector2i = world.build_anchor()
+		Draw.tower(ci, world.build_type, 1, Game.footprint_center(world.build_type, a), -PI / 2.0, tower_scale(Game.size_of(world.build_type)), world.anim_t, 0.0)

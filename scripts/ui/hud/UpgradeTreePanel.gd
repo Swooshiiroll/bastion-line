@@ -144,7 +144,7 @@ func _state(id: String) -> String:
 		if why == "":
 			return "next" if gold >= t.upgrade_cost(b) else "short"
 		return "blocked"
-	if t.trunk >= 2 and t.block_reason(b) != "" and not t.block_reason(b).begins_with("Upgrade"):
+	if t.trunk >= 2 and t.block_reason(b) != "" and not t.block_reason(b).begins_with("Retrofit"):
 		return "blocked"
 	return "future"
 
@@ -253,11 +253,11 @@ func _refresh_status() -> void:
 		var text := ""
 		var col := _branch_color(b)
 		if t.locked_in() and b == t.primary():
-			text = "PRIMARY · %s %d/4%s" % [b.to_upper(), d, " + M" if t.mastered else ""]
+			text = "PRIMARY · %s T%d%s" % [b.to_upper(), d, " + MASTERY" if t.mastered else ""]
 		elif t.locked_in() and d > 0:
-			text = "SECONDARY · %s %d/2" % [b.to_upper(), d]
+			text = "SECONDARY · %s T%d (max T2)" % [b.to_upper(), d]
 		elif d > 0:
-			text = "%s %d/4" % [b.to_upper(), d]
+			text = "%s T%d" % [b.to_upper(), d]
 		elif t.started.size() >= 2:
 			text = "%s LOCKED" % b.to_upper()
 			col = Color(0.35, 0.42, 0.5)
@@ -288,7 +288,8 @@ func _label(id: String) -> void:
 	var st := _state(id)
 	var b: String = _parse(id)[0]
 	var name_col := (_branch_color(b) if b != "" else UiKit.TEXT) if st in ["owned", "next", "short"] else Color(0.35, 0.42, 0.5)
-	var n := UiKit.label(str(_node(id).name), 12, name_col, HORIZONTAL_ALIGNMENT_CENTER)
+	var node_name := Tower.trunk_name(int(_parse(id)[1])) if b == "" else str(_node(id).name)
+	var n := UiKit.label(node_name, 12, name_col, HORIZONTAL_ALIGNMENT_CENTER)
 	n.custom_minimum_size = Vector2(156, 0)
 	n.clip_text = true
 	lab.add_child(n)
@@ -331,9 +332,9 @@ func _show_detail(id: String) -> void:
 	var nd := _node(id)
 	var left := UiKit.vbox(4)
 	left.size = Vector2(520, 150)
-	var kind := "TIER %d" % k
+	var kind := "TRUNK  ·  %s" % Tower.trunk_name(k).to_upper()
 	if b != "":
-		kind = "BRANCH %s  ·  %s" % [b.to_upper(), "MASTERY" if k == 5 else ("SPECIALIZATION" if k == 1 else "UPGRADE %d OF 4" % k)]
+		kind = "BRANCH %s  ·  %s" % [b.to_upper(), "MASTERY" if k == 5 else ("T1  ·  SPECIALIZATION" if k == 1 else "T%d" % k)]
 	var head := UiKit.hbox(12)
 	head.add_child(UiKit.label(str(nd.name).to_upper(), 17, _branch_color(b) if b != "" else Draw.accent(tower.type)))
 	head.add_child(UiKit.label(kind, 11, UiKit.DIM))

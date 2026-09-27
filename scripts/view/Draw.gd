@@ -187,8 +187,10 @@ static func arc_segments(ci: CanvasItem, c: Vector2, r: float, count: int, gap: 
 
 # --- Towers ----------------------------------------------------------------------------------
 
-static func tower(ci: CanvasItem, type: String, tier: int, c: Vector2, aim: float, s := 1.0, t := 0.0, flash := 0.0, spec := "") -> void:
-	var acc := accent(type, spec)
+## `spec` shapes the model; `tint_spec` (default: the same) picks its accent colour, so a tower can
+## show branch details while keeping its stock colour until its primary locks in.
+static func tower(ci: CanvasItem, type: String, tier: int, c: Vector2, aim: float, s := 1.0, t := 0.0, flash := 0.0, spec := "", tint_spec := "~") -> void:
+	var acc := accent(type, spec if tint_spec == "~" else tint_spec)
 	if tier >= 4:
 		mastery_ring(ci, c, s, acc, t)
 	_pad(ci, c, s, acc, tier, t)

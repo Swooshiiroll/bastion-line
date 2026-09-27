@@ -27,7 +27,7 @@ func _draw() -> void:
 		if tw.target != null and tw.target.alive:
 			cur = lerp_angle(cur, (tw.target.pos - tw.pos).angle(), 0.35)
 		_aim[key] = cur
-		Draw.tower(self, tw.type, tw.tier, tw.pos, cur, 1.0, t + float(tw.cell.x) * 0.3, tw.fire_flash, tw.spec)
+		Draw.tower(self, tw.type, tw.tier, tw.pos, cur, 1.0 if tw.size <= 1 else 1.8, t + float(tw.cell.x) * 0.3, tw.fire_flash, tw.spec, tw.shown_spec)
 		if tw.disabled > 0.0:
 			Draw.tower_offline(self, tw.pos, t)
 		if tw.buff_dmg > 0.0:

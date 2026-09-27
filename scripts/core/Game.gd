@@ -19,7 +19,7 @@ enum State { BUILD, WAVE, GAMEOVER }
 
 const TICK := 1.0 / 60.0
 const SELL_REFUND := 0.7
-const SAVE_VERSION := 8
+const SAVE_VERSION := 9
 ## Credits every run starts with, on every sector and mode (before research).
 const START_GOLD := 500
 const AUTO_START_DELAY := 5.0
@@ -258,6 +258,32 @@ static func site_of(tile: String) -> String:
 	return tile if tile in ["H", "P"] else ""
 
 
+## Tiles along each side a tower type takes (1, or 2 for the Scrapyard and Drone Bay).
+static func size_of(type: String) -> int:
+	return int(Towers.TOWERS[type].get("size", 1))
+
+
+## The tiles a tower of `type` with its top-left tile at `anchor` covers.
+static func footprint(type: String, anchor: Vector2i) -> Array:
+	var out: Array = []
+	var n := size_of(type)
+	for dy in n:
+		for dx in n:
+			out.append(anchor + Vector2i(dx, dy))
+	return out
+
+
+## The centre of that footprint, where the tower stands.
+static func footprint_center(type: String, anchor: Vector2i) -> Vector2:
+	return Grid.cell_rect(anchor).position + Vector2.ONE * Grid.TILE * float(size_of(type)) / 2.0
+
+
+## A power node anywhere under the footprint wins, then high ground.
+func footprint_site(type: String, anchor: Vector2i) -> String:
+	var tiles: Array = footprint(type, anchor).map(func(c): return grid.tile_at(c))
+	return "P" if tiles.has("P") else ("H" if tiles.has("H") else "")
+
+
 # --- Switch gates ----------------------------------------------------------------------------
 
 func gate_label(gi: int) -> String:
@@ -309,16 +335,17 @@ func _pick_route(gi: int) -> int:
 func placement_error(type: String, cell: Vector2i) -> String:
 	if is_over():
 		return "The battle is over"
-	if not Grid.in_bounds(cell):
-		return "Out of bounds"
-	if grid.path_cells.has(cell):
-		return "Can't build on the lane"
-	if has_rubble(cell):
-		return "Rubble: clear it first (%d cr)" % rubble_cost()
-	if not is_buildable(cell):
-		return "That tile is blocked"
-	if tower_at.has(cell):
-		return "Tile already has a tower"
+	for c in footprint(type, cell):
+		if not Grid.in_bounds(c):
+			return "Out of bounds"
+		if grid.path_cells.has(c):
+			return "Can't build on the lane"
+		if has_rubble(c):
+			return "Rubble: clear it first (%d cr)" % rubble_cost()
+		if not is_buildable(c):
+			return "That tile is blocked"
+		if tower_at.has(c):
+			return "Tile already has a tower"
 	if gold < tower_cost(type):
 		return "Not enough credits"
 	return ""
@@ -330,11 +357,12 @@ func place_tower(type: String, cell: Vector2i):
 	if placement_error(type, cell) != "":
 		return null
 	var t = Tower.new()
-	t.setup(type, cell, Grid.cell_center(cell), tower_mods[type])
-	t.site = site_of(grid.tile_at(cell))
+	t.setup(type, cell, footprint_center(type, cell), tower_mods[type])
+	t.site = footprint_site(type, cell)
 	gold -= t.spent
 	towers.append(t)
-	tower_at[cell] = t
+	for c in footprint(type, cell):
+		tower_at[c] = t
 	stats["towers_built"] += 1
 	_recompute_buffs()
 	_emit({"type": "build", "pos": t.pos, "tower": type})
@@ -373,7 +401,8 @@ func sell_tower(t) -> int:
 	var value := sell_value(t)
 	gold += value
 	towers.erase(t)
-	tower_at.erase(t.cell)
+	for c in footprint(t.type, t.cell):
+		tower_at.erase(c)
 	_recompute_buffs()
 	_emit({"type": "sell", "pos": t.pos, "value": value})
 	return value
@@ -381,6 +410,11 @@ func sell_tower(t) -> int:
 
 func cycle_mode(t) -> void:
 	t.mode = (t.mode + 1) % Tower.MODE_NAMES.size()
+
+
+## Any -> Air -> Ground. Only matters for towers that hit both.
+func cycle_priority(t) -> void:
+	t.priority = (t.priority + 1) % Tower.PRIORITY_NAMES.size()
 
 
 func start_wave() -> bool:
@@ -571,10 +605,20 @@ func damage_enemy(e, amount: float, pierce: bool, source, flash := true, bypass_
 
 ## Best target in range for the tower's targeting mode, skipping anything in `exclude`.
 func pick_target(t, exclude: Array = []):
-	var r: float = t.get_range()
-	var r2 := r * r
 	var air: bool = t.hits_air()
 	var ground: bool = t.hits_ground()
+	# A tower that hits both can prefer one kind; with none of that kind in range it takes the other.
+	if air and ground and t.priority != 0:
+		var want_air: bool = t.priority == 1
+		var pick = _pick_target(t, exclude, want_air, not want_air)
+		if pick != null:
+			return pick
+	return _pick_target(t, exclude, air, ground)
+
+
+func _pick_target(t, exclude: Array, air: bool, ground: bool):
+	var r: float = t.get_range()
+	var r2 := r * r
 	var best = null
 	var best_score := -INF
 	for e in enemies:
@@ -1165,6 +1209,8 @@ func _drone_target(t, s: Dictionary, bomber: bool):
 			score += 10.0
 		if interceptor and e.flying:
 			score += 5.0
+		if t.priority != 0 and e.flying == (t.priority == 1):
+			score += 8.0
 		score -= float(taken.get(e, 0)) * 3.0
 		if score > best_score:
 			best_score = score
@@ -1751,7 +1797,7 @@ func to_save() -> Dictionary:
 	for t in towers:
 		tl.append({
 			"type": t.type, "col": t.cell.x, "row": t.cell.y, "trunk": t.trunk, "depth": t.depth.duplicate(),
-			"started": t.started.duplicate(), "mastery": t.mastered, "mode": t.mode, "kills": t.kills, "spent": t.spent,
+			"started": t.started.duplicate(), "mastery": t.mastered, "mode": t.mode, "priority": t.priority, "kills": t.kills, "spent": t.spent,
 		})
 	return {
 		"version": SAVE_VERSION,
@@ -1862,21 +1908,28 @@ func apply_save(data: Dictionary) -> String:
 		if not Towers.TOWERS.has(type):
 			return "Unknown tower type '%s'." % type
 		var cell := Vector2i(int(entry.get("col", -1)), int(entry.get("row", -1)))
+		var tiles := footprint(type, cell)
+		if size_of(type) > 1 and tiles.any(func(c): return not is_buildable(c) or tower_at.has(c)):
+			# A Scrapyard or Drone Bay from before they were 2x2 whose footprint doesn't fit: refund it.
+			gold += maxi(0, int(entry.get("spent", 0)))
+			continue
 		if not is_buildable(cell):
 			return "Tower at %s is not on a buildable tile." % cell
 		if tower_at.has(cell):
 			return "Two towers share tile %s." % cell
 		var t = Tower.new()
-		t.setup(type, cell, Grid.cell_center(cell), tower_mods[type])
-		t.site = site_of(grid.tile_at(cell))
+		t.setup(type, cell, footprint_center(type, cell), tower_mods[type])
+		t.site = footprint_site(type, cell)
 		var err := _restore_upgrades(t, entry)
 		if err != "":
 			return "Tower at %s: %s" % [cell, err]
 		t.mode = clampi(int(entry.get("mode", 0)), 0, Tower.MODE_NAMES.size() - 1)
+		t.priority = clampi(int(entry.get("priority", 0)), 0, Tower.PRIORITY_NAMES.size() - 1)
 		t.kills = maxi(0, int(entry.get("kills", 0)))
 		t.spent = maxi(0, int(entry.get("spent", t.spent)))
 		towers.append(t)
-		tower_at[cell] = t
+		for c in tiles:
+			tower_at[c] = t
 	_recompute_buffs()
 	state = State.BUILD
 	return ""
