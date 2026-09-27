@@ -39,11 +39,11 @@ func _ready() -> void:
 	top.hud = self
 	top.screen = screen
 	root.add_child(top)
-	start_btn = top.start_btn
 	bottom = BottomBar.new()
 	bottom.hud = self
 	bottom.screen = screen
 	root.add_child(bottom)
+	start_btn = bottom.start_btn
 	# Toasts sit under the pop-outs so they never cover a pop-out's title strip.
 	toasts = UiKit.vbox(4)
 	toasts.position = FIELD.position + Vector2(12, 10)
@@ -112,7 +112,7 @@ func close(kind: String) -> void:
 		return
 	var p = popouts[kind]
 	popouts.erase(kind)
-	p.queue_free()
+	p.dismiss()
 	if kind == "shop" and not is_open("shop"):
 		hovered_build = ""
 	_dim.visible = is_open("research")

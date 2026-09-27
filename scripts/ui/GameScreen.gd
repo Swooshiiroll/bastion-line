@@ -303,6 +303,10 @@ func _on_field_clicked(cell: Vector2i, button: int, shift: bool, pos: Vector2) -
 		return
 	if button != MOUSE_BUTTON_LEFT:
 		return
+	# Clicking the field with nothing picked up closes the shop (the click still selects a tower).
+	if hud.is_open("shop") and world.build_type == "" and world.ability_target == "":
+		hud.close("shop")
+		shop_return = false
 	if world.ability_target == "meteor":
 		if game.cast_meteor(pos):
 			world.ability_target = ""
@@ -463,7 +467,7 @@ func _show_modal(c: Control) -> void:
 
 func _close_modal() -> void:
 	if modal != null:
-		modal.queue_free()
+		UiKit.dismiss(modal)
 		modal = null
 
 
@@ -501,6 +505,16 @@ func quit_to_menu() -> void:
 
 func restart() -> void:
 	app.start_game(game.map_id, game.difficulty)
+
+
+## Pause-menu restart: asks first, since this run's progress is lost.
+func confirm_restart() -> void:
+	var dd: Dictionary = Difficulty.DIFFICULTIES[game.difficulty]
+	_show_modal(ConfirmDialog.new(
+		"Restart %s on %s from round 1?\nThis run's progress is lost." % [game.map_def.name, dd.name],
+		func(): restart(),
+		func(): open_pause(),
+		"Restart", "Keep playing"))
 
 
 func map_select() -> void:

@@ -401,6 +401,7 @@ func _interaction_checks() -> void:
 	await _key(KEY_ESCAPE)
 
 	var start_btn: Button = screen.hud.start_btn
+	fails += _expect(start_btn.get_parent() == screen.hud.bottom and start_btn.get_global_rect().position.y > 800.0, "the Launch button sits in the bottom bar")
 	await _click(start_btn.get_global_rect().get_center())
 	fails += _expect(g.wave == 1 and g.state == Game.State.WAVE, "Start Wave button starts wave 1")
 	await _key(KEY_F)
@@ -515,14 +516,19 @@ func _popout_checks() -> void:
 	var cell_pos: Vector2 = screen.world.base_pos + Vector2((cell.x + 0.5) * 48.0, (cell.y + 0.5) * 48.0)
 	await _click(cell_pos)
 	fails += _expect(g.tower_at.has(cell) and hud.is_open("shop"), "placing the tower reopens the shop")
+	await _click(screen.world.base_pos + Grid.cell_center(Vector2i(8, 12)))
+	fails += _expect(not hud.is_open("shop"), "clicking the field with an empty hand closes the shop")
+	await _key(KEY_B)
 	await _key(KEY_ESCAPE)
 	fails += _expect(not hud.any_open() and screen.world.build_type == "" and not screen.paused, "Esc closes every pop-out (and doesn't pause)")
 	await _key(KEY_2)
 	var c2 := Vector2i(5, 5)
 	await _click(screen.world.base_pos + Vector2((c2.x + 0.5) * 48.0, (c2.y + 0.5) * 48.0))
 	fails += _expect(g.tower_at.has(c2) and not hud.is_open("shop"), "a hotkey build never opens the shop")
+	g.place_tower("amp", Vector2i(3, 3))
 	await _click(cell_pos)
 	await _wait(0.2)
+	fails += _expect(screen.hud.bottom._boosts(g.tower_at[cell]).has("+15% dmg (pylon)"), "the tower card lists the pylon boost as a percentage")
 	await _shot("16b_hud_selected")
 	await _key(KEY_E)
 	fails += _expect(hud.is_open("tree"), "E opens the upgrade tree")
@@ -590,7 +596,22 @@ func _popout_checks() -> void:
 	await _key(KEY_ESCAPE)
 	await _key(KEY_ESCAPE)
 	fails += _expect(screen.modal != null and screen.paused, "Esc with nothing open or selected opens the pause menu")
-	await _key(KEY_ESCAPE)
+	await _wait(0.3)
+	await _shot("16g_pause_menu")
+	var restart_btn: Button = _button_in(screen.modal, "Restart Sector")
+	fails += _expect(restart_btn != null, "the pause menu has Restart Sector")
+	if restart_btn != null:
+		await _click(restart_btn.get_global_rect().get_center())
+		await _wait(0.3)
+		var yes: Button = _button_in(screen.modal, "Restart")
+		fails += _expect(yes != null and screen.modal.get_script() != null, "Restart asks for confirmation first")
+		if yes != null:
+			await _click(yes.get_global_rect().get_center())
+			await _wait(0.5)
+			var fresh = app.current
+			fails += _expect(fresh != screen and fresh.game.wave == 0 and fresh.game.towers.is_empty() and fresh.game.map_id == g.map_id, "confirming restarts the sector from round 0 with no towers")
+	else:
+		await _key(KEY_ESCAPE)
 	print("POPOUT CHECKS: %s" % ("ALL PASSED" if fails == 0 else "%d FAILED" % fails))
 
 
@@ -658,6 +679,15 @@ func _grow(g, t, path: String) -> bool:
 		if not g.upgrade_tower(t, "" if ch == "T" else ch):
 			return false
 	return true
+
+## The first visible button under `root` whose text is exactly `text`, or null.
+func _button_in(root: Node, text: String) -> Button:
+	if root == null:
+		return null
+	for b in root.find_children("*", "Button", true, false):
+		if (b as Button).text == text and (b as Button).is_visible_in_tree():
+			return b
+	return null
 
 func _expect(cond: bool, what: String) -> int:
 	print("  %s %s" % ["ok  " if cond else "FAIL", what])

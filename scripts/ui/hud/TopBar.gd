@@ -19,7 +19,6 @@ var lives_label: Label
 var gold_label: Label
 var next_btn: Button
 var next_box: HBoxContainer
-var start_btn: Button
 var speed_btn: Button
 var auto_btn: Button
 ## Enemy types shown in the NEXT strip before it collapses the rest into "+N".
@@ -86,7 +85,6 @@ func _ready() -> void:
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	spacer.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	row.add_child(spacer)
-	start_btn = UiKit.button("", Callable(screen, "start_wave"), Vector2(180, 30))
 	speed_btn = UiKit.button("", Callable(screen, "toggle_speed"), Vector2(58, 30))
 	speed_btn.tooltip_text = "Game speed"
 	auto_btn = UiKit.button("", Callable(screen, "toggle_auto"), Vector2(96, 30))
@@ -96,7 +94,7 @@ func _ready() -> void:
 	research_btn = UiKit.button("Research  [R]", Callable(screen, "toggle_research"), Vector2(108, 30))
 	research_btn.tooltip_text = "Research Lab (pauses the battle; purchases apply from your next run)"
 	var menu_btn := UiKit.button("Menu  [Esc]", Callable(screen, "open_pause"), Vector2(96, 30))
-	for b in [next_btn, start_btn, speed_btn, auto_btn, shop_btn, research_btn, menu_btn]:
+	for b in [next_btn, speed_btn, auto_btn, shop_btn, research_btn, menu_btn]:
 		b.add_theme_font_size_override("font_size", 14)
 		if b != next_btn:
 			row.add_child(b)
@@ -122,19 +120,6 @@ func refresh(_delta: float) -> void:
 	lives_label.text = str(g.lives)
 	lives_label.modulate = Color(1, 1, 1).lerp(Color(1, 0.3, 0.3), clampf(hud.lives_flash / 0.3, 0.0, 1.0))
 	gold_label.text = str(g.gold)
-	if g.is_over():
-		start_btn.text = "Battle over"
-		start_btn.disabled = true
-	elif g.state == Game.State.BUILD:
-		var next: int = g.wave + 1
-		start_btn.text = ("Round %d in %ds  [Space]" % [next, ceili(Game.AUTO_START_DELAY - g.auto_timer)]) if g.auto_start else ("Launch Round %d  [Space]" % next)
-		start_btn.disabled = false
-	elif g.can_call_early():
-		start_btn.text = "Call Early +%d cr  [Space]" % Waves.early_call_bonus(g.wave + 1)
-		start_btn.disabled = false
-	else:
-		start_btn.text = "Round in progress"
-		start_btn.disabled = true
 	speed_btn.text = "%dx  [F]" % screen.speed
 	auto_btn.text = "Auto: %s  [A]" % ("On" if g.auto_start else "Off")
 	for kind in _lit:

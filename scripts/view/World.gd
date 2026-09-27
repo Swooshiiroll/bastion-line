@@ -59,6 +59,7 @@ func setup(g) -> void:
 	add_child(terrain)
 	lane_fx = LaneFx.new()
 	lane_fx.grid = g.grid
+	lane_fx.game = g
 	add_child(lane_fx)
 	scenery = Scenery.new()
 	scenery.world = self
@@ -192,9 +193,12 @@ func _visual(ev: Dictionary) -> void:
 		"tracer":
 			var rcol := Draw.SPEC_ALT.lance if str(ev.get("spec", "")) == "lance" else Draw.ACCENT.sniper
 			var tw := 3.0 + maxf(0.0, float(ev.get("width", 10.0)) - 10.0) * 0.45
+			# The slug keeps going past what it hits, off the edge of the screen (visual only).
+			var shot: Vector2 = ev.to - ev.from
+			var far: Vector2 = ev.to if shot.length_squared() < 1.0 else ev.from + shot.normalized() * 4000.0
 			if tw > 3.0:
-				fx.tracer(ev.from, ev.to, Color(rcol, 0.35), 0.3, tw * 2.2)
-			fx.tracer(ev.from, ev.to, rcol, 0.22, tw)
+				fx.tracer(ev.from, far, Color(rcol, 0.35), 0.3, tw * 2.2)
+			fx.tracer(ev.from, far, rcol, 0.22, tw)
 			fx.flash(ev.to, 9.0, rcol, 0.1)
 			fx.flash(ev.from, 8.0, Color(1, 1, 1), 0.06)
 		"frost":

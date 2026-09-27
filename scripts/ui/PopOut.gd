@@ -9,6 +9,7 @@ signal close_requested
 
 const TITLE_H := 44.0
 const SLIDE_TIME := 0.16
+const CLOSE_TIME := 0.12
 
 var title := ""
 var title_color := UiKit.ACCENT
@@ -73,6 +74,18 @@ func _ready() -> void:
 	_tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
 	_tween.tween_property(self, "position", rect.position, SLIDE_TIME)
 	_tween.tween_property(self, "modulate:a", 1.0, SLIDE_TIME)
+
+
+## Slides and fades back out the way it came in, then frees itself. The HUD has already dropped
+## it, so it counts as closed at once; it just stops taking clicks while it goes.
+func dismiss() -> void:
+	propagate_call("set", ["mouse_filter", Control.MOUSE_FILTER_IGNORE])
+	if _tween != null:
+		_tween.kill()
+	_tween = create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_IN)
+	_tween.tween_property(self, "position", rect.position + slide, CLOSE_TIME)
+	_tween.tween_property(self, "modulate:a", 0.0, CLOSE_TIME)
+	_tween.chain().tween_callback(queue_free)
 
 
 ## Subclasses add their content to `body` (and optionally to `header`).

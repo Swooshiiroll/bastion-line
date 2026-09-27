@@ -264,7 +264,7 @@ func _show_modal(c: Control) -> void:
 
 func _close_modal() -> void:
 	if _modal != null:
-		_modal.queue_free()
+		UiKit.dismiss(_modal)
 		_modal = null
 
 

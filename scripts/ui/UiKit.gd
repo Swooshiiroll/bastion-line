@@ -126,12 +126,9 @@ static func box(bg: Color, border: Color, radius := 6, border_w := 1, margin := 
 	s.bg_color = bg
 	s.border_color = border
 	s.set_border_width_all(border_w)
-	# Angled "cut" corners: two opposite corners get a large radius, the others stay sharp.
-	s.corner_radius_top_left = int(radius * 1.6)
-	s.corner_radius_bottom_right = int(radius * 1.6)
-	s.corner_radius_top_right = mini(radius, 2)
-	s.corner_radius_bottom_left = mini(radius, 2)
-	s.corner_detail = 2
+	# Smoothly rounded corners, the same on all four.
+	s.set_corner_radius_all(int(radius * 1.3))
+	s.corner_detail = 8
 	s.content_margin_left = margin
 	s.content_margin_right = margin
 	s.content_margin_top = margin * 0.45
@@ -225,6 +222,10 @@ static func dimmer(alpha := 0.6) -> ColorRect:
 	r.color = Color(0, 0, 0, alpha)
 	r.mouse_filter = Control.MOUSE_FILTER_STOP
 	bleed(r)
+	r.ready.connect(func():
+		var a := r.color.a
+		r.color.a = 0.0
+		r.create_tween().tween_property(r, "color:a", a, OPEN_TIME))
 	return r
 
 
@@ -244,8 +245,35 @@ static func hbox(sep := 8) -> HBoxContainer:
 static func centered_panel(width: float) -> PanelContainer:
 	var p := PanelContainer.new()
 	p.custom_minimum_size = Vector2(width, 0)
-	p.resized.connect(func(): p.position = ((SCREEN - p.size) / 2.0).floor())
+	p.resized.connect(func():
+		p.position = ((SCREEN - p.size) / 2.0).floor()
+		p.pivot_offset = p.size / 2.0)
+	p.ready.connect(func(): animate_in(p))
 	return p
+
+
+const OPEN_TIME := 0.14
+const CLOSE_TIME := 0.12
+
+
+## Opening animation for a menu panel: fades in while growing slightly into place.
+static func animate_in(c: Control) -> void:
+	c.modulate.a = 0.0
+	c.scale = Vector2(0.96, 0.96)
+	var tw := c.create_tween().set_parallel(true).set_trans(Tween.TRANS_CUBIC).set_ease(Tween.EASE_OUT)
+	tw.tween_property(c, "modulate:a", 1.0, OPEN_TIME)
+	tw.tween_property(c, "scale", Vector2.ONE, OPEN_TIME)
+
+
+## Closing animation for a menu or overlay: stops taking clicks, fades out, then frees itself.
+## Callers drop their reference first, so the game treats it as closed straight away.
+static func dismiss(n: CanvasItem) -> void:
+	if not is_instance_valid(n) or n.is_queued_for_deletion():
+		return
+	n.propagate_call("set", ["mouse_filter", Control.MOUSE_FILTER_IGNORE])
+	var tw := n.create_tween()
+	tw.tween_property(n, "modulate:a", 0.0, CLOSE_TIME)
+	tw.tween_callback(n.queue_free)
 
 
 static func _check_icon(checked: bool) -> ImageTexture:

@@ -21,7 +21,7 @@ const TICK := 1.0 / 60.0
 const SELL_REFUND := 0.7
 const SAVE_VERSION := 8
 ## Credits every run starts with, on every sector and mode (before research).
-const START_GOLD := 300
+const START_GOLD := 500
 const AUTO_START_DELAY := 5.0
 const RETARGET_DELAY := 0.1
 const STAT_KEYS := ["kills", "gold_earned", "towers_built", "leaked", "waves_cleared"]

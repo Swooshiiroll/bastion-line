@@ -12,9 +12,12 @@ const Towers = preload("res://data/towers.gd")
 const Abilities = preload("res://data/abilities.gd")
 const Research = preload("res://scripts/core/Research.gd")
 const Game = preload("res://scripts/core/Game.gd")
+const Waves = preload("res://data/waves.gd")
 
 const HEIGHT := 92.0
 const CTX_X := 190.0
+## The big Launch button, anchored to the bar's right edge.
+const LAUNCH_W := 210.0
 
 var hud
 var screen
@@ -27,6 +30,7 @@ var _live_labels := {}
 var _cost_buttons: Array = []
 var _sell_btn: Button = null
 var _status_label: Label = null
+var start_btn: Button
 
 
 var _bg: Control
@@ -63,6 +67,12 @@ func _ready() -> void:
 	_fit_view.call_deferred()
 	ctx.mouse_filter = Control.MOUSE_FILTER_PASS
 	add_child(ctx)
+	start_btn = UiKit.button("", Callable(screen, "start_wave"), Vector2(LAUNCH_W, HEIGHT - 16))
+	start_btn.size = Vector2(LAUNCH_W, HEIGHT - 16)
+	start_btn.position = Vector2(size.x - LAUNCH_W - 8, 8)
+	start_btn.add_theme_font_size_override("font_size", 17)
+	start_btn.tooltip_text = "Launch the next round, or call it early for bonus credits once the current round has finished spawning  [Space]"
+	add_child(start_btn)
 
 
 func _ability_button(id: String) -> Button:
@@ -113,6 +123,7 @@ func refresh(_delta: float) -> void:
 			status.text = "next round"
 			status.add_theme_color_override("font_color", UiKit.DIM)
 		ability_btns[id].disabled = not g.ability_ready(id)
+	_refresh_launch(g)
 
 	var w = screen.world
 	var key := "idle"
@@ -121,7 +132,7 @@ func refresh(_delta: float) -> void:
 	if w.ability_target == "meteor":
 		key = "meteor"
 	elif t != null:
-		key = "t:%d:%d:%s:%s:%d:%.2f%.2f%.2f" % [t.get_instance_id(), t.trunk, str(t.depth), t.mastered, t.mode, t.buff_dmg, t.buff_rate, t.buff_range]
+		key = "t:%d:%d:%s:%s:%d:%.2f%.2f%.2f%.2f%.2f" % [t.get_instance_id(), t.trunk, str(t.depth), t.mastered, t.mode, t.buff_dmg, t.buff_rate, t.buff_range, t.discount, t.refund_field]
 	elif build != "":
 		key = "b:" + build
 	elif w.hover_enemy != null and w.hover_enemy.alive:
@@ -136,6 +147,27 @@ func refresh(_delta: float) -> void:
 		_rebuild(key)
 	_update_live()
 
+
+
+func _refresh_launch(g) -> void:
+	var next: int = g.wave + 1
+	var text := "ROUND IN PROGRESS"
+	var can_launch := false
+	if g.is_over():
+		text = "BATTLE OVER"
+	elif g.state == Game.State.BUILD:
+		can_launch = true
+		text = ("ROUND %d IN %ds
+Space: launch now" % [next, ceili(Game.AUTO_START_DELAY - g.auto_timer)]) if g.auto_start else ("LAUNCH ROUND %d
+Space" % next)
+	elif g.can_call_early():
+		can_launch = true
+		text = "CALL EARLY  +%d cr
+Space" % Waves.early_call_bonus(next)
+	if start_btn.text != text:
+		start_btn.text = text
+	start_btn.disabled = not can_launch
+	start_btn.add_theme_color_override("font_color", UiKit.GOLD if can_launch else UiKit.DIM)
 
 func _clear() -> void:
 	for c in ctx.get_children():
@@ -222,6 +254,26 @@ func _arrow() -> Label:
 	return UiKit.label("▸", 12, Color(0.3, 0.38, 0.45))
 
 
+## What is boosting a tower right now, as percentages: pylons, its build site and Scrapyards.
+func _boosts(t) -> Array:
+	var out: Array = []
+	if t.buff_dmg > 0.0:
+		out.append("+%d%% dmg (pylon)" % roundi(t.buff_dmg * 100.0))
+	if t.buff_rate > 0.0:
+		out.append("+%d%% speed (pylon)" % roundi(t.buff_rate * 100.0))
+	if t.buff_range > 0.0:
+		out.append("+%d%% range (pylon)" % roundi(t.buff_range * 100.0))
+	if t.site == "P":
+		out.append("+%d%% dmg (power node)" % roundi(Tower.SITE_DAMAGE * 100.0))
+	elif t.site == "H":
+		out.append("+%d%% range (high ground)" % roundi(Tower.SITE_RANGE * 100.0))
+	if t.discount > 0.0:
+		out.append("−%d%% upgrades (depot)" % roundi(t.discount * 100.0))
+	if t.refund_field > 0.0:
+		out.append("%d%% sell refund (depot)" % roundi(t.refund_field * 100.0))
+	return out
+
+
 func _tower_card(t) -> void:
 	var g = screen.game
 	var d: Dictionary = t.def
@@ -247,14 +299,21 @@ func _tower_card(t) -> void:
 	summ.clip_text = true
 	summ.custom_minimum_size = Vector2(250, 0)
 	var extras: Array = []
-	if t.buff_dmg > 0.0 or t.buff_rate > 0.0 or t.buff_range > 0.0:
-		extras.append("Pylon boost active")
 	var rl := TowerInfo.research_line(t.mods)
 	if rl != "":
 		extras.append(rl)
 	summ.tooltip_text = "\n".join(PackedStringArray([summ.text] + extras))
 	summ.mouse_filter = Control.MOUSE_FILTER_PASS
 	id_box.add_child(summ)
+	var boosts := _boosts(t)
+	if not boosts.is_empty():
+		var bl := UiKit.label("BOOST  " + "  Â·  ".join(PackedStringArray(boosts)), 11, UiKit.GOOD)
+		bl.clip_text = true
+		bl.custom_minimum_size = Vector2(250, 0)
+		bl.tooltip_text = "
+".join(PackedStringArray(boosts))
+		bl.mouse_filter = Control.MOUSE_FILTER_PASS
+		id_box.add_child(bl)
 	ctx.add_child(id_box)
 
 	# Branch strip: the trunk, then each branch with its progress.
@@ -349,7 +408,7 @@ func _build_card(type: String) -> void:
 	right.add_child(UiKit.label(TowerInfo.summary(g.level_stats(type, 1), bool(d.get("beam", false))), 13, Color(0.72, 0.81, 0.88)))
 	var bl := UiKit.label(d.blurb, 12, UiKit.DIM)
 	bl.clip_text = true
-	bl.custom_minimum_size = Vector2(1060, 0)
+	bl.custom_minimum_size = Vector2(840, 0)
 	bl.tooltip_text = d.blurb
 	bl.mouse_filter = Control.MOUSE_FILTER_PASS
 	right.add_child(bl)
@@ -421,7 +480,7 @@ func _tile_card(c: Vector2i) -> void:
 	_live_labels["tile"] = [sub, kind, c]
 	var bl := UiKit.label(info[1], 13, UiKit.DIM)
 	bl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	bl.custom_minimum_size = Vector2(1300, 0)
+	bl.custom_minimum_size = Vector2(1080, 0)
 	box.add_child(bl)
 	ctx.add_child(box)
 
@@ -507,4 +566,5 @@ func _fit_view() -> void:
 	size.x = w
 	_bg.size.x = w
 	_line.size.x = w
-	ctx.size.x = w - CTX_X - 8
+	ctx.size.x = w - CTX_X - LAUNCH_W - 24
+	start_btn.position.x = w - LAUNCH_W - 8

@@ -90,6 +90,8 @@ func _run() -> void:
 		"test_research_effects",
 		"test_mastery_upgrades",
 		"test_branch_rules",
+		"test_laser_charge_stat",
+		"test_scrapyard",
 		"test_mastery_mechanics",
 		"test_save_research_v4",
 		"test_phantom_cloak",
@@ -1757,6 +1759,12 @@ func test_mastery_upgrades() -> void:
 	var mortar = build_to(r, "cannon", Vector2i(5, 5), "siege", 4)
 	check(mortar.tier == 3, "mastery research is per tower type")
 	check(r.level_stats("cannon", 4, "siege").has("stun"), "level_stats reaches the mastery")
+
+
+func test_laser_charge_stat() -> void:
+	for lv in [Tower.lines("laser").t1, Tower.lines("laser").t2, Tower.lines("laser").a[1], Tower.lines("laser").b[1]]:
+		check(float(lv.get("ramp_time", 0.0)) > 0.0, "laser levels carry a charge time (ramp_time)")
+	check(Game.START_GOLD == 500, "runs start with 500 credits")
 
 
 func test_branch_rules() -> void:

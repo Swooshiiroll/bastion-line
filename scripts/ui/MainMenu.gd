@@ -59,7 +59,7 @@ func _build_ui() -> void:
 	foot.position = Vector2(0, 836)
 	foot.size = Vector2(1600, 20)
 	root.add_child(foot)
-	var ver := UiKit.label("v3.2.1  -  Godot %s" % Engine.get_version_info().string, 12, UiKit.DIM, HORIZONTAL_ALIGNMENT_RIGHT)
+	var ver := UiKit.label("v3.3  -  Godot %s" % Engine.get_version_info().string, 12, UiKit.DIM, HORIZONTAL_ALIGNMENT_RIGHT)
 	ver.position = Vector2(1220, 872)
 	ver.size = Vector2(364, 20)
 	root.add_child(ver)
@@ -102,7 +102,7 @@ func _show_modal(c: Control) -> void:
 
 func _close_modal() -> void:
 	if _modal != null:
-		_modal.queue_free()
+		UiKit.dismiss(_modal)
 		_modal = null
 
 

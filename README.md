@@ -65,11 +65,11 @@ godot_console --headless --path . --export-release "Linux" build/linux/BastionLi
 
 | Input | Action |
 |---|---|
-| `B` or the Shop button | Open the tower shop. Picking a tower closes it while you place it; it reopens once the tower is placed |
+| `B` or the Shop button | Open the tower shop. Picking a tower closes it while you place it; it reopens once the tower is placed. Clicking the field with nothing picked up closes it |
 | `1`-`9`, `0`, `-`, `=`, `[`, `]`, `\` | Pick a tower to deploy directly (the shop stays closed) |
 | Left-click a tile | Build (Shift+click to keep building) |
 | Left-click rubble / a switch gate | Clear the rubble (40 cr) / switch which branch arriving enemies take |
-| Left-click a tower | Select it: the bottom bar shows its tier, kills, upgrade path and actions. Double-click opens its upgrade tree |
+| Left-click a tower | Select it: the bottom bar shows its tier, kills, upgrade path, actions and any boosts (pylon, high ground, power node, Supply Depot) as percentages. Double-click opens its upgrade tree |
 | Right-click | Cancel build mode, targeting or selection |
 | `U` | Upgrade the selected tower to tier 2, then buy the next upgrade on branch A (the mastery after its 4th upgrade) |
 | `I` / `O` | Buy the next upgrade on branch B / branch C |
@@ -78,13 +78,13 @@ godot_console --headless --path . --export-release "Linux" build/linux/BastionLi
 | `E` | Upgrade tree for the selected tower: the trunk, all three branches and their masteries, with before/after stats; click a lit node to buy it |
 | `R` | Research Lab in battle (pauses; purchases apply from your next run) |
 | `N` or click NEXT | Intel on the next round: enemies, counts, traits, HP and speed scale, bonuses |
-| `Space` | Launch the next round, or call it early for bonus credits once the current round has finished spawning |
+| `Space` or the Launch button (bottom right) | Launch the next round, or call it early for bonus credits once the current round has finished spawning |
 | `Q` then click | Orbital Strike: armor-piercing blast at the clicked spot after 0.9 s (45 s cooldown) |
 | `W` | Chrono Field: slows every enemy 60% for 5 s; bosses resist half (70 s cooldown) |
 | `F` | Game speed 1x / 2x / 3x |
 | `A` | Auto-launch the next round 5 s after each clear |
 | `Esc` | Closes every open menu at once; with nothing open it cancels build/selection, then opens the pause menu |
-| `P` | Pause menu (resume, save, settings, quit) |
+| `P` | Pause menu (resume, restart the sector, save, settings, quit) |
 
 ### Towers and upgrade trees
 
@@ -233,7 +233,7 @@ with the round number, so it stays useful late. The HUD's bottom-left buttons sh
 
 ### Sectors, modes and medals
 
-Sectors are pure maps: every run starts with 300 credits, and enemy strength depends only on the
+Sectors are pure maps: every run starts with 500 credits, and enemy strength depends only on the
 round. What makes a sector harder is its layout.
 
 | Sector | Layout |
@@ -282,10 +282,11 @@ hard, and Cataclysm brutal:
 
 ### The battlefield
 
-The game renders natively at 1600 × 900 (other 16:9 window sizes scale evenly). The battlefield
-fills the screen: the deck, props and lanes continue
-past the playable grid to the screen edges, dimmed slightly, with corner brackets marking the
-build zone. Warp gates stand where enemies appear, just outside the grid.
+The game is laid out at 1600 × 900 and fills any window (see Display). The battlefield fills the
+screen: the deck, props and lanes continue past the playable grid to the window edges, dimmed
+slightly, with corner brackets marking the build zone. Warp gates stand where enemies appear, just
+outside the grid. Chevrons along the lanes show which way enemies will come; they show between rounds
+and fade out while a round is in progress.
 
 Each sector is a 32 × 16 grid of 48 px tiles (1536 × 768, everything between the top and bottom
 bars), laid out as ASCII in `data/maps.gd`. Each keeps its original 20 × 12 design in the top-left
