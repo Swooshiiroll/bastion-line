@@ -95,6 +95,12 @@ const TREES := {
 					},
 					"add": {},
 				},
+				"prestige": {
+					"name": "Tempest Array",
+					"cost": 900,
+					"blurb": "Three ammo feeds, and every tenth volley sprays every enemy in range at once.",
+					"stats_text": "30 dmg · 185 range · 8.5/s · 3 targets · every 10th volley hits everything in range",
+				},
 			},
 			{
 				"key": "b",
@@ -157,6 +163,12 @@ const TREES := {
 					},
 					"add": {},
 				},
+				"prestige": {
+					"name": "Unmaker",
+					"cost": 900,
+					"blurb": "Strips armor three at a time, and anything stripped bare takes 20% more damage from every tower.",
+					"stats_text": "64 dmg · 190 range · 4.0/s · shred 3 (max 20) · +20% damage to enemies stripped to 0 armor",
+				},
 			},
 			{
 				"key": "c",
@@ -218,6 +230,12 @@ const TREES := {
 						"bypass_shield": true,
 					},
 					"add": {},
+				},
+				"prestige": {
+					"name": "Flechette Storm",
+					"cost": 900,
+					"blurb": "A quarter-circle of flechettes, each punching through its first target into the one behind.",
+					"stats_text": "18 dmg × 12 · 160 range · 2.2/s · 90° cone · bypasses barriers · flechettes pass through to a second enemy",
 				},
 			},
 		],
@@ -311,6 +329,12 @@ const TREES := {
 					},
 					"add": {},
 				},
+				"prestige": {
+					"name": "Worldbreaker",
+					"cost": 1100,
+					"blurb": "Every fourth shell rolls an aftershock ring through the blast, stunning everything a second time.",
+					"stats_text": "190 dmg · 200 range · 1.0/s · 130 blast · 0.5 s stun · every 4th shell sends an aftershock that stuns again",
+				},
 			},
 			{
 				"key": "b",
@@ -372,6 +396,12 @@ const TREES := {
 						"burn_time": 5.0,
 					},
 					"add": {},
+				},
+				"prestige": {
+					"name": "Sunfall",
+					"cost": 1100,
+					"blurb": "Pools that feed on their victims, spreading outward while anything is burning in them.",
+					"stats_text": "110 dmg · 175 range · 95 blast · 90 burn/s for 6 s · pools spread 20 px per second while enemies stand in them",
 				},
 			},
 			{
@@ -438,6 +468,12 @@ const TREES := {
 						"unearth": 4.0,
 					},
 					"add": {},
+				},
+				"prestige": {
+					"name": "Tectonic Lance",
+					"cost": 1100,
+					"blurb": "Shells dive into the lane and erupt along it, breaking armor on everything in the fault line.",
+					"stats_text": "160 dmg · 175 range · 0.9/s · 90 blast · −9 armor for 6 s · hits burrowed · unearths for 6 s · each shell erupts along 160 px of lane",
 				},
 			},
 		],
@@ -526,6 +562,12 @@ const TREES := {
 					},
 					"add": {},
 				},
+				"prestige": {
+					"name": "Stasis Singularity",
+					"cost": 850,
+					"blurb": "The field periodically locks solid, freezing every enemy inside in place.",
+					"stats_text": "26 dmg · 200 range · 70% slow · every 8 s freezes everything in the field for 1 s (bosses 0.3 s)",
+				},
 			},
 			{
 				"key": "b",
@@ -585,6 +627,12 @@ const TREES := {
 						"vuln": 0.45,
 					},
 					"add": {},
+				},
+				"prestige": {
+					"name": "Shatterpoint",
+					"cost": 850,
+					"blurb": "Frozen hulls shatter when destroyed, shrapnel tearing into everything around them.",
+					"stats_text": "28 dmg · 160 range · 55% slow · +55% damage taken · chilled enemies that die shatter for 10% of their max health in 60 px",
 				},
 			},
 			{
@@ -647,6 +695,12 @@ const TREES := {
 						"block_barrier": true,
 					},
 					"add": {},
+				},
+				"prestige": {
+					"name": "Glacial Prison",
+					"cost": 850,
+					"blurb": "Barriers freeze brittle inside the field and crack under three times the damage.",
+					"stats_text": "20 dmg · 175 range · 60% slow · +20% damage taken · blocks repair · blocks barrier recharge · barriers in the field take 3× damage",
 				},
 			},
 		],
@@ -738,6 +792,12 @@ const TREES := {
 					},
 					"add": {},
 				},
+				"prestige": {
+					"name": "Kingslayer",
+					"cost": 1400,
+					"blurb": "Built for one job: every fifth slug into a boss tears away a slice of its total health.",
+					"stats_text": "340 dmg · 520 range · 0.75/s · 3.5× vs bosses · executes non-bosses below 25% · every 5th shot at a boss adds 5% of its max health",
+				},
 			},
 			{
 				"key": "b",
@@ -796,6 +856,12 @@ const TREES := {
 						"rail_width": 22.0,
 					},
 					"add": {},
+				},
+				"prestige": {
+					"name": "Horizon Lance",
+					"cost": 1400,
+					"blurb": "The beam carries across the whole sector, hitting everything along it at full strength.",
+					"stats_text": "260 dmg · 470 range · 0.8/s · 30 px line · the line runs to the edge of the map at full damage",
 				},
 			},
 			{
@@ -860,6 +926,12 @@ const TREES := {
 						"expose": true,
 					},
 					"add": {},
+				},
+				"prestige": {
+					"name": "Null Horizon",
+					"cost": 1400,
+					"blurb": "Silenced enemies are left defenceless, taking a quarter more damage from everything.",
+					"stats_text": "280 dmg · 440 range · 0.7/s · 12 s suppression · 90 px spread · strips barrier · exposes · suppressed enemies take +25% damage",
 				},
 			},
 		],
@@ -948,6 +1020,12 @@ const TREES := {
 					},
 					"add": {},
 				},
+				"prestige": {
+					"name": "Thunder God",
+					"cost": 1450,
+					"blurb": "Lightning that doubles back, leaping further and striking its victims again.",
+					"stats_text": "66 dmg · 175 range · 20 chains · arcs can strike the same enemy twice and jump 120 px",
+				},
 			},
 			{
 				"key": "b",
@@ -1007,6 +1085,12 @@ const TREES := {
 					},
 					"add": {},
 				},
+				"prestige": {
+					"name": "Overlord Coil",
+					"cost": 1450,
+					"blurb": "Stunned enemies become conductors, passing the charge on to their neighbours.",
+					"stats_text": "78 dmg · 165 range · 8 chains · 1.0 s stun · stunned enemies arc to one more enemy each second",
+				},
 			},
 			{
 				"key": "c",
@@ -1065,6 +1149,12 @@ const TREES := {
 						"block_grants": true,
 					},
 					"add": {},
+				},
+				"prestige": {
+					"name": "Eye of the Storm",
+					"cost": 1450,
+					"blurb": "A second storm cell breaks away and hunts the enemy furthest along the lane.",
+					"stats_text": "50 dmg per tick · 180 field · 2.5 ticks/s · blocks barrier grants · a second storm follows the leading enemy down the lane",
 				},
 			},
 		],
@@ -1154,6 +1244,12 @@ const TREES := {
 					},
 					"add": {},
 				},
+				"prestige": {
+					"name": "Prismatic Lattice",
+					"cost": 1550,
+					"blurb": "Beams that meet on one target fuse into a single, far hotter lance.",
+					"stats_text": "64 dps · 175 range · 8 beams · beams on the same target fuse into one at 150% of their total",
+				},
 			},
 			{
 				"key": "b",
@@ -1211,6 +1307,12 @@ const TREES := {
 						"ramp": 7.0,
 					},
 					"add": {},
+				},
+				"prestige": {
+					"name": "Stellar Core",
+					"cost": 1550,
+					"blurb": "The lens never cools: the ramp carries over from one target to the next.",
+					"stats_text": "84 dps · 185 range · ramps to 10× · keeps its ramp when it switches target",
 				},
 			},
 			{
@@ -1273,6 +1375,12 @@ const TREES := {
 						"shield_mult": 2.0,
 					},
 					"add": {},
+				},
+				"prestige": {
+					"name": "Reaper Halo",
+					"cost": 1550,
+					"blurb": "Three beams wheel around the tower in full circles, burning everything they cross.",
+					"stats_text": "54 dps · 170 range · 3 beams · 360° sweep · 2× vs barriers · the beams spin full circles through everything in range",
 				},
 			},
 		],
@@ -1361,6 +1469,12 @@ const TREES := {
 					},
 					"add": {},
 				},
+				"prestige": {
+					"name": "Hivemind Salvo",
+					"cost": 1400,
+					"blurb": "A networked swarm: no missile is wasted on a target that's already gone.",
+					"stats_text": "34 dmg · 245 range · 12 missiles · missiles that lose their target find a new one",
+				},
 			},
 			{
 				"key": "b",
@@ -1421,6 +1535,12 @@ const TREES := {
 						"air_mult": 3.0,
 					},
 					"add": {},
+				},
+				"prestige": {
+					"name": "Armageddon",
+					"cost": 1400,
+					"blurb": "Every sixth salvo is one enormous warhead that flattens everything nearby.",
+					"stats_text": "140 dmg · 250 range · 3 missiles · 85 blast · 3× vs flyers · every 6th salvo is a single 600 dmg warhead with a 160 px blast",
 				},
 			},
 			{
@@ -1483,6 +1603,12 @@ const TREES := {
 						"pierce": true,
 					},
 					"add": {},
+				},
+				"prestige": {
+					"name": "Firestorm Doctrine",
+					"cost": 1400,
+					"blurb": "Bomblets set the ground alight wherever they land.",
+					"stats_text": "30 dmg · 240 range · 4 missiles · 10 bomblets (36 blast) · pierces armor · bomblets leave fires (20 burn/s for 2 s)",
 				},
 			},
 		],
@@ -1569,6 +1695,12 @@ const TREES := {
 					},
 					"add": {},
 				},
+				"prestige": {
+					"name": "Overdrive Nexus",
+					"cost": 1150,
+					"blurb": "The only pylon whose boost adds to another's: towers in both fields get this plus half the other.",
+					"stats_text": "150 field · +50% damage · +50% speed · stacks with one other pylon's boost at half strength",
+				},
 			},
 			{
 				"key": "b",
@@ -1626,6 +1758,12 @@ const TREES := {
 					},
 					"add": {},
 				},
+				"prestige": {
+					"name": "Strategic Uplink",
+					"cost": 1150,
+					"blurb": "A shared targeting network: every tower in the field splits its fire across an extra target.",
+					"stats_text": "150 field · +45% damage · +45% range · towers in the field fire at one extra target",
+				},
 			},
 			{
 				"key": "c",
@@ -1682,6 +1820,12 @@ const TREES := {
 						"jam": 2.0,
 					},
 					"add": {},
+				},
+				"prestige": {
+					"name": "Void Bastion",
+					"cost": 1150,
+					"blurb": "Nothing keeps its tricks inside the field: support is jammed and immunities fail.",
+					"stats_text": "165 field · +40% damage · jams everything · exposes enemies in the field",
 				},
 			},
 		],
@@ -1772,6 +1916,12 @@ const TREES := {
 					},
 					"add": {},
 				},
+				"prestige": {
+					"name": "Iron Sky",
+					"cost": 1000,
+					"blurb": "Relentless fire that leaves flyers crippled for the rest of the defence.",
+					"stats_text": "46 dmg · 240 range · 5.5/s · flyers hit take +25% damage from all towers for 2 s",
+				},
 			},
 			{
 				"key": "b",
@@ -1831,6 +1981,12 @@ const TREES := {
 						"stun": 0.5,
 					},
 					"add": {},
+				},
+				"prestige": {
+					"name": "Skyfall",
+					"cost": 1000,
+					"blurb": "Flyers brought down crash onto the lane below, crushing whatever is under them.",
+					"stats_text": "180 dmg · 255 range · 1.4/s · 110 burst · 0.6 s stun · destroyed flyers crash for 50% of their max health in 60 px",
 				},
 			},
 			{
@@ -1896,6 +2052,12 @@ const TREES := {
 						"ground_mult": 1.0,
 					},
 					"add": {},
+				},
+				"prestige": {
+					"name": "Steel Rain",
+					"cost": 1000,
+					"blurb": "Double-burst shells: a second detonation 0.4 s after the first.",
+					"stats_text": "62 dmg · 230 range · 1.8/s · 72 burst · shred 3 · 100% vs ground · every shell bursts twice",
 				},
 			},
 		],
@@ -1980,6 +2142,12 @@ const TREES := {
 					},
 					"add": {},
 				},
+				"prestige": {
+					"name": "Panopticon",
+					"cost": 850,
+					"blurb": "Sees the whole sector: no cloak works anywhere while it stands.",
+					"stats_text": "320 field · +22% mark · reveals cloaked enemies everywhere on the map",
+				},
 			},
 			{
 				"key": "b",
@@ -2035,6 +2203,12 @@ const TREES := {
 						"mark": 0.4,
 					},
 					"add": {},
+				},
+				"prestige": {
+					"name": "Death Mark",
+					"cost": 850,
+					"blurb": "Marked enemies are worth more when they fall.",
+					"stats_text": "185 field · +50% mark · marked enemies pay +25% kill credits",
 				},
 			},
 			{
@@ -2093,6 +2267,12 @@ const TREES := {
 						"expose": true,
 					},
 					"add": {},
+				},
+				"prestige": {
+					"name": "Total Blackout",
+					"cost": 850,
+					"blurb": "A complete blackout: no cloaks, no immunities, no support inside the field.",
+					"stats_text": "220 field · +20% mark · disrupts · exposes · jams everything",
 				},
 			},
 		],
@@ -2182,6 +2362,12 @@ const TREES := {
 					},
 					"add": {},
 				},
+				"prestige": {
+					"name": "Event Engine",
+					"cost": 1500,
+					"blurb": "Gravity strong enough to throw flyers back along their route too.",
+					"stats_text": "65 dmg · 150 range · 0.4/s · 150 px shove · shoves flyers too",
+				},
 			},
 			{
 				"key": "b",
@@ -2240,6 +2426,12 @@ const TREES := {
 						"stun": 1.0,
 					},
 					"add": {},
+				},
+				"prestige": {
+					"name": "Black Hole",
+					"cost": 1500,
+					"blurb": "Periodically collapses, crushing anything in the field that's already failing.",
+					"stats_text": "160 dmg · 145 range · 0.5/s · 1.2 s stun · every 10 s crushes non-boss enemies in the field below 15% health",
 				},
 			},
 			{
@@ -2300,6 +2492,12 @@ const TREES := {
 						"implode_pct": 0.06,
 					},
 					"add": {},
+				},
+				"prestige": {
+					"name": "Gravity Well Prime",
+					"cost": 1500,
+					"blurb": "Implodes twice as often, each time tearing a slice off everything held.",
+					"stats_text": "52 dmg · 155 range · 90 px pull · implodes every 2nd pulse for 7% max HP",
 				},
 			},
 		],
@@ -2396,6 +2594,12 @@ const TREES := {
 					},
 					"add": {},
 				},
+				"prestige": {
+					"name": "Nullspace",
+					"cost": 1250,
+					"blurb": "A dead zone where armor, barriers and immunities all fail.",
+					"stats_text": "18 dmg · 170 field · −10 armor inside · exposes · blocks barrier recharge · enemies inside take +15% damage",
+				},
 			},
 			{
 				"key": "b",
@@ -2456,6 +2660,12 @@ const TREES := {
 						"suppress_boss": 0.5,
 					},
 					"add": {},
+				},
+				"prestige": {
+					"name": "Dead Zone",
+					"cost": 1250,
+					"blurb": "Even bosses are fully silenced inside the field.",
+					"stats_text": "16 dmg · 170 field · suppression lingers 5 s · exposes · suppresses bosses fully",
 				},
 			},
 			{
@@ -2520,6 +2730,12 @@ const TREES := {
 						"cascade_radius": 60.0,
 					},
 					"add": {},
+				},
+				"prestige": {
+					"name": "Feedback Storm",
+					"cost": 1250,
+					"blurb": "Every barrier in the field is torn away and hurled back as a wider, harder blast.",
+					"stats_text": "16 dmg · 160 field · strips all barriers · exposes · returns 150% of the stripped barrier · cascades 75% in 80 px",
 				},
 			},
 		],
@@ -2609,6 +2825,12 @@ const TREES := {
 					},
 					"add": {},
 				},
+				"prestige": {
+					"name": "Quasar",
+					"cost": 1550,
+					"blurb": "Every fourth wave is followed by a second, far wider ring.",
+					"stats_text": "270 dmg · 165 radius · 0.45/s · strips 75% of barriers · every 4th wave adds a 240 px ring at half damage",
+				},
 			},
 			{
 				"key": "b",
@@ -2666,6 +2888,12 @@ const TREES := {
 						"mini_nova": 40.0,
 					},
 					"add": {},
+				},
+				"prestige": {
+					"name": "Fusion Cascade",
+					"cost": 1550,
+					"blurb": "Chain reactions that set off chain reactions.",
+					"stats_text": "56 dmg · 130 radius · 1.9/s · 60 px mini-novas · mini-novas can chain one step further",
 				},
 			},
 			{
@@ -2727,6 +2955,12 @@ const TREES := {
 						"aura_dps": 45.0,
 					},
 					"add": {},
+				},
+				"prestige": {
+					"name": "Star Heart",
+					"cost": 1550,
+					"blurb": "A miniature star: anything in its glow burns and takes more damage from every tower.",
+					"stats_text": "75 dmg · 145 radius · 0.6/s · 70 burn/s aura · enemies burning in the aura take +15% damage",
 				},
 			},
 		],
@@ -2821,6 +3055,12 @@ const TREES := {
 					},
 					"add": {},
 				},
+				"prestige": {
+					"name": "Armada",
+					"cost": 1550,
+					"blurb": "A full armada that sweeps the whole sky between targets.",
+					"stats_text": "12 drones · 24 dmg · 5 shots/s · 280 speed · 2× vs flyers · idle drones hunt the nearest flyer anywhere",
+				},
 			},
 			{
 				"key": "b",
@@ -2879,6 +3119,12 @@ const TREES := {
 						"hits_burrowed": true,
 					},
 					"add": {},
+				},
+				"prestige": {
+					"name": "Carpet Wing",
+					"cost": 1550,
+					"blurb": "Every bombing run lays a line of three bombs along the lane.",
+					"stats_text": "6 bombers · 120 bomb dmg · 60 blast · hits burrowed · each run drops a line of 3 bombs",
 				},
 			},
 			{
@@ -2940,6 +3186,12 @@ const TREES := {
 						"suppress_hit": true,
 					},
 					"add": {},
+				},
+				"prestige": {
+					"name": "Black Ops",
+					"cost": 1550,
+					"blurb": "Kill, retarget, strike: each kill sets up a double-damage opening shot on the next specialist.",
+					"stats_text": "6 drones · 40 dmg · marks +35% · hunts specialists · suppresses target · after a kill, the next specialist takes a double-damage first shot",
 				},
 			},
 		],
@@ -3021,6 +3273,12 @@ const TREES := {
 					},
 					"add": {},
 				},
+				"prestige": {
+					"name": "Central Treasury",
+					"cost": 1900,
+					"blurb": "The whole sector feeds the treasury: every kill anywhere pays a credit.",
+					"stats_text": "320 cr per round · 5% interest (max 600) · 1 cr per enemy destroyed anywhere",
+				},
 			},
 			{
 				"key": "b",
@@ -3077,6 +3335,12 @@ const TREES := {
 					},
 					"add": {},
 				},
+				"prestige": {
+					"name": "Salvage Empire",
+					"cost": 1800,
+					"blurb": "Nothing goes to waste: even leaks pay a salvage fee.",
+					"stats_text": "230 field · +80% kill credits · bosses pay triple · leaked enemies refund 25% of their credits",
+				},
 			},
 			{
 				"key": "c",
@@ -3132,6 +3396,12 @@ const TREES := {
 						"sell_field": 1.0,
 					},
 					"add": {},
+				},
+				"prestige": {
+					"name": "Supreme Command",
+					"cost": 1800,
+					"blurb": "Cheaper upgrades, cheaper builds and full refunds across its whole field.",
+					"stats_text": "230 field · 35% off upgrades · 100% sell refund · towers built in the field cost 15% less",
 				},
 			},
 		],

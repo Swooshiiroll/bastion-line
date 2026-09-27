@@ -163,6 +163,8 @@ for (const t of towers.filter((t) => t.rows.length)) {
     key: p, id: ids[i] || `${id}_${p}`, attack: attack.includes(p),
     nodes: ["3", "4", "5", "6"].map((tier, k) => node(row(tier, p), k > 0)),
     mastery: node(row("M", p), false),
+    // Prestige: a design draft for now, kept as written (the game doesn't use it yet).
+    prestige: row("P", p) ? { name: row("P", p).name, cost: row("P", p).cost, blurb: row("P", p).blurb, stats_text: row("P", p).stats } : null,
   }));
   for (const b of branches) {
     if (b.nodes.some((n) => !n) || !b.mastery) errors.push(`${t.name}: branch ${b.key} is incomplete`);

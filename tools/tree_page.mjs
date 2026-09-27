@@ -45,7 +45,7 @@ for (let i = 0; i < lines.length; i++) {
     if (cells.length < 7 || cells[0] === "Tier" || /^-+$/.test(cells[0])) continue;
     const [tier, path, name, cost, stats, effect, status] = cells;
     section.nodes.push({
-      tier: /^m/i.test(tier) ? 8 : /^s/i.test(tier) ? 9 : parseInt(tier, 10), path: path.toLowerCase(), name, cost: parseInt(cost, 10) || 0,
+      tier: /^m/i.test(tier) ? 8 : /^p/i.test(tier) ? 10 : /^s/i.test(tier) ? 9 : parseInt(tier, 10), path: path.toLowerCase(), name, cost: parseInt(cost, 10) || 0,
       stats: stats.split("·").map((s) => s.trim()).filter(Boolean), effect, status: (status || "existing").toLowerCase(),
     });
   } else if (/^[a-z]+:/.test(line) && line.includes("·")) {
@@ -115,8 +115,8 @@ const PATHS = { a: "A", b: "B", c: "C" };
 const card = (n, color, adds = null) => {
   if (!n) return `<div class="card missing">Not defined yet</div>`;
   const isNew = n.status === "new" || n.status === "changed";
-  const label = n.tier <= 2 ? `Tier ${n.tier}` : n.tier === 3 ? `${PATHS[n.path]}1 · specialization` : n.tier === 8 ? `${PATHS[n.path]} · mastery` : `${PATHS[n.path]}${n.tier - 2}`;
-  const kind = n.tier === 8 ? "mastery" : n.tier === 3 ? "spec" : n.tier > 3 ? "step" : "trunk";
+  const label = n.tier <= 2 ? (n.tier === 1 ? "Stock" : "Retrofit") : n.tier === 3 ? `${PATHS[n.path]} · T1 · specialization` : n.tier === 8 ? `${PATHS[n.path]} · mastery` : n.tier === 10 ? `${PATHS[n.path]} · prestige` : `${PATHS[n.path]} · T${n.tier - 2}`;
+  const kind = n.tier === 10 ? "prestige" : n.tier === 8 ? "mastery" : n.tier === 3 ? "spec" : n.tier > 3 ? "step" : "trunk";
   return `<article class="card ${kind} ${isNew ? "is-new" : "is-old"} path-${n.path}" style="--tw:${color}">
     <header><span class="tag">${label}</span>${isNew ? `<span class="new">${n.status}</span>` : ""}<span class="cost">${n.cost} cr</span></header>
     <h4>${inline(n.name)}</h4>
@@ -129,14 +129,14 @@ const card = (n, color, adds = null) => {
 
 const attackStyle = (t) => (t.meta.attack || "").toLowerCase().split(/[^a-c]+/).filter(Boolean);
 
-const pathTotal = (t, p) => t.nodes.filter((n) => n.path === "base" || n.path === p).reduce((a, n) => a + n.cost, 0);
+const pathTotal = (t, p) => t.nodes.filter((n) => n.tier !== 10 && (n.path === "base" || n.path === p)).reduce((a, n) => a + n.cost, 0);
 
 const treeHtml = (t) => {
   const color = ACCENT[t.meta.id] || "#4de1ff";
   const find = (tier, path) => t.nodes.find((n) => n.tier === tier && n.path === path);
   const rows = ["a", "b", "c"].map((p, i) => `
       <div class="fork r${i + 1}" aria-hidden="true"></div>
-      <div class="branch r${i + 1}">${[3, 4, 5, 6, 8].map((tier) => card(find(tier, p), color, tier !== 3 || !find(3, p) || !find(2, "base") ? null : attackStyle(t).includes(p) ? "attack" : secondaryAdds(find(3, p), find(2, "base")))).join("")}</div>`).join("");
+      <div class="branch r${i + 1}">${[3, 4, 5, 6, 8, 10].map((tier) => card(find(tier, p), color, tier !== 3 || !find(3, p) || !find(2, "base") ? null : attackStyle(t).includes(p) ? "attack" : secondaryAdds(find(3, p), find(2, "base")))).join("")}</div>`).join("");
   const isNewTower = (t.meta.status || "") === "new";
   const own = t.nodes.filter((n) => n.tier !== 9);
   const newCount = own.filter((n) => n.status !== "existing").length;
@@ -221,7 +221,7 @@ const html = `<title>Bastion Line Upgrade Trees</title>
   .new { font: 600 10.5px/1 var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--ground); background: var(--new); padding: 3px 6px; border-radius: 2px; }
   .new.big { font-size: 11px; padding: 4px 8px; }
   .tree-scroll { overflow-x: auto; padding-bottom: 4px; }
-  .tree { display: grid; min-width: 1320px; grid-template-columns: 150px 20px 150px 28px 1fr; grid-template-rows: auto auto auto; }
+  .tree { display: grid; min-width: 1540px; grid-template-columns: 150px 20px 150px 28px 1fr; grid-template-rows: auto auto auto; }
   .cell { display: flex; align-items: center; padding-block: 6px; }
   .cell > .card { width: 100%; }
   .t1 { grid-column: 1; grid-row: 1 / 4; }
@@ -229,7 +229,7 @@ const html = `<title>Bastion Line Upgrade Trees</title>
   .base1 { grid-column: 2; grid-row: 1 / 4; }
   .base2 { grid-column: 4; grid-row: 1 / 4; }
   .fork { grid-column: 4; }
-  .branch { grid-column: 5; display: grid; grid-template-columns: 1.3fr repeat(3, 1fr) 1.35fr; gap: 0 18px; padding-block: 6px; align-items: stretch; }
+  .branch { grid-column: 5; display: grid; grid-template-columns: 1.3fr repeat(3, 1fr) 1.35fr 1.35fr; gap: 0 18px; padding-block: 6px; align-items: stretch; }
   .r1 { grid-row: 1; } .r2 { grid-row: 2; } .r3 { grid-row: 3; }
   .link, .fork { position: relative; }
   .link::before, .fork::before, .fork::after { content: ""; position: absolute; background: var(--wire); }
@@ -253,6 +253,9 @@ const html = `<title>Bastion Line Upgrade Trees</title>
   .card header { display: flex; align-items: center; gap: 8px; }
   .tag { font: 600 10.5px var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
   .mastery .tag { color: var(--gold); }
+  .card.prestige { background: linear-gradient(180deg, color-mix(in srgb, #d98cff 9%, var(--panel)), var(--panel)); border-color: color-mix(in srgb, #d98cff 45%, var(--rule)); border-style: dashed; }
+  .prestige .tag { color: #d98cff; }
+  .card.prestige h4 { font-size: 16.5px; }
   .cost { margin-left: auto; font: 500 12px var(--mono); color: var(--gold); font-variant-numeric: tabular-nums; white-space: nowrap; }
   .card h4 { margin: 0; font: 600 16px/1.2 var(--display); letter-spacing: .01em; }
   .stats { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 3px 5px; }
@@ -318,9 +321,9 @@ console.log(`Wrote design/upgrade_trees.html: ${towers.length} towers, ${nodes.l
 for (const t of towers) {
   const problems = [];
   const want = [[1, "base"], [2, "base"]];
-  for (const p of ["a", "b", "c"]) for (const tier of [3, 4, 5, 6, 8]) want.push([tier, p]);
+  for (const p of ["a", "b", "c"]) for (const tier of [3, 4, 5, 6, 8, 10]) want.push([tier, p]);
   for (const [tier, path] of want)
-    if (!t.nodes.some((n) => n.tier === tier && n.path === path)) problems.push(`missing ${path} ${tier === 8 ? "M" : tier}`);
+    if (!t.nodes.some((n) => n.tier === tier && n.path === path)) problems.push(`missing ${path} ${tier === 8 ? "M" : tier === 10 ? "P" : tier}`);
   for (const n of t.nodes) if (!n.effect) problems.push(`no description on ${n.name}`);
   problems.push(...progressionWarnings(t));
   if (problems.length) console.log(`  ${t.name}: ${problems.join(", ")}`);
