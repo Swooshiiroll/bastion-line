@@ -10,6 +10,9 @@ const ShopPanel = preload("res://scripts/ui/hud/ShopPanel.gd")
 const UpgradeTreePanel = preload("res://scripts/ui/hud/UpgradeTreePanel.gd")
 const IntelPanel = preload("res://scripts/ui/hud/IntelPanel.gd")
 const ResearchPopOut = preload("res://scripts/ui/hud/ResearchPopOut.gd")
+const KnowledgePopOut = preload("res://scripts/ui/hud/KnowledgePopOut.gd")
+## Pop-outs that pause the battle while open.
+const PAUSING := ["research", "codex"]
 
 ## Battlefield rect on screen (World.base_pos and the grid size).
 const FIELD := Rect2(32, 40, 1536, 768)
@@ -83,7 +86,8 @@ func any_open() -> bool:
 	return not popouts.is_empty()
 
 
-func open(kind: String) -> void:
+## `arg` is kind-specific: the Codex entry to open on.
+func open(kind: String, arg := "") -> void:
 	if is_open(kind):
 		return
 	var p
@@ -99,12 +103,14 @@ func open(kind: String) -> void:
 			p = IntelPanel.new(self)
 		"research":
 			p = ResearchPopOut.new(self)
+		"codex":
+			p = KnowledgePopOut.new(self, arg)
 		_:
 			return
 	p.close_requested.connect(func(): screen.close_popout(kind))
 	popouts[kind] = p
 	_pop_root.add_child(p)
-	_dim.visible = is_open("research")
+	_dim.visible = is_open("research") or is_open("codex")
 
 
 func close(kind: String) -> void:
@@ -115,7 +121,12 @@ func close(kind: String) -> void:
 	p.dismiss()
 	if kind == "shop" and not is_open("shop"):
 		hovered_build = ""
-	_dim.visible = is_open("research")
+	_dim.visible = is_open("research") or is_open("codex")
+
+
+## True while a pop-out that pauses the battle is open.
+func pausing_open() -> bool:
+	return PAUSING.any(func(k): return is_open(k))
 
 
 func close_all() -> void:

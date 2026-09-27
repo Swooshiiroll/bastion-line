@@ -99,12 +99,14 @@ func _ready() -> void:
 	shop_btn.tooltip_text = "Tower shop"
 	research_btn = UiKit.button("Research  [R]", Callable(screen, "toggle_research"), Vector2(108, 30))
 	research_btn.tooltip_text = "Research Lab (pauses the battle; purchases apply from your next run)"
+	var codex_btn := UiKit.button("Codex  [K]", Callable(screen, "toggle_codex"), Vector2(92, 30))
+	codex_btn.tooltip_text = "Codex: every tower, enemy, effect and rule (pauses the battle). Opens on your selection."
 	var menu_btn := UiKit.button("Menu  [Esc]", Callable(screen, "open_pause"), Vector2(96, 30))
-	for b in [next_btn, speed_btn, auto_btn, shop_btn, research_btn, menu_btn]:
+	for b in [next_btn, speed_btn, auto_btn, shop_btn, research_btn, codex_btn, menu_btn]:
 		b.add_theme_font_size_override("font_size", 14)
 		if b != next_btn:
 			row.add_child(b)
-	_lit = {"shop": shop_btn, "research": research_btn, "intel": next_btn}
+	_lit = {"shop": shop_btn, "research": research_btn, "codex": codex_btn, "intel": next_btn}
 
 
 func _icon_value(fn: Callable, which: String) -> HBoxContainer:

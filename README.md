@@ -80,6 +80,7 @@ godot_console --headless --path . --export-release "Linux" build/linux/BastionLi
 | `G` | Target priority for towers that hit air and ground: Any, Air or Ground (it still shoots the other kind when that's all that's in range) |
 | Mouse wheel, middle-drag, arrow keys, `Home` | Zoom the battlefield (up to 2.5×), pan it, reset the view |
 | `F3` | Show or hide the FPS counter |
+| `K` or `F1`, or the Codex button | The Codex: every tower, enemy, effect and rule. In battle it pauses and opens on the selected tower (or the enemy under the cursor) |
 | `E` | Upgrade tree for the selected tower: the trunk, all three branches and their masteries, with before/after stats; click a lit node to buy it |
 | `R` | Research Lab in battle (pauses; purchases apply from your next run) |
 | `N` or click NEXT | Intel on the next round: enemies, counts, traits, HP and speed scale, bonuses |
@@ -157,6 +158,22 @@ other Scrapyards. Scrapyards cost more on the harder modes like every tower, so 
 bigger bet on Nightmare and Cataclysm.
 
 A mastered tower has a gold ring around its pad.
+
+### Codex
+
+An in-game encyclopedia, from the main menu (Codex) or in battle (`K`, `F1`, the top-bar button, or the
+upgrade tree's Codex link; the battle pauses). Categories: Towers, Enemies, Effects, Battlefield and
+Rules, plus a search box (`/` or Ctrl+F); Up / Down move through the list and Tab changes category.
+- **Towers:** role, key, cost, reach and size, then the whole upgrade path (Stock, Retrofit, every
+  branch from T1 to its Mastery), each step with its price, description and exactly what it changes.
+- **Enemies:** stats, the round they first appear, every ability with its real numbers, health and
+  credits by round, the towers that can hit them, and tips on dealing with them.
+- **Effects, Battlefield and Rules:** armor, barriers, slows, stuns, suppression, sludge, gates,
+  targeting, economy, research and the rest, with See-also links between them.
+
+Tower and enemy pages are generated from the game data (`scripts/core/Lore.gd`); the rest is written in
+`data/glossary.gd`, whose numbers are placeholders filled from the game's constants, so the Codex can't
+drift from the rules.
 
 ### Research Lab
 

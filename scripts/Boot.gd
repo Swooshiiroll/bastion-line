@@ -73,6 +73,12 @@ func show_map_select() -> void:
 	_set_screen(m)
 
 
+func show_codex() -> void:
+	var k = load("res://scripts/ui/KnowledgeBase.gd").new()
+	k.app = self
+	_set_screen(k)
+
+
 func show_research() -> void:
 	var r = ResearchLab.new()
 	r.app = self

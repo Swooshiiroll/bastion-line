@@ -69,7 +69,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	world.damage_numbers = bool(SaveManager.setting("damage_numbers"))
 	# Arrow keys pan the battlefield unless a menu is using them.
-	world.keys_enabled = modal == null and not hud.is_open("research") and not hud.is_open("tree")
+	world.keys_enabled = modal == null and not hud.pausing_open() and not hud.is_open("tree")
 	if not paused:
 		for ev in world.simulate(delta, speed):
 			_handle_event(ev)
@@ -280,15 +280,30 @@ func toggle_research() -> void:
 		paused = true
 
 
+func toggle_codex() -> void:
+	if hud.is_open("codex"):
+		close_popout("codex")
+	elif not _ended:
+		# Open on what the player is looking at: the selected tower, else the enemy under the cursor.
+		hud.close("tree")
+		var entry := ""
+		if world.selected_tower != null:
+			entry = "tower:" + str(world.selected_tower.type)
+		elif world.hover_enemy != null and world.hover_enemy.alive:
+			entry = "enemy:" + str(world.hover_enemy.type)
+		hud.open("codex", entry)
+		paused = true
+
+
 func close_popout(kind: String) -> void:
 	hud.close(kind)
-	if kind == "research" and modal == null:
+	if kind in Hud.PAUSING and modal == null and not hud.pausing_open():
 		paused = false
 
 
 ## Esc's first job: close every open pop-out (and stop building or aiming).
 func close_popouts() -> void:
-	var had_research: bool = hud.is_open("research")
+	var had_research: bool = hud.pausing_open()
 	hud.close_all()
 	shop_return = false
 	world.build_type = ""
@@ -571,6 +586,15 @@ func _unhandled_input(event: InputEvent) -> void:
 				open_pause()
 			get_viewport().set_input_as_handled()
 		return
+	if hud.is_open("codex"):
+		# The battle is paused behind the Codex: only closing keys reach the game.
+		if event.keycode in [KEY_ESCAPE, KEY_K, KEY_F1]:
+			if event.keycode == KEY_ESCAPE:
+				close_popouts()
+			else:
+				close_popout("codex")
+			get_viewport().set_input_as_handled()
+		return
 	if hud.is_open("research"):
 		# The battle is paused behind the lab: only closing keys work.
 		if event.keycode in [KEY_ESCAPE, KEY_R]:
@@ -589,6 +613,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			open_tree()
 		KEY_R:
 			toggle_research()
+		KEY_K, KEY_F1:
+			toggle_codex()
 		KEY_N:
 			toggle_intel()
 		KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9:

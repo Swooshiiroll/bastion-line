@@ -526,6 +526,17 @@ func _popout_checks() -> void:
 	await _wait(0.2)
 	await _shot("16i_priority")
 	await _key(KEY_ESCAPE)
+	# K opens the Codex on the selected tower and pauses the battle.
+	var rail = g.place_tower("sniper", Vector2i(7, 4))
+	screen.world.selected_tower = rail
+	await _wait(0.1)
+	await _key(KEY_K)
+	await _wait(0.5)
+	fails += _expect(hud.is_open("codex") and screen.paused and hud.popout("codex").panel.current == "tower:sniper", "K opens the Codex on the selected Railgun and pauses")
+	await _shot("19d_codex_battle")
+	await _key(KEY_ESCAPE)
+	fails += _expect(not hud.is_open("codex") and not screen.paused, "Esc closes the Codex and resumes")
+	screen.world.selected_tower = null
 	# A late round lists many enemy types: the NEXT strip must fit its button.
 	g.wave = 59
 	await _wait(0.2)
@@ -715,6 +726,38 @@ func _research_checks() -> void:
 	await _wait(0.2)
 	await _key(KEY_ESCAPE)
 	fails += _expect(app.current != lab, "Esc leaves the lab")
+	# The Codex from the main menu.
+	await _wait(0.4)
+	var cbtn: Button = _button_in(app.current, "Codex")
+	fails += _expect(cbtn != null, "the main menu has a Codex button")
+	if cbtn != null:
+		await _click(cbtn.get_global_rect().get_center())
+		await _wait(0.5)
+		var kp = app.current.get("panel")
+		fails += _expect(kp != null and str(kp.current).begins_with("tower:"), "the Codex opens on the towers")
+		await _shot("19_codex_tower")
+		var first: String = kp.current
+		await _key(KEY_DOWN)
+		fails += _expect(kp.current != first, "Down moves to the next entry")
+		kp.set_category("enemies")
+		await _wait(0.2)
+		fails += _expect(kp._visible_ids.size() == Enemies.ORDER.size(), "the Enemies tab lists all %d enemies" % Enemies.ORDER.size())
+		kp.open_entry("enemy:bulwark")
+		await _wait(0.3)
+		await _shot("19b_codex_enemy")
+		kp._search.text = "barrier"
+		kp._refresh_list()
+		fails += _expect(kp._visible_ids.has("enemy:aegis") and kp._visible_ids.has("enemy:bulwark") and kp._visible_ids.has("g:barrier"), "searching 'barrier' finds the Aegis Walker, Bulwark and the Barrier entry")
+		kp.open_entry("g:barrier")
+		await _wait(0.3)
+		await _shot("19c_codex_effect")
+		var link: Button = _button_in(kp, "Barrier strip")
+		if link != null:
+			await _click(link.get_global_rect().get_center())
+		fails += _expect(kp.current == "g:strip", "a See-also link jumps to its entry")
+		await _key(KEY_ESCAPE)
+		await _wait(0.3)
+		fails += _expect(app.current.get("panel") == null, "Esc leaves the Codex")
 	print("RESEARCH CHECKS: %s" % ("ALL PASSED" if fails == 0 else "%d FAILED" % fails))
 
 

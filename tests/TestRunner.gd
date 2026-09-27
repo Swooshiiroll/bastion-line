@@ -6,6 +6,8 @@ extends Node
 const Game = preload("res://scripts/core/Game.gd")
 const Bot = preload("res://scripts/core/Bot.gd")
 const SaveCodec = preload("res://scripts/core/SaveCodec.gd")
+const Lore = preload("res://scripts/core/Lore.gd")
+const Glossary = preload("res://data/glossary.gd")
 const Grid = preload("res://scripts/core/Grid.gd")
 const Enemy = preload("res://scripts/entities/Enemy.gd")
 const Tower = preload("res://scripts/entities/Tower.gd")
@@ -91,6 +93,7 @@ func _run() -> void:
 		"test_mastery_upgrades",
 		"test_branch_rules",
 		"test_laser_charge_stat",
+		"test_knowledge_base",
 		"test_footprint",
 		"test_target_priority",
 		"test_mastery_needs_all_research",
@@ -1827,6 +1830,30 @@ func test_mastery_needs_all_research() -> void:
 	check(Research.prerequisites_met(["arrow_1", "arrow_2a", "arrow_2b"], "arrow_m"), "with the whole tree it's open")
 	check(Research.prerequisites_met(["arrow_1"], "arrow_2a") and Research.prerequisites_met(["arrow_1"], "arrow_2b"), "branch nodes still need only the root")
 	check(Research.buy_block_reason(["arrow_1", "arrow_2b"], "arrow_m", 99).contains("everything else"), "the reason says what's missing")
+
+
+func test_knowledge_base() -> void:
+	for id in Glossary.ENTRIES:
+		var ge: Dictionary = Glossary.ENTRIES[id]
+		var txt := Lore.text(id)
+		check(str(ge.title) != "" and txt.length() > 40 and not txt.contains("{"), "Codex entry %s has text with its numbers filled in" % id)
+		check(Glossary.CATEGORIES.has(ge.category), "Codex entry %s is in a known category" % id)
+		for s in ge.see:
+			check(Glossary.ENTRIES.has(s), "%s links to %s, which exists" % [id, s])
+	var ability_keys := ["cloaked", "shield", "heal_pct", "split_type", "emp_radius", "burrow_interval", "blink_interval", "regen_pct", "aura_radius", "grant_interval", "spawn_type", "phases", "cc_immune", "stun_immune"]
+	for t in Enemies.ORDER:
+		var d: Dictionary = Enemies.ENEMIES[t]
+		var ab := Lore.enemy_abilities(d)
+		check(not ability_keys.any(func(k): return d.has(k)) or not ab.is_empty(), "the Codex describes %s's abilities" % t)
+		check(not Lore.hitters(d).is_empty(), "the Codex lists towers that can hit %s" % t)
+		for g in Lore.enemy_topics(d):
+			check(Glossary.ENTRIES.has(g), "%s's tip %s exists" % [t, g])
+	check(Lore.enemy_abilities(Enemies.ENEMIES.jammer).any(func(s): return s.contains("95 px") and s.contains("2 s")), "the Jammer's EMP quotes its real numbers")
+	check(Lore.text("sludge").contains("%d%%" % roundi(Game.SLUDGE_SLOW * 100.0)), "glossary numbers come from the game's constants")
+	for t in Towers.ORDER:
+		var rows := Lore.tower_rows(t)
+		check(rows.size() == 2 + 3 * 5, "the Codex lists %s's whole tree (%d rows)" % [t, rows.size()])
+		check(rows.all(func(r): return int(r.cost) > 0 and str(r.blurb) != "" and not (r.stats as Dictionary).is_empty()), "every %s row has a price, description and stats" % t)
 
 
 func test_laser_charge_stat() -> void:

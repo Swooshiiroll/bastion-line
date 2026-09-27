@@ -59,7 +59,7 @@ func _build_ui() -> void:
 	foot.position = Vector2(0, 836)
 	foot.size = Vector2(1600, 20)
 	root.add_child(foot)
-	var ver := UiKit.label("v3.4  -  Godot %s" % Engine.get_version_info().string, 12, UiKit.DIM, HORIZONTAL_ALIGNMENT_RIGHT)
+	var ver := UiKit.label("v3.5  -  Godot %s" % Engine.get_version_info().string, 12, UiKit.DIM, HORIZONTAL_ALIGNMENT_RIGHT)
 	ver.position = Vector2(1220, 872)
 	ver.size = Vector2(364, 20)
 	root.add_child(ver)
@@ -89,6 +89,7 @@ func _fill_buttons() -> void:
 	if avail > 0:
 		lab.add_theme_color_override("font_color", UiKit.GOLD)
 	_buttons.add_child(lab)
+	_buttons.add_child(UiKit.button("Codex", func(): app.show_codex(), Vector2(0, 46), true))
 	_buttons.add_child(UiKit.button("Settings", _on_settings, Vector2(0, 46), true))
 	_buttons.add_child(UiKit.button("Quit", func(): get_tree().quit(), Vector2(0, 46), true))
 	(first if first != null else new_btn).grab_focus.call_deferred()

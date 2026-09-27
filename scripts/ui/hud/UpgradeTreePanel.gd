@@ -44,6 +44,12 @@ func _init(owner_hud, t) -> void:
 
 func _build() -> void:
 	_pos = TRUNK.duplicate()
+	var codex := UiKit.button("Codex  [K]", func():
+		screen.close_popout("tree")
+		screen.toggle_codex(), Vector2(0, 26))
+	codex.tooltip_text = "This tower's full entry in the Codex"
+	codex.add_theme_font_size_override("font_size", 12)
+	header.add_child(codex)
 	for b in Tower.BRANCHES:
 		for k in 4:
 			_pos["%s%d" % [b, k + 1]] = Vector2(COL_X[k], ROW_Y[b])
