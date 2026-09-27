@@ -27,7 +27,10 @@ DIN-style face.
 - **Linux:** `build/linux/BastionLine.x86_64` (about 74 MB, x86_64, game data embedded). Mark it
   executable (`chmod +x`) and run it. Tested on Nobara Linux 44 (KDE). Saves go to
   `~/.local/share/godot/app_userdata/Bastion Line/`.
-- **From source:** double-click `Play.cmd` (Windows) or run `./Play.sh` (Linux), or run `godot --path "C:\Users\anode admin\Documents\TowerDefense"`.
+- **From source** (needs Godot 4.7 installed): double-click `Play.cmd` (Windows) or run `./Play.sh` (Linux).
+  Without Godot, `Play.cmd` runs `build\BastionLine.exe` if it has been built, and otherwise explains
+  where to download the standalone build. A clone of the repo has no exe, because builds live on the
+  GitHub releases page.
 - **To edit:** `godot --path "C:\Users\anode admin\Documents\TowerDefense" --editor`, then press F5 to run.
 
 Both the exe and the source build share the same saves and profile.
