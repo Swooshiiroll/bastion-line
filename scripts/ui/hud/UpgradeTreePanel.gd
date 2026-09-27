@@ -124,6 +124,9 @@ func _state(id: String) -> String:
 			return "owned"
 		return "next" if gold >= t.upgrade_cost() else "short"
 	var d: int = t.depth[b]
+	# The secondary stops at its cap once a primary is locked in.
+	if t.locked_in() and b != t.primary() and k > Tower.SECONDARY_CAP:
+		return "owned" if d >= k else "blocked"
 	if k == 5:
 		if t.mastered and t.primary() == b:
 			return "owned"

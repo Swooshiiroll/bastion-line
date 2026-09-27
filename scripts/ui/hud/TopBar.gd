@@ -22,6 +22,9 @@ var next_box: HBoxContainer
 var start_btn: Button
 var speed_btn: Button
 var auto_btn: Button
+## Enemy types shown in the NEXT strip before it collapses the rest into "+N".
+const NEXT_TYPES := 4
+
 var shop_btn: Button
 var research_btn: Button
 var _next_key := ""
@@ -69,11 +72,12 @@ func _ready() -> void:
 	row.add_child(_icon_value(func(ci): Draw.shield(ci, ci.size / 2.0, 8.0, UiKit.ACCENT), "lives"))
 	row.add_child(_icon_value(func(ci): Draw.coin(ci, ci.size / 2.0, 8.0), "gold"))
 
-	next_btn = UiKit.button("", Callable(screen, "toggle_intel"), Vector2(190, 30))
+	next_btn = UiKit.button("", Callable(screen, "toggle_intel"), Vector2(300, 30))
+	next_btn.clip_contents = true
 	next_btn.tooltip_text = "Next round. Click (or N) for full intel."
-	next_box = UiKit.hbox(8)
+	next_box = UiKit.hbox(6)
 	next_box.position = Vector2(8, 3)
-	next_box.size = Vector2(176, 24)
+	next_box.size = Vector2(286, 24)
 	next_box.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	next_btn.add_child(next_box)
 	row.add_child(next_btn)
@@ -166,15 +170,17 @@ func _refresh_next(g) -> void:
 			counts[grp.t] = 0
 			order.append(grp.t)
 		counts[grp.t] += int(grp.n)
-	for et in order.slice(0, 4):
+	for et in order.slice(0, NEXT_TYPES):
 		var ed: Dictionary = Enemies.ENEMIES[et]
 		var etype: String = et
 		var boss: bool = ed.get("boss", false)
 		var item := UiKit.hbox(1)
 		item.mouse_filter = Control.MOUSE_FILTER_IGNORE
-		item.add_child(DrawControl.new(func(ci): Draw.enemy(ci, etype, ci.size / 2.0, Vector2.RIGHT, float(ed.radius), 0.0, false, 0.0, 0.42 if boss else 0.8), Vector2(22, 24)))
+		item.add_child(DrawControl.new(func(ci): Draw.enemy(ci, etype, ci.size / 2.0, Vector2.RIGHT, float(ed.radius), 0.0, false, 0.0, 0.4 if boss else 0.75), Vector2(20, 24)))
 		item.add_child(UiKit.label("×%d" % counts[et], 12, UiKit.BAD if boss else UiKit.TEXT))
 		next_box.add_child(item)
+	if order.size() > NEXT_TYPES:
+		next_box.add_child(UiKit.label("+%d" % (order.size() - NEXT_TYPES), 12, UiKit.DIM))
 
 
 ## Spans the whole window width at its top edge (the layout itself is centred).

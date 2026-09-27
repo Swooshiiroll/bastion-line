@@ -49,6 +49,8 @@ const SLUDGE := Color(0.30, 0.85, 0.50)
 const SHOCK := Color(1.0, 0.88, 0.30)
 
 var grid
+## Rubble cells the player has cleared (the game's own `cleared` dictionary), drawn as open floor.
+var cleared := {}
 
 
 static func palette(theme_name: String) -> Dictionary:
@@ -111,15 +113,11 @@ func _draw() -> void:
 			_floor_tile(c, pal)
 			if not margin_lanes.has(c) and hash01(x, y, 23) > 0.8:
 				_prop(Grid.cell_center(c), pal, hash01(x, y, 7))
+	# Floor everywhere, lanes included: the rounded lanes are drawn over it, and the corners of lane
+	# tiles they don't cover show plain floor.
 	for y in Grid.ROWS:
 		for x in Grid.COLS:
-			var c := Vector2i(x, y)
-			if grid.path_cells.has(c):
-				continue
-			_floor_tile(c, pal)
-	# Lane beds under the lanes (fill the tile corners the rounded lanes don't cover).
-	for c in grid.path_cells:
-		draw_rect(Grid.cell_rect(c), (pal.lane as Color).lerp(pal.a, 0.35))
+			_floor_tile(Vector2i(x, y), pal)
 	# Dim everything outside the build zone.
 	var outer := Rect2(Vector2(-MARGIN_COLS, -MARGIN_ROWS) * Grid.TILE, Grid.field_size() + Vector2(MARGIN_COLS * 2, MARGIN_ROWS * 2) * Grid.TILE)
 	var dim := Color(0.0, 0.01, 0.02, 0.38)
@@ -135,7 +133,8 @@ func _draw() -> void:
 			"P":
 				_power_socket(c, pal)
 			"R":
-				_rubble(c, pal)
+				if not cleared.has(c):
+					_rubble(c, pal)
 			"#":
 				_prop(Grid.cell_center(c), pal, hash01(c.x, c.y, 7))
 	for group in grid.groups:
@@ -217,32 +216,74 @@ func _draw_lanes(pal: Dictionary) -> void:
 			acc_d += seg
 		draw_polyline(pts, Color(1, 1, 1, 0.03), 3.0, true)
 		draw_polyline(pts, Color(edge, 0.06), 1.0, true)
+	# Hazard bases follow the lane's centre line, so they bend with it around rounded corners.
+	for run in _hazard_runs("sludge"):
+		draw_polyline(run, Color(0.08, 0.25, 0.14, 0.9), 36.0)
+	for run in _hazard_runs("shock"):
+		for k in 3:
+			var strip := _offset_line(run, (float(k) - 1.0) * 11.0)
+			draw_polyline(strip, Color(0.35, 0.3, 0.1), 3.0, true)
+			draw_polyline(strip, Color(SHOCK, 0.35), 1.0, true)
 	for c in grid.hazards:
-		var r := Grid.cell_rect(c)
-		var ctr := r.get_center()
+		var frame := lane_frame(grid, c)
+		var ctr: Vector2 = frame[0]
+		var dir: Vector2 = frame[1]
 		if grid.hazards[c] == "sludge":
-			draw_rect(Rect2(ctr - Vector2(24, 18), Vector2(48, 36)) if _horizontal(c) else Rect2(ctr - Vector2(18, 24), Vector2(36, 48)), Color(0.08, 0.25, 0.14, 0.9))
 			for k in 3:
-				var p := ctr + Vector2(hash01(c.x, c.y, 40 + k) * 30.0 - 15.0, hash01(c.x, c.y, 50 + k) * 24.0 - 12.0)
+				var p := ctr + dir * (hash01(c.x, c.y, 40 + k) * 26.0 - 13.0) + dir.orthogonal() * (hash01(c.x, c.y, 50 + k) * 20.0 - 10.0)
 				draw_circle(p, 3.0 + 3.0 * hash01(c.x, c.y, 60 + k), Color(SLUDGE, 0.35))
 		else:
-			var horiz := _horizontal(c)
-			for k in 3:
-				var off := (float(k) - 1.0) * 11.0
-				if horiz:
-					draw_line(Vector2(r.position.x, ctr.y + off), Vector2(r.end.x, ctr.y + off), Color(0.35, 0.3, 0.1), 3.0)
-					draw_line(Vector2(r.position.x, ctr.y + off), Vector2(r.end.x, ctr.y + off), Color(SHOCK, 0.35), 1.0)
-				else:
-					draw_line(Vector2(ctr.x + off, r.position.y), Vector2(ctr.x + off, r.end.y), Color(0.35, 0.3, 0.1), 3.0)
-					draw_line(Vector2(ctr.x + off, r.position.y), Vector2(ctr.x + off, r.end.y), Color(SHOCK, 0.35), 1.0)
 			for k in 2:
-				var cp := ctr + (Vector2(12.0 * (float(k) * 2.0 - 1.0), 0) if horiz else Vector2(0, 12.0 * (float(k) * 2.0 - 1.0)))
+				var cp := ctr + dir * 12.0 * (float(k) * 2.0 - 1.0)
 				draw_circle(cp, 3.5, Color(0.2, 0.18, 0.06))
 				draw_circle(cp, 2.0, Color(SHOCK, 0.6))
 
 
-func _horizontal(c: Vector2i) -> bool:
-	return grid.path_cells.has(c + Vector2i.LEFT) or grid.path_cells.has(c + Vector2i.RIGHT)
+## The lane's centre line through hazard cells of one kind, as runs of consecutive route points.
+func _hazard_runs(kind: String) -> Array:
+	var runs: Array = []
+	for curve in grid.ground_paths:
+		var run := PackedVector2Array()
+		for p in (curve as Curve2D).get_baked_points():
+			if str(grid.hazards.get(Grid.world_to_cell(p), "")) == kind:
+				run.append(p)
+			else:
+				if run.size() > 1:
+					runs.append(run)
+				run = PackedVector2Array()
+		if run.size() > 1:
+			runs.append(run)
+	return runs
+
+
+## A polyline shifted sideways by `dist` (along each point's normal).
+static func _offset_line(pts: PackedVector2Array, dist: float) -> PackedVector2Array:
+	var out := PackedVector2Array()
+	for i in pts.size():
+		var a: Vector2 = pts[maxi(0, i - 1)]
+		var b: Vector2 = pts[mini(pts.size() - 1, i + 1)]
+		var n := (b - a).normalized().orthogonal() if a.distance_squared_to(b) > 0.0001 else Vector2.ZERO
+		out.append(pts[i] + n * dist)
+	return out
+
+
+## Where the lane runs through a cell: the closest point on any ground route to the cell's centre
+## and the route's direction there. Hazard details use it so they sit on the lane at corners too.
+static func lane_frame(g, c: Vector2i) -> Array:
+	var ctr := Grid.cell_center(c)
+	var best := [ctr, Vector2.RIGHT]
+	var best_d := INF
+	for curve in g.ground_paths:
+		var cv: Curve2D = curve
+		var off := cv.get_closest_offset(ctr)
+		var p := cv.sample_baked(off)
+		var d := p.distance_squared_to(ctr)
+		if d < best_d:
+			best_d = d
+			var a := cv.sample_baked(maxf(0.0, off - 4.0))
+			var b := cv.sample_baked(minf(cv.get_baked_length(), off + 4.0))
+			best = [p, (b - a).normalized() if a.distance_squared_to(b) > 0.0001 else Vector2.RIGHT]
+	return best
 
 
 func _plate_detail(r: Rect2, c: Vector2i, pal: Dictionary) -> void:

@@ -55,6 +55,7 @@ func setup(g) -> void:
 		child.queue_free()
 	terrain = Terrain.new()
 	terrain.grid = g.grid
+	terrain.cleared = g.cleared
 	add_child(terrain)
 	lane_fx = LaneFx.new()
 	lane_fx.grid = g.grid
@@ -201,6 +202,7 @@ func _visual(ev: Dictionary) -> void:
 			fx.ring(ev.pos, 12.0, ev.radius, fcol, 0.45, 2.0, true)
 			fx.burst(ev.pos, fcol, 6, 70.0, 2.0, 0.5)
 		"rubble_cleared":
+			terrain.queue_redraw()
 			ground_fx.burst(ev.pos, Color(0.45, 0.4, 0.35, 0.9), 18, 90.0, 3.5, 0.7)
 			fx.ring(ev.pos, 6.0, 30.0, Color(1.0, 0.8, 0.4), 0.3, 2.0)
 		"gate":

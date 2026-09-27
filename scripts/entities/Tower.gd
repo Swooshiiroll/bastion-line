@@ -232,8 +232,10 @@ func block_reason(key: String) -> String:
 		return ""
 	if d == 0 and started.size() >= 2:
 		return "Locked: two branches are already started"
-	if locked_in() and key != primary():
-		return "Blocked: branch %s is the primary" % primary().to_upper()
+	# Once a primary is locked in, the other started branch stays a secondary: it can still reach
+	# its cap of two upgrades, but no further.
+	if locked_in() and key != primary() and d >= SECONDARY_CAP:
+		return "Blocked: the secondary is capped at %d upgrades" % SECONDARY_CAP
 	return ""
 
 

@@ -464,6 +464,9 @@ func _field_checks() -> void:
 	await _shot("18b_rubble_hover")
 	await _click(rub_pos)
 	fails += _expect(not g.has_rubble(rub) and g.gold == gold_before_rubble - 40, "clicking rubble clears it for 40 cr")
+	fails += _expect(screen.world.terrain.cleared.has(rub), "the terrain stops drawing cleared rubble")
+	await _wait(0.2)
+	await _shot("18b2_rubble_cleared")
 	await _key(KEY_1)
 	await _hover(screen.world.base_pos + Grid.cell_center(Vector2i(11, 5)))
 	await _wait(0.3)
@@ -493,6 +496,13 @@ func _popout_checks() -> void:
 	var g = screen.game
 	var hud = screen.hud
 	await _shot("16_hud_idle")
+	# A late round lists many enemy types: the NEXT strip must fit its button.
+	g.wave = 59
+	await _wait(0.2)
+	fails += _expect(hud.top.next_box.get_combined_minimum_size().x <= hud.top.next_btn.size.x - 8, "the NEXT strip fits its button on a crowded round (%d of %d px)" % [hud.top.next_box.get_combined_minimum_size().x, hud.top.next_btn.size.x])
+	await _shot("16a_next_strip_crowded")
+	g.wave = 0
+	await _wait(0.2)
 	await _key(KEY_B)
 	fails += _expect(hud.is_open("shop"), "B opens the shop")
 	await _wait(0.3)
@@ -538,6 +548,26 @@ func _popout_checks() -> void:
 	await _click(tree.node_buttons["b4"].get_global_rect().get_center())
 	await _click(tree.node_buttons["bm"].get_global_rect().get_center())
 	fails += _expect(int(tw.depth.b) == 4 and not tw.mastered, "a mastery without research can't be bought")
+	# The playtest case: the primary locks in while the secondary has only one upgrade.
+	g.gold += 3000
+	var sa = g.place_tower("sensor", Vector2i(12, 1))
+	_grow(g, sa, "Tacaa")
+	await _key(KEY_ESCAPE)
+	screen.world.selected_tower = sa
+	await _key(KEY_E)
+	await _wait(0.3)
+	var stree = hud.popout("tree")
+	await _click(stree.node_buttons["c2"].get_global_rect().get_center())
+	fails += _expect(int(sa.depth.c) == 2 and sa.locked_in(), "the tree buys the secondary's second upgrade after the primary locks in")
+	await _click(stree.node_buttons["c3"].get_global_rect().get_center())
+	fails += _expect(int(sa.depth.c) == 2, "the secondary stops at 2")
+	await _wait(0.2)
+	await _shot("16d2_tree_secondary")
+	await _key(KEY_ESCAPE)
+	screen.world.selected_tower = tw
+	await _key(KEY_E)
+	await _wait(0.3)
+	tree = hud.popout("tree")
 	var hover := InputEventMouseMotion.new()
 	hover.position = get_viewport().get_final_transform() * (tree.node_buttons["bm"].get_global_rect().get_center() + UiKit.view_offset())
 	hover.global_position = hover.position

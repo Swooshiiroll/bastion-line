@@ -1769,9 +1769,20 @@ func test_branch_rules() -> void:
 	check(g.upgrade_tower(t, "b") and g.upgrade_tower(t, "a"), "both branches can reach two upgrades")
 	check(t.primary() == "a" and not t.locked_in(), "nothing is locked in at 2 and 2 (the first started leads)")
 	check(g.upgrade_tower(t, "a") and t.primary() == "a" and t.locked_in(), "the first third upgrade makes the primary")
-	check(not g.upgrade_tower(t, "b") and t.block_reason("b").contains("Blocked"), "the secondary is then blocked")
+	check(not g.upgrade_tower(t, "b") and t.block_reason("b").contains("Blocked"), "a secondary already at its cap of 2 is then blocked")
 	check(g.upgrade_tower(t, "a") and t.depth.a == 4, "the primary climbs on")
 	check(g.upgrade_tower(t, "a") and t.mastered and t.tier == 4, "and takes its mastery")
+	# The playtest case: the primary locks in while the secondary has only one upgrade. The secondary
+	# can still take its second, then stops; the third branch stays locked.
+	var s = g.place_tower("sensor", Vector2i(12, 1))
+	for k in "Tacaa":
+		g.upgrade_tower(s, "" if k == "T" else k)
+	check(int(s.depth.a) == 3 and int(s.depth.c) == 1 and s.locked_in() and s.primary() == "a", "Sensor Array: primary A at 3, secondary C at 1")
+	check(s.can_buy("c") and g.upgrade_tower(s, "c") and int(s.depth.c) == 2, "the secondary can still take its second upgrade after the primary locks in")
+	check(not g.upgrade_tower(s, "c") and s.block_reason("c").contains("capped"), "then it stops at its cap of 2")
+	check(s.block_reason("b").contains("Locked"), "the third branch is still locked")
+	var sln := Tower.lines("sensor")
+	check(near(float(s.base_stats().range), float(sln.a[3].range) + float(sln.c[2].range) - float(sln.t2.range)), "the secondary's second upgrade counts in the stats")
 	# Stats: primary line plus the secondary's difference from Tier 2.
 	var ln := Tower.lines("arrow")
 	var expect_dmg := float(ln.a_m.damage) + float(ln.b[2].damage) - float(ln.t2.damage)

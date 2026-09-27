@@ -13,6 +13,7 @@ const GOLD := Color(1.0, 0.78, 0.3)
 var world
 var grid
 var _power: Array = []
+## Per hazard cell: [cell, lane point, lane direction] (see Terrain.lane_frame).
 var _sludge: Array = []
 var _shock: Array = []
 var _props: Array = []
@@ -34,7 +35,8 @@ func _ready() -> void:
 			"#":
 				_props.append(c)
 	for c in grid.hazards:
-		(_sludge if grid.hazards[c] == "sludge" else _shock).append(c)
+		var frame := Terrain.lane_frame(grid, c)
+		(_sludge if grid.hazards[c] == "sludge" else _shock).append([c, frame[0], frame[1]])
 	for y in Grid.ROWS:
 		for x in Grid.COLS:
 			var c := Vector2i(x, y)
@@ -65,29 +67,29 @@ func _draw() -> void:
 		var p := 0.5 + 0.5 * sin(t * 2.6 + float(c.x))
 		draw_circle(ctr, 10.0 + 3.0 * p, Color(GOLD, 0.10 + 0.08 * p))
 		Draw.glow_dot(self, ctr, 3.0 + p, Color(GOLD, 0.9))
-	for c in _sludge:
-		var ctr := Grid.cell_center(c)
+	for h in _sludge:
+		var c: Vector2i = h[0]
+		var ctr: Vector2 = h[1]
+		var dir: Vector2 = h[2]
 		for k in 3:
 			var ph := fmod(t * 0.6 + Terrain.hash01(c.x, c.y, k), 1.0)
-			var p := ctr + Vector2(Terrain.hash01(c.x, c.y, 30 + k) * 28.0 - 14.0, Terrain.hash01(c.x, c.y, 40 + k) * 20.0 - 10.0)
+			var p := ctr + dir * (Terrain.hash01(c.x, c.y, 30 + k) * 26.0 - 13.0) + dir.orthogonal() * (Terrain.hash01(c.x, c.y, 40 + k) * 20.0 - 10.0)
 			draw_arc(p, 1.5 + 4.0 * ph, 0.0, TAU, 10, Color(Terrain.SLUDGE, 0.5 * (1.0 - ph)), 1.2, true)
-	for c in _shock:
+	for h in _shock:
+		var c: Vector2i = h[0]
+		var ctr: Vector2 = h[1]
+		var dir: Vector2 = h[2]
 		var slot := int(t * 9.0 + float(c.x * 3 + c.y * 7))
 		if slot % 4 != 0:
 			continue
-		var ctr := Grid.cell_center(c)
 		var pts := PackedVector2Array()
 		for k in 5:
 			var f := float(k) / 4.0
 			var jitter := (Terrain.hash01(slot, c.x * 31 + c.y, k) - 0.5) * 16.0
-			pts.append(ctr + Vector2(-20.0 + 40.0 * f, jitter) if _horizontal(c) else ctr + Vector2(jitter, -20.0 + 40.0 * f))
+			pts.append(ctr + dir * (-20.0 + 40.0 * f) + dir.orthogonal() * jitter)
 		draw_polyline(pts, Color(Terrain.SHOCK, 0.8), 1.6, true)
 	for g in _gates:
 		_gate(g, t)
-
-
-func _horizontal(c: Vector2i) -> bool:
-	return grid.path_cells.has(c + Vector2i.LEFT) or grid.path_cells.has(c + Vector2i.RIGHT)
 
 
 ## A switch gate: a housing on the fork tile with one arrow per branch, lit when that branch is
