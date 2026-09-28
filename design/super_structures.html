@@ -1,7 +1,12 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Bastion Line Super Structures</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<style>
+<style id="page-css">
   :root {
     color-scheme: dark;
     --ground: #070b10; --panel: #0d1620; --panel-2: #111e2a; --rule: #1d3a4b; --wire: #2a5a70;
@@ -41,8 +46,8 @@
   .s-body { display: grid; grid-template-columns: minmax(230px, 280px) 1fr; gap: 18px; align-items: start; }
   .left { display: grid; gap: 12px; }
   .recipe { margin: 0; display: grid; gap: 6px; }
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border: 1px dashed var(--wire); border-radius: 3px; aspect-ratio: 1 / 1; max-width: 100%; }
-  .tile { background: var(--panel-2); border: 1px solid color-mix(in srgb, var(--tw) 45%, var(--rule)); border-radius: 2px; display: grid; place-items: center; gap: 6px;
+  .grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 4px; padding: 4px; border: 1px dashed var(--wire); border-radius: 3px; aspect-ratio: 1 / 1; max-width: 100%; }
+  .tile { min-width: 0; background: var(--panel-2); border: 1px solid color-mix(in srgb, var(--tw) 45%, var(--rule)); border-radius: 2px; display: grid; place-items: center; gap: 6px;
     align-content: center; text-align: center; padding: 6px; font: 600 12.5px/1.2 var(--display); letter-spacing: .03em; color: var(--tw); }
   .tile i { width: 22px; height: 22px; background: var(--tw); opacity: .85; clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%); }
   figcaption { font: 500 12px var(--mono); color: var(--faint); }
@@ -68,321 +73,292 @@
   @media (max-width: 1100px) { .cards { grid-template-columns: 1fr 1fr; } }
   @media (max-width: 760px) { .s-body { grid-template-columns: 1fr; } .grid2 { max-width: 260px; } .cards { grid-template-columns: 1fr; } }
   @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
+  .tile .kit-select { width: 100%; min-width: 0; }
+  figcaption .kit-select { max-width: 100%; }
+  /* ---- Page kit: editing ---- */
+  :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  body { margin: 0; }
+  [hidden] { display: none !important; }
+  .kit-bar { position: fixed; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 20; display: flex; gap: 8px; align-items: center;
+    flex-wrap: wrap; justify-content: flex-end; max-width: calc(100vw - 32px); background: var(--panel); border: 1px solid var(--wire); border-radius: 4px;
+    padding: 8px 10px; box-shadow: 0 10px 30px rgba(0, 0, 0, .55); font: 500 12.5px var(--body); color: var(--dim); }
+  .kit-bar button { font: 600 12px var(--display); letter-spacing: .08em; text-transform: uppercase; padding: 6px 12px; border-radius: 3px;
+    border: 1px solid var(--wire); background: var(--panel-2); color: var(--text); cursor: pointer; }
+  .kit-bar button[data-act="next"] { color: var(--new); border-color: color-mix(in srgb, var(--new) 45%, var(--wire)); text-transform: none; letter-spacing: .02em; }
+  .kit-bar button.primary { background: var(--accent); color: var(--ground); border-color: var(--accent); }
+  .kit-bar button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+  .kit-bar button:disabled { opacity: .5; cursor: default; }
+  .kit-bar button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .kit-msg { max-width: 42ch; }
+  body.editing [data-edit] { outline: 1px dashed color-mix(in srgb, var(--accent) 40%, transparent); outline-offset: 2px; border-radius: 2px; cursor: text; }
+  body.editing [data-edit]:hover { outline-color: var(--accent); }
+  body.editing [data-edit]:focus { outline: 2px solid var(--accent); background: color-mix(in srgb, var(--accent) 8%, transparent); }
+  body.editing [data-edit].bad { outline: 2px solid #ff5d6c; }
+  [data-was] { text-decoration: underline 2px color-mix(in srgb, var(--new) 75%, transparent); text-underline-offset: 3px; }
+  ul[data-was] li, .stats-edit[data-was] { border-color: color-mix(in srgb, var(--new) 60%, var(--rule)); }
+  .card:has([data-was]) header .tag::after { content: " · edited"; color: var(--new); }
+  .flash { animation: kit-flash 1.2s ease-out; }
+  @keyframes kit-flash { from { background: color-mix(in srgb, var(--new) 30%, transparent); } }
+  .stats-edit { margin: 0; font: 400 12px/1.45 var(--mono); color: var(--text); }
+  .answer-in { display: block; width: 100%; min-height: 3.2em; resize: vertical; margin-top: 5px; padding: 6px 8px; background: var(--panel-2); color: var(--text);
+    border: 1px solid var(--wire); border-radius: 3px; font: 13px/1.45 var(--body); }
+  .answer-in:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .answer { margin: 5px 0 2px; color: var(--text); border-left: 2px solid var(--new); padding-left: 8px; }
+  .answer b { font: 600 10.5px var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--new); margin-right: 8px; }
+  .kit-select { font: 600 12px var(--display); background: var(--panel-2); color: var(--text); border: 1px solid var(--wire); border-radius: 3px; padding: 3px 4px; max-width: 100%; }
+  @media (prefers-reduced-motion: reduce) { .flash { animation: none; } }
 </style>
-<div class="wrap">
-  <header class="top">
-    <span class="eyebrow">Bastion Line · design draft</span>
-    <h1>Super Structures</h1>
-    <p class="lede">Four specific towers in a 2×2 block, each with its primary locked in, merge into one Super Structure with its own two-branch tree. Six recipes for review; edit <code>design/super_structures.md</code> and the page regenerates from it.</p>
-    <div class="counts"><span><b>6</b> structures</span><span><b>54</b> nodes</span><span><b>13</b> of 15 towers used</span></div>
-  </header>
-  <nav class="bar" aria-label="Structures"><a class="chip" href="#railstorm" style="--c1:#73ff8c"><i></i>Railstorm Citadel</a><a class="chip" href="#aegis_bastion" style="--c1:#8cd9ff"><i></i>Aegis Bastion</a><a class="chip" href="#sunforge" style="--c1:#ff4d59"><i></i>Sunforge</a><a class="chip" href="#sky_fortress" style="--c1:#d9ff73"><i></i>Sky Fortress</a><a class="chip" href="#null_spire" style="--c1:#c8b6ff"><i></i>Null Spire</a><a class="chip" href="#sentinel" style="--c1:#4de6ff"><i></i>Sentinel Spire</a></nav>
-  <div class="panels"><div class="panel"><h2>Rules</h2><ul><li>A recipe is four specific towers in a 2×2 block, in the layout it asks for. Every one of the four must have its primary locked in (a branch at T3 or beyond); which branches doesn't matter.</li><li>When a block matches, selecting any of its towers shows &quot;Merge into &lt;Structure&gt;&quot; in the bottom bar, with the merge price. Merging replaces the four towers with the structure, which takes their 2×2 block. Everything spent on the four towers and the merge counts toward its sell value.</li><li>A structure has two branches (A and B) of three upgrades and a mastery. It commits to one branch: there's no secondary.</li><li>Only one of each structure can stand on the field at a time.</li><li>Structures keep the site bonus rule of other 2×2 towers: a power node or high ground under any of their four tiles counts.</li><li>Merging is unlocked by a Super Structures node in the Command research tree; each structure's mastery needs its own research, like tower masteries.</li><li>A structure can't be split back into its towers. Selling refunds it like any tower.</li></ul></div><div class="panel"><h2>Open questions</h2><ul><li>Should a structure inherit anything from the four towers' primaries (for example a Shredder primary adding shred), or always be the same regardless of how they were upgraded? Drafted as always the same, which is simpler to read and balance.</li><li>Merge prices are drafted at 1,500 to 1,700 credits on top of the four towers. Is merging meant to be a late-game sink (higher) or a mid-game spike (lower)?</li><li>Six recipes cover twelve of the fifteen towers. The Scrapyard and Drone Bay are already 2×2, so they can't sit in a block; the Missile Battery and Plasma Mortar appear twice. More recipes later?</li><li>Research cost for the Super Structures node and the six structure masteries, which also feeds the RP question in the upgrade-trees draft.</li></ul></div></div>
-  <section class="structure" id="railstorm" style="--c1:#73ff8c;--c2:#bf80ff">
-    <header class="s-head"><span class="swatch"></span><div><h3>Railstorm Citadel</h3><p class="role">Railguns charged by arc coils: slugs that tear down a line and shed lightning off everything they pierce.</p></div></header>
-    <div class="s-body">
-      <div class="left"><figure class="recipe"><div class="grid2"><div class="tile" style="--tw:#73ff8c"><i></i><span>Railgun</span></div><div class="tile" style="--tw:#bf80ff"><i></i><span>Arc Coil</span></div><div class="tile" style="--tw:#bf80ff"><i></i><span>Arc Coil</span></div><div class="tile" style="--tw:#73ff8c"><i></i><span>Railgun</span></div></div><figcaption>Matching towers on the diagonals · each tower at T3+</figcaption></figure><article class="card base">
-    <header><span class="tag">Merge price</span><span class="cost">1,600 cr</span></header>
-    <h4>Railstorm Citadel</h4>
-    <ul class="stats"><li>420 dmg</li><li>480 range</li><li>0.6/s</li><li>30 px line</li><li>each hit arcs to 4 enemies for 40%</li></ul>
-    <p class="fx">Fires a charged slug down a line; everything it pierces sheds lightning to the enemies around it.</p>
-  </article></div>
-      <div class="right"><div class="branch"><div class="branch-head"><b>Branch A</b><span>5,900 cr for the whole branch</span></div><div class="cards"><article class="card step">
-    <header><span class="tag">A · T1</span><span class="cost">900 cr</span></header>
-    <h4>Capacitor Banks</h4>
-    <ul class="stats"><li>+80 dmg</li></ul>
-    <p class="fx">Deeper capacitor banks put more energy into every slug.</p>
-  </article><article class="card step">
-    <header><span class="tag">A · T2</span><span class="cost">1,100 cr</span></header>
-    <h4>Twin Rails</h4>
-    <ul class="stats"><li>+0.2/s</li></ul>
-    <p class="fx">A second rail alternates with the first.</p>
-  </article><article class="card step">
-    <header><span class="tag">A · T3</span><span class="cost">1,300 cr</span></header>
-    <h4>Magnetic Lens</h4>
-    <ul class="stats"><li>+60 range</li><li>+10 px line</li></ul>
-    <p class="fx">A longer, wider line.</p>
-  </article><article class="card mastery">
-    <header><span class="tag">A · mastery</span><span class="cost">2,600 cr</span></header>
-    <h4>Railstorm</h4>
-    <ul class="stats"><li>600 dmg</li><li>560 range</li><li>0.8/s</li><li>45 px line</li><li>arcs to 6 enemies for 50%</li><li>arcs stun 0.4 s</li></ul>
-    <p class="fx">Every slug is a storm: its arcs stun everything they touch.</p>
-  </article></div></div><div class="branch"><div class="branch-head"><b>Branch B</b><span>5,900 cr for the whole branch</span></div><div class="cards"><article class="card step">
-    <header><span class="tag">B · T1</span><span class="cost">900 cr</span></header>
-    <h4>Ion Trail</h4>
-    <ul class="stats"><li>leaves a storm along its line for 3 s (30 dmg per tick)</li></ul>
-    <p class="fx">The slug's path keeps crackling after it passes.</p>
-  </article><article class="card step">
-    <header><span class="tag">B · T2</span><span class="cost">1,100 cr</span></header>
-    <h4>Grounding Rods</h4>
-    <ul class="stats"><li>+2 arcs</li></ul>
-    <p class="fx">More enemies share each discharge.</p>
-  </article><article class="card step">
-    <header><span class="tag">B · T3</span><span class="cost">1,300 cr</span></header>
-    <h4>Static Field</h4>
-    <ul class="stats"><li>enemies hit take +15% damage for 3 s</li></ul>
-    <p class="fx">Charged hulls conduct every other tower's damage better.</p>
-  </article><article class="card mastery">
-    <header><span class="tag">B · mastery</span><span class="cost">2,600 cr</span></header>
-    <h4>Thunder Rail</h4>
-    <ul class="stats"><li>450 dmg</li><li>500 range</li><li>0.7/s</li><li>storm lines for 5 s (60 dmg per tick)</li><li>arcs to 8 enemies</li></ul>
-    <p class="fx">Paints the lane with lingering storms.</p>
-  </article></div></div></div>
-    </div>
-  </section><section class="structure" id="aegis_bastion" style="--c1:#8cd9ff;--c2:#9973ff">
-    <header class="s-head"><span class="swatch"></span><div><h3>Aegis Bastion</h3><p class="role">A crowd-control fortress: a huge cryo field that periodically locks everything solid and hurls it back.</p></div></header>
-    <div class="s-body">
-      <div class="left"><figure class="recipe"><div class="grid2"><div class="tile" style="--tw:#8cd9ff"><i></i><span>Cryo Emitter</span></div><div class="tile" style="--tw:#9973ff"><i></i><span>Graviton Projector</span></div><div class="tile" style="--tw:#9973ff"><i></i><span>Graviton Projector</span></div><div class="tile" style="--tw:#8cd9ff"><i></i><span>Cryo Emitter</span></div></div><figcaption>Matching towers on the diagonals · each tower at T3+</figcaption></figure><article class="card base">
-    <header><span class="tag">Merge price</span><span class="cost">1,500 cr</span></header>
-    <h4>Aegis Bastion</h4>
-    <ul class="stats"><li>40 dmg</li><li>200 field</li><li>60% slow</li><li>every 6 s: 1 s freeze and 90 px shove</li></ul>
-    <p class="fx">A cold field that freezes everything inside every six seconds and throws it back down the lane (bosses 30% freeze, 25% shove).</p>
-  </article></div>
-      <div class="right"><div class="branch"><div class="branch-head"><b>Branch A</b><span>5,400 cr for the whole branch</span></div><div class="cards"><article class="card step">
-    <header><span class="tag">A · T1</span><span class="cost">800 cr</span></header>
-    <h4>Deep Cold</h4>
-    <ul class="stats"><li>+20 field</li></ul>
-    <p class="fx">The field reaches further.</p>
-  </article><article class="card step">
-    <header><span class="tag">A · T2</span><span class="cost">1,000 cr</span></header>
-    <h4>Brittle Ice</h4>
-    <ul class="stats"><li>+20% damage taken</li></ul>
-    <p class="fx">Frozen enemies crack under every tower's fire.</p>
-  </article><article class="card step">
-    <header><span class="tag">A · T3</span><span class="cost">1,200 cr</span></header>
-    <h4>Cold Snap</h4>
-    <ul class="stats"><li>freezes every 5 s</li></ul>
-    <p class="fx">The field locks solid more often.</p>
-  </article><article class="card mastery">
-    <header><span class="tag">A · mastery</span><span class="cost">2,400 cr</span></header>
-    <h4>Absolute Bastion</h4>
-    <ul class="stats"><li>60 dmg</li><li>240 field</li><li>70% slow</li><li>+30% damage taken</li><li>every 4 s: 1.5 s freeze</li></ul>
-    <p class="fx">A near-permanent freeze zone.</p>
-  </article></div></div><div class="branch"><div class="branch-head"><b>Branch B</b><span>5,400 cr for the whole branch</span></div><div class="cards"><article class="card step">
-    <header><span class="tag">B · T1</span><span class="cost">800 cr</span></header>
-    <h4>Compression</h4>
-    <ul class="stats"><li>+30 px shove</li></ul>
-    <p class="fx">Harder throws.</p>
-  </article><article class="card step">
-    <header><span class="tag">B · T2</span><span class="cost">1,000 cr</span></header>
-    <h4>Crush Plates</h4>
-    <ul class="stats"><li>+60 dmg</li></ul>
-    <p class="fx">Every pulse crushes as it throws.</p>
-  </article><article class="card step">
-    <header><span class="tag">B · T3</span><span class="cost">1,200 cr</span></header>
-    <h4>Event Rim</h4>
-    <ul class="stats"><li>shoves flyers too</li></ul>
-    <p class="fx">Gravity reaches the air lane.</p>
-  </article><article class="card mastery">
-    <header><span class="tag">B · mastery</span><span class="cost">2,400 cr</span></header>
-    <h4>Orbital Vise</h4>
-    <ul class="stats"><li>140 dmg</li><li>220 field</li><li>50% slow</li><li>every 5 s: 150 px shove and 0.8 s stun</li><li>shoves flyers</li></ul>
-    <p class="fx">Throws everything, flyers included, and stuns it where it lands.</p>
-  </article></div></div></div>
-    </div>
-  </section><section class="structure" id="sunforge" style="--c1:#ff4d59;--c2:#ffb347">
-    <header class="s-head"><span class="swatch"></span><div><h3>Sunforge</h3><p class="role">A solar furnace: a lance from the sky that scorches a stretch of lane and leaves it burning.</p></div></header>
-    <div class="s-body">
-      <div class="left"><figure class="recipe"><div class="grid2"><div class="tile" style="--tw:#ff4d59"><i></i><span>Laser Lance</span></div><div class="tile" style="--tw:#ffb347"><i></i><span>Nova Reactor</span></div><div class="tile" style="--tw:#ff8c33"><i></i><span>Plasma Mortar</span></div><div class="tile" style="--tw:#ff8c33"><i></i><span>Plasma Mortar</span></div></div><figcaption>Any arrangement · each tower at T3+</figcaption></figure><article class="card base">
-    <header><span class="tag">Merge price</span><span class="cost">1,700 cr</span></header>
-    <h4>Sunforge</h4>
-    <ul class="stats"><li>180 dps</li><li>260 range</li><li>ramps to 3×</li><li>the beam burns a 40 px strip of lane (60 burn/s for 4 s)</li></ul>
-    <p class="fx">A focused solar beam that sets the lane under its target on fire.</p>
-  </article></div>
-      <div class="right"><div class="branch"><div class="branch-head"><b>Branch A</b><span>6,400 cr for the whole branch</span></div><div class="cards"><article class="card step">
-    <header><span class="tag">A · T1</span><span class="cost">1,000 cr</span></header>
-    <h4>Focusing Array</h4>
-    <ul class="stats"><li>ramps to 4×</li></ul>
-    <p class="fx">A tighter focus.</p>
-  </article><article class="card step">
-    <header><span class="tag">A · T2</span><span class="cost">1,200 cr</span></header>
-    <h4>Corona Lens</h4>
-    <ul class="stats"><li>+60 dps</li></ul>
-    <p class="fx">Hotter at the core.</p>
-  </article><article class="card step">
-    <header><span class="tag">A · T3</span><span class="cost">1,400 cr</span></header>
-    <h4>Heliostat</h4>
-    <ul class="stats"><li>+60 range</li></ul>
-    <p class="fx">Tracking mirrors reach further.</p>
-  </article><article class="card mastery">
-    <header><span class="tag">A · mastery</span><span class="cost">2,800 cr</span></header>
-    <h4>Star Lance</h4>
-    <ul class="stats"><li>320 dps</li><li>330 range</li><li>ramps to 6×</li><li>the strip burns 100/s for 5 s</li></ul>
-    <p class="fx">A beam that melts bosses and the lane beneath them.</p>
-  </article></div></div><div class="branch"><div class="branch-head"><b>Branch B</b><span>6,400 cr for the whole branch</span></div><div class="cards"><article class="card step">
-    <header><span class="tag">B · T1</span><span class="cost">1,000 cr</span></header>
-    <h4>Fuel Injection</h4>
-    <ul class="stats"><li>+30 burn/s</li></ul>
-    <p class="fx">The fires burn hotter.</p>
-  </article><article class="card step">
-    <header><span class="tag">B · T2</span><span class="cost">1,200 cr</span></header>
-    <h4>Wide Burn</h4>
-    <ul class="stats"><li>+20 px strip</li></ul>
-    <p class="fx">A wider band of fire.</p>
-  </article><article class="card step">
-    <header><span class="tag">B · T3</span><span class="cost">1,400 cr</span></header>
-    <h4>Firewall</h4>
-    <ul class="stats"><li>burning enemies are slowed 20%</li></ul>
-    <p class="fx">The flames drag at everything crossing them.</p>
-  </article><article class="card mastery">
-    <header><span class="tag">B · mastery</span><span class="cost">2,800 cr</span></header>
-    <h4>Inferno Crown</h4>
-    <ul class="stats"><li>220 dps</li><li>280 range</li><li>burns a 70 px strip (140 burn/s for 6 s)</li><li>burning enemies take +20% damage</li></ul>
-    <p class="fx">Turns a whole stretch of lane into a furnace.</p>
-  </article></div></div></div>
-    </div>
-  </section><section class="structure" id="sky_fortress" style="--c1:#d9ff73;--c2:#ffd94d">
-    <header class="s-head"><span class="swatch"></span><div><h3>Sky Fortress</h3><p class="role">An air-defence citadel: a flak curtain on the top row, a homing swarm launcher on the bottom.</p></div></header>
-    <div class="s-body">
-      <div class="left"><figure class="recipe"><div class="grid2"><div class="tile" style="--tw:#d9ff73"><i></i><span>Flak Battery</span></div><div class="tile" style="--tw:#d9ff73"><i></i><span>Flak Battery</span></div><div class="tile" style="--tw:#ffd94d"><i></i><span>Missile Battery</span></div><div class="tile" style="--tw:#ffd94d"><i></i><span>Missile Battery</span></div></div><figcaption>Pairs side by side · each tower at T3+</figcaption></figure><article class="card base">
-    <header><span class="tag">Merge price</span><span class="cost">1,500 cr</span></header>
-    <h4>Sky Fortress</h4>
-    <ul class="stats"><li>70 dmg</li><li>300 range</li><li>4.0/s</li><li>80 burst</li><li>6 missiles every 2 s (60 dmg, 3× vs flyers)</li><li>air only</li></ul>
-    <p class="fx">Flak and missiles together: nothing crosses its sky for long.</p>
-  </article></div>
-      <div class="right"><div class="branch"><div class="branch-head"><b>Branch A</b><span>5,500 cr for the whole branch</span></div><div class="cards"><article class="card step">
-    <header><span class="tag">A · T1</span><span class="cost">800 cr</span></header>
-    <h4>Autoloaders</h4>
-    <ul class="stats"><li>+1.0/s</li></ul>
-    <p class="fx">Faster flak.</p>
-  </article><article class="card step">
-    <header><span class="tag">A · T2</span><span class="cost">1,000 cr</span></header>
-    <h4>Wide Fuses</h4>
-    <ul class="stats"><li>+20 burst</li></ul>
-    <p class="fx">Bigger airbursts.</p>
-  </article><article class="card step">
-    <header><span class="tag">A · T3</span><span class="cost">1,200 cr</span></header>
-    <h4>Shrapnel Veil</h4>
-    <ul class="stats"><li>flyers hit are slowed 30%</li></ul>
-    <p class="fx">Damaged flyers struggle to stay on course.</p>
-  </article><article class="card mastery">
-    <header><span class="tag">A · mastery</span><span class="cost">2,500 cr</span></header>
-    <h4>Iron Heaven</h4>
-    <ul class="stats"><li>100 dmg</li><li>340 range</li><li>6.0/s</li><li>110 burst</li><li>flyers hit take +25% damage</li></ul>
-    <p class="fx">A curtain of flak that leaves flyers crippled.</p>
-  </article></div></div><div class="branch"><div class="branch-head"><b>Branch B</b><span>5,500 cr for the whole branch</span></div><div class="cards"><article class="card step">
-    <header><span class="tag">B · T1</span><span class="cost">800 cr</span></header>
-    <h4>Deep Racks</h4>
-    <ul class="stats"><li>+3 missiles</li></ul>
-    <p class="fx">Bigger salvos.</p>
-  </article><article class="card step">
-    <header><span class="tag">B · T2</span><span class="cost">1,000 cr</span></header>
-    <h4>Seeker Heads</h4>
-    <ul class="stats"><li>missiles retarget</li></ul>
-    <p class="fx">No missile wasted.</p>
-  </article><article class="card step">
-    <header><span class="tag">B · T3</span><span class="cost">1,200 cr</span></header>
-    <h4>Ground Mode</h4>
-    <ul class="stats"><li>missiles hit ground enemies at 50%</li></ul>
-    <p class="fx">The swarm also strikes the lane.</p>
-  </article><article class="card mastery">
-    <header><span class="tag">B · mastery</span><span class="cost">2,500 cr</span></header>
-    <h4>Starfall Battery</h4>
-    <ul class="stats"><li>80 dmg</li><li>320 range</li><li>4.0/s</li><li>14 missiles every 2 s (90 dmg, 3× vs flyers)</li><li>hits ground at 50%</li></ul>
-    <p class="fx">A missile storm for sky and lane alike.</p>
-  </article></div></div></div>
-    </div>
-  </section><section class="structure" id="null_spire" style="--c1:#c8b6ff;--c2:#59ffd9">
-    <header class="s-head"><span class="swatch"></span><div><h3>Null Spire</h3><p class="role">A support spire that tears away every defence in a huge field and drives the towers around it harder.</p></div></header>
-    <div class="s-body">
-      <div class="left"><figure class="recipe"><div class="grid2"><div class="tile" style="--tw:#c8b6ff"><i></i><span>Nullifier</span></div><div class="tile" style="--tw:#c8b6ff"><i></i><span>Nullifier</span></div><div class="tile" style="--tw:#59ffd9"><i></i><span>Sensor Array</span></div><div class="tile" style="--tw:#ff66d9"><i></i><span>Amplifier Pylon</span></div></div><figcaption>Any arrangement · each tower at T3+</figcaption></figure><article class="card base">
-    <header><span class="tag">Merge price</span><span class="cost">1,600 cr</span></header>
-    <h4>Null Spire</h4>
-    <ul class="stats"><li>260 field</li><li>strips 60% of barriers every 2 s</li><li>exposes</li><li>reveals cloaked</li><li>+25% mark</li><li>towers within 180 px deal +25% damage</li></ul>
-    <p class="fx">Strips, reveals and marks everything in a huge field, and boosts the towers around it.</p>
-  </article></div>
-      <div class="right"><div class="branch"><div class="branch-head"><b>Branch A</b><span>5,800 cr for the whole branch</span></div><div class="cards"><article class="card step">
-    <header><span class="tag">A · T1</span><span class="cost">900 cr</span></header>
-    <h4>Silence Coils</h4>
-    <ul class="stats"><li>jams everything</li></ul>
-    <p class="fx">Support enemies go quiet inside the field.</p>
-  </article><article class="card step">
-    <header><span class="tag">A · T2</span><span class="cost">1,100 cr</span></header>
-    <h4>Dead Air</h4>
-    <ul class="stats"><li>suppresses non-bosses for 1 s every pulse</li></ul>
-    <p class="fx">Enemy abilities cut out with every pulse.</p>
-  </article><article class="card step">
-    <header><span class="tag">A · T3</span><span class="cost">1,300 cr</span></header>
-    <h4>Wide Null</h4>
-    <ul class="stats"><li>+40 field</li></ul>
-    <p class="fx">A bigger dead zone.</p>
-  </article><article class="card mastery">
-    <header><span class="tag">A · mastery</span><span class="cost">2,500 cr</span></header>
-    <h4>Absolute Silence</h4>
-    <ul class="stats"><li>320 field</li><li>strips all barriers</li><li>exposes</li><li>jams everything</li><li>suppresses everything (bosses at half)</li><li>+30% mark</li></ul>
-    <p class="fx">Nothing uses an ability or keeps a barrier inside the field.</p>
-  </article></div></div><div class="branch"><div class="branch-head"><b>Branch B</b><span>5,800 cr for the whole branch</span></div><div class="cards"><article class="card step">
-    <header><span class="tag">B · T1</span><span class="cost">900 cr</span></header>
-    <h4>Fire Control</h4>
-    <ul class="stats"><li>+10% tower damage</li></ul>
-    <p class="fx">A stronger boost.</p>
-  </article><article class="card step">
-    <header><span class="tag">B · T2</span><span class="cost">1,100 cr</span></header>
-    <h4>Rangefinders</h4>
-    <ul class="stats"><li>towers in range get +15% range</li></ul>
-    <p class="fx">Boosted towers reach further.</p>
-  </article><article class="card step">
-    <header><span class="tag">B · T3</span><span class="cost">1,300 cr</span></header>
-    <h4>Overclock Link</h4>
-    <ul class="stats"><li>towers in range get +15% speed</li></ul>
-    <p class="fx">Boosted towers fire faster.</p>
-  </article><article class="card mastery">
-    <header><span class="tag">B · mastery</span><span class="cost">2,500 cr</span></header>
-    <h4>Command Spire</h4>
-    <ul class="stats"><li>280 field</li><li>strips 60% of barriers</li><li>exposes</li><li>+30% mark</li><li>towers within 220 px get +40% damage, +25% range, +25% speed</li></ul>
-    <p class="fx">The strongest support in the game.</p>
-  </article></div></div></div>
-    </div>
-  </section><section class="structure" id="sentinel" style="--c1:#4de6ff;--c2:#73ff8c">
-    <header class="s-head"><span class="swatch"></span><div><h3>Sentinel Spire</h3><p class="role">A precision hub: a rotary cannon that shreds armor, with a marksman rail on the bottom row.</p></div></header>
-    <div class="s-body">
-      <div class="left"><figure class="recipe"><div class="grid2"><div class="tile" style="--tw:#4de6ff"><i></i><span>Pulse Turret</span></div><div class="tile" style="--tw:#4de6ff"><i></i><span>Pulse Turret</span></div><div class="tile" style="--tw:#73ff8c"><i></i><span>Railgun</span></div><div class="tile" style="--tw:#73ff8c"><i></i><span>Railgun</span></div></div><figcaption>Pairs side by side · each tower at T3+</figcaption></figure><article class="card base">
-    <header><span class="tag">Merge price</span><span class="cost">1,500 cr</span></header>
-    <h4>Sentinel Spire</h4>
-    <ul class="stats"><li>40 dmg</li><li>260 range</li><li>6.0/s</li><li>shred 2 (max 16)</li><li>every 8th shot is a 300 dmg armor-piercing rail</li></ul>
-    <p class="fx">Shreds armor fast, then finishes targets with a heavy rail.</p>
-  </article></div>
-      <div class="right"><div class="branch"><div class="branch-head"><b>Branch A</b><span>5,400 cr for the whole branch</span></div><div class="cards"><article class="card step">
-    <header><span class="tag">A · T1</span><span class="cost">800 cr</span></header>
-    <h4>Spin-Up</h4>
-    <ul class="stats"><li>+2.0/s</li></ul>
-    <p class="fx">Faster barrels.</p>
-  </article><article class="card step">
-    <header><span class="tag">A · T2</span><span class="cost">1,000 cr</span></header>
-    <h4>Split Feed</h4>
-    <ul class="stats"><li>+1 target</li></ul>
-    <p class="fx">Fires at two targets at once.</p>
-  </article><article class="card step">
-    <header><span class="tag">A · T3</span><span class="cost">1,200 cr</span></header>
-    <h4>Heavy Rounds</h4>
-    <ul class="stats"><li>+10 dmg</li></ul>
-    <p class="fx">Harder-hitting rounds.</p>
-  </article><article class="card mastery">
-    <header><span class="tag">A · mastery</span><span class="cost">2,400 cr</span></header>
-    <h4>Bullet Storm</h4>
-    <ul class="stats"><li>60 dmg</li><li>280 range</li><li>10/s</li><li>3 targets</li><li>shred 3 (max 24)</li></ul>
-    <p class="fx">A wall of shredding fire across three targets.</p>
-  </article></div></div><div class="branch"><div class="branch-head"><b>Branch B</b><span>5,400 cr for the whole branch</span></div><div class="cards"><article class="card step">
-    <header><span class="tag">B · T1</span><span class="cost">800 cr</span></header>
-    <h4>Rail Rhythm</h4>
-    <ul class="stats"><li>a rail every 6th shot</li></ul>
-    <p class="fx">More rails.</p>
-  </article><article class="card step">
-    <header><span class="tag">B · T2</span><span class="cost">1,000 cr</span></header>
-    <h4>Heavy Slugs</h4>
-    <ul class="stats"><li>+200 rail dmg</li></ul>
-    <p class="fx">Much heavier rails.</p>
-  </article><article class="card step">
-    <header><span class="tag">B · T3</span><span class="cost">1,200 cr</span></header>
-    <h4>Finisher</h4>
-    <ul class="stats"><li>rails execute non-bosses below 20%</li></ul>
-    <p class="fx">A rail into a weakened enemy destroys it.</p>
-  </article><article class="card mastery">
-    <header><span class="tag">B · mastery</span><span class="cost">2,400 cr</span></header>
-    <h4>Judgement</h4>
-    <ul class="stats"><li>50 dmg</li><li>320 range</li><li>6.0/s</li><li>every 4th shot is a 700 dmg rail</li><li>executes non-bosses below 25%</li><li>3× vs bosses</li></ul>
-    <p class="fx">A marksman hub that hunts bosses.</p>
-  </article></div></div></div>
-    </div>
-  </section>
-</div>
+</head>
+<body>
+<div id="app"><div class="wrap"><header class="top"><span class="eyebrow">Bastion Line · design draft</span><h1>Super Structures</h1><p class="lede">Four specific towers in a 2×2 block, each with its primary locked in, merge into one Super Structure with its own two-branch tree. Six recipes for review. Built from <code>design/super_structures.md</code>; use Edit (bottom right) to change recipes, names, costs, stats and rules, and to answer the open questions.</p><div class="counts"><span><b>6</b> structures</span><span><b>54</b> nodes</span><span><b>13</b> of 15 towers used</span></div></header><nav class="bar" aria-label="Structures"><a class="chip" href="#railstorm" style="--c1:#73ff8c"><i></i>Railstorm Citadel</a><a class="chip" href="#aegis_bastion" style="--c1:#8cd9ff"><i></i>Aegis Bastion</a><a class="chip" href="#sunforge" style="--c1:#ff4d59"><i></i>Sunforge</a><a class="chip" href="#sky_fortress" style="--c1:#d9ff73"><i></i>Sky Fortress</a><a class="chip" href="#null_spire" style="--c1:#c8b6ff"><i></i>Null Spire</a><a class="chip" href="#sentinel" style="--c1:#4de6ff"><i></i>Sentinel Spire</a></nav><div class="panels"><div class="panel"><h2>Rules</h2><ul><li><span data-edit="panels.0.bullets.0" data-kind="text">A recipe is four specific towers in a 2×2 block, in the layout it asks for. Every one of the four must have its primary locked in (a branch at T3 or beyond); which branches doesn't matter.</span></li><li><span data-edit="panels.0.bullets.1" data-kind="text">When a block matches, selecting any of its towers shows &quot;Merge into &lt;Structure&gt;&quot; in the bottom bar, with the merge price. Merging replaces the four towers with the structure, which takes their 2×2 block. Everything spent on the four towers and the merge counts toward its sell value.</span></li><li><span data-edit="panels.0.bullets.2" data-kind="text">A structure has two branches (A and B) of three upgrades and a mastery. It commits to one branch: there's no secondary.</span></li><li><span data-edit="panels.0.bullets.3" data-kind="text">Only one of each structure can stand on the field at a time.</span></li><li><span data-edit="panels.0.bullets.4" data-kind="text">Structures keep the site bonus rule of other 2×2 towers: a power node or high ground under any of their four tiles counts.</span></li><li><span data-edit="panels.0.bullets.5" data-kind="text">Merging is unlocked by a Super Structures node in the Command research tree; each structure's mastery needs its own research, like tower masteries.</span></li><li><span data-edit="panels.0.bullets.6" data-kind="text">A structure can't be split back into its towers. Selling refunds it like any tower.</span></li></ul></div><div class="panel"><h2>Open questions</h2><ul><li><span data-edit="panels.1.bullets.0" data-kind="text">Should a structure inherit anything from the four towers' primaries (for example a Shredder primary adding shred), or always be the same regardless of how they were upgraded? Drafted as always the same, which is simpler to read and balance.</span></li><li><span data-edit="panels.1.bullets.1" data-kind="text">Merge prices are drafted at 1,500 to 1,700 credits on top of the four towers. Is merging meant to be a late-game sink (higher) or a mid-game spike (lower)?</span></li><li><span data-edit="panels.1.bullets.2" data-kind="text">Six recipes cover twelve of the fifteen towers. The Scrapyard and Drone Bay are already 2×2, so they can't sit in a block; the Missile Battery and Plasma Mortar appear twice. More recipes later?</span></li><li><span data-edit="panels.1.bullets.3" data-kind="text">Research cost for the Super Structures node and the six structure masteries, which also feeds the RP question in the upgrade-trees draft.</span></li></ul></div></div><section class="structure" id="railstorm" style="--c1:#73ff8c;--c2:#bf80ff"><header class="s-head"><span class="swatch"></span><div><h3 data-edit="structures.0.title" data-kind="text">Railstorm Citadel</h3><p class="role" data-edit="structures.0.role" data-kind="text">Railguns charged by arc coils: slugs that tear down a line and shed lightning off everything they pierce.</p></div></header><div class="s-body"><div class="left"><figure class="recipe"><div class="grid2"><div class="tile" style="--tw:#73ff8c"><i></i><span data-edit="structures.0.recipe.0" data-kind="text">Railgun</span></div><div class="tile" style="--tw:#bf80ff"><i></i><span data-edit="structures.0.recipe.1" data-kind="text">Arc Coil</span></div><div class="tile" style="--tw:#bf80ff"><i></i><span data-edit="structures.0.recipe.2" data-kind="text">Arc Coil</span></div><div class="tile" style="--tw:#73ff8c"><i></i><span data-edit="structures.0.recipe.3" data-kind="text">Railgun</span></div></div><figcaption><span data-edit="structures.0.layout" data-kind="text">Matching towers on the diagonals</span> · each tower at T3+</figcaption></figure><article class="card base"><header><span class="tag">Merge price</span><span class="cost"><span data-edit="structures.0.rows.0.cost" data-kind="int">1,600</span> cr</span></header><h4 data-edit="structures.0.rows.0.name" data-kind="text">Railstorm Citadel</h4><ul class="stats" data-edit="structures.0.rows.0.stats" data-kind="list"><li class="">420 dmg</li><li class="">480 range</li><li class="">0.6/s</li><li class="">30 px line</li><li class="">each hit arcs to 4 enemies for 40%</li></ul><p class="fx" data-edit="structures.0.rows.0.effect" data-kind="text">Fires a charged slug down a line; everything it pierces sheds lightning to the enemies around it.</p></article></div><div class="right"><div class="branch"><div class="branch-head"><b>Branch A</b><span>5,900 cr for the whole branch</span></div><div class="cards"><article class="card step"><header><span class="tag">A · T1</span><span class="cost"><span data-edit="structures.0.rows.1.cost" data-kind="int">900</span> cr</span></header><h4 data-edit="structures.0.rows.1.name" data-kind="text">Capacitor Banks</h4><ul class="stats" data-edit="structures.0.rows.1.stats" data-kind="list"><li class="">+80 dmg</li></ul><p class="fx" data-edit="structures.0.rows.1.effect" data-kind="text">Deeper capacitor banks put more energy into every slug.</p></article><article class="card step"><header><span class="tag">A · T2</span><span class="cost"><span data-edit="structures.0.rows.2.cost" data-kind="int">1,100</span> cr</span></header><h4 data-edit="structures.0.rows.2.name" data-kind="text">Twin Rails</h4><ul class="stats" data-edit="structures.0.rows.2.stats" data-kind="list"><li class="">+0.2/s</li></ul><p class="fx" data-edit="structures.0.rows.2.effect" data-kind="text">A second rail alternates with the first.</p></article><article class="card step"><header><span class="tag">A · T3</span><span class="cost"><span data-edit="structures.0.rows.3.cost" data-kind="int">1,300</span> cr</span></header><h4 data-edit="structures.0.rows.3.name" data-kind="text">Magnetic Lens</h4><ul class="stats" data-edit="structures.0.rows.3.stats" data-kind="list"><li class="">+60 range</li><li class="">+10 px line</li></ul><p class="fx" data-edit="structures.0.rows.3.effect" data-kind="text">A longer, wider line.</p></article><article class="card mastery"><header><span class="tag">A · mastery</span><span class="cost"><span data-edit="structures.0.rows.4.cost" data-kind="int">2,600</span> cr</span></header><h4 data-edit="structures.0.rows.4.name" data-kind="text">Railstorm</h4><ul class="stats" data-edit="structures.0.rows.4.stats" data-kind="list"><li class="">600 dmg</li><li class="">560 range</li><li class="">0.8/s</li><li class="">45 px line</li><li class="">arcs to 6 enemies for 50%</li><li class="">arcs stun 0.4 s</li></ul><p class="fx" data-edit="structures.0.rows.4.effect" data-kind="text">Every slug is a storm: its arcs stun everything they touch.</p></article></div></div><div class="branch"><div class="branch-head"><b>Branch B</b><span>5,900 cr for the whole branch</span></div><div class="cards"><article class="card step"><header><span class="tag">B · T1</span><span class="cost"><span data-edit="structures.0.rows.5.cost" data-kind="int">900</span> cr</span></header><h4 data-edit="structures.0.rows.5.name" data-kind="text">Ion Trail</h4><ul class="stats" data-edit="structures.0.rows.5.stats" data-kind="list"><li class="">leaves a storm along its line for 3 s (30 dmg per tick)</li></ul><p class="fx" data-edit="structures.0.rows.5.effect" data-kind="text">The slug's path keeps crackling after it passes.</p></article><article class="card step"><header><span class="tag">B · T2</span><span class="cost"><span data-edit="structures.0.rows.6.cost" data-kind="int">1,100</span> cr</span></header><h4 data-edit="structures.0.rows.6.name" data-kind="text">Grounding Rods</h4><ul class="stats" data-edit="structures.0.rows.6.stats" data-kind="list"><li class="">+2 arcs</li></ul><p class="fx" data-edit="structures.0.rows.6.effect" data-kind="text">More enemies share each discharge.</p></article><article class="card step"><header><span class="tag">B · T3</span><span class="cost"><span data-edit="structures.0.rows.7.cost" data-kind="int">1,300</span> cr</span></header><h4 data-edit="structures.0.rows.7.name" data-kind="text">Static Field</h4><ul class="stats" data-edit="structures.0.rows.7.stats" data-kind="list"><li class="">enemies hit take +15% damage for 3 s</li></ul><p class="fx" data-edit="structures.0.rows.7.effect" data-kind="text">Charged hulls conduct every other tower's damage better.</p></article><article class="card mastery"><header><span class="tag">B · mastery</span><span class="cost"><span data-edit="structures.0.rows.8.cost" data-kind="int">2,600</span> cr</span></header><h4 data-edit="structures.0.rows.8.name" data-kind="text">Thunder Rail</h4><ul class="stats" data-edit="structures.0.rows.8.stats" data-kind="list"><li class="">450 dmg</li><li class="">500 range</li><li class="">0.7/s</li><li class="">storm lines for 5 s (60 dmg per tick)</li><li class="">arcs to 8 enemies</li></ul><p class="fx" data-edit="structures.0.rows.8.effect" data-kind="text">Paints the lane with lingering storms.</p></article></div></div></div></div></section><section class="structure" id="aegis_bastion" style="--c1:#8cd9ff;--c2:#9973ff"><header class="s-head"><span class="swatch"></span><div><h3 data-edit="structures.1.title" data-kind="text">Aegis Bastion</h3><p class="role" data-edit="structures.1.role" data-kind="text">A crowd-control fortress: a huge cryo field that periodically locks everything solid and hurls it back.</p></div></header><div class="s-body"><div class="left"><figure class="recipe"><div class="grid2"><div class="tile" style="--tw:#8cd9ff"><i></i><span data-edit="structures.1.recipe.0" data-kind="text">Cryo Emitter</span></div><div class="tile" style="--tw:#9973ff"><i></i><span data-edit="structures.1.recipe.1" data-kind="text">Graviton Projector</span></div><div class="tile" style="--tw:#9973ff"><i></i><span data-edit="structures.1.recipe.2" data-kind="text">Graviton Projector</span></div><div class="tile" style="--tw:#8cd9ff"><i></i><span data-edit="structures.1.recipe.3" data-kind="text">Cryo Emitter</span></div></div><figcaption><span data-edit="structures.1.layout" data-kind="text">Matching towers on the diagonals</span> · each tower at T3+</figcaption></figure><article class="card base"><header><span class="tag">Merge price</span><span class="cost"><span data-edit="structures.1.rows.0.cost" data-kind="int">1,500</span> cr</span></header><h4 data-edit="structures.1.rows.0.name" data-kind="text">Aegis Bastion</h4><ul class="stats" data-edit="structures.1.rows.0.stats" data-kind="list"><li class="">40 dmg</li><li class="">200 field</li><li class="">60% slow</li><li class="">every 6 s: 1 s freeze and 90 px shove</li></ul><p class="fx" data-edit="structures.1.rows.0.effect" data-kind="text">A cold field that freezes everything inside every six seconds and throws it back down the lane (bosses 30% freeze, 25% shove).</p></article></div><div class="right"><div class="branch"><div class="branch-head"><b>Branch A</b><span>5,400 cr for the whole branch</span></div><div class="cards"><article class="card step"><header><span class="tag">A · T1</span><span class="cost"><span data-edit="structures.1.rows.1.cost" data-kind="int">800</span> cr</span></header><h4 data-edit="structures.1.rows.1.name" data-kind="text">Deep Cold</h4><ul class="stats" data-edit="structures.1.rows.1.stats" data-kind="list"><li class="">+20 field</li></ul><p class="fx" data-edit="structures.1.rows.1.effect" data-kind="text">The field reaches further.</p></article><article class="card step"><header><span class="tag">A · T2</span><span class="cost"><span data-edit="structures.1.rows.2.cost" data-kind="int">1,000</span> cr</span></header><h4 data-edit="structures.1.rows.2.name" data-kind="text">Brittle Ice</h4><ul class="stats" data-edit="structures.1.rows.2.stats" data-kind="list"><li class="">+20% damage taken</li></ul><p class="fx" data-edit="structures.1.rows.2.effect" data-kind="text">Frozen enemies crack under every tower's fire.</p></article><article class="card step"><header><span class="tag">A · T3</span><span class="cost"><span data-edit="structures.1.rows.3.cost" data-kind="int">1,200</span> cr</span></header><h4 data-edit="structures.1.rows.3.name" data-kind="text">Cold Snap</h4><ul class="stats" data-edit="structures.1.rows.3.stats" data-kind="list"><li class="">freezes every 5 s</li></ul><p class="fx" data-edit="structures.1.rows.3.effect" data-kind="text">The field locks solid more often.</p></article><article class="card mastery"><header><span class="tag">A · mastery</span><span class="cost"><span data-edit="structures.1.rows.4.cost" data-kind="int">2,400</span> cr</span></header><h4 data-edit="structures.1.rows.4.name" data-kind="text">Absolute Bastion</h4><ul class="stats" data-edit="structures.1.rows.4.stats" data-kind="list"><li class="">60 dmg</li><li class="">240 field</li><li class="">70% slow</li><li class="">+30% damage taken</li><li class="">every 4 s: 1.5 s freeze</li></ul><p class="fx" data-edit="structures.1.rows.4.effect" data-kind="text">A near-permanent freeze zone.</p></article></div></div><div class="branch"><div class="branch-head"><b>Branch B</b><span>5,400 cr for the whole branch</span></div><div class="cards"><article class="card step"><header><span class="tag">B · T1</span><span class="cost"><span data-edit="structures.1.rows.5.cost" data-kind="int">800</span> cr</span></header><h4 data-edit="structures.1.rows.5.name" data-kind="text">Compression</h4><ul class="stats" data-edit="structures.1.rows.5.stats" data-kind="list"><li class="">+30 px shove</li></ul><p class="fx" data-edit="structures.1.rows.5.effect" data-kind="text">Harder throws.</p></article><article class="card step"><header><span class="tag">B · T2</span><span class="cost"><span data-edit="structures.1.rows.6.cost" data-kind="int">1,000</span> cr</span></header><h4 data-edit="structures.1.rows.6.name" data-kind="text">Crush Plates</h4><ul class="stats" data-edit="structures.1.rows.6.stats" data-kind="list"><li class="">+60 dmg</li></ul><p class="fx" data-edit="structures.1.rows.6.effect" data-kind="text">Every pulse crushes as it throws.</p></article><article class="card step"><header><span class="tag">B · T3</span><span class="cost"><span data-edit="structures.1.rows.7.cost" data-kind="int">1,200</span> cr</span></header><h4 data-edit="structures.1.rows.7.name" data-kind="text">Event Rim</h4><ul class="stats" data-edit="structures.1.rows.7.stats" data-kind="list"><li class="">shoves flyers too</li></ul><p class="fx" data-edit="structures.1.rows.7.effect" data-kind="text">Gravity reaches the air lane.</p></article><article class="card mastery"><header><span class="tag">B · mastery</span><span class="cost"><span data-edit="structures.1.rows.8.cost" data-kind="int">2,400</span> cr</span></header><h4 data-edit="structures.1.rows.8.name" data-kind="text">Orbital Vise</h4><ul class="stats" data-edit="structures.1.rows.8.stats" data-kind="list"><li class="">140 dmg</li><li class="">220 field</li><li class="">50% slow</li><li class="">every 5 s: 150 px shove and 0.8 s stun</li><li class="">shoves flyers</li></ul><p class="fx" data-edit="structures.1.rows.8.effect" data-kind="text">Throws everything, flyers included, and stuns it where it lands.</p></article></div></div></div></div></section><section class="structure" id="sunforge" style="--c1:#ff4d59;--c2:#ffb347"><header class="s-head"><span class="swatch"></span><div><h3 data-edit="structures.2.title" data-kind="text">Sunforge</h3><p class="role" data-edit="structures.2.role" data-kind="text">A solar furnace: a lance from the sky that scorches a stretch of lane and leaves it burning.</p></div></header><div class="s-body"><div class="left"><figure class="recipe"><div class="grid2"><div class="tile" style="--tw:#ff4d59"><i></i><span data-edit="structures.2.recipe.0" data-kind="text">Laser Lance</span></div><div class="tile" style="--tw:#ffb347"><i></i><span data-edit="structures.2.recipe.1" data-kind="text">Nova Reactor</span></div><div class="tile" style="--tw:#ff8c33"><i></i><span data-edit="structures.2.recipe.2" data-kind="text">Plasma Mortar</span></div><div class="tile" style="--tw:#ff8c33"><i></i><span data-edit="structures.2.recipe.3" data-kind="text">Plasma Mortar</span></div></div><figcaption><span data-edit="structures.2.layout" data-kind="text">Any arrangement</span> · each tower at T3+</figcaption></figure><article class="card base"><header><span class="tag">Merge price</span><span class="cost"><span data-edit="structures.2.rows.0.cost" data-kind="int">1,700</span> cr</span></header><h4 data-edit="structures.2.rows.0.name" data-kind="text">Sunforge</h4><ul class="stats" data-edit="structures.2.rows.0.stats" data-kind="list"><li class="">180 dps</li><li class="">260 range</li><li class="">ramps to 3×</li><li class="">the beam burns a 40 px strip of lane (60 burn/s for 4 s)</li></ul><p class="fx" data-edit="structures.2.rows.0.effect" data-kind="text">A focused solar beam that sets the lane under its target on fire.</p></article></div><div class="right"><div class="branch"><div class="branch-head"><b>Branch A</b><span>6,400 cr for the whole branch</span></div><div class="cards"><article class="card step"><header><span class="tag">A · T1</span><span class="cost"><span data-edit="structures.2.rows.1.cost" data-kind="int">1,000</span> cr</span></header><h4 data-edit="structures.2.rows.1.name" data-kind="text">Focusing Array</h4><ul class="stats" data-edit="structures.2.rows.1.stats" data-kind="list"><li class="">ramps to 4×</li></ul><p class="fx" data-edit="structures.2.rows.1.effect" data-kind="text">A tighter focus.</p></article><article class="card step"><header><span class="tag">A · T2</span><span class="cost"><span data-edit="structures.2.rows.2.cost" data-kind="int">1,200</span> cr</span></header><h4 data-edit="structures.2.rows.2.name" data-kind="text">Corona Lens</h4><ul class="stats" data-edit="structures.2.rows.2.stats" data-kind="list"><li class="">+60 dps</li></ul><p class="fx" data-edit="structures.2.rows.2.effect" data-kind="text">Hotter at the core.</p></article><article class="card step"><header><span class="tag">A · T3</span><span class="cost"><span data-edit="structures.2.rows.3.cost" data-kind="int">1,400</span> cr</span></header><h4 data-edit="structures.2.rows.3.name" data-kind="text">Heliostat</h4><ul class="stats" data-edit="structures.2.rows.3.stats" data-kind="list"><li class="">+60 range</li></ul><p class="fx" data-edit="structures.2.rows.3.effect" data-kind="text">Tracking mirrors reach further.</p></article><article class="card mastery"><header><span class="tag">A · mastery</span><span class="cost"><span data-edit="structures.2.rows.4.cost" data-kind="int">2,800</span> cr</span></header><h4 data-edit="structures.2.rows.4.name" data-kind="text">Star Lance</h4><ul class="stats" data-edit="structures.2.rows.4.stats" data-kind="list"><li class="">320 dps</li><li class="">330 range</li><li class="">ramps to 6×</li><li class="">the strip burns 100/s for 5 s</li></ul><p class="fx" data-edit="structures.2.rows.4.effect" data-kind="text">A beam that melts bosses and the lane beneath them.</p></article></div></div><div class="branch"><div class="branch-head"><b>Branch B</b><span>6,400 cr for the whole branch</span></div><div class="cards"><article class="card step"><header><span class="tag">B · T1</span><span class="cost"><span data-edit="structures.2.rows.5.cost" data-kind="int">1,000</span> cr</span></header><h4 data-edit="structures.2.rows.5.name" data-kind="text">Fuel Injection</h4><ul class="stats" data-edit="structures.2.rows.5.stats" data-kind="list"><li class="">+30 burn/s</li></ul><p class="fx" data-edit="structures.2.rows.5.effect" data-kind="text">The fires burn hotter.</p></article><article class="card step"><header><span class="tag">B · T2</span><span class="cost"><span data-edit="structures.2.rows.6.cost" data-kind="int">1,200</span> cr</span></header><h4 data-edit="structures.2.rows.6.name" data-kind="text">Wide Burn</h4><ul class="stats" data-edit="structures.2.rows.6.stats" data-kind="list"><li class="">+20 px strip</li></ul><p class="fx" data-edit="structures.2.rows.6.effect" data-kind="text">A wider band of fire.</p></article><article class="card step"><header><span class="tag">B · T3</span><span class="cost"><span data-edit="structures.2.rows.7.cost" data-kind="int">1,400</span> cr</span></header><h4 data-edit="structures.2.rows.7.name" data-kind="text">Firewall</h4><ul class="stats" data-edit="structures.2.rows.7.stats" data-kind="list"><li class="">burning enemies are slowed 20%</li></ul><p class="fx" data-edit="structures.2.rows.7.effect" data-kind="text">The flames drag at everything crossing them.</p></article><article class="card mastery"><header><span class="tag">B · mastery</span><span class="cost"><span data-edit="structures.2.rows.8.cost" data-kind="int">2,800</span> cr</span></header><h4 data-edit="structures.2.rows.8.name" data-kind="text">Inferno Crown</h4><ul class="stats" data-edit="structures.2.rows.8.stats" data-kind="list"><li class="">220 dps</li><li class="">280 range</li><li class="">burns a 70 px strip (140 burn/s for 6 s)</li><li class="">burning enemies take +20% damage</li></ul><p class="fx" data-edit="structures.2.rows.8.effect" data-kind="text">Turns a whole stretch of lane into a furnace.</p></article></div></div></div></div></section><section class="structure" id="sky_fortress" style="--c1:#d9ff73;--c2:#ffd94d"><header class="s-head"><span class="swatch"></span><div><h3 data-edit="structures.3.title" data-kind="text">Sky Fortress</h3><p class="role" data-edit="structures.3.role" data-kind="text">An air-defence citadel: a flak curtain on the top row, a homing swarm launcher on the bottom.</p></div></header><div class="s-body"><div class="left"><figure class="recipe"><div class="grid2"><div class="tile" style="--tw:#d9ff73"><i></i><span data-edit="structures.3.recipe.0" data-kind="text">Flak Battery</span></div><div class="tile" style="--tw:#d9ff73"><i></i><span data-edit="structures.3.recipe.1" data-kind="text">Flak Battery</span></div><div class="tile" style="--tw:#ffd94d"><i></i><span data-edit="structures.3.recipe.2" data-kind="text">Missile Battery</span></div><div class="tile" style="--tw:#ffd94d"><i></i><span data-edit="structures.3.recipe.3" data-kind="text">Missile Battery</span></div></div><figcaption><span data-edit="structures.3.layout" data-kind="text">Pairs side by side</span> · each tower at T3+</figcaption></figure><article class="card base"><header><span class="tag">Merge price</span><span class="cost"><span data-edit="structures.3.rows.0.cost" data-kind="int">1,500</span> cr</span></header><h4 data-edit="structures.3.rows.0.name" data-kind="text">Sky Fortress</h4><ul class="stats" data-edit="structures.3.rows.0.stats" data-kind="list"><li class="">70 dmg</li><li class="">300 range</li><li class="">4.0/s</li><li class="">80 burst</li><li class="">6 missiles every 2 s (60 dmg, 3× vs flyers)</li><li class="">air only</li></ul><p class="fx" data-edit="structures.3.rows.0.effect" data-kind="text">Flak and missiles together: nothing crosses its sky for long.</p></article></div><div class="right"><div class="branch"><div class="branch-head"><b>Branch A</b><span>5,500 cr for the whole branch</span></div><div class="cards"><article class="card step"><header><span class="tag">A · T1</span><span class="cost"><span data-edit="structures.3.rows.1.cost" data-kind="int">800</span> cr</span></header><h4 data-edit="structures.3.rows.1.name" data-kind="text">Autoloaders</h4><ul class="stats" data-edit="structures.3.rows.1.stats" data-kind="list"><li class="">+1.0/s</li></ul><p class="fx" data-edit="structures.3.rows.1.effect" data-kind="text">Faster flak.</p></article><article class="card step"><header><span class="tag">A · T2</span><span class="cost"><span data-edit="structures.3.rows.2.cost" data-kind="int">1,000</span> cr</span></header><h4 data-edit="structures.3.rows.2.name" data-kind="text">Wide Fuses</h4><ul class="stats" data-edit="structures.3.rows.2.stats" data-kind="list"><li class="">+20 burst</li></ul><p class="fx" data-edit="structures.3.rows.2.effect" data-kind="text">Bigger airbursts.</p></article><article class="card step"><header><span class="tag">A · T3</span><span class="cost"><span data-edit="structures.3.rows.3.cost" data-kind="int">1,200</span> cr</span></header><h4 data-edit="structures.3.rows.3.name" data-kind="text">Shrapnel Veil</h4><ul class="stats" data-edit="structures.3.rows.3.stats" data-kind="list"><li class="">flyers hit are slowed 30%</li></ul><p class="fx" data-edit="structures.3.rows.3.effect" data-kind="text">Damaged flyers struggle to stay on course.</p></article><article class="card mastery"><header><span class="tag">A · mastery</span><span class="cost"><span data-edit="structures.3.rows.4.cost" data-kind="int">2,500</span> cr</span></header><h4 data-edit="structures.3.rows.4.name" data-kind="text">Iron Heaven</h4><ul class="stats" data-edit="structures.3.rows.4.stats" data-kind="list"><li class="">100 dmg</li><li class="">340 range</li><li class="">6.0/s</li><li class="">110 burst</li><li class="">flyers hit take +25% damage</li></ul><p class="fx" data-edit="structures.3.rows.4.effect" data-kind="text">A curtain of flak that leaves flyers crippled.</p></article></div></div><div class="branch"><div class="branch-head"><b>Branch B</b><span>5,500 cr for the whole branch</span></div><div class="cards"><article class="card step"><header><span class="tag">B · T1</span><span class="cost"><span data-edit="structures.3.rows.5.cost" data-kind="int">800</span> cr</span></header><h4 data-edit="structures.3.rows.5.name" data-kind="text">Deep Racks</h4><ul class="stats" data-edit="structures.3.rows.5.stats" data-kind="list"><li class="">+3 missiles</li></ul><p class="fx" data-edit="structures.3.rows.5.effect" data-kind="text">Bigger salvos.</p></article><article class="card step"><header><span class="tag">B · T2</span><span class="cost"><span data-edit="structures.3.rows.6.cost" data-kind="int">1,000</span> cr</span></header><h4 data-edit="structures.3.rows.6.name" data-kind="text">Seeker Heads</h4><ul class="stats" data-edit="structures.3.rows.6.stats" data-kind="list"><li class="">missiles retarget</li></ul><p class="fx" data-edit="structures.3.rows.6.effect" data-kind="text">No missile wasted.</p></article><article class="card step"><header><span class="tag">B · T3</span><span class="cost"><span data-edit="structures.3.rows.7.cost" data-kind="int">1,200</span> cr</span></header><h4 data-edit="structures.3.rows.7.name" data-kind="text">Ground Mode</h4><ul class="stats" data-edit="structures.3.rows.7.stats" data-kind="list"><li class="">missiles hit ground enemies at 50%</li></ul><p class="fx" data-edit="structures.3.rows.7.effect" data-kind="text">The swarm also strikes the lane.</p></article><article class="card mastery"><header><span class="tag">B · mastery</span><span class="cost"><span data-edit="structures.3.rows.8.cost" data-kind="int">2,500</span> cr</span></header><h4 data-edit="structures.3.rows.8.name" data-kind="text">Starfall Battery</h4><ul class="stats" data-edit="structures.3.rows.8.stats" data-kind="list"><li class="">80 dmg</li><li class="">320 range</li><li class="">4.0/s</li><li class="">14 missiles every 2 s (90 dmg, 3× vs flyers)</li><li class="">hits ground at 50%</li></ul><p class="fx" data-edit="structures.3.rows.8.effect" data-kind="text">A missile storm for sky and lane alike.</p></article></div></div></div></div></section><section class="structure" id="null_spire" style="--c1:#c8b6ff;--c2:#59ffd9"><header class="s-head"><span class="swatch"></span><div><h3 data-edit="structures.4.title" data-kind="text">Null Spire</h3><p class="role" data-edit="structures.4.role" data-kind="text">A support spire that tears away every defence in a huge field and drives the towers around it harder.</p></div></header><div class="s-body"><div class="left"><figure class="recipe"><div class="grid2"><div class="tile" style="--tw:#c8b6ff"><i></i><span data-edit="structures.4.recipe.0" data-kind="text">Nullifier</span></div><div class="tile" style="--tw:#c8b6ff"><i></i><span data-edit="structures.4.recipe.1" data-kind="text">Nullifier</span></div><div class="tile" style="--tw:#59ffd9"><i></i><span data-edit="structures.4.recipe.2" data-kind="text">Sensor Array</span></div><div class="tile" style="--tw:#ff66d9"><i></i><span data-edit="structures.4.recipe.3" data-kind="text">Amplifier Pylon</span></div></div><figcaption><span data-edit="structures.4.layout" data-kind="text">Any arrangement</span> · each tower at T3+</figcaption></figure><article class="card base"><header><span class="tag">Merge price</span><span class="cost"><span data-edit="structures.4.rows.0.cost" data-kind="int">1,600</span> cr</span></header><h4 data-edit="structures.4.rows.0.name" data-kind="text">Null Spire</h4><ul class="stats" data-edit="structures.4.rows.0.stats" data-kind="list"><li class="">260 field</li><li class="">strips 60% of barriers every 2 s</li><li class="">exposes</li><li class="">reveals cloaked</li><li class="">+25% mark</li><li class="">towers within 180 px deal +25% damage</li></ul><p class="fx" data-edit="structures.4.rows.0.effect" data-kind="text">Strips, reveals and marks everything in a huge field, and boosts the towers around it.</p></article></div><div class="right"><div class="branch"><div class="branch-head"><b>Branch A</b><span>5,800 cr for the whole branch</span></div><div class="cards"><article class="card step"><header><span class="tag">A · T1</span><span class="cost"><span data-edit="structures.4.rows.1.cost" data-kind="int">900</span> cr</span></header><h4 data-edit="structures.4.rows.1.name" data-kind="text">Silence Coils</h4><ul class="stats" data-edit="structures.4.rows.1.stats" data-kind="list"><li class="">jams everything</li></ul><p class="fx" data-edit="structures.4.rows.1.effect" data-kind="text">Support enemies go quiet inside the field.</p></article><article class="card step"><header><span class="tag">A · T2</span><span class="cost"><span data-edit="structures.4.rows.2.cost" data-kind="int">1,100</span> cr</span></header><h4 data-edit="structures.4.rows.2.name" data-kind="text">Dead Air</h4><ul class="stats" data-edit="structures.4.rows.2.stats" data-kind="list"><li class="">suppresses non-bosses for 1 s every pulse</li></ul><p class="fx" data-edit="structures.4.rows.2.effect" data-kind="text">Enemy abilities cut out with every pulse.</p></article><article class="card step"><header><span class="tag">A · T3</span><span class="cost"><span data-edit="structures.4.rows.3.cost" data-kind="int">1,300</span> cr</span></header><h4 data-edit="structures.4.rows.3.name" data-kind="text">Wide Null</h4><ul class="stats" data-edit="structures.4.rows.3.stats" data-kind="list"><li class="">+40 field</li></ul><p class="fx" data-edit="structures.4.rows.3.effect" data-kind="text">A bigger dead zone.</p></article><article class="card mastery"><header><span class="tag">A · mastery</span><span class="cost"><span data-edit="structures.4.rows.4.cost" data-kind="int">2,500</span> cr</span></header><h4 data-edit="structures.4.rows.4.name" data-kind="text">Absolute Silence</h4><ul class="stats" data-edit="structures.4.rows.4.stats" data-kind="list"><li class="">320 field</li><li class="">strips all barriers</li><li class="">exposes</li><li class="">jams everything</li><li class="">suppresses everything (bosses at half)</li><li class="">+30% mark</li></ul><p class="fx" data-edit="structures.4.rows.4.effect" data-kind="text">Nothing uses an ability or keeps a barrier inside the field.</p></article></div></div><div class="branch"><div class="branch-head"><b>Branch B</b><span>5,800 cr for the whole branch</span></div><div class="cards"><article class="card step"><header><span class="tag">B · T1</span><span class="cost"><span data-edit="structures.4.rows.5.cost" data-kind="int">900</span> cr</span></header><h4 data-edit="structures.4.rows.5.name" data-kind="text">Fire Control</h4><ul class="stats" data-edit="structures.4.rows.5.stats" data-kind="list"><li class="">+10% tower damage</li></ul><p class="fx" data-edit="structures.4.rows.5.effect" data-kind="text">A stronger boost.</p></article><article class="card step"><header><span class="tag">B · T2</span><span class="cost"><span data-edit="structures.4.rows.6.cost" data-kind="int">1,100</span> cr</span></header><h4 data-edit="structures.4.rows.6.name" data-kind="text">Rangefinders</h4><ul class="stats" data-edit="structures.4.rows.6.stats" data-kind="list"><li class="">towers in range get +15% range</li></ul><p class="fx" data-edit="structures.4.rows.6.effect" data-kind="text">Boosted towers reach further.</p></article><article class="card step"><header><span class="tag">B · T3</span><span class="cost"><span data-edit="structures.4.rows.7.cost" data-kind="int">1,300</span> cr</span></header><h4 data-edit="structures.4.rows.7.name" data-kind="text">Overclock Link</h4><ul class="stats" data-edit="structures.4.rows.7.stats" data-kind="list"><li class="">towers in range get +15% speed</li></ul><p class="fx" data-edit="structures.4.rows.7.effect" data-kind="text">Boosted towers fire faster.</p></article><article class="card mastery"><header><span class="tag">B · mastery</span><span class="cost"><span data-edit="structures.4.rows.8.cost" data-kind="int">2,500</span> cr</span></header><h4 data-edit="structures.4.rows.8.name" data-kind="text">Command Spire</h4><ul class="stats" data-edit="structures.4.rows.8.stats" data-kind="list"><li class="">280 field</li><li class="">strips 60% of barriers</li><li class="">exposes</li><li class="">+30% mark</li><li class="">towers within 220 px get +40% damage, +25% range, +25% speed</li></ul><p class="fx" data-edit="structures.4.rows.8.effect" data-kind="text">The strongest support in the game.</p></article></div></div></div></div></section><section class="structure" id="sentinel" style="--c1:#4de6ff;--c2:#73ff8c"><header class="s-head"><span class="swatch"></span><div><h3 data-edit="structures.5.title" data-kind="text">Sentinel Spire</h3><p class="role" data-edit="structures.5.role" data-kind="text">A precision hub: a rotary cannon that shreds armor, with a marksman rail on the bottom row.</p></div></header><div class="s-body"><div class="left"><figure class="recipe"><div class="grid2"><div class="tile" style="--tw:#4de6ff"><i></i><span data-edit="structures.5.recipe.0" data-kind="text">Pulse Turret</span></div><div class="tile" style="--tw:#4de6ff"><i></i><span data-edit="structures.5.recipe.1" data-kind="text">Pulse Turret</span></div><div class="tile" style="--tw:#73ff8c"><i></i><span data-edit="structures.5.recipe.2" data-kind="text">Railgun</span></div><div class="tile" style="--tw:#73ff8c"><i></i><span data-edit="structures.5.recipe.3" data-kind="text">Railgun</span></div></div><figcaption><span data-edit="structures.5.layout" data-kind="text">Pairs side by side</span> · each tower at T3+</figcaption></figure><article class="card base"><header><span class="tag">Merge price</span><span class="cost"><span data-edit="structures.5.rows.0.cost" data-kind="int">1,500</span> cr</span></header><h4 data-edit="structures.5.rows.0.name" data-kind="text">Sentinel Spire</h4><ul class="stats" data-edit="structures.5.rows.0.stats" data-kind="list"><li class="">40 dmg</li><li class="">260 range</li><li class="">6.0/s</li><li class="">shred 2 (max 16)</li><li class="">every 8th shot is a 300 dmg armor-piercing rail</li></ul><p class="fx" data-edit="structures.5.rows.0.effect" data-kind="text">Shreds armor fast, then finishes targets with a heavy rail.</p></article></div><div class="right"><div class="branch"><div class="branch-head"><b>Branch A</b><span>5,400 cr for the whole branch</span></div><div class="cards"><article class="card step"><header><span class="tag">A · T1</span><span class="cost"><span data-edit="structures.5.rows.1.cost" data-kind="int">800</span> cr</span></header><h4 data-edit="structures.5.rows.1.name" data-kind="text">Spin-Up</h4><ul class="stats" data-edit="structures.5.rows.1.stats" data-kind="list"><li class="">+2.0/s</li></ul><p class="fx" data-edit="structures.5.rows.1.effect" data-kind="text">Faster barrels.</p></article><article class="card step"><header><span class="tag">A · T2</span><span class="cost"><span data-edit="structures.5.rows.2.cost" data-kind="int">1,000</span> cr</span></header><h4 data-edit="structures.5.rows.2.name" data-kind="text">Split Feed</h4><ul class="stats" data-edit="structures.5.rows.2.stats" data-kind="list"><li class="">+1 target</li></ul><p class="fx" data-edit="structures.5.rows.2.effect" data-kind="text">Fires at two targets at once.</p></article><article class="card step"><header><span class="tag">A · T3</span><span class="cost"><span data-edit="structures.5.rows.3.cost" data-kind="int">1,200</span> cr</span></header><h4 data-edit="structures.5.rows.3.name" data-kind="text">Heavy Rounds</h4><ul class="stats" data-edit="structures.5.rows.3.stats" data-kind="list"><li class="">+10 dmg</li></ul><p class="fx" data-edit="structures.5.rows.3.effect" data-kind="text">Harder-hitting rounds.</p></article><article class="card mastery"><header><span class="tag">A · mastery</span><span class="cost"><span data-edit="structures.5.rows.4.cost" data-kind="int">2,400</span> cr</span></header><h4 data-edit="structures.5.rows.4.name" data-kind="text">Bullet Storm</h4><ul class="stats" data-edit="structures.5.rows.4.stats" data-kind="list"><li class="">60 dmg</li><li class="">280 range</li><li class="">10/s</li><li class="">3 targets</li><li class="">shred 3 (max 24)</li></ul><p class="fx" data-edit="structures.5.rows.4.effect" data-kind="text">A wall of shredding fire across three targets.</p></article></div></div><div class="branch"><div class="branch-head"><b>Branch B</b><span>5,400 cr for the whole branch</span></div><div class="cards"><article class="card step"><header><span class="tag">B · T1</span><span class="cost"><span data-edit="structures.5.rows.5.cost" data-kind="int">800</span> cr</span></header><h4 data-edit="structures.5.rows.5.name" data-kind="text">Rail Rhythm</h4><ul class="stats" data-edit="structures.5.rows.5.stats" data-kind="list"><li class="">a rail every 6th shot</li></ul><p class="fx" data-edit="structures.5.rows.5.effect" data-kind="text">More rails.</p></article><article class="card step"><header><span class="tag">B · T2</span><span class="cost"><span data-edit="structures.5.rows.6.cost" data-kind="int">1,000</span> cr</span></header><h4 data-edit="structures.5.rows.6.name" data-kind="text">Heavy Slugs</h4><ul class="stats" data-edit="structures.5.rows.6.stats" data-kind="list"><li class="">+200 rail dmg</li></ul><p class="fx" data-edit="structures.5.rows.6.effect" data-kind="text">Much heavier rails.</p></article><article class="card step"><header><span class="tag">B · T3</span><span class="cost"><span data-edit="structures.5.rows.7.cost" data-kind="int">1,200</span> cr</span></header><h4 data-edit="structures.5.rows.7.name" data-kind="text">Finisher</h4><ul class="stats" data-edit="structures.5.rows.7.stats" data-kind="list"><li class="">rails execute non-bosses below 20%</li></ul><p class="fx" data-edit="structures.5.rows.7.effect" data-kind="text">A rail into a weakened enemy destroys it.</p></article><article class="card mastery"><header><span class="tag">B · mastery</span><span class="cost"><span data-edit="structures.5.rows.8.cost" data-kind="int">2,400</span> cr</span></header><h4 data-edit="structures.5.rows.8.name" data-kind="text">Judgement</h4><ul class="stats" data-edit="structures.5.rows.8.stats" data-kind="list"><li class="">50 dmg</li><li class="">320 range</li><li class="">6.0/s</li><li class="">every 4th shot is a 700 dmg rail</li><li class="">executes non-bosses below 25%</li><li class="">3× vs bosses</li></ul><p class="fx" data-edit="structures.5.rows.8.effect" data-kind="text">A marksman hub that hunts bosses.</p></article></div></div></div></div></section></div></div>
+<script type="application/json" id="page-data">{"kind":"super","pageTitle":"Bastion Line Super Structures","changed":{},"towers":{"arrow":{"name":"Pulse Turret","color":"#4de6ff","size":1},"cannon":{"name":"Plasma Mortar","color":"#ff8c33","size":1},"frost":{"name":"Cryo Emitter","color":"#8cd9ff","size":1},"sniper":{"name":"Railgun","color":"#73ff8c","size":1},"tesla":{"name":"Arc Coil","color":"#bf80ff","size":1},"laser":{"name":"Laser Lance","color":"#ff4d59","size":1},"missile":{"name":"Missile Battery","color":"#ffd94d","size":1},"amp":{"name":"Amplifier Pylon","color":"#ff66d9","size":1},"flak":{"name":"Flak Battery","color":"#d9ff73","size":1},"sensor":{"name":"Sensor Array","color":"#59ffd9","size":1},"gravity":{"name":"Graviton Projector","color":"#9973ff","size":1},"nullifier":{"name":"Nullifier","color":"#c8b6ff","size":1},"nova":{"name":"Nova Reactor","color":"#ffb347","size":1},"drones":{"name":"Drone Bay","color":"#9fe870","size":2},"scrap":{"name":"Scrapyard","color":"#f2b86b","size":2}},"panels":[{"name":"Rules","bullets":["A recipe is four specific towers in a 2×2 block, in the layout it asks for. Every one of the four must have its primary locked in (a branch at T3 or beyond); which branches doesn't matter.","When a block matches, selecting any of its towers shows \"Merge into \u003cStructure>\" in the bottom bar, with the merge price. Merging replaces the four towers with the structure, which takes their 2×2 block. Everything spent on the four towers and the merge counts toward its sell value.","A structure has two branches (A and B) of three upgrades and a mastery. It commits to one branch: there's no secondary.","Only one of each structure can stand on the field at a time.","Structures keep the site bonus rule of other 2×2 towers: a power node or high ground under any of their four tiles counts.","Merging is unlocked by a Super Structures node in the Command research tree; each structure's mastery needs its own research, like tower masteries.","A structure can't be split back into its towers. Selling refunds it like any tower."],"answers":["","","","","","",""]},{"name":"Open questions","bullets":["Should a structure inherit anything from the four towers' primaries (for example a Shredder primary adding shred), or always be the same regardless of how they were upgraded? Drafted as always the same, which is simpler to read and balance.","Merge prices are drafted at 1,500 to 1,700 credits on top of the four towers. Is merging meant to be a late-game sink (higher) or a mid-game spike (lower)?","Six recipes cover twelve of the fifteen towers. The Scrapyard and Drone Bay are already 2×2, so they can't sit in a block; the Missile Battery and Plasma Mortar appear twice. More recipes later?","Research cost for the Super Structures node and the six structure masteries, which also feeds the RP question in the upgrade-trees draft."],"answers":["","","",""]}],"structures":[{"id":"railstorm","title":"Railstorm Citadel","role":"Railguns charged by arc coils: slugs that tear down a line and shed lightning off everything they pierce.","layout":"diagonal","recipe":["sniper","tesla","tesla","sniper"],"rows":[{"tier":"1","path":"base","name":"Railstorm Citadel","cost":1600,"stats":["420 dmg","480 range","0.6/s","30 px line","each hit arcs to 4 enemies for 40%"],"effect":"Fires a charged slug down a line; everything it pierces sheds lightning to the enemies around it."},{"tier":"2","path":"a","name":"Capacitor Banks","cost":900,"stats":["+80 dmg"],"effect":"Deeper capacitor banks put more energy into every slug."},{"tier":"3","path":"a","name":"Twin Rails","cost":1100,"stats":["+0.2/s"],"effect":"A second rail alternates with the first."},{"tier":"4","path":"a","name":"Magnetic Lens","cost":1300,"stats":["+60 range","+10 px line"],"effect":"A longer, wider line."},{"tier":"M","path":"a","name":"Railstorm","cost":2600,"stats":["600 dmg","560 range","0.8/s","45 px line","arcs to 6 enemies for 50%","arcs stun 0.4 s"],"effect":"Every slug is a storm: its arcs stun everything they touch."},{"tier":"2","path":"b","name":"Ion Trail","cost":900,"stats":["leaves a storm along its line for 3 s (30 dmg per tick)"],"effect":"The slug's path keeps crackling after it passes."},{"tier":"3","path":"b","name":"Grounding Rods","cost":1100,"stats":["+2 arcs"],"effect":"More enemies share each discharge."},{"tier":"4","path":"b","name":"Static Field","cost":1300,"stats":["enemies hit take +15% damage for 3 s"],"effect":"Charged hulls conduct every other tower's damage better."},{"tier":"M","path":"b","name":"Thunder Rail","cost":2600,"stats":["450 dmg","500 range","0.7/s","storm lines for 5 s (60 dmg per tick)","arcs to 8 enemies"],"effect":"Paints the lane with lingering storms."}]},{"id":"aegis_bastion","title":"Aegis Bastion","role":"A crowd-control fortress: a huge cryo field that periodically locks everything solid and hurls it back.","layout":"diagonal","recipe":["frost","gravity","gravity","frost"],"rows":[{"tier":"1","path":"base","name":"Aegis Bastion","cost":1500,"stats":["40 dmg","200 field","60% slow","every 6 s: 1 s freeze and 90 px shove"],"effect":"A cold field that freezes everything inside every six seconds and throws it back down the lane (bosses 30% freeze, 25% shove)."},{"tier":"2","path":"a","name":"Deep Cold","cost":800,"stats":["+20 field"],"effect":"The field reaches further."},{"tier":"3","path":"a","name":"Brittle Ice","cost":1000,"stats":["+20% damage taken"],"effect":"Frozen enemies crack under every tower's fire."},{"tier":"4","path":"a","name":"Cold Snap","cost":1200,"stats":["freezes every 5 s"],"effect":"The field locks solid more often."},{"tier":"M","path":"a","name":"Absolute Bastion","cost":2400,"stats":["60 dmg","240 field","70% slow","+30% damage taken","every 4 s: 1.5 s freeze"],"effect":"A near-permanent freeze zone."},{"tier":"2","path":"b","name":"Compression","cost":800,"stats":["+30 px shove"],"effect":"Harder throws."},{"tier":"3","path":"b","name":"Crush Plates","cost":1000,"stats":["+60 dmg"],"effect":"Every pulse crushes as it throws."},{"tier":"4","path":"b","name":"Event Rim","cost":1200,"stats":["shoves flyers too"],"effect":"Gravity reaches the air lane."},{"tier":"M","path":"b","name":"Orbital Vise","cost":2400,"stats":["140 dmg","220 field","50% slow","every 5 s: 150 px shove and 0.8 s stun","shoves flyers"],"effect":"Throws everything, flyers included, and stuns it where it lands."}]},{"id":"sunforge","title":"Sunforge","role":"A solar furnace: a lance from the sky that scorches a stretch of lane and leaves it burning.","layout":"any","recipe":["laser","nova","cannon","cannon"],"rows":[{"tier":"1","path":"base","name":"Sunforge","cost":1700,"stats":["180 dps","260 range","ramps to 3×","the beam burns a 40 px strip of lane (60 burn/s for 4 s)"],"effect":"A focused solar beam that sets the lane under its target on fire."},{"tier":"2","path":"a","name":"Focusing Array","cost":1000,"stats":["ramps to 4×"],"effect":"A tighter focus."},{"tier":"3","path":"a","name":"Corona Lens","cost":1200,"stats":["+60 dps"],"effect":"Hotter at the core."},{"tier":"4","path":"a","name":"Heliostat","cost":1400,"stats":["+60 range"],"effect":"Tracking mirrors reach further."},{"tier":"M","path":"a","name":"Star Lance","cost":2800,"stats":["320 dps","330 range","ramps to 6×","the strip burns 100/s for 5 s"],"effect":"A beam that melts bosses and the lane beneath them."},{"tier":"2","path":"b","name":"Fuel Injection","cost":1000,"stats":["+30 burn/s"],"effect":"The fires burn hotter."},{"tier":"3","path":"b","name":"Wide Burn","cost":1200,"stats":["+20 px strip"],"effect":"A wider band of fire."},{"tier":"4","path":"b","name":"Firewall","cost":1400,"stats":["burning enemies are slowed 20%"],"effect":"The flames drag at everything crossing them."},{"tier":"M","path":"b","name":"Inferno Crown","cost":2800,"stats":["220 dps","280 range","burns a 70 px strip (140 burn/s for 6 s)","burning enemies take +20% damage"],"effect":"Turns a whole stretch of lane into a furnace."}]},{"id":"sky_fortress","title":"Sky Fortress","role":"An air-defence citadel: a flak curtain on the top row, a homing swarm launcher on the bottom.","layout":"pairs","recipe":["flak","flak","missile","missile"],"rows":[{"tier":"1","path":"base","name":"Sky Fortress","cost":1500,"stats":["70 dmg","300 range","4.0/s","80 burst","6 missiles every 2 s (60 dmg, 3× vs flyers)","air only"],"effect":"Flak and missiles together: nothing crosses its sky for long."},{"tier":"2","path":"a","name":"Autoloaders","cost":800,"stats":["+1.0/s"],"effect":"Faster flak."},{"tier":"3","path":"a","name":"Wide Fuses","cost":1000,"stats":["+20 burst"],"effect":"Bigger airbursts."},{"tier":"4","path":"a","name":"Shrapnel Veil","cost":1200,"stats":["flyers hit are slowed 30%"],"effect":"Damaged flyers struggle to stay on course."},{"tier":"M","path":"a","name":"Iron Heaven","cost":2500,"stats":["100 dmg","340 range","6.0/s","110 burst","flyers hit take +25% damage"],"effect":"A curtain of flak that leaves flyers crippled."},{"tier":"2","path":"b","name":"Deep Racks","cost":800,"stats":["+3 missiles"],"effect":"Bigger salvos."},{"tier":"3","path":"b","name":"Seeker Heads","cost":1000,"stats":["missiles retarget"],"effect":"No missile wasted."},{"tier":"4","path":"b","name":"Ground Mode","cost":1200,"stats":["missiles hit ground enemies at 50%"],"effect":"The swarm also strikes the lane."},{"tier":"M","path":"b","name":"Starfall Battery","cost":2500,"stats":["80 dmg","320 range","4.0/s","14 missiles every 2 s (90 dmg, 3× vs flyers)","hits ground at 50%"],"effect":"A missile storm for sky and lane alike."}]},{"id":"null_spire","title":"Null Spire","role":"A support spire that tears away every defence in a huge field and drives the towers around it harder.","layout":"any","recipe":["nullifier","nullifier","sensor","amp"],"rows":[{"tier":"1","path":"base","name":"Null Spire","cost":1600,"stats":["260 field","strips 60% of barriers every 2 s","exposes","reveals cloaked","+25% mark","towers within 180 px deal +25% damage"],"effect":"Strips, reveals and marks everything in a huge field, and boosts the towers around it."},{"tier":"2","path":"a","name":"Silence Coils","cost":900,"stats":["jams everything"],"effect":"Support enemies go quiet inside the field."},{"tier":"3","path":"a","name":"Dead Air","cost":1100,"stats":["suppresses non-bosses for 1 s every pulse"],"effect":"Enemy abilities cut out with every pulse."},{"tier":"4","path":"a","name":"Wide Null","cost":1300,"stats":["+40 field"],"effect":"A bigger dead zone."},{"tier":"M","path":"a","name":"Absolute Silence","cost":2500,"stats":["320 field","strips all barriers","exposes","jams everything","suppresses everything (bosses at half)","+30% mark"],"effect":"Nothing uses an ability or keeps a barrier inside the field."},{"tier":"2","path":"b","name":"Fire Control","cost":900,"stats":["+10% tower damage"],"effect":"A stronger boost."},{"tier":"3","path":"b","name":"Rangefinders","cost":1100,"stats":["towers in range get +15% range"],"effect":"Boosted towers reach further."},{"tier":"4","path":"b","name":"Overclock Link","cost":1300,"stats":["towers in range get +15% speed"],"effect":"Boosted towers fire faster."},{"tier":"M","path":"b","name":"Command Spire","cost":2500,"stats":["280 field","strips 60% of barriers","exposes","+30% mark","towers within 220 px get +40% damage, +25% range, +25% speed"],"effect":"The strongest support in the game."}]},{"id":"sentinel","title":"Sentinel Spire","role":"A precision hub: a rotary cannon that shreds armor, with a marksman rail on the bottom row.","layout":"pairs","recipe":["arrow","arrow","sniper","sniper"],"rows":[{"tier":"1","path":"base","name":"Sentinel Spire","cost":1500,"stats":["40 dmg","260 range","6.0/s","shred 2 (max 16)","every 8th shot is a 300 dmg armor-piercing rail"],"effect":"Shreds armor fast, then finishes targets with a heavy rail."},{"tier":"2","path":"a","name":"Spin-Up","cost":800,"stats":["+2.0/s"],"effect":"Faster barrels."},{"tier":"3","path":"a","name":"Split Feed","cost":1000,"stats":["+1 target"],"effect":"Fires at two targets at once."},{"tier":"4","path":"a","name":"Heavy Rounds","cost":1200,"stats":["+10 dmg"],"effect":"Harder-hitting rounds."},{"tier":"M","path":"a","name":"Bullet Storm","cost":2400,"stats":["60 dmg","280 range","10/s","3 targets","shred 3 (max 24)"],"effect":"A wall of shredding fire across three targets."},{"tier":"2","path":"b","name":"Rail Rhythm","cost":800,"stats":["a rail every 6th shot"],"effect":"More rails."},{"tier":"3","path":"b","name":"Heavy Slugs","cost":1000,"stats":["+200 rail dmg"],"effect":"Much heavier rails."},{"tier":"4","path":"b","name":"Finisher","cost":1200,"stats":["rails execute non-bosses below 20%"],"effect":"A rail into a weakened enemy destroys it."},{"tier":"M","path":"b","name":"Judgement","cost":2400,"stats":["50 dmg","320 range","6.0/s","every 4th shot is a 700 dmg rail","executes non-bosses below 25%","3× vs bosses"],"effect":"A marksman hub that hunts bosses."}]}]}</script>
+<script id="page-js">
+(function () {
+// ---- Super Structures page: renders every recipe and its tree from DATA (design/super_structures.md).
+var DATA = typeof PAGE_DATA !== "undefined" ? PAGE_DATA : JSON.parse(document.getElementById("page-data").textContent);
+var LAYOUT_TEXT = { pairs: "Pairs side by side", diagonal: "Matching towers on the diagonals", any: "Any arrangement" };
+
+function towerColor(D, id) { return (D.towers[id] && D.towers[id].color) || "#888"; }
+function towerName(D, id) { return (D.towers[id] && D.towers[id].name) || id; }
+
+function recipeGrid(D, o, s, si) {
+  var P = "structures." + si + ".";
+  var tiles = s.recipe.map(function (id, k) {
+    var label = o.editing
+      ? '<select class="kit-select"' + ed(D, P + "recipe." + k, "text") + ' aria-label="Recipe tower ' + (k + 1) + '">' +
+        Object.keys(D.towers).filter(function (t) { return D.towers[t].size !== 2; }).map(function (t) {
+          return '<option value="' + esc(t) + '"' + (t === id ? " selected" : "") + ">" + esc(D.towers[t].name) + "</option>";
+        }).join("") + "</select>"
+      : "<span" + ed(D, P + "recipe." + k, "text") + ">" + esc(towerName(D, id)) + "</span>";
+    return '<div class="tile" style="--tw:' + towerColor(D, id) + '"><i></i>' + label + "</div>";
+  }).join("");
+  var layout = o.editing
+    ? '<select class="kit-select"' + ed(D, P + "layout", "text") + ' aria-label="Layout">' + Object.keys(LAYOUT_TEXT).map(function (k) {
+        return '<option value="' + k + '"' + (k === s.layout ? " selected" : "") + ">" + LAYOUT_TEXT[k] + "</option>";
+      }).join("") + "</select>"
+    : "<span" + ed(D, P + "layout", "text") + ">" + esc(LAYOUT_TEXT[s.layout] || s.layout) + "</span>";
+  return '<figure class="recipe"><div class="grid2">' + tiles + "</div><figcaption>" + layout + " · each tower at T3+</figcaption></figure>";
+}
+
+function card(D, o, s, si, r, kind, label) {
+  var P = "structures." + si + ".rows." + s.rows.indexOf(r) + ".";
+  return '<article class="card ' + kind + '"><header><span class="tag">' + label + '</span><span class="cost"><span' + ed(D, P + "cost", "int") + ">" +
+    r.cost.toLocaleString("en-US") + "</span> cr</span></header>" +
+    field(D, o, "h4", "", P + "name", "text", r.name) + statList(D, o, P + "stats", r.stats) + field(D, o, "p", "fx", P + "effect", "text", r.effect) + "</article>";
+}
+
+function branchRow(D, o, s, si, p) {
+  var rows = s.rows.filter(function (r) { return r.path === p; });
+  var total = rows.reduce(function (a, r) { return a + r.cost; }, 0);
+  var cards = ["2", "3", "4", "M"].map(function (t, i) {
+    var r = rows.filter(function (x) { return x.tier === t; })[0];
+    if (!r) return '<div class="card missing">Not drafted</div>';
+    return card(D, o, s, si, r, t === "M" ? "mastery" : "step", t === "M" ? p.toUpperCase() + " · mastery" : p.toUpperCase() + " · T" + (i + 1));
+  }).join("");
+  return '<div class="branch"><div class="branch-head"><b>Branch ' + p.toUpperCase() + "</b><span>" + total.toLocaleString("en-US") +
+    ' cr for the whole branch</span></div><div class="cards">' + cards + "</div></div>";
+}
+
+function structureHtml(D, o, s, si) {
+  var c1 = towerColor(D, s.recipe[0]);
+  var c2 = towerColor(D, s.recipe.filter(function (x) { return x !== s.recipe[0]; })[0] || s.recipe[0]);
+  var base = s.rows.filter(function (r) { return r.tier === "1"; })[0];
+  return '<section class="structure" id="' + esc(s.id) + '" style="--c1:' + c1 + ";--c2:" + c2 + '">' +
+    '<header class="s-head"><span class="swatch"></span><div>' + field(D, o, "h3", "", "structures." + si + ".title", "text", s.title) +
+    field(D, o, "p", "role", "structures." + si + ".role", "text", s.role) + "</div></header>" +
+    '<div class="s-body"><div class="left">' + recipeGrid(D, o, s, si) + (base ? card(D, o, s, si, base, "base", "Merge price") : "") + "</div>" +
+    '<div class="right">' + branchRow(D, o, s, si, "a") + branchRow(D, o, s, si, "b") + "</div></div></section>";
+}
+
+function renderPage(D, o) {
+  o = o || {};
+  var used = {};
+  D.structures.forEach(function (s) { s.recipe.forEach(function (id) { used[id] = 1; }); });
+  var nodes = D.structures.reduce(function (a, s) { return a + s.rows.length; }, 0);
+  return '<div class="wrap"><header class="top"><span class="eyebrow">Bastion Line · design draft</span><h1>Super Structures</h1>' +
+    '<p class="lede">Four specific towers in a 2×2 block, each with its primary locked in, merge into one Super Structure with its own two-branch tree. Six recipes for review. Built from <code>design/super_structures.md</code>; use Edit (bottom right) to change recipes, names, costs, stats and rules, and to answer the open questions.</p>' +
+    '<div class="counts"><span><b>' + D.structures.length + "</b> structures</span><span><b>" + nodes + "</b> nodes</span><span><b>" + Object.keys(used).length + "</b> of " + Object.keys(D.towers).length + " towers used</span></div></header>" +
+    '<nav class="bar" aria-label="Structures">' + D.structures.map(function (s) {
+      return '<a class="chip" href="#' + esc(s.id) + '" style="--c1:' + towerColor(D, s.recipe[0]) + '"><i></i>' + esc(s.title) + "</a>";
+    }).join("") + "</nav>" +
+    '<div class="panels">' + D.panels.map(function (p, pi) {
+      var asks = /question/i.test(p.name);
+      return '<div class="panel"><h2>' + inline(p.name) + "</h2><ul>" + p.bullets.map(function (b, bi) {
+        return "<li>" + field(D, o, "span", "", "panels." + pi + ".bullets." + bi, "text", b) + (asks ? answerBox(D, o, "panels." + pi + ".answers." + bi) : "") + "</li>";
+      }).join("") + "</ul></div>";
+    }).join("") + "</div>" +
+    D.structures.map(function (s, si) { return structureHtml(D, o, s, si); }).join("") + "</div>";
+}
+
+// ---- Page kit (shared by the design pages): in-place editing and saving. -----------------------
+// Runs inside the page's script after the page's own render code, so `DATA`, `renderPage` and
+// `pageBoot` are in scope. The generator also runs this file in Node to build the same document a
+// save produces, which is why nothing here touches `document` until boot().
+var FONTS = '<link rel="preconnect" href="https://fonts.googleapis.com">\n' +
+  '<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">';
+
+function esc(s) { return String(s == null ? "" : s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;"); }
+function inline(s) { return esc(s).replace(/`([^`]+)`/g, "<code>$1</code>"); }
+function getPath(o, p) { return p.split(".").reduce(function (a, k) { return a == null ? a : a[k]; }, o); }
+function setPath(o, p, v) { var ks = p.split("."), last = ks.pop(); var t = ks.reduce(function (a, k) { return a[k]; }, o); t[last] = v; }
+function same(a, b) { return JSON.stringify(a) === JSON.stringify(b); }
+function shown(kind, v) { return kind === "list" ? (v || []).join(" · ") : v == null ? "" : String(v); }
+
+// Attributes for an editable element: its data path, how to read it, and the was-marker if edited.
+function ed(D, path, kind) {
+  var was = D.changed && Object.prototype.hasOwnProperty.call(D.changed, path) ? D.changed[path] : undefined;
+  return ' data-edit="' + esc(path) + '" data-kind="' + (kind || "text") + '"' +
+    (was !== undefined ? ' data-was="' + esc(shown(kind, was)) + '" title="Was: ' + esc(shown(kind, was)) + '"' : "");
+}
+// Text that shows inline markup when viewing and its raw source while editing.
+function field(D, o, tag, cls, path, kind, value) {
+  return "<" + tag + (cls ? ' class="' + cls + '"' : "") + ed(D, path, kind) + ">" + (o.editing ? esc(shown(kind, value)) : inline(shown(kind, value))) + "</" + tag + ">";
+}
+// A stat list: chips when viewing, one " · " separated line while editing.
+function statList(D, o, path, stats, liClass) {
+  if (o.editing) return '<p class="stats-edit"' + ed(D, path, "list") + ">" + esc(stats.join(" · ")) + "</p>";
+  return '<ul class="stats"' + ed(D, path, "list") + ">" + stats.map(function (s) { return '<li class="' + (liClass ? liClass(s) : "") + '">' + inline(s) + "</li>"; }).join("") + "</ul>";
+}
+// An open question's answer box (not part of the markdown; read back by Claude).
+function answerBox(D, o, path) {
+  var v = getPath(D, path) || "";
+  if (o.editing) return '<textarea class="answer-in" rows="2" placeholder="Your answer" data-edit="' + esc(path) + '" data-kind="multiline" data-track="0">' + esc(v) + "</textarea>";
+  return v ? '<p class="answer"><b>Answer</b>' + esc(v).replace(/\n/g, "<br>") + "</p>" : "";
+}
+
+function buildDoc(data, css, js) {
+  return "<!doctype html>\n<html lang=\"en\">\n<head>\n<meta charset=\"utf-8\">\n" +
+    "<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\">\n" +
+    "<title>" + esc(data.pageTitle) + "</title>\n" + FONTS + "\n<style id=\"page-css\">" + css + "</style>\n</head>\n<body>\n" +
+    "<div id=\"app\">" + renderPage(data, {}) + "</div>\n" +
+    "<script type=\"application/json\" id=\"page-data\">" + JSON.stringify(data).replace(/</g, "\\u003c") + "<\/script>\n" +
+    "<script id=\"page-js\">" + js + "<\/script>\n</body>\n</html>\n";
+}
+
+function parseField(kind, raw) {
+  if (kind === "multiline") return raw.replace(/\r/g, "").replace(/[ \t]+\n/g, "\n").trim();
+  var t = raw.replace(/ /g, " ").replace(/\s+/g, " ").trim().replace(/\|/g, "/");
+  if (kind === "int") { var n = t.replace(/[, ]|cr$/gi, ""); return /^\d+$/.test(n) ? parseInt(n, 10) : undefined; }
+  if (kind === "list") return t.split(/\s*·\s*/).filter(Boolean);
+  return t;
+}
+
+function boot() {
+  var app = document.getElementById("app");
+  var st = { editing: false, dirty: false, saving: false, readOnly: false, retried: false, msg: "", art: null };
+  if (!DATA.changed) DATA.changed = {};
+  var bar = document.createElement("div");
+  bar.className = "kit-bar";
+  bar.hidden = true;
+  bar.setAttribute("role", "toolbar");
+  bar.setAttribute("aria-label", "Edit this page");
+  document.body.appendChild(bar);
+
+  function count() { return Object.keys(DATA.changed).length; }
+  function draw() {
+    var y = window.scrollY;
+    app.innerHTML = renderPage(DATA, { editing: st.editing });
+    var editable = st.editing ? ("plaintext-only" in document.body ? "plaintext-only" : "true") : null;
+    app.querySelectorAll("[data-edit]").forEach(function (el) {
+      if (el.tagName === "SELECT" || el.tagName === "TEXTAREA") return;
+      if (editable) { el.contentEditable = editable; el.spellcheck = true; } else el.removeAttribute("contenteditable");
+    });
+    document.body.classList.toggle("editing", st.editing);
+    window.scrollTo(0, y);
+  }
+  function ui() {
+    var n = count();
+    bar.innerHTML =
+      (n ? '<button type="button" data-act="next" title="Jump to the next edited field">' + n + (n === 1 ? " edit" : " edits") + "</button>" : "") +
+      (st.msg ? '<span class="kit-msg" role="status">' + esc(st.msg) + "</span>" : st.dirty ? '<span class="kit-msg" role="status">Unsaved changes</span>' : "") +
+      (st.readOnly ? "" : '<button type="button" data-act="toggle" aria-pressed="' + st.editing + '">' + (st.editing ? "Done" : "Edit") + "</button>") +
+      (st.dirty && !st.readOnly ? '<button type="button" class="primary" data-act="save"' + (st.saving ? " disabled" : "") + ">" + (st.saving ? "Saving…" : "Save") + "</button>" : "");
+  }
+
+  app.addEventListener("input", function (e) {
+    var el = e.target.closest ? e.target.closest("[data-edit]") : null;
+    if (!el || !st.editing) return;
+    var kind = el.dataset.kind || "text";
+    var raw = el.tagName === "SELECT" || el.tagName === "TEXTAREA" ? el.value : el.innerText;
+    var v = parseField(kind, raw);
+    if (v === undefined) { el.classList.add("bad"); return; }
+    el.classList.remove("bad");
+    var path = el.dataset.edit, old = getPath(DATA, path);
+    if (same(old, v)) return;
+    if (el.dataset.track !== "0") {
+      if (!Object.prototype.hasOwnProperty.call(DATA.changed, path)) DATA.changed[path] = old;
+      if (same(DATA.changed[path], v)) delete DATA.changed[path];
+      var was = DATA.changed[path];
+      if (was === undefined) { el.removeAttribute("data-was"); el.removeAttribute("title"); }
+      else { el.setAttribute("data-was", shown(kind, was)); el.title = "Was: " + shown(kind, was); }
+    }
+    setPath(DATA, path, v);
+    st.dirty = true; st.msg = "";
+    ui();
+  });
+  app.addEventListener("keydown", function (e) {
+    var el = e.target.closest ? e.target.closest("[data-edit]") : null;
+    if (el && e.key === "Enter" && el.dataset.kind !== "multiline" && el.tagName !== "SELECT") { e.preventDefault(); el.blur(); }
+    if (el && e.key === "Escape") el.blur();
+  });
+  // Selects fire "change" on some browsers only; route both through the input handler.
+  app.addEventListener("change", function (e) {
+    if (e.target.tagName !== "SELECT") return;
+    var ev = new Event("input", { bubbles: true });
+    e.target.dispatchEvent(ev);
+  });
+
+  var nextIdx = 0;
+  bar.addEventListener("click", function (e) {
+    var b = e.target.closest("button");
+    if (!b) return;
+    var act = b.dataset.act;
+    if (act === "toggle") { st.editing = !st.editing; st.msg = ""; draw(); ui(); }
+    else if (act === "save") save();
+    else if (act === "next") {
+      var els = app.querySelectorAll("[data-was]");
+      if (!els.length) return;
+      var el = els[nextIdx++ % els.length];
+      el.scrollIntoView({ block: "center", behavior: "smooth" });
+      el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
+    }
+  });
+  window.addEventListener("beforeunload", function (e) { if (st.dirty && !st.saving) { e.preventDefault(); e.returnValue = ""; } });
+
+  function save() {
+    if (!st.art || st.saving) return;
+    st.saving = true; st.msg = ""; ui();
+    var css = document.getElementById("page-css").textContent;
+    var js = document.getElementById("page-js").textContent;
+    st.art.publish(buildDoc(DATA, css, js)).then(function () {
+      st.saving = false; st.dirty = false; st.msg = "Saved. Reloading…"; ui();
+    }, function (err) {
+      var c = err && err.code;
+      st.saving = false;
+      if (c === "conflict") st.msg = "A newer version was saved elsewhere; the page is reloading to it, so these edits are lost.";
+      else if (["not_writer", "not_granted", "not_declared", "capability_disabled", "capability_removed", "consent_required"].indexOf(c) >= 0) {
+        st.readOnly = true; st.msg = "This view is read-only, so edits can't be saved here.";
+      } else if (c === "rate_limited") st.msg = "Saving too often. Wait a moment, then Save again.";
+      else if (c === "too_large") st.msg = "The page is too large to save.";
+      else if (!st.retried) { st.retried = true; setTimeout(save, 800 + Math.random() * 1200); st.msg = "Retrying the save…"; }
+      else st.msg = "Couldn't save (" + (c || "error") + "). Your edits are still here; try Save again.";
+      ui();
+    });
+  }
+
+  if (typeof pageBoot === "function") pageBoot();
+  if (window.claude && typeof window.claude.use === "function") {
+    window.claude.use("artifact").then(function (art) {
+      if (!art) return;
+      st.art = art;
+      bar.hidden = false;
+      ui();
+    }, function () {});
+  }
+}
+if (typeof document !== "undefined") boot();
+return { renderPage: renderPage, buildDoc: buildDoc };
+})();
+</script>
+</body>
+</html>

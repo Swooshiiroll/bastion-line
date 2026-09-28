@@ -3,6 +3,7 @@
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+import { buildPage } from "./pages/build.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const src = readFileSync(join(root, "design", "super_structures.md"), "utf8").replace(/\r\n/g, "\n");
@@ -13,8 +14,6 @@ const ACCENT = {
   laser: "#ff4d59", missile: "#ffd94d", amp: "#ff66d9", flak: "#d9ff73", sensor: "#59ffd9",
   gravity: "#9973ff", nullifier: "#c8b6ff", nova: "#ffb347", drones: "#9fe870", scrap: "#f2b86b",
 };
-const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-const inline = (s) => esc(s).replace(/`([^`]+)`/g, "<code>$1</code>");
 
 // Tower display names from the upgrade-trees design file.
 const TOWER_NAME = {};
@@ -52,125 +51,22 @@ for (const line of src.split("\n")) {
 const structures = sections.filter((s) => s.rows.length);
 const panels = sections.filter((s) => !s.rows.length && s.bullets.length);
 
-// --- Render --------------------------------------------------------------------------------------
-const LAYOUT_TEXT = { pairs: "Pairs side by side", diagonal: "Matching towers on the diagonals", any: "Any arrangement" };
-const recipeGrid = (s) => {
-  const ids = (s.meta.recipe || "").split(",").map((x) => x.trim());
-  const tiles = ids.map((id) => `<div class="tile" style="--tw:${ACCENT[id] || "#888"}"><i></i><span>${esc(TOWER_NAME[id] || id)}</span></div>`).join("");
-  return `<figure class="recipe"><div class="grid2">${tiles}</div><figcaption>${esc(LAYOUT_TEXT[s.meta.layout] || s.meta.layout || "")} · each tower at T3+</figcaption></figure>`;
+// --- Page ---------------------------------------------------------------------------------------
+// The page renders itself from this data (tools/pages/super.js) and can be edited in place; a Save
+// republishes it with the edits in `changed`, which tools/design_pull.mjs writes back to the md.
+const TWO_BY_TWO = ["scrap", "drones"]; // already 2x2 (data/towers.gd "size": 2), so never in a recipe
+const data = {
+  kind: "super", pageTitle: "Bastion Line Super Structures", changed: {},
+  towers: Object.fromEntries(Object.entries(TOWER_NAME).map(([id, name]) => [id, { name, color: ACCENT[id] || "#888", size: TWO_BY_TWO.includes(id) ? 2 : 1 }])),
+  panels: panels.map((p) => ({ name: p.title, bullets: p.bullets, answers: p.bullets.map(() => "") })),
+  structures: structures.map((s) => ({
+    id: s.meta.id || s.title, title: s.title, role: s.role, layout: s.meta.layout || "any",
+    recipe: (s.meta.recipe || "").split(",").map((x) => x.trim()).filter(Boolean),
+    rows: s.rows.map((r) => ({ tier: r.tier, path: r.path, name: r.name, cost: r.cost, stats: r.stats, effect: r.effect })),
+  })),
 };
-const card = (r, kind, label) => `<article class="card ${kind}">
-    <header><span class="tag">${label}</span><span class="cost">${r.cost.toLocaleString("en-US")} cr</span></header>
-    <h4>${inline(r.name)}</h4>
-    <ul class="stats">${r.stats.map((x) => `<li>${inline(x)}</li>`).join("")}</ul>
-    <p class="fx">${inline(r.effect)}</p>
-  </article>`;
-const branchRow = (s, p) => {
-  const rows = s.rows.filter((r) => r.path === p);
-  const order = ["2", "3", "4", "M"];
-  const total = rows.reduce((a, r) => a + r.cost, 0);
-  const cards = order.map((t) => rows.find((r) => r.tier === t)).map((r, i) => r ? card(r, r.tier === "M" ? "mastery" : "step", r.tier === "M" ? `${p.toUpperCase()} · mastery` : `${p.toUpperCase()} · T${i + 1}`) : `<div class="card missing">Not drafted</div>`).join("");
-  return `<div class="branch"><div class="branch-head"><b>Branch ${p.toUpperCase()}</b><span>${total.toLocaleString("en-US")} cr for the whole branch</span></div><div class="cards">${cards}</div></div>`;
-};
-const structureHtml = (s) => {
-  const ids = (s.meta.recipe || "").split(",").map((x) => x.trim());
-  const c1 = ACCENT[ids[0]] || "#4de1ff";
-  const c2 = ACCENT[ids.find((x) => x !== ids[0])] || c1;
-  const base = s.rows.find((r) => r.tier === "1");
-  return `<section class="structure" id="${esc(s.meta.id || s.title)}" style="--c1:${c1};--c2:${c2}">
-    <header class="s-head"><span class="swatch"></span><div><h3>${inline(s.title)}</h3><p class="role">${inline(s.role)}</p></div></header>
-    <div class="s-body">
-      <div class="left">${recipeGrid(s)}${base ? card(base, "base", "Merge price") : ""}</div>
-      <div class="right">${branchRow(s, "a")}${branchRow(s, "b")}</div>
-    </div>
-  </section>`;
-};
-const nav = structures.map((s) => `<a class="chip" href="#${esc(s.meta.id)}" style="--c1:${ACCENT[(s.meta.recipe || "").split(",")[0].trim()] || "#4de1ff"}"><i></i>${esc(s.title)}</a>`).join("");
 const nodes = structures.reduce((a, s) => a + s.rows.length, 0);
-
-const html = `<title>Bastion Line Super Structures</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
-<style>
-  :root {
-    color-scheme: dark;
-    --ground: #070b10; --panel: #0d1620; --panel-2: #111e2a; --rule: #1d3a4b; --wire: #2a5a70;
-    --text: #dcedf7; --dim: #86a0b1; --faint: #4f6a7b; --accent: #4de1ff; --gold: #ffc85a;
-    --display: "Chakra Petch", "Bahnschrift", "Segoe UI", sans-serif;
-    --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
-    --mono: "IBM Plex Mono", "Consolas", monospace;
-  }
-  * { box-sizing: border-box; }
-  body { color: var(--text); font: 14px/1.5 var(--body); padding-inline: 16px; padding-block: 0 48px;
-    background: var(--ground) radial-gradient(circle at 1px 1px, #10202b 1px, transparent 1.5px) 0 0 / 24px 24px; }
-  .wrap { max-width: 1480px; margin: 0 auto; }
-  code { font-family: var(--mono); font-size: .92em; }
-  .top { padding-block: 40px 18px; display: grid; gap: 12px; }
-  .eyebrow { font: 600 12px/1 var(--display); letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
-  h1 { font: 700 clamp(28px, 4.2vw, 44px)/1.05 var(--display); margin: 0; text-wrap: balance; letter-spacing: .01em; }
-  .lede { color: var(--dim); max-width: 70ch; margin: 0; }
-  .counts { display: flex; flex-wrap: wrap; gap: 8px 22px; font: 500 13px var(--mono); color: var(--dim); font-variant-numeric: tabular-nums; }
-  .counts b { color: var(--text); font-weight: 500; }
-  .bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: color-mix(in srgb, var(--ground) 92%, transparent);
-    backdrop-filter: blur(6px); border-bottom: 1px solid var(--rule); padding-block: 10px; display: flex; flex-wrap: wrap; gap: 6px; }
-  .chip { font: 600 12px var(--display); letter-spacing: .04em; color: var(--text); text-decoration: none; padding: 5px 10px; border: 1px solid var(--rule);
-    border-radius: 3px; display: inline-flex; gap: 7px; align-items: center; background: var(--panel); }
-  .chip i { width: 8px; height: 8px; border-radius: 1px; background: var(--c1); }
-  .chip:hover, .chip:focus-visible { border-color: var(--c1); outline: none; }
-  .panels { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 520px), 1fr)); gap: 12px; margin-top: 18px; align-items: start; }
-  .panel { border: 1px solid var(--rule); border-left: 3px solid var(--gold); background: var(--panel); padding: 12px 16px; border-radius: 2px; }
-  .panel h2 { font: 600 13px var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--gold); margin: 0 0 6px; }
-  .panel ul { margin: 0; padding-left: 18px; color: var(--dim); display: grid; gap: 4px; max-width: 80ch; }
-  .structure { margin-top: 36px; scroll-margin-top: 64px; }
-  .s-head { display: flex; gap: 12px; align-items: center; border-bottom: 1px solid var(--rule); padding-bottom: 10px; margin-bottom: 14px; }
-  .swatch { width: 16px; height: 16px; flex: none; background: linear-gradient(135deg, var(--c1) 50%, var(--c2) 50%);
-    clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%); }
-  h3 { font: 700 23px/1.1 var(--display); margin: 0; letter-spacing: .02em; background: linear-gradient(90deg, var(--c1), var(--c2));
-    -webkit-background-clip: text; background-clip: text; color: transparent; }
-  .role { margin: 2px 0 0; color: var(--dim); }
-  .s-body { display: grid; grid-template-columns: minmax(230px, 280px) 1fr; gap: 18px; align-items: start; }
-  .left { display: grid; gap: 12px; }
-  .recipe { margin: 0; display: grid; gap: 6px; }
-  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; padding: 4px; border: 1px dashed var(--wire); border-radius: 3px; aspect-ratio: 1 / 1; max-width: 100%; }
-  .tile { background: var(--panel-2); border: 1px solid color-mix(in srgb, var(--tw) 45%, var(--rule)); border-radius: 2px; display: grid; place-items: center; gap: 6px;
-    align-content: center; text-align: center; padding: 6px; font: 600 12.5px/1.2 var(--display); letter-spacing: .03em; color: var(--tw); }
-  .tile i { width: 22px; height: 22px; background: var(--tw); opacity: .85; clip-path: polygon(25% 0, 75% 0, 100% 50%, 75% 100%, 25% 100%, 0 50%); }
-  figcaption { font: 500 12px var(--mono); color: var(--faint); }
-  .right { display: grid; gap: 12px; min-width: 0; }
-  .branch-head { display: flex; gap: 12px; align-items: baseline; margin-bottom: 6px; font-size: 12.5px; color: var(--dim); }
-  .branch-head b { font: 600 13px var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--text); }
-  .cards { display: grid; grid-template-columns: repeat(3, 1fr) 1.3fr; gap: 10px; }
-  .card { background: var(--panel); border: 1px solid var(--rule); border-radius: 3px; padding: 10px 12px 11px; display: grid; gap: 5px; align-content: start; position: relative; }
-  .card::before { content: ""; position: absolute; left: -1px; top: -1px; bottom: -1px; width: 3px; background: linear-gradient(var(--c1), var(--c2)); border-radius: 3px 0 0 3px; }
-  .card header { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
-  .tag { font: 600 10.5px var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
-  .cost { font: 500 12px var(--mono); color: var(--gold); font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .card h4 { margin: 0; font: 600 15px/1.2 var(--display); letter-spacing: .02em; }
-  .card.base h4, .card.mastery h4 { font-size: 17px; }
-  .card.base { border-color: color-mix(in srgb, var(--c1) 40%, var(--rule)); }
-  .card.mastery { background: linear-gradient(180deg, color-mix(in srgb, var(--gold) 7%, var(--panel)), var(--panel)); border-color: color-mix(in srgb, var(--gold) 40%, var(--rule)); }
-  .card.mastery .tag, .card.base .tag { color: var(--gold); }
-  .stats { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 3px 10px; font: 500 12.5px/1.45 var(--mono); color: var(--text); }
-  .fx { margin: 0; color: var(--dim); font-size: 12.5px; }
-  .left, .right, .card, .cards > * { min-width: 0; }
-  .stats li, .fx, .role { overflow-wrap: anywhere; }
-  .missing { color: var(--faint); font-style: italic; }
-  @media (max-width: 1100px) { .cards { grid-template-columns: 1fr 1fr; } }
-  @media (max-width: 760px) { .s-body { grid-template-columns: 1fr; } .grid2 { max-width: 260px; } .cards { grid-template-columns: 1fr; } }
-  @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto; } }
-</style>
-<div class="wrap">
-  <header class="top">
-    <span class="eyebrow">Bastion Line · design draft</span>
-    <h1>Super Structures</h1>
-    <p class="lede">Four specific towers in a 2×2 block, each with its primary locked in, merge into one Super Structure with its own two-branch tree. Six recipes for review; edit <code>design/super_structures.md</code> and the page regenerates from it.</p>
-    <div class="counts"><span><b>${structures.length}</b> structures</span><span><b>${nodes}</b> nodes</span><span><b>${new Set(structures.flatMap((s) => (s.meta.recipe || "").split(",").map((x) => x.trim()))).size}</b> of 15 towers used</span></div>
-  </header>
-  <nav class="bar" aria-label="Structures">${nav}</nav>
-  <div class="panels">${panels.map((p) => `<div class="panel"><h2>${inline(p.title)}</h2><ul>${p.bullets.map((b) => `<li>${inline(b)}</li>`).join("")}</ul></div>`).join("")}</div>
-  ${structures.map(structureHtml).join("")}
-</div>
-`;
+const html = buildPage("super", data);
 writeFileSync(join(root, "design", "super_structures.html"), html);
 console.log(`Wrote design/super_structures.html: ${structures.length} structures, ${nodes} nodes.`);
 for (const s of structures) {
