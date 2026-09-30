@@ -144,13 +144,206 @@ static func box(length: float, half_w: float, back := 0.0) -> PackedVector2Array
 
 
 static func fill(ci: CanvasItem, center: Vector2, pts: PackedVector2Array, color: Color, rot := 0.0, s := 1.0) -> void:
-	ci.draw_colored_polygon(xform(center, pts, rot, s), color)
+	poly(ci, xform(center, pts, rot, s), color)
+
+
+# --- Fast shapes -------------------------------------------------------------------------------
+# In the Compatibility renderer, draw_circle, draw_arc and draw_colored_polygon each allocate GPU
+# buffers as they're recorded (12-30 µs apiece), and the battlefield records thousands of them a
+# frame. These draw the same shapes from cached disc and ring textures, quad primitives and line
+# segments instead (0.5-2 µs). Use them for anything drawn every frame.
+
+const _TEX_SIZES := [8, 16, 32, 64, 128, 256]
+static var _discs := {}
+static var _rings := {}
+## Ring stroke widths (in texels) that get their own texture; others snap to the nearest, so a
+## pulsing or growing ring reuses a few textures instead of making a new one every frame.
+const _RING_TEXELS := [2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96, 127]
+
+
+## Texture size for a shape of radius `r`, with room for up to 3x screen scale (zoom and stretch).
+static func _tex_size(r: float) -> int:
+	for size in _TEX_SIZES:
+		if float(size) >= r * 6.0:
+			return size
+	return _TEX_SIZES[-1]
+
+
+## A white disc, or a ring `width` texels wide, filling a size×size texture with 1-texel soft edges.
+## Solid runs are filled a row span at a time; only edge texels are computed one by one.
+static func _shape_texture(size: int, width := 0) -> Texture2D:
+	var img := Image.create(size, size, false, Image.FORMAT_LA8)
+	var half := float(size) * 0.5
+	var outer := half - 1.0
+	var inner := outer - float(width) if width > 0 else -1.0
+	var white := Color(1, 1, 1, 1)
+	for y in size:
+		var dy := float(y) + 0.5 - half
+		if absf(dy) > outer + 0.5:
+			continue
+		var xo := sqrt(maxf(0.0, (outer + 0.5) * (outer + 0.5) - dy * dy))
+		var x0 := maxi(0, floori(half - xo) - 1)
+		var x1 := mini(size - 1, ceili(half + xo))
+		# Opaque spans: inside outer - 0.5 and (for rings) outside inner + 0.5.
+		var so := sqrt(maxf(0.0, (outer - 0.5) * (outer - 0.5) - dy * dy)) if absf(dy) < outer - 0.5 else -1.0
+		var si := sqrt(maxf(0.0, (inner + 0.5) * (inner + 0.5) - dy * dy)) if inner >= 0.0 and absf(dy) < inner + 0.5 else -1.0
+		for x in range(x0, x1 + 1):
+			var dx := float(x) + 0.5 - half
+			var ax := absf(dx)
+			if so >= 0.0 and ax < so - 1.0 and (si < 0.0 or ax > si + 1.0):
+				img.set_pixel(x, y, white)
+				continue
+			var d := sqrt(dx * dx + dy * dy)
+			var al := clampf(outer - d + 0.5, 0.0, 1.0)
+			if inner >= 0.0:
+				al = minf(al, clampf(d - inner + 0.5, 0.0, 1.0))
+			if al > 0.0:
+				img.set_pixel(x, y, Color(1, 1, 1, al))
+	return ImageTexture.create_from_image(img)
+
+
+## --- Sprite cache: static artwork drawn once into a texture and stamped after that. ------------
+## Cached at 3x so it stays sharp at full zoom on a stretched window. The first frame a key is
+## used the texture is still empty (the viewport renders at the end of that frame).
+const SPRITE_SCALE := 3.0
+const DrawNode = preload("res://scripts/view/DrawNode.gd")
+static var _sprites := {}
+static var _sprite_host: Node = null
+
+
+## Stamps the artwork `painter` draws around (0, 0) within ±`half`, centred on `c`, tinted by
+## `tint`. `key` must identify everything the painter depends on.
+static func cached(ci: CanvasItem, key: String, c: Vector2, half: Vector2, painter: Callable, tint := Color(1, 1, 1)) -> void:
+	var tex: Texture2D = _sprites.get(key)
+	if tex == null:
+		tex = _bake_sprite(half, painter)
+		if tex == null:
+			painter.call(ci, c)
+			return
+		_sprites[key] = tex
+	ci.draw_texture_rect(tex, Rect2(c - half, half * 2.0), false, tint)
+
+
+static func _bake_sprite(half: Vector2, painter: Callable) -> Texture2D:
+	var tree := Engine.get_main_loop() as SceneTree
+	if tree == null or tree.root == null:
+		return null
+	if _sprite_host == null or not is_instance_valid(_sprite_host):
+		_sprite_host = Node.new()
+		_sprite_host.name = "SpriteCache"
+		tree.root.add_child.call_deferred(_sprite_host)
+	var view := SubViewport.new()
+	view.size = Vector2i((half * 2.0 * SPRITE_SCALE).ceil())
+	view.transparent_bg = true
+	view.disable_3d = true
+	view.render_target_update_mode = SubViewport.UPDATE_ONCE
+	var node := DrawNode.new()
+	node.draw_fn = func(n: CanvasItem): painter.call(n, Vector2.ZERO)
+	view.add_child(node)
+	_sprite_host.add_child.call_deferred(view)
+	# Only once the viewport is in the tree does it have a canvas to transform.
+	view.set_deferred("canvas_transform", Transform2D(0.0, Vector2(SPRITE_SCALE, SPRITE_SCALE), 0.0, half * SPRITE_SCALE))
+	return view.get_texture()
+
+
+## Draws a size-`size` shape texture so its outer edge lands on radius (rx, ry) around `c`.
+static func _stamp(ci: CanvasItem, tex: Texture2D, size: int, c: Vector2, rx: float, ry: float, color: Color) -> void:
+	var k := float(size) * 0.5 / (float(size) * 0.5 - 1.0)
+	ci.draw_texture_rect(tex, Rect2(c.x - rx * k, c.y - ry * k, rx * k * 2.0, ry * k * 2.0), false, color)
+
+
+## draw_circle, fast. Unfilled circles draw as a ring.
+static func disc(ci: CanvasItem, c: Vector2, r: float, color: Color, filled := true, width := -1.0, _aa := false) -> void:
+	if r <= 0.0:
+		return
+	if not filled:
+		ring(ci, c, r, color, width if width > 0.0 else 1.0)
+		return
+	var size := _tex_size(r)
+	if not _discs.has(size):
+		_discs[size] = _shape_texture(size)
+	_stamp(ci, _discs[size], size, c, r, r, color)
+
+
+## A full ring of radius `r` (to the middle of its stroke), `width` wide. Rings too thin for the
+## texture fall back to a line loop.
+static func ring(ci: CanvasItem, center: Vector2, r: float, color: Color, width := 1.5) -> void:
+	var w := maxf(width, 1.0)
+	var outer := r + w * 0.5
+	var size := _tex_size(outer)
+	var want := w / outer * (float(size) * 0.5 - 1.0)
+	if want < 1.5:
+		arc(ci, center, r, 0.0, TAU, 32, color, width, true, true)
+		return
+	var texels: int = _RING_TEXELS[-1]
+	for q in _RING_TEXELS:
+		if float(q) >= want * 0.92:
+			texels = q
+			break
+	var key := size * 1000 + texels
+	if not _rings.has(key):
+		_rings[key] = _shape_texture(size, texels)
+	_stamp(ci, _rings[key], size, center, outer, outer, color)
+
+
+## draw_arc, fast: full circles become rings, partial arcs a few antialiased line segments.
+static func arc(ci: CanvasItem, c: Vector2, r: float, a0: float, a1: float, points: int, color: Color, width := -1.0, aa := false, as_lines := false) -> void:
+	var span := a1 - a0
+	if absf(span) >= TAU - 0.001 and not as_lines:
+		ring(ci, c, r, color, width if width > 0.0 else 1.0)
+		return
+	var n := clampi(ceili(absf(span) * r / 6.0), 1, maxi(points - 1, 1))
+	var prev := c + Vector2(cos(a0), sin(a0)) * r
+	for i in range(1, n + 1):
+		var a := a0 + span * float(i) / float(n)
+		var p := c + Vector2(cos(a), sin(a)) * r
+		ci.draw_line(prev, p, color, width, aa)
+		prev = p
+
+
+## draw_colored_polygon, fast for convex shapes (drawn as quads); others fall back to the polygon.
+static func poly(ci: CanvasItem, pts: PackedVector2Array, color: Color) -> void:
+	var n := pts.size()
+	if n < 3:
+		return
+	var turn := 0.0
+	for i in n:
+		var a := pts[i]
+		var b := pts[(i + 1) % n]
+		var d := pts[(i + 2) % n]
+		var cr := (b - a).cross(d - b)
+		if absf(cr) < 1e-6:
+			continue
+		if turn == 0.0:
+			turn = signf(cr)
+		elif signf(cr) != turn:
+			ci.draw_colored_polygon(pts, color)
+			return
+	var cols := PackedColorArray([color])
+	var none := PackedVector2Array()
+	var i := 1
+	while i < n - 1:
+		if i + 2 < n:
+			ci.draw_primitive(PackedVector2Array([pts[0], pts[i], pts[i + 1], pts[i + 2]]), cols, none)
+			i += 2
+		else:
+			ci.draw_primitive(PackedVector2Array([pts[0], pts[i], pts[i + 1]]), cols, none)
+			i += 1
+
+
+## draw_polyline, fast for short lines (separate segments); long ones stay one polyline.
+static func polyline(ci: CanvasItem, pts: PackedVector2Array, color: Color, width := -1.0, aa := false) -> void:
+	if pts.size() > 9:
+		ci.draw_polyline(pts, color, width, aa)
+		return
+	for k in pts.size() - 1:
+		ci.draw_line(pts[k], pts[k + 1], color, width, aa)
 
 
 static func outline(ci: CanvasItem, center: Vector2, pts: PackedVector2Array, color: Color, width: float, rot := 0.0, s := 1.0) -> void:
 	var p := xform(center, pts, rot, s)
 	p.append(p[0])
-	ci.draw_polyline(p, color, width, true)
+	polyline(ci, p, color, width, true)
 
 
 ## Filled polygon with a dark outline. `line_w` is in pixels, independent of the polygon scale `s`.
@@ -160,29 +353,24 @@ static func solid(ci: CanvasItem, center: Vector2, pts: PackedVector2Array, colo
 
 
 static func ellipse(ci: CanvasItem, center: Vector2, rx: float, ry: float, color: Color) -> void:
-	var pts := PackedVector2Array()
-	for i in 18:
-		var a := TAU * float(i) / 18.0
-		pts.append(center + Vector2(cos(a) * rx, sin(a) * ry))
-	ci.draw_colored_polygon(pts, color)
+	var size := _tex_size(maxf(rx, ry))
+	if not _discs.has(size):
+		_discs[size] = _shape_texture(size)
+	_stamp(ci, _discs[size], size, center, rx, ry, color)
 
 
 static func glow_dot(ci: CanvasItem, c: Vector2, r: float, color: Color) -> void:
-	ci.draw_circle(c, r * 2.2, Color(color, 0.18))
-	ci.draw_circle(c, r * 1.4, Color(color, 0.35))
-	ci.draw_circle(c, r, color)
-	ci.draw_circle(c, r * 0.45, Color(1, 1, 1, 0.9))
-
-
-static func ring(ci: CanvasItem, center: Vector2, r: float, color: Color, width := 1.5) -> void:
-	ci.draw_arc(center, r, 0.0, TAU, 32, color, width, true)
+	disc(ci, c, r * 2.2, Color(color, 0.18))
+	disc(ci, c, r * 1.4, Color(color, 0.35))
+	disc(ci, c, r, color)
+	disc(ci, c, r * 0.45, Color(1, 1, 1, 0.9))
 
 
 static func arc_segments(ci: CanvasItem, c: Vector2, r: float, count: int, gap: float, rot: float, color: Color, width: float) -> void:
 	var span := TAU / float(count)
 	for i in count:
 		var a0 := rot + span * float(i) + gap * 0.5
-		ci.draw_arc(c, r, a0, a0 + span - gap, 8, color, width, true)
+		arc(ci, c, r, a0, a0 + span - gap, 8, color, width, true)
 
 
 # --- Towers ----------------------------------------------------------------------------------
@@ -235,11 +423,11 @@ const LIGHT := Vector2(-0.6, -0.8)
 ## A shaded ball or dome: outline, base, a lit face offset toward the light, a rim highlight
 ## and a small specular glint.
 static func orb(ci: CanvasItem, p: Vector2, r: float, col: Color, s := 1.0) -> void:
-	ci.draw_circle(p, r + 1.1 * s, OUTLINE)
-	ci.draw_circle(p, r, col.darkened(0.3))
-	ci.draw_circle(p + LIGHT * r * 0.12, r * 0.8, col)
-	ci.draw_arc(p, r * 0.72, PI * 1.05, PI * 1.6, 10, col.lightened(0.35), maxf(0.8, r * 0.16), true)
-	ci.draw_circle(p + LIGHT * r * 0.45, maxf(0.6, r * 0.13), Color(1, 1, 1, 0.55))
+	disc(ci, p, r + 1.1 * s, OUTLINE)
+	disc(ci, p, r, col.darkened(0.3))
+	disc(ci, p + LIGHT * r * 0.12, r * 0.8, col)
+	arc(ci, p, r * 0.72, PI * 1.05, PI * 1.6, 10, col.lightened(0.35), maxf(0.8, r * 0.16), true)
+	disc(ci, p + LIGHT * r * 0.45, maxf(0.6, r * 0.13), Color(1, 1, 1, 0.55))
 
 
 ## A bevelled plate: outlined polygon, a lighter inset face, lit edges toward the light and
@@ -248,7 +436,7 @@ static func plate(ci: CanvasItem, c: Vector2, pts: PackedVector2Array, col: Colo
 	var p := xform(c, pts, rot, s)
 	var closed := p.duplicate()
 	closed.append(p[0])
-	ci.draw_colored_polygon(p, col.darkened(0.22))
+	poly(ci, p, col.darkened(0.22))
 	var centre := Vector2.ZERO
 	for q in p:
 		centre += q
@@ -256,7 +444,7 @@ static func plate(ci: CanvasItem, c: Vector2, pts: PackedVector2Array, col: Colo
 	var inset := PackedVector2Array()
 	for q in p:
 		inset.append(centre + (q - centre) * 0.8)
-	ci.draw_colored_polygon(inset, col)
+	poly(ci, inset, col)
 	for i in p.size():
 		var a := p[i]
 		var b := p[(i + 1) % p.size()]
@@ -267,15 +455,15 @@ static func plate(ci: CanvasItem, c: Vector2, pts: PackedVector2Array, col: Colo
 			ci.draw_line(a.lerp(centre, 0.1), b.lerp(centre, 0.1), col.lightened(0.45), maxf(0.8, line_w * 0.8), true)
 		elif dark:
 			ci.draw_line(a.lerp(centre, 0.1), b.lerp(centre, 0.1), col.darkened(0.5), maxf(0.8, line_w * 0.8), true)
-	ci.draw_polyline(closed, OUTLINE, line_w, true)
+	polyline(ci, closed, OUTLINE, line_w, true)
 
 
 ## Small rivets at a polygon's (scaled-in) corners; `r` is the rivet radius in pixels.
 static func rivets(ci: CanvasItem, c: Vector2, pts: PackedVector2Array, rot: float, s: float, inset := 0.72, r := 0.9) -> void:
 	for q in xform(c, pts, rot, s):
 		var p: Vector2 = c + (q - c) * inset
-		ci.draw_circle(p, r + 0.3, OUTLINE)
-		ci.draw_circle(p, r, METAL_L.lightened(0.15))
+		disc(ci, p, r + 0.3, OUTLINE)
+		disc(ci, p, r, METAL_L.lightened(0.15))
 
 
 ## A thick shaded bar from a to b (barrels, rails, struts).
@@ -305,29 +493,40 @@ static func rect_pts(hw: float, hh: float) -> PackedVector2Array:
 ## The hex deck every tower stands on: bevelled armour, corner bolts, vents, status LEDs,
 ## an accent trim that breathes, and tier pips (gold from the specialization on).
 static func _pad(ci: CanvasItem, c: Vector2, s: float, acc: Color, tier: int, t: float) -> void:
+	# Static plating below the lit rim, the rim (a white stroke tinted live), then rivets and vents.
+	var half := Vector2(24.0, 24.0) * s
+	cached(ci, "pad_a_%.2f" % s, c, half, func(n: CanvasItem, o: Vector2): _pad_base(n, o, s))
+	var pulse := 0.5 + 0.2 * sin(t * 2.2)
+	var w := (1.0 + 0.35 * float(tier)) * s
+	cached(ci, "pad_rim_%.2f_%d" % [s, tier], c, half, func(n: CanvasItem, o: Vector2): outline(n, o, ngon(6, 1.0), Color(1, 1, 1), w, 0.0, 17.6 * s), Color(acc, pulse))
+	cached(ci, "pad_b_%.2f" % s, c, half, func(n: CanvasItem, o: Vector2): _pad_rivets(n, o, s))
+	var blink := fmod(t * 0.9, 2.0) < 0.12
+	disc(ci, c + Vector2(-9.0, 11.0) * s, 1.0 * s, Color(0.4, 1.0, 0.5, 0.95 if blink else 0.45))
+	disc(ci, c + Vector2(9.0, 11.0) * s, 1.0 * s, Color(acc, 0.8))
+	for i in tier:
+		var x := (float(i) - float(tier - 1) / 2.0) * 6.5
+		var pip := Rect2(c + Vector2(x - 2.4, 15.0) * s, Vector2(4.8, 2.0) * s)
+		ci.draw_rect(pip.grow(0.6), OUTLINE)
+		ci.draw_rect(pip, GOLD if tier >= 3 else acc)
+
+
+static func _pad_base(ci: CanvasItem, c: Vector2, s: float) -> void:
 	ellipse(ci, c + Vector2(0, 6) * s, 21.0 * s, 9.0 * s, Color(0, 0, 0, 0.35))
 	var hex := ngon(6, 1.0)
 	fill(ci, c, hex, OUTLINE, 0.0, 20.5 * s)
 	plate(ci, c, hex, METAL_D.lightened(0.05), 0.0, 19.2 * s, 1.0)
 	fill(ci, c, hex, METAL, 0.0, 15.6 * s)
 	outline(ci, c, hex, Color(0, 0, 0, 0.45), 1.0, 0.0, 15.6 * s)
-	var pulse := 0.5 + 0.2 * sin(t * 2.2)
-	outline(ci, c, hex, Color(acc, pulse), (1.0 + 0.35 * float(tier)) * s, 0.0, 17.6 * s)
-	for q in xform(c, hex, 0.0, 17.6 * s):
-		ci.draw_circle(q, 1.5 * s, OUTLINE)
-		ci.draw_circle(q, 1.0 * s, METAL_L)
+
+
+static func _pad_rivets(ci: CanvasItem, c: Vector2, s: float) -> void:
+	for q in xform(c, ngon(6, 1.0), 0.0, 17.6 * s):
+		disc(ci, q, 1.5 * s, OUTLINE)
+		disc(ci, q, 1.0 * s, METAL_L)
 	for k in 3:
 		var y := c.y - 13.0 * s + float(k) * 2.2 * s
 		ci.draw_line(Vector2(c.x - 13.5 * s, y), Vector2(c.x - 10.0 * s, y), Color(0, 0, 0, 0.5), 1.0)
 		ci.draw_line(Vector2(c.x + 10.0 * s, y), Vector2(c.x + 13.5 * s, y), Color(0, 0, 0, 0.5), 1.0)
-	var blink := fmod(t * 0.9, 2.0) < 0.12
-	ci.draw_circle(c + Vector2(-9.0, 11.0) * s, 1.0 * s, Color(0.4, 1.0, 0.5, 0.95 if blink else 0.45))
-	ci.draw_circle(c + Vector2(9.0, 11.0) * s, 1.0 * s, Color(acc, 0.8))
-	for i in tier:
-		var x := (float(i) - float(tier - 1) / 2.0) * 6.5
-		var pip := Rect2(c + Vector2(x - 2.4, 15.0) * s, Vector2(4.8, 2.0) * s)
-		ci.draw_rect(pip.grow(0.6), OUTLINE)
-		ci.draw_rect(pip, GOLD if tier >= 3 else acc)
 
 
 ## Pulse Turret: an armoured dome turret firing energy bolts from coil-wrapped emitters (two from
@@ -374,7 +573,7 @@ static func _pulse(ci: CanvasItem, c: Vector2, aim: float, s: float, tier: int, 
 			for i in 16:
 				teeth.append(Vector2.from_angle(spin + TAU * float(i) / 16.0) * (5.8 if i % 2 == 0 else 4.2))
 			solid(ci, saw, teeth, acc, 0.0, s, 1.0)
-			ci.draw_arc(saw, 3.4 * s, spin, spin + 2.0, 8, Color(1, 1, 1, 0.35), 1.0 * s, true)
+			arc(ci, saw, 3.4 * s, spin, spin + 2.0, 8, Color(1, 1, 1, 0.35), 1.0 * s, true)
 			orb(ci, saw, 1.9 * s, METAL_L, s)
 	else:
 		var count := 1 if tier <= 1 else 2
@@ -387,7 +586,7 @@ static func _pulse(ci: CanvasItem, c: Vector2, aim: float, s: float, tier: int, 
 				var p: Vector2 = b0 + d * (8.0 + float(r) * 4.0) * s
 				bar(ci, p - n * 3.2 * s, p + n * 3.2 * s, 1.6 * s, METAL_D.lightened(0.15))
 				ci.draw_line(p - n * 2.6 * s, p + n * 2.6 * s, Color(acc, 0.95), 0.8 * s, true)
-			ci.draw_circle(b0 + d * length * s, 1.9 * s, OUTLINE)
+			disc(ci, b0 + d * length * s, 1.9 * s, OUTLINE)
 			glow_dot(ci, b0 + d * (length + 0.5) * s, (1.2 + flash * 7.0) * s, acc)
 	var head := ngon(8, 1.0, PI / 8.0)
 	plate(ci, c, head, METAL_L, aim, 8.2 * s, 1.2)
@@ -433,10 +632,10 @@ static func _mortar(ci: CanvasItem, c: Vector2, aim: float, s: float, tier: int,
 	orb(ci, mouth, tube_r, METAL_L, s)
 	for k in mini(tier, 3):
 		ring(ci, mouth, tube_r * (0.92 - 0.1 * float(k)), Color(GOLD, 0.85) if m4 and k == 0 else Color(0, 0, 0, 0.35), 1.1 * s)
-	ci.draw_circle(mouth, tube_r * 0.62, OUTLINE)
-	ci.draw_circle(mouth, tube_r * 0.56, Color(0.03, 0.03, 0.04))
-	ci.draw_circle(mouth, tube_r * 0.5, Color(plasma, 0.3 + 0.5 * kick))
-	ci.draw_arc(mouth, tube_r * 0.38, 0.0, TAU, 14, Color(plasma, 0.6), 1.0 * s, true)
+	disc(ci, mouth, tube_r * 0.62, OUTLINE)
+	disc(ci, mouth, tube_r * 0.56, Color(0.03, 0.03, 0.04))
+	disc(ci, mouth, tube_r * 0.5, Color(plasma, 0.3 + 0.5 * kick))
+	arc(ci, mouth, tube_r * 0.38, 0.0, TAU, 14, Color(plasma, 0.6), 1.0 * s, true)
 	glow_dot(ci, mouth, tube_r * 0.24, plasma)
 	if m4 and siege:
 		arc_segments(ci, mouth, tube_r + 4.0 * s, 6, 0.5, aim, Color(GOLD, 0.75), 1.4 * s)
@@ -447,7 +646,7 @@ static func _mortar(ci: CanvasItem, c: Vector2, aim: float, s: float, tier: int,
 static func _cryo(ci: CanvasItem, c: Vector2, s: float, tier: int, t: float, flash: float, spec: String, acc: Color) -> void:
 	var m4 := tier >= 4
 	var glow := clampf(0.14 + 0.08 * sin(t * 3.0) + flash, 0.0, 0.6)
-	ci.draw_circle(c, 15.0 * s, Color(acc, glow))
+	disc(ci, c, 15.0 * s, Color(acc, glow))
 	var vents := 3 if tier <= 1 else 6
 	for k in vents:
 		var a := TAU * float(k) / float(vents) + PI / 6.0
@@ -455,22 +654,22 @@ static func _cryo(ci: CanvasItem, c: Vector2, s: float, tier: int, t: float, fla
 		plate(ci, c + vd * 11.8 * s, rect_pts(2.6, 2.4), METAL_L, a, s, 1.0)
 		ci.draw_line(c + vd * 13.6 * s + vd.orthogonal() * 1.6 * s, c + vd * 13.6 * s - vd.orthogonal() * 1.6 * s, Color(acc, 0.9), 0.9 * s)
 		var puff := fmod(t * 0.5 + float(k) * 0.37, 1.0)
-		ci.draw_circle(c + vd * (15.0 + 5.0 * puff) * s, (1.4 + 2.2 * puff) * s, Color(0.9, 0.97, 1.0, 0.35 * (1.0 - puff)))
+		disc(ci, c + vd * (15.0 + 5.0 * puff) * s, (1.4 + 2.2 * puff) * s, Color(0.9, 0.97, 1.0, 0.35 * (1.0 - puff)))
 	if spec == "stasis":
 		ring(ci, c, 16.8 * s, Color(acc, 0.7), 1.6 * s)
 		arc_segments(ci, c, 16.8 * s, 4, 0.9, -t * 0.9, Color(1, 1, 1, 0.55), 2.0 * s)
 		for k in 4:
-			ci.draw_circle(c + Vector2.from_angle(-t * 0.9 + float(k) * PI / 2.0) * 16.8 * s, 1.3 * s, Color(1, 1, 1, 0.9))
+			disc(ci, c + Vector2.from_angle(-t * 0.9 + float(k) * PI / 2.0) * 16.8 * s, 1.3 * s, Color(1, 1, 1, 0.9))
 	if spec == "shatter":
 		for i in 6:
 			var a := TAU * float(i) / 6.0 + t * 0.4
 			var tip := c + Vector2.from_angle(a) * 17.5 * s
 			var b1 := c + Vector2.from_angle(a + 0.2) * 11.0 * s
 			var b2 := c + Vector2.from_angle(a - 0.2) * 11.0 * s
-			ci.draw_colored_polygon(PackedVector2Array([tip, b1, b2]), Color(acc, 0.85))
+			poly(ci, PackedVector2Array([tip, b1, b2]), Color(acc, 0.85))
 			ci.draw_line(tip, b1.lerp(b2, 0.5), Color(1, 1, 1, 0.6), 0.8 * s, true)
 	orb(ci, c, 9.0 * s, METAL, s)
-	ci.draw_circle(c, 7.4 * s, Color(acc, 0.28))
+	disc(ci, c, 7.4 * s, Color(acc, 0.28))
 	var rot := t * 0.5
 	var arm := (7.4 + 0.5 * float(tier)) * s
 	var ice := Color(0.93, 0.98, 1.0)
@@ -485,7 +684,7 @@ static func _cryo(ci: CanvasItem, c: Vector2, s: float, tier: int, t: float, fla
 			var bl := arm * (0.36 if f < 0.6 else 0.24)
 			for sgn in [-1.0, 1.0]:
 				ci.draw_line(mid, mid + dv.rotated(0.85 * sgn) * bl, ice, 1.2 * s, true)
-		ci.draw_circle(tip, (1.3 if m4 else 0.9) * s, GOLD if m4 else ice)
+		disc(ci, tip, (1.3 if m4 else 0.9) * s, GOLD if m4 else ice)
 	glow_dot(ci, c, 2.0 * s, acc)
 
 
@@ -503,7 +702,7 @@ static func _rail(ci: CanvasItem, c: Vector2, aim: float, s: float, tier: int, f
 		var cap: Vector2 = c - d * 8.0 * s + n * side * 6.6 * s
 		plate(ci, cap, rect_pts(4.2, 2.6), METAL_D.lightened(0.12), aim, s, 1.0)
 		for k in 3:
-			ci.draw_circle(cap - d * (2.4 - float(k) * 2.4) * s, 0.8 * s, Color(acc, 0.35 + 0.6 * float(k == int(fmod(Time.get_ticks_msec() / 250.0, 3.0)))))
+			disc(ci, cap - d * (2.4 - float(k) * 2.4) * s, 0.8 * s, Color(acc, 0.35 + 0.6 * float(k == int(fmod(Time.get_ticks_msec() / 250.0, 3.0)))))
 	var b0 := c - d * (7.0 * s + recoil)
 	for side in [-1.0, 1.0]:
 		var off: Vector2 = n * side * gap
@@ -518,7 +717,7 @@ static func _rail(ci: CanvasItem, c: Vector2, aim: float, s: float, tier: int, f
 	if spec == "deadeye":
 		var scope := c + n * 7.2 * s + d * 3.0 * s
 		bar(ci, scope - d * 5.0 * s, scope + d * 6.0 * s, 2.4 * s, METAL_L)
-		ci.draw_circle(scope + d * 6.4 * s, 1.5 * s, OUTLINE)
+		disc(ci, scope + d * 6.4 * s, 1.5 * s, OUTLINE)
 		glow_dot(ci, scope + d * 6.4 * s, 1.1 * s, Color(1.0, 0.3, 0.3))
 	glow_dot(ci, c, 1.6 * s, acc)
 	if flash > 0.02:
@@ -538,23 +737,23 @@ static func _arc(ci: CanvasItem, c: Vector2, s: float, tier: int, t: float, flas
 			orb(ci, sp, 3.2 * s, METAL_L, s)
 			glow_dot(ci, sp, 1.2 * s, acc)
 			if fmod(t * 3.0 + float(k), 1.0) < 0.3:
-				ci.draw_polyline(PackedVector2Array([sp, sp.lerp(c, 0.5) + Vector2(2, -2) * s, c + (sp - c).normalized() * 9.0 * s]), Color(acc, 0.8), 1.0 * s, true)
+				polyline(ci, PackedVector2Array([sp, sp.lerp(c, 0.5) + Vector2(2, -2) * s, c + (sp - c).normalized() * 9.0 * s]), Color(acc, 0.8), 1.0 * s, true)
 	plate(ci, c, ngon(8, 1.0, PI / 8.0), METAL_D.lightened(0.05), 0.0, 12.8 * s, 1.2)
 	var rings := 1 if tier <= 1 else 2
 	var tw := (3.8 if overload else 3.0) * s
 	for k in rings:
 		var r := (9.4 - float(k) * 3.4) * s
-		ci.draw_arc(c, r, 0.0, TAU, 32, OUTLINE, tw + 1.6 * s, true)
-		ci.draw_arc(c, r, 0.0, TAU, 32, METAL.lightened(0.05), tw, true)
-		ci.draw_arc(c, r - tw * 0.15, PI * 0.95, PI * 1.75, 12, METAL_L.lightened(0.3), tw * 0.35, true)
-		ci.draw_arc(c, r + tw * 0.15, PI * -0.05, PI * 0.7, 12, Color(0, 0, 0, 0.35), tw * 0.3, true)
+		arc(ci, c, r, 0.0, TAU, 32, OUTLINE, tw + 1.6 * s, true)
+		arc(ci, c, r, 0.0, TAU, 32, METAL.lightened(0.05), tw, true)
+		arc(ci, c, r - tw * 0.15, PI * 0.95, PI * 1.75, 12, METAL_L.lightened(0.3), tw * 0.35, true)
+		arc(ci, c, r + tw * 0.15, PI * -0.05, PI * 0.7, 12, Color(0, 0, 0, 0.35), tw * 0.3, true)
 	var nodes := 6 if overload else 4
 	for k in nodes:
 		var np := c + Vector2.from_angle(TAU * float(k) / float(nodes) + PI / 4.0) * 9.4 * s
 		orb(ci, np, (1.5 if overload else 1.1) * s, GOLD if m4 else acc, s)
 	var orb_p := c + Vector2(0, -1) * s
 	var pulse := 0.5 + 0.5 * sin(t * 5.0)
-	ci.draw_circle(orb_p, (4.5 + 2.0 * pulse + 5.0 * flash) * s, Color(acc, 0.22))
+	disc(ci, orb_p, (4.5 + 2.0 * pulse + 5.0 * flash) * s, Color(acc, 0.22))
 	orb(ci, orb_p, 2.8 * s, acc.lightened(0.2), s)
 	glow_dot(ci, orb_p, (1.6 + 0.3 * float(tier)) * s, acc)
 	for i in tier + 1:
@@ -562,8 +761,8 @@ static func _arc(ci: CanvasItem, c: Vector2, s: float, tier: int, t: float, flas
 		var p1 := orb_p + Vector2.from_angle(a) * 3.0 * s
 		var p2 := c + Vector2.from_angle(a + 0.4) * 9.4 * s
 		var mid := (p1 + p2) / 2.0 + Vector2.from_angle(a + 2.0) * 2.0 * s
-		ci.draw_polyline(PackedVector2Array([p1, mid, p2]), Color(acc, 0.85), 1.1 * s, true)
-		ci.draw_polyline(PackedVector2Array([p1, mid, p2]), Color(1, 1, 1, 0.5), 0.4 * s, true)
+		polyline(ci, PackedVector2Array([p1, mid, p2]), Color(acc, 0.85), 1.1 * s, true)
+		polyline(ci, PackedVector2Array([p1, mid, p2]), Color(1, 1, 1, 0.5), 0.4 * s, true)
 
 
 ## Laser Lance: a sleek armoured hull with heat-sink fins, a long lance barrel with focusing
@@ -644,12 +843,12 @@ static func _missile(ci: CanvasItem, c: Vector2, aim: float, s: float, tier: int
 	var ready := 1.0 - clampf(flash / 0.15, 0.0, 1.0)
 	for tp in tubes:
 		var p: Vector2 = c + d * tp.x * s + n * tp.y * s
-		ci.draw_circle(p, (tube_r + 0.9) * s, OUTLINE)
-		ci.draw_circle(p, (tube_r + 0.3) * s, METAL_L)
-		ci.draw_circle(p, tube_r * s, Color(0.04, 0.04, 0.05))
+		disc(ci, p, (tube_r + 0.9) * s, OUTLINE)
+		disc(ci, p, (tube_r + 0.3) * s, METAL_L)
+		disc(ci, p, tube_r * s, Color(0.04, 0.04, 0.05))
 		if ready > 0.05:
 			orb(ci, p, tube_r * 0.72 * s, Color(0.86, 0.88, 0.92, ready), s * 0.6)
-			ci.draw_circle(p, tube_r * 0.32 * s, Color(1.0, 0.32, 0.25, ready))
+			disc(ci, p, tube_r * 0.32 * s, Color(1.0, 0.32, 0.25, ready))
 		if spec == "hellfire":
 			for f in 4:
 				var fd := Vector2.from_angle(float(f) * PI / 2.0 + PI / 4.0)
@@ -665,7 +864,7 @@ static func _amp(ci: CanvasItem, c: Vector2, s: float, tier: int, t: float, spec
 	var m4 := tier >= 4
 	for k in 2:
 		var ph := fmod(t * 0.6 + float(k) * 0.5, 1.0)
-		ci.draw_arc(c, (8.0 + 12.0 * ph) * s, 0.0, TAU, 32, Color(acc, 0.5 * (1.0 - ph)), 1.4 * s, true)
+		arc(ci, c, (8.0 + 12.0 * ph) * s, 0.0, TAU, 32, Color(acc, 0.5 * (1.0 - ph)), 1.4 * s, true)
 	for k in 3:
 		var ld := Vector2.from_angle(TAU * float(k) / 3.0 - PI / 2.0)
 		bar(ci, c + ld * 5.0 * s, c + ld * 14.5 * s, 3.0 * s, METAL_D.lightened(0.12))
@@ -678,19 +877,19 @@ static func _amp(ci: CanvasItem, c: Vector2, s: float, tier: int, t: float, spec
 		for i in 20:
 			teeth.append(Vector2.from_angle(t * 2.5 + TAU * float(i) / 20.0) * (11.0 if i % 2 == 0 else 9.4))
 		solid(ci, c, teeth, GOLD if m4 else METAL_L, 0.0, s, 1.0)
-		ci.draw_arc(c, 10.0 * s, PI * 1.0, PI * 1.6, 10, Color(1, 1, 1, 0.3), 1.0 * s, true)
+		arc(ci, c, 10.0 * s, PI * 1.0, PI * 1.6, 10, Color(1, 1, 1, 0.3), 1.0 * s, true)
 	orb(ci, c, 7.6 * s, METAL, s)
 	ring(ci, c, 5.2 * s, METAL_L, 1.4 * s)
 	ring(ci, c, 3.8 * s, Color(0, 0, 0, 0.4), 0.8 * s)
 	if spec == "array":
 		var dd := Vector2.from_angle(t * 0.7)
-		ci.draw_arc(c + dd * 2.0 * s, 7.0 * s, dd.angle() - 1.1, dd.angle() + 1.1, 10, OUTLINE, 3.6 * s, true)
-		ci.draw_arc(c + dd * 2.0 * s, 7.0 * s, dd.angle() - 1.1, dd.angle() + 1.1, 10, GOLD if m4 else METAL_L, 2.2 * s, true)
+		arc(ci, c + dd * 2.0 * s, 7.0 * s, dd.angle() - 1.1, dd.angle() + 1.1, 10, OUTLINE, 3.6 * s, true)
+		arc(ci, c + dd * 2.0 * s, 7.0 * s, dd.angle() - 1.1, dd.angle() + 1.1, 10, GOLD if m4 else METAL_L, 2.2 * s, true)
 		for k in 4:
 			var cd := Vector2.from_angle(float(k) * PI / 2.0)
 			ci.draw_line(c + cd * 2.5 * s, c + cd * 5.5 * s, Color(acc, 0.9), 1.0 * s)
 	var pulse := 0.5 + 0.5 * sin(t * 4.0)
-	ci.draw_circle(c, (3.2 + 1.2 * pulse + 0.4 * float(tier)) * s, Color(acc, 0.35))
+	disc(ci, c, (3.2 + 1.2 * pulse + 0.4 * float(tier)) * s, Color(acc, 0.35))
 	glow_dot(ci, c, (2.0 + 0.3 * float(tier)) * s, acc)
 
 
@@ -714,8 +913,8 @@ static func _flak(ci: CanvasItem, c: Vector2, aim: float, s: float, tier: int, t
 	for off in barrels:
 		var o: Vector2 = n * float(off) * s
 		bar(ci, base + o, base + o + d * bl * s, bw * s, METAL_L)
-		ci.draw_circle(base + o + d * bl * s, bw * 0.6 * s, Color(0.05, 0.05, 0.05))
-		ci.draw_circle(base + o + d * bl * s, bw * 0.45 * s, Color(acc, 0.3 + 3.0 * flash))
+		disc(ci, base + o + d * bl * s, bw * 0.6 * s, Color(0.05, 0.05, 0.05))
+		disc(ci, base + o + d * bl * s, bw * 0.45 * s, Color(acc, 0.3 + 3.0 * flash))
 	bar(ci, base + d * 6.0 * s - n * 5.0 * s, base + d * 6.0 * s + n * 5.0 * s, 1.6 * s, METAL_D.lightened(0.15))
 	var body := PackedVector2Array([Vector2(8, -6), Vector2(8, 6), Vector2(-7, 8), Vector2(-9, 0), Vector2(-7, -8)])
 	plate(ci, c, body, METAL_L, aim, s, 1.2)
@@ -723,8 +922,8 @@ static func _flak(ci: CanvasItem, c: Vector2, aim: float, s: float, tier: int, t
 	var ammo := c - d * 3.0 * s - n * 6.5 * s
 	plate(ci, ammo, rect_pts(2.5, 2.0), Color(0.4, 0.42, 0.25), aim, s, 1.0)
 	var dish := c - d * 6.0 * s + n * 5.0 * s
-	ci.draw_arc(dish, 3.2 * s, t * 3.0, t * 3.0 + PI, 8, OUTLINE, 2.6 * s, true)
-	ci.draw_arc(dish, 3.2 * s, t * 3.0, t * 3.0 + PI, 8, Color(acc, 0.9), 1.4 * s, true)
+	arc(ci, dish, 3.2 * s, t * 3.0, t * 3.0 + PI, 8, OUTLINE, 2.6 * s, true)
+	arc(ci, dish, 3.2 * s, t * 3.0, t * 3.0 + PI, 8, Color(acc, 0.9), 1.4 * s, true)
 	glow_dot(ci, c + d * 2.0 * s, 1.5 * s, acc)
 
 
@@ -736,16 +935,16 @@ static func _sensor(ci: CanvasItem, c: Vector2, s: float, tier: int, t: float, s
 	var wedge := PackedVector2Array([c])
 	for k in 7:
 		wedge.append(c + Vector2.from_angle(sweep - 0.6 + 0.1 * float(k)) * reach)
-	ci.draw_colored_polygon(wedge, Color(acc, 0.16))
+	poly(ci, wedge, Color(acc, 0.16))
 	ci.draw_line(c, c + Vector2.from_angle(sweep) * reach, Color(acc, 0.8), 1.4 * s, true)
 	plate(ci, c, ngon(8, 1.0, PI / 8.0), METAL, 0.0, 9.2 * s, 1.1)
 	arc_segments(ci, c, 6.0 * s, 4, 0.5, -t * 0.8, Color(acc, 0.7), 1.2 * s)
 	var dd := Vector2.from_angle(sweep)
 	var dc := c + dd * 2.0 * s
 	var dr := (6.5 + (1.5 if spec == "deepscan" else 0.0)) * s
-	ci.draw_arc(dc, dr, sweep - 1.1, sweep + 1.1, 12, OUTLINE, 3.8 * s, true)
-	ci.draw_arc(dc, dr, sweep - 1.1, sweep + 1.1, 12, METAL_L, 2.4 * s, true)
-	ci.draw_arc(dc, dr - 0.8 * s, sweep - 0.9, sweep + 0.2, 8, METAL_L.lightened(0.35), 0.8 * s, true)
+	arc(ci, dc, dr, sweep - 1.1, sweep + 1.1, 12, OUTLINE, 3.8 * s, true)
+	arc(ci, dc, dr, sweep - 1.1, sweep + 1.1, 12, METAL_L, 2.4 * s, true)
+	arc(ci, dc, dr - 0.8 * s, sweep - 0.9, sweep + 0.2, 8, METAL_L.lightened(0.35), 0.8 * s, true)
 	for sgn in [-1.0, 1.0]:
 		ci.draw_line(c, dc + Vector2.from_angle(sweep + 0.9 * sgn) * dr, Color(0.1, 0.12, 0.14), 1.0 * s, true)
 	bar(ci, c, dc + dd * 4.0 * s, 1.4 * s, METAL_L)
@@ -766,11 +965,11 @@ static func _gravity(ci: CanvasItem, c: Vector2, s: float, tier: int, t: float, 
 	for k in 6:
 		var ep := c + Vector2.from_angle(TAU * float(k) / 6.0 + t * 0.2) * 11.0 * s
 		orb(ci, ep, 1.6 * s, METAL_L, s)
-		ci.draw_circle(ep, 0.8 * s, Color(acc, 0.9))
+		disc(ci, ep, 0.8 * s, Color(acc, 0.9))
 	for k in 3:
 		var ph := fmod(t * 0.7 + float(k) / 3.0, 1.0)
 		var rr := lerpf(10.5, 4.0, ph) + pulse * 6.0
-		ci.draw_arc(c, rr * s, 0.0, TAU, 20, Color(acc, 0.25 + 0.5 * ph), 1.2 * s, true)
+		arc(ci, c, rr * s, 0.0, TAU, 20, Color(acc, 0.25 + 0.5 * ph), 1.2 * s, true)
 	var spin := -t * (2.0 if spec == "crush" else 1.2)
 	arc_segments(ci, c, (8.6 + float(tier) * 0.3) * s, 3 if spec != "crush" else 6, 0.6, spin, Color(acc, 0.9), 1.8 * s)
 	if spec == "repulsor":
@@ -778,15 +977,15 @@ static func _gravity(ci: CanvasItem, c: Vector2, s: float, tier: int, t: float, 
 			var a := TAU * float(k) / 4.0 + t * 0.5
 			var p := c + Vector2.from_angle(a) * 15.5 * s
 			var dd := Vector2.from_angle(a)
-			ci.draw_polyline(PackedVector2Array([p - dd.orthogonal() * 2.5 * s - dd * 1.5 * s, p + dd * 1.5 * s, p + dd.orthogonal() * 2.5 * s - dd * 1.5 * s]), Color(acc, 0.85), 1.4 * s, true)
+			polyline(ci, PackedVector2Array([p - dd.orthogonal() * 2.5 * s - dd * 1.5 * s, p + dd * 1.5 * s, p + dd.orthogonal() * 2.5 * s - dd * 1.5 * s]), Color(acc, 0.85), 1.4 * s, true)
 	if spec == "crush":
 		for k in 6:
 			var a := TAU * float(k) / 6.0 - t * 0.4
 			ci.draw_line(c + Vector2.from_angle(a) * 15.0 * s, c + Vector2.from_angle(a) * 8.0 * s, Color(acc, 0.7), 1.3 * s, true)
-	ci.draw_circle(c, (4.8 + 1.5 * pulse) * s, Color(acc, 0.35))
-	ci.draw_circle(c, (4.0 + 1.5 * pulse) * s, Color(0.01, 0.0, 0.04))
-	ci.draw_arc(c, (4.2 + 1.5 * pulse) * s, t * 3.0, t * 3.0 + 4.0, 12, Color(1, 1, 1, 0.7), 0.8 * s, true)
-	ci.draw_circle(c, 1.0 * s, Color(1, 1, 1, 0.8))
+	disc(ci, c, (4.8 + 1.5 * pulse) * s, Color(acc, 0.35))
+	disc(ci, c, (4.0 + 1.5 * pulse) * s, Color(0.01, 0.0, 0.04))
+	arc(ci, c, (4.2 + 1.5 * pulse) * s, t * 3.0, t * 3.0 + 4.0, 12, Color(1, 1, 1, 0.7), 0.8 * s, true)
+	disc(ci, c, 1.0 * s, Color(1, 1, 1, 0.8))
 
 
 ## Nullifier: three dampening prongs aimed at a pinned void sphere inside a rotating hex field.
@@ -800,27 +999,27 @@ static func _nullifier(ci: CanvasItem, c: Vector2, s: float, tier: int, t: float
 		var a := TAU * float(k) / 3.0 - PI / 2.0
 		var d := Vector2.from_angle(a)
 		var prong := PackedVector2Array([c + d * 12.0 * s + d.orthogonal() * 3.2 * s, c + d * 5.8 * s, c + d * 12.0 * s - d.orthogonal() * 3.2 * s])
-		ci.draw_colored_polygon(prong, METAL_L)
-		ci.draw_polyline(prong + PackedVector2Array([prong[0]]), OUTLINE, 1.0 * s, true)
+		poly(ci, prong, METAL_L)
+		polyline(ci, prong + PackedVector2Array([prong[0]]), OUTLINE, 1.0 * s, true)
 		if spec == "purge":
 			ci.draw_line(c + d * 10.0 * s + d.orthogonal() * 2.2 * s, c + d * 10.0 * s - d.orthogonal() * 2.2 * s, Color(1.0, 0.35, 0.35), 1.4 * s, true)
 		glow_dot(ci, c + d * 6.4 * s, 1.1 * s, acc)
 	if spec == "dampener":
 		for k in 2:
 			var ph := fmod(t * 0.8 + float(k) * 0.5, 1.0)
-			ci.draw_arc(c, (6.0 + ph * 9.0) * s, 0.0, TAU, 24, Color(acc, 0.5 * (1.0 - ph)), 1.0 * s, true)
+			arc(ci, c, (6.0 + ph * 9.0) * s, 0.0, TAU, 24, Color(acc, 0.5 * (1.0 - ph)), 1.0 * s, true)
 	if spec == "feedback":
 		for k in 2:
 			var a0 := t * 1.6 + PI * float(k)
-			ci.draw_arc(c, 9.0 * s, a0, a0 + 1.9, 10, Color(acc, 0.85), 1.4 * s, true)
+			arc(ci, c, 9.0 * s, a0, a0 + 1.9, 10, Color(acc, 0.85), 1.4 * s, true)
 			var tip := c + Vector2.from_angle(a0 + 1.9) * 9.0 * s
 			var dd := Vector2.from_angle(a0 + 1.9 + PI / 2.0)
-			ci.draw_polyline(PackedVector2Array([tip - dd * 2.0 * s + dd.orthogonal() * 2.0 * s, tip + dd * 1.5 * s, tip - dd * 2.0 * s - dd.orthogonal() * 2.0 * s]), Color(acc, 0.85), 1.2 * s, true)
-	ci.draw_circle(c, (4.4 + 1.2 * pulse) * s, Color(acc, 0.3))
-	ci.draw_circle(c, 3.6 * s, Color(0.02, 0.01, 0.05))
-	ci.draw_arc(c, 3.8 * s, -t * 2.0, -t * 2.0 + 3.5, 10, Color(1, 1, 1, 0.75), 0.8 * s, true)
+			polyline(ci, PackedVector2Array([tip - dd * 2.0 * s + dd.orthogonal() * 2.0 * s, tip + dd * 1.5 * s, tip - dd * 2.0 * s - dd.orthogonal() * 2.0 * s]), Color(acc, 0.85), 1.2 * s, true)
+	disc(ci, c, (4.4 + 1.2 * pulse) * s, Color(acc, 0.3))
+	disc(ci, c, 3.6 * s, Color(0.02, 0.01, 0.05))
+	arc(ci, c, 3.8 * s, -t * 2.0, -t * 2.0 + 3.5, 10, Color(1, 1, 1, 0.75), 0.8 * s, true)
 	if tier >= 2:
-		ci.draw_circle(c, 1.0 * s, Color(acc.lightened(0.4), 0.9))
+		disc(ci, c, 1.0 * s, Color(acc.lightened(0.4), 0.9))
 
 
 ## Nova Reactor: a vented housing around a fusion core inside containment rings. Supernova carries a
@@ -847,11 +1046,11 @@ static func _nova(ci: CanvasItem, c: Vector2, s: float, tier: int, t: float, fla
 			for i in 5:
 				var f := float(i) / 4.0
 				pts.append(c + Vector2.from_angle(a + sin(t * 4.0 + f * 3.0) * 0.4 * f) * (5.0 + f * 9.0) * s)
-			ci.draw_polyline(pts, Color(1.0, 0.6, 0.2, 0.75), 1.4 * s, true)
+			polyline(ci, pts, Color(1.0, 0.6, 0.2, 0.75), 1.4 * s, true)
 	var core := (3.6 + (1.4 if spec == "supernova" else 0.0) + 0.3 * float(tier) + 2.0 * pulse) * s
-	ci.draw_circle(c, core * 1.7, Color(acc, 0.18 + 0.2 * pulse))
-	ci.draw_circle(c, core, acc.lightened(0.15))
-	ci.draw_circle(c, core * 0.55, Color(1.0, 0.97, 0.85))
+	disc(ci, c, core * 1.7, Color(acc, 0.18 + 0.2 * pulse))
+	disc(ci, c, core, acc.lightened(0.15))
+	disc(ci, c, core * 0.55, Color(1.0, 0.97, 0.85))
 
 
 ## Drone Bay: a hangar pad with a landing ring, a launch rail and an antenna, drones docked on its
@@ -913,45 +1112,45 @@ static func _scrapyard(ci: CanvasItem, c: Vector2, s: float, tier: int, t: float
 	bar(ci, mast, tip, (2.4 if spec == "collector" else 1.8) * s, METAL_L)
 	ci.draw_line(tip, tip + Vector2(0, 3.5) * s, OUTLINE, 0.8 * s)
 	var mag_r := (3.2 if spec == "collector" else 2.4) * s
-	ci.draw_circle(tip + Vector2(0, 4.5) * s, mag_r + 0.8 * s, OUTLINE)
-	ci.draw_circle(tip + Vector2(0, 4.5) * s, mag_r, Color(acc, 0.9) if spec == "collector" else METAL)
-	ci.draw_arc(tip + Vector2(0, 4.5) * s, mag_r * 0.6, PI, TAU, 8, Color(1, 1, 1, 0.35), 0.8 * s, true)
+	disc(ci, tip + Vector2(0, 4.5) * s, mag_r + 0.8 * s, OUTLINE)
+	disc(ci, tip + Vector2(0, 4.5) * s, mag_r, Color(acc, 0.9) if spec == "collector" else METAL)
+	arc(ci, tip + Vector2(0, 4.5) * s, mag_r * 0.6, PI, TAU, 8, Color(1, 1, 1, 0.35), 0.8 * s, true)
 	# The credit chip: brighter with each tier, gold once mastered.
 	var chip := c + Vector2(-8.0, -8.0) * s
 	var pulse := 0.5 + 0.5 * sin(t * 2.5)
-	ci.draw_circle(chip, (2.6 + 0.4 * float(tier) + pulse) * s, Color(GOLD if m4 else acc, 0.22))
+	disc(ci, chip, (2.6 + 0.4 * float(tier) + pulse) * s, Color(GOLD if m4 else acc, 0.22))
 	fill(ci, chip, ngon(6, 1.0, PI / 6.0), OUTLINE, 0.0, 3.4 * s)
 	fill(ci, chip, ngon(6, 1.0, PI / 6.0), GOLD if m4 or spec == "mint" else acc, 0.0, 2.7 * s)
-	ci.draw_circle(chip, 0.9 * s, Color(1, 1, 0.9))
+	disc(ci, chip, 0.9 * s, Color(1, 1, 0.9))
 
 ## A single drone (also drawn in flight by the entity layer).
 static func drone(ci: CanvasItem, p: Vector2, facing: Vector2, s: float, t: float, spec: String, acc: Color, bomber := false) -> void:
 	var n := facing.orthogonal()
 	if bomber or spec == "bombers":
 		plate(ci, p, rect_pts(0.5, 0.4), METAL, facing.angle(), 6.0 * s, 1.0)
-		ci.draw_circle(p + facing * 1.0 * s, 1.6 * s, Color(0.1, 0.1, 0.1))
+		disc(ci, p + facing * 1.0 * s, 1.6 * s, Color(0.1, 0.1, 0.1))
 		glow_dot(ci, p - facing * 2.2 * s, 0.8 * s, Color(1.0, 0.55, 0.2))
 		return
 	for k in 4:
 		var a := facing.angle() + PI / 4.0 + TAU * float(k) / 4.0
 		var tip := p + Vector2.from_angle(a) * 3.2 * s
 		ci.draw_line(p, tip, METAL_L, 0.9 * s, true)
-		ci.draw_arc(tip, 1.4 * s, t * 30.0, t * 30.0 + 2.4, 5, Color(0.85, 0.9, 1.0, 0.6), 0.6 * s, true)
+		arc(ci, tip, 1.4 * s, t * 30.0, t * 30.0 + 2.4, 5, Color(0.85, 0.9, 1.0, 0.6), 0.6 * s, true)
 	var body := PackedVector2Array([p + facing * 2.6 * s, p + n * 1.5 * s - facing * 1.4 * s, p - n * 1.5 * s - facing * 1.4 * s])
-	ci.draw_colored_polygon(body, METAL.lightened(0.1) if spec != "interceptors" else acc.darkened(0.3))
+	poly(ci, body, METAL.lightened(0.1) if spec != "interceptors" else acc.darkened(0.3))
 	glow_dot(ci, p + facing * 1.2 * s, 0.7 * s, Color(1.0, 0.25, 0.25) if spec == "hunters" else acc)
 
 
 ## EMP overlay for a tower a Jammer knocked offline.
 static func tower_offline(ci: CanvasItem, c: Vector2, t: float) -> void:
 	var col := Color(0.9, 1.0, 0.3)
-	ci.draw_circle(c, 17.0, Color(0.05, 0.06, 0.02, 0.45))
+	disc(ci, c, 17.0, Color(0.05, 0.06, 0.02, 0.45))
 	for k in 3:
 		var a := t * 7.0 + float(k) * 2.1
 		var p0 := c + Vector2.from_angle(a) * 6.0
 		var p1 := c + Vector2.from_angle(a + 0.5) * 12.0 + Vector2(sin(t * 40.0 + float(k)) * 2.0, 0)
 		var p2 := c + Vector2.from_angle(a + 0.2) * 17.0
-		ci.draw_polyline(PackedVector2Array([p0, p1, p2]), Color(col, 0.8), 1.3, true)
+		polyline(ci, PackedVector2Array([p0, p1, p2]), Color(col, 0.8), 1.3, true)
 	arc_segments(ci, c, 19.0, 4, 0.8, t * 3.0, Color(col, 0.6), 1.2)
 
 
@@ -967,24 +1166,24 @@ static func oval(ci: CanvasItem, c: Vector2, rx: float, ry: float, rot: float, c
 		var big := PackedVector2Array()
 		for p in pts:
 			big.append(c + (p - c) * (1.0 + outline_w / maxf(rx, ry)))
-		ci.draw_colored_polygon(big, OUTLINE)
-	ci.draw_colored_polygon(pts, color)
+		poly(ci, big, OUTLINE)
+	poly(ci, pts, color)
 
 
 ## A shaded oval: outline, base, lit face toward the light, glint.
 static func shaded_oval(ci: CanvasItem, c: Vector2, rx: float, ry: float, rot: float, col: Color, s := 1.0) -> void:
 	oval(ci, c, rx, ry, rot, col.darkened(0.3), 1.3 * s)
 	oval(ci, c + LIGHT * minf(rx, ry) * 0.12, rx * 0.8, ry * 0.78, rot, col)
-	ci.draw_circle(c + LIGHT * minf(rx, ry) * 0.5, maxf(0.6, minf(rx, ry) * 0.14), Color(1, 1, 1, 0.45))
+	disc(ci, c + LIGHT * minf(rx, ry) * 0.5, maxf(0.6, minf(rx, ry) * 0.14), Color(1, 1, 1, 0.45))
 
 
 ## A jointed limb: segments with a joint dot at each bend.
 static func limb(ci: CanvasItem, pts: PackedVector2Array, w: float, col: Color) -> void:
-	ci.draw_polyline(pts, OUTLINE, w + 1.4, true)
-	ci.draw_polyline(pts, col, w, true)
+	polyline(ci, pts, OUTLINE, w + 1.4, true)
+	polyline(ci, pts, col, w, true)
 	for i in range(1, pts.size() - 1):
-		ci.draw_circle(pts[i], w * 0.75 + 0.4, OUTLINE)
-		ci.draw_circle(pts[i], w * 0.75, col.lightened(0.25))
+		disc(ci, pts[i], w * 0.75 + 0.4, OUTLINE)
+		disc(ci, pts[i], w * 0.75, col.lightened(0.25))
 
 
 static func enemy(ci: CanvasItem, type: String, c: Vector2, facing: Vector2, r: float, t: float, slowed := false, flash := 0.0, s := 1.0, hidden := false) -> void:
@@ -998,19 +1197,19 @@ static func enemy(ci: CanvasItem, type: String, c: Vector2, facing: Vector2, r: 
 	match type:
 		"grunt":
 			# Drone: a hovering combat disc with side thrusters, an armour ring, a gun and one red optic.
-			ci.draw_circle(c, rr * 1.2, Color(glow, 0.07))
+			disc(ci, c, rr * 1.2, Color(glow, 0.07))
 			for side in [-1.0, 1.0]:
 				var pod: Vector2 = c + n * side * rr * 0.95
 				plate(ci, pod, rect_pts(0.5, 0.24), METAL_D.lightened(0.1), ang, rr, 1.0)
 				strip(ci, pod - facing * rr * 0.55 - n * rr * 0.12, pod - facing * rr * 0.55 + n * rr * 0.12, 0.8 * s, Color(0.4, 0.8, 1.0))
 			bar(ci, c + facing * rr * 0.3, c + facing * rr * 1.3, 2.0 * s, METAL_L)
-			ci.draw_circle(c + facing * rr * 1.3, 1.1 * s, Color(0.05, 0.05, 0.05))
+			disc(ci, c + facing * rr * 1.3, 1.1 * s, Color(0.05, 0.05, 0.05))
 			orb(ci, c, rr * 0.86, body, s)
 			arc_segments(ci, c, rr * 0.64, 6, 0.35, ang, body.darkened(0.35), 1.4 * s)
-			ci.draw_circle(c + facing * rr * 0.12, rr * 0.4, OUTLINE)
-			ci.draw_circle(c + facing * rr * 0.12, rr * 0.33, Color(0.15, 0.03, 0.03))
+			disc(ci, c + facing * rr * 0.12, rr * 0.4, OUTLINE)
+			disc(ci, c + facing * rr * 0.12, rr * 0.33, Color(0.15, 0.03, 0.03))
 			glow_dot(ci, c + facing * rr * 0.12, rr * 0.2, glow)
-			ci.draw_circle(c + facing * rr * 0.12 + LIGHT * rr * 0.15, rr * 0.07, Color(1, 1, 1, 0.8))
+			disc(ci, c + facing * rr * 0.12 + LIGHT * rr * 0.15, rr * 0.07, Color(1, 1, 1, 0.8))
 		"runner":
 			# Skitter: a fast spider-bot on six jointed legs, with an armoured abdomen and mandibles.
 			for i in 3:
@@ -1046,18 +1245,18 @@ static func enemy(ci: CanvasItem, type: String, c: Vector2, facing: Vector2, r: 
 				var sh: Vector2 = c + n * side * rr * 0.78
 				plate(ci, sh, rect_pts(0.34, 0.3), METAL_L, ang, rr, 1.2)
 				bar(ci, sh + facing * rr * 0.2, sh + facing * rr * 1.15, 2.4 * s, METAL_L)
-				ci.draw_circle(sh + facing * rr * 1.15, 1.4 * s, Color(0.05, 0.05, 0.05))
-				ci.draw_circle(sh + facing * rr * 1.15, 0.8 * s, Color(glow, 0.9))
+				disc(ci, sh + facing * rr * 1.15, 1.4 * s, Color(0.05, 0.05, 0.05))
+				disc(ci, sh + facing * rr * 1.15, 0.8 * s, Color(glow, 0.9))
 			var visor := c + facing * rr * 0.42
 			strip(ci, visor - n * rr * 0.28, visor + n * rr * 0.28, 1.6 * s, glow)
 		"swarmling":
 			# Nanite: a tiny cloud of machines orbiting a glowing core.
-			ci.draw_circle(c, rr * 1.7, Color(glow, 0.13))
+			disc(ci, c, rr * 1.7, Color(glow, 0.13))
 			for k in 4:
 				var p := c + Vector2.from_angle(t * 7.0 + TAU * float(k) / 4.0) * rr * 0.78
 				var dia := PackedVector2Array([Vector2(0.5, 0), Vector2(0, 0.35), Vector2(-0.5, 0), Vector2(0, -0.35)])
 				solid(ci, p, dia, body.lightened(0.35), t * 7.0, rr, 0.8)
-				ci.draw_circle(p, rr * 0.11, glow)
+				disc(ci, p, rr * 0.11, glow)
 			orb(ci, c, rr * 0.34, body.lightened(0.2), s)
 			glow_dot(ci, c, rr * 0.18, glow)
 		"bat":
@@ -1068,8 +1267,8 @@ static func enemy(ci: CanvasItem, type: String, c: Vector2, facing: Vector2, r: 
 				var a := ang + PI / 4.0 + TAU * float(k) / 4.0
 				var tip := c + Vector2.from_angle(a) * rr * 1.2
 				bar(ci, c, tip, 1.8 * s, METAL_D.lightened(0.15))
-				ci.draw_circle(tip, rr * 0.62, Color(0.8, 0.86, 0.95, 0.12))
-				ci.draw_arc(tip, rr * 0.62, 0.0, TAU, 16, Color(0.8, 0.86, 0.95, 0.35), 0.8 * s, true)
+				disc(ci, tip, rr * 0.62, Color(0.8, 0.86, 0.95, 0.12))
+				arc(ci, tip, rr * 0.62, 0.0, TAU, 16, Color(0.8, 0.86, 0.95, 0.35), 0.8 * s, true)
 				var spin := t * 38.0 * (1.0 if k % 2 == 0 else -1.0)
 				for b in 2:
 					var bd := Vector2.from_angle(spin + float(b) * PI)
@@ -1089,7 +1288,7 @@ static func enemy(ci: CanvasItem, type: String, c: Vector2, facing: Vector2, r: 
 			strip(ci, c - facing * rr * 0.35 - n * rr * 0.12, c - facing * rr * 0.35 + n * rr * 0.12, 0.7 * s, glow)
 		"shaman":
 			# Repair Bot: a tracked medic unit with two welding arms and an emissive repair cross.
-			ci.draw_arc(c, rr * 2.0 + sin(t * 3.0) * 2.0, 0.0, TAU, 28, Color(glow, 0.25), 2.0, true)
+			arc(ci, c, rr * 2.0 + sin(t * 3.0) * 2.0, 0.0, TAU, 28, Color(glow, 0.25), 2.0, true)
 			for side in [-1.0, 1.0]:
 				var tr: Vector2 = c + n * side * rr * 0.82
 				plate(ci, tr, rect_pts(0.66, 0.2), METAL_D.lightened(0.1), ang, rr, 1.0)
@@ -1100,7 +1299,7 @@ static func enemy(ci: CanvasItem, type: String, c: Vector2, facing: Vector2, r: 
 				var elbow: Vector2 = sh + facing * rr * 0.55 + n * side * rr * 0.45
 				var claw: Vector2 = elbow + facing * rr * 0.55 - n * side * rr * 0.12 + facing * sin(t * 6.0 + side) * rr * 0.08
 				limb(ci, PackedVector2Array([sh, elbow, claw]), 1.6 * s, METAL_L)
-				ci.draw_arc(claw, rr * 0.16, ang - 1.2, ang + 1.2, 6, METAL_L, 1.4 * s, true)
+				arc(ci, claw, rr * 0.16, ang - 1.2, ang + 1.2, 6, METAL_L, 1.4 * s, true)
 				if fmod(t * 2.0 + (0.5 if side > 0.0 else 0.0), 1.0) < 0.15:
 					glow_dot(ci, claw + facing * rr * 0.12, rr * 0.12, glow)
 			orb(ci, c, rr * 0.8, body, s)
@@ -1116,7 +1315,7 @@ static func enemy(ci: CanvasItem, type: String, c: Vector2, facing: Vector2, r: 
 			var blade := PackedVector2Array([Vector2(1.4, 0), Vector2(0.1, 0.55), Vector2(-0.9, 1.0), Vector2(-0.5, 0), Vector2(-0.9, -1.0), Vector2(0.1, -0.55)])
 			if hidden:
 				var ripple := fmod(t * 1.3, 1.0)
-				ci.draw_arc(c, rr * (1.0 + 0.8 * ripple), 0.0, TAU, 18, Color(0.8, 0.95, 1.0, 0.22 * (1.0 - ripple)), 1.0 * s, true)
+				arc(ci, c, rr * (1.0 + 0.8 * ripple), 0.0, TAU, 18, Color(0.8, 0.95, 1.0, 0.22 * (1.0 - ripple)), 1.0 * s, true)
 				outline(ci, c, blade, Color(glow, a), 1.2 * s, ang, rr)
 				outline(ci, c + n * sin(t * 11.0) * 1.5 * s, blade, Color(glow, a * 0.5), 1.0 * s, ang, rr * 1.08)
 			else:
@@ -1141,13 +1340,13 @@ static func enemy(ci: CanvasItem, type: String, c: Vector2, facing: Vector2, r: 
 			orb(ci, c - facing * rr * 0.25, rr * 0.2, glow.darkened(0.3), s)
 			glow_dot(ci, c - facing * rr * 0.25, rr * 0.12, glow)
 			var sc := c + facing * rr * 0.2
-			ci.draw_arc(sc, rr * 0.95, ang - 0.95, ang + 0.95, 16, OUTLINE, 5.6 * s, true)
-			ci.draw_arc(sc, rr * 0.95, ang - 0.95, ang + 0.95, 16, METAL_L, 3.8 * s, true)
-			ci.draw_arc(sc, rr * 0.88, ang - 0.8, ang + 0.1, 10, METAL_L.lightened(0.35), 1.0 * s, true)
+			arc(ci, sc, rr * 0.95, ang - 0.95, ang + 0.95, 16, OUTLINE, 5.6 * s, true)
+			arc(ci, sc, rr * 0.95, ang - 0.95, ang + 0.95, 16, METAL_L, 3.8 * s, true)
+			arc(ci, sc, rr * 0.88, ang - 0.8, ang + 0.1, 10, METAL_L.lightened(0.35), 1.0 * s, true)
 			for k in 3:
 				var hp := sc + Vector2.from_angle(ang + (float(k) - 1.0) * 0.55) * rr * 0.95
-				ci.draw_circle(hp, 0.9 * s, Color(glow, 0.9))
-			ci.draw_arc(sc, rr * 1.04, ang - 0.9, ang + 0.9, 16, Color(glow, 0.8), 1.2 * s, true)
+				disc(ci, hp, 0.9 * s, Color(glow, 0.9))
+			arc(ci, sc, rr * 1.04, ang - 0.9, ang + 0.9, 16, Color(glow, 0.8), 1.2 * s, true)
 		"hydra":
 			# Hydra Frame: an armoured body with three swaying serpent heads (it splits apart when killed).
 			shaded_oval(ci, c - facing * rr * 0.3, rr * 0.52, rr * 0.48, ang, body, s)
@@ -1160,10 +1359,10 @@ static func enemy(ci: CanvasItem, type: String, c: Vector2, facing: Vector2, r: 
 					var f := float(i) / 4.0
 					var sway := sin(t * 4.0 + float(k) * 1.7 - f * 2.0) * rr * 0.22 * f
 					pts.append(c + Vector2.from_angle(base_a) * rr * (0.05 + 1.05 * f) + Vector2.from_angle(base_a + PI / 2.0) * sway)
-				ci.draw_polyline(pts, OUTLINE, 5.0 * s, true)
-				ci.draw_polyline(pts, body.lightened(0.15), 3.2 * s, true)
+				polyline(ci, pts, OUTLINE, 5.0 * s, true)
+				polyline(ci, pts, body.lightened(0.15), 3.2 * s, true)
 				for i in range(1, 4):
-					ci.draw_circle(pts[i], 1.0 * s, body.darkened(0.25))
+					disc(ci, pts[i], 1.0 * s, body.darkened(0.25))
 				var hd := (pts[4] - pts[3]).normalized()
 				var headp := pts[4] + hd * rr * 0.12
 				var skull := PackedVector2Array([Vector2(0.6, 0), Vector2(0.05, 0.38), Vector2(-0.4, 0.3), Vector2(-0.4, -0.3), Vector2(0.05, -0.38)])
@@ -1174,7 +1373,7 @@ static func enemy(ci: CanvasItem, type: String, c: Vector2, facing: Vector2, r: 
 		"jammer":
 			# Jammer: a tracked electronic-warfare rig with a spinning dish, a mast and EMP rings.
 			var ping := fmod(t * 0.9, 1.0)
-			ci.draw_arc(c, rr * (1.2 + 1.4 * ping), 0.0, TAU, 24, Color(glow, 0.35 * (1.0 - ping)), 1.5 * s, true)
+			arc(ci, c, rr * (1.2 + 1.4 * ping), 0.0, TAU, 24, Color(glow, 0.35 * (1.0 - ping)), 1.5 * s, true)
 			for side in [-1.0, 1.0]:
 				var tr: Vector2 = c + n * side * rr * 0.72
 				plate(ci, tr, rect_pts(0.8, 0.22), METAL_D.lightened(0.08), ang, rr, 1.0)
@@ -1183,8 +1382,8 @@ static func enemy(ci: CanvasItem, type: String, c: Vector2, facing: Vector2, r: 
 					ci.draw_line(lp - n * rr * 0.16, lp + n * rr * 0.16, Color(0, 0, 0, 0.45), 0.9 * s)
 			orb(ci, c, rr * 0.72, body, s)
 			var dir := Vector2.from_angle(t * 2.5)
-			ci.draw_arc(c, rr * 0.55, t * 2.5 - 0.9, t * 2.5 + 0.9, 8, OUTLINE, 3.6 * s, true)
-			ci.draw_arc(c, rr * 0.55, t * 2.5 - 0.9, t * 2.5 + 0.9, 8, METAL_L, 2.2 * s, true)
+			arc(ci, c, rr * 0.55, t * 2.5 - 0.9, t * 2.5 + 0.9, 8, OUTLINE, 3.6 * s, true)
+			arc(ci, c, rr * 0.55, t * 2.5 - 0.9, t * 2.5 + 0.9, 8, METAL_L, 2.2 * s, true)
 			bar(ci, c, c + dir * rr * 0.9, 1.2 * s, METAL_L)
 			glow_dot(ci, c + dir * rr * 0.9, rr * 0.14, glow)
 			glow_dot(ci, c, rr * 0.18, glow)
@@ -1200,7 +1399,7 @@ static func enemy(ci: CanvasItem, type: String, c: Vector2, facing: Vector2, r: 
 					ci.draw_line(lp - n * rr * 0.26, lp + n * rr * 0.26, METAL_L, 1.1 * s)
 				for k in 4:
 					var wp := tread + facing * (float(k) - 1.5) * rr * 0.6
-					ci.draw_circle(wp, rr * 0.12, Color(0, 0, 0, 0.35))
+					disc(ci, wp, rr * 0.12, Color(0, 0, 0, 0.35))
 			var hull2 := PackedVector2Array([Vector2(1.05, -0.45), Vector2(1.05, 0.45), Vector2(0.6, 0.62), Vector2(-0.95, 0.62), Vector2(-1.05, 0.4), Vector2(-1.05, -0.4), Vector2(-0.95, -0.62), Vector2(0.6, -0.62)])
 			plate(ci, c, hull2, body, ang, rr * 0.82, 1.8)
 			rivets(ci, c, hull2, ang, rr * 0.82, 0.85, 0.7 * s)
@@ -1218,22 +1417,22 @@ static func enemy(ci: CanvasItem, type: String, c: Vector2, facing: Vector2, r: 
 				var a := ang + PI + (float(i) - 2.5) * 0.45
 				var wave := sin(t * 3.0 + float(i)) * 0.35
 				var tp := PackedVector2Array([c + Vector2.from_angle(a) * rr * 0.75, c + Vector2.from_angle(a + wave) * rr * 1.3, c + Vector2.from_angle(a + wave * 2.0) * rr * 1.75])
-				ci.draw_polyline(tp, OUTLINE, 4.5 * s, true)
-				ci.draw_polyline(tp, body.lightened(0.3), 2.8 * s, true)
+				polyline(ci, tp, OUTLINE, 4.5 * s, true)
+				polyline(ci, tp, body.lightened(0.3), 2.8 * s, true)
 				for p in tp:
-					ci.draw_circle(p, 1.1 * s, body.lightened(0.45))
+					disc(ci, p, 1.1 * s, body.lightened(0.45))
 				glow_dot(ci, tp[2], 1.4 * s, glow)
 			var pulse := 0.5 + 0.5 * sin(t * 3.0)
-			ci.draw_circle(c, rr * (1.12 + 0.08 * pulse), Color(glow, 0.12))
+			disc(ci, c, rr * (1.12 + 0.08 * pulse), Color(glow, 0.12))
 			for side in [-1.0, 1.0]:
 				shaded_oval(ci, c + n * side * rr * 0.36, rr * 0.9, rr * 0.5, ang, body.lightened(0.12), s)
 			ci.draw_line(c - facing * rr * 0.85, c + facing * rr * 0.85, OUTLINE, 2.4 * s, true)
 			for side in [-1.0, 1.0]:
 				for k in 3:
 					var fc: Vector2 = c + n * side * rr * 0.38 + facing * (float(k) - 1.0) * rr * 0.5
-					ci.draw_arc(fc, rr * 0.22, ang + (0.3 if side > 0.0 else PI + 0.3), ang + (2.8 if side > 0.0 else PI + 2.8), 8, Color(glow, 0.35 + 0.4 * pulse), 1.4 * s, true)
+					arc(ci, fc, rr * 0.22, ang + (0.3 if side > 0.0 else PI + 0.3), ang + (2.8 if side > 0.0 else PI + 2.8), 8, Color(glow, 0.35 + 0.4 * pulse), 1.4 * s, true)
 				var vein := PackedVector2Array([c + n * side * rr * 0.1 - facing * rr * 0.6, c + n * side * rr * 0.5 - facing * rr * 0.1, c + n * side * rr * 0.3 + facing * rr * 0.55])
-				ci.draw_polyline(vein, Color(glow, 0.3 + 0.3 * pulse), 0.8 * s, true)
+				polyline(ci, vein, Color(glow, 0.3 + 0.3 * pulse), 0.8 * s, true)
 			orb(ci, c + facing * rr * 0.9, rr * 0.2, glow.darkened(0.4), s)
 			glow_dot(ci, c + facing * rr * 0.9, rr * 0.13, glow)
 		"locust":
@@ -1255,8 +1454,8 @@ static func enemy(ci: CanvasItem, type: String, c: Vector2, facing: Vector2, r: 
 			plate(ci, c - facing * rr * 1.35, rect_pts(0.1, 0.42), METAL, ang, rr, 1.0)
 			for side in [-1.0, 1.0]:
 				var fan: Vector2 = c + n * side * rr * 0.95 - facing * rr * 0.1
-				ci.draw_circle(fan, rr * 0.5, OUTLINE)
-				ci.draw_circle(fan, rr * 0.44, METAL_D)
+				disc(ci, fan, rr * 0.5, OUTLINE)
+				disc(ci, fan, rr * 0.44, METAL_D)
 				var spin: float = t * 30.0 * side
 				for b in 3:
 					var bd := Vector2.from_angle(spin + TAU * float(b) / 3.0)
@@ -1280,7 +1479,7 @@ static func enemy(ci: CanvasItem, type: String, c: Vector2, facing: Vector2, r: 
 				shaded_oval(ci, c, rr * 1.15, rr * 0.8, ang, dirt, s)
 				for k in 5:
 					var a := ang + TAU * float(k) / 5.0 + t * 0.5
-					ci.draw_circle(c + Vector2.from_angle(a) * rr * (0.85 + 0.15 * sin(t * 9.0 + float(k))), 1.4 * s, dirt.lightened(0.2))
+					disc(ci, c + Vector2.from_angle(a) * rr * (0.85 + 0.15 * sin(t * 9.0 + float(k))), 1.4 * s, dirt.lightened(0.2))
 				ci.draw_line(c + facing * rr * 0.6, c + facing * rr * 1.05, METAL_L, 2.0 * s, true)
 				glow_dot(ci, c + facing * rr * 0.2, rr * 0.12, Color(glow, 0.6))
 			else:
@@ -1336,11 +1535,11 @@ static func enemy(ci: CanvasItem, type: String, c: Vector2, facing: Vector2, r: 
 		"rally":
 			# Rally Beacon: a wheeled signal mast with a rotating siren and overdrive pulses.
 			var ping := fmod(t * 1.4, 1.0)
-			ci.draw_arc(c, rr * (1.1 + 1.6 * ping), 0.0, TAU, 24, Color(glow, 0.4 * (1.0 - ping)), 1.6 * s, true)
+			arc(ci, c, rr * (1.1 + 1.6 * ping), 0.0, TAU, 24, Color(glow, 0.4 * (1.0 - ping)), 1.6 * s, true)
 			for k in 4:
 				var wp: Vector2 = c + Vector2.from_angle(ang + PI / 4.0 + float(k) * PI / 2.0) * rr * 0.72
-				ci.draw_circle(wp, rr * 0.22, OUTLINE)
-				ci.draw_circle(wp, rr * 0.16, METAL_D.lightened(0.15))
+				disc(ci, wp, rr * 0.22, OUTLINE)
+				disc(ci, wp, rr * 0.16, METAL_D.lightened(0.15))
 			var hexr := ngon(6, 1.0, 0.0)
 			plate(ci, c, hexr, body, ang, rr * 0.62, 1.3)
 			bar(ci, c, c - facing * rr * 0.1 + Vector2(0, -rr * 0.9), 1.6 * s, METAL_L)
@@ -1430,16 +1629,16 @@ static func enemy(ci: CanvasItem, type: String, c: Vector2, facing: Vector2, r: 
 				var gun: Vector2 = c + n * side * rr * 0.5
 				bar(ci, gun, gun + facing * rr * 0.95, 4.0 * s, METAL_L)
 				orb(ci, gun, rr * 0.18, body.lightened(0.15), s)
-			ci.draw_circle(c, rr * 0.36, OUTLINE)
-			ci.draw_circle(c, rr * 0.3, Color(glow.darkened(0.5), 1.0))
+			disc(ci, c, rr * 0.36, OUTLINE)
+			disc(ci, c, rr * 0.3, Color(glow.darkened(0.5), 1.0))
 			glow_dot(ci, c, rr * (0.18 + 0.04 * core), glow)
 		_:
-			ci.draw_circle(c, rr, body)
+			disc(ci, c, rr, body)
 	if slowed and not hidden:
-		ci.draw_circle(c, rr * 1.12, Color(0.55, 0.85, 1.0, 0.28))
+		disc(ci, c, rr * 1.12, Color(0.55, 0.85, 1.0, 0.28))
 		ring(ci, c, rr * 1.12, Color(0.7, 0.95, 1.0, 0.6), 1.0 * s)
 	if flash > 0.0 and not hidden:
-		ci.draw_circle(c, rr, Color(1, 1, 1, clampf(flash * 8.0, 0.0, 0.6)))
+		disc(ci, c, rr, Color(1, 1, 1, clampf(flash * 8.0, 0.0, 0.6)))
 
 
 ## Small status markers: armor shred, vulnerability, stun.
@@ -1459,11 +1658,11 @@ static func enemy_status(ci: CanvasItem, e, t: float) -> void:
 	if e.stun_timer > 0.0:
 		for i in 3:
 			var a := t * 9.0 + TAU * float(i) / 3.0
-			ci.draw_circle(e.pos + Vector2(cos(a) * r * 0.9, -r - 4.0 + sin(a) * 2.0), 1.8, Color(1.0, 0.92, 0.3))
+			disc(ci, e.pos + Vector2(cos(a) * r * 0.9, -r - 4.0 + sin(a) * 2.0), 1.8, Color(1.0, 0.92, 0.3))
 	# Silenced (suppressed or jammed): a struck-through ring over the head.
 	if e.silenced():
 		var sp: Vector2 = e.pos + Vector2(-r * 0.7, -r - 3.0)
-		ci.draw_arc(sp, 3.2, 0.0, TAU, 12, Color(0.75, 0.55, 1.0, 0.9), 1.3, true)
+		arc(ci, sp, 3.2, 0.0, TAU, 12, Color(0.75, 0.55, 1.0, 0.9), 1.3, true)
 		ci.draw_line(sp + Vector2(-2.3, 2.3), sp + Vector2(2.3, -2.3), Color(0.75, 0.55, 1.0, 0.9), 1.3, true)
 	# Exposed (immunities stripped): a dashed white ring.
 	if e.exposed():
@@ -1472,14 +1671,14 @@ static func enemy_status(ci: CanvasItem, e, t: float) -> void:
 	if e.armor_break_timer > 0.0 and e.armor > 0.0:
 		var bp: Vector2 = e.pos + Vector2(-r * 0.75, r * 0.55)
 		ci.draw_rect(Rect2(bp - Vector2(3, 3), Vector2(6, 6)), Color(0.55, 0.55, 0.6, 0.9))
-		ci.draw_polyline(PackedVector2Array([bp + Vector2(-2, -3), bp + Vector2(0.5, -0.5), bp + Vector2(-1, 1), bp + Vector2(2, 3)]), Color(1.0, 0.45, 0.2), 1.1, true)
+		polyline(ci, PackedVector2Array([bp + Vector2(-2, -3), bp + Vector2(0.5, -0.5), bp + Vector2(-1, 1), bp + Vector2(2, 3)]), Color(1.0, 0.45, 0.2), 1.1, true)
 	# Burning: flickering flame tongues.
 	if e.dot_timer > 0.0 and e.dot_dps > 0.0:
 		for i in 3:
 			var fx := (float(i) - 1.0) * r * 0.45
 			var h := 4.0 + 2.0 * sin(t * 14.0 + float(i) * 2.0)
 			var fb: Vector2 = e.pos + Vector2(fx, -r * 0.3)
-			ci.draw_colored_polygon(PackedVector2Array([fb + Vector2(-1.8, 0), fb + Vector2(0, -h), fb + Vector2(1.8, 0)]), Color(1.0, 0.55, 0.15, 0.75))
+			poly(ci, PackedVector2Array([fb + Vector2(-1.8, 0), fb + Vector2(0, -h), fb + Vector2(1.8, 0)]), Color(1.0, 0.55, 0.15, 0.75))
 
 
 # --- HUD glyphs ------------------------------------------------------------------------------
@@ -1490,10 +1689,10 @@ static func shield(ci: CanvasItem, c: Vector2, size: float, col: Color) -> void:
 		c + Vector2(-r * 0.85, -r * 0.8), c + Vector2(0, -r * 1.05), c + Vector2(r * 0.85, -r * 0.8),
 		c + Vector2(r * 0.8, r * 0.1), c + Vector2(0, r * 1.05), c + Vector2(-r * 0.8, r * 0.1),
 	])
-	ci.draw_colored_polygon(pts, Color(col, 0.35))
+	poly(ci, pts, Color(col, 0.35))
 	var closed := pts.duplicate()
 	closed.append(pts[0])
-	ci.draw_polyline(closed, col, 2.0, true)
+	polyline(ci, closed, col, 2.0, true)
 	ci.draw_line(c + Vector2(0, -r * 0.6), c + Vector2(0, r * 0.6), col, 1.6, true)
 
 
@@ -1502,7 +1701,7 @@ static func coin(ci: CanvasItem, c: Vector2, r: float) -> void:
 	fill(ci, c, hex, OUTLINE, 0.0, r + 1.2)
 	fill(ci, c, hex, Color(1.0, 0.72, 0.22), 0.0, r)
 	outline(ci, c, hex, Color(0.6, 0.38, 0.08), 1.2, 0.0, r * 0.62)
-	ci.draw_circle(c, r * 0.22, Color(1, 1, 0.85))
+	disc(ci, c, r * 0.22, Color(1, 1, 0.85))
 
 
 ## Research-node glyphs for the Research Lab (see `icon` in data/research.gd).
@@ -1512,17 +1711,17 @@ static func research_glyph(ci: CanvasItem, icon: String, c: Vector2, r: float, c
 		"damage":
 			for k in 2:
 				var y := (0.25 - 0.55 * float(k)) * r
-				ci.draw_polyline(PackedVector2Array([c + Vector2(-0.55 * r, y + 0.35 * r), c + Vector2(0, y - 0.1 * r), c + Vector2(0.55 * r, y + 0.35 * r)]), col, w, true)
+				polyline(ci, PackedVector2Array([c + Vector2(-0.55 * r, y + 0.35 * r), c + Vector2(0, y - 0.1 * r), c + Vector2(0.55 * r, y + 0.35 * r)]), col, w, true)
 		"range":
-			ci.draw_circle(c + Vector2(-0.45 * r, 0.35 * r), w * 0.9, col)
+			disc(ci, c + Vector2(-0.45 * r, 0.35 * r), w * 0.9, col)
 			for k in 2:
-				ci.draw_arc(c + Vector2(-0.45 * r, 0.35 * r), (0.45 + 0.42 * float(k)) * r, -PI / 2.0, 0.0, 10, col, w, true)
+				arc(ci, c + Vector2(-0.45 * r, 0.35 * r), (0.45 + 0.42 * float(k)) * r, -PI / 2.0, 0.0, 10, col, w, true)
 		"rate":
 			for k in 2:
 				var x := (-0.45 + 0.5 * float(k)) * r
-				ci.draw_polyline(PackedVector2Array([c + Vector2(x, -0.5 * r), c + Vector2(x + 0.4 * r, 0), c + Vector2(x, 0.5 * r)]), col, w, true)
+				polyline(ci, PackedVector2Array([c + Vector2(x, -0.5 * r), c + Vector2(x + 0.4 * r, 0), c + Vector2(x, 0.5 * r)]), col, w, true)
 		"blast":
-			ci.draw_circle(c, 0.28 * r, col)
+			disc(ci, c, 0.28 * r, col)
 			for k in 8:
 				var d := Vector2.from_angle(TAU * float(k) / 8.0 + PI / 8.0)
 				ci.draw_line(c + d * 0.45 * r, c + d * 0.8 * r, col, w * 0.8, true)
@@ -1530,11 +1729,11 @@ static func research_glyph(ci: CanvasItem, icon: String, c: Vector2, r: float, c
 			for k in 3:
 				var d := Vector2.from_angle(PI / 2.0 + PI * float(k) / 3.0) * 0.72 * r
 				ci.draw_line(c - d, c + d, col, w, true)
-			ci.draw_circle(c, w, col)
+			disc(ci, c, w, col)
 		"chain":
-			ci.draw_polyline(PackedVector2Array([c + Vector2(-0.6, -0.55) * r, c + Vector2(0.05, -0.1) * r, c + Vector2(-0.15, 0.15) * r, c + Vector2(0.6, 0.6) * r]), col, w, true)
-			ci.draw_circle(c + Vector2(-0.6, -0.55) * r, w * 1.1, col)
-			ci.draw_circle(c + Vector2(0.6, 0.6) * r, w * 1.1, col)
+			polyline(ci, PackedVector2Array([c + Vector2(-0.6, -0.55) * r, c + Vector2(0.05, -0.1) * r, c + Vector2(-0.15, 0.15) * r, c + Vector2(0.6, 0.6) * r]), col, w, true)
+			disc(ci, c + Vector2(-0.6, -0.55) * r, w * 1.1, col)
+			disc(ci, c + Vector2(0.6, 0.6) * r, w * 1.1, col)
 		"credits":
 			var hex := ngon(6, 1.0, PI / 6.0)
 			outline(ci, c, hex, col, w, 0.0, 0.62 * r)
@@ -1542,30 +1741,30 @@ static func research_glyph(ci: CanvasItem, icon: String, c: Vector2, r: float, c
 		"shield":
 			shield(ci, c, 0.62 * r, col)
 		"push":
-			ci.draw_circle(c + Vector2(0.5 * r, 0), 0.22 * r, col)
+			disc(ci, c + Vector2(0.5 * r, 0), 0.22 * r, col)
 			for k in 2:
 				var x := (0.15 - 0.4 * float(k)) * r
-				ci.draw_polyline(PackedVector2Array([c + Vector2(x + 0.25 * r, -0.5 * r), c + Vector2(x - 0.15 * r, 0), c + Vector2(x + 0.25 * r, 0.5 * r)]), col, w, true)
+				polyline(ci, PackedVector2Array([c + Vector2(x + 0.25 * r, -0.5 * r), c + Vector2(x - 0.15 * r, 0), c + Vector2(x + 0.25 * r, 0.5 * r)]), col, w, true)
 		"salvage":
-			ci.draw_arc(c, 0.55 * r, -PI * 0.1, PI * 1.35, 16, col, w, true)
+			arc(ci, c, 0.55 * r, -PI * 0.1, PI * 1.35, 16, col, w, true)
 			var tip := c + Vector2.from_angle(-PI * 0.1) * 0.55 * r
-			ci.draw_polyline(PackedVector2Array([tip + Vector2(-0.32, -0.12) * r, tip, tip + Vector2(0.08, -0.34) * r]), col, w, true)
+			polyline(ci, PackedVector2Array([tip + Vector2(-0.32, -0.12) * r, tip, tip + Vector2(0.08, -0.34) * r]), col, w, true)
 		"uplink":
-			ci.draw_arc(c + Vector2(0, 0.1 * r), 0.6 * r, PI * 1.15, PI * 1.85, 10, col, w, true)
+			arc(ci, c + Vector2(0, 0.1 * r), 0.6 * r, PI * 1.15, PI * 1.85, 10, col, w, true)
 			ci.draw_line(c + Vector2(0, 0.1 * r), c + Vector2(0, 0.65 * r), col, w, true)
 			var pulse := fmod(t * 0.8, 1.0)
-			ci.draw_arc(c + Vector2(0, -0.2 * r), (0.3 + 0.5 * pulse) * r, PI * 1.3, PI * 1.7, 8, Color(col, 1.0 - pulse), w * 0.7, true)
-			ci.draw_circle(c + Vector2(0, -0.2 * r), w, col)
+			arc(ci, c + Vector2(0, -0.2 * r), (0.3 + 0.5 * pulse) * r, PI * 1.3, PI * 1.7, 8, Color(col, 1.0 - pulse), w * 0.7, true)
+			disc(ci, c + Vector2(0, -0.2 * r), w, col)
 		"mastery":
 			var pts := PackedVector2Array()
 			for k in 8:
 				var a := -PI / 2.0 + TAU * float(k) / 8.0
 				pts.append(c + Vector2.from_angle(a) * (0.78 if k % 2 == 0 else 0.3) * r)
-			ci.draw_colored_polygon(pts, Color(col, 0.35))
+			poly(ci, pts, Color(col, 0.35))
 			var closed := pts.duplicate()
 			closed.append(pts[0])
-			ci.draw_polyline(closed, col, w * 0.8, true)
-			ci.draw_circle(c, 0.14 * r, Color(1, 1, 1, 0.9))
+			polyline(ci, closed, col, w * 0.8, true)
+			disc(ci, c, 0.14 * r, Color(1, 1, 1, 0.9))
 
 
 ## A skill-tree hex node (Research Lab and the upgrade tree). `state`:
@@ -1597,7 +1796,7 @@ static func skill_hex(ci: CanvasItem, c: Vector2, r: float, state: String, acc: 
 			edge = Color(0.18, 0.23, 0.29)
 			glyph = Color(0.25, 0.3, 0.36)
 	if state == "owned" or state == "ready":
-		ci.draw_circle(c, r * 1.25, Color(edge, 0.12))
+		disc(ci, c, r * 1.25, Color(edge, 0.12))
 	fill(ci, c, hex, OUTLINE, 0.0, r + 2.0)
 	fill(ci, c, hex, fill_c, 0.0, r)
 	outline(ci, c, hex, edge, edge_w, 0.0, r)
@@ -1609,7 +1808,7 @@ static func skill_hex(ci: CanvasItem, c: Vector2, r: float, state: String, acc: 
 ## Small padlock glyph.
 static func lock(ci: CanvasItem, c: Vector2, s: float, col: Color) -> void:
 	ci.draw_rect(Rect2(c + Vector2(-4, -1) * s, Vector2(8, 6.5) * s), col)
-	ci.draw_arc(c + Vector2(0, -1) * s, 2.6 * s, PI, TAU, 8, col, 1.5 * s, true)
+	arc(ci, c + Vector2(0, -1) * s, 2.6 * s, PI, TAU, 8, col, 1.5 * s, true)
 
 
 ## Tier-4 mastery aura: a slow gold segmented ring around the tower pad.
@@ -1628,13 +1827,13 @@ static func star(ci: CanvasItem, c: Vector2, r: float, filled: bool) -> void:
 		var a := -PI / 2.0 + TAU * float(i) / 10.0
 		pts.append(c + Vector2(cos(a), sin(a)) * (r if i % 2 == 0 else r * 0.45))
 	if filled:
-		ci.draw_circle(c, r * 1.1, Color(GOLD, 0.15))
-		ci.draw_colored_polygon(pts, GOLD)
+		disc(ci, c, r * 1.1, Color(GOLD, 0.15))
+		poly(ci, pts, GOLD)
 	else:
-		ci.draw_colored_polygon(pts, Color(0.12, 0.15, 0.2))
+		poly(ci, pts, Color(0.12, 0.15, 0.2))
 	var closed := pts.duplicate()
 	closed.append(pts[0])
-	ci.draw_polyline(closed, OUTLINE if filled else Color(0.3, 0.42, 0.52), 1.5, true)
+	polyline(ci, closed, OUTLINE if filled else Color(0.3, 0.42, 0.52), 1.5, true)
 
 
 static func stars(ci: CanvasItem, c: Vector2, r: float, count: int, total := 3) -> void:
@@ -1651,22 +1850,22 @@ static func medal(ci: CanvasItem, c: Vector2, r: float, mode: String, earned: bo
 		col = Color(0.26, 0.31, 0.37)
 	var tail := col.darkened(0.3) if earned else Color(0.2, 0.24, 0.29)
 	for s in [-1.0, 1.0]:
-		ci.draw_colored_polygon(PackedVector2Array([
+		poly(ci, PackedVector2Array([
 			c + Vector2(s * r * 0.1, r * 0.2), c + Vector2(s * r * 0.72, r * 0.35),
 			c + Vector2(s * r * 0.62, r * 1.35), c + Vector2(s * r * 0.38, r * 1.08), c + Vector2(s * r * 0.08, r * 1.3),
 		]), tail)
 	var rim := Color(1.0, 0.8, 0.35) if earned else Color(0.33, 0.38, 0.44)
-	ci.draw_circle(c, r, OUTLINE)
-	ci.draw_circle(c, r * 0.92, rim.darkened(0.35))
-	ci.draw_circle(c, r * 0.8, rim)
-	ci.draw_circle(c, r * 0.66, col.darkened(0.15) if earned else Color(0.11, 0.14, 0.18))
+	disc(ci, c, r, OUTLINE)
+	disc(ci, c, r * 0.92, rim.darkened(0.35))
+	disc(ci, c, r * 0.8, rim)
+	disc(ci, c, r * 0.66, col.darkened(0.15) if earned else Color(0.11, 0.14, 0.18))
 	var mark := Color(1, 1, 1, 0.95) if earned else Color(0.38, 0.44, 0.5)
 	var w := r * 0.36
 	for i in tier:
 		var y := (float(i) - float(tier - 1) / 2.0) * r * 0.22
-		ci.draw_polyline(PackedVector2Array([c + Vector2(-w, y + r * 0.09), c + Vector2(0, y - r * 0.09), c + Vector2(w, y + r * 0.09)]), mark, maxf(1.3, r * 0.09), true)
+		polyline(ci, PackedVector2Array([c + Vector2(-w, y + r * 0.09), c + Vector2(0, y - r * 0.09), c + Vector2(w, y + r * 0.09)]), mark, maxf(1.3, r * 0.09), true)
 	if earned:
-		ci.draw_arc(c, r * 0.72, -2.5 + 0.15 * sin(t * 2.0), -1.3 + 0.15 * sin(t * 2.0), 10, Color(1, 1, 1, 0.5), maxf(1.0, r * 0.07), true)
+		arc(ci, c, r * 0.72, -2.5 + 0.15 * sin(t * 2.0), -1.3 + 0.15 * sin(t * 2.0), 10, Color(1, 1, 1, 0.5), maxf(1.0, r * 0.07), true)
 
 
 
@@ -1680,10 +1879,10 @@ static func ability_icon(ci: CanvasItem, id: String, c: Vector2, r: float, t: fl
 			ci.draw_line(c + Vector2(-r * 0.8, r * 0.35), c + Vector2(-r * 0.35, r * 0.35), col, 1.6, true)
 			ci.draw_line(c + Vector2(r * 0.35, r * 0.35), c + Vector2(r * 0.8, r * 0.35), col, 1.6, true)
 		"warp":
-			ci.draw_circle(c, r * 0.95, Color(0.45, 0.35, 1.0, 0.25 + 0.1 * sin(t * 3.0)))
-			ci.draw_arc(c, r * 0.8, 0.0, TAU, 32, Color(0.75, 0.68, 1.0), 2.5, true)
+			disc(ci, c, r * 0.95, Color(0.45, 0.35, 1.0, 0.25 + 0.1 * sin(t * 3.0)))
+			arc(ci, c, r * 0.8, 0.0, TAU, 32, Color(0.75, 0.68, 1.0), 2.5, true)
 			ci.draw_line(c, c + Vector2.from_angle(t * 0.8 - PI / 2.0) * r * 0.6, Color(1, 1, 1), 2.5, true)
 			ci.draw_line(c, c + Vector2.from_angle(t * 0.1 - PI / 2.0) * r * 0.4, Color(1, 1, 1), 3.0, true)
 			for i in 12:
 				var a := TAU * float(i) / 12.0
-				ci.draw_circle(c + Vector2.from_angle(a) * r * 0.8, 1.4, Color(0.9, 0.85, 1.0))
+				disc(ci, c + Vector2.from_angle(a) * r * 0.8, 1.4, Color(0.9, 0.85, 1.0))

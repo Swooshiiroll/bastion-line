@@ -5,6 +5,7 @@ extends Node
 ##   --screenshot-tour   capture a scripted tour of every screen into res://screenshots/ and quit
 ##   --sprite-sheet      render every tower and enemy sprite to res://screenshots/sprite_sheet.png
 ##   --codex=<dir>       export data and sprites for the printable codex (tools/codex.mjs)
+##   --perf[=map,difficulty,round]  measure frame times per render layer (tools/PerfProbe.gd)
 
 const MainMenu = preload("res://scripts/ui/MainMenu.gd")
 const MapSelect = preload("res://scripts/ui/MapSelect.gd")
@@ -28,6 +29,11 @@ func _ready() -> void:
 		return
 	if Array(args).any(func(a): return str(a).begins_with("--codex=")):
 		add_child(load("res://tools/Codex.gd").new())
+		return
+	if Array(args).any(func(a): return str(a).begins_with("--perf")):
+		var perf = load("res://tools/PerfProbe.gd").new()
+		perf.app = self
+		add_child(perf)
 		return
 	if "--sprite-sheet" in args:
 		add_child(load("res://tools/SpriteSheet.gd").new())

@@ -31,8 +31,8 @@ func _draw() -> void:
 		if tw.disabled > 0.0:
 			Draw.tower_offline(self, tw.pos, t)
 		if tw.buff_dmg > 0.0:
-			draw_circle(tw.pos + Vector2(14, -14), 3.0, Draw.OUTLINE)
-			draw_circle(tw.pos + Vector2(14, -14), 2.2, Draw.ACCENT.amp)
+			Draw.disc(self, tw.pos + Vector2(14, -14), 3.0, Draw.OUTLINE)
+			Draw.disc(self, tw.pos + Vector2(14, -14), 2.2, Draw.ACCENT.amp)
 
 	var ground: Array = []
 	var air: Array = []
@@ -61,12 +61,12 @@ func _pool(pool, t: float) -> void:
 	var r: float = pool.r
 	var k := clampf(float(pool.t) / 0.6, 0.0, 1.0)
 	var col := Color(0.55, 1.0, 0.3)
-	draw_circle(pool.pos, r, Color(0.15, 0.35, 0.05, 0.35 * k))
-	draw_circle(pool.pos, r * (0.7 + 0.08 * sin(t * 9.0)), Color(col, 0.18 * k))
-	draw_arc(pool.pos, r, 0.0, TAU, 32, Color(col, 0.6 * k), 1.5, true)
+	Draw.disc(self, pool.pos, r, Color(0.15, 0.35, 0.05, 0.35 * k))
+	Draw.disc(self, pool.pos, r * (0.7 + 0.08 * sin(t * 9.0)), Color(col, 0.18 * k))
+	Draw.arc(self, pool.pos, r, 0.0, TAU, 32, Color(col, 0.6 * k), 1.5, true)
 	for i in 4:
 		var a := t * 1.5 + float(i) * 1.7
-		draw_circle(pool.pos + Vector2(cos(a), sin(a * 1.3)) * r * 0.5, 2.5, Color(col, 0.5 * k))
+		Draw.disc(self, pool.pos + Vector2(cos(a), sin(a * 1.3)) * r * 0.5, 2.5, Color(col, 0.5 * k))
 
 
 func _enemy(e, t: float) -> void:
@@ -76,7 +76,7 @@ func _enemy(e, t: float) -> void:
 		return
 	var d: Dictionary = e.def
 	if d.has("aura_radius"):
-		draw_arc(e.pos, float(d.aura_radius), 0.0, TAU, 48, Color(Draw.ENEMY_COLOR.rally, 0.16 + 0.08 * sin(t * 4.0)), 1.5, true)
+		Draw.arc(self, e.pos, float(d.aura_radius), 0.0, TAU, 48, Color(Draw.ENEMY_COLOR.rally, 0.16 + 0.08 * sin(t * 4.0)), 1.5, true)
 	if d.has("regen_pct") and e.since_hit >= float(d.regen_delay) and e.hp < e.max_hp:
 		Draw.arc_segments(self, e.pos, e.radius + 5.0, 3, 0.8, t * 3.0, Color(Draw.ENEMY_COLOR.mender, 0.85), 1.6)
 	if e.haste > 0.0:
@@ -112,34 +112,34 @@ func _projectile(p) -> void:
 			var back: Vector2 = (p.start - p.pos).normalized() if p.start.distance_squared_to(p.pos) > 1.0 else Vector2.LEFT
 			for k in 4:
 				var tp: Vector2 = sp + back * (4.0 + 3.5 * float(k)) + Vector2(0, float(k) * 1.5)
-				draw_circle(tp, 3.4 - 0.7 * float(k), Color(col, 0.35 - 0.08 * float(k)))
-			draw_circle(sp, 7.0, Color(col, 0.22))
-			draw_circle(sp, 4.8, Draw.OUTLINE)
-			draw_circle(sp, 4.2, col)
-			draw_circle(sp + Vector2(-1.2, -1.2), 1.8, Color(1, 1, 0.9))
+				Draw.disc(self, tp, 3.4 - 0.7 * float(k), Color(col, 0.35 - 0.08 * float(k)))
+			Draw.disc(self, sp, 7.0, Color(col, 0.22))
+			Draw.disc(self, sp, 4.8, Draw.OUTLINE)
+			Draw.disc(self, sp, 4.2, col)
+			Draw.disc(self, sp + Vector2(-1.2, -1.2), 1.8, Color(1, 1, 0.9))
 		"flak":
 			var fd: Vector2 = (p.target_pos - p.pos).normalized()
 			if fd == Vector2.ZERO:
 				fd = Vector2.RIGHT
 			draw_line(p.pos - fd * 10.0, p.pos, Color(Draw.ACCENT.flak, 0.3), 4.0, true)
 			draw_line(p.pos - fd * 6.0, p.pos, Color(1.0, 0.9, 0.6, 0.6), 1.4, true)
-			draw_circle(p.pos, 3.0, Draw.OUTLINE)
-			draw_circle(p.pos, 2.3, Color(0.8, 0.75, 0.5))
-			draw_circle(p.pos + fd * 0.8, 1.1, Color(1.0, 0.4, 0.3))
+			Draw.disc(self, p.pos, 3.0, Draw.OUTLINE)
+			Draw.disc(self, p.pos, 2.3, Color(0.8, 0.75, 0.5))
+			Draw.disc(self, p.pos + fd * 0.8, 1.1, Color(1.0, 0.4, 0.3))
 		"missile":
 			# A finned missile with a red warhead, a flaring motor and a smoke trail.
 			var d: Vector2 = p.vel.normalized() if p.vel.length_squared() > 1.0 else Vector2.RIGHT
 			var n := d.orthogonal()
 			for k in 4:
 				var sp2: Vector2 = p.pos - d * (9.0 + 4.0 * float(k))
-				draw_circle(sp2, 1.5 + 0.8 * float(k), Color(0.6, 0.6, 0.65, 0.22 - 0.045 * float(k)))
-			draw_circle(p.pos - d * 6.5, 3.0, Color(1.0, 0.55, 0.2, 0.35))
-			draw_circle(p.pos - d * 6.0, 1.8, Color(1.0, 0.85, 0.5, 0.95))
+				Draw.disc(self, sp2, 1.5 + 0.8 * float(k), Color(0.6, 0.6, 0.65, 0.22 - 0.045 * float(k)))
+			Draw.disc(self, p.pos - d * 6.5, 3.0, Color(1.0, 0.55, 0.2, 0.35))
+			Draw.disc(self, p.pos - d * 6.0, 1.8, Color(1.0, 0.85, 0.5, 0.95))
 			for sgn in [-1.0, 1.0]:
-				draw_colored_polygon(PackedVector2Array([p.pos - d * 2.5 + n * sgn * 1.4, p.pos - d * 5.5 + n * sgn * 3.6, p.pos - d * 5.5 + n * sgn * 1.4]), Color(0.45, 0.47, 0.52))
+				Draw.poly(self, PackedVector2Array([p.pos - d * 2.5 + n * sgn * 1.4, p.pos - d * 5.5 + n * sgn * 3.6, p.pos - d * 5.5 + n * sgn * 1.4]), Color(0.45, 0.47, 0.52))
 			draw_line(p.pos - d * 5.0, p.pos + d * 3.5, Draw.OUTLINE, 3.6, true)
 			draw_line(p.pos - d * 5.0, p.pos + d * 3.5, Color(0.85, 0.88, 0.92), 2.4, true)
-			draw_circle(p.pos + d * 4.2, 1.5, Color(1.0, 0.3, 0.25))
+			Draw.disc(self, p.pos + d * 4.2, 1.5, Color(1.0, 0.3, 0.25))
 		_:
 			var d: Vector2 = (p.target_pos - p.pos).normalized()
 			if d == Vector2.ZERO:
@@ -148,8 +148,8 @@ func _projectile(p) -> void:
 			draw_line(p.pos - d * 14.0, p.pos, Color(col, 0.2), 6.0, true)
 			draw_line(p.pos - d * 11.0, p.pos, Color(col, 0.5), 3.2, true)
 			draw_line(p.pos - d * 8.0, p.pos, col, 1.8, true)
-			draw_circle(p.pos, 2.4, Color(col, 0.6))
-			draw_circle(p.pos, 1.5, Color(1, 1, 1))
+			Draw.disc(self, p.pos, 2.4, Color(col, 0.6))
+			Draw.disc(self, p.pos, 1.5, Color(1, 1, 1))
 
 
 func _hp_bar(e) -> void:
@@ -190,4 +190,4 @@ func _boss_bar(g) -> void:
 	var label := "%s   %d / %d" % [str(boss.def.name).to_upper(), ceili(boss.hp), ceili(boss.max_hp)]
 	draw_string_outline(_font, p + Vector2(0, 13), label, HORIZONTAL_ALIGNMENT_CENTER, w, 13, 4, Color(0, 0, 0, 0.9))
 	draw_string(_font, p + Vector2(0, 13), label, HORIZONTAL_ALIGNMENT_CENTER, w, 13, Color(1, 0.95, 0.95))
-	draw_arc(boss.pos, boss.radius + 7.0 + sin(world.anim_t * 6.0) * 2.0, 0.0, TAU, 36, Color(glow, 0.7), 2.0, true)
+	Draw.arc(self, boss.pos, boss.radius + 7.0 + sin(world.anim_t * 6.0) * 2.0, 0.0, TAU, 36, Color(glow, 0.7), 2.0, true)

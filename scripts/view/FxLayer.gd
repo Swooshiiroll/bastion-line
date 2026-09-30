@@ -1,4 +1,6 @@
 extends Node2D
+
+const Draw = preload("res://scripts/view/Draw.gd")
 ## Short-lived visual effects: particles, expanding rings, lightning, tracers, flashes, floating text.
 ## Purely cosmetic; lives in real time independent of game speed.
 
@@ -120,21 +122,21 @@ func _age(list: Array, dt: float) -> Array:
 func _draw() -> void:
 	for s in scorches:
 		var k: float = s.life / s.max
-		draw_circle(s.p, s.r, Color(0.08, 0.05, 0.03, 0.45 * minf(1.0, k * 2.0)))
-		draw_circle(s.p, s.r * 0.6, Color(0.05, 0.03, 0.02, 0.35 * minf(1.0, k * 2.0)))
+		Draw.disc(self, s.p, s.r, Color(0.08, 0.05, 0.03, 0.45 * minf(1.0, k * 2.0)))
+		Draw.disc(self, s.p, s.r * 0.6, Color(0.05, 0.03, 0.02, 0.35 * minf(1.0, k * 2.0)))
 	if warp_t > 0.0:
 		var fade := minf(1.0, warp_t / 0.6) * minf(1.0, (warp_max - warp_t) / 0.3)
 		draw_rect(Rect2(Vector2.ZERO, Grid.field_size()), Color(0.45, 0.35, 1.0, 0.13 * fade))
 		var center := Grid.field_size() / 2.0
 		for i in 3:
 			var ph := fmod(_time * 0.6 + i / 3.0, 1.0)
-			draw_arc(center, 40.0 + ph * 520.0, 0.0, TAU, 96, Color(0.7, 0.6, 1.0, 0.25 * (1.0 - ph) * fade), 3.0, true)
+			Draw.arc(self, center, 40.0 + ph * 520.0, 0.0, TAU, 96, Color(0.7, 0.6, 1.0, 0.25 * (1.0 - ph) * fade), 3.0, true)
 	for m in meteors:
 		var k: float = m.life / m.max
 		var pulse := 0.5 + 0.5 * sin(_time * 18.0)
-		draw_circle(m.p, m.r, Color(1.0, 0.3, 0.15, 0.08 + 0.06 * pulse))
-		draw_arc(m.p, m.r, 0.0, TAU, 48, Color(1.0, 0.45, 0.2, 0.7), 2.0, true)
-		draw_arc(m.p, m.r * (0.3 + 0.7 * k), 0.0, TAU, 32, Color(1.0, 0.7, 0.3, 0.5), 1.5, true)
+		Draw.disc(self, m.p, m.r, Color(1.0, 0.3, 0.15, 0.08 + 0.06 * pulse))
+		Draw.arc(self, m.p, m.r, 0.0, TAU, 48, Color(1.0, 0.45, 0.2, 0.7), 2.0, true)
+		Draw.arc(self, m.p, m.r * (0.3 + 0.7 * k), 0.0, TAU, 32, Color(1.0, 0.7, 0.3, 0.5), 1.5, true)
 		# Orbital targeting: a thin guide beam from orbit that thickens as the strike charges.
 		var top := Vector2(m.p.x, -60.0)
 		var charge := 1.0 - k
@@ -142,28 +144,28 @@ func _draw() -> void:
 		draw_line(top, m.p, Color(1.0, 0.9, 0.7, 0.4 + 0.4 * charge), 1.0 + 1.5 * charge, true)
 		for i in 3:
 			var a := _time * 3.0 + TAU * float(i) / 3.0
-			draw_arc(m.p, m.r * (0.35 + 0.1 * float(i)), a, a + 1.2, 10, Color(1.0, 0.7, 0.35, 0.6), 2.0, true)
+			Draw.arc(self, m.p, m.r * (0.35 + 0.1 * float(i)), a, a + 1.2, 10, Color(1.0, 0.7, 0.35, 0.6), 2.0, true)
 	for f in flashes:
 		var k: float = f.life / f.max
-		draw_circle(f.p, f.r * (0.6 + 0.4 * k), Color(f.c, f.c.a * k))
+		Draw.disc(self, f.p, f.r * (0.6 + 0.4 * k), Color(f.c, f.c.a * k))
 	for r in rings:
 		var k: float = 1.0 - r.life / r.max
 		var radius: float = lerpf(r.r0, r.r1, 1.0 - pow(1.0 - k, 3.0))
 		if r.f:
-			draw_circle(r.p, radius, Color(r.c, 0.12 * (1.0 - k)))
-		draw_arc(r.p, radius, 0.0, TAU, 48, Color(r.c, r.c.a * (1.0 - k)), r.w, true)
+			Draw.disc(self, r.p, radius, Color(r.c, 0.12 * (1.0 - k)))
+		Draw.arc(self, r.p, radius, 0.0, TAU, 48, Color(r.c, r.c.a * (1.0 - k)), r.w, true)
 	for b in bolts:
 		var k: float = b.life / b.max
-		draw_polyline(b.pts, Color(b.c, 0.3 * k), b.w * 3.5, true)
-		draw_polyline(b.pts, Color(b.c, k), b.w, true)
-		draw_polyline(b.pts, Color(1, 1, 1, k), maxf(1.0, b.w * 0.4), true)
+		Draw.polyline(self, b.pts, Color(b.c, 0.3 * k), b.w * 3.5, true)
+		Draw.polyline(self, b.pts, Color(b.c, k), b.w, true)
+		Draw.polyline(self, b.pts, Color(1, 1, 1, k), maxf(1.0, b.w * 0.4), true)
 	for tr in tracers:
 		var k: float = tr.life / tr.max
 		draw_line(tr.a, tr.b, Color(tr.c, 0.35 * k), tr.w * 3.0, true)
 		draw_line(tr.a, tr.b, Color(tr.c, k), tr.w * k + 0.5, true)
 	for p in particles:
 		var k: float = p.life / p.max
-		draw_circle(p.p, p.s * (0.4 + 0.6 * k), Color(p.c, p.c.a * k))
+		Draw.disc(self, p.p, p.s * (0.4 + 0.6 * k), Color(p.c, p.c.a * k))
 	for t in texts:
 		var k: float = t.life / t.max
 		var size: int = t.s

@@ -88,21 +88,21 @@ func _draw() -> void:
 			draw_rect(Grid.cell_rect(hc).grow(-2.0), Color(1, 1, 1, 0.08))
 	var he = world.hover_enemy
 	if he != null and he.alive:
-		draw_arc(he.pos, he.radius + 5.0, 0.0, TAU, 32, Color(1, 1, 1, 0.85), 1.5, true)
+		Draw.arc(self, he.pos, he.radius + 5.0, 0.0, TAU, 32, Color(1, 1, 1, 0.85), 1.5, true)
 
 
 func _meteor_reticle(g, p: Vector2) -> void:
 	var r: float = Abilities.ABILITIES.meteor.radius
 	var pulse := 0.5 + 0.5 * sin(world.anim_t * 8.0)
-	draw_circle(p, r, Color(1.0, 0.4, 0.15, 0.10 + 0.05 * pulse))
-	draw_arc(p, r, 0.0, TAU, 64, Color(1.0, 0.55, 0.25, 0.95), 2.5, true)
-	draw_arc(p, r * 0.55, 0.0, TAU, 40, Color(1.0, 0.7, 0.35, 0.5), 1.5, true)
+	Draw.disc(self, p, r, Color(1.0, 0.4, 0.15, 0.10 + 0.05 * pulse))
+	Draw.arc(self, p, r, 0.0, TAU, 64, Color(1.0, 0.55, 0.25, 0.95), 2.5, true)
+	Draw.arc(self, p, r * 0.55, 0.0, TAU, 40, Color(1.0, 0.7, 0.35, 0.5), 1.5, true)
 	for a in 4:
 		var d := Vector2.from_angle(a * PI / 2.0 + PI / 4.0)
 		draw_line(p + d * (r - 12.0), p + d * (r + 8.0), Color(1.0, 0.6, 0.3), 2.5, true)
 	for e in g.enemies:
 		if e.alive and e.pos.distance_squared_to(p) <= r * r:
-			draw_arc(e.pos, e.radius + 4.0, 0.0, TAU, 24, Color(1.0, 0.5, 0.2, 0.9), 2.0, true)
+			Draw.arc(self, e.pos, e.radius + 4.0, 0.0, TAU, 24, Color(1.0, 0.5, 0.2, 0.9), 2.0, true)
 
 
 ## A small label with a dark backing, centred on `p`.
@@ -126,8 +126,8 @@ func _reach(t) -> float:
 func _range(center: Vector2, r: float, col: Color) -> void:
 	if r <= 0.0:
 		return
-	draw_circle(center, r, Color(col, 0.09))
-	draw_arc(center, r, 0.0, TAU, 72, Color(col, 0.75), 2.0, true)
+	Draw.disc(self, center, r, Color(col, 0.09))
+	Draw.arc(self, center, r, 0.0, TAU, 72, Color(col, 0.75), 2.0, true)
 
 
 ## The rectangle a tower of `type` at `anchor` covers.

@@ -8,6 +8,7 @@ const Game = preload("res://scripts/core/Game.gd")
 const Grid = preload("res://scripts/core/Grid.gd")
 const Draw = preload("res://scripts/view/Draw.gd")
 const Terrain = preload("res://scripts/view/Terrain.gd")
+const TerrainCache = preload("res://scripts/view/TerrainCache.gd")
 const LaneFx = preload("res://scripts/view/LaneFx.gd")
 const Scenery = preload("res://scripts/view/Scenery.gd")
 const EntityLayer = preload("res://scripts/view/EntityLayer.gd")
@@ -65,7 +66,7 @@ func setup(g) -> void:
 	position = base_pos
 	for child in get_children():
 		child.queue_free()
-	terrain = Terrain.new()
+	terrain = TerrainCache.new()
 	terrain.grid = g.grid
 	terrain.cleared = g.cleared
 	add_child(terrain)
@@ -270,7 +271,7 @@ func _visual(ev: Dictionary) -> void:
 			fx.ring(ev.pos, 12.0, ev.radius, fcol, 0.45, 2.0, true)
 			fx.burst(ev.pos, fcol, 6, 70.0, 2.0, 0.5)
 		"rubble_cleared":
-			terrain.queue_redraw()
+			terrain.refresh()
 			ground_fx.burst(ev.pos, Color(0.45, 0.4, 0.35, 0.9), 18, 90.0, 3.5, 0.7)
 			fx.ring(ev.pos, 6.0, 30.0, Color(1.0, 0.8, 0.4), 0.3, 2.0)
 		"gate":

@@ -65,7 +65,7 @@ func _draw() -> void:
 	for c in _power:
 		var ctr := Grid.cell_center(c)
 		var p := 0.5 + 0.5 * sin(t * 2.6 + float(c.x))
-		draw_circle(ctr, 10.0 + 3.0 * p, Color(GOLD, 0.10 + 0.08 * p))
+		Draw.disc(self, ctr, 10.0 + 3.0 * p, Color(GOLD, 0.10 + 0.08 * p))
 		Draw.glow_dot(self, ctr, 3.0 + p, Color(GOLD, 0.9))
 	for h in _sludge:
 		var c: Vector2i = h[0]
@@ -74,7 +74,7 @@ func _draw() -> void:
 		for k in 3:
 			var ph := fmod(t * 0.6 + Terrain.hash01(c.x, c.y, k), 1.0)
 			var p := ctr + dir * (Terrain.hash01(c.x, c.y, 30 + k) * 26.0 - 13.0) + dir.orthogonal() * (Terrain.hash01(c.x, c.y, 40 + k) * 20.0 - 10.0)
-			draw_arc(p, 1.5 + 4.0 * ph, 0.0, TAU, 10, Color(Terrain.SLUDGE, 0.5 * (1.0 - ph)), 1.2, true)
+			Draw.arc(self, p, 1.5 + 4.0 * ph, 0.0, TAU, 10, Color(Terrain.SLUDGE, 0.5 * (1.0 - ph)), 1.2, true)
 	for h in _shock:
 		var c: Vector2i = h[0]
 		var ctr: Vector2 = h[1]
@@ -87,7 +87,7 @@ func _draw() -> void:
 			var f := float(k) / 4.0
 			var jitter := (Terrain.hash01(slot, c.x * 31 + c.y, k) - 0.5) * 16.0
 			pts.append(ctr + dir * (-20.0 + 40.0 * f) + dir.orthogonal() * jitter)
-		draw_polyline(pts, Color(Terrain.SHOCK, 0.8), 1.6, true)
+		Draw.polyline(self, pts, Color(Terrain.SHOCK, 0.8), 1.6, true)
 	for g in _gates:
 		_gate(g, t)
 
@@ -112,15 +112,15 @@ func _gate(g: Array, t: float) -> void:
 		var base := ctr + d * 3.0
 		var n := d.orthogonal()
 		draw_line(base, tip, col, 2.5, true)
-		draw_polyline(PackedVector2Array([tip - d * 5.0 + n * 4.0, tip, tip - d * 5.0 - n * 4.0]), col, 2.0, true)
+		Draw.polyline(self, PackedVector2Array([tip - d * 5.0 + n * 4.0, tip, tip - d * 5.0 - n * 4.0]), col, 2.0, true)
 		if not open:
 			var x := ctr + d * 20.0
 			draw_line(x + Vector2(-3, -3), x + Vector2(3, 3), col, 1.6)
 			draw_line(x + Vector2(-3, 3), x + Vector2(3, -3), col, 1.6)
-	draw_circle(ctr, 3.0, Color(GOLD, 0.6 + 0.3 * sin(t * 4.0)))
+	Draw.disc(self, ctr, 3.0, Color(GOLD, 0.6 + 0.3 * sin(t * 4.0)))
 	if cd > 0.0:
 		var f := cd / 6.0
-		draw_arc(ctr, 21.0, -PI / 2.0, -PI / 2.0 + TAU * f, 24, Color(0.9, 0.9, 1.0, 0.7), 2.0, true)
+		Draw.arc(self, ctr, 21.0, -PI / 2.0, -PI / 2.0 + TAU * f, 24, Color(0.9, 0.9, 1.0, 0.7), 2.0, true)
 
 
 func _ambience(t: float) -> void:
@@ -142,11 +142,11 @@ func _ambience(t: float) -> void:
 			for k in 14:
 				var x := fmod(Terrain.hash01(k, 1, 91) * size.x + t * (8.0 + 6.0 * Terrain.hash01(k, 2, 91)), size.x + 160.0) - 80.0
 				var y := Terrain.hash01(k, 3, 91) * size.y + sin(t * 0.4 + float(k)) * 12.0
-				draw_circle(Vector2(x, y), 34.0 + 20.0 * Terrain.hash01(k, 4, 91), Color(0.75, 0.9, 1.0, 0.035))
+				Draw.disc(self, Vector2(x, y), 34.0 + 20.0 * Terrain.hash01(k, 4, 91), Color(0.75, 0.9, 1.0, 0.035))
 		"crossroads":
 			for c in _props:
 				var ph := fmod(t * 0.5 + Terrain.hash01(c.x, c.y, 9), 1.0)
-				draw_arc(Grid.cell_center(c), 10.0 + 14.0 * ph, 0.0, TAU, 20, Color(_edge, 0.3 * (1.0 - ph)), 1.2, true)
+				Draw.arc(self, Grid.cell_center(c), 10.0 + 14.0 * ph, 0.0, TAU, 20, Color(_edge, 0.3 * (1.0 - ph)), 1.2, true)
 		"foundry":
 			for c in _props:
 				var slot := int(t * 6.0 + Terrain.hash01(c.x, c.y, 5) * 10.0)
@@ -155,7 +155,7 @@ func _ambience(t: float) -> void:
 					for k in 3:
 						var a := -PI / 2.0 + (Terrain.hash01(slot, c.x + k, 2) - 0.5) * 1.8
 						var d := 6.0 + 10.0 * Terrain.hash01(slot, c.y + k, 4)
-						draw_circle(ctr + Vector2(8, -12) + Vector2.from_angle(a) * d, 1.2, Color(1.0, 0.75, 0.3, 0.9))
+						Draw.disc(self, ctr + Vector2(8, -12) + Vector2.from_angle(a) * d, 1.2, Color(1.0, 0.75, 0.3, 0.9))
 		"singularity":
 			var core := Terrain.core_pos(grid.waypoints[0])
 			for k in 3:
