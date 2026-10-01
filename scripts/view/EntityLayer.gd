@@ -6,6 +6,9 @@ const Draw = preload("res://scripts/view/Draw.gd")
 const Grid = preload("res://scripts/core/Grid.gd")
 
 var world
+## Microseconds spent per section of _draw, summed; tools/PerfProbe.gd reads and resets it.
+static var timing := {}
+static var timing_on := false
 var _aim := {}
 var _font: Font
 
@@ -21,6 +24,9 @@ func _draw() -> void:
 	var t: float = world.anim_t
 	for pool in g.pools:
 		_pool(pool, t)
+	# Turrets' static layers come from Draw's sprite cache here (see Draw.dyn).
+	var t0 := Time.get_ticks_usec()
+	Draw.turret_cache = true
 	for tw in g.towers:
 		var key: int = tw.get_instance_id()
 		var cur: float = _aim.get(key, -PI / 2.0)
@@ -33,6 +39,10 @@ func _draw() -> void:
 		if tw.buff_dmg > 0.0:
 			Draw.disc(self, tw.pos + Vector2(14, -14), 3.0, Draw.OUTLINE)
 			Draw.disc(self, tw.pos + Vector2(14, -14), 2.2, Draw.ACCENT.amp)
+	Draw.turret_cache = false
+	var t1 := Time.get_ticks_usec()
+	if timing_on:
+		timing.towers = int(timing.get("towers", 0)) + t1 - t0
 
 	var ground: Array = []
 	var air: Array = []
@@ -50,11 +60,17 @@ func _draw() -> void:
 	for tw in g.towers:
 		if not tw.wing.is_empty():
 			_wing(tw, t)
+	var t2 := Time.get_ticks_usec()
+	if timing_on:
+		timing.enemies = int(timing.get("enemies", 0)) + t2 - t1
 	for e in ground:
 		_hp_bar(e)
 	for e in air:
 		_hp_bar(e)
 	_boss_bar(g)
+	if timing_on:
+		timing.bars = int(timing.get("bars", 0)) + Time.get_ticks_usec() - t2
+		timing.frames = int(timing.get("frames", 0)) + 1
 
 
 func _pool(pool, t: float) -> void:

@@ -4,6 +4,7 @@ extends Node
 ## off in turn, so the cost of every layer shows up as the time saved without it. Prints and quits.
 
 const Game = preload("res://scripts/core/Game.gd")
+const EntityLayer = preload("res://scripts/view/EntityLayer.gd")
 const Bot = preload("res://scripts/core/Bot.gd")
 const WARMUP := 1.5
 const PHASE := 4.0
@@ -19,6 +20,9 @@ var samples: Array = []
 
 
 func _ready() -> void:
+	if "--perf-compare" in OS.get_cmdline_user_args():
+		add_child(load("res://tools/TurretCompare.gd").new())
+		return
 	var map_id := "meadow"
 	var diff := "medium"
 	var target := 40
@@ -43,11 +47,17 @@ func _ready() -> void:
 		ticks += 1
 	print("PERF fast-forward: %s %s to round %d in %.1f s (%d ticks, %.3f ms/tick average), %d towers" % [
 		map_id, diff, game.wave, (Time.get_ticks_usec() - t0) / 1e6, ticks, (Time.get_ticks_usec() - t0) / 1000.0 / maxf(1.0, ticks), game.towers.size()])
+	var mix := {}
+	for tw in game.towers:
+		var k := "%s/%s" % [tw.type, tw.spec if tw.spec != "" else "-"]
+		mix[k] = int(mix.get(k, 0)) + 1
+	print("PERF tower mix: %s" % str(mix))
 	if game.is_over():
 		print("PERF the bot lost before round %d; measuring anyway" % target)
 	game.emit_events = true
 	var bench = load("res://tools/DrawBench.gd").new()
 	add_child(bench)
+	add_child(load("res://tools/DrawBench2.gd").new())
 	app.start_game_with(game)
 	screen = app.current
 	var w = screen.world
@@ -70,6 +80,8 @@ func _next() -> void:
 	phase += 1
 	phase_t = -WARMUP
 	samples = []
+	EntityLayer.timing = {}
+	EntityLayer.timing_on = true
 	if phase >= phases.size():
 		get_tree().quit()
 		return
@@ -114,3 +126,7 @@ func _report() -> void:
 	print("PERF %-16s %6.1f fps  frame %6.2f ms (p95 %6.2f)  scripts %6.2f ms  draw calls %5d  primitives %7d  | round %d, %d enemies, %d towers, %d projectiles" % [
 		phases[phase][0], 1000.0 / (avg / n), avg / n, ft[int(n * 0.95) - 1] if n >= 20 else ft[-1], proc / n, roundi(calls / n), roundi(prims / n),
 		game.wave, live, game.towers.size(), game.projectiles.size()])
+	var tm: Dictionary = EntityLayer.timing
+	var fr := maxf(1.0, float(tm.get("frames", 0)))
+	if tm.has("frames"):
+		print("PERF   entity draw per frame: towers %.2f ms, enemies+projectiles %.2f ms, bars %.2f ms" % [float(tm.get("towers", 0)) / fr / 1000.0, float(tm.get("enemies", 0)) / fr / 1000.0, float(tm.get("bars", 0)) / fr / 1000.0])

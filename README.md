@@ -522,6 +522,24 @@ The commands below assume the console build is on PATH as `godot_console` (winge
    - Overmind: a glowing brain.
    - Leviathan: a colossal flying carrier with launch bays and an engine bank.
    - Colossus: a four-legged walking fortress with a molten core and shoulder cannons.
+5. **Performance probe** (opens a window for about a minute). It works with the built game too.
+   - The bot plays a sector to the given round with no rendering. Then the game renders live, and the probe prints its frame rate:
+     - with everything shown;
+     - with each visual layer hidden in turn;
+     - at 3× speed.
+   - It also prints how long towers and enemies take to draw.
+
+   ```
+   godot_console --path . -- --perf=canyon,hard,70
+   BastionLine.exe -- --perf=meadow,medium,40
+   ```
+
+   `--perf-compare` draws every tower in full and through the sprite caches side by side, into `screenshots/turret_compare.png`; each pair should look identical.
+
+   In the Compatibility renderer, `draw_circle`, `draw_arc`, `draw_colored_polygon` and `draw_polyline` each allocate GPU buffers as they are recorded, costing 12–30 µs per call. Rectangles, lines and textures cost about 0.4 µs. Code that draws every frame uses these instead (all in `Draw.gd`):
+   - **Cheap shapes:** `Draw.disc`, `ring`, `arc`, `poly` and `polyline` draw the same shapes from cached textures and quads.
+   - **Static parts of turrets:** these are baked into textures once per look and drawn rotated to the aim. Live parts sit between `dyn(true)` and `dyn(false)`.
+   - **Other cached art:** the terrain (`TerrainCache`), tower base plates, mastery rings and spinning parts (`Draw.spinning`) are cached too.
 
 ### Claude Code / MCP
 
