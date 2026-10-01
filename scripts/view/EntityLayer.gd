@@ -40,6 +40,8 @@ func _draw() -> void:
 			Draw.disc(self, tw.pos + Vector2(14, -14), 3.0, Draw.OUTLINE)
 			Draw.disc(self, tw.pos + Vector2(14, -14), 2.2, Draw.ACCENT.amp)
 	Draw.turret_cache = false
+	for i in 400:
+		draw_circle(Vector2(i, 0), 2.0, Color.RED)
 	var t1 := Time.get_ticks_usec()
 	if timing_on:
 		timing.towers = int(timing.get("towers", 0)) + t1 - t0
