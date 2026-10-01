@@ -2267,3 +2267,7 @@ func _collect_scripts(dir: String, out: Array) -> void:
 			out.append(dir.path_join(f))
 	for d in DirAccess.get_directories_at(dir):
 		_collect_scripts(dir.path_join(d), out)
+
+
+func test_gate_demo_failure() -> void:
+	check(false, "deliberate failure (gate test, not for merging)")
