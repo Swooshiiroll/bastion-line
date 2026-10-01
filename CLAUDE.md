@@ -46,8 +46,10 @@ with the owner before writing any code.
    - Columns: Backlog → Next → In progress → In review → Done.
    - Move the issue as work moves: `gh project item-edit`, or drag it on the board.
 2. **Branch:** `feat/<issue>-slug`, `fix/…`, `perf/…`, `balance/…`, `design/…` or `chore/…`.
-3. **Work in small commits.** Before pushing, run `tools/dev.sh check` and `tools/dev.sh test`. If
-   you changed anything visual, also run `tools/dev.sh tour`.
+3. **Work in small commits.**
+   - **Unit tests:** every behaviour change adds or updates unit tests in `tests/TestRunner.gd`.
+   - **Before pushing:** run `tools/dev.sh check` and `tools/dev.sh test`.
+   - **Visual changes:** also run `tools/dev.sh tour`.
 4. **Open the pull request:** `gh pr create`, using the template.
    - Put `Closes #<issue>` in it.
    - Add a line to `CHANGELOG.md` under Unreleased.
@@ -67,7 +69,7 @@ with the owner before writing any code.
 |---|---|
 | `import` | First run on a fresh checkout |
 | `check` | Static checks: draw lint, design data in sync, version consistent |
-| `test [--only=x]` | Headless test suite. Every `test_*` method runs; the list in TestRunner.gd only sets the order. |
+| `test [--only=x]` | Unit tests (`tests/TestRunner.gd`, headless). Every `test_*` method runs; the list in TestRunner.gd only sets the order. CI runs them as the `unit-tests` check. |
 | `tour` | Screenshot tour with interaction checks |
 | `compare` | Full vs cached tower drawing, pixel by pixel |
 | `perf [--update]` | Render counts against `tests/perf_budget.json`. Use `--update` only for an intended increase, and say so in the pull request. |

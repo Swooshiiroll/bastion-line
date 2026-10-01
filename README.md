@@ -385,13 +385,14 @@ Feature.
 **Making a change.**
 1. Branch from an issue: `feat/<issue>-slug`, `fix/…`, `perf/…`, `balance/…`, `design/…` or `chore/…`.
 2. Open a pull request that closes the issue.
-3. `main` only accepts pull requests whose four CI checks pass.
+3. `main` only accepts pull requests whose five CI checks pass.
 
 The CI checks run on every push to any branch:
 
 | Check | What it does |
 |---|---|
-| `check` | Static checks, then the test suite |
+| `check` | Static checks: draw lint, design data in sync, version consistent |
+| `unit-tests` | The unit tests in `tests/TestRunner.gd` (about 12,000 checks, about 3 min) |
 | `visual` | Screenshot tour, turret comparison and sprite sheet, under Xvfb with software OpenGL |
 | `perf` | Render counts against `tests/perf_budget.json`. The run's summary has the table. |
 | `build` | Windows and Linux exports |
