@@ -1,0 +1,69 @@
+name: Release
+
+# Pushing a tag vX.Y.Z publishes that version: checks and tests, both exports, and a GitHub release
+# whose notes are the version's CHANGELOG.md section. A tag with a suffix (v3.6.0-rc1) becomes a
+# pre-release built as X.Y.Z, with the Unreleased notes; it's for trying the release pipeline.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+env:
+  CI: "true"
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: ./.github/actions/setup-godot
+        with:
+          templates: "true"
+
+      - name: Version
+        id: v
+        run: |
+          tag=${GITHUB_REF_NAME#v}
+          base=${tag%%-*}
+          pre=false; [ "$tag" != "$base" ] && pre=true
+          echo "base=$base" >> "$GITHUB_OUTPUT"
+          echo "pre=$pre" >> "$GITHUB_OUTPUT"
+          have=$(sed -n 's/^config\/version="\(.*\)"/\1/p' project.godot)
+          if [ "$pre" = false ] && [ "$have" != "$base" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME but project.godot says $have. Release from a merged pull request that ran 'tools/dev.sh version $base'."
+            exit 1
+          fi
+          tools/dev.sh version "$base"
+
+      - name: Release notes
+        run: |
+          heading="## [${{ steps.v.outputs.base }}]"
+          [ "${{ steps.v.outputs.pre }}" = true ] && heading="## [Unreleased]"
+          awk -v h="$heading" 'index($0, h) == 1 {on=1; next} on && index($0, "## [") == 1 {exit} on' CHANGELOG.md > out-notes.md
+          if [ ! -s out-notes.md ]; then
+            echo "::error::CHANGELOG.md has no section for ${{ steps.v.outputs.base }}"; exit 1
+          fi
+          printf '\n**Downloads:** Windows, run `BastionLine.exe`. Linux (x86_64), extract the `.tar.gz` and run `BastionLine/BastionLine.x86_64`.\n' >> out-notes.md
+          cat out-notes.md
+
+      - name: Checks and tests
+        run: |
+          tools/dev.sh check
+          tools/dev.sh test
+
+      - name: Export
+        run: tools/dev.sh build all
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          flags=""; [ "${{ steps.v.outputs.pre }}" = true ] && flags="--prerelease"
+          gh release create "$GITHUB_REF_NAME" build/BastionLine.exe build/BastionLine-linux-x86_64.tar.gz \
+            --title "Bastion Line $GITHUB_REF_NAME" --notes-file out-notes.md --verify-tag $flags
