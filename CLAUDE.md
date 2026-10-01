@@ -55,6 +55,12 @@ with the owner before writing any code.
    - Add a line to `CHANGELOG.md` under Unreleased.
 5. **Wait for CI:** `gh pr checks --watch`. Then give the owner the test-build link: the run's
    Artifacts, `BastionLine-<branch>-<sha>-windows` / `-linux`.
+   - **After every build, run `tools/dev.sh lx`.** It puts the build on Corundum-LX, where the owner
+     playtests.
+     - **Where:** each build gets its own folder inside
+       `/home/swooshii/Documents/Bastion Line Testing`, named `<date> <time> <branch> (<commit>)`,
+       with a BUILD.txt saying what it is. Older builds are kept.
+     - **If LX is off,** it says so, and nothing else changes.
 6. **Merge only when the owner says so:** `gh pr merge --squash --delete-branch`.
 
 **Releasing:**
@@ -75,6 +81,7 @@ with the owner before writing any code.
 | `perf [--update]` | Render counts against `tests/perf_budget.json`. Use `--update` only for an intended increase, and say so in the pull request. |
 | `build [windows\|linux\|all]` | Exports to `build/` |
 | `version x.y.z` | Sets the version everywhere |
+| `lx` | Builds Linux and puts it in a new folder for this build inside Corundum-LX's `Bastion Line Testing` (skipped if LX is off) |
 
 Logs go to `out/`.
 
