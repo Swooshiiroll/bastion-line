@@ -4,18 +4,18 @@
     "slow_calls": 2
   },
   "viewport": [
-    1040,
+    1600,
     900
   ],
   "scenarios": {
     "meadow medium r40": {
-      "draw_calls": 1389,
-      "primitives": 50879,
+      "draw_calls": 1246,
+      "primitives": 41783,
       "slow_calls": 2
     },
     "canyon hard r70": {
-      "draw_calls": 3098,
-      "primitives": 94930,
+      "draw_calls": 2943,
+      "primitives": 85916,
       "slow_calls": 2
     }
   }

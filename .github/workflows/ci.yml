@@ -1,0 +1,120 @@
+name: CI
+
+# Every push to any branch: static checks and tests, rendered checks (tour, turret comparison,
+# perf budget) and a test build. main only takes pull requests whose head commit passed all four.
+on:
+  push:
+    branches: ["**"]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CI: "true"
+
+jobs:
+  check:
+    name: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: ./.github/actions/setup-godot
+      - name: Static checks
+        run: tools/dev.sh check
+      - name: Tests
+        run: tools/dev.sh test
+      - name: Test log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-log
+          path: out/*.log
+
+  visual:
+    name: visual
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-godot
+        with:
+          display: "true"
+      - name: Turret cache matches full drawing
+        run: xvfb-run -a -s "-screen 0 1600x900x24" tools/dev.sh compare
+      - name: Screenshot tour (one retry; it's timing-sensitive under load)
+        run: |
+          xvfb-run -a -s "-screen 0 1600x900x24" tools/dev.sh tour \
+            || { echo "::warning::tour failed once, retrying"; xvfb-run -a -s "-screen 0 1600x900x24" tools/dev.sh tour; }
+      - name: Sprite sheet
+        if: always()
+        run: xvfb-run -a -s "-screen 0 1600x900x24" timeout 120 "$GODOT" --audio-driver Dummy --path . -- --sprite-sheet || true
+      - name: Screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: |
+            screenshots/*.png
+            out/*.log
+          retention-days: 14
+
+  perf:
+    name: perf
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: ./.github/actions/setup-godot
+        with:
+          display: "true"
+      - name: Render counts against the budget
+        run: |
+          set -o pipefail
+          xvfb-run -a -s "-screen 0 1600x900x24" tools/dev.sh perf | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Perf result
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: perf
+          path: |
+            out/perf.json
+            out/perf.log
+          retention-days: 30
+
+  build:
+    name: build
+    needs: check
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-godot
+        with:
+          templates: "true"
+      - name: Export Windows and Linux
+        run: tools/dev.sh build all
+      - name: Artifact names
+        id: names
+        run: echo "base=BastionLine-${GITHUB_REF_NAME//\//-}-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+      - name: Windows build
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.names.outputs.base }}-windows
+          path: build/BastionLine.exe
+          retention-days: 14
+      - name: Linux build
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.names.outputs.base }}-linux
+          path: build/BastionLine-linux-x86_64.tar.gz
+          retention-days: 14
+          compression-level: 0
