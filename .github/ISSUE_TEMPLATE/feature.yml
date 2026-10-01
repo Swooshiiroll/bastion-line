@@ -1,5 +1,5 @@
 name: Feature
-description: Something new for the game.
+description: Something new for the game, or a rework of something that exists.
 labels: [feature]
 body:
   - type: textarea
@@ -14,3 +14,13 @@ body:
     attributes:
       label: Details and rules
       description: Numbers, edge cases, links to design docs.
+  - type: textarea
+    id: unsure
+    attributes:
+      label: Questions / not sure yet
+      description: Anything still open. These start the design questions before anything is built.
+  - type: input
+    id: design
+    attributes:
+      label: Design doc
+      description: Filled in once the design is written, e.g. design/upgrade_preview.md (big features) or "spec below" (small ones).
