@@ -56,12 +56,16 @@ Both the exe and the source build share the same saves and profile.
 The Windows and Linux (x86_64) export templates for 4.7.2 are installed in
 `%APPDATA%\Godot\export_templates\4.7.2.stable`. They were extracted from the official release
 archive after checking it against the release's SHA512-SUMS. The presets live in
-`export_presets.cfg` and leave out `screenshots/` and `tests/`.
+`export_presets.cfg`. They leave out `screenshots/` and `tests/`, and include `playtest/` along with
+its notes.
 
 ```
-godot_console --headless --path . --export-release "Windows Desktop" build/BastionLine.exe
-godot_console --headless --path . --export-release "Linux" build/linux/BastionLine.x86_64
+tools/dev.sh build all
 ```
+
+This exports `build/BastionLine.exe` and `build/linux/BastionLine.x86_64`, and packs
+`build/BastionLine-linux-x86_64.tar.gz`. CI and the release workflow build the same way (see
+Workflow).
 
 ### Controls
 
@@ -371,6 +375,41 @@ Hovering any special tile explains it in the bottom bar.
 The simulation (`scripts/core/Game.gd`) is deterministic, fixed-step (60 Hz) and node-free. The view
 layer (`scripts/view/`) only draws it and turns its events into effects; the UI lives in `scripts/ui/`.
 Balance numbers live in `data/*.gd`.
+
+### Workflow
+
+**Planning.** Work is tracked as GitHub issues, with milestones v3.6–v3.9 and Backlog, on the board
+at https://github.com/users/Swooshiiroll/projects/1. The issue templates are Bug, Playtest note and
+Feature.
+
+**Making a change.**
+1. Branch from an issue: `feat/<issue>-slug`, `fix/…`, `perf/…`, `balance/…`, `design/…` or `chore/…`.
+2. Open a pull request that closes the issue.
+3. `main` only accepts pull requests whose four CI checks pass.
+
+The CI checks run on every push to any branch:
+
+| Check | What it does |
+|---|---|
+| `check` | Static checks, then the test suite |
+| `visual` | Screenshot tour, turret comparison and sprite sheet, under Xvfb with software OpenGL |
+| `perf` | Render counts against `tests/perf_budget.json`. The run's summary has the table. |
+| `build` | Windows and Linux exports |
+
+**Test builds.** Every push uploads a Windows and a Linux build as the run's artifacts:
+`BastionLine-<branch>-<commit>-windows` and `-linux`, kept for 14 days. Open the branch's latest run
+under Actions to download them.
+
+**Releasing.**
+1. Move the Unreleased notes in `CHANGELOG.md` under the new version.
+2. Run `tools/dev.sh version x.y.z` and merge that.
+3. Push the tag `vx.y.z`.
+4. The release workflow tests it, builds both platforms and publishes the release with those notes.
+   A suffixed tag such as `v3.6.0-rc1` makes a pre-release.
+
+**Running checks locally.** Everything runs through `tools/dev.sh <command>`, or `tools\dev.ps1`
+from PowerShell. The commands are `import`, `check`, `test`, `tour`, `compare`, `perf`, `build` and
+`version`. They are listed in `CLAUDE.md` and at the top of the script.
 
 ### Printable codex
 

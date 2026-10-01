@@ -7,8 +7,12 @@ owner, who decides and playtests, and Claude, who implements. Details of the gam
 
 `main` is protected: it only takes pull requests whose CI checks pass. Never push to `main`.
 
-1. **Start from an issue.** Find or create it (`gh issue list`, `gh issue create`). Use the
-   templates' labels and a milestone if it belongs to one.
+1. **Start from an issue.** Find or create it (`gh issue list`, `gh issue create`).
+   - Give it the templates' labels, and a milestone if it belongs to one.
+   - Add it to the board with `--project "Bastion Line"`:
+     https://github.com/users/Swooshiiroll/projects/1.
+   - Columns: Backlog → Next → In progress → In review → Done.
+   - Move the issue as work moves: `gh project item-edit`, or drag it on the board.
 2. **Branch:** `feat/<issue>-slug`, `fix/…`, `perf/…`, `balance/…`, `design/…` or `chore/…`.
 3. **Work in small commits.** Before pushing, run `tools/dev.sh check` and `tools/dev.sh test`. If
    you changed anything visual, also run `tools/dev.sh tour`.
