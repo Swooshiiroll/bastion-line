@@ -1,0 +1,15 @@
+name: Playtest note
+description: Anything from a play session, rough is fine. It gets sorted into a bug, balance change or feature later.
+labels: [playtest]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      placeholder: v3.5.1
+  - type: textarea
+    id: note
+    attributes:
+      label: Note
+    validations:
+      required: true

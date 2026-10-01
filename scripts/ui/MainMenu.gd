@@ -59,7 +59,7 @@ func _build_ui() -> void:
 	foot.position = Vector2(0, 836)
 	foot.size = Vector2(1600, 20)
 	root.add_child(foot)
-	var ver := UiKit.label("v3.5.1  -  Godot %s" % Engine.get_version_info().string, 12, UiKit.DIM, HORIZONTAL_ALIGNMENT_RIGHT)
+	var ver := UiKit.label("v%s  -  Godot %s" % [ProjectSettings.get_setting("application/config/version", "?"), Engine.get_version_info().string], 12, UiKit.DIM, HORIZONTAL_ALIGNMENT_RIGHT)
 	ver.position = Vector2(1220, 872)
 	ver.size = Vector2(364, 20)
 	root.add_child(ver)

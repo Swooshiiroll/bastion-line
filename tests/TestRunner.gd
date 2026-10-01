@@ -47,6 +47,8 @@ func _run() -> void:
 		if FileAccess.file_exists(f):
 			DirAccess.remove_absolute(f)
 	SaveManager.load_profile()
+	# Run order: this list first (some tests set up state for later ones), then any other test_*
+	# method, so a new test never silently goes unrun.
 	var tests := [
 		"test_data_integrity",
 		"test_map_geometry",
@@ -120,6 +122,16 @@ func _run() -> void:
 		"test_bot_playthroughs",
 		"test_bot_full_research",
 	]
+	var extra: Array = []
+	for m in get_method_list():
+		var mn := str(m.name)
+		if mn.begins_with("test_") and not tests.has(mn) and not extra.has(mn):
+			extra.append(mn)
+	extra.sort()
+	for name in tests:
+		if not has_method(name):
+			failures.append("%s is listed but not defined" % name)
+	tests = tests.filter(func(n): return has_method(n)) + extra
 	for name in tests:
 		if only != "" and not name.contains(only):
 			continue
@@ -2235,3 +2247,23 @@ func test_bot_full_research() -> void:
 		"MEDAL" if g.medal else "LOST", g.wave, g.lives, g.max_lives, t4])
 	check(g.medal, "bot with full research earns the Medium medal")
 	check(t4 > 0, "bot buys tier-4 masteries when researched")
+
+
+## Every script in the project loads and compiles, including tools that only run from the
+## command line (a parse error there would otherwise go unnoticed until someone runs them).
+func test_scripts_parse() -> void:
+	var paths: Array = []
+	for dir in ["res://scripts", "res://data", "res://tools", "res://tests"]:
+		_collect_scripts(dir, paths)
+	check(paths.size() > 40, "found the project's scripts (%d)" % paths.size())
+	for p in paths:
+		var s = load(p)
+		check(s is Script and s.can_instantiate(), "%s compiles" % p)
+
+
+func _collect_scripts(dir: String, out: Array) -> void:
+	for f in DirAccess.get_files_at(dir):
+		if f.ends_with(".gd"):
+			out.append(dir.path_join(f))
+	for d in DirAccess.get_directories_at(dir):
+		_collect_scripts(dir.path_join(d), out)

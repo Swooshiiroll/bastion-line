@@ -1,0 +1,29 @@
+name: Bug
+description: Something in the game doesn't work as it should.
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: Shown at the bottom right of the main menu, or the build's branch and commit.
+      placeholder: v3.5.1
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What you did, what happened, and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: How to make it happen
+      placeholder: "Sector, difficulty, round, which towers..."
+  - type: textarea
+    id: shots
+    attributes:
+      label: Screenshots
+      description: Drag images in here.

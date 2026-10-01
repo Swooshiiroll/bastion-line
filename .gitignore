@@ -15,3 +15,6 @@
 *.tmp
 Thumbs.db
 desktop.ini
+
+# Logs and results from tools/dev.sh
+/out/

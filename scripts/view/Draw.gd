@@ -159,6 +159,9 @@ const _TEX_SIZES := [8, 16, 32, 64, 128, 256]
 static var _discs := {}
 static var _rings := {}
 static var _glows := {}
+## Slow draw calls made through the fallbacks below (non-convex polygons, long polylines);
+## tools/PerfProbe.gd reads and resets it to keep them on a budget.
+static var slow_calls := 0
 ## Ring stroke widths (in texels) that get their own texture; others snap to the nearest, so a
 ## pulsing or growing ring reuses a few textures instead of making a new one every frame.
 const _RING_TEXELS := [2, 3, 4, 5, 6, 8, 10, 12, 16, 20, 24, 32, 40, 48, 64, 80, 96, 127]
@@ -376,7 +379,8 @@ static func poly(ci: CanvasItem, pts: PackedVector2Array, color: Color) -> void:
 		if turn == 0.0:
 			turn = signf(cr)
 		elif signf(cr) != turn:
-			ci.draw_colored_polygon(pts, color)
+			slow_calls += 1
+			ci.draw_colored_polygon(pts, color)  # raw-draw-ok: non-convex fallback
 			return
 	var cols := PackedColorArray([color])
 	var none := PackedVector2Array()
@@ -395,7 +399,8 @@ static func polyline(ci: CanvasItem, pts: PackedVector2Array, color: Color, widt
 	if _skip and not _drawing():
 		return
 	if pts.size() > 9:
-		ci.draw_polyline(pts, color, width, aa)
+		slow_calls += 1
+		ci.draw_polyline(pts, color, width, aa)  # raw-draw-ok: long-line fallback
 		return
 	for k in pts.size() - 1:
 		ci.draw_line(pts[k], pts[k + 1], color, width, aa)

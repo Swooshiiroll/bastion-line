@@ -1,0 +1,22 @@
+{
+  "tolerance": 0.1,
+  "slack": {
+    "slow_calls": 2
+  },
+  "viewport": [
+    1040,
+    900
+  ],
+  "scenarios": {
+    "meadow medium r40": {
+      "draw_calls": 1389,
+      "primitives": 50879,
+      "slow_calls": 2
+    },
+    "canyon hard r70": {
+      "draw_calls": 3098,
+      "primitives": 94930,
+      "slow_calls": 2
+    }
+  }
+}

@@ -20,6 +20,11 @@ var samples: Array = []
 
 
 func _ready() -> void:
+	if Array(OS.get_cmdline_user_args()).any(func(a): return str(a).begins_with("--perf-ci=")):
+		var ci = load("res://tools/PerfCI.gd").new()
+		ci.app = app
+		add_child(ci)
+		return
 	if "--perf-compare" in OS.get_cmdline_user_args():
 		add_child(load("res://tools/TurretCompare.gd").new())
 		return

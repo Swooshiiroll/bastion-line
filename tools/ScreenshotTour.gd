@@ -356,8 +356,8 @@ func _run() -> void:
 	await _shot("12_menu_continue")
 
 	SaveManager.delete_run()
-	print("TOUR COMPLETE")
-	get_tree().quit()
+	print("TOUR COMPLETE: %s" % ("ALL PASSED" if failed_total == 0 else "%d FAILED" % failed_total))
+	get_tree().quit(0 if failed_total == 0 else 1)
 
 
 ## Drives the real input pipeline (synthetic key presses and mouse clicks) and asserts outcomes.
@@ -786,7 +786,13 @@ func _button_in(root: Node, text: String) -> Button:
 			return b
 	return null
 
+## Every failed expectation in the run; the tour exits with code 1 if there are any.
+var failed_total := 0
+
+
 func _expect(cond: bool, what: String) -> int:
+	if not cond:
+		failed_total += 1
 	print("  %s %s" % ["ok  " if cond else "FAIL", what])
 	return 0 if cond else 1
 
