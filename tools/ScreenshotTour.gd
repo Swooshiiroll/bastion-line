@@ -570,46 +570,75 @@ func _popout_checks() -> void:
 	await _wait(0.2)
 	fails += _expect(screen.hud.bottom._boosts(g.tower_at[cell]).has("+15% dmg (pylon)"), "the tower card lists the pylon boost as a percentage")
 	await _shot("16b_hud_selected")
+	# The tower panel (design/upgrade_rework.md): selecting a tower opens it in the shop's slot.
+	var tw = g.tower_at[cell]
+	fails += _expect(hud.is_open("tower") and hud.popout("tower").tower == tw, "selecting a tower opens its tower panel")
+	fails += _expect(hud.popout("tower").cards.keys() == ["trunk"], "a stock tower's panel offers the Retrofit")
 	await _key(KEY_E)
 	fails += _expect(hud.is_open("tree"), "E opens the upgrade tree")
 	var tree = hud.popout("tree")
 	await _wait(0.3)
 	await _click(tree.node_buttons["t2"].get_global_rect().get_center())
-	fails += _expect(g.tower_at[cell].tier == 2, "clicking the next node in the tree upgrades")
+	fails += _expect(tw.tier == 1 and tree.selected == "t2", "clicking a tree node selects it and doesn't buy")
+	fails += _expect(tree.preview.game != null, "a selected node plays its preview")
+	await _card("trunk")
+	fails += _expect(tw.tier == 2, "the panel's Retrofit card upgrades")
 	g.gold += 3000
-	var tw = g.tower_at[cell]
-	await _click(tree.node_buttons["b1"].get_global_rect().get_center())
-	fails += _expect(tw.tier == 3 and tw.spec == "shredder", "the tree buys a specialization")
-	await _click(tree.node_buttons["a1"].get_global_rect().get_center())
-	fails += _expect(int(tw.depth.a) == 1 and tw.secondary() == "a", "the tree starts a secondary branch")
-	await _click(tree.node_buttons["c1"].get_global_rect().get_center())
-	fails += _expect(int(tw.depth.c) == 0, "a third branch is locked once two are started")
-	await _click(tree.node_buttons["b2"].get_global_rect().get_center())
-	await _click(tree.node_buttons["a2"].get_global_rect().get_center())
-	await _click(tree.node_buttons["b3"].get_global_rect().get_center())
+	await _card("b")
+	fails += _expect(tw.tier == 3 and tw.spec == "shredder", "a branch card buys the specialization")
+	await _card("a")
+	fails += _expect(int(tw.depth.a) == 1 and tw.secondary() == "a", "another card starts a secondary branch")
+	fails += _expect(hud.popout("tower").cards.has("c"), "the third branch keeps a card")
+	await _card("c")
+	fails += _expect(int(tw.depth.c) == 0, "the locked third branch's card buys nothing")
+	await _card("b")
+	await _card("a")
+	await _card("b")
 	fails += _expect(int(tw.depth.b) == 3 and tw.locked_in() and tw.primary() == "b", "a third upgrade locks the primary in")
-	await _click(tree.node_buttons["a3"].get_global_rect().get_center())
-	fails += _expect(int(tw.depth.a) == 2, "the secondary is capped at 2 once the primary is locked in")
+	await _card("a")
+	fails += _expect(int(tw.depth.a) == 2, "the capped secondary's card buys nothing")
 	g.gold += 2000
-	await _click(tree.node_buttons["b4"].get_global_rect().get_center())
-	await _click(tree.node_buttons["bm"].get_global_rect().get_center())
+	await _card("b")
+	await _card("b")
 	fails += _expect(int(tw.depth.b) == 4 and not tw.mastered, "a mastery without research can't be bought")
+	await _wait(0.2)
+	await _shot("16c_tower_panel")
+	# The tree previews reachable nodes only.
+	await _click(tree.node_buttons["b4"].get_global_rect().get_center())
+	await _wait(1.6)
+	fails += _expect(tree.selected == "b4" and tree.preview.game != null and tree.preview.tower.depth.b == 4, "the preview shows the clicked upgrade")
+	await _shot("16d_tree")
+	await _wait(3.0)
+	await _shot("16d4_preview_combat")
+	await _click(tree.node_buttons["c1"].get_global_rect().get_center())
+	fails += _expect(tree.preview.game == null, "an unreachable node shows a note instead of a preview")
+	await _key(KEY_E)
+	fails += _expect(not hud.is_open("tree"), "E closes the tree")
 	# The playtest case: the primary locks in while the secondary has only one upgrade.
 	g.gold += 3000
 	var sa = g.place_tower("sensor", Vector2i(12, 1))
 	_grow(g, sa, "Tacaa")
-	await _key(KEY_ESCAPE)
 	screen.world.selected_tower = sa
+	await _wait(0.4)
+	fails += _expect(hud.popout("tower") != null and hud.popout("tower").tower == sa, "the panel follows the selection")
+	await _card("c")
+	fails += _expect(int(sa.depth.c) == 2 and sa.locked_in(), "the secondary takes its second upgrade after the primary locks in")
+	await _card("c")
+	fails += _expect(int(sa.depth.c) == 2, "the secondary stops at 2")
 	await _key(KEY_E)
 	await _wait(0.6)
-	var stree = hud.popout("tree")
-	await _click(stree.node_buttons["c2"].get_global_rect().get_center())
-	fails += _expect(int(sa.depth.c) == 2 and sa.locked_in(), "the tree buys the secondary's second upgrade after the primary locks in")
-	await _click(stree.node_buttons["c3"].get_global_rect().get_center())
-	fails += _expect(int(sa.depth.c) == 2, "the secondary stops at 2")
-	await _wait(0.2)
 	await _shot("16d2_tree_secondary")
 	await _key(KEY_ESCAPE)
+	fails += _expect(not hud.is_open("tree") and screen.world.selected_tower == sa, "Esc closes the tree first")
+	await _key(KEY_B)
+	await _wait(0.2)
+	fails += _expect(hud.is_open("shop") and not hud.is_open("tower") and screen.world.selected_tower == null, "B swaps the tower panel for the shop")
+	await _key(KEY_ESCAPE)
+	screen.world.selected_tower = tw
+	await _wait(0.2)
+	await _key(KEY_ESCAPE)
+	await _wait(0.2)
+	fails += _expect(screen.world.selected_tower == null and not hud.is_open("tower"), "Esc deselects, which closes the panel")
 	screen.world.selected_tower = tw
 	await _key(KEY_E)
 	await _wait(0.3)
@@ -619,7 +648,7 @@ func _popout_checks() -> void:
 	hover.global_position = hover.position
 	Input.parse_input_event(hover)
 	await _wait(0.3)
-	await _shot("16d_tree")
+	await _shot("16d3_tree_hover")
 	await _key(KEY_R)
 	fails += _expect(hud.is_open("research") and screen.paused, "R opens research and pauses the battle")
 	await _wait(0.3)
@@ -785,6 +814,16 @@ func _button_in(root: Node, text: String) -> Button:
 		if (b as Button).text == text and (b as Button).is_visible_in_tree():
 			return b
 	return null
+
+## Clicks the selected tower's upgrade card for `key` ("trunk", "a", "b", "c") in the tower panel.
+func _card(key: String) -> void:
+	var panel = app.current.hud.popout("tower")
+	if panel == null or not panel.cards.has(key):
+		print("  (no %s card to click)" % key)
+		return
+	await _click(panel.cards[key].get_global_rect().get_center())
+	await get_tree().process_frame
+
 
 ## Every failed expectation in the run; the tour exits with code 1 if there are any.
 var failed_total := 0

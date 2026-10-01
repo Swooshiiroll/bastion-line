@@ -8,11 +8,15 @@ const TopBar = preload("res://scripts/ui/hud/TopBar.gd")
 const BottomBar = preload("res://scripts/ui/hud/BottomBar.gd")
 const ShopPanel = preload("res://scripts/ui/hud/ShopPanel.gd")
 const UpgradeTreePanel = preload("res://scripts/ui/hud/UpgradeTreePanel.gd")
+const TowerPanel = preload("res://scripts/ui/hud/TowerPanel.gd")
 const IntelPanel = preload("res://scripts/ui/hud/IntelPanel.gd")
 const ResearchPopOut = preload("res://scripts/ui/hud/ResearchPopOut.gd")
 const KnowledgePopOut = preload("res://scripts/ui/hud/KnowledgePopOut.gd")
 ## Pop-outs that pause the battle while open.
 const PAUSING := ["research", "codex"]
+## The tower panel follows the selection (GameScreen._sync_side_panel), so "close everything" and
+## "is anything open" leave it out: Esc closes the other pop-outs first, then deselects.
+const FOLLOWS_SELECTION := ["tower"]
 
 ## Battlefield rect on screen (World.base_pos and the grid size).
 const FIELD := Rect2(32, 40, 1536, 768)
@@ -83,7 +87,7 @@ func is_open(kind: String) -> bool:
 
 
 func any_open() -> bool:
-	return not popouts.is_empty()
+	return popouts.keys().any(func(k): return not FOLLOWS_SELECTION.has(k))
 
 
 ## `arg` is kind-specific: the Codex entry to open on.
@@ -94,6 +98,11 @@ func open(kind: String, arg := "") -> void:
 	match kind:
 		"shop":
 			p = ShopPanel.new(self)
+		"tower":
+			var st = screen.world.selected_tower
+			if st == null:
+				return
+			p = TowerPanel.new(self, st)
 		"tree":
 			var t = screen.world.selected_tower
 			if t == null:
@@ -131,7 +140,8 @@ func pausing_open() -> bool:
 
 func close_all() -> void:
 	for kind in popouts.keys():
-		close(kind)
+		if not FOLLOWS_SELECTION.has(kind):
+			close(kind)
 
 
 func popout(kind: String):

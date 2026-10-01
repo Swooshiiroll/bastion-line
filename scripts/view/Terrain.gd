@@ -51,6 +51,9 @@ const SHOCK := Color(1.0, 0.88, 0.30)
 var grid
 ## Rubble cells the player has cleared (the game's own `cleared` dictionary), drawn as open floor.
 var cleared := {}
+## Only draw the tiles in this cell rectangle (the upgrade preview shows a small part of a map).
+## Empty: draw everything.
+var clip := Rect2i()
 
 
 static func palette(theme_name: String) -> Dictionary:
@@ -108,7 +111,7 @@ func _draw() -> void:
 	for y in range(-MARGIN_ROWS, Grid.ROWS + MARGIN_ROWS):
 		for x in range(-MARGIN_COLS, Grid.COLS + MARGIN_COLS):
 			var c := Vector2i(x, y)
-			if Grid.in_bounds(c):
+			if Grid.in_bounds(c) or (clip.has_area() and not clip.has_point(c)):
 				continue
 			_floor_tile(c, pal)
 			if not margin_lanes.has(c) and hash01(x, y, 23) > 0.8:
@@ -117,7 +120,8 @@ func _draw() -> void:
 	# tiles they don't cover show plain floor.
 	for y in Grid.ROWS:
 		for x in Grid.COLS:
-			_floor_tile(Vector2i(x, y), pal)
+			if not clip.has_area() or clip.has_point(Vector2i(x, y)):
+				_floor_tile(Vector2i(x, y), pal)
 	# Dim everything outside the build zone.
 	var outer := Rect2(Vector2(-MARGIN_COLS, -MARGIN_ROWS) * Grid.TILE, Grid.field_size() + Vector2(MARGIN_COLS * 2, MARGIN_ROWS * 2) * Grid.TILE)
 	var dim := Color(0.0, 0.01, 0.02, 0.38)
@@ -127,6 +131,8 @@ func _draw() -> void:
 	draw_rect(Rect2(Vector2(0, field.end.y), Vector2(field.size.x, outer.end.y - field.end.y)), dim)
 	_draw_lanes(pal)
 	for c in grid.tiles:
+		if clip.has_area() and not clip.has_point(c):
+			continue
 		match grid.tiles[c]:
 			"H":
 				_high_ground(c, pal)

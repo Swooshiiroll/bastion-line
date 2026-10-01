@@ -75,7 +75,7 @@ Workflow).
 | `1`-`9`, `0`, `-`, `=`, `[`, `]`, `\` | Pick a tower to deploy directly (the shop stays closed) |
 | Left-click a tile | Build (Shift+click to keep building) |
 | Left-click rubble / a switch gate | Clear the rubble (40 cr) / switch which branch arriving enemies take |
-| Left-click a tower | Select it: the bottom bar shows its tier, kills, upgrade path, actions and any boosts (pylon, high ground, power node, Supply Depot) as percentages. Double-click opens its upgrade tree |
+| Left-click a tower | Select it: its **tower panel** opens on the right (in the shop's place) with its combat stats and the next upgrade on each branch as cards to buy; cards that can't be bought say why. The bottom bar shows its tier, kills, upgrade path, actions and any boosts (pylon, high ground, power node, Supply Depot) as percentages. Double-click opens its upgrade tree |
 | Right-click | Cancel build mode, targeting or selection |
 | `U` | Retrofit the selected tower, then buy the next upgrade on branch A (the mastery after its T4) |
 | `I` / `O` | Buy the next upgrade on branch B / branch C |
@@ -85,7 +85,7 @@ Workflow).
 | Mouse wheel, middle-drag, arrow keys, `Home` | Zoom the battlefield (up to 2.5×), pan it, reset the view |
 | `F3` | Show or hide the FPS counter |
 | `K` or `F1`, or the Codex button | The Codex: every tower, enemy, effect and rule. In battle it pauses and opens on the selected tower (or the enemy under the cursor) |
-| `E` | Upgrade tree for the selected tower: the trunk, all three branches and their masteries, with before/after stats; click a lit node to buy it |
+| `E` | Upgrade tree for the selected tower, for reading and planning: the trunk, all three branches and their masteries. Hover a node for its details and stat changes; click one to watch a **live preview** of it fighting enemies picked to show it off. Upgrades are bought in the tower panel |
 | `R` | Research Lab in battle (pauses; purchases apply from your next run) |
 | `N` or click NEXT | Intel on the next round: enemies, counts, traits, HP and speed scale, bonuses |
 | `Space` or the Launch button (bottom right) | Launch the next round, or call it early for bonus credits once the current round has finished spawning |
