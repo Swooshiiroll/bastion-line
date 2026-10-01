@@ -5,7 +5,7 @@
 Closes #
 
 ## Checks
-- [ ] Tests added or updated for new behaviour (`tools/dev.sh test`)
+- [ ] Unit tests added or updated for every behaviour change (`tools/dev.sh test`)
 - [ ] `tools/dev.sh check` passes locally
 - [ ] Perf summary looked at (CI → this run → Summary); budget updated only if the increase is intended
 - [ ] Screenshots looked at, if anything visual changed (CI artifact `screenshots`)

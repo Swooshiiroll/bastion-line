@@ -10,6 +10,7 @@
 #   perf [--update]     render the standard scenarios and check tests/perf_budget.json (needs a display)
 #   build [windows|linux|all]   export to build/ (Linux also packed as a .tar.gz)
 #   version <x.y.z>     set the version in project.godot and both export presets
+#   lx                  build Linux and put it on Corundum-LX for playtesting (skipped if LX is off)
 #
 # Godot: $GODOT, else godot4/godot on PATH, else the WinGet install. Logs go to out/.
 set -uo pipefail
@@ -123,6 +124,32 @@ case "$cmd" in
     sed -i "s/^application\/file_version=\".*\"/application\/file_version=\"$v.0\"/; s/^application\/product_version=\".*\"/application\/product_version=\"$v.0\"/" export_presets.cfg
     echo "version $v" ;;
 
+  lx)
+    # The owner playtests on Corundum-LX: every build gets its own folder inside the testing folder
+    # there, named "<date> <time> <branch> (<commit>)" so the folders sort oldest to newest, with a
+    # BUILD.txt saying what it is. Older builds are kept. LX is often off; then this says so and
+    # succeeds.
+    host=${LX_HOST:-swooshii@corundum-lx}
+    root=${LX_DIR:-/home/swooshii/Documents/Bastion Line Testing}
+    if ! ssh -o ConnectTimeout=8 -o BatchMode=yes "$host" true 2>/dev/null; then
+      echo "Corundum-LX isn't reachable: build not copied"; exit 0
+    fi
+    "$0" build linux || exit 1
+    v=$(sed -n 's/^config\/version="\(.*\)"/\1/p' project.godot)
+    branch=$(git branch --show-current)
+    commit=$(git rev-parse --short HEAD)
+    dirty=""; git diff --quiet HEAD -- . ':!playtest' 2>/dev/null || dirty=" + uncommitted changes"
+    name="$(date '+%Y-%m-%d %H%M') ${branch//\//-} ($commit)"
+    rm -rf out/lx && mkdir -p out/lx
+    cp build/linux/BastionLine.x86_64 out/lx/ && cp fonts/OFL.txt out/lx/FONT-LICENSE-Barlow.txt
+    printf 'Bastion Line test build\nBranch:  %s\nCommit:  %s%s\nVersion: %s\nBuilt:   %s\n\nRun ./BastionLine.x86_64\n' \
+      "$branch" "$commit" "$dirty" "$v" "$(date '+%Y-%m-%d %H:%M')" > out/lx/BUILD.txt
+    # tar over ssh copes with the spaces in the folder names.
+    tar -C out/lx -cf - . | ssh "$host" "mkdir -p \"$root/$name\" && cd \"$root/$name\" && tar --no-same-owner -xf - && chmod +x BastionLine.x86_64" \
+      || { echo "copy to Corundum-LX failed"; exit 1; }
+    echo "On Corundum-LX: $root/$name"
+    sed 's/^/  /' out/lx/BUILD.txt | head -5 ;;
+
   *)
-    sed -n '2,13p' "$0"; exit 1 ;;
+    sed -n '2,14p' "$0"; exit 1 ;;
 esac

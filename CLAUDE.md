@@ -46,13 +46,21 @@ with the owner before writing any code.
    - Columns: Backlog → Next → In progress → In review → Done.
    - Move the issue as work moves: `gh project item-edit`, or drag it on the board.
 2. **Branch:** `feat/<issue>-slug`, `fix/…`, `perf/…`, `balance/…`, `design/…` or `chore/…`.
-3. **Work in small commits.** Before pushing, run `tools/dev.sh check` and `tools/dev.sh test`. If
-   you changed anything visual, also run `tools/dev.sh tour`.
+3. **Work in small commits.**
+   - **Unit tests:** every behaviour change adds or updates unit tests in `tests/TestRunner.gd`.
+   - **Before pushing:** run `tools/dev.sh check` and `tools/dev.sh test`.
+   - **Visual changes:** also run `tools/dev.sh tour`.
 4. **Open the pull request:** `gh pr create`, using the template.
    - Put `Closes #<issue>` in it.
    - Add a line to `CHANGELOG.md` under Unreleased.
 5. **Wait for CI:** `gh pr checks --watch`. Then give the owner the test-build link: the run's
    Artifacts, `BastionLine-<branch>-<sha>-windows` / `-linux`.
+   - **After every build, run `tools/dev.sh lx`.** It puts the build on Corundum-LX, where the owner
+     playtests.
+     - **Where:** each build gets its own folder inside
+       `/home/swooshii/Documents/Bastion Line Testing`, named `<date> <time> <branch> (<commit>)`,
+       with a BUILD.txt saying what it is. Older builds are kept.
+     - **If LX is off,** it says so, and nothing else changes.
 6. **Merge only when the owner says so:** `gh pr merge --squash --delete-branch`.
 
 **Releasing:**
@@ -67,12 +75,13 @@ with the owner before writing any code.
 |---|---|
 | `import` | First run on a fresh checkout |
 | `check` | Static checks: draw lint, design data in sync, version consistent |
-| `test [--only=x]` | Headless test suite. Every `test_*` method runs; the list in TestRunner.gd only sets the order. |
+| `test [--only=x]` | Unit tests (`tests/TestRunner.gd`, headless). Every `test_*` method runs; the list in TestRunner.gd only sets the order. CI runs them as the `unit-tests` check. |
 | `tour` | Screenshot tour with interaction checks |
 | `compare` | Full vs cached tower drawing, pixel by pixel |
 | `perf [--update]` | Render counts against `tests/perf_budget.json`. Use `--update` only for an intended increase, and say so in the pull request. |
 | `build [windows\|linux\|all]` | Exports to `build/` |
 | `version x.y.z` | Sets the version everywhere |
+| `lx` | Builds Linux and puts it in a new folder for this build inside Corundum-LX's `Bastion Line Testing` (skipped if LX is off) |
 
 Logs go to `out/`.
 
