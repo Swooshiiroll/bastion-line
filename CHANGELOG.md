@@ -16,6 +16,7 @@ so write for players.
   - **Render counts stay within budget.**
   - **Cached towers look identical to fully drawn ones.**
 - **Version:** shown in the main menu from a single setting (`tools/dev.sh version x.y.z`).
+- **Releases:** pushing a version tag builds and publishes the release, using that version's changelog section as the notes.
 
 ## [3.5.1] - 2026-09-30
 
