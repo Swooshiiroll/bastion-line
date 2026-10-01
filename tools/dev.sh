@@ -30,7 +30,10 @@ G=$(find_godot)
 # and fails on a script error even if Godot itself exits 0.
 run() {
   local name=$1 limit=$2; shift 2
-  timeout "$limit" "$G" "$@" > "out/$name.log" 2>&1
+  local extra=()
+  # CI machines have no sound card.
+  [ -n "${CI:-}" ] && extra=(--audio-driver Dummy)
+  timeout "$limit" "$G" "${extra[@]}" "$@" > "out/$name.log" 2>&1
   local code=$?
   [ $code -eq 124 ] && echo "$name: TIMEOUT after ${limit}s" && code=1
   if grep -qE "SCRIPT ERROR|Parse Error|Failed to load script" "out/$name.log"; then
