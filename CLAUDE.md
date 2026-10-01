@@ -3,6 +3,38 @@
 A Godot 4.7 tower defense game (GDScript, gl_compatibility renderer). Two people work on it: the
 owner, who decides and playtests, and Claude, who implements. Details of the game are in README.md.
 
+## Designing a feature first
+
+For a **new feature or a rework** of an existing one (not bug fixes or small tweaks), design it
+with the owner before writing any code.
+
+1. **Ask questions, lots of them, in rounds.** Each round builds on the answers to the last. Keep
+   going until nothing important is unclear.
+   - Use multiple choice (AskUserQuestion) where there are clear options.
+   - Ask open questions for creative matters: look, feel, names.
+   - Never fill a gap with an assumption.
+
+   Cover:
+   - **Purpose:** what it's for, and the player experience it should create.
+   - **Rules and numbers:** costs, limits, timings, stacking, how it scales by round and difficulty.
+   - **Interactions:** towers and branches, research, difficulty modes, the economy, saves (format
+     bump?), the bot, the Codex, the design pages.
+   - **UI and controls:** where it lives, keys, feedback, tooltips, what the player sees.
+   - **Visuals and sound:** look and animation, within the drawing performance rules below.
+   - **Edge cases:** old saves, endless mode, 2×2 towers, flyers, bosses, selling and refunds.
+   - **Balance targets:** how strong and how expensive, and how to check it with the bot probe.
+   - **Scope:** what's out, and whether it ships in phases.
+   - **Acceptance:** how we'll know it's right, and what the tests must check.
+2. **Write the answers down.**
+   - **Big features** (a new system, many files, a save change) go in `design/<feature>.md`, like
+     `design/upgrade_trees.md` and `design/super_structures.md`. Give it an Open questions section.
+   - **Small ones** get a spec in their issue.
+   - Link the doc from the issue.
+3. **Get the owner's confirmation** of the spec before creating the branch. Questions that come up
+   while building go back to the owner too.
+4. **Map the pull request to the spec.** Its description says which points it covers and any it
+   leaves for later.
+
 ## Every change goes through a pull request
 
 `main` is protected: it only takes pull requests whose CI checks pass. Never push to `main`.
