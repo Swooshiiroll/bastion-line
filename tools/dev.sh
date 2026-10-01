@@ -125,24 +125,29 @@ case "$cmd" in
     echo "version $v" ;;
 
   lx)
-    # The owner playtests on Corundum-LX: every build goes to the testing folder there, with a
-    # BUILD.txt saying what it is. LX is often off; then this says so and succeeds.
+    # The owner playtests on Corundum-LX: every build gets its own folder inside the testing folder
+    # there, named "<date> <time> <branch> (<commit>)" so the folders sort oldest to newest, with a
+    # BUILD.txt saying what it is. Older builds are kept. LX is often off; then this says so and
+    # succeeds.
     host=${LX_HOST:-swooshii@corundum-lx}
-    dir=${LX_DIR:-/home/swooshii/Documents/Bastion Line Testing}
+    root=${LX_DIR:-/home/swooshii/Documents/Bastion Line Testing}
     if ! ssh -o ConnectTimeout=8 -o BatchMode=yes "$host" true 2>/dev/null; then
       echo "Corundum-LX isn't reachable: build not copied"; exit 0
     fi
     "$0" build linux || exit 1
     v=$(sed -n 's/^config\/version="\(.*\)"/\1/p' project.godot)
+    branch=$(git branch --show-current)
+    commit=$(git rev-parse --short HEAD)
     dirty=""; git diff --quiet HEAD -- . ':!playtest' 2>/dev/null || dirty=" + uncommitted changes"
+    name="$(date '+%Y-%m-%d %H%M') ${branch//\//-} ($commit)"
     rm -rf out/lx && mkdir -p out/lx
     cp build/linux/BastionLine.x86_64 out/lx/ && cp fonts/OFL.txt out/lx/FONT-LICENSE-Barlow.txt
     printf 'Bastion Line test build\nBranch:  %s\nCommit:  %s%s\nVersion: %s\nBuilt:   %s\n\nRun ./BastionLine.x86_64\n' \
-      "$(git branch --show-current)" "$(git rev-parse --short HEAD)" "$dirty" "$v" "$(date '+%Y-%m-%d %H:%M')" > out/lx/BUILD.txt
-    # tar over ssh copes with the spaces in the folder name; the old build is replaced.
-    tar -C out/lx -cf - . | ssh "$host" "mkdir -p \"$dir\" && cd \"$dir\" && rm -f BastionLine.x86_64 BUILD.txt FONT-LICENSE-Barlow.txt && tar --no-same-owner -xf - && chmod +x BastionLine.x86_64" \
+      "$branch" "$commit" "$dirty" "$v" "$(date '+%Y-%m-%d %H:%M')" > out/lx/BUILD.txt
+    # tar over ssh copes with the spaces in the folder names.
+    tar -C out/lx -cf - . | ssh "$host" "mkdir -p \"$root/$name\" && cd \"$root/$name\" && tar --no-same-owner -xf - && chmod +x BastionLine.x86_64" \
       || { echo "copy to Corundum-LX failed"; exit 1; }
-    echo "On Corundum-LX: $dir"
+    echo "On Corundum-LX: $root/$name"
     sed 's/^/  /' out/lx/BUILD.txt | head -5 ;;
 
   *)
