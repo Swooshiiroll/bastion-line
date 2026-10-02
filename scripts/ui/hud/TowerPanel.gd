@@ -11,22 +11,36 @@ const UpgradeRules = preload("res://scripts/core/UpgradeRules.gd")
 
 const BRANCH_COLORS := {"a": Color(0.44, 0.72, 1.0), "b": Color(1.0, 0.62, 0.37), "c": Color(0.49, 1.0, 0.69)}
 const W := 302.0
+## Where the panel sits on each side of the screen.
+const RIGHT_X := 1290.0
+const LEFT_X := 8.0
 
 var hud
 var screen
 var tower
+## "right" or "left": the side away from the tower (side_for).
+var side := "right"
 ## Card key ("trunk", "a", "b", "c") -> its Button (the screenshot tour clicks these).
 var cards := {}
 var _content: VBoxContainer
 var _key := ""
 
 
-func _init(owner_hud, t) -> void:
-	super(Rect2(1290, 44, W, 760), str(t.display_name()).to_upper(), Vector2(320, 0))
+func _init(owner_hud, t, on_side := "right") -> void:
+	side = on_side
+	var left := side == "left"
+	super(Rect2(LEFT_X if left else RIGHT_X, 44, W, 760), str(t.display_name()).to_upper(), Vector2(-320 if left else 320, 0))
 	hud = owner_hud
 	screen = owner_hud.screen
 	tower = t
 	title_color = Draw.accent(t.type, t.shown_spec) if t.shown_spec != "" else UiKit.TEXT
+
+
+## The side of the screen away from tower `t`, so the panel never covers it: a tower on the left
+## half of the screen (after zoom and pan) gets the panel on the right, and the other way round.
+static func side_for(world, t) -> String:
+	var x: float = world.position.x + float(t.pos.x) * float(world.zoom)
+	return "left" if x > UiKit.SCREEN.x / 2.0 else "right"
 
 
 func _build() -> void:
@@ -42,10 +56,15 @@ func _build() -> void:
 
 func refresh(_delta: float) -> void:
 	var t = tower
-	var key := "%d:%s:%s:%s:%d:%s" % [t.trunk, str(t.depth), str(t.started), t.mastered, screen.game.gold, t.mastery_unlocked()]
+	# Rebuild only when something a card shows changes: the tower's upgrades, a card's state (e.g.
+	# affordable or not), prices. Credits alone change with every kill; rebuilding then would swap
+	# the card under the mouse mid-hover.
+	var states := UpgradeRules.card_keys(t).map(func(k): return str(UpgradeRules.card(t, k, screen.game.gold).state))
+	var key := "%d:%s:%s:%s:%s:%s:%.3f" % [t.trunk, str(t.depth), str(t.started), t.mastered, t.mastery_unlocked(), ",".join(PackedStringArray(states)), t.discount]
 	if key != _key:
 		_key = key
 		_rebuild()
+		_rehover.call_deferred()
 
 
 func _rebuild() -> void:
@@ -133,6 +152,16 @@ func _card(c: Dictionary) -> Button:
 	btn.mouse_exited.connect(func(): _highlight({}))
 	btn.tooltip_text = str(c.reason) if c.reason != "" else ""
 	return btn
+
+
+## After a rebuild, the card under a still mouse is re-highlighted in the tree.
+func _rehover() -> void:
+	var m := get_global_mouse_position()
+	for k in cards:
+		var b: Button = cards[k]
+		if is_instance_valid(b) and b.get_global_rect().has_point(m):
+			_highlight(UpgradeRules.card(tower, k, screen.game.gold))
+			return
 
 
 func _buy(c: Dictionary) -> void:

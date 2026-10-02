@@ -4,6 +4,7 @@ extends Node
 const Game = preload("res://scripts/core/Game.gd")
 const World = preload("res://scripts/view/World.gd")
 const Hud = preload("res://scripts/ui/Hud.gd")
+const TowerPanel = preload("res://scripts/ui/hud/TowerPanel.gd")
 const PauseMenu = preload("res://scripts/ui/PauseMenu.gd")
 const EndScreen = preload("res://scripts/ui/EndScreen.gd")
 const SettingsPanel = preload("res://scripts/ui/SettingsPanel.gd")
@@ -299,6 +300,9 @@ func toggle_codex() -> void:
 
 
 func close_popout(kind: String) -> void:
+	# The tower panel follows the selection: closing it means letting go of the tower.
+	if kind == "tower":
+		world.selected_tower = null
 	hud.close(kind)
 	if kind in Hud.PAUSING and modal == null and not hud.pausing_open():
 		paused = false
@@ -323,7 +327,7 @@ func _sync_side_panel() -> void:
 		hud.close("tower")
 		tp = null
 	if sel != null and tp == null and not _ended:
-		hud.open("tower")
+		hud.open("tower", TowerPanel.side_for(world, sel))
 	_panel_tower = sel
 
 

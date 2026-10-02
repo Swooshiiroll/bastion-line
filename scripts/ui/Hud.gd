@@ -102,7 +102,7 @@ func open(kind: String, arg := "") -> void:
 			var st = screen.world.selected_tower
 			if st == null:
 				return
-			p = TowerPanel.new(self, st)
+			p = TowerPanel.new(self, st, arg if arg != "" else "right")
 		"tree":
 			var t = screen.world.selected_tower
 			if t == null:
@@ -183,6 +183,9 @@ func refresh(delta: float) -> void:
 	lives_flash = maxf(0.0, lives_flash - delta)
 	top.refresh(delta)
 	bottom.refresh(delta)
+	# Toasts sit top-left over the field; a tower panel on the left pushes them to its right.
+	var side_panel = popouts.get("tower")
+	toasts.position.x = (TowerPanel.LEFT_X + TowerPanel.W + 16.0) if side_panel != null and side_panel.side == "left" else FIELD.position.x + 12.0
 	if is_open("tree"):
 		var tp = popouts.tree
 		if screen.world.selected_tower != tp.tower or not screen.game.towers.has(tp.tower):

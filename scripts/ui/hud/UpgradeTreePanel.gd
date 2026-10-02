@@ -252,7 +252,8 @@ func _draw_node(ci: Control, id: String) -> void:
 
 
 func refresh(_delta: float) -> void:
-	var key := "%d:%s:%s:%s:%d" % [tower.trunk, str(tower.depth), str(tower.started), tower.mastered, screen.game.gold]
+	# Keyed on what the nodes show (their states), not raw credits, which change with every kill.
+	var key := "%d:%s:%s:%s:%s" % [tower.trunk, str(tower.depth), str(tower.started), tower.mastered, ",".join(PackedStringArray(_pos.keys().map(func(id): return _state(id))))]
 	if key != _key:
 		_key = key
 		for id in _labels:

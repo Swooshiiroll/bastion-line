@@ -639,6 +639,29 @@ func _popout_checks() -> void:
 	await _key(KEY_ESCAPE)
 	await _wait(0.2)
 	fails += _expect(screen.world.selected_tower == null and not hud.is_open("tower"), "Esc deselects, which closes the panel")
+	# The panel's close button lets go of the tower, so the panel stays closed.
+	screen.world.selected_tower = tw
+	await _wait(0.3)
+	var close_btn: Button = _button_in(hud.popout("tower"), "×")
+	var found_close := close_btn != null
+	if found_close:
+		await _click(close_btn.get_global_rect().get_center())
+	await _wait(0.4)
+	fails += _expect(found_close and not hud.is_open("tower") and screen.world.selected_tower == null, "the panel's close button closes it for good")
+	# Credits changing (every kill) doesn't swap the cards under the mouse.
+	screen.world.selected_tower = tw
+	await _wait(0.3)
+	var cards_before: Array = hud.popout("tower").cards.values()
+	g.gold += 1
+	await _wait(0.2)
+	fails += _expect(hud.popout("tower").cards.values() == cards_before, "a change in credits doesn't rebuild the cards")
+	# The panel opens on the side away from the tower.
+	fails += _expect(hud.popout("tower").side == "right" and hud.popout("tower").rect.position.x > 800.0, "a tower on the left opens its panel on the right")
+	var far = g.place_tower("arrow", Vector2i(28, 1))
+	screen.world.selected_tower = far
+	await _wait(0.4)
+	fails += _expect(far != null and hud.popout("tower") != null and hud.popout("tower").side == "left" and hud.popout("tower").rect.position.x < 400.0, "a tower on the right opens its panel on the left")
+	await _shot("16c2_panel_left")
 	screen.world.selected_tower = tw
 	await _key(KEY_E)
 	await _wait(0.3)

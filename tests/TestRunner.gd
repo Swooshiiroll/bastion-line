@@ -2296,7 +2296,7 @@ func test_upgrade_cards() -> void:
 	check(UpgradeRules.card_keys(t) == ["trunk"], "a stock tower's panel offers only the Retrofit")
 	check(_card_state(t, "trunk") == "buy", "the Retrofit card can be bought with credits")
 	var short := UpgradeRules.card(t, "trunk", 0)
-	check(short.state == "short" and str(short.reason).begins_with("Need "), "without credits the card says how many more are needed")
+	check(short.state == "short" and str(short.reason) == "Cannot afford", "without credits the card says Cannot afford")
 	t = _upgraded("arrow", "t")[1]
 	check(UpgradeRules.card_keys(t) == ["a", "b", "c"], "after the Retrofit there's a card per branch")
 	check(["a", "b", "c"].all(func(k): return _card_state(t, k) == "buy"), "every branch's first upgrade is buyable after the Retrofit")

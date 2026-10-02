@@ -51,7 +51,7 @@ static func card(t, key: String, gold: int) -> Dictionary:
 		c.cost = t.upgrade_cost()
 		c.state = "buy" if gold >= c.cost else "short"
 		if c.state == "short":
-			c.reason = "Need %d more credits" % (c.cost - gold)
+			c.reason = "Cannot afford"
 		return c
 	var br: Dictionary = t.branch(key)
 	var d: int = t.depth[key]
@@ -61,7 +61,7 @@ static func card(t, key: String, gold: int) -> Dictionary:
 		c.cost = t.upgrade_cost(key)
 		c.state = "buy" if gold >= c.cost else "short"
 		if c.state == "short":
-			c.reason = "Need %d more credits" % (c.cost - gold)
+			c.reason = "Cannot afford"
 	elif why.begins_with("Needs"):
 		c.node = br.mastery
 		# What it will cost once researched (upgrade_cost is 0 while it can't be bought).
