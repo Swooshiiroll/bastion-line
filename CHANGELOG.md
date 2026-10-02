@@ -6,8 +6,10 @@ so write for players.
 
 ## [Unreleased]
 
+## [3.5.2] - 2026-10-02
+
 ### Added
-- **Tower panel:** clicking a tower opens its panel on the right, in the shop's place.
+- **Tower panel:** clicking a tower opens its panel on the side of the screen away from the tower.
   - It shows the tower's combat stats and the next upgrade on each branch as cards: name, price, key, stat changes and description.
   - Cards you can't buy yet stay visible and say why: credits, research, secondary capped or branch locked.
 - **Upgrade preview:** in the upgrade tree, clicking an upgrade plays a live preview of it. Your tower fights a looping wave of enemies picked to show the upgrade off (armored for shred, flyers for anti-air, crowds for splash...), in the current sector's look.
@@ -19,6 +21,13 @@ so write for players.
 - **Research applies at once:** research bought or reset in the middle of a run takes effect immediately. Tower boosts reach towers already built, masteries can be bought straight away, and starting credits and shields are granted (or taken back) on the spot.
 - **Flechette volleys** draw one trace per flechette, scattered across the cone.
 - **Research Lab:** research nodes are 50% larger, with roomier columns, and the selected node is drawn larger still, with a pulsing outline.
+
+### Fixed
+- Power-node tiles no longer have a black box under the boost hexagon.
+- The MASTERY burst no longer plays when a secondary upgrade is bought on a mastered tower.
+- The mouse wheel no longer zooms the battlefield while a menu (research, Codex, upgrade tree, pause) is open or the mouse is over the HUD.
+
+### Behind the scenes
 - **Development workflow:** the dev scripts (`tools/dev.sh`, `tools/dev.ps1`) are now in the repo, with a CI test build for every branch.
 - **New checks:**
   - **Every script compiles.**
@@ -30,11 +39,6 @@ so write for players.
 - **Version:** shown in the main menu from a single setting (`tools/dev.sh version x.y.z`).
 - **Releases:** pushing a version tag builds and publishes the release, using that version's changelog section as the notes.
 - **Models:** plans are made on Opus 5.5 (high effort) and carried out on Sonnet 5.5 (medium effort); see CLAUDE.md.
-
-### Fixed
-- Power-node tiles no longer have a black box under the boost hexagon.
-- The MASTERY burst no longer plays when a secondary upgrade is bought on a mastered tower.
-- The mouse wheel no longer zooms the battlefield while a menu (research, Codex, upgrade tree, pause) is open or the mouse is over the HUD.
 
 ## [3.5.1] - 2026-09-30
 
