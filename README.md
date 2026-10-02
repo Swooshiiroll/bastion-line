@@ -86,7 +86,7 @@ Workflow).
 | `F3` | Show or hide the FPS counter |
 | `K` or `F1`, or the Codex button | The Codex: every tower, enemy, effect and rule. In battle it pauses and opens on the selected tower (or the enemy under the cursor) |
 | `E` | Upgrade tree for the selected tower: the trunk, all three branches and their masteries, with before/after stats; click a lit node to buy it |
-| `R` | Research Lab in battle (pauses; purchases apply from your next run) |
+| `R` | Research Lab in battle (pauses; purchases and resets apply at once) |
 | `N` or click NEXT | Intel on the next round: enemies, counts, traits, HP and speed scale, bonuses |
 | `Space` or the Launch button (bottom right) | Launch the next round, or call it early for bonus credits once the current round has finished spawning |
 | `Q` then click | Orbital Strike: armor-piercing blast at the clicked spot after 0.9 s (45 s cooldown) |

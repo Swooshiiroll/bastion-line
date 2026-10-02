@@ -98,7 +98,7 @@ func _ready() -> void:
 	shop_btn = UiKit.button("Shop  [B]", Callable(screen, "toggle_shop"), Vector2(84, 30))
 	shop_btn.tooltip_text = "Tower shop"
 	research_btn = UiKit.button("Research  [R]", Callable(screen, "toggle_research"), Vector2(108, 30))
-	research_btn.tooltip_text = "Research Lab (pauses the battle; purchases apply from your next run)"
+	research_btn.tooltip_text = "Research Lab (pauses the battle; purchases apply at once)"
 	var codex_btn := UiKit.button("Codex  [K]", Callable(screen, "toggle_codex"), Vector2(92, 30))
 	codex_btn.tooltip_text = "Codex: every tower, enemy, effect and rule (pauses the battle). Opens on your selection."
 	var menu_btn := UiKit.button("Menu  [Esc]", Callable(screen, "open_pause"), Vector2(96, 30))

@@ -7,6 +7,9 @@ so write for players.
 ## [Unreleased]
 
 ### Changed
+- **Research applies at once:** research bought or reset in the middle of a run takes effect immediately. Tower boosts reach towers already built, masteries can be bought straight away, and starting credits and shields are granted (or taken back) on the spot.
+- **Flechette volleys** draw one trace per flechette, scattered across the cone.
+- **Research Lab:** the selected node is drawn larger, with a brighter outline.
 - **Development workflow:** the dev scripts (`tools/dev.sh`, `tools/dev.ps1`) are now in the repo, with a CI test build for every branch.
 - **New checks:**
   - **Every script compiles.**
@@ -17,6 +20,11 @@ so write for players.
   - **Cached towers look identical to fully drawn ones.**
 - **Version:** shown in the main menu from a single setting (`tools/dev.sh version x.y.z`).
 - **Releases:** pushing a version tag builds and publishes the release, using that version's changelog section as the notes.
+
+### Fixed
+- Power-node tiles no longer have a black box under the boost hexagon.
+- The MASTERY burst no longer plays when a secondary upgrade is bought on a mastered tower.
+- The mouse wheel no longer zooms the battlefield while a menu (research, Codex, upgrade tree, pause) is open or the mouse is over the HUD.
 
 ## [3.5.1] - 2026-09-30
 

@@ -69,7 +69,8 @@ var beam_targets: Array = []
 var disabled := 0.0
 ## The special tile under the tower: "H" (high ground), "P" (power node) or "".
 var site := ""
-## Research modifiers for this tower type (see Research.tower_mods). Fixed for the whole run.
+## Research modifiers for this tower type (see Research.tower_mods). Replaced by Game.apply_research
+## when research changes mid-run; call invalidate() after.
 var mods := {}
 ## Per-type attack state (pulse counters, sweep angle, drone wing...).
 var pulse_count := 0

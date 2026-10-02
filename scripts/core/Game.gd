@@ -69,8 +69,8 @@ var auto_timer := 0.0
 var speed := 1
 var time := 0.0
 var seed_value := 1
-## Research nodes owned when the run started. Fixed for the run and saved with it, so changing
-## research later never alters a run in progress (or its deterministic replay).
+## Research nodes in effect. Set at the start of the run and again whenever research is bought or
+## reset mid-run (apply_research); saved with the run.
 var research: Array = []
 var run_mods := {}
 var tower_mods := {}
@@ -119,7 +119,7 @@ func _init(id: String = "meadow", seed_in: int = 0, diff: String = "medium", res
 		tower_mods[type] = Research.tower_mods(research, type)
 		tower_mods[type]["price"] = Difficulty.price(difficulty)
 	sell_refund = SELL_REFUND + float(run_mods.sell_refund)
-	gold = int(round(float(START_GOLD) * (1.0 + float(run_mods.start_gold))))
+	gold = start_gold(run_mods)
 	lives = start_lives(difficulty, run_mods)
 	max_lives = lives
 	seed_value = seed_in if seed_in != 0 else (randi() | 1)
@@ -127,6 +127,34 @@ func _init(id: String = "meadow", seed_in: int = 0, diff: String = "medium", res
 		stats[k] = 0
 	for a in Abilities.ORDER:
 		ability_cd[a] = 0.0
+
+
+## Credits a run starts with: the standard amount plus the research bonus.
+static func start_gold(mods: Dictionary) -> int:
+	return int(round(float(START_GOLD) * (1.0 + float(mods.get("start_gold", 0.0)))))
+
+
+## Applies research bought or reset during the run, at once: tower boosts and discounts (existing
+## towers too), masteries, refunds and ability recharge. The run-start bonuses change by the
+## difference: credits are added or taken back (never below 0), and the core's shields too
+## (never below 1). Masteries already bought stay bought.
+func apply_research(owned: Array) -> void:
+	var old_mods := run_mods
+	research = Research.sanitize(owned)
+	run_mods = Research.run_mods(research)
+	for type in Towers.ORDER:
+		var price = tower_mods[type].get("price", Difficulty.price(difficulty))
+		tower_mods[type] = Research.tower_mods(research, type)
+		tower_mods[type]["price"] = price
+	sell_refund = SELL_REFUND + float(run_mods.sell_refund)
+	for t in towers:
+		t.mods = tower_mods[t.type]
+		t.invalidate()
+	_recompute_buffs()
+	gold = maxi(0, gold + start_gold(run_mods) - start_gold(old_mods))
+	var shields := start_lives(difficulty, run_mods) - start_lives(difficulty, old_mods)
+	max_lives = maxi(1, max_lives + shields)
+	lives = clampi(lives + maxi(0, shields), 1, max_lives) if lives > 0 else lives
 
 
 ## Core shields a run starts with: the mode's shields plus the research bonus (a fraction, rounded
@@ -384,6 +412,7 @@ func upgrade_tower(t, key := "") -> bool:
 	var cost: int = t.upgrade_cost(branch)
 	if cost <= 0 or gold < cost:
 		return false
+	var was_mastered: bool = t.tier >= 4
 	gold -= cost
 	t.spent += cost
 	if t.trunk < 2:
@@ -391,7 +420,8 @@ func upgrade_tower(t, key := "") -> bool:
 	else:
 		t.buy(branch)
 	_recompute_buffs()
-	_emit({"type": "upgrade", "pos": t.pos, "tier": t.tier, "spec": t.spec, "branch": branch, "depth": int(t.depth.get(branch, 0)) if branch != "" else 0})
+	# "mastery" is only for the purchase that reaches the mastery, not later secondary upgrades.
+	_emit({"type": "upgrade", "pos": t.pos, "tier": t.tier, "spec": t.spec, "branch": branch, "depth": int(t.depth.get(branch, 0)) if branch != "" else 0, "mastery": not was_mastered and t.tier >= 4})
 	return true
 
 
@@ -893,7 +923,7 @@ func _flechette(t, pellets: float, cone_deg: float, bypass: bool) -> void:
 		if absf(angle_difference(t.aim, (e.pos - t.pos).angle())) <= half:
 			var d := damage_enemy(e, dmg, false, t, true, bypass)
 			_emit({"type": "hit", "pos": e.pos, "amount": d, "kind": "arrow"})
-	_emit({"type": "flechette", "pos": t.pos, "aim": t.aim, "cone": cone_deg, "range": r, "tier": t.tier})
+	_emit({"type": "flechette", "pos": t.pos, "aim": t.aim, "cone": cone_deg, "range": r, "tier": t.tier, "pellets": int(round(pellets))})
 
 
 ## Amplifier Pylon branch C: jams enemy support (and at the mastery, everything) inside its field.

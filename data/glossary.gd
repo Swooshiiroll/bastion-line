@@ -101,7 +101,7 @@ const ENTRIES := {
 	"rules_modes": {"title": "Difficulty modes and medals", "category": "rules", "see": ["research"],
 		"text": "Easy, Medium, Hard, Nightmare and Cataclysm set the number of rounds, your core shields and tower prices. Clearing a mode's last round earns the sector's medal for that mode, and endless mode starts right away."},
 	"research": {"title": "Research", "category": "rules", "see": ["mastery", "rules_modes"],
-		"text": "Research points come from your records: medals, reaching rounds 20, 40, 60, 80 and 100 on a sector, and endless rounds. Research applies from the next run you start and can be reset for free."},
+		"text": "Research points come from your records: medals, reaching rounds 20, 40, 60, 80 and 100 on a sector, and endless rounds. Research applies at once, even mid-run, and can be reset for free."},
 	"abilities": {"title": "Orbital Strike and Chrono Field", "category": "rules", "see": ["boss_rules"],
 		"text": "Q calls an Orbital Strike on a spot: {meteor_damage} armor-ignoring damage (growing each round) in {meteor_radius} px after {meteor_delay} s, every {meteor_cd} s. W opens a Chrono Field: every enemy is slowed {warp_slow}% for {warp_time} s (bosses resist half), every {warp_cd} s. Both recharge only while a round is running."},
 }

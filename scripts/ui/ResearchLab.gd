@@ -30,7 +30,9 @@ func _ready() -> void:
 	panel.position = Vector2(24, 162)
 	root.add_child(panel)
 	var back := UiKit.button("Back  [Esc]", func(): app.show_menu(), Vector2(150, 42))
-	back.position = Vector2(24, 740)
+	# Below the panel, which grows with the research tile size.
+	var below := maxf(740.0, 174.0 + ResearchPanel.panel_height())
+	back.position = Vector2(24, below)
 	root.add_child(back)
 	var medal_rp := PackedStringArray(Difficulty.ORDER.map(func(m): return "%s %d" % [Difficulty.DIFFICULTIES[m].name, int(Difficulty.DIFFICULTIES[m].medal_rp)]))
 	var text := "Earn RP per sector: medals (%s),  1 each for reaching rounds %s,  1 per %d endless rounds (max %d)" % [
@@ -40,7 +42,7 @@ func _ready() -> void:
 		text += ".  +%d legacy RP from your old records" % SaveManager.legacy_rp()
 	var rules := UiKit.label(text, 12, UiKit.DIM)
 	rules.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	rules.position = Vector2(200, 744)
+	rules.position = Vector2(200, below + 4.0)
 	rules.size = Vector2(1376, 40)
 	root.add_child(rules)
 

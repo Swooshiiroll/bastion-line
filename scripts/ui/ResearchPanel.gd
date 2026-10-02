@@ -16,19 +16,28 @@ const Towers = preload("res://data/towers.gd")
 const TowerTrees = preload("res://data/tower_trees.gd")
 
 signal bought(id: String)
+## All research was refunded.
+signal reset_done
 
+## Width; the height follows the tile size (panel_height).
 const SIZE := Vector2(1552, 552)
-const COL_W := 96.0
 const COL_TOP := 30.0
-const COL_H := 350.0
-const ROW_Y := [82.0, 168.0, 254.0]
-const SLOT_DX := 28.0
-const NODE_R := 17.0
-const BTN := Vector2(44, 44)
-## Carousel: side trees are drawn at SIDE_SCALE, spaced SPACING apart; the focused one at full size.
+## Research tiles' size relative to the original 44 px nodes; every column measure follows it.
+static var tile_scale := 1.0
+## Carousel: side trees are drawn at SIDE_SCALE, spaced col spacing apart; the focused one at full size.
 const SIDE_SCALE := 0.72
-const SPACING := 78.0
-const STRIP_H := 388.0
+## The selected node is drawn this much larger, with a bright double outline.
+const SELECTED_GROW := 1.18
+
+# Column measures for tile_scale (set in _init, see _measure).
+var col_w := 96.0
+var col_h := 350.0
+var row_y := [82.0, 168.0, 254.0]
+var slot_dx := 28.0
+var node_r := 17.0
+var btn := Vector2(44, 44)
+var spacing := 78.0
+var strip_h := 388.0
 ## Column headers are narrow; full names are in each node's details.
 const SHORT_NAMES := {
 	"command": "COMMAND", "arrow": "PULSE", "cannon": "MORTAR", "frost": "CRYO", "sniper": "RAILGUN",
@@ -57,11 +66,35 @@ var _focus_f := 0.0
 
 func _init(note_text := "") -> void:
 	note = note_text
+	_measure()
+
+
+## Sets the column measures from tile_scale. At 1.0 they're the original layout (552 px tall).
+func _measure() -> void:
+	var f := tile_scale
+	node_r = 17.0 * f
+	btn = Vector2(44, 44) * f
+	slot_dx = 28.0 * f
+	col_w = 96.0 * f
+	spacing = 78.0 * f
+	var gap := maxf(86.0, btn.y + 14.0)
+	var r0 := 52.0 + btn.y / 2.0 + 8.0
+	row_y = [r0, r0 + gap, r0 + 2.0 * gap]
+	col_h = maxf(350.0, float(row_y[2]) + btn.y / 2.0 + 40.0)
+	strip_h = COL_TOP + col_h + 8.0
+
+
+## The panel's height at the current tile_scale: the tree strip plus the 160 px detail panel.
+static func panel_height() -> float:
+	var f := tile_scale
+	var gap := maxf(86.0, 44.0 * f + 14.0)
+	var r2 := 52.0 + 22.0 * f + 8.0 + 2.0 * gap
+	return COL_TOP + maxf(350.0, r2 + 22.0 * f + 40.0) + 8.0 + 4.0 + 160.0
 
 
 func _ready() -> void:
 	theme = UiKit.theme()
-	size = SIZE
+	size = Vector2(SIZE.x, panel_height())
 	mouse_filter = Control.MOUSE_FILTER_PASS
 	_modal_layer = CanvasLayer.new()
 	_modal_layer.layer = 30
@@ -76,7 +109,7 @@ func _ready() -> void:
 	add_child(_rp_label)
 	_strip = Control.new()
 	_strip.position = Vector2(0, 0)
-	_strip.size = Vector2(SIZE.x, STRIP_H)
+	_strip.size = Vector2(SIZE.x, strip_h)
 	_strip.clip_contents = true
 	_strip.mouse_filter = Control.MOUSE_FILTER_PASS
 	_strip.gui_input.connect(_on_strip_input)
@@ -85,7 +118,7 @@ func _ready() -> void:
 		_column(Data.TREE_ORDER[i], 0.0)
 	_layout(true)
 
-	var panel := UiKit.panel(Rect2(0, 392, SIZE.x, 160), UiKit.BG, 10)
+	var panel := UiKit.panel(Rect2(0, strip_h + 4.0, SIZE.x, 160), UiKit.BG, 10)
 	add_child(panel)
 	_detail = Control.new()
 	_detail.position = Vector2(18, 12)
@@ -109,10 +142,10 @@ func _ready() -> void:
 
 
 func _column(tree: String, x: float) -> void:
-	var col := UiKit.panel(Rect2(x + 3, COL_TOP, COL_W - 6, COL_H), Color(0.03, 0.045, 0.07, 0.88), 8)
-	col.pivot_offset = Vector2((COL_W - 6.0) / 2.0, 0.0)
+	var col := UiKit.panel(Rect2(x + 3, COL_TOP, col_w - 6, col_h), Color(0.03, 0.045, 0.07, 0.88), 8)
+	col.pivot_offset = Vector2((col_w - 6.0) / 2.0, 0.0)
 	_strip.add_child(col)
-	var cx := COL_W / 2.0 - 3.0
+	var cx := col_w / 2.0 - 3.0
 	var acc := _tree_color(tree)
 	var icon := DrawControl.new(func(ci):
 		if tree == "command":
@@ -124,29 +157,29 @@ func _column(tree: String, x: float) -> void:
 	col.add_child(icon)
 	var name_l := UiKit.label(str(SHORT_NAMES.get(tree, Research.tree_name(tree).to_upper())), 11, acc, HORIZONTAL_ALIGNMENT_CENTER)
 	name_l.position = Vector2(0, 36)
-	name_l.size = Vector2(COL_W - 6, 16)
+	name_l.size = Vector2(col_w - 6, 16)
 	name_l.clip_text = true
 	col.add_child(name_l)
 	var prog := UiKit.label("", 10, UiKit.DIM, HORIZONTAL_ALIGNMENT_CENTER)
-	prog.position = Vector2(0, COL_H - 22)
-	prog.size = Vector2(COL_W - 6, 16)
+	prog.position = Vector2(0, col_h - 22)
+	prog.size = Vector2(col_w - 6, 16)
 	col.add_child(prog)
 	var ids := Research.tree_nodes(tree)
-	col.add_child(DrawControl.new(func(ci): _draw_links(ci, ids, cx, acc), Vector2(COL_W - 6, COL_H), true))
+	col.add_child(DrawControl.new(func(ci): _draw_links(ci, ids, cx, acc), Vector2(col_w - 6, col_h), true))
 	for id in ids:
 		var slot: Vector2i = Data.NODES[id].slot
-		var center := Vector2(cx + slot.x * SLOT_DX, ROW_Y[slot.y])
+		var center := Vector2(cx + slot.x * slot_dx, row_y[slot.y])
 		var b := Button.new()
 		b.focus_mode = Control.FOCUS_NONE
 		b.flat = true
 		var empty := StyleBoxEmpty.new()
 		for s in ["normal", "hover", "pressed", "focus", "disabled"]:
 			b.add_theme_stylebox_override(s, empty)
-		b.position = center - BTN / 2.0
-		b.size = BTN
+		b.position = center - btn / 2.0
+		b.size = btn
 		b.tooltip_text = "%s  (%d RP)\n%s" % [Data.NODES[id].name, int(Data.NODES[id].cost), Data.NODES[id].blurb]
 		var node_id: String = id
-		b.add_child(DrawControl.new(func(ci): _draw_node(ci, node_id, acc), BTN, true))
+		b.add_child(DrawControl.new(func(ci): _draw_node(ci, node_id, acc), btn, true))
 		b.mouse_entered.connect(func(): _hovered = node_id)
 		b.mouse_exited.connect(func():
 			if _hovered == node_id:
@@ -178,10 +211,10 @@ func _draw_links(ci: Control, ids: Array, cx: float, acc: Color) -> void:
 	var owned := SaveManager.research_owned()
 	for id in ids:
 		var slot: Vector2i = Data.NODES[id].slot
-		var to := Vector2(cx + slot.x * SLOT_DX, ROW_Y[slot.y])
+		var to := Vector2(cx + slot.x * slot_dx, row_y[slot.y])
 		for req in Data.NODES[id].requires:
 			var ps: Vector2i = Data.NODES[req].slot
-			var from := Vector2(cx + ps.x * SLOT_DX, ROW_Y[ps.y])
+			var from := Vector2(cx + ps.x * slot_dx, row_y[ps.y])
 			var col := Color(0.25, 0.32, 0.4, 0.5)
 			var w := 2.0
 			if owned.has(req) and owned.has(id):
@@ -203,18 +236,23 @@ func _draw_node(ci: Control, id: String, acc: Color) -> void:
 	var c := ci.size / 2.0
 	var nd: Dictionary = Data.NODES[id]
 	var mastery := bool(nd.effects.get("mastery", false))
-	var r := NODE_R + (2.0 if mastery else 0.0)
+	var r := node_r + (2.0 if mastery else 0.0) * tile_scale
+	if id == _selected:
+		r *= SELECTED_GROW
 	var st := _state(id)
 	var glyph := Draw.skill_hex(ci, c, r, st, acc, t, mastery)
 	Draw.research_glyph(ci, str(nd.icon), c, r * 0.62, glyph, t)
 	# Cost pips along the bottom edge.
 	var cost := int(nd.cost)
 	for k in cost:
-		var px := c.x + (float(k) - float(cost - 1) / 2.0) * 6.0
-		var pip := PackedVector2Array([Vector2(px, c.y + r - 1.0), Vector2(px + 2.2, c.y + r + 1.4), Vector2(px, c.y + r + 3.8), Vector2(px - 2.2, c.y + r + 1.4)])
+		var px := c.x + (float(k) - float(cost - 1) / 2.0) * 6.0 * tile_scale
+		var pk := 2.2 * tile_scale
+		var pip := PackedVector2Array([Vector2(px, c.y + r - 1.0), Vector2(px + pk, c.y + r - 1.0 + pk * 1.1), Vector2(px, c.y + r - 1.0 + pk * 2.2), Vector2(px - pk, c.y + r - 1.0 + pk * 1.1)])
 		ci.draw_colored_polygon(pip, UiKit.GOLD if st == "owned" or st == "ready" else Color(0.5, 0.45, 0.3))
 	if id == _selected:
-		Draw.outline(ci, c, Draw.ngon(6, 1.0, PI / 6.0), Color(1, 1, 1, 0.85), 1.2, 0.0, r + 5.0)
+		var pulse := 0.75 + 0.25 * sin(t * 4.0)
+		Draw.outline(ci, c, Draw.ngon(6, 1.0, PI / 6.0), Color(1, 1, 1, 0.95 * pulse), 2.4, 0.0, r + 5.0)
+		Draw.outline(ci, c, Draw.ngon(6, 1.0, PI / 6.0), Color(acc, 0.55 * pulse), 1.5, 0.0, r + 9.0)
 
 
 func _process(delta: float) -> void:
@@ -255,9 +293,9 @@ func _layout(snap := false) -> void:
 		var d := float(i) - _focus_f
 		var k := clampf(absf(d), 0.0, 1.0)
 		var s := lerpf(1.0, SIDE_SCALE, k)
-		var cx := SIZE.x / 2.0 + d * SPACING + signf(d) * k * (COL_W - SPACING) * 0.5
+		var cx := SIZE.x / 2.0 + d * spacing + signf(d) * k * (col_w - spacing) * 0.5
 		col.scale = Vector2(s, s)
-		col.position = Vector2(cx - (COL_W - 6.0) / 2.0, COL_TOP + (1.0 - s) * COL_H * 0.5)
+		col.position = Vector2(cx - (col_w - 6.0) / 2.0, COL_TOP + (1.0 - s) * col_h * 0.5)
 		col.modulate = Color(1, 1, 1, clampf(1.0 - 0.13 * absf(d), 0.3, 1.0))
 		col.z_index = 10 - int(absf(d))
 
@@ -357,7 +395,8 @@ func _confirm_reset() -> void:
 			SaveManager.reset_research()
 			Sfx.play("sell", -6.0, 0.0)
 			_close_modal()
-			refresh_all(),
+			refresh_all()
+			reset_done.emit(),
 		func(): _close_modal(),
 		"Reset", "Cancel"))
 
