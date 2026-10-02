@@ -3,6 +3,15 @@
 A Godot 4.7 tower defense game (GDScript, gl_compatibility renderer). Two people work on it: the
 owner, who decides and playtests, and Claude, who implements. Details of the game are in README.md.
 
+## Models
+
+- **Planning** (plan mode: design rounds, bug triage, the plan itself): Opus 5.5, high effort.
+- **Carrying out an approved plan:** Sonnet 5.5, medium effort.
+
+This is automatic: the owner's Claude Code user settings use `opusplan`, which switches from Opus to
+Sonnet when a plan is approved, with the effort set per model. So plan in plan mode. If a session
+is on the wrong model for the phase, say so; the owner switches with `/model`.
+
 ## Designing a feature first
 
 For a **new feature or a rework** of an existing one (not bug fixes or small tweaks), design it

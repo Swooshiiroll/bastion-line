@@ -26,6 +26,7 @@ so write for players.
   - **Cached towers look identical to fully drawn ones.**
 - **Version:** shown in the main menu from a single setting (`tools/dev.sh version x.y.z`).
 - **Releases:** pushing a version tag builds and publishes the release, using that version's changelog section as the notes.
+- **Models:** plans are made on Opus 5.5 (high effort) and carried out on Sonnet 5.5 (medium effort); see CLAUDE.md.
 
 ## [3.5.1] - 2026-09-30
 
