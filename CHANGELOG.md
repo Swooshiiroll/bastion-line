@@ -18,7 +18,7 @@ so write for players.
 - **Shop:** after placing a tower picked from the shop, the shop stays open for the next build (the new tower isn't selected). Pressing B with a tower selected swaps its panel for the shop.
 - **Research applies at once:** research bought or reset in the middle of a run takes effect immediately. Tower boosts reach towers already built, masteries can be bought straight away, and starting credits and shields are granted (or taken back) on the spot.
 - **Flechette volleys** draw one trace per flechette, scattered across the cone.
-- **Research Lab:** the selected node is drawn larger, with a brighter outline.
+- **Research Lab:** research nodes are 50% larger, with roomier columns, and the selected node is drawn larger still, with a pulsing outline.
 - **Development workflow:** the dev scripts (`tools/dev.sh`, `tools/dev.ps1`) are now in the repo, with a CI test build for every branch.
 - **New checks:**
   - **Every script compiles.**

@@ -22,14 +22,16 @@ signal reset_done
 ## Width; the height follows the tile size (panel_height).
 const SIZE := Vector2(1552, 552)
 const COL_TOP := 30.0
-## Research tiles' size relative to the original 44 px nodes; every column measure follows it.
-static var tile_scale := 1.0
+## Research tiles relative to the original 44 px nodes (owner's pick, playtest round 2): the nodes
+## at 150%, the column layout around them (widths, spacing, rows) at 130%.
+static var node_scale := 1.5
+static var layout_scale := 1.3
 ## Carousel: side trees are drawn at SIDE_SCALE, spaced col spacing apart; the focused one at full size.
 const SIDE_SCALE := 0.72
 ## The selected node is drawn this much larger, with a bright double outline.
 const SELECTED_GROW := 1.18
 
-# Column measures for tile_scale (set in _init, see _measure).
+# Column measures for node_scale and layout_scale (set in _init, see _measure).
 var col_w := 96.0
 var col_h := 350.0
 var row_y := [82.0, 168.0, 254.0]
@@ -69,27 +71,38 @@ func _init(note_text := "") -> void:
 	_measure()
 
 
-## Sets the column measures from tile_scale. At 1.0 they're the original layout (552 px tall).
+## Sets the column measures: node sizes from node_scale, the layout from layout_scale. At 1.0 / 1.0
+## they're the original layout (552 px tall).
 func _measure() -> void:
-	var f := tile_scale
-	node_r = 17.0 * f
-	btn = Vector2(44, 44) * f
-	slot_dx = 28.0 * f
-	col_w = 96.0 * f
-	spacing = 78.0 * f
-	var gap := maxf(86.0, btn.y + 14.0)
-	var r0 := 52.0 + btn.y / 2.0 + 8.0
-	row_y = [r0, r0 + gap, r0 + 2.0 * gap]
-	col_h = maxf(350.0, float(row_y[2]) + btn.y / 2.0 + 40.0)
+	node_r = 17.0 * node_scale
+	btn = Vector2(44, 44) * node_scale
+	slot_dx = 28.0 * layout_scale
+	# Columns (and the carousel step) widen by the extra node size, so the outer nodes sit as far
+	# from the column edge as they do at the layout scale.
+	var extra := 44.0 * (node_scale - layout_scale)
+	col_w = 96.0 * layout_scale + extra
+	spacing = 78.0 * layout_scale + extra
+	row_y = _rows()
+	col_h = _col_h()
 	strip_h = COL_TOP + col_h + 8.0
 
 
-## The panel's height at the current tile_scale: the tree strip plus the 160 px detail panel.
+## Row centres: the first below the column header (at the layout's spacing), then a row gap that
+## always leaves room between nodes.
+static func _rows() -> Array:
+	var gap := maxf(86.0, 44.0 * node_scale + 14.0)
+	var r0 := 52.0 + 22.0 * layout_scale + 8.0
+	return [r0, r0 + gap, r0 + 2.0 * gap]
+
+
+## Column height: down to the last row's node, its cost pips and the progress line.
+static func _col_h() -> float:
+	return maxf(350.0, float(_rows()[2]) + 22.0 * node_scale + 40.0)
+
+
+## The panel's height: the tree strip plus the 160 px detail panel.
 static func panel_height() -> float:
-	var f := tile_scale
-	var gap := maxf(86.0, 44.0 * f + 14.0)
-	var r2 := 52.0 + 22.0 * f + 8.0 + 2.0 * gap
-	return COL_TOP + maxf(350.0, r2 + 22.0 * f + 40.0) + 8.0 + 4.0 + 160.0
+	return COL_TOP + _col_h() + 8.0 + 4.0 + 160.0
 
 
 func _ready() -> void:
@@ -236,7 +249,7 @@ func _draw_node(ci: Control, id: String, acc: Color) -> void:
 	var c := ci.size / 2.0
 	var nd: Dictionary = Data.NODES[id]
 	var mastery := bool(nd.effects.get("mastery", false))
-	var r := node_r + (2.0 if mastery else 0.0) * tile_scale
+	var r := node_r + (2.0 if mastery else 0.0) * node_scale
 	if id == _selected:
 		r *= SELECTED_GROW
 	var st := _state(id)
@@ -245,8 +258,8 @@ func _draw_node(ci: Control, id: String, acc: Color) -> void:
 	# Cost pips along the bottom edge.
 	var cost := int(nd.cost)
 	for k in cost:
-		var px := c.x + (float(k) - float(cost - 1) / 2.0) * 6.0 * tile_scale
-		var pk := 2.2 * tile_scale
+		var px := c.x + (float(k) - float(cost - 1) / 2.0) * 6.0 * node_scale
+		var pk := 2.2 * node_scale
 		var pip := PackedVector2Array([Vector2(px, c.y + r - 1.0), Vector2(px + pk, c.y + r - 1.0 + pk * 1.1), Vector2(px, c.y + r - 1.0 + pk * 2.2), Vector2(px - pk, c.y + r - 1.0 + pk * 1.1)])
 		ci.draw_colored_polygon(pip, UiKit.GOLD if st == "owned" or st == "ready" else Color(0.5, 0.45, 0.3))
 	if id == _selected:
