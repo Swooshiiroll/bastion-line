@@ -418,10 +418,9 @@ func _high_ground(c: Vector2i, pal: Dictionary) -> void:
 		draw_polyline(PackedVector2Array([Vector2(ctr.x - 6, y + 3), Vector2(ctr.x, y - 2), Vector2(ctr.x + 6, y + 3)]), Color(0.65, 0.88, 1.0, 0.55), 1.5, true)
 
 
-## Power node: a dark socket with a ring; its glow pulses in Scenery.
+## Power node: a dark hexagonal socket with a ring, on the floor tile; its glow pulses in Scenery.
 func _power_socket(c: Vector2i, pal: Dictionary) -> void:
 	var ctr := Grid.cell_center(c)
-	draw_rect(Grid.cell_rect(c).grow(-3.0), Color(0.06, 0.06, 0.07))
 	Draw.fill(self, ctr, Draw.ngon(6, 1.0, PI / 6.0), Color(0.16, 0.14, 0.08), 0.0, 19.0)
 	Draw.outline(self, ctr, Draw.ngon(6, 1.0, PI / 6.0), Color(1.0, 0.78, 0.3, 0.7), 1.5, 0.0, 19.0)
 	for k in 6:

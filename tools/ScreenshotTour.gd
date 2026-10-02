@@ -438,6 +438,9 @@ func _field_checks() -> void:
 		mg.start_wave()
 		await _wait(4.0)
 		await _shot("17_sector_%s" % id)
+	# A flechette volley: one trace per flechette (7, as after Dense Pack), scattered over the cone.
+	app.current.world._visual({"type": "flechette", "pos": Grid.cell_center(Vector2i(8, 6)), "aim": 0.0, "cone": 50.0, "range": 130.0, "tier": 3, "pellets": 7})
+	await _shot("17z_flechette_volley")
 	app.start_game("delta")
 	await _wait(0.4)
 	var screen = app.current
@@ -657,6 +660,9 @@ func _popout_checks() -> void:
 	fails += _expect(hud.popout("tower").cards.values() == cards_before, "a change in credits doesn't rebuild the cards")
 	# The panel opens on the side away from the tower.
 	fails += _expect(hud.popout("tower").side == "right" and hud.popout("tower").rect.position.x > 800.0, "a tower on the left opens its panel on the right")
+	var zp: float = screen.world.zoom
+	await _wheel(hud.popout("tower").get_global_rect().get_center(), true)
+	fails += _expect(is_equal_approx(screen.world.zoom, zp), "the wheel over the tower panel doesn't zoom the battlefield")
 	var far = g.place_tower("arrow", Vector2i(28, 1))
 	screen.world.selected_tower = far
 	await _wait(0.4)
@@ -672,8 +678,14 @@ func _popout_checks() -> void:
 	Input.parse_input_event(hover)
 	await _wait(0.3)
 	await _shot("16d3_tree_hover")
+	var z0: float = screen.world.zoom
+	await _wheel(fpos, true)
+	fails += _expect(is_equal_approx(screen.world.zoom, z0), "the wheel doesn't zoom the battlefield while the tree is open")
 	await _key(KEY_R)
 	fails += _expect(hud.is_open("research") and screen.paused, "R opens research and pauses the battle")
+	await _wheel(fpos, true)
+	await _wheel(Vector2(40, 450), false)
+	fails += _expect(is_equal_approx(screen.world.zoom, z0), "the wheel doesn't zoom the battlefield behind the research lab")
 	await _wait(0.3)
 	await _shot("16e_research")
 	await _mouse_away()
@@ -690,6 +702,8 @@ func _popout_checks() -> void:
 	fails += _expect(screen.modal != null and screen.paused, "Esc with nothing open or selected opens the pause menu")
 	await _wait(0.3)
 	await _shot("16g_pause_menu")
+	await _wheel(fpos, true)
+	fails += _expect(is_equal_approx(screen.world.zoom, z0), "the wheel doesn't zoom the battlefield behind the pause menu")
 	var restart_btn: Button = _button_in(screen.modal, "Restart Sector")
 	fails += _expect(restart_btn != null, "the pause menu has Restart Sector")
 	if restart_btn != null:

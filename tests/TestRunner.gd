@@ -1749,6 +1749,110 @@ func test_research_effects() -> void:
 	check(near(partial.level_stats("arrow", 1).damage, 9.54) and near(partial.level_stats("cannon", 1).damage, 22.0), "research only touches its own tower")
 
 
+## Research bought or reset mid-run applies at once (playtest round 2, #29).
+func test_live_research() -> void:
+	var g = research_game([])
+	g.gold += 5000
+	var old = g.place_tower("arrow", Vector2i(2, 3))
+	check(near(old.stats().damage, 9.0), "no research: 9 damage")
+	g.apply_research(["arrow_1"])
+	check(near(old.stats().damage, 9.54), "a boost bought mid-run reaches an existing tower (%.2f)" % old.stats().damage)
+	var fresh = g.place_tower("arrow", Vector2i(8, 3))
+	check(near(fresh.stats().damage, 9.54), "and new towers")
+	check(g.research == ["arrow_1"], "the run's research list follows")
+
+	# Masteries: a tower stopped before its mastery can buy it once the research is in.
+	var gat = build_to(g, "arrow", Vector2i(10, 5), "gatling", 4)
+	check(gat.tier == 3 and not g.upgrade_tower(gat), "without Mastery research the branch stops before the mastery")
+	g.apply_research(["arrow_1", "arrow_2a", "arrow_2b", "arrow_m"])
+	g.gold += 5000
+	check(g.upgrade_tower(gat) and gat.tier == 4, "with it, the mastery can be bought at once")
+
+	# Run-start bonuses: the difference is granted on the spot.
+	var c = research_game([])
+	var gold0: int = c.gold
+	c.apply_research(["cmd_funds", "cmd_core"])
+	check(c.gold == gold0 + Game.start_gold(Research.run_mods(["cmd_funds"])) - Game.START_GOLD, "Reserve Funds adds its credits now (%d)" % c.gold)
+	check(c.max_lives == 110 and c.lives == 110, "Reinforced Core adds its shields now (%d/%d)" % [c.lives, c.max_lives])
+
+	# A reset takes it all back: boosts gone, bought masteries kept, credits >= 0, shields >= 1.
+	g.apply_research([])
+	check(near(old.stats().damage, 9.0) and near(fresh.stats().damage, 9.0), "a reset removes the boosts")
+	check(gat.tier == 4, "a mastery already bought stays bought")
+	c.gold = 10
+	c.lives = 1
+	c.apply_research([])
+	check(c.gold == 0, "taking back the credit bonus never goes below 0 (%d)" % c.gold)
+	check(c.max_lives == 100 and c.lives == 1, "shields come off the maximum, never below 1 (%d/%d)" % [c.lives, c.max_lives])
+	var d = research_game(["cmd_core"])
+	d.apply_research([])
+	check(d.lives == 100 and d.max_lives == 100, "full shields are capped to the new maximum (%d)" % d.lives)
+
+	# Saving after a live purchase keeps the same run.
+	var h = research_game([])
+	h.gold += 5000
+	var ht = h.place_tower("arrow", Vector2i(2, 3))
+	h.apply_research(["arrow_1", "cmd_core"])
+	var res := SaveCodec.decode(JSON.parse_string(JSON.stringify(SaveCodec.encode(h))))
+	check(res.has("game"), "the run saves and loads")
+	if res.has("game"):
+		var h2 = res.game
+		check(h2.research == h.research and h2.gold == h.gold and h2.lives == h.lives and h2.max_lives == h.max_lives, "same research, credits and shields after loading")
+		check(h2.towers.size() == 1 and near(h2.towers[0].stats().damage, ht.stats().damage), "same tower stats after loading")
+
+
+## The MASTERY burst is for the mastery purchase only, not later secondaries (#32).
+func test_upgrade_event_mastery() -> void:
+	var g = research_game(["arrow_1", "arrow_2a", "arrow_2b", "arrow_m"])
+	var t = build_to(g, "arrow", Vector2i(2, 3), "gatling", 3)
+	while t.tier < 4 and t.depth.a < Tower.BRANCH_STEPS:
+		g.gold += 1000
+		g.upgrade_tower(t, "a")
+	g.emit_events = true
+	g.events.clear()
+	g.gold += 5000
+	check(g.upgrade_tower(t, "a") and t.tier == 4, "the mastery is bought")
+	var ups: Array = g.events.filter(func(ev): return ev.type == "upgrade")
+	check(ups.size() == 1 and bool(ups[0].get("mastery", false)), "its upgrade event is marked as the mastery")
+	g.events.clear()
+	check(g.upgrade_tower(t, "b"), "a secondary upgrade on the mastered tower")
+	ups = g.events.filter(func(ev): return ev.type == "upgrade")
+	check(ups.size() == 1 and not bool(ups[0].get("mastery", true)), "a secondary bought after the mastery is not marked")
+
+
+## One flechette trace per flechette (#35): the event carries the count.
+func test_flechette_pellets() -> void:
+	var counts := []
+	for setup in ["flechette", "dense", "secondary"]:
+		var g = new_game()
+		var t
+		if setup == "secondary":
+			g.gold += 5000
+			t = g.place_tower("arrow", Vector2i(2, 3))
+			g.upgrade_tower(t)
+			g.upgrade_tower(t, "a")
+			g.upgrade_tower(t, "c")
+		else:
+			t = spec_tower(g, "arrow", Vector2i(2, 3), "flechette")
+			if setup == "dense":
+				g.upgrade_tower(t, "c")
+				g.upgrade_tower(t, "c")
+		g.emit_events = true
+		g.state = Game.State.WAVE
+		put(g, "brute", 100.0, 0, 50.0)
+		var seen := -1
+		for i in int(8.0 / SIM_DT):
+			g.events.clear()
+			g.tick(SIM_DT)
+			for ev in g.events:
+				if ev.type == "flechette":
+					seen = int(ev.get("pellets", -1))
+			if seen >= 0:
+				break
+		counts.append(seen)
+	check(counts == [6, 7, 3], "flechette volleys carry 6, 7 after Dense Pack, and 3 for the secondary (%s)" % str(counts))
+
+
 func test_mastery_upgrades() -> void:
 	var g = research_game([])
 	var t = build_to(g, "arrow", Vector2i(2, 3), "gatling", 4)

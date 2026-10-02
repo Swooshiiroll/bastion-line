@@ -372,7 +372,7 @@ func _show_detail(id: String) -> void:
 	left.add_child(UiKit.wrap_label(str(nd.blurb) if str(nd.blurb) != "" else str(tower.def.blurb), _detail.size.x, 13, UiKit.TEXT))
 	if st == "locked":
 		var node_name: String = Research.Data.NODES[Research.mastery_node(tower.type)].name
-		left.add_child(UiKit.wrap_label("Research %s in the Research Lab [R] to unlock this tower's masteries. Research applies from your next run." % node_name, _detail.size.x, 12, UiKit.DIM))
+		left.add_child(UiKit.wrap_label("Research %s in the Research Lab [R] to unlock this tower's masteries. Research applies at once, even mid-run." % node_name, _detail.size.x, 12, UiKit.DIM))
 	elif st == "blocked":
 		left.add_child(UiKit.wrap_label(tower.block_reason(b) + ".", _detail.size.x, 12, UiKit.DIM))
 	elif st in ["next", "short"]:

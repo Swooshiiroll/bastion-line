@@ -16,6 +16,9 @@ so write for players.
 - **Upgrade tree:** it's for reading and planning; upgrades are bought in the tower panel (or with U / I / O). Its window is bigger, with the preview and the upgrade's details under the tree.
 - **Bottom bar:** no longer has upgrade buttons.
 - **Shop:** after placing a tower picked from the shop, the shop stays open for the next build (the new tower isn't selected). Pressing B with a tower selected swaps its panel for the shop.
+- **Research applies at once:** research bought or reset in the middle of a run takes effect immediately. Tower boosts reach towers already built, masteries can be bought straight away, and starting credits and shields are granted (or taken back) on the spot.
+- **Flechette volleys** draw one trace per flechette, scattered across the cone.
+- **Research Lab:** research nodes are 50% larger, with roomier columns, and the selected node is drawn larger still, with a pulsing outline.
 - **Development workflow:** the dev scripts (`tools/dev.sh`, `tools/dev.ps1`) are now in the repo, with a CI test build for every branch.
 - **New checks:**
   - **Every script compiles.**
@@ -27,6 +30,11 @@ so write for players.
 - **Version:** shown in the main menu from a single setting (`tools/dev.sh version x.y.z`).
 - **Releases:** pushing a version tag builds and publishes the release, using that version's changelog section as the notes.
 - **Models:** plans are made on Opus 5.5 (high effort) and carried out on Sonnet 5.5 (medium effort); see CLAUDE.md.
+
+### Fixed
+- Power-node tiles no longer have a black box under the boost hexagon.
+- The MASTERY burst no longer plays when a secondary upgrade is bought on a mastered tower.
+- The mouse wheel no longer zooms the battlefield while a menu (research, Codex, upgrade tree, pause) is open or the mouse is over the HUD.
 
 ## [3.5.1] - 2026-09-30
 

@@ -211,6 +211,9 @@ func _unhandled_input(event: InputEvent) -> void:
 		if not Rect2(Vector2.ZERO, Grid.field_size()).has_point(m):
 			return
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP or event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
+			# Menus (pause, research, Codex, tree) and HUD panels keep the wheel to themselves.
+			if not keys_enabled or _over_ui():
+				return
 			zoom_at(m, ZOOM_STEP if event.button_index == MOUSE_BUTTON_WHEEL_UP else 1.0 / ZOOM_STEP)
 			get_viewport().set_input_as_handled()
 			return
@@ -284,12 +287,13 @@ func _visual(ev: Dictionary) -> void:
 			fx.burst(ev.pos, Color(0.35, 0.36, 0.34, 0.9), 8, 60.0, 3.0, 0.5)
 			fx.ring(ev.pos, 4.0, float(ev.radius), Color(Draw.ACCENT.flak, 0.8), 0.22, 1.6)
 		"flechette":
+			# One trace per flechette, scattered across the cone at random lengths.
 			var fcone := deg_to_rad(float(ev.cone)) * 0.5
 			var faim := float(ev.aim)
-			for k in 7:
-				var fa := faim - fcone + fcone * 2.0 * float(k) / 6.0
-				var fend: Vector2 = ev.pos + Vector2.from_angle(fa) * float(ev.range) * randf_range(0.75, 1.0)
-				fx.tracer(ev.pos + Vector2.from_angle(fa) * 10.0, fend, Color(Draw.SPEC_ALT.flechette, 0.8), 0.12, 1.4)
+			for k in int(ev.get("pellets", 6)):
+				var fa := faim + randf_range(-fcone, fcone)
+				var fend: Vector2 = ev.pos + Vector2.from_angle(fa) * float(ev.range) * randf_range(0.55, 1.0)
+				fx.tracer(ev.pos + Vector2.from_angle(fa) * randf_range(6.0, 12.0), fend, Color(Draw.SPEC_ALT.flechette, 0.8), 0.12, 1.4)
 			fx.flash(ev.pos + Vector2.from_angle(faim) * 12.0, 9.0, Draw.SPEC_ALT.flechette, 0.08)
 		"suppress":
 			fx.ring(ev.pos, 6.0, float(ev.radius), Color(0.75, 0.55, 1.0), 0.35, 1.8)
@@ -404,7 +408,7 @@ func _visual(ev: Dictionary) -> void:
 			fx.burst(ev.pos, Draw.accent(str(ev.tower)), 16, 90.0, 2.2, 0.5)
 			fx.ring(ev.pos, 6.0, 30.0, Draw.accent(str(ev.tower)), 0.3, 2.0)
 		"upgrade":
-			if int(ev.get("tier", 0)) >= 4:
+			if bool(ev.get("mastery", false)):
 				fx.burst(ev.pos, Color(1.0, 0.85, 0.4), 40, 170.0, 3.0, 0.8)
 				fx.ring(ev.pos, 10.0, 70.0, Color(1.0, 0.85, 0.4), 0.6, 3.5)
 				fx.ring(ev.pos, 4.0, 46.0, Draw.accent("", str(ev.get("spec", ""))), 0.45, 2.5)
