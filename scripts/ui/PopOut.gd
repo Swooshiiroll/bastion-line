@@ -32,6 +32,8 @@ func _ready() -> void:
 	# window is wider than the layout.
 	if slide.x > 0.0:
 		rect.position.x += UiKit.view_offset().x
+	elif slide.x < 0.0:
+		rect.position.x -= UiKit.view_offset().x
 	theme = UiKit.theme()
 	position = rect.position
 	size = rect.size

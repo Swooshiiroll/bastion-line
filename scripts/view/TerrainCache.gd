@@ -14,6 +14,9 @@ const DECK_SCALE_CAP := 2.0
 
 var grid
 var cleared := {}
+## A cell rectangle to bake instead of the whole deck (the upgrade preview), and its scale.
+var clip := Rect2i()
+var clip_scale := 2.0
 var _bakes: Array = []
 var _scale := 0.0
 
@@ -41,6 +44,11 @@ func _on_resize() -> void:
 
 func _build() -> void:
 	_scale = _pixel_scale()
+	if clip.has_area():
+		if _bakes.is_empty():
+			_bakes.append(_new_bake())
+		_fit(_bakes[0], Rect2(Vector2(clip.position) * Grid.TILE, Vector2(clip.size) * Grid.TILE), clip_scale)
+		return
 	var m := Vector2(Terrain.MARGIN_COLS, Terrain.MARGIN_ROWS) * Grid.TILE
 	var rects := [Rect2(-m, Grid.field_size() + m * 2.0), Rect2(Vector2.ZERO, Grid.field_size())]
 	var scales := [minf(_scale, DECK_SCALE_CAP), minf(_scale * ZOOM_MAX, FIELD_SCALE_CAP)]
@@ -59,6 +67,7 @@ func _new_bake() -> Dictionary:
 	var painter := Terrain.new()
 	painter.grid = grid
 	painter.cleared = cleared
+	painter.clip = clip
 	view.add_child(painter)
 	add_child(view)
 	var sprite := Sprite2D.new()

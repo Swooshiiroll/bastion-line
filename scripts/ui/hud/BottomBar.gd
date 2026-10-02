@@ -349,33 +349,9 @@ func _tower_card(t) -> void:
 		strip.add_child(_chip(label, state, br.nodes[0].blurb if why == "" else why))
 	ctx.add_child(strip)
 
-	# Action buttons: the next upgrade on each branch that can take one.
+	# Actions. Upgrades are bought in the tower panel on the right (or with U / I / O).
 	var row := UiKit.hbox(8)
 	row.position = Vector2(326, 44)
-	if t.trunk < 2:
-		var c1: int = t.upgrade_cost()
-		var up := UiKit.button("%s  ·  %d cr  [U]" % [Tower.trunk_name(2), c1], Callable(screen, "upgrade_selected").bind(0), Vector2(0, 34))
-		row.add_child(up)
-		_cost_buttons.append([up, c1])
-	else:
-		for i in Tower.BRANCHES.size():
-			var b: String = Tower.BRANCHES[i]
-			var nd: Dictionary = t.next_node(b)
-			if nd.is_empty():
-				continue
-			var cst: int = t.upgrade_cost(b)
-			var is_m: bool = int(t.depth[b]) >= Tower.BRANCH_STEPS
-			var bb := UiKit.button("%s%s  ·  %d cr  [%s]" % ["Mastery: " if is_m else "", nd.name, cst, ["U", "I", "O"][i]], Callable(screen, "upgrade_selected").bind(i), Vector2(0, 34))
-			bb.add_theme_color_override("font_color", UiKit.GOLD if is_m else Draw.accent(type, str(t.branch(b).id)))
-			bb.tooltip_text = str(nd.blurb)
-			row.add_child(bb)
-			_cost_buttons.append([bb, cst])
-		var p: String = t.primary()
-		if p != "" and int(t.depth[p]) >= Tower.BRANCH_STEPS and not t.mastered and not t.mastery_unlocked():
-			var node_name: String = Research.Data.NODES[Research.mastery_node(type)].name
-			var lock := UiKit.label("Mastery needs %s research" % node_name, 12, UiKit.DIM)
-			row.add_child(lock)
-
 	var tree := UiKit.button("Tree  [E]", Callable(screen, "open_tree"), Vector2(0, 34))
 	row.add_child(tree)
 	if not t.is_support() and not (type in ["frost", "gravity"]):

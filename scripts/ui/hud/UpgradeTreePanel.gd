@@ -1,16 +1,21 @@
 extends "res://scripts/ui/PopOut.gd"
-## Upgrade-tree pop-out for the selected tower: the trunk (tier 1 -> tier 2) on the left, then the
-## three branches as rows of four upgrades ending in a mastery, drawn as hex nodes on circuit
+## Upgrade-tree pop-out for the selected tower, for reading and planning (design/upgrade_rework.md
+## §3); upgrades are bought in the tower panel. The trunk (tier 1 -> tier 2) is on the left, then
+## the three branches as rows of four upgrades ending in a mastery, drawn as hex nodes on circuit
 ## traces. Owned nodes are gold, the next buyable one pulses, blocked and locked ones are dim, and
 ## a marker after the second upgrade shows where a secondary branch stops. The header says which
-## branch is primary. Hover a node for its description and the tower's stats before and after;
-## click to buy.
+## branch is primary.
+## Under the tree, a strip: the selected node's live preview (UpgradePreview) on the left, and the
+## hovered (else selected) node's description and stat changes on the right. Click a node to
+## select it.
 
 const DrawControl = preload("res://scripts/ui/DrawControl.gd")
 const Draw = preload("res://scripts/view/Draw.gd")
 const TowerInfo = preload("res://scripts/ui/TowerInfo.gd")
 const Tower = preload("res://scripts/entities/Tower.gd")
 const Research = preload("res://scripts/core/Research.gd")
+const UpgradeRules = preload("res://scripts/core/UpgradeRules.gd")
+const UpgradePreview = preload("res://scripts/ui/hud/UpgradePreview.gd")
 
 const NODE_R := 24.0
 const BTN := Vector2(62, 62)
@@ -19,6 +24,7 @@ const ROW_Y := {"a": 64.0, "b": 170.0, "c": 276.0}
 const COL_X := [330.0, 500.0, 670.0, 840.0, 1010.0]
 const TRUNK := {"t1": Vector2(70, 170), "t2": Vector2(200, 170)}
 const TREE_H := 350.0
+const PREVIEW := Vector2(600, 300)
 
 var hud
 var screen
@@ -31,11 +37,16 @@ var _hovered := ""
 var _shown := "?"
 var _key := ""
 var _detail: Control
+## The clicked node, whose preview plays ("" until the default is picked).
+var selected := ""
+## A node the tower panel is pointing at (its hovered card), outlined.
+var _pointed := ""
+var preview
 var _status: HBoxContainer
 
 
 func _init(owner_hud, t) -> void:
-	super(Rect2(250, 110, 1100, 580), "%s  ·  UPGRADE TREE" % str(t.def.name).to_upper(), Vector2(0, 18))
+	super(Rect2(24, 46, 1250, 740), "%s  ·  UPGRADE TREE" % str(t.def.name).to_upper(), Vector2(0, 18))
 	hud = owner_hud
 	screen = owner_hud.screen
 	tower = t
@@ -73,7 +84,7 @@ func _build() -> void:
 			if _hovered == nid:
 				_hovered = ""
 		)
-		btn.pressed.connect(func(): _buy(nid))
+		btn.pressed.connect(func(): select(nid))
 		body.add_child(btn)
 		node_buttons[id] = btn
 		var lab := UiKit.vbox(-2)
@@ -92,9 +103,12 @@ func _build() -> void:
 	sep.position = Vector2(16, TREE_H + 4)
 	sep.size = Vector2(rect.size.x - 32, 1)
 	body.add_child(sep)
+	preview = UpgradePreview.new(PREVIEW)
+	preview.position = Vector2(20, TREE_H + 16)
+	body.add_child(preview)
 	_detail = Control.new()
-	_detail.position = Vector2(20, TREE_H + 14)
-	_detail.size = Vector2(rect.size.x - 40, 160)
+	_detail.position = Vector2(PREVIEW.x + 44, TREE_H + 16)
+	_detail.size = Vector2(rect.size.x - PREVIEW.x - 64, PREVIEW.y)
 	body.add_child(_detail)
 
 
@@ -231,19 +245,24 @@ func _draw_node(ci: Control, id: String) -> void:
 		Draw.fill(ci, c, Draw.ngon(6, 1.0, PI / 6.0), Color(0.02, 0.03, 0.05, 0.6), 0.0, r - 1.0)
 	if st in ["locked", "blocked"]:
 		Draw.lock(ci, c + Vector2(0, 1), 1.4, Color(0.75, 0.8, 0.86))
-	if id == _hovered:
+	if id == selected:
+		Draw.outline(ci, c, Draw.ngon(6, 1.0, PI / 6.0), UiKit.GOLD, 2.0, 0.0, r + 9.0)
+	elif id == _hovered or id == _pointed:
 		Draw.outline(ci, c, Draw.ngon(6, 1.0, PI / 6.0), Color(UiKit.ACCENT, 0.7), 1.0, 0.0, r + 9.0)
 
 
 func refresh(_delta: float) -> void:
-	var key := "%d:%s:%s:%s:%d" % [tower.trunk, str(tower.depth), str(tower.started), tower.mastered, screen.game.gold]
+	# Keyed on what the nodes show (their states), not raw credits, which change with every kill.
+	var key := "%d:%s:%s:%s:%s" % [tower.trunk, str(tower.depth), str(tower.started), tower.mastered, ",".join(PackedStringArray(_pos.keys().map(func(id): return _state(id))))]
 	if key != _key:
 		_key = key
 		for id in _labels:
 			_label(id)
 		_refresh_status()
 		_shown = "?"
-	var want := _hovered if _hovered != "" else _default_focus()
+	if selected == "":
+		select(_default_select())
+	var want := _hovered if _hovered != "" else selected
 	if want != _shown:
 		_shown = want
 		_show_detail(want)
@@ -279,11 +298,16 @@ func _refresh_status() -> void:
 		_status.add_child(pc)
 
 
-func _default_focus() -> String:
-	for id in _pos:
-		if _state(id) in ["next", "short"]:
-			return id
-	return "t1"
+## The node selected when the tree opens: the next upgrade on the primary (its mastery once the
+## branch is full), else the Retrofit.
+func _default_select() -> String:
+	if tower.trunk < 2:
+		return "t2"
+	var p: String = tower.primary()
+	if p == "":
+		return "t2"
+	var d: int = tower.depth[p]
+	return p + "m" if d >= Tower.BRANCH_STEPS else "%s%d" % [p, d + 1]
 
 
 func _label(id: String) -> void:
@@ -337,7 +361,7 @@ func _show_detail(id: String) -> void:
 	var k: int = p[1]
 	var nd := _node(id)
 	var left := UiKit.vbox(4)
-	left.size = Vector2(520, 150)
+	left.size = Vector2(_detail.size.x, 150)
 	var kind := "TRUNK  ·  %s" % Tower.trunk_name(k).to_upper()
 	if b != "":
 		kind = "BRANCH %s  ·  %s" % [b.to_upper(), "MASTERY" if k == 5 else ("T1  ·  SPECIALIZATION" if k == 1 else "T%d" % k)]
@@ -345,36 +369,38 @@ func _show_detail(id: String) -> void:
 	head.add_child(UiKit.label(str(nd.name).to_upper(), 17, _branch_color(b) if b != "" else Draw.accent(tower.type)))
 	head.add_child(UiKit.label(kind, 11, UiKit.DIM))
 	left.add_child(head)
-	left.add_child(UiKit.wrap_label(str(nd.blurb) if str(nd.blurb) != "" else str(tower.def.blurb), 520, 13, UiKit.TEXT))
+	left.add_child(UiKit.wrap_label(str(nd.blurb) if str(nd.blurb) != "" else str(tower.def.blurb), _detail.size.x, 13, UiKit.TEXT))
 	if st == "locked":
 		var node_name: String = Research.Data.NODES[Research.mastery_node(tower.type)].name
-		left.add_child(UiKit.wrap_label("Research %s in the Research Lab [R] to unlock this tower's masteries. Research applies from your next run." % node_name, 520, 12, UiKit.DIM))
+		left.add_child(UiKit.wrap_label("Research %s in the Research Lab [R] to unlock this tower's masteries. Research applies from your next run." % node_name, _detail.size.x, 12, UiKit.DIM))
 	elif st == "blocked":
-		left.add_child(UiKit.wrap_label(tower.block_reason(b) + ".", 520, 12, UiKit.DIM))
+		left.add_child(UiKit.wrap_label(tower.block_reason(b) + ".", _detail.size.x, 12, UiKit.DIM))
 	elif st in ["next", "short"]:
 		var key: String = "U" if b == "" else KEYS[Tower.BRANCHES.find(b)]
-		var buy := UiKit.button("Buy for %d cr  [%s]" % [_cost(id), key], func(): _buy(id), Vector2(210, 34))
-		buy.disabled = st == "short"
-		left.add_child(buy)
-	_detail.add_child(left)
+		left.add_child(UiKit.label("%d cr  ·  buy it in the tower panel or with %s" % [_cost(id), key], 12, UiKit.GOLD if st == "next" else UiKit.BAD))
 	var cur: Dictionary = tower.stats()
 	var nxt: Dictionary = {}
 	if st in ["next", "short"]:
 		nxt = tower.next_stats(b)
+	_detail.add_child(left)
 	var grid := TowerInfo.stats_grid(cur, nxt, tower.is_beam(), 12, 12)
-	grid.position = Vector2(560, 0)
+	grid.position = Vector2(0, 150)
 	_detail.add_child(grid)
 
 
-func _buy(id: String) -> void:
-	var st := _state(id)
-	if st != "next":
-		if st == "short":
-			hud.toast("Not enough credits", UiKit.BAD)
-		elif st == "blocked":
-			hud.toast(tower.block_reason(_parse(id)[0]), UiKit.DIM)
-		Sfx.play("error", -6.0, 0.0)
+## Selects node `id` and plays its preview. Unreachable nodes say why instead.
+func select(id: String) -> void:
+	selected = id
+	_shown = "?"
+	if preview == null:
 		return
-	var b: String = _parse(id)[0]
-	screen.upgrade_selected(0 if b == "" else Tower.BRANCHES.find(b))
-	_key = ""
+	if UpgradeRules.reachable(tower, id):
+		preview.show_node(screen.game, tower, id)
+	else:
+		var b: String = UpgradeRules.parse(id)[0]
+		preview.show_node(screen.game, tower, "", "Not reachable on this tower: %s." % tower.block_reason(b).trim_suffix("."))
+
+
+## Outlines node `id` for the tower panel (its hovered card); "" clears it.
+func highlight(id: String) -> void:
+	_pointed = id

@@ -7,6 +7,8 @@ const Game = preload("res://scripts/core/Game.gd")
 const Bot = preload("res://scripts/core/Bot.gd")
 const SaveCodec = preload("res://scripts/core/SaveCodec.gd")
 const Lore = preload("res://scripts/core/Lore.gd")
+const UpgradeRules = preload("res://scripts/core/UpgradeRules.gd")
+const UpgradePreview = preload("res://scripts/ui/hud/UpgradePreview.gd")
 const Glossary = preload("res://data/glossary.gd")
 const Grid = preload("res://scripts/core/Grid.gd")
 const Enemy = preload("res://scripts/entities/Enemy.gd")
@@ -2267,3 +2269,153 @@ func _collect_scripts(dir: String, out: Array) -> void:
 			out.append(dir.path_join(f))
 	for d in DirAccess.get_directories_at(dir):
 		_collect_scripts(dir.path_join(d), out)
+
+
+# --- Upgrade rework (design/upgrade_rework.md) ---------------------------------------------------
+
+## A tower on meadow with plenty of credits, upgraded along `path` ("t" is the Retrofit, then branch
+## keys), with its mastery research on if `research`. Returns [game, tower].
+func _upgraded(type: String, path: String, research := false) -> Array:
+	var g = Game.new("meadow", 5, "medium")
+	g.gold = 1 << 30
+	var t = g.place_tower(type, Vector2i(0, 0))
+	if research:
+		t.mods["mastery"] = true
+		t.invalidate()
+	for ch in path:
+		g.upgrade_tower(t, "" if ch == "t" else ch)
+	return [g, t]
+
+
+func _card_state(t, key: String, gold := 1 << 30) -> String:
+	return str(UpgradeRules.card(t, key, gold).state)
+
+
+func test_upgrade_cards() -> void:
+	var t = _upgraded("arrow", "")[1]
+	check(UpgradeRules.card_keys(t) == ["trunk"], "a stock tower's panel offers only the Retrofit")
+	check(_card_state(t, "trunk") == "buy", "the Retrofit card can be bought with credits")
+	var short := UpgradeRules.card(t, "trunk", 0)
+	check(short.state == "short" and str(short.reason) == "Cannot afford", "without credits the card says Cannot afford")
+	t = _upgraded("arrow", "t")[1]
+	check(UpgradeRules.card_keys(t) == ["a", "b", "c"], "after the Retrofit there's a card per branch")
+	check(["a", "b", "c"].all(func(k): return _card_state(t, k) == "buy"), "every branch's first upgrade is buyable after the Retrofit")
+	check(UpgradeRules.card(t, "b", 1 << 30).node == t.branch("b").nodes[0], "the card offers the branch's specialization first")
+	t = _upgraded("arrow", "tab")[1]
+	check(_card_state(t, "c") == "locked", "the third branch is locked once two are started")
+	check(str(UpgradeRules.card(t, "c", 1 << 30).reason).begins_with("Branch locked"), "and says so")
+	t = _upgraded("arrow", "tbabab")[1]
+	check(t.locked_in() and t.primary() == "b", "b locked in as the primary")
+	check(_card_state(t, "a") == "capped", "the secondary's card is capped at 2")
+	check(_card_state(t, "b") == "buy", "the primary keeps going")
+	t = _upgraded("arrow", "tbbbb")[1]
+	check(_card_state(t, "b") == "research", "the mastery card needs research without it")
+	check(str(UpgradeRules.card(t, "b", 1 << 30).reason).contains("Mastery research"), "and names the research")
+	t = _upgraded("arrow", "tbbbb", true)[1]
+	check(_card_state(t, "b") == "buy" and UpgradeRules.card(t, "b", 1 << 30).node == t.branch("b").mastery, "with research the card offers the mastery")
+	t = _upgraded("arrow", "tbbbbb", true)[1]
+	check(t.mastered and _card_state(t, "b") == "done", "a mastered branch shows a finished card")
+	check(str(UpgradeRules.card(t, "b", 1 << 30).reason) == "Mastered", "labelled Mastered")
+	# Cards agree with what U / I / O would do.
+	for type in Towers.ORDER:
+		var tw = _upgraded(type, "tc")[1]
+		for k in ["a", "b", "c"]:
+			var c := UpgradeRules.card(tw, k, 1 << 30)
+			check((c.state == "buy") == tw.can_buy(k), "%s %s: card state matches the buy rules" % [type, k])
+
+
+func test_upgrade_reachable_nodes() -> void:
+	var t = _upgraded("arrow", "")[1]
+	for id in ["t1", "t2", "a1", "a4", "am", "b3", "cm"]:
+		check(UpgradeRules.reachable(t, id), "stock: %s is reachable" % id)
+	t = _upgraded("arrow", "tab")[1]
+	check(not UpgradeRules.reachable(t, "c1"), "two branches started: the third isn't reachable")
+	check(UpgradeRules.reachable(t, "a3") and UpgradeRules.reachable(t, "bm"), "either started branch can still become the primary")
+	t = _upgraded("arrow", "tbabab")[1]
+	check(UpgradeRules.reachable(t, "a2") and not UpgradeRules.reachable(t, "a3"), "the secondary is reachable up to its cap")
+	check(not UpgradeRules.reachable(t, "am"), "the secondary's mastery isn't reachable")
+	check(UpgradeRules.reachable(t, "bm"), "the primary's mastery is reachable even before its research")
+	check(UpgradeRules.reachable(t, "b1"), "owned nodes are reachable")
+
+
+## A tower set to a preview state, as the preview builds it.
+func _at_state(type: String, st: Dictionary, research := true):
+	var g2 = Game.new("meadow", 5, "medium")
+	var tw = g2.place_tower(type, Vector2i(0, 0))
+	if research:
+		tw.mods["mastery"] = true
+	tw.trunk = st.trunk
+	tw.depth = st.depth
+	tw.started = st.started
+	tw.mastered = st.mastered
+	tw.invalidate()
+	return tw
+
+
+## A preview builds the same tower stats as buying up to the node in a real game.
+func test_upgrade_preview_state() -> void:
+	var cases := [["arrow", "", "b3", "tbbb"], ["cannon", "t", "am", "taaaaa"], ["tesla", "tab", "a3", "tabaa"],
+		["sniper", "tbabab", "a2", "tbabab"], ["frost", "tcc", "c4", "tcccc"], ["drones", "", "t2", "t"], ["scrap", "tb", "bm", "tbbbbb"]]
+	for cs in cases:
+		var t = _upgraded(cs[0], cs[1], true)[1]
+		var want = _upgraded(cs[0], cs[3], true)[1]
+		var tw = _at_state(cs[0], UpgradeRules.preview_state(t, cs[2]))
+		check(tw.stats() == want.stats(), "%s from '%s' previewing %s matches buying %s" % [cs[0], cs[1], cs[2], cs[3]])
+
+
+func test_upgrade_preview_enemies() -> void:
+	var ids := ["t1", "t2"]
+	for b in ["a", "b", "c"]:
+		for k in 4:
+			ids.append("%s%d" % [b, k + 1])
+		ids.append(b + "m")
+	for type in Towers.ORDER:
+		var t = _upgraded(type, "", true)[1]
+		for id in ids:
+			var tw = _at_state(type, UpgradeRules.preview_state(t, id))
+			var partner: bool = UpgradeRules.needs_partner(tw)
+			var air: bool = partner or tw.hits_air()
+			var ground: bool = partner or tw.hits_ground()
+			var list := UpgradeRules.enemies_for(UpgradeRules.node_for(type, id), air, ground)
+			check(not list.is_empty(), "%s %s: the preview sends enemies" % [type, id])
+			var ok := true
+			for e in list:
+				var flying := bool(Enemies.ENEMIES[e].get("flying", false))
+				if (flying and not air) or (not flying and not ground):
+					ok = false
+			check(ok, "%s %s: the tower can hit every preview enemy" % [type, id])
+	check(UpgradeRules.enemies_for({"set": {"shred": 1.0}}, true, true).has("brute"), "shred previews against armored enemies")
+	check(UpgradeRules.enemies_for({"add": {"air_mult": 0.5}}, true, true).has("bat"), "anti-air previews against flyers")
+	check(UpgradeRules.enemies_for({"set": {"boss_mult": 3.0}}, true, true) == ["juggernaut"], "boss bonuses preview against a boss")
+
+
+## The preview's sandbox runs on its own: playing it never changes the real game.
+func test_upgrade_preview_sandbox() -> void:
+	var r = _upgraded("arrow", "tbb", true)
+	var real = r[0]
+	var t = r[1]
+	var before := [real.gold, real.wave, real.time, real.enemies.size(), real.towers.size(), t.stats().duplicate(), str(t.depth)]
+	var p = UpgradePreview.new(Vector2(600, 300))
+	add_child(p)
+	p.show_node(real, t, "bm")
+	check(p.game != null and p.tower != null, "the preview builds a sandbox")
+	check(p.game != real and p.game.map_id == "range", "on the test range, separate from the real game")
+	check(p.tower.mastered and p.tower.primary() == "b", "the sandbox tower is at the previewed node")
+	check(str(p.game.grid.def.theme) == str(real.map_def.theme), "in the current sector's look")
+	var fought := false
+	for i in 300:
+		p._process(1.0 / 30.0)
+		if not p.game.enemies.is_empty() or int(p.game.stats.kills) > 0:
+			fought = true
+	check(fought, "the sandbox sends enemies at the tower")
+	var after := [real.gold, real.wave, real.time, real.enemies.size(), real.towers.size(), t.stats(), str(t.depth)]
+	check(after == before, "the real game is untouched by the preview")
+	p.show_node(real, t, "", "Not reachable")
+	check(p.game == null, "an unreachable node shows a note instead of a sandbox")
+	p.queue_free()
+
+
+func test_range_map() -> void:
+	var grid = Grid.new("range")
+	check(grid.ground_paths.size() == 1 and grid.air_paths.size() == 1, "the test range has one lane")
+	check(not Maps.ORDER.has("range"), "the test range isn't a playable sector")
