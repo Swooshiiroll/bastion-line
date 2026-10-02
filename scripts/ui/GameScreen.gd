@@ -4,6 +4,7 @@ extends Node
 const Game = preload("res://scripts/core/Game.gd")
 const World = preload("res://scripts/view/World.gd")
 const Hud = preload("res://scripts/ui/Hud.gd")
+const TowerPanel = preload("res://scripts/ui/hud/TowerPanel.gd")
 const PauseMenu = preload("res://scripts/ui/PauseMenu.gd")
 const EndScreen = preload("res://scripts/ui/EndScreen.gd")
 const SettingsPanel = preload("res://scripts/ui/SettingsPanel.gd")
@@ -22,6 +23,8 @@ var world
 var hud
 var speed := 1
 var paused := false
+## The tower the side panel last saw selected (see _sync_side_panel).
+var _panel_tower = null
 var modal: Control = null
 var _modal_layer: CanvasLayer
 var _ended := false
@@ -73,6 +76,7 @@ func _process(delta: float) -> void:
 	if not paused:
 		for ev in world.simulate(delta, speed):
 			_handle_event(ev)
+	_sync_side_panel()
 	hud.refresh(delta)
 
 
@@ -296,9 +300,35 @@ func toggle_codex() -> void:
 
 
 func close_popout(kind: String) -> void:
+	# The tower panel follows the selection: closing it means letting go of the tower.
+	if kind == "tower":
+		world.selected_tower = null
 	hud.close(kind)
 	if kind in Hud.PAUSING and modal == null and not hud.pausing_open():
 		paused = false
+
+
+## The tower panel follows the selection and shares the shop's slot (design/upgrade_rework.md):
+## selecting a tower opens its panel and closes the shop; opening the shop (B, or going back to it
+## after a build) deselects the tower.
+func _sync_side_panel() -> void:
+	var sel = world.selected_tower
+	if sel != null and not game.towers.has(sel):
+		sel = null
+	if sel != null and hud.is_open("shop"):
+		if sel != _panel_tower:
+			hud.close("shop")
+			shop_return = false
+		else:
+			world.selected_tower = null
+			sel = null
+	var tp = hud.popout("tower")
+	if tp != null and tp.tower != sel:
+		hud.close("tower")
+		tp = null
+	if sel != null and tp == null and not _ended:
+		hud.open("tower", TowerPanel.side_for(world, sel))
+	_panel_tower = sel
 
 
 ## Esc's first job: close every open pop-out (and stop building or aiming).
@@ -338,8 +368,12 @@ func _on_field_clicked(cell: Vector2i, button: int, shift: bool, pos: Vector2) -
 			var t = game.place_tower(world.build_type, at)
 			if not shift:
 				world.build_type = ""
-				world.selected_tower = t
-				_return_to_shop()
+				# Picked from the shop: back to the shop for the next build. Otherwise select the new
+				# tower, which opens its panel.
+				if shop_return:
+					_return_to_shop()
+				else:
+					world.selected_tower = t
 		elif game.tower_at.has(cell):
 			world.build_type = ""
 			shop_return = false

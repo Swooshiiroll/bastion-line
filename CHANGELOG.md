@@ -6,7 +6,16 @@ so write for players.
 
 ## [Unreleased]
 
+### Added
+- **Tower panel:** clicking a tower opens its panel on the right, in the shop's place.
+  - It shows the tower's combat stats and the next upgrade on each branch as cards: name, price, key, stat changes and description.
+  - Cards you can't buy yet stay visible and say why: credits, research, secondary capped or branch locked.
+- **Upgrade preview:** in the upgrade tree, clicking an upgrade plays a live preview of it. Your tower fights a looping wave of enemies picked to show the upgrade off (armored for shred, flyers for anti-air, crowds for splash...), in the current sector's look.
+
 ### Changed
+- **Upgrade tree:** it's for reading and planning; upgrades are bought in the tower panel (or with U / I / O). Its window is bigger, with the preview and the upgrade's details under the tree.
+- **Bottom bar:** no longer has upgrade buttons.
+- **Shop:** after placing a tower picked from the shop, the shop stays open for the next build (the new tower isn't selected). Pressing B with a tower selected swaps its panel for the shop.
 - **Research applies at once:** research bought or reset in the middle of a run takes effect immediately. Tower boosts reach towers already built, masteries can be bought straight away, and starting credits and shields are granted (or taken back) on the spot.
 - **Flechette volleys** draw one trace per flechette, scattered across the cone.
 - **Research Lab:** the selected node is drawn larger, with a brighter outline.

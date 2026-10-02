@@ -61,7 +61,8 @@ var _accum := 0.0
 var _mouse := Vector2(-1000, -1000)
 
 
-func setup(g) -> void:
+## `clip`: only this cell rectangle of the map is shown (the upgrade preview), so only it is baked.
+func setup(g, clip := Rect2i()) -> void:
 	game = g
 	position = base_pos
 	for child in get_children():
@@ -69,6 +70,7 @@ func setup(g) -> void:
 	terrain = TerrainCache.new()
 	terrain.grid = g.grid
 	terrain.cleared = g.cleared
+	terrain.clip = clip
 	add_child(terrain)
 	lane_fx = LaneFx.new()
 	lane_fx.grid = g.grid
