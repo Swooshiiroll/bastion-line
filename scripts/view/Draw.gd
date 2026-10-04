@@ -1029,6 +1029,11 @@ static func _arc(ci: CanvasItem, c: Vector2, s: float, tier: int, t: float, flas
 		polyline(ci, PackedVector2Array([p1, mid, p2]), Color(1, 1, 1, 0.5), 0.4 * s, true)
 
 
+## Distance from a Laser Lance's centre to the tip of its barrel, at drawing scale `s`.
+static func laser_barrel_length(tier: int, s: float) -> float:
+	return (19.0 + 2.0 * float(tier)) * s
+
+
 ## Laser Lance: a sleek armoured hull with heat-sink fins, a long lance barrel with focusing
 ## rings, and an emitter crystal at the tip. Prism Array ends in a splitting prism; Focus Lens in
 ## one big lens.
@@ -1045,7 +1050,7 @@ static func _laser(ci: CanvasItem, c: Vector2, aim: float, s: float, tier: int, 
 	var hull := PackedVector2Array([Vector2(7, 0), Vector2(1, 6), Vector2(-9, 5), Vector2(-11, 0), Vector2(-9, -5), Vector2(1, -6)])
 	plate(ci, c, hull, METAL_L, aim, s, 1.2)
 	line(ci, c - d * 8.0 * s, c + d * 3.0 * s, Color(0, 0, 0, 0.35), 1.0 * s)
-	var length := (19.0 + 2.0 * float(tier)) * s
+	var length := laser_barrel_length(tier, s)
 	bar(ci, c + d * 4.0 * s, c + d * length, 3.0 * s, METAL)
 	dyn(true)
 	strip(ci, c + d * 5.0 * s, c + d * length, 0.6 * s, Color(acc, 0.35 + 0.6 * lit))

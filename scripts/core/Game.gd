@@ -543,6 +543,8 @@ func tick(dt: float) -> void:
 		gate_cd[gi] = maxf(0.0, float(gate_cd[gi]) - dt)
 	time += dt
 	if state == State.BUILD:
+		for t in towers:
+			t.sweep_angles = []
 		if auto_start:
 			auto_timer += dt
 			if auto_timer >= AUTO_START_DELAY:
@@ -811,6 +813,7 @@ func _update_tower(t, dt: float) -> void:
 		t.disabled = maxf(0.0, t.disabled - dt)
 		t.target = null
 		t.beam_targets.clear()
+		t.sweep_angles = []
 		t.ramp = 0.0
 		t.ramp_mult = 1.0
 		return

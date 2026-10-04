@@ -56,9 +56,11 @@ func _beams(tw, t: float) -> void:
 func _sweeps(tw, t: float) -> void:
 	var acc := Draw.accent(tw.type, tw.spec)
 	var r: float = tw.get_range()
+	# Beams leave the tip of the barrel (which points at the sweep's centre line), not the hull.
+	var tip: Vector2 = tw.pos + Vector2.from_angle(tw.aim) * Draw.laser_barrel_length(tw.tier, 1.0 if tw.size <= 1 else 1.8)
 	for a in tw.sweep_angles:
 		var d := Vector2.from_angle(float(a))
-		var src: Vector2 = tw.pos + d * 11.0
+		var src: Vector2 = tip
 		var end: Vector2 = tw.pos + d * r
 		var flick := 0.85 + 0.15 * sin(t * 45.0 + float(a))
 		draw_line(src, end, Color(acc, 0.16 * flick), 9.0, true)

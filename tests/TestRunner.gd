@@ -4,6 +4,7 @@ extends Node
 ## Exits with code 0 when every check passes, 1 otherwise.
 
 const Game = preload("res://scripts/core/Game.gd")
+const Draw = preload("res://scripts/view/Draw.gd")
 const Bot = preload("res://scripts/core/Bot.gd")
 const SaveCodec = preload("res://scripts/core/SaveCodec.gd")
 const Lore = preload("res://scripts/core/Lore.gd")
@@ -118,6 +119,7 @@ func _run() -> void:
 		"test_rampart",
 		"test_is_boss_round",
 		"test_launch_view",
+		"test_sweeper_beams_clear_between_rounds",
 		"test_leviathan",
 		"test_colossus",
 		"test_v3_flyers",
@@ -684,6 +686,19 @@ func test_launch_view() -> void:
 	g.spawn_queue.clear()
 	g.endless = true
 	check(BottomBar.launch_view(g, false).counter == "ROUND 3  ENDLESS", "endless drops the total")
+
+
+func test_sweeper_beams_clear_between_rounds() -> void:
+	var g = new_game()
+	g.state = Game.State.WAVE
+	var sw = spec_tower(g, "laser", Vector2i(2, 3), "sweeper")
+	put(g, "grunt", 80.0, 0, 30.0)
+	g.tick(SIM_DT)
+	check(not sw.sweep_angles.is_empty(), "a sweeper with a target is sweeping")
+	g.state = Game.State.BUILD
+	g.tick(SIM_DT)
+	check(sw.sweep_angles.is_empty(), "no sweep beams between rounds")
+	check(Draw.laser_barrel_length(1, 1.0) > 11.0, "the barrel tip is past the old 11 px beam origin")
 
 
 func test_leviathan() -> void:
