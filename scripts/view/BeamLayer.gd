@@ -36,7 +36,7 @@ func _draw() -> void:
 func _beams(tw, t: float) -> void:
 	var acc := Draw.accent(tw.type, tw.spec)
 	var d := Vector2.from_angle(tw.aim)
-	var src: Vector2 = tw.pos + d * 11.0
+	var src: Vector2 = tw.pos + d * Draw.laser_barrel_length(tw.tier, 1.0 if tw.size <= 1 else 1.8)
 	var ramp: float = tw.ramp_mult
 	for i in tw.beam_targets.size():
 		var e = tw.beam_targets[i]
