@@ -6,6 +6,8 @@ so write for players.
 
 ## [Unreleased]
 
+## [3.5.4] - 2026-10-04
+
 ### Changed
 - **Round counter on the Launch button:** it shows the round in every state (ROUND 3 / 40, or ROUND 3  ENDLESS), with the action under it. Boss rounds read BOSS ROUND and the last one FINAL ROUND, in red.
 - **Top bar:** the map and difficulty are bigger and share one line; the round label moved to the Launch button.
