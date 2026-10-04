@@ -6,6 +6,14 @@ so write for players.
 
 ## [Unreleased]
 
+### Changed
+- **Round counter on the Launch button:** it shows the round in every state (ROUND 3 / 40, or ROUND 3  ENDLESS), with the action under it. Boss rounds read BOSS ROUND and the last one FINAL ROUND, in red.
+- **Top bar:** the map and difficulty are bigger and share one line; the round label moved to the Launch button.
+- The sector banner at round 0 and the Round / Boss Round banners are gone.
+
+### Fixed
+- The sector banner no longer shows through the Research Lab at round 0 (#39).
+
 ## [3.5.2] - 2026-10-02
 
 ### Added

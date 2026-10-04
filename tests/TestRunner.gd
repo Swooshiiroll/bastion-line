@@ -116,6 +116,8 @@ func _run() -> void:
 		"test_rally_beacon",
 		"test_bulwark",
 		"test_rampart",
+		"test_is_boss_round",
+		"test_launch_view",
 		"test_leviathan",
 		"test_colossus",
 		"test_v3_flyers",
@@ -648,6 +650,40 @@ func test_rampart() -> void:
 	brute.apply_stun(1.0)
 	check(brute.stun_timer > 0.0 and not brute.shove_immune(), "ordinary enemies still can be")
 	check(near(g.damage_enemy(r, 10.0, false, null), 2.0), "8 armor (20% floor on a 10-damage hit)")
+
+
+func test_is_boss_round() -> void:
+	var g = new_game()
+	var bosses := 0
+	for n in range(1, g.final_round() + 1):
+		if g.is_boss_round(n):
+			bosses += 1
+	check(bosses > 0, "some rounds are boss rounds (%d)" % bosses)
+	check(not g.is_boss_round(1), "round 1 has no boss")
+	check(g.is_boss_round(g.final_round()), "the final round has bosses")
+
+
+func test_launch_view() -> void:
+	var BottomBar = load("res://scripts/ui/hud/BottomBar.gd")
+	var g = new_game()
+	var v: Dictionary = BottomBar.launch_view(g, false)
+	check(v.counter == "ROUND 1 / %d" % g.final_round(), "round 0 shows the first round: %s" % v.counter)
+	check(v.action == "LAUNCH  [Space]" and v.can_launch and not v.red, "ready to launch, normal colour")
+	g.auto_start = true
+	check(BottomBar.launch_view(g, false).action.begins_with("LAUNCH IN 5s"), "auto-start counts down")
+	g.auto_start = false
+	check(BottomBar.launch_view(g, true).red and BottomBar.launch_view(g, true).counter.begins_with("BOSS ROUND 1 /"), "a boss round is red and labelled")
+	g.wave = g.final_round() - 1
+	v = BottomBar.launch_view(g, true)
+	check(v.counter == "FINAL ROUND %d / %d" % [g.final_round(), g.final_round()] and v.red, "the final round is labelled: %s" % v.counter)
+	g.wave = 3
+	g.state = Game.State.WAVE
+	g.spawn_queue.append({"time": 99.0, "type": "grunt", "wave": 3})
+	v = BottomBar.launch_view(g, false)
+	check(v.counter == "ROUND 3 / %d" % g.final_round() and not v.can_launch, "mid-round shows the current round, no launch")
+	g.spawn_queue.clear()
+	g.endless = true
+	check(BottomBar.launch_view(g, false).counter == "ROUND 3  ENDLESS", "endless drops the total")
 
 
 func test_leviathan() -> void:

@@ -402,6 +402,7 @@ func _interaction_checks() -> void:
 
 	var start_btn: Button = screen.hud.start_btn
 	fails += _expect(start_btn.get_parent() == screen.hud.bottom and start_btn.get_global_rect().position.y > 800.0, "the Launch button sits in the bottom bar")
+	fails += _expect(screen.hud.bottom._launch_counter.text.begins_with("ROUND 1 / "), "the Launch button carries the round counter")
 	await _click(start_btn.get_global_rect().get_center())
 	fails += _expect(g.wave == 1 and g.state == Game.State.WAVE, "Start Wave button starts wave 1")
 	await _key(KEY_F)

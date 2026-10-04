@@ -217,6 +217,14 @@ func preview_wave(n: int) -> Array:
 	return Waves.get_wave(n, _wave_rng(n), final_round())
 
 
+## True if round `n` contains a boss.
+func is_boss_round(n: int) -> bool:
+	for g in preview_wave(n):
+		if bool(Enemies.ENEMIES[g.t].get("boss", false)):
+			return true
+	return false
+
+
 func tower_cost(type: String) -> int:
 	return Research.discounted(int(Tower.tree(type).tiers[0].cost), tower_mods[type])
 
