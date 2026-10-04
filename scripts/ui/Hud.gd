@@ -12,6 +12,7 @@ const TowerPanel = preload("res://scripts/ui/hud/TowerPanel.gd")
 const IntelPanel = preload("res://scripts/ui/hud/IntelPanel.gd")
 const ResearchPopOut = preload("res://scripts/ui/hud/ResearchPopOut.gd")
 const KnowledgePopOut = preload("res://scripts/ui/hud/KnowledgePopOut.gd")
+const SpawnerPanel = preload("res://scripts/ui/hud/SpawnerPanel.gd")
 ## Pop-outs that pause the battle while open.
 const PAUSING := ["research", "codex"]
 ## The tower panel follows the selection (GameScreen._sync_side_panel), so "close everything" and
@@ -102,7 +103,11 @@ func open(kind: String, arg := "") -> void:
 			var st = screen.world.selected_tower
 			if st == null:
 				return
-			p = TowerPanel.new(self, st, arg if arg != "" else "right")
+			var tower_side := arg if arg != "" else "right"
+			if tower_side == "left":
+				# The Spawner lives on the left edge too; the tower you picked wins that slot.
+				close("spawner")
+			p = TowerPanel.new(self, st, tower_side)
 		"tree":
 			var t = screen.world.selected_tower
 			if t == null:
@@ -114,6 +119,13 @@ func open(kind: String, arg := "") -> void:
 			p = ResearchPopOut.new(self)
 		"codex":
 			p = KnowledgePopOut.new(self, arg)
+		"spawner":
+			if not screen.game.sandbox:
+				return
+			var tp = popouts.get("tower")
+			if tp != null and tp.side == "left":
+				screen.close_popout("tower")
+			p = SpawnerPanel.new(self)
 		_:
 			return
 	p.close_requested.connect(func(): screen.close_popout(kind))

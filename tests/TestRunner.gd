@@ -120,6 +120,13 @@ func _run() -> void:
 		"test_is_boss_round",
 		"test_launch_view",
 		"test_sweeper_beams_clear_between_rounds",
+		"test_sandbox_resources",
+		"test_sandbox_spawn",
+		"test_sandbox_call_round",
+		"test_sandbox_clear_field",
+		"test_sandbox_max_branch",
+		"test_sandbox_no_medal",
+		"test_sandbox_dps",
 		"test_leviathan",
 		"test_colossus",
 		"test_v3_flyers",
@@ -699,6 +706,110 @@ func test_sweeper_beams_clear_between_rounds() -> void:
 	g.tick(SIM_DT)
 	check(sw.sweep_angles.is_empty(), "no sweep beams between rounds")
 	check(Draw.laser_barrel_length(1, 1.0) > 11.0, "the barrel tip is past the old 11 px beam origin")
+
+
+func sandbox_game(diff := "medium"):
+	var g = new_game("meadow", 1234, diff)
+	g.make_sandbox()
+	return g
+
+
+func test_sandbox_resources() -> void:
+	var g = sandbox_game()
+	check(g.gold == Game.SANDBOX_GOLD, "credits start pinned")
+	var t = g.place_tower("arrow", Vector2i(2, 3))
+	check(t != null, "towers can be built")
+	g.upgrade_tower(t)
+	g.tick(SIM_DT)
+	check(g.gold == Game.SANDBOX_GOLD, "credits are topped back up after spending")
+	check(g.sell_value(t) == t.spent, "selling refunds 100%")
+	var lives0: int = g.lives
+	var grunt = put(g, "grunt", 0.0)
+	g._leak(grunt)
+	check(g.lives == lives0 and not g.is_over(), "a leak costs no shields and ends nothing")
+	var real = new_game()
+	check(real.gold != Game.SANDBOX_GOLD and not real.sandbox, "a normal run is unaffected")
+	check(sandbox_game().ability_cd.values().all(func(c): return c == 0.0), "abilities start ready")
+	g.state = Game.State.WAVE
+	check(g.cast_warp() and g.ability_cd["warp"] == 0.0, "a cast leaves no cooldown")
+
+
+func test_sandbox_spawn() -> void:
+	var g = sandbox_game()
+	g.sandbox_spawn("grunt", 5)
+	check(g.spawn_queue.size() == 5 and g.state == Game.State.WAVE, "five queued, round running")
+	check(g.spawn_queue.all(func(s): return s.wave == -1), "tagged with no round (no clear bonus)")
+	check(near(float(g.spawn_queue[0].hp_mult), g.hp_mult_for(1)), "base strength")
+	var groups := {}
+	for s in g.spawn_queue:
+		groups[s.group] = true
+	check(g.grid.groups.size() < 2 or groups.size() > 1, "lanes alternate")
+	g.sandbox_spawn("brute", 2)
+	check(g.spawn_queue.size() == 7, "spawns stack")
+	var leak_before: int = g.stats["leaked"]
+	check(run_until(g, func(): return g.state == Game.State.BUILD, 120.0), "the field empties by itself and returns to build")
+	var normal = new_game()
+	normal.sandbox_spawn("grunt", 3)
+	check(normal.spawn_queue.is_empty(), "outside Sandbox the spawner does nothing")
+	check(g.stats["leaked"] >= leak_before, "leaks counted, harmlessly")
+
+
+func test_sandbox_call_round() -> void:
+	var g = sandbox_game()
+	var want := 0
+	for grp in g.preview_wave(10):
+		want += int(grp.n)
+	g.sandbox_call_round(10)
+	check(g.spawn_queue.size() == want and g.wave == 0, "round 10's real wave, round counter untouched (%d of %d)" % [g.spawn_queue.size(), want])
+	check(near(float(g.spawn_queue[0].hp_mult), g.hp_mult_for(10)), "at round 10 strength")
+	g.sandbox_call_round(40)
+	check(g.spawn_queue.size() > want, "calls stack")
+	check(g.wave_remaining.is_empty(), "no clear bonus is tracked")
+
+
+func test_sandbox_clear_field() -> void:
+	var g = sandbox_game()
+	g.sandbox_call_round(20)
+	put(g, "grunt", 50.0)
+	var lives0: int = g.lives
+	g.sandbox_clear_field()
+	check(g.spawn_queue.is_empty() and g.enemies.is_empty(), "queue and field emptied")
+	check(g.state == Game.State.BUILD and g.lives == lives0 and g.gold == Game.SANDBOX_GOLD, "back to build, nothing paid or lost")
+
+
+func test_sandbox_max_branch() -> void:
+	var g = sandbox_game()
+	var t = g.place_tower("arrow", Vector2i(2, 3))
+	g.upgrade_tower(t)
+	var n: int = g.sandbox_max_branch(t, "a")
+	check(n == Tower.BRANCH_STEPS, "a branch buys its %d steps, no mastery without research (%d)" % [Tower.BRANCH_STEPS, n])
+	g.sandbox_set_research("all", [])
+	var m: int = g.sandbox_max_branch(t, "a")
+	check(m == 1 and t.tier >= Tower.MASTERY_TIER, "with research on, Max reaches the mastery (%d)" % m)
+	g.sandbox_set_research("none", [])
+	check(g.research.is_empty() and g.gold == Game.SANDBOX_GOLD, "research off again")
+	g.sandbox_set_research("mine", ["arrow_1"])
+	check(g.research == ["arrow_1"], "mine applies the player's own")
+
+
+func test_sandbox_no_medal() -> void:
+	var g = sandbox_game("easy")
+	g.wave = g.final_round()
+	g.state = Game.State.WAVE
+	g.tick(SIM_DT)
+	check(g.state == Game.State.BUILD and g.endless and not g.medal, "past the last round: endless, no medal")
+
+
+func test_sandbox_dps() -> void:
+	var g = sandbox_game()
+	var t = g.place_tower("arrow", Vector2i(2, 3))
+	var e = put(g, "grunt", 60.0, 0, 1000.0)
+	g.state = Game.State.WAVE
+	for i in int(6.0 / SIM_DT):
+		g.tick(SIM_DT)
+	var dps: float = t.live_dps(Game.DPS_BUCKET)
+	check(dps > 0.0 and t.damage_dealt > 0.0, "the meter reads the tower's damage (%.1f)" % dps)
+	check(t.dps_buckets.size() <= Game.DPS_BUCKETS, "a 5 s window")
 
 
 func test_leviathan() -> void:

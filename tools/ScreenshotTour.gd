@@ -6,6 +6,7 @@ extends Node
 
 const Game = preload("res://scripts/core/Game.gd")
 const Towers = preload("res://data/towers.gd")
+const Tower = preload("res://scripts/entities/Tower.gd")
 const Bot = preload("res://scripts/core/Bot.gd")
 const Enemies = preload("res://data/enemies.gd")
 const Research = preload("res://scripts/core/Research.gd")
@@ -347,6 +348,8 @@ func _run() -> void:
 	await _wait(0.4)
 	await _shot("30c_tree_locked_in")
 	await _key(KEY_ESCAPE)
+
+	await _sandbox_checks()
 
 	# Save/continue flow: the menu should now offer Continue for a saved run.
 	var saved = _bot_game("meadow", 6)
@@ -723,6 +726,53 @@ func _popout_checks() -> void:
 
 
 ## Research Lab through real clicks: earn RP from records, buy nodes, check the menu badge.
+## Sandbox (design/sandbox.md): the Spawner through real input, ∞ readouts, the DPS line, Max, and
+## nothing saved.
+func _sandbox_checks() -> void:
+	var fails := 0
+	app.start_game("meadow", "medium", true)
+	await _wait(0.4)
+	var screen = app.current
+	var g = screen.game
+	fails += _expect(g.sandbox and g.gold == Game.SANDBOX_GOLD, "a sandbox run starts with pinned credits")
+	fails += _expect(screen.hud.top.gold_label.text == "∞" and screen.hud.top.lives_label.text == "∞", "credits and shields read ∞")
+	await _key(KEY_S)
+	await _wait(0.4)
+	fails += _expect(screen.hud.is_open("spawner"), "S opens the Spawner")
+	var sp = screen.hud.popout("spawner")
+	var grunt_btn: Button = null
+	for b in sp.find_children("*", "Button", true, false):
+		if b.tooltip_text.begins_with("Drone"):
+			grunt_btn = b
+	fails += _expect(grunt_btn != null, "the Spawner has a Drone card")
+	if grunt_btn != null:
+		await _click(grunt_btn.get_global_rect().get_center())
+		fails += _expect(g.spawn_queue.size() + g.enemies.size() == 1 and g.state == Game.State.WAVE, "clicking a card spawns that enemy")
+	screen.set_spawn_count(5)
+	screen.call_round = 10
+	screen.sandbox_call()
+	await _wait(1.0)
+	await _shot("40_sandbox_spawner")
+	var t = g.place_tower("arrow", Vector2i(2, 3))
+	g.upgrade_tower(t)
+	screen.world.selected_tower = t
+	await _wait(0.4)
+	var max_btn: Button = null
+	for b in screen.hud.popout("tower").find_children("*", "Button", true, false):
+		if b.text == "Max this branch" and max_btn == null:
+			max_btn = b
+	fails += _expect(max_btn != null, "branch cards have a Max button")
+	if max_btn != null:
+		await _click(max_btn.get_global_rect().get_center())
+		fails += _expect(t.tier >= 3 and t.depth.values().max() >= Tower.BRANCH_STEPS, "Max buys the branch (tier %d)" % t.tier)
+	await _wait(3.0)
+	await _shot("40b_sandbox_dps")
+	screen.sandbox_clear()
+	fails += _expect(g.enemies.is_empty() and g.spawn_queue.is_empty(), "Clear field empties the field")
+	fails += _expect(not g.can_save(), "a sandbox run can't be saved")
+	print("SANDBOX CHECKS: %s" % ("ALL PASSED" if fails == 0 else "%d FAILED" % fails))
+
+
 func _research_checks() -> void:
 	var fails := 0
 	SaveManager.record_run("meadow", "hard", 80, true, false)
