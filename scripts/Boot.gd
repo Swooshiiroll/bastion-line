@@ -91,12 +91,12 @@ func show_research() -> void:
 	_set_screen(r)
 
 
-func start_game(map_id: String, difficulty := "") -> void:
+func start_game(map_id: String, difficulty := "", sandbox := false) -> void:
 	if difficulty == "":
 		difficulty = str(SaveManager.setting("difficulty"))
 	var g = GameScreen.new()
 	g.app = self
-	g.setup_new(map_id, difficulty)
+	g.setup_new(map_id, difficulty, sandbox)
 	_set_screen(g)
 
 

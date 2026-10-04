@@ -27,9 +27,10 @@ func _ready() -> void:
 	v.add_child(resume)
 	v.add_child(UiKit.button("Restart Sector", Callable(screen, "confirm_restart"), Vector2(0, 42), true))
 	var save := UiKit.button("Save Game", _on_save, Vector2(0, 42), true)
+	save.visible = not g.sandbox
 	save.disabled = not g.can_save()
 	v.add_child(save)
-	_status = UiKit.label("" if g.can_save() else "Saving is available between rounds.", 12, UiKit.DIM, HORIZONTAL_ALIGNMENT_CENTER)
+	_status = UiKit.label("Sandbox: nothing is saved or earned." if g.sandbox else ("" if g.can_save() else "Saving is available between rounds."), 12, UiKit.DIM, HORIZONTAL_ALIGNMENT_CENTER)
 	v.add_child(_status)
 	v.add_child(UiKit.button("Settings", Callable(screen, "open_settings"), Vector2(0, 42), true))
 	v.add_child(UiKit.button("Quit to Main Menu", Callable(screen, "quit_to_menu"), Vector2(0, 42), true))

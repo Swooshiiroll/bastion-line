@@ -198,7 +198,7 @@ func is_idle() -> bool:
 
 
 func can_save() -> bool:
-	return state == State.BUILD and is_idle()
+	return state == State.BUILD and is_idle() and not sandbox
 
 
 func can_start_wave() -> bool:

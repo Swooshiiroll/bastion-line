@@ -33,12 +33,19 @@ var shop_return := false
 var _last_click_ms := -100000
 const DOUBLE_CLICK_MS := 350
 
+## Sandbox Spawner state: enemies per click, the round "Call" sends, and the research switch.
+var spawn_count := 1
+var call_round := 1
+var sandbox_research_mode := "mine"
+
 ## RP the medal paid this run (shown again on the end screen).
 var _medal_rp := 0
 
 
-func setup_new(map_id: String, difficulty := "medium") -> void:
+func setup_new(map_id: String, difficulty := "medium", sandbox := false) -> void:
 	game = Game.new(map_id, 0, difficulty, SaveManager.research_owned())
+	if sandbox:
+		game.make_sandbox()
 
 
 func setup_with(g) -> void:
@@ -146,7 +153,8 @@ func _handle_event(ev: Dictionary) -> void:
 			hud.toast("Early call bonus   +%d cr" % ev.bonus, UiKit.GOLD)
 		"field_clear":
 			# Progress counts toward round milestones even if the run is quit later.
-			SaveManager.record_run(game.map_id, game.difficulty, game.wave, false, game.endless)
+			if not game.sandbox:
+				SaveManager.record_run(game.map_id, game.difficulty, game.wave, false, game.endless)
 			_autosave()
 		"medal":
 			_on_medal()
@@ -249,11 +257,64 @@ func toggle_intel() -> void:
 
 
 func toggle_research() -> void:
+	if game.sandbox:
+		return
 	if hud.is_open("research"):
 		close_popout("research")
 	elif not _ended:
 		hud.open("research")
 		paused = true
+
+
+## Sandbox (design/sandbox.md): the Spawner pop-out and what it drives.
+func toggle_spawner() -> void:
+	if not game.sandbox:
+		return
+	if hud.is_open("spawner"):
+		close_popout("spawner")
+	elif not _ended:
+		hud.open("spawner")
+
+
+func set_spawn_count(n: int) -> void:
+	spawn_count = n
+
+
+func step_call_round(d: int) -> void:
+	call_round = clampi(call_round + d, 1, 999)
+
+
+func sandbox_spawn(type: String) -> void:
+	game.sandbox_spawn(type, spawn_count)
+	Sfx.play("wave", -8.0, 0.0)
+
+
+func sandbox_call() -> void:
+	game.sandbox_call_round(call_round)
+	Sfx.play("wave", -6.0, 0.0)
+	hud.toast("Called round %d" % call_round, UiKit.GOLD)
+
+
+func sandbox_clear() -> void:
+	game.sandbox_clear_field()
+	hud.toast("Field cleared", UiKit.DIM)
+
+
+func sandbox_research(mode: String) -> void:
+	sandbox_research_mode = mode
+	game.sandbox_set_research(mode, SaveManager.research_owned())
+	Sfx.play("upgrade", -8.0, 0.0)
+
+
+## Buys the selected tower's `key` branch as far as the rules allow (Sandbox).
+func max_branch(key: String) -> void:
+	var t = world.selected_tower
+	if t == null or not game.sandbox:
+		return
+	if t.trunk < 2:
+		game.upgrade_tower(t)
+	if game.sandbox_max_branch(t, key) > 0:
+		Sfx.play("upgrade", -6.0, 0.0)
 
 
 func toggle_codex() -> void:
@@ -539,7 +600,7 @@ func quit_to_menu() -> void:
 
 
 func restart() -> void:
-	app.start_game(game.map_id, game.difficulty)
+	app.start_game(game.map_id, game.difficulty, game.sandbox)
 
 
 ## Pause-menu restart: asks first, since this run's progress is lost.
@@ -615,6 +676,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	match event.keycode:
 		KEY_B:
 			toggle_shop()
+		KEY_S:
+			toggle_spawner()
 		KEY_E:
 			open_tree()
 		KEY_R:

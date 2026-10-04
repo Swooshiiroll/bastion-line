@@ -65,7 +65,7 @@ func _ready() -> void:
 	who.add_child(UiKit.label(str(g.map_def.name).to_upper(), 19, UiKit.ACCENT))
 	who.add_child(UiKit.label("·", 19, UiKit.DIM))
 	var dd: Dictionary = Difficulty.DIFFICULTIES[g.difficulty]
-	who.add_child(UiKit.label(str(dd.name).to_upper(), 19, dd.color))
+	who.add_child(UiKit.label("SANDBOX" if g.sandbox else str(dd.name).to_upper(), 19, dd.color))
 	row.add_child(who)
 	row.add_child(_icon_value(func(ci): Draw.shield(ci, ci.size / 2.0, 8.0, UiKit.ACCENT), "lives"))
 	row.add_child(_icon_value(func(ci): Draw.coin(ci, ci.size / 2.0, 8.0), "gold"))
@@ -94,8 +94,8 @@ func _ready() -> void:
 	auto_btn.tooltip_text = "Automatically launch the next round 5 seconds after each clear"
 	shop_btn = UiKit.button("Shop  [B]", Callable(screen, "toggle_shop"), Vector2(84, 30))
 	shop_btn.tooltip_text = "Tower shop"
-	research_btn = UiKit.button("Research  [R]", Callable(screen, "toggle_research"), Vector2(108, 30))
-	research_btn.tooltip_text = "Research Lab (pauses the battle; purchases apply at once)"
+	research_btn = UiKit.button("Spawner  [S]" if g.sandbox else "Research  [R]", Callable(screen, "toggle_spawner" if g.sandbox else "toggle_research"), Vector2(108, 30))
+	research_btn.tooltip_text = "Sandbox Spawner: spawn enemies, call rounds, switch research" if g.sandbox else "Research Lab (pauses the battle; purchases apply at once)"
 	var codex_btn := UiKit.button("Codex  [K]", Callable(screen, "toggle_codex"), Vector2(92, 30))
 	codex_btn.tooltip_text = "Codex: every tower, enemy, effect and rule (pauses the battle). Opens on your selection."
 	var menu_btn := UiKit.button("Menu  [Esc]", Callable(screen, "open_pause"), Vector2(96, 30))
@@ -103,7 +103,7 @@ func _ready() -> void:
 		b.add_theme_font_size_override("font_size", 14)
 		if b != next_btn:
 			row.add_child(b)
-	_lit = {"shop": shop_btn, "research": research_btn, "codex": codex_btn, "intel": next_btn}
+	_lit = {"shop": shop_btn, ("spawner" if g.sandbox else "research"): research_btn, "codex": codex_btn, "intel": next_btn}
 
 
 func _icon_value(fn: Callable, which: String) -> HBoxContainer:
@@ -124,9 +124,9 @@ func refresh(_delta: float) -> void:
 	fps_label.visible = bool(SaveManager.setting("show_fps"))
 	if fps_label.visible:
 		fps_label.text = "%d FPS" % roundi(Engine.get_frames_per_second())
-	lives_label.text = str(g.lives)
+	lives_label.text = "∞" if g.sandbox else str(g.lives)
 	lives_label.modulate = Color(1, 1, 1).lerp(Color(1, 0.3, 0.3), clampf(hud.lives_flash / 0.3, 0.0, 1.0))
-	gold_label.text = str(g.gold)
+	gold_label.text = "∞" if g.sandbox else str(g.gold)
 	speed_btn.text = "%dx  [F]" % screen.speed
 	auto_btn.text = "Auto: %s  [A]" % ("On" if g.auto_start else "Off")
 	for kind in _lit:

@@ -6,6 +6,7 @@ extends "res://scripts/ui/PopOut.gd"
 
 const TowerInfo = preload("res://scripts/ui/TowerInfo.gd")
 const Tower = preload("res://scripts/entities/Tower.gd")
+const Game = preload("res://scripts/core/Game.gd")
 const Draw = preload("res://scripts/view/Draw.gd")
 const UpgradeRules = preload("res://scripts/core/UpgradeRules.gd")
 
@@ -23,6 +24,8 @@ var side := "right"
 ## Card key ("trunk", "a", "b", "c") -> its Button (the screenshot tour clicks these).
 var cards := {}
 var _content: VBoxContainer
+## Sandbox: the live DPS / damage / kills line under the stats.
+var _dps_label: Label = null
 var _key := ""
 
 
@@ -54,8 +57,25 @@ func _build() -> void:
 	scroll.add_child(_content)
 
 
+func _update_dps() -> void:
+	var t = tower
+	_dps_label.text = "DPS %s (5 s)  ·  Damage %s  ·  Kills %d" % [_thousands(roundi(t.live_dps(Game.DPS_BUCKET))), _thousands(roundi(t.damage_dealt)), t.kills]
+
+
+static func _thousands(n: int) -> String:
+	var s := str(absi(n))
+	var out := ""
+	for i in s.length():
+		if i > 0 and (s.length() - i) % 3 == 0:
+			out += ","
+		out += s[i]
+	return ("-" if n < 0 else "") + out
+
+
 func refresh(_delta: float) -> void:
 	var t = tower
+	if _dps_label != null:
+		_update_dps()
 	# Rebuild only when something a card shows changes: the tower's upgrades, a card's state (e.g.
 	# affordable or not), prices. Credits alone change with every kill; rebuilding then would swap
 	# the card under the mouse mid-hover.
@@ -86,12 +106,21 @@ func _rebuild() -> void:
 	_content.add_child(UiKit.label(level, 12, UiKit.GOLD if t.tier >= 3 else UiKit.DIM))
 	_content.add_child(UiKit.label("COMBAT STATS", 11, UiKit.DIM))
 	_content.add_child(TowerInfo.stats_grid(t.stats(), {}, t.is_beam(), 12, 10))
+	_dps_label = null
+	if screen.game.sandbox:
+		_dps_label = UiKit.label("", 12, UiKit.GOLD)
+		_content.add_child(_dps_label)
+		_update_dps()
 	_content.add_child(UiKit.label("UPGRADES", 11, UiKit.DIM))
 	for k in UpgradeRules.card_keys(t):
 		var c := UpgradeRules.card(t, k, screen.game.gold)
 		var btn := _card(c)
 		cards[k] = btn
 		_content.add_child(btn)
+		if screen.game.sandbox and k != "trunk" and c.state == "buy":
+			var mx := UiKit.button("Max this branch", Callable(screen, "max_branch").bind(k), Vector2(W - 34, 26))
+			mx.tooltip_text = "Sandbox: buy this branch as far as the rules allow."
+			_content.add_child(mx)
 	_content.add_child(UiKit.button("View upgrade tree  [E]", Callable(screen, "open_tree"), Vector2(W - 34, 34)))
 
 
