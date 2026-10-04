@@ -13,6 +13,8 @@ so write for players.
 
 ### Fixed
 - The sector banner no longer shows through the Research Lab at round 0 (#39).
+- Laser Lance beams (every branch, including the Sweeper) start at the tip of the barrel instead of the middle of the tower (#44).
+- Sweeper beams no longer stay on screen after a round ends (#45).
 
 ## [3.5.2] - 2026-10-02
 
