@@ -6,6 +6,9 @@ so write for players.
 
 ## [Unreleased]
 
+### Added
+- **Sandbox mode:** tick Sandbox on the sector screen for a test bench. Credits and shields are infinite, upgrades are free (branch cards get a Max button), selling refunds everything, and the abilities have no cooldown. Press S for the Spawner: click any enemy to send it (x1 / x5 / x10 / x25), call any round's real wave, clear the field, and switch research between All / Mine / None. Towers show live DPS, damage and kills in their panel. Nothing is saved or earned (#47).
+
 ### Changed
 - **Round counter on the Launch button:** it shows the round in every state (ROUND 3 / 40, or ROUND 3  ENDLESS), with the action under it. Boss rounds read BOSS ROUND and the last one FINAL ROUND, in red.
 - **Top bar:** the map and difficulty are bigger and share one line; the round label moved to the Launch button.

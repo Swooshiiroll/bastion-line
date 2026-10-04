@@ -15,6 +15,8 @@ const Game = preload("res://scripts/core/Game.gd")
 var app
 var _layer: CanvasLayer
 var _grids := {}
+## Sandbox toggle (design/sandbox.md): kept while this screen is open, off by default.
+var sandbox := false
 
 
 func _ready() -> void:
@@ -58,6 +60,18 @@ func _build() -> void:
 			b.add_theme_color_override("font_color", dd.color)
 			b.add_theme_color_override("font_focus_color", dd.color)
 		row.add_child(b)
+	var gap := Control.new()
+	gap.custom_minimum_size = Vector2(24, 0)
+	row.add_child(gap)
+	var sb := UiKit.button("Sandbox: On" if sandbox else "Sandbox: Off", _toggle_sandbox, Vector2(160, 36), true)
+	sb.tooltip_text = "A test bench: infinite credits and shields, free upgrades, spawn any enemy or round. Nothing is saved or earned."
+	if sandbox:
+		var on := UiKit.box(Color(0.2, 0.22, 0.2), UiKit.GOLD, 6, 2)
+		for s in ["normal", "hover", "pressed", "focus"]:
+			sb.add_theme_stylebox_override(s, on)
+		sb.add_theme_color_override("font_color", UiKit.GOLD)
+		sb.add_theme_color_override("font_focus_color", UiKit.GOLD)
+	row.add_child(sb)
 	var rm := Research.run_mods(SaveManager.research_owned())
 	var gold := int(round(float(Game.START_GOLD) * (1.0 + float(rm.start_gold))))
 	var blurb := UiKit.label("%s  Starting credits: %d on every sector." % [Difficulty.DIFFICULTIES[diff].blurb, gold], 14, UiKit.DIM, HORIZONTAL_ALIGNMENT_CENTER)
@@ -83,6 +97,11 @@ func _build() -> void:
 
 func _set_difficulty(d: String) -> void:
 	SaveManager.set_setting("difficulty", d)
+	_build.call_deferred()
+
+
+func _toggle_sandbox() -> void:
+	sandbox = not sandbox
 	_build.call_deferred()
 
 
@@ -143,7 +162,7 @@ func _card(root: Control, id: String, diff: String, at: Vector2) -> Button:
 	rec_l.position = Vector2(186, 226)
 	card.add_child(rec_l)
 
-	var play := UiKit.button("Deploy", func(): app.start_game(id, diff), Vector2(118, 34), true)
+	var play := UiKit.button("Deploy", func(): app.start_game(id, diff, sandbox), Vector2(118, 34), true)
 	play.position = Vector2(366, 216)
 	play.size = Vector2(118, 34)
 	card.add_child(play)

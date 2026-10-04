@@ -167,7 +167,7 @@ func refresh(_delta: float) -> void:
 ## g.is_boss_round() for the round shown, passed in so the bar can cache it.
 static func launch_view(g, boss: bool) -> Dictionary:
 	var building: bool = g.state == Game.State.BUILD and not g.is_over()
-	var n: int = g.wave + 1 if building else g.wave
+	var n: int = maxi(1, g.wave + 1 if building else g.wave)
 	var final: bool = not g.endless and n == g.final_round()
 	var kind := "FINAL ROUND" if final else ("BOSS ROUND" if boss else "ROUND")
 	var counter := ("%s %d  ENDLESS" % [kind, n]) if g.endless else ("%s %d / %d" % [kind, n, g.final_round()])
@@ -186,7 +186,7 @@ static func launch_view(g, boss: bool) -> Dictionary:
 
 func _refresh_launch(g) -> void:
 	var building: bool = g.state == Game.State.BUILD and not g.is_over()
-	var n: int = g.wave + 1 if building else g.wave
+	var n: int = maxi(1, g.wave + 1 if building else g.wave)
 	if not _boss_cache.has(n):
 		_boss_cache[n] = g.is_boss_round(n)
 	var v := launch_view(g, _boss_cache[n])
@@ -226,7 +226,7 @@ func _rebuild(key: String) -> void:
 		var ht = g.tower_at[w.hover_cell]
 		_hint(["%s: %d kills." % [ht.display_name(), ht.kills], "Click to select it."])
 	else:
-		_hint(["B  open the shop", "Space  launch the round", "Click a tower for its details and upgrades", "Esc  menu"])
+		_hint(["B  open the shop", "Space  launch the round", "Click a tower for its details and upgrades", "Esc  menu"] + (["S  Spawner (Sandbox)"] if screen.game.sandbox else []))
 
 
 func _hint(parts: Array) -> void:
