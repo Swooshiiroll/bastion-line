@@ -31,6 +31,9 @@ var _cost_buttons: Array = []
 var _sell_btn: Button = null
 var _status_label: Label = null
 var start_btn: Button
+var _launch_counter: Label
+var _launch_action: Label
+var _boss_cache := {}
 
 
 var _bg: Control
@@ -70,9 +73,19 @@ func _ready() -> void:
 	start_btn = UiKit.button("", Callable(screen, "start_wave"), Vector2(LAUNCH_W, HEIGHT - 16))
 	start_btn.size = Vector2(LAUNCH_W, HEIGHT - 16)
 	start_btn.position = Vector2(size.x - LAUNCH_W - 8, 8)
-	start_btn.add_theme_font_size_override("font_size", 17)
 	start_btn.tooltip_text = "Launch the next round, or call it early for bonus credits once the current round has finished spawning  [Space]"
 	add_child(start_btn)
+	# A Button has one font colour, so the counter (red on boss rounds) and the action are labels on it.
+	var stack := UiKit.vbox(2)
+	stack.alignment = BoxContainer.ALIGNMENT_CENTER
+	stack.position = Vector2.ZERO
+	stack.size = start_btn.size
+	stack.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_launch_counter = UiKit.label("", 19, UiKit.TEXT, HORIZONTAL_ALIGNMENT_CENTER)
+	_launch_action = UiKit.label("", 14, UiKit.GOLD, HORIZONTAL_ALIGNMENT_CENTER)
+	stack.add_child(_launch_counter)
+	stack.add_child(_launch_action)
+	start_btn.add_child(stack)
 
 
 func _ability_button(id: String) -> Button:
@@ -149,25 +162,41 @@ func refresh(_delta: float) -> void:
 
 
 
-func _refresh_launch(g) -> void:
-	var next: int = g.wave + 1
-	var text := "ROUND IN PROGRESS"
+## What the Launch button shows for game `g`: the round counter, the action under it, whether the
+## round is a boss or the final one (red counter), and whether the button is live. `boss` is
+## g.is_boss_round() for the round shown, passed in so the bar can cache it.
+static func launch_view(g, boss: bool) -> Dictionary:
+	var building: bool = g.state == Game.State.BUILD and not g.is_over()
+	var n: int = g.wave + 1 if building else g.wave
+	var final: bool = not g.endless and n == g.final_round()
+	var kind := "FINAL ROUND" if final else ("BOSS ROUND" if boss else "ROUND")
+	var counter := ("%s %d  ENDLESS" % [kind, n]) if g.endless else ("%s %d / %d" % [kind, n, g.final_round()])
+	var action := "IN PROGRESS"
 	var can_launch := false
 	if g.is_over():
-		text = "BATTLE OVER"
-	elif g.state == Game.State.BUILD:
+		action = "BATTLE OVER"
+	elif building:
 		can_launch = true
-		text = ("ROUND %d IN %ds
-Space: launch now" % [next, ceili(Game.AUTO_START_DELAY - g.auto_timer)]) if g.auto_start else ("LAUNCH ROUND %d
-Space" % next)
+		action = ("LAUNCH IN %ds  [Space]" % ceili(Game.AUTO_START_DELAY - g.auto_timer)) if g.auto_start else "LAUNCH  [Space]"
 	elif g.can_call_early():
 		can_launch = true
-		text = "CALL EARLY  +%d cr
-Space" % Waves.early_call_bonus(next)
-	if start_btn.text != text:
-		start_btn.text = text
-	start_btn.disabled = not can_launch
-	start_btn.add_theme_color_override("font_color", UiKit.GOLD if can_launch else UiKit.DIM)
+		action = "CALL EARLY +%d cr  [Space]" % Waves.early_call_bonus(g.wave + 1)
+	return {"counter": counter, "action": action, "red": final or boss, "can_launch": can_launch, "round": n}
+
+
+func _refresh_launch(g) -> void:
+	var building: bool = g.state == Game.State.BUILD and not g.is_over()
+	var n: int = g.wave + 1 if building else g.wave
+	if not _boss_cache.has(n):
+		_boss_cache[n] = g.is_boss_round(n)
+	var v := launch_view(g, _boss_cache[n])
+	if _launch_counter.text != v.counter:
+		_launch_counter.text = v.counter
+	if _launch_action.text != v.action:
+		_launch_action.text = v.action
+	start_btn.disabled = not v.can_launch
+	_launch_counter.add_theme_color_override("font_color", UiKit.BAD if v.red else UiKit.TEXT)
+	_launch_action.add_theme_color_override("font_color", UiKit.GOLD if v.can_launch else UiKit.DIM)
 
 func _clear() -> void:
 	for c in ctx.get_children():

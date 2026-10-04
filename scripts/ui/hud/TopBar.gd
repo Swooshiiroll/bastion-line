@@ -1,5 +1,5 @@
 extends Control
-## In-game top bar (1600×40): sector and mode, round, core shields, credits, the NEXT strip (click for the
+## In-game top bar (1600×40): sector and mode, core shields, credits, the NEXT strip (click for the
 ## Intel pop-out) and the Launch / speed / auto / Shop / Research / Menu buttons.
 
 const UiKit = preload("res://scripts/ui/UiKit.gd")
@@ -14,7 +14,6 @@ const HEIGHT := 40.0
 
 var hud
 var screen
-var wave_label: Label
 var lives_label: Label
 var gold_label: Label
 var next_btn: Button
@@ -61,15 +60,13 @@ func _ready() -> void:
 	get_viewport().size_changed.connect(_fit_view)
 	_fit_view.call_deferred()
 	var g = screen.game
-	var who := UiKit.vbox(-2)
-	who.custom_minimum_size = Vector2(92, 0)
-	who.add_child(UiKit.label(str(g.map_def.name).to_upper(), 11, UiKit.ACCENT))
+	var who := UiKit.hbox(8)
+	who.custom_minimum_size = Vector2(300, 0)
+	who.add_child(UiKit.label(str(g.map_def.name).to_upper(), 19, UiKit.ACCENT))
+	who.add_child(UiKit.label("·", 19, UiKit.DIM))
 	var dd: Dictionary = Difficulty.DIFFICULTIES[g.difficulty]
-	who.add_child(UiKit.label(str(dd.name).to_upper(), 10, dd.color))
+	who.add_child(UiKit.label(str(dd.name).to_upper(), 19, dd.color))
 	row.add_child(who)
-	wave_label = UiKit.label("", 19)
-	wave_label.custom_minimum_size = Vector2(236, 0)
-	row.add_child(wave_label)
 	row.add_child(_icon_value(func(ci): Draw.shield(ci, ci.size / 2.0, 8.0, UiKit.ACCENT), "lives"))
 	row.add_child(_icon_value(func(ci): Draw.coin(ci, ci.size / 2.0, 8.0), "gold"))
 
@@ -127,7 +124,6 @@ func refresh(_delta: float) -> void:
 	fps_label.visible = bool(SaveManager.setting("show_fps"))
 	if fps_label.visible:
 		fps_label.text = "%d FPS" % roundi(Engine.get_frames_per_second())
-	wave_label.text = ("ROUND %d  ENDLESS" % g.wave) if g.endless else ("ROUND %d / %d" % [g.wave, g.final_round()])
 	lives_label.text = str(g.lives)
 	lives_label.modulate = Color(1, 1, 1).lerp(Color(1, 0.3, 0.3), clampf(hud.lives_flash / 0.3, 0.0, 1.0))
 	gold_label.text = str(g.gold)

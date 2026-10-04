@@ -62,10 +62,7 @@ func _ready() -> void:
 	_modal_layer = CanvasLayer.new()
 	_modal_layer.layer = 20
 	add_child(_modal_layer)
-	if game.wave == 0:
-		var dd: Dictionary = Difficulty.DIFFICULTIES[game.difficulty]
-		hud.show_banner(str(game.map_def.name).to_upper(), "%s: %d rounds, %d core shields. Deploy towers, then press Space to launch round 1." % [dd.name, game.final_round(), game.lives], UiKit.ACCENT)
-	else:
+	if game.wave > 0:
 		hud.show_banner("Welcome back", "Round %d cleared. Core %d, credits %d." % [game.wave, game.lives, game.gold], UiKit.TEXT)
 
 
@@ -140,12 +137,8 @@ func _handle_event(ev: Dictionary) -> void:
 		"wave_start":
 			if ev.boss:
 				Sfx.play("boss", -2.0, 0.0)
-				var title := "FINAL ROUND %d" if _is_final(int(ev.wave)) else "BOSS ROUND %d"
-				hud.show_banner(title % ev.wave, _boss_line(int(ev.wave)), UiKit.BAD)
 			else:
 				Sfx.play("wave", -6.0, 0.0)
-				var sub := "Final round!" if _is_final(int(ev.wave)) else ""
-				hud.show_banner("Round %d" % ev.wave, sub)
 		"wave_clear":
 			Sfx.play("coin", -8.0, 0.0)
 			hud.toast("Round %d cleared   +%d cr" % [ev.wave, ev.bonus], UiKit.GOLD)
@@ -187,27 +180,6 @@ func _handle_event(ev: Dictionary) -> void:
 		"warp":
 			Sfx.play("warp", -2.0, 0.0)
 			hud.show_banner("Chrono Field", "", UiKit.BLUE)
-
-
-func _is_final(w: int) -> bool:
-	return not game.endless and w == game.final_round()
-
-
-func _boss_line(w: int) -> String:
-	var names: Array = []
-	for grp in game.preview_wave(w):
-		var ed: Dictionary = Enemies.ENEMIES[grp.t]
-		if bool(ed.get("boss", false)) and not names.has(ed.name):
-			names.append(ed.name)
-	if _is_final(w):
-		return "Every boss they have: %s. Hold this and the medal is yours." % ", ".join(PackedStringArray(names))
-	if names.has("Colossus"):
-		return "A Colossus approaches. It can't be stunned and sheds armor as it breaks."
-	if names.has("Leviathan"):
-		return "A Leviathan approaches. Only anti-air can reach it."
-	if names.has("Overmind"):
-		return "The Overmind approaches. Don't let it reach the core."
-	return "A Dreadnought approaches. Armored and slow-resistant."
 
 
 # --- Player actions (called by HUD buttons and hotkeys) -------------------------------------
