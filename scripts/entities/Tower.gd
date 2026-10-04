@@ -76,6 +76,9 @@ var mods := {}
 var pulse_count := 0
 var sweep_t := 0.0
 var sweep_angles: Array = []
+## Sandbox DPS meter: damage dealt per 0.25 s bucket over the last 5 s, newest last.
+var dps_buckets: Array = []
+var _dps_mark := 0.0
 ## Drone Bay: its drones ({kind, pos, target, cd}). Not saved; rebuilt each round.
 var wing: Array = []
 
@@ -470,3 +473,21 @@ func can_target(e) -> bool:
 		return false
 	var r := get_range()
 	return pos.distance_squared_to(e.pos) <= r * r
+
+
+## Closes one DPS bucket of `secs` seconds, keeping the last `keep`. Called by Game while sandboxed.
+func roll_dps(_secs: float, keep: int) -> void:
+	dps_buckets.append(damage_dealt - _dps_mark)
+	_dps_mark = damage_dealt
+	if dps_buckets.size() > keep:
+		dps_buckets.pop_front()
+
+
+## Damage per second over the buckets kept (the last 5 s once the meter has run that long).
+func live_dps(secs_per_bucket: float) -> float:
+	if dps_buckets.is_empty():
+		return 0.0
+	var sum := 0.0
+	for b in dps_buckets:
+		sum += float(b)
+	return sum / (float(dps_buckets.size()) * secs_per_bucket)

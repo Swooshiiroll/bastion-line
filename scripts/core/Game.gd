@@ -22,6 +22,11 @@ const SELL_REFUND := 0.7
 const SAVE_VERSION := 9
 ## Credits every run starts with, on every sector and mode (before research).
 const START_GOLD := 500
+## Sandbox runs keep the credit balance pinned here (see sandbox).
+const SANDBOX_GOLD := 999999
+## Sandbox DPS meter: seconds per bucket and buckets kept (a 5 s window).
+const DPS_BUCKET := 0.25
+const DPS_BUCKETS := 20
 const AUTO_START_DELAY := 5.0
 const RETARGET_DELAY := 0.1
 const STAT_KEYS := ["kills", "gold_earned", "towers_built", "leaked", "waves_cleared"]
@@ -62,6 +67,10 @@ var wave := 0
 var endless := false
 ## This run has cleared its mode's last round (the sector's medal for the mode is earned).
 var medal := false
+## Sandbox: a test bench. Infinite credits and shields, free upgrades, no ability cooldowns, nothing
+## saved or earned. Set by the creator right after construction. See design/sandbox.md.
+var sandbox := false
+var _dps_clock := 0.0
 ## Balance-probe knob: extra enemy HP multiplier (1.0 in real games; not saved).
 var hp_factor := 1.0
 var auto_start := false
@@ -230,6 +239,8 @@ func tower_cost(type: String) -> int:
 
 
 func sell_value(t) -> int:
+	if sandbox:
+		return t.spent
 	return int(floor(t.spent * maxf(sell_refund, t.refund_field)))
 
 
@@ -465,12 +476,20 @@ func start_wave() -> bool:
 	wave += 1
 	state = State.WAVE
 	auto_timer = 0.0
-	var groups := preview_wave(wave)
-	var hp_mult := hp_mult_for(wave)
+	var q := _queue_round(wave, wave)
+	wave_remaining[wave] = q.total
+	_emit({"type": "wave_start", "wave": wave, "boss": q.boss})
+	return true
+
+
+## Queues round `n`'s enemies at its strength, tagged `wave_id` (-1 for none: no clear bonus).
+## Returns the enemy count and whether it holds a boss.
+func _queue_round(n: int, wave_id: int) -> Dictionary:
+	var hp_mult := hp_mult_for(n)
 	var total := 0
 	var boss := false
 	var n_groups: int = grid.groups.size()
-	for g in groups:
+	for g in preview_wave(n):
 		var etype: String = g.t
 		var count := int(g.n)
 		var interval := float(g.get("i", 1.0))
@@ -478,12 +497,12 @@ func start_wave() -> bool:
 		var is_boss := bool(Enemies.ENEMIES[etype].get("boss", false))
 		if is_boss:
 			boss = true
-		var speed_mult := speed_mult_for(wave, is_boss)
+		var speed_mult := speed_mult_for(n, is_boss)
 		for k in count:
 			spawn_queue.append({
 				"time": time + delay + k * interval,
 				"type": etype,
-				"wave": wave,
+				"wave": wave_id,
 				"group": _spawn_counter % n_groups,
 				"hp_mult": hp_mult,
 				"speed_mult": speed_mult,
@@ -491,9 +510,92 @@ func start_wave() -> bool:
 			_spawn_counter += 1
 			total += 1
 	spawn_queue.sort_custom(func(a, b): return a.time < b.time)
-	wave_remaining[wave] = total
-	_emit({"type": "wave_start", "wave": wave, "boss": boss})
-	return true
+	return {"total": total, "boss": boss}
+
+
+# --- Sandbox (design/sandbox.md) -------------------------------------------------------------
+
+## Turns this run into a sandbox: credits pinned, shields never lost, nothing earned. Call right
+## after construction.
+func make_sandbox() -> void:
+	sandbox = true
+	gold = SANDBOX_GOLD
+
+
+## Sends `n` of one enemy at round-1 strength (times the mode's factors), 0.4 s apart, alternating
+## lanes. Stacks with whatever is on the field.
+func sandbox_spawn(type: String, n: int) -> void:
+	if not sandbox or is_over():
+		return
+	var is_boss := bool(Enemies.ENEMIES[type].get("boss", false))
+	var n_groups: int = grid.groups.size()
+	for k in n:
+		spawn_queue.append({
+			"time": time + k * 0.4,
+			"type": type,
+			"wave": -1,
+			"group": _spawn_counter % n_groups,
+			"hp_mult": hp_mult_for(1),
+			"speed_mult": speed_mult_for(1, is_boss),
+		})
+		_spawn_counter += 1
+	spawn_queue.sort_custom(func(a, b): return a.time < b.time)
+	state = State.WAVE
+
+
+## Sends round `n`'s real wave without touching the round counter. Stacks with the field.
+func sandbox_call_round(n: int) -> void:
+	if not sandbox or is_over():
+		return
+	_queue_round(maxi(1, n), -1)
+	state = State.WAVE
+
+
+## Removes every enemy and pending spawn: no bounty, no leak.
+func sandbox_clear_field() -> void:
+	if not sandbox:
+		return
+	spawn_queue.clear()
+	_new_enemies.clear()
+	for e in enemies:
+		e.alive = false
+	enemies.clear()
+	projectiles.clear()
+	if state == State.WAVE and wave_remaining.is_empty():
+		_on_field_clear()
+
+
+## Buys upgrades on one branch of `t` until the rules (or the branch's end) stop it. Returns how many.
+func sandbox_max_branch(t, key: String) -> int:
+	var bought := 0
+	while upgrade_tower(t, key):
+		bought += 1
+		if bought > 12:
+			break
+	return bought
+
+
+## Switches a sandbox run's research: "all" (every node), "mine" (`mine`, the player's own) or "none".
+func sandbox_set_research(mode: String, mine: Array) -> void:
+	if not sandbox:
+		return
+	match mode:
+		"all":
+			apply_research(Research.node_ids())
+		"mine":
+			apply_research(mine)
+		_:
+			apply_research([])
+	gold = SANDBOX_GOLD
+
+
+## Rolls the DPS meters: each tower's damage over the last 5 s (sandbox only).
+func _sample_dps(dt: float) -> void:
+	_dps_clock += dt
+	while _dps_clock >= DPS_BUCKET:
+		_dps_clock -= DPS_BUCKET
+		for t in towers:
+			t.roll_dps(DPS_BUCKET, DPS_BUCKETS)
 
 
 func ability_ready(id: String) -> bool:
@@ -514,7 +616,7 @@ func cast_meteor(pos: Vector2) -> bool:
 	if not ability_ready("meteor"):
 		return false
 	var a: Dictionary = Abilities.ABILITIES.meteor
-	ability_cd["meteor"] = ability_cooldown("meteor")
+	ability_cd["meteor"] = 0.0 if sandbox else ability_cooldown("meteor")
 	var strike := {
 		"pos": pos, "t": float(a.delay), "radius": float(a.radius),
 		"damage": float(a.damage) * Waves.hp_scale(maxi(1, wave)),
@@ -528,7 +630,7 @@ func cast_warp() -> bool:
 	if not ability_ready("warp"):
 		return false
 	var a: Dictionary = Abilities.ABILITIES.warp
-	ability_cd["warp"] = ability_cooldown("warp")
+	ability_cd["warp"] = 0.0 if sandbox else ability_cooldown("warp")
 	warp_timer = float(a.duration)
 	_emit({"type": "warp", "duration": warp_timer})
 	return true
@@ -542,6 +644,9 @@ func tick(dt: float) -> void:
 	for gi in gate_cd.size():
 		gate_cd[gi] = maxf(0.0, float(gate_cd[gi]) - dt)
 	time += dt
+	if sandbox:
+		gold = SANDBOX_GOLD
+		_sample_dps(dt)
 	if state == State.BUILD:
 		for t in towers:
 			t.sweep_angles = []
@@ -1762,7 +1867,8 @@ func _kill(e, source) -> void:
 
 func _leak(e) -> void:
 	e.alive = false
-	lives = maxi(0, lives - e.lives_cost)
+	if not sandbox:
+		lives = maxi(0, lives - e.lives_cost)
 	stats["leaked"] += 1
 	_emit({"type": "leak", "pos": e.pos, "lives": e.lives_cost, "enemy": e.type})
 	if lives <= 0 and state != State.GAMEOVER:
@@ -1806,7 +1912,11 @@ func _on_field_clear() -> void:
 		t.ramp_mult = 1.0
 		t.beam_targets.clear()
 		t.disabled = 0.0
-	if not endless and wave >= final_round():
+	if sandbox and not endless and wave >= final_round():
+		# A test bench earns nothing: past the last round it just carries on, endless.
+		endless = true
+		_emit({"type": "field_clear", "wave": wave})
+	elif not endless and wave >= final_round():
 		# The mode's last round is held: the medal is earned and endless mode begins right away.
 		medal = true
 		endless = true
