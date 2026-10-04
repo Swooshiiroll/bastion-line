@@ -6,6 +6,8 @@ so write for players.
 
 ## [Unreleased]
 
+## [3.6.0] - 2026-10-04
+
 ### Added
 - **Sandbox mode:** tick Sandbox on the sector screen for a test bench. Credits and shields are infinite, upgrades are free (branch cards get a Max button), selling refunds everything, and the abilities have no cooldown. Press S for the Spawner: click any enemy to send it (x1 / x5 / x10 / x25), call any round's real wave, clear the field, and switch research between All / Mine / None. Towers show live DPS, damage and kills in their panel. Nothing is saved or earned (#47).
 
