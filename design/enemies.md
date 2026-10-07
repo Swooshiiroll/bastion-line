@@ -84,6 +84,10 @@ so neither fits its draft slot well (deferred, see Deferred below).
 - **Rank comes from a formula (owner direction):** it is worked out from each enemy's base health, armor and
   speed, not ordered by hand. The formula is spd² (arm x hp) (see "Strength rank" below),
   awaiting confirmation. Stronger enemies also **drain more shields** when they leak (section 5).
+- **Support and Special enemies get their own target priority (decided).** Strongest alone rarely picks
+  them (Repair Bot scores low), so towers get a new priority choice that targets Support and Special
+  enemies first, instead of a score bonus. Towers already have two choices: a mode (First, Last,
+  Strongest, Closest, `Tower.MODE_NAMES`) and a priority (Any, Air, Ground, `Tower.PRIORITY_NAMES`).
 - The rank is computed from the stats in the data table, so rebalancing stats rebalances the rank without
   code changes. It is shown in the Codex and Intel.
 
@@ -171,7 +175,11 @@ exact curve is set with the balance probe.
 ### Waves (decided)
 
 - **One generator makes every round** (owner direction). It replaces the hand-authored rounds 1 to 25 in
-  `data/waves.gd` as well as rounds 26 and up, and it keeps going for Endless.
+  `data/waves.gd` as well as rounds 26 and up, and it keeps going for Endless. It **starts fresh**: it
+  does not reproduce today's rounds.
+- **Boss rounds are every 20 rounds** (20, 40, 60, 80, 100, 120). Each mode's last round (40, 60, 80, 100,
+  and Cataclysm's 120) already falls on one. Today's Dreadnought every 5th round and the other recurring
+  bosses are replaced by this cadence.
 - **Identical on every playthrough:** it is seeded by the round number alone, not the run's random seed.
 - **Introduction rounds are baked in as data** for each new tier, each elite kind and each modifier, so a
   new threat always appears on a known round. Today's `INTRO` table (e.g. Rampart at round 40) is the
@@ -227,7 +235,7 @@ these land (phase 4).
 Separate PRs, each confirmed by the owner:
 
 1. Role, tier and strength-rank data, plus the trait registry and per-trait timers. No gameplay change.
-2. Strongest targeting by strength rank (with its tests and Codex text).
+2. Strongest targeting by strength rank, plus the Support/Special priority (with tests and Codex text).
 3. Modifier engine, wave generation (rounds identical on every playthrough, see Open questions) and
    the Intel UI.
 4. Roster changes and rebalance: tiers, new enemies, leak costs, boss kits.
@@ -262,6 +270,13 @@ they exist.
 - **Boss above all:** bosses rank above every non-boss, whatever their score.
 - **Volatile:** shelved. Towers are not destroyed or disabled for now; it may return later or become its
   own game mode.
+- **Support and Special priority:** a new target priority for Support and Special enemies, not a score
+  bonus.
+- **Rounds 1 to 25:** the generator starts fresh and does not reproduce today's rounds.
+- **Boss rounds:** every 20 rounds.
+- **Old saves:** an old save's remaining rounds change once at the update. Accepted.
+- **Roster placements and draft stats:** acceptable for now. The order is subject to change with
+  balancing tweaks and stat changes.
 - **Q13 Roster file:** the current and proposed enemies live in `design/enemy_roster.md`, with stats.
 - **Q11 Saves and waves:** one generator makes every round, identical on every playthrough, seeded by
   the round number alone, with introduction rounds baked in for new tiers, elites and modifiers. It goes
@@ -275,23 +290,24 @@ they exist.
 
 ### Still open
 
-1. **Support bonus.** Repair Bot scores 31.25, below Skitter, so Strongest would rarely pick a Support unit.
-   Do Supports need an ability bonus in the score (or a role bonus)? The formula also sets leak cost, so
-   its bands need a mapping (e.g. score bands to 1, 2, 3 shields). **Recommendation:** a small bonus for
-   Support and Disruptor, tuned with the balance probe.
-2. **Replacing rounds 1 to 25.** One generator for every round means the 25 hand-authored rounds go away.
-   They set the early difficulty curve, and the bot playthroughs and wave tests depend on them.
-   **Recommendation:** have the generator reproduce today's rounds 1 to 25 as its output (check each
-   round matches), then tune from there. Say if you would rather start fresh.
-3. **First-boss round.** You wrote "like round 40 for the first boss". Today the Dreadnought boss arrives
-   at round 5, and round 40 is when Rampart is introduced. Did you mean the first new tier, or that the
-   first boss should move to round 40?
-4. **Old saves.** The new generator changes the remaining rounds of an old save once, at the update.
-   Accept?
-5. **Tier order and roster.** `design/enemy_roster.md` puts Drone at Swarm T2 and Locust at T3, and
-   Strike Drone at Rusher T1 and Skitter at T2, because the formula orders them that way. It adds Surge
-   Core (Disruptor T4) and Slipstream (Evader T3) to fill four tiers, and cuts Nexus. Do you agree with
-   those placements and the draft stats?
+1. **Support and Special priority: details.** The game already has a per-tower priority (Any, Air,
+   Ground). **Recommendation:** add a fourth entry (e.g. "Support") to `Tower.PRIORITY_NAMES`, so it
+   uses the existing cycle button and needs no save version bump (old saves load with their stored
+   value). Questions: does "Special" include Phantom, Aegis Walker, Hydra Frame and the new Mimic, Decoy
+   Beacon and Echo? **Recommendation:** yes, and it goes by the enemy's *displayed* identity, so Mimic and
+   Decoy tricks still work until revealed. Which mode (First, Strongest...) orders targets inside the
+   priority? **Recommendation:** the tower's current mode.
+2. **Boss rounds: details.** Every 20 rounds. Which boss comes on which boss round (20, 40, 60, 80, 100,
+   120)? Does the Dreadnought stop appearing every 5th round? Do the existing finales (e.g. round 40:
+   two Dreadnoughts, a Leviathan, an Overmind) stay as the 40th-round boss wave?
+   **Recommendation:** Dreadnought at 20, then the finales as they are, adding Colossus and Overmind
+   appearances so each boss round is bigger than the last.
+3. **Generator acceptance.** Starting fresh means no old rounds to compare against. **Recommendation:**
+   accept it when (a) the Easy and Medium bot playthroughs still earn medals, (b) the balance probe shows
+   a smooth difficulty curve on every mode, and (c) a fixed seed-free check shows identical rounds each
+   run.
+4. **Leak-cost bands.** The strength score sets leak cost, so its bands need a mapping (e.g. score bands to
+   1, 2, 3 shields, bosses a fixed share). Proposed with the balance probe in phase 4.
 
 ### Deferred
 
