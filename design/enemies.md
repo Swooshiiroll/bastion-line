@@ -86,9 +86,9 @@ so neither fits its draft slot well (deferred, see Deferred below).
 - **Rank comes from a formula (owner direction):** it is worked out from each enemy's base health, armor and
   speed, not ordered by hand. The formula is spd² (arm x hp) (see "Strength rank" below),
   awaiting confirmation. Stronger enemies also **drain more shields** when they leak (section 5).
-- **Support and Special enemies get their own target priority (decided).** Strongest alone rarely picks
-  them (Repair Bot scores low), so towers get a new priority choice that targets Support and Special
-  enemies first, instead of a score bonus. Towers already have two choices: a mode (First, Last,
+- **Support enemies get their own target priority (decided).** Strongest alone rarely picks them (Repair
+  Bot scores low), so towers get a new priority choice that targets enemies **in the Support role** first,
+  instead of a score bonus. It does not cover Specials (owner: "nix Special"). Towers already have two choices: a mode (First, Last,
   Strongest, Closest, `Tower.MODE_NAMES`) and a priority (Any, Air, Ground, `Tower.PRIORITY_NAMES`).
 - The rank is computed from the stats in the data table, so rebalancing stats rebalances the rank without
   code changes. It is shown in the Codex and Intel.
@@ -198,9 +198,14 @@ exact curve is set with the balance probe.
 ### 5. Leak costs (closes #7)
 
 Leak cost follows **strength** (owner: stronger enemies drain more shields): a base cost per strength
-band, derived from the rank formula, +1 for elites, and bosses a fixed share of the
-mode's shields (so Cataclysm's single shield still works). Checked with the balance probe on every
-difficulty.
+band, derived from the rank formula, +1 for elites. **A boss costs its fixed round number** (owner), the
+round it is introduced: a boss first met on round 20 costs 20 shields. Checked with the balance probe on
+every difficulty.
+
+Note the consequence: against a mode's shield pool (Easy 200, Medium 100, Hard 50, Nightmare 25,
+Cataclysm 1), a boss introduced on round 60 costs 60, which is more than Hard's 50 or Nightmare's 25, so on
+those modes a leaking boss from round 40 or 60 on is an instant defeat. That may be the intent; it is
+flagged to confirm (Still open, item 3).
 
 ### 6. Bosses
 
@@ -243,7 +248,7 @@ these land (phase 4).
 Separate PRs, each confirmed by the owner:
 
 1. Role, tier and strength-rank data, plus the trait registry and per-trait timers. No gameplay change.
-2. Strongest targeting by strength rank, plus the Support/Special priority (with tests and Codex text).
+2. Strongest targeting by strength rank, plus the Support priority (with tests and Codex text).
 3. Modifier engine, wave generation (rounds identical on every playthrough, see Open questions) and
    the Intel UI.
 4. Roster changes and rebalance: tiers, new enemies, leak costs, boss kits.
@@ -278,10 +283,15 @@ they exist.
 - **Boss above all:** bosses rank above every non-boss, whatever their score.
 - **Volatile:** shelved. Towers are not destroyed or disabled for now; it may return later or become its
   own game mode.
-- **Support and Special priority:** a new target priority for Support and Special enemies, not a score
-  bonus.
+- **Support priority:** a new target priority for enemies in the **Support role** (Specials are not
+  included), not a score bonus.
 - **Rounds 1 to 25:** the generator starts fresh and does not reproduce today's rounds.
-- **Boss rounds:** every 20 rounds.
+- **Boss rounds:** every 20 rounds. **Once a boss round is passed, that boss can be a recurring enemy in
+  later rounds.**
+- **Generator acceptance (approved):** the new generator is accepted when the Easy and Medium bot
+  playthroughs still earn medals, the balance probe shows a smooth difficulty curve on every mode, and a
+  seed-free check shows identical rounds on every run.
+- **Boss leak cost:** a boss costs its fixed round number in shields (see section 5).
 - **Old saves:** an old save's remaining rounds change once at the update. Accepted.
 - **Roster placements and draft stats:** acceptable for now. The order is subject to change with
   balancing tweaks and stat changes. The owner's adjusted tier grid (Locust Swarm T2, Drone T3; Skitter
@@ -299,7 +309,7 @@ they exist.
   non-projectile tower plus burn/damage over time and Arc Coils. Sheets in `design/new_enemies.md`.
 - **New enemies, round 4 (targeting tricks):** Masquerade (reveals below 50% health), Decoy Beacon (bait, fakes
   a rank above every non-boss, never stops) and Mirage (2 holograms every 6 s that walk to the core without
-  leaking). The Support/Special priority and Strongest go by the **displayed** identity. A specific new
+  leaking). The Support priority and Strongest go by the **displayed** identity. A specific new
   Sensor Array upgrade reveals tricks (its own PR). Sheets in `design/new_enemies.md`.
 - **Q13 Roster file:** the current and proposed enemies live in `design/enemy_roster.md`, with stats.
 - **Q11 Saves and waves:** one generator makes every round, identical on every playthrough, seeded by
@@ -314,24 +324,24 @@ they exist.
 
 ### Still open
 
-1. **Support and Special priority: details.** The game already has a per-tower priority (Any, Air,
-   Ground). **Recommendation:** add a fourth entry (e.g. "Support") to `Tower.PRIORITY_NAMES`, so it
-   uses the existing cycle button and needs no save version bump (old saves load with their stored
-   value). **Decided:** it goes by the enemy's *displayed* identity, so the tricks (Masquerade, Decoy
-   Beacon) still work until revealed. Still open: does "Special" include Phantom, Aegis Walker, Hydra Frame,
-   Masquerade (once revealed), Decoy Beacon and Mirage? **Recommendation:** yes, by displayed identity. Which
-   mode (First, Strongest...) orders targets inside the priority? **Recommendation:** the tower's current mode.
-2. **Boss rounds: details.** Every 20 rounds. Which boss comes on which boss round (20, 40, 60, 80, 100,
-   120)? Does the Dreadnought stop appearing every 5th round? Do the existing finales (e.g. round 40:
-   two Dreadnoughts, a Leviathan, an Overmind) stay as the 40th-round boss wave?
-   **Recommendation:** Dreadnought at 20, then the finales as they are, adding Colossus and Overmind
-   appearances so each boss round is bigger than the last.
-3. **Generator acceptance.** Starting fresh means no old rounds to compare against. **Recommendation:**
-   accept it when (a) the Easy and Medium bot playthroughs still earn medals, (b) the balance probe shows
-   a smooth difficulty curve on every mode, and (c) a fixed seed-free check shows identical rounds each
-   run.
-4. **Leak-cost bands.** The strength score sets leak cost, so its bands need a mapping (e.g. score bands to
-   1, 2, 3 shields, bosses a fixed share). Proposed with the balance probe in phase 4.
+1. **Support priority: details.** The game already has a per-tower priority (Any, Air, Ground).
+   **Recommendation:** add a fourth entry ("Support") to `Tower.PRIORITY_NAMES`, so it uses the existing
+   cycle button and needs no save version bump (old saves load with their stored value). **Decided:** it
+   targets enemies in the **Support role** only (Repair Bot, Rally Beacon, Bulwark, Mender Hulk), and it goes by
+   the enemy's *displayed* identity. Still open: which mode (First, Strongest...) orders targets inside the
+   priority? **Recommendation:** the tower's current mode.
+2. **Boss rounds: details.** Every 20 rounds, and a boss met once can recur in later rounds (decided). Which
+   boss comes on which boss round (20, 40, 60, 80, 100, 120)? Does the Dreadnought stop appearing every 5th
+   round? Do the existing finales (e.g. round 40: two Dreadnoughts, a Leviathan, an Overmind) stay as the
+   40th-round boss wave? **Recommendation:** Dreadnought at 20, then the finales as they are, adding Colossus
+   and Overmind appearances so each boss round is bigger than the last; recurrence then draws from the bosses
+   already met.
+3. **Boss leak cost.** The owner said bosses cost "their fixed round number". I read that as the round the
+   boss is first introduced (a round-20 boss costs 20). Confirm, and confirm the consequence: on Hard (50
+   shields) and Nightmare (25 shields) a leaking boss from round 40 or 60 on is an instant defeat. Does a
+   recurring boss keep its introduction-round cost?
+4. **Leak-cost bands (non-boss).** The strength score sets leak cost, so its bands need a mapping (e.g.
+   score bands to 1, 2, 3 shields). Proposed with the balance probe in phase 4.
 
 ### Deferred
 

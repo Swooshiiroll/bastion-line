@@ -260,7 +260,7 @@ trick is revealed.
 
 ### Shared rules for the tricks
 
-- **Displayed vs true:** Strongest targeting and the new **Support/Special priority both go by the displayed
+- **Displayed vs true:** Strongest targeting and the new **Support priority both go by the displayed
   identity** (decided), so a disguise works until it is revealed. First, Last and Closest don't read rank,
   so they are never fooled.
 - **A subtle tell:** a disguised enemy (Masquerade, Decoy Beacon) carries a thin **dotted ring**; the shape
@@ -280,7 +280,7 @@ trick is revealed.
 | 320 | 60 | 3 | No | 345.60 | A T1 (Nanite-class, about 13) | 2 | 14 |
 
 - **Behaviour:** it shows a **low, T1-class strength** and a T1-class role, so Strongest and the
-  Support/Special priority ignore it. It keeps the disguise **until it drops below 50% health**, then shows its
+  Support priority ignore it. It keeps the disguise **until it drops below 50% health**, then shows its
   real rank and role (a short flash and a label change).
 - **Job:** soak real damage while looking harmless; it punishes defences that rely on Strongest.
 - **Counters:** First, Last or Closest targeting, area damage that happens to hit it, and the Sensor Array
@@ -332,7 +332,7 @@ trick is revealed.
   single hit kills one. Splash and chain towers clear them."
 - **Edge cases:** holograms are live enemies until they vanish at the core, so a round does not end while any
   are walking. They are ground units and can take hazards. Because the Mirage is a Special, the
-  Support/Special priority targets it and its holograms.
+  Support priority (Support role only) ignores it and its holograms.
 
 ## Implementation notes (for when the spec is confirmed)
 
@@ -342,7 +342,7 @@ trick is revealed.
 - **Drawing:** follow the performance rules (`Draw.disc`, `ring`, `poly`, `polyline`; animated parts in
   `Draw.dyn`). Screenshots go to the owner for review.
 - **Tricks:** the enemy gets `shown_str` and `shown_role` read by `Game._score` (Strongest) and the
-  Support/Special priority in `pick_target`; a hologram is a lightweight enemy (no leak, no bounty, dies to any
+  Support priority in `pick_target`; a hologram is a lightweight enemy (no leak, no bounty, dies to any
   damage). Tests: Strongest ignores a Masquerade until half health; a Decoy outranks non-bosses but not bosses;
   a hologram never leaks or pays; the round waits for holograms; the Sensor upgrade reveals tricks; the
   priority uses displayed identity.
@@ -374,5 +374,5 @@ trick is revealed.
     revealed? The Codex states the tricks plainly either way.
 11. **The Sensor Array upgrade.** Its name, position in the tree, cost and exact effect are for its own PR and
     your approval; the upgrade data is generated from `design/upgrade_trees.md`.
-12. **Decoy's role in the priority.** It shows as a Tank-class unit, so the Support/Special priority ignores
-    it. Is that right?
+12. **Decoy and the Support priority (resolved).** The Support priority covers the Support role only, so it
+    ignores every Special (Masquerade, Decoy Beacon, Mirage and its holograms). The tricks only fool Strongest.

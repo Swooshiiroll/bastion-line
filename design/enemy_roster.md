@@ -61,7 +61,7 @@ built so each tier has more HP and/or speed than the one below it. No game code 
 | 24 | Wraith | Evader | T4 | 260 | 74 | 2 | 284.75 | 3 | 18 |  | Cloaked (Sensor Array reveals it) and immune to physical damage: only energy hurts it (every non-projectile tower, plus burn, damage over time and Arc Coils). No blink. Parked until the damage-type PR | Proposed (draft) |
 | 25 | Decoy Beacon | Special | - | 400 | 36 | 6 | 311.04 | 1 | 10 |  | Fakes a rank above every non-boss (below bosses) that never drops, so Strongest towers aim at it; does nothing else; a Sensor Array upgrade reveals it | Proposed (draft) |
 | 26 | Capacitor | Disruptor | T4 | 420 | 44 | 4 | 325.25 | 3 | 20 |  | Charge and release: 2 s telegraphed charge, then EMP radius 160, towers offline 3 s, every 8 s; silence, stun or death during the charge cancels it | Proposed (draft) |
-| 27 | Masquerade | Special | - | 320 | 60 | 3 | 345.60 | 2 | 14 |  | Shows a T1-class rank and role (Strongest and the Support/Special priority ignore it) until it drops below 50% health; a Sensor Array upgrade reveals it early | Proposed (draft) |
+| 27 | Masquerade | Special | - | 320 | 60 | 3 | 345.60 | 2 | 14 |  | Shows a T1-class rank and role (Strongest and the Support priority ignore it) until it drops below 50% health; a Sensor Array upgrade reveals it early | Proposed (draft) |
 | 28 | Rampart | Tank | T2 | 520 | 34 | 8 | 480.90 | 3 | 18 |  | Immune to slows, stuns and shoves | Current |
 | 29 | Gunship | Tank | T3 | 600 | 42 | 5 | 529.20 | 3 | 18 | Yes | Armored heavy flyer | Current, adjusted (HP 420 to 600) |
 | 30 | Titan | Tank | T4 | 700 | 30 | 9 | 567.00 | 4 | 24 |  | Slow resist 50%; at half health its plates shed: armor 9 to 5 and speed +20% | Proposed (draft) |
@@ -106,6 +106,6 @@ raise Drone's HP to 100 (Str 30.25) instead of lowering Locust's.
 
 - The proposed enemies keep the targeting tricks from the spec: Masquerade hides its rank, Decoy Beacon fakes
   a high one, and Mirage spends shots on holograms. Their score is the real stat score; Strongest and the
-  Support/Special priority read the displayed one until a trick is revealed.
+  Support priority read the displayed one until a trick is revealed.
 - Armor 1 and armor 0 multiply by 1, so Repair Bot, Jammer and Blink Stalker score as unarmored.
 - Questions on this roster go in the Open questions of `design/enemies.md`.
