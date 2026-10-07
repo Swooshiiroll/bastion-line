@@ -223,8 +223,8 @@ Role, tier, job and counter are a draft. **Stats for every current and proposed 
 | Shrike (was Razor Swarm) | Swarm T4 | Higher tier | Flying cluster of 5 per spawn | Flak and chain, anti-air |
 | Titan | Tank T4 | Higher tier | Heaviest non-boss hull; plates shed at half health (armor 9 to 5, speed +20%) | Armor shred, big hitters, burst after the shed |
 | Capacitor (was Surge Core) | Disruptor T4 | Higher tier | Charge and release: 2 s telegraph, then a radius-160 EMP for 3 s every 8 s | Stun or silence during the charge, burst |
-| Slipstream | Evader T3 | Higher tier | Burrows and blinks in one body | Sensors, area |
-| Wraith | Evader T4 | Higher tier | Cloaked; visible for a moment after each blink | Sensors, area |
+| Shifter (was Slipstream) | Evader T3 | Higher tier | Blinks 60 px every 5 s; the landing point boosts nearby enemies +20% speed for 2 s | Slow or stun to reset its charge |
+| Wraith | Evader T4 (parked) | Higher tier | Cloaked and immune to physical damage; only energy hurts it | Energy towers, Arc Coils, burn, Sensor Array |
 | Mimic | Evader or Special | Targeting trick | Shows a low rank (looks like T1) until first hit or below a set HP, then shows its real higher rank | Area damage reveals it early; First targeting |
 | Decoy Beacon | Special | Targeting trick | Shows a false high strength rank so Strongest towers aim at it while others get past; armored, does nothing else | Switch towers to First, splash |
 | Echo | Special | Targeting trick | Puts out hologram copies with the same rank and 1 HP that use up shots | Area and chain, sensors |
@@ -294,6 +294,9 @@ they exist.
   strongest wins), Blackout Rig (T3, a bigger Jammer: EMP radius 130, 2.5 s every 4 s) and Capacitor (T4,
   charge and release). A 1 s **disable guard** applies to every Disruptor. Sheets in
   `design/new_enemies.md`.
+- **New enemies, round 3 (Evaders):** Shifter (Evader T3, blink plus a wake burst of +20% speed) and Wraith
+  (Evader T4: cloak plus energy-only, no blink, parked until the damage-type PR). Energy means every
+  non-projectile tower plus burn/damage over time and Arc Coils. Sheets in `design/new_enemies.md`.
 - **Q13 Roster file:** the current and proposed enemies live in `design/enemy_roster.md`, with stats.
 - **Q11 Saves and waves:** one generator makes every round, identical on every playthrough, seeded by
   the round number alone, with introduction rounds baked in for new tiers, elites and modifiers. It goes

@@ -11,7 +11,7 @@ changes until the owner confirms the spec.**
 |---|---|---|
 | 1 | Needle, Fury Drone, Shrike, Titan (the stat enemies) | Designed below |
 | 2 | Siphon, Blackout Rig, Capacitor (Disruptors) | Designed below |
-| 3 | Slipstream, Wraith (Evaders) | To do (Wraith waits for the damage-type PR) |
+| 3 | Shifter, Wraith (Evaders) | Designed below (Wraith parked until the damage-type PR) |
 | 4 | Mimic, Decoy Beacon, Echo (targeting tricks) | To do |
 
 ## Rules shared by all new enemies
@@ -45,8 +45,8 @@ changes until the owner confirms the spec.**
 - **Behaviour:** each spawn event sends **two Needles 0.25 s apart on the same lane**. No ability.
 - **Job:** slip past before single-target towers land a shot. A pair doubles the problem.
 - **Counters:** slows, splash and chain, rapid-fire towers.
-- **Look:** a slim chevron, pale ice-blue accent on a dark cool hull (Skitter's accent is amber, so they read
-  apart). The pair keeps a tight formation. One short high-pitched whine per spawn.
+- **Look:** a slim chevron, chalk-white accent on a dark cool hull (Skitter's accent is amber and Phantom's
+  cyan, so they read apart). The pair keeps a tight formation. One short high-pitched whine per spawn.
 - **Codex text (draft):** "Hair-thin sprinter that always arrives in pairs. Single-target towers can't keep
   up. Slows, splash and rapid fire can."
 - **Edge cases:** lanes alternate by spawn group as in normal waves, and the pair shares a lane. Rally Beacon
@@ -67,7 +67,7 @@ changes until the owner confirms the spec.**
   adrenaline is a **separate multiplier** so the two compound.
 - **Job:** punish chip damage. Burst kills it before it matters; many weak hits make it faster.
 - **Counters:** burst and armor shred. Slows still apply on top of the boosts.
-- **Look:** an angular hunter drone, violet accent (Strike Drone is red, Skitter amber). Below half health the
+- **Look:** an angular hunter drone, hot magenta accent (Strike Drone is red, Blink Stalker violet, Skitter amber). Below half health the
   engine glow turns white-hot and a short speed trail appears (an animated part, so inside `Draw.dyn`). A
   rising rev sound plays once when adrenaline starts.
 - **Codex text (draft):** "Hunter drone that overclocks when hurt: below half health it runs 30% faster.
@@ -188,10 +188,72 @@ Blackout Rig (T3), Capacitor (T4).
 - **Edge cases:** if two Capacitors charge together, each pulses on its own timer, and the 1 s disable guard
   applies to the second. It is not a boss.
 
+## Round 3: the Evaders
+
+Today's Evaders (`data/enemies.gd`): Blink Stalker (T1, blinks 80 px every 4 s; a slow or stun resets the
+charge) and Burrower (T2, burrowed 2.5 s every 5 s: untargetable, hazard-proof, can't be shoved; a Sensor
+Array "disrupt" or a silence forces it up). Cloaked enemies (the Phantom) are hidden until a Sensor Array
+reveals them (`Enemy.is_hidden()`). The two new Evaders extend the role in tier order: Shifter (T3), Wraith (T4).
+
+### Shifter (Evader T3)
+
+*Placeholder name: Slipstream.*
+
+| HP | Speed | Armor | Fly | Str | Leak | Bounty |
+|---|---|---|---|---|---|---|
+| 200 | 68 | 2 | No | 184.96 | 2 | 13 |
+
+- **Behaviour:** blinks **60 px** down the lane **every 5 s**. Each blink releases a **wake burst of radius
+  80 px at the landing point**: non-boss enemies inside get **+20% speed for 2 s**. The Shifter itself is
+  not boosted.
+- **Stacking:** the wake multiplies with other speed boosts (Rally Beacon, Fury Drone's adrenaline), as
+  decided for adrenaline. A second wake refreshes the 2 s and doesn't add; several Shifters don't stack.
+- **Job:** a Support-adjacent Evader: it dodges single-target fire and speeds the group up behind it.
+- **Counters:** slows and stuns reset its blink charge (the existing Blink Stalker rule, `_reset_blink`),
+  silence stops the blink, and killing it before it blinks removes the boost.
+- **Look:** a lean angular walker with a faint afterimage, in a white-gold accent (the Evaders already use
+  cyan, violet and orange). The wake burst is a one-shot expanding ring at the landing point. A soft
+  whoosh on each blink.
+- **Codex text (draft):** "Blinks 60 px every 5 s and speeds up nearby enemies by 20% for 2 s where it
+  lands. Slow or stun it to reset its charge."
+- **Edge cases:** bosses aren't boosted (as with Rally Beacon). The burst ignores flying status of the
+  enemies it boosts. It is a ground enemy and can be hit while it walks. Not a boss.
+
+### Wraith (Evader T4)
+
+| HP | Speed | Armor | Fly | Str | Leak | Bounty |
+|---|---|---|---|---|---|---|
+| 260 | 74 | 2 | No | 284.75 | 3 | 18 |
+
+**Parked:** the Wraith needs damage types, which are a separate PR after the core rework. It is designed here
+and not built first; until then **Evader T4 stays empty**. The other three Tier 4 enemies ship without it.
+
+- **Behaviour:** two evasions, **no blink**:
+  - **Cloaked** (the Phantom's rule): towers can target it only inside a Sensor Array field, or for a moment
+    after it takes damage.
+  - **Energy only:** it is **immune to physical damage** (takes 0) and is hurt only by energy damage.
+- **What counts as energy (decided):** every **non-projectile tower** (beam, chain and field towers), plus
+  **burn and damage-over-time** effects and **Arc Coils**, which always bypass the immunity. Projectile and
+  blast towers (for example Pulse Turret, Plasma Mortar, Railgun) are physical. The tower-by-tower list,
+  including edge cases such as drones, is settled in the damage-type PR.
+- **Job:** force a defence to carry energy towers. A defence of only projectile and blast towers can't kill it
+  (the owner's intent: "build energy towers").
+- **Counters:** Arc Coils, beam and field towers, burn and damage-over-time, and a Sensor Array to see it.
+  Slows from field towers still apply.
+- **Look:** a dark indigo hull that is nearly invisible until revealed, then a ghostly white outline, using
+  the Phantom's cloak shimmer. A faint hiss while visible.
+- **Codex text (draft):** "Cloaked and immune to physical damage. Only energy hurts it: beams, chains, fields,
+  burning and Arc Coils. Bring a Sensor Array to see it."
+- **Edge cases:** physical hits do 0 damage and don't reveal it (the reveal-on-damage rule fires only for
+  damage it actually takes). Introduce it only after players can reasonably own an energy tower.
+  Armor is irrelevant to the immunity. Not a boss.
+- **Dependency:** a damage-type tag on every damage event and tower, and an `energy_only` trait. That is a
+  separate PR with its own design.
+
 ## Implementation notes (for when the spec is confirmed)
 
 - **Registry:** all four go in `data/enemies.gd` (`ORDER` and `ENEMIES`). The "22 enemy types" test count
-  becomes 26 with the round-1 four and 29 after round 2, plus per-trait tests (pair spawn, adrenaline, plate shed,
+  becomes 26 with the round-1 four, 29 after round 2 and 30 with Shifter (31 when the parked Wraith lands), plus per-trait tests (pair spawn, adrenaline, plate shed,
   flying cluster, Siphon aura debuff and strongest-wins, Capacitor charge cancel, disable guard).
 - **Drawing:** follow the performance rules (`Draw.disc`, `ring`, `poly`, `polyline`; animated parts in
   `Draw.dyn`). Screenshots go to the owner for review.
@@ -211,4 +273,8 @@ Blackout Rig (T3), Capacitor (T4).
    Capacitor's 37.5% are tuned with the balance probe.
 5. **Jamming modifier.** Does the Jamming modifier (any elite) reuse the Jammer's EMP, a Siphon aura, or let
    the wave generator choose?
-6. **Remaining five enemies.** Slipstream, Wraith, Mimic, Decoy Beacon and Echo are in later rounds.
+6. **Energy classification.** The tower-by-tower energy list, including edge towers (drones, scrap, Nova) and
+   Pulse Turret (its blurb says "energy bolts" but it is a projectile), is the damage-type PR's job.
+7. **Wraith introduction.** The first round it appears, after players can own an energy tower, set in the
+   generator PR.
+8. **Remaining three enemies.** Mimic, Decoy Beacon and Echo (the targeting tricks) are the last round.

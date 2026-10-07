@@ -25,7 +25,7 @@ built so each tier has more HP and/or speed than the one below it. No game code 
 | Tank | Siege Mech | Rampart | Gunship | Titan (new) |
 | Support | Repair Bot | Rally Beacon | Bulwark | Mender Hulk |
 | Disruptor | Jammer | Siphon (new) | Blackout Rig (new) | Capacitor (new) |
-| Evader | Blink Stalker | Burrower | Slipstream (new) | Wraith (new) |
+| Evader | Blink Stalker | Burrower | Shifter (new) | Wraith (new) |
 
 **Special (no tiers):** Phantom, Aegis Walker, Hydra Frame, Mimic (new), Decoy Beacon (new), Echo (new).
 **Boss (no tiers):** Dreadnought, Overmind, Leviathan, Colossus.
@@ -56,9 +56,9 @@ built so each tier has more HP and/or speed than the one below it. No game code 
 | 19 | Fury Drone | Rusher | T4 | 85 | 125 | 1 | 132.81 | 2 | 9 |  | Adrenaline: +30% speed below half health (multiplies with Rally Beacon haste) | Proposed (draft) |
 | 20 | Mender Hulk | Support | T4 | 380 | 38 | 3 | 164.62 | 2 | 14 |  | Regenerates 4% of its health per second after 1.5 s without damage | Current |
 | 21 | Blackout Rig | Disruptor | T3 | 260 | 48 | 3 | 179.71 | 3 | 15 |  | Bigger Jammer: EMP radius 130, towers offline 2.5 s every 4 s | Proposed (draft) |
-| 22 | Slipstream | Evader | T3 | 200 | 68 | 2 | 184.96 | 2 | 13 |  | Burrows 2 s every 6 s and blinks 60 px every 5 s | Proposed (draft) |
+| 22 | Shifter | Evader | T3 | 200 | 68 | 2 | 184.96 | 2 | 13 |  | Blinks 60 px every 5 s; each landing releases an 80 px wake: non-boss enemies inside get +20% speed for 2 s (multiplies with other boosts) | Proposed (draft) |
 | 23 | Siege Mech | Tank | T1 | 265 | 40 | 6 | 254.40 | 2 | 10 |  | Armor plating | Current |
-| 24 | Wraith | Evader | T4 | 260 | 74 | 2 | 284.75 | 3 | 18 |  | Cloaked; visible 1 s after each blink; blinks 80 px every 5 s; only energy attacks hurt it (needs the damage-type PR) | Proposed (draft) |
+| 24 | Wraith | Evader | T4 | 260 | 74 | 2 | 284.75 | 3 | 18 |  | Cloaked (Sensor Array reveals it) and immune to physical damage: only energy hurts it (every non-projectile tower, plus burn, damage over time and Arc Coils). No blink. Parked until the damage-type PR | Proposed (draft) |
 | 25 | Decoy Beacon | Special | - | 400 | 36 | 6 | 311.04 | 1 | 10 |  | Shows a false top rank so Strongest towers aim at it; does nothing else | Proposed (draft) |
 | 26 | Capacitor | Disruptor | T4 | 420 | 44 | 4 | 325.25 | 3 | 20 |  | Charge and release: 2 s telegraphed charge, then EMP radius 160, towers offline 3 s, every 8 s; silence, stun or death during the charge cancels it | Proposed (draft) |
 | 27 | Mimic | Special | - | 320 | 60 | 3 | 345.60 | 2 | 14 |  | Shows as a T1 until first hit or below half health, then shows its real rank | Proposed (draft) |
@@ -81,9 +81,9 @@ differ.
   adjustments below:
   - none
 - **Slots filled by new enemies:** Swarm T4, Rusher T2 and T4, Tank T4, Disruptor T2 to T4, Evader T3 and T4.
-  Capacitor and Slipstream are new placeholders for Disruptor T4 and Evader T3. Nexus is cut.
+  Capacitor and Shifter are new placeholders for Disruptor T4 and Evader T3. Nexus is cut.
 - **Strike Drone at Rusher T3 is a flyer** in a role that is otherwise ground rushers.
-- **Wraith** waits for the damage-type PR, so Evader T4 may stay empty until then.
+- **Wraith** is parked until the damage-type PR, so Evader T4 stays empty until then.
 
 ## Stat adjustments to match the tier order
 
