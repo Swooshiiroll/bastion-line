@@ -13,6 +13,8 @@ built so each tier has more HP and/or speed than the one below it. No game code 
   weakest. **Bosses rank above every non-boss**, whatever their score.
 - **Leak** is the core shields a leak costs. For current enemies it is today's value. For proposed ones
   it is a draft; the leak-cost bands (section 5 of the spec) are not defined yet.
+  **Boss leak costs** shown here are today's values (6, 20, 15, 25); under the new rule (confirmed by the owner)
+  a boss costs its introduction round, set when the boss rounds are decided.
 - **Bounty** is the gold per kill. Proposed values are drafts.
 - **Fly** is Yes for flyers. **Special** and **Boss** have no tiers.
 

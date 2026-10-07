@@ -198,14 +198,14 @@ exact curve is set with the balance probe.
 ### 5. Leak costs (closes #7)
 
 Leak cost follows **strength** (owner: stronger enemies drain more shields): a base cost per strength
-band, derived from the rank formula, +1 for elites. **A boss costs its fixed round number** (owner), the
-round it is introduced: a boss first met on round 20 costs 20 shields. Checked with the balance probe on
+band, derived from the rank formula, +1 for elites. **A boss costs its fixed introduction round** (owner,
+confirmed): a boss first met on round 20 costs 20 shields, and it keeps that cost whenever it recurs. Checked with the balance probe on
 every difficulty.
 
-Note the consequence: against a mode's shield pool (Easy 200, Medium 100, Hard 50, Nightmare 25,
+The consequence, accepted: against a mode's shield pool (Easy 200, Medium 100, Hard 50, Nightmare 25,
 Cataclysm 1), a boss introduced on round 60 costs 60, which is more than Hard's 50 or Nightmare's 25, so on
-those modes a leaking boss from round 40 or 60 on is an instant defeat. That may be the intent; it is
-flagged to confirm (Still open, item 3).
+those modes a leaking boss from round 40 or 60 on is an instant defeat. The bosses' costs follow the boss
+rounds, which are set in Still open, item 2.
 
 ### 6. Bosses
 
@@ -291,7 +291,9 @@ they exist.
 - **Generator acceptance (approved):** the new generator is accepted when the Easy and Medium bot
   playthroughs still earn medals, the balance probe shows a smooth difficulty curve on every mode, and a
   seed-free check shows identical rounds on every run.
-- **Boss leak cost:** a boss costs its fixed round number in shields (see section 5).
+- **Boss leak cost (confirmed):** a boss costs its **introduction round** in shields (a round-20 boss costs 20)
+  and keeps that cost when it recurs. Late bosses are therefore an instant defeat if they leak on Hard
+  and Nightmare (see section 5).
 - **Old saves:** an old save's remaining rounds change once at the update. Accepted.
 - **Roster placements and draft stats:** acceptable for now. The order is subject to change with
   balancing tweaks and stat changes. The owner's adjusted tier grid (Locust Swarm T2, Drone T3; Skitter
@@ -336,11 +338,7 @@ they exist.
    40th-round boss wave? **Recommendation:** Dreadnought at 20, then the finales as they are, adding Colossus
    and Overmind appearances so each boss round is bigger than the last; recurrence then draws from the bosses
    already met.
-3. **Boss leak cost.** The owner said bosses cost "their fixed round number". I read that as the round the
-   boss is first introduced (a round-20 boss costs 20). Confirm, and confirm the consequence: on Hard (50
-   shields) and Nightmare (25 shields) a leaking boss from round 40 or 60 on is an instant defeat. Does a
-   recurring boss keep its introduction-round cost?
-4. **Leak-cost bands (non-boss).** The strength score sets leak cost, so its bands need a mapping (e.g.
+3. **Leak-cost bands (non-boss).** The strength score sets leak cost, so its bands need a mapping (e.g.
    score bands to 1, 2, 3 shields). Proposed with the balance probe in phase 4.
 
 ### Deferred
