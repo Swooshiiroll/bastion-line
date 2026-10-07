@@ -80,48 +80,54 @@ so neither fits its draft slot well (deferred, see Deferred below).
   "Strongest ties").
 - Whether a modifier changes the rank **depends on the modifier**: each modifier's entry states its
   effect on rank.
-- **Rank comes from a formula (owner direction):** it is worked out from each enemy's base health and
-  speed, not ordered by hand. The formula is HP x (speed / 100) (see "Strength rank, proposed" below),
+- **Rank comes from a formula (owner direction):** it is worked out from each enemy's base health, armor and
+  speed, not ordered by hand. The formula is speed x (armor x HP) (see "Strength rank" below),
   awaiting confirmation. Stronger enemies also **drain more shields** when they leak (section 5).
 - The rank is computed from the stats in the data table, so rebalancing stats rebalances the rank without
   code changes. It is shown in the Codex and Intel.
 
-#### Strength rank, proposed
+#### Strength rank (owner formula)
 
-Score = base HP x (speed / 100), using round-1 values from `data/enemies.gd`. An enemy with 1000 HP and
-speed 45 scores 1000 x 0.45 = 450. Armor and abilities are not in the score yet.
+**Str = (speed / 100) x (armor x HP)**, using round-1 values from `data/enemies.gd`. Example from the
+owner: armor 50, HP 100, speed 45 gives 0.45 x (50 x 100) = 2250.
 
-| Enemy | HP | Speed | Score |
-|---|---|---|---|
-| Nanite | 22 | 78 | 17.16 |
-| Locust | 18 | 115 | 20.70 |
-| Drone | 70 | 55 | 38.50 |
-| Skitter | 45 | 105 | 47.25 |
-| Strike Drone | 64 | 82 | 52.48 |
-| Phantom | 85 | 72 | 61.20 |
-| Repair Bot | 125 | 50 | 62.50 |
-| Aegis Walker | 150 | 44 | 66.00 |
-| Jammer | 150 | 50 | 75.00 |
-| Blink Stalker | 110 | 70 | 77.00 |
-| Rally Beacon | 170 | 48 | 81.60 |
-| Bulwark | 200 | 42 | 84.00 |
-| Hydra Frame | 190 | 46 | 87.40 |
-| Burrower | 160 | 62 | 99.20 |
-| Siege Mech | 265 | 40 | 106.00 |
-| Mender Hulk | 380 | 38 | 144.40 |
-| Gunship | 420 | 42 | 176.40 |
-| Rampart | 520 | 34 | 176.80 |
-| Dreadnought | 800 | 32 | 256.00 |
-| Overmind | 1,900 | 20 | 380.00 |
-| Leviathan | 2,600 | 24 | 624.00 |
-| Colossus | 4,200 | 18 | 756.00 |
+Two additions, both proposed and awaiting confirmation:
+- **Armor floor of 1.** Armor 0 would zero the score (six enemies have armor 0), so armor counts as 1 when
+  it is 0. Otherwise those six all tie at 0.
+- **Bosses rank above every non-boss**, whatever their score (Rampart scores higher than the Dreadnought
+  below).
+
+| Enemy | HP | Speed | Armor | Str |
+|---|---|---|---|---|
+| Nanite | 22 | 78 | 0 | 17.16 |
+| Locust | 18 | 115 | 0 | 20.70 |
+| Drone | 70 | 55 | 0 | 38.50 |
+| Skitter | 45 | 105 | 0 | 47.25 |
+| Strike Drone | 64 | 82 | 0 | 52.48 |
+| Phantom | 85 | 72 | 0 | 61.20 |
+| Repair Bot | 125 | 50 | 1 | 62.50 |
+| Jammer | 150 | 50 | 1 | 75.00 |
+| Blink Stalker | 110 | 70 | 1 | 77.00 |
+| Aegis Walker | 150 | 44 | 2 | 132.00 |
+| Rally Beacon | 170 | 48 | 2 | 163.20 |
+| Burrower | 160 | 62 | 2 | 198.40 |
+| Bulwark | 200 | 42 | 3 | 252.00 |
+| Hydra Frame | 190 | 46 | 3 | 262.20 |
+| Mender Hulk | 380 | 38 | 3 | 433.20 |
+| Siege Mech | 265 | 40 | 6 | 636.00 |
+| Gunship | 420 | 42 | 5 | 882.00 |
+| Dreadnought (boss) | 800 | 32 | 5 | 1,280.00 |
+| Rampart | 520 | 34 | 8 | 1,414.40 |
+| Leviathan (boss) | 2,600 | 24 | 6 | 3,744.00 |
+| Overmind (boss) | 1,900 | 20 | 10 | 3,800.00 |
+| Colossus (boss) | 4,200 | 18 | 14 | 10,584.00 |
 
 What it shows:
-- Bosses fall naturally at the top.
-- Gunship and Rampart are nearly tied (176.40 and 176.80), so the tie-break matters there.
 - A fast fragile enemy (Skitter, 47.25) outranks the basic Drone (38.50).
-- Armor is ignored, so Rampart (8 armor) undersells its toughness. A variant multiplies HP by an armor
-  factor.
+- Armor is a strong lever: Siege Mech (armor 6) outranks Mender Hulk (armor 3, more HP).
+- Rampart (1,414.40) outscores the Dreadnought boss (1,280.00), hence the boss rule.
+- Armor is flat damage removed per hit, and today's values run 0 to 14, so the score is a proxy. A
+  different armor scale (the example uses 50) would change every rank.
 
 ### 3. Traits as data-driven building blocks
 
@@ -225,7 +231,7 @@ they exist.
 - **Q1 Tier count:** four tiers for every regular role; Special and Boss are named exceptions; the draft
   Nexus (Support T5) is cut or folded into T4.
 - **Q2 Tier scaling:** each tier has a flat HP and speed stat.
-- **Q4 Strongest ties:** rank comes from a formula over base HP and speed, so ties are rare. Stronger
+- **Q4 Strongest ties:** rank comes from a formula over base HP, armor and speed, so ties are rare. Stronger
   enemies also drain more shields. The formula itself is under Still open.
 - **Q5 Phantom:** keeps its built-in cloak as a specialized enemy; Cloaked is also a modifier for any
   enemy.
@@ -246,9 +252,9 @@ they exist.
 
 ### Still open
 
-1. **Strength formula (Q4).** HP x (speed / 100), as the owner's example shows (1000 HP, speed 45 scores
-   450); table in section 2. Still open: add an armor factor so Rampart ranks clearly above Gunship, or
-   a tunable HP/speed weight the balance probe adjusts. The formula also
+1. **Strength formula (Q4).** Str = (speed / 100) x (armor x HP), from the owner (table in section 2).
+   Still open: the armor floor of 1 for armor-0 enemies, and the boss-above-all rule. Is that how you want
+   zero armor and bosses handled? The formula also
    sets leak cost, so its bands need a mapping (e.g. score bands to 1, 2, 3 shields).
 2. **Waves (Q11).** The generator already runs forever (Endless) and is deterministic for a given seed.
    Making rounds identical on every playthrough means seeding it from the round number alone
