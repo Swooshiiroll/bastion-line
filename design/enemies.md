@@ -33,6 +33,8 @@ spec (repo CLAUDE.md, "Designing a feature first").
 - Difficulty changes only the round count, shields, prices and medal RP.
 - A leak costs a fixed number of shields per type (1 to 3; bosses 6, 15, 20, 25).
 - Heal, spawn, EMP and shield-grant share one timer, so an enemy can have only one of them.
+- Saves (`Game.to_save`, `SAVE_VERSION` 9) store the wave, towers, research, seed and spawn counter, not
+  enemies, and only between rounds. Each round's waves are generated from the seed.
 - Tests pin many numbers (waves, scaling, the "22 enemy types", Codex ability text). The Easy and
   Medium bot playthroughs must still earn medals.
 
@@ -182,29 +184,55 @@ Answered by the owner on 2026-10-07. Numbers match the first draft's question nu
 
 ### Still open
 
-1. **Tier count (from Q1).** Every role gets the same number of tiers, but the draft has 1 to 4 per
-   role. What is the number? Do Disruptor, Rusher and the others get filled out to match? Are Special
-   and Boss exceptions?
-2. **Strongest ties (Q4).** Two enemies share a rank, e.g. two Gunships.
-   - **A:** highest current HP first, then path progress. This keeps today's feel within a tier, but a
-     fresh Gunship at the back outranks a nearly dead one at the exit.
-   - **B:** path progress first. This stops leaks but ignores HP.
-   - **Recommendation: A.**
-3. **Tower and research counters (Q10).** Some modifiers have no counter today (Cloaked needs a Sensor
-   Array, Volatile damages towers, Resolute shrugs off slows). May I add or change tower upgrades and
-   research nodes to counter them, or must modifiers work with the current towers?
+Each item has a recommendation. Reply with a letter or a change.
+
+1. **Tier count (from Q1).** Every role gets the same number of tiers, but today's counts are Swarm 3,
+   Rusher 2, Tank 3, Support 4, Disruptor 1 and Evader 2 (Phantom moves to Special).
+   - **3 tiers:** Support loses a tier and Disruptor needs two new enemies.
+   - **4 tiers:** most roles gain new enemies, which fits the wish for higher tiers.
+   - **Recommendation: 4** for the regular roles, with Special and Boss as named exceptions. The draft
+     Nexus (Support T5) is then cut or folded into T4.
+2. **Strongest ties (Q4).** Strongest sorts by strength rank first. A tie means two enemies of the same
+   role and tier on the field, e.g. a wave of Gunships.
+   - **A:** highest current HP first, then path progress. Within a tier, Strongest still means "the
+     beefiest", as it does today. A fresh enemy at the back outranks a nearly dead one at the exit.
+   - **B:** path progress first. This stops leaks, but Strongest then behaves like First within a tier.
+   - **Recommendation: A.** First and Last already cover position.
+3. **Tower and research counters (Q10).** Some modifiers have no clean counter today:
+   - **Cloaked** needs Sensor Array coverage, so a cloaked elite in an uncovered lane is effectively
+     untouchable.
+   - **Volatile** hurts towers and needs range or burst to pop it early.
+   - **Resolute** shrugs off slows and stuns (Rampart and Colossus already show how awkward that is).
+
+   May I add or change tower upgrades and research nodes to counter them, or must modifiers work with
+   the current towers? Without counters, the catalogue shrinks to what current towers can answer.
    **Recommendation:** allow small counters, each in its own PR you approve.
-4. **Saves (Q11).** A mid-run Continue save stores the field and the wave; modifiers and tiers add
-   fields old saves lack.
-   - **A:** bump the version and migrate, so old saves load with no modifiers.
-   - **B:** bump the version and drop old Continue saves.
-   - **Recommendation: A.** The save code is not yet checked; it gets read before either is chosen.
-5. **New roster (Q13).** Keep, cut or rename which of the 11 draft enemies? (No answer yet.)
-6. **Mimic and Decoy rank (Q16).** The field label hides the true rank until the trick is revealed
-   (the owner's "likely hidden until revealed"). Should the Codex entry also hide it, or explain the
-   trick plainly like the Phantom's entry? **Recommendation:** the Codex explains it.
-7. **Swarming.** It doubles the count at half HP, which acts on a group, not a single elite. Cut it,
-   rework it into a single-elite modifier, or allow it as an exception?
+4. **Saves (Q11).** Corrected after reading the save code:
+   - A save stores the wave, gold, lives, towers, research, the seed and the spawn counter
+     (`Game.to_save`, `SAVE_VERSION` 9). **It stores no enemies**, and saving only works between
+     rounds (`can_save`). Each round's waves come from `seed_value * 1000 + round`.
+   - If elites and their modifiers are picked from that same seed, **modifiers need no new save field
+     and no version bump.**
+   - What does change: the same seed produces different future waves after the update, so an old save's
+     remaining rounds differ. That is a balance change, not corruption.
+   - Old saves already load and re-save at the current version (tests cover v1 to v8). Dropping them
+     would break that pattern.
+   - **Recommendation:** no bump for modifiers. Bump `SAVE_VERSION` only if the tier or roster data
+     changes what a saved value means, and then migrate as the existing tests do.
+5. **New roster (Q13).** The 11 draft enemies are Dart, Interceptor, Siphon, Blackout Rig, Razor Swarm,
+   Titan, Nexus, Wraith, Mimic, Decoy Beacon and Echo. Which to keep, cut or rename depends on item 1.
+   Nexus (Support T5) and Wraith (Evader T4) only exist if those roles reach that tier. With cloak now
+   a modifier, check whether Wraith is still needed. A rough keep/drop list is enough; names can wait.
+6. **Mimic and Decoy rank (Q16).** The field label hides the true rank until revealed (decided).
+   The open part is the Codex. **Recommendation:** the Codex states each trick plainly, as the Phantom's
+   entry does, but a player who has not met the enemy yet should not be spoiled. Check whether the
+   Codex tracks seen enemies; if not, state the trick plainly anyway.
+7. **Swarming.** It doubles the count at half HP, which acts on a group, not a single elite.
+   - **1:** drop it.
+   - **2:** rework it into an elite that spawns a pair of weaker copies on death (this overlaps
+     Splitting).
+   - **3:** keep it as a wave-level exception.
+   - **Recommendation: 1.** Splitting covers the idea.
 
 ### Deferred
 
