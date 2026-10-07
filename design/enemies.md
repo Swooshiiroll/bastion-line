@@ -81,16 +81,16 @@ so neither fits its draft slot well (deferred, see Deferred below).
 - Whether a modifier changes the rank **depends on the modifier**: each modifier's entry states its
   effect on rank.
 - **Rank comes from a formula (owner direction):** it is worked out from each enemy's base health, armor and
-  speed, not ordered by hand. The formula is spd x (arm x hp) x spd (see "Strength rank" below),
+  speed, not ordered by hand. The formula is spd² (arm x hp) (see "Strength rank" below),
   awaiting confirmation. Stronger enemies also **drain more shields** when they leak (section 5).
 - The rank is computed from the stats in the data table, so rebalancing stats rebalances the rank without
   code changes. It is shown in the Codex and Intel.
 
 #### Strength rank (owner formula)
 
-**Str = spd x (arm x hp) x spd**, where spd is speed / 100, so **Str = (speed / 100)^2 x armor x HP**.
+**Str = spd² (arm x hp)**, where spd is speed / 100 (so spd² is the speed as a decimal, squared).
 It uses round-1 values from `data/enemies.gd`. Example from the owner: armor 50, HP 100, speed 45 gives
-0.45 x (50 x 100) x 0.45 = 1012.5.
+0.45² x (50 x 100) = 0.2025 x 5000 = 1012.5.
 
 **Armor of 0 counts as 1 (decided).** A 0 would zero the score, and 1 is the multiplier for "no armor", so
 armor 0 and armor 1 both multiply by 1. This changes only the score: those enemies still take full damage
@@ -257,7 +257,7 @@ they exist.
 
 ### Still open
 
-1. **Strength formula (Q4).** Str = spd x (arm x hp) x spd with spd = speed / 100, from the owner (table
+1. **Strength formula (Q4).** Str = spd² (arm x hp) with spd = speed / 100, from the owner (table
    in section 2). Armor 0 counts as 1 (decided). Still open: the boss-above-all rule, and whether Support units
    need an ability bonus so they rank high enough for Strongest. The formula also
    sets leak cost, so its bands need a mapping (e.g. score bands to 1, 2, 3 shields).
