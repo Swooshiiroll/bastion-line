@@ -131,12 +131,18 @@ Dreadnought below).
 | Leviathan (boss) | 2,600 | 24 | 6 | 898.56 |
 | Colossus (boss) | 4,200 | 18 | 14 | 1,905.12 |
 
-What it shows:
-- Squaring speed rewards fast units: Locust (flyer, 23.80) now outranks the basic Drone (21.18), and
-  Skitter (49.61) outranks Strike Drone (43.03).
+The table uses today's stats. What it shows:
+- Squaring speed rewards fast units: Locust (flyer, 23.80) outranks the basic Drone (21.18), and
+  Skitter (49.61) outranks Strike Drone (43.03). With the owner's tier grid (Locust T2, Drone T3; Strike
+  Drone T3 above Dart T2; Gunship T3 above Rampart T2) those orders are wrong.
 - Support units rank low: Repair Bot (31.25) sits below Skitter. The score ignores abilities, so a
   Support unit never ranks high under Strongest, which was one of the original complaints.
 - Rampart (480.90) outscores the Dreadnought boss (409.60), hence the boss rule.
+
+**Stats adjusted to follow the tiers (owner request, draft).** So that strength rises with tier in every
+role, `design/enemy_roster.md` changes four HP values: Locust 18 to 15 (Str 19.84), Strike Drone 64 to 100
+(67.24), Gunship 420 to 600 (529.20), and the new Dart 40 to 30 (58.80). Nothing else changes. After that,
+no role has a higher tier scoring below a lower one. The roster lists the alternatives.
 - Armor is flat damage removed per hit, and today's values run 0 to 14, so the score is a proxy. A
   different armor scale (the example uses 50) would change every rank.
 
