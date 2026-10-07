@@ -27,7 +27,7 @@ built so each tier has more HP and/or speed than the one below it. No game code 
 | Disruptor | Jammer | Siphon (new) | Blackout Rig (new) | Capacitor (new) |
 | Evader | Blink Stalker | Burrower | Shifter (new) | Wraith (new) |
 
-**Special (no tiers):** Phantom, Aegis Walker, Hydra Frame, Mimic (new), Decoy Beacon (new), Echo (new).
+**Special (no tiers):** Phantom, Aegis Walker, Hydra Frame, Masquerade (new), Decoy Beacon (new), Mirage (new).
 **Boss (no tiers):** Dreadnought, Overmind, Leviathan, Colossus.
 **Cut:** Nexus (draft Support T5). Support already has four tiers, so it is cut or folded into T4.
 
@@ -40,7 +40,7 @@ built so each tier has more HP and/or speed than the one below it. No game code 
 | 3 | Drone | Swarm | T3 | 70 | 55 | 0 | 21.18 | 1 | 4 |  | Basic combat drone | Current |
 | 4 | Repair Bot | Support | T1 | 125 | 50 | 1 | 31.25 | 2 | 11 |  | Heals nearby enemies 8% every 2 s, radius 90 (not bosses) | Current |
 | 5 | Jammer | Disruptor | T1 | 150 | 50 | 1 | 37.50 | 2 | 12 |  | EMP radius 95: towers offline 2 s every 5 s | Current |
-| 6 | Echo | Special | - | 140 | 55 | 1 | 42.35 | 2 | 12 |  | Every 6 s drops 2 hologram copies (1 HP, same displayed rank) that use up shots | Proposed (draft) |
+| 6 | Mirage | Special | - | 140 | 55 | 1 | 42.35 | 2 | 12 |  | Every 6 s projects 2 translucent 1-HP holograms that walk to the core and vanish (never leak, no bounty) and soak shots | Proposed (draft) |
 | 7 | Phantom | Special | - | 85 | 72 | 0 | 44.06 | 1 | 7 |  | Built-in cloak: targetable only inside a Sensor Array field or briefly after area damage | Current |
 | 8 | Shrike | Swarm | T4 | 55 | 90 | 0 | 44.55 | 2 | 3 | Yes | Flying cluster: 5 per spawn event, 0.15 s apart; flies straight at the core | Proposed (draft) |
 | 9 | Skitter | Rusher | T1 | 45 | 105 | 0 | 49.61 | 1 | 4 |  | Fast, fragile crawler | Current |
@@ -59,9 +59,9 @@ built so each tier has more HP and/or speed than the one below it. No game code 
 | 22 | Shifter | Evader | T3 | 200 | 68 | 2 | 184.96 | 2 | 13 |  | Blinks 60 px every 5 s; each landing releases an 80 px wake: non-boss enemies inside get +20% speed for 2 s (multiplies with other boosts) | Proposed (draft) |
 | 23 | Siege Mech | Tank | T1 | 265 | 40 | 6 | 254.40 | 2 | 10 |  | Armor plating | Current |
 | 24 | Wraith | Evader | T4 | 260 | 74 | 2 | 284.75 | 3 | 18 |  | Cloaked (Sensor Array reveals it) and immune to physical damage: only energy hurts it (every non-projectile tower, plus burn, damage over time and Arc Coils). No blink. Parked until the damage-type PR | Proposed (draft) |
-| 25 | Decoy Beacon | Special | - | 400 | 36 | 6 | 311.04 | 1 | 10 |  | Shows a false top rank so Strongest towers aim at it; does nothing else | Proposed (draft) |
+| 25 | Decoy Beacon | Special | - | 400 | 36 | 6 | 311.04 | 1 | 10 |  | Fakes a rank above every non-boss (below bosses) that never drops, so Strongest towers aim at it; does nothing else; a Sensor Array upgrade reveals it | Proposed (draft) |
 | 26 | Capacitor | Disruptor | T4 | 420 | 44 | 4 | 325.25 | 3 | 20 |  | Charge and release: 2 s telegraphed charge, then EMP radius 160, towers offline 3 s, every 8 s; silence, stun or death during the charge cancels it | Proposed (draft) |
-| 27 | Mimic | Special | - | 320 | 60 | 3 | 345.60 | 2 | 14 |  | Shows as a T1 until first hit or below half health, then shows its real rank | Proposed (draft) |
+| 27 | Masquerade | Special | - | 320 | 60 | 3 | 345.60 | 2 | 14 |  | Shows a T1-class rank and role (Strongest and the Support/Special priority ignore it) until it drops below 50% health; a Sensor Array upgrade reveals it early | Proposed (draft) |
 | 28 | Rampart | Tank | T2 | 520 | 34 | 8 | 480.90 | 3 | 18 |  | Immune to slows, stuns and shoves | Current |
 | 29 | Gunship | Tank | T3 | 600 | 42 | 5 | 529.20 | 3 | 18 | Yes | Armored heavy flyer | Current, adjusted (HP 420 to 600) |
 | 30 | Titan | Tank | T4 | 700 | 30 | 9 | 567.00 | 4 | 24 |  | Slow resist 50%; at half health its plates shed: armor 9 to 5 and speed +20% | Proposed (draft) |
@@ -104,7 +104,8 @@ raise Drone's HP to 100 (Str 30.25) instead of lowering Locust's.
 
 ## Notes
 
-- The proposed enemies keep the targeting tricks from the spec: Mimic hides its rank, Decoy Beacon fakes
-  a high one, and Echo spends shots on holograms. Their score is the real stat score.
+- The proposed enemies keep the targeting tricks from the spec: Masquerade hides its rank, Decoy Beacon fakes
+  a high one, and Mirage spends shots on holograms. Their score is the real stat score; Strongest and the
+  Support/Special priority read the displayed one until a trick is revealed.
 - Armor 1 and armor 0 multiply by 1, so Repair Bot, Jammer and Blink Stalker score as unarmored.
 - Questions on this roster go in the Open questions of `design/enemies.md`.

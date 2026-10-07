@@ -12,7 +12,7 @@ changes until the owner confirms the spec.**
 | 1 | Needle, Fury Drone, Shrike, Titan (the stat enemies) | Designed below |
 | 2 | Siphon, Blackout Rig, Capacitor (Disruptors) | Designed below |
 | 3 | Shifter, Wraith (Evaders) | Designed below (Wraith parked until the damage-type PR) |
-| 4 | Mimic, Decoy Beacon, Echo (targeting tricks) | To do |
+| 4 | Masquerade, Decoy Beacon, Mirage (targeting tricks) | Designed below |
 
 ## Rules shared by all new enemies
 
@@ -250,13 +250,102 @@ and not built first; until then **Evader T4 stays empty**. The other three Tier 
 - **Dependency:** a damage-type tag on every damage event and tower, and an `energy_only` trait. That is a
   separate PR with its own design.
 
+## Round 4: the targeting tricks
+
+These three are **Specials** (no tiers) that play with what a tower believes about an enemy. Strongest
+targeting reads an enemy's strength in one place, `Game._score` (`e.hp` today, strength rank in the
+rework), and `Game.pick_target` already filters by the tower's priority (Any, Air, Ground). The tricks add a
+**displayed strength** and a **displayed role** that those two read instead of the true values, until the
+trick is revealed.
+
+### Shared rules for the tricks
+
+- **Displayed vs true:** Strongest targeting and the new **Support/Special priority both go by the displayed
+  identity** (decided), so a disguise works until it is revealed. First, Last and Closest don't read rank,
+  so they are never fooled.
+- **A subtle tell:** a disguised enemy (Masquerade, Decoy Beacon) carries a thin **dotted ring**; the shape
+  is the tell, so the colour follows the hull. The Codex states each trick plainly (decided earlier), and a
+  player who has met one can spot it.
+- **Revealing early:** a **specific new Sensor Array upgrade** reveals the true rank and identity of tricks
+  inside its field and marks holograms as fake. It is **not** part of the base Sensor Array. Its name, tree
+  position and cost are for its own PR (the upgrade trees are generated from `design/upgrade_trees.md`).
+- **Intel and Codex:** the field label shows the displayed identity until revealed.
+
+### Masquerade (Special)
+
+*Placeholder name: Mimic.*
+
+| HP | Speed | Armor | Fly | True Str | Shown as | Leak | Bounty |
+|---|---|---|---|---|---|---|---|
+| 320 | 60 | 3 | No | 345.60 | A T1 (Nanite-class, about 13) | 2 | 14 |
+
+- **Behaviour:** it shows a **low, T1-class strength** and a T1-class role, so Strongest and the
+  Support/Special priority ignore it. It keeps the disguise **until it drops below 50% health**, then shows its
+  real rank and role (a short flash and a label change).
+- **Job:** soak real damage while looking harmless; it punishes defences that rely on Strongest.
+- **Counters:** First, Last or Closest targeting, area damage that happens to hit it, and the Sensor Array
+  upgrade. Once below half health it is an ordinary Special.
+- **Look:** drawn with a Nanite-style hull on its own (larger) body, so its size is a second tell, plus the
+  dotted ring. When revealed the disguise peels away to its true hull (a one-shot effect). A glassy crack on
+  reveal.
+- **Codex text (draft):** "Looks like a basic unit and ranks like one, so Strongest targeting ignores it.
+  Below half health it drops the disguise. Use First or Closest targeting, or a Sensor Array upgrade, to see
+  it."
+- **Edge cases:** the 50% threshold is a one-way change (healing above it doesn't re-disguise it). Rally
+  Beacon haste applies. Not a boss. Strongest ties: it uses its displayed strength until revealed.
+
+### Decoy Beacon (Special)
+
+| HP | Speed | Armor | Fly | True Str | Shown as | Leak | Bounty |
+|---|---|---|---|---|---|---|---|
+| 400 | 36 | 6 | No | 311.04 | Above every non-boss, below bosses | 1 | 10 |
+
+- **Behaviour:** it **fakes a high strength**, above every non-boss and below the bosses, and **never stops**
+  until it dies or the Sensor upgrade reveals it. It does nothing else. It draws as a heavy hull and shows
+  as a Tank-class role.
+- **Job:** bait: Strongest towers waste fire on it while the real threats walk past.
+- **Counters:** switch the tower to First, Last or Closest, kill it (it has real HP and armor 6), or the
+  Sensor Array upgrade.
+- **Look:** a heavy, slow gunmetal hull with a beacon mast and the dotted ring. A low ping every few seconds
+  (the "beacon").
+- **Codex text (draft):** "Ranks as a heavy unit so Strongest towers aim at it, but it does nothing else.
+  Switch tower targeting, or kill it, to stop wasting fire."
+- **Edge cases:** because it displays below the bosses, real bosses keep their priority. It leaks for 1
+  shield (it is harmless). Not a boss.
+
+### Mirage (Special)
+
+*Placeholder name: Echo.*
+
+| HP | Speed | Armor | Fly | Str | Leak | Bounty |
+|---|---|---|---|---|---|---|
+| 140 | 55 | 1 | No | 42.35 | 2 | 12 |
+
+- **Behaviour:** every **6 s** it projects **2 holograms**: translucent copies (**1 HP**) that **walk to the
+  core and vanish there**. They **never leak**, cost no shields and give no bounty. They show the Mirage's own
+  displayed rank. Any hit kills one, so splash and chain clear several at once.
+- **Job:** a shot sink: towers waste shots on 1-HP copies.
+- **Counters:** area and chain towers, and the Sensor Array upgrade, which marks holograms as fake.
+- **Look:** a projector dish; the holograms are a translucent copy of the Mirage with a scanline (an alpha
+  plus a line, cheap to draw). A soft chime per pair.
+- **Codex text (draft):** "Projects two translucent copies every 6 s that soak shots and walk to the core. A
+  single hit kills one. Splash and chain towers clear them."
+- **Edge cases:** holograms are live enemies until they vanish at the core, so a round does not end while any
+  are walking. They are ground units and can take hazards. Because the Mirage is a Special, the
+  Support/Special priority targets it and its holograms.
+
 ## Implementation notes (for when the spec is confirmed)
 
 - **Registry:** all four go in `data/enemies.gd` (`ORDER` and `ENEMIES`). The "22 enemy types" test count
-  becomes 26 with the round-1 four, 29 after round 2 and 30 with Shifter (31 when the parked Wraith lands), plus per-trait tests (pair spawn, adrenaline, plate shed,
+  becomes 26 with the round-1 four, 29 after round 2 and 30 with Shifter, 33 with the three tricks (and 34 if a hologram is its own type; 31 or more when the parked Wraith lands), plus per-trait tests (pair spawn, adrenaline, plate shed,
   flying cluster, Siphon aura debuff and strongest-wins, Capacitor charge cancel, disable guard).
 - **Drawing:** follow the performance rules (`Draw.disc`, `ring`, `poly`, `polyline`; animated parts in
   `Draw.dyn`). Screenshots go to the owner for review.
+- **Tricks:** the enemy gets `shown_str` and `shown_role` read by `Game._score` (Strongest) and the
+  Support/Special priority in `pick_target`; a hologram is a lightweight enemy (no leak, no bounty, dies to any
+  damage). Tests: Strongest ignores a Masquerade until half health; a Decoy outranks non-bosses but not bosses;
+  a hologram never leaks or pays; the round waits for holograms; the Sensor upgrade reveals tricks; the
+  priority uses displayed identity.
 - **Sandbox Spawner:** new enemies appear in its grid once registered.
 - **Saves:** enemies aren't saved, so there is no save bump.
 - **Codex:** entries and the Codex PDF are regenerated in phase 5.
@@ -277,4 +366,13 @@ and not built first; until then **Evader T4 stays empty**. The other three Tier 
    Pulse Turret (its blurb says "energy bolts" but it is a projectile), is the damage-type PR's job.
 7. **Wraith introduction.** The first round it appears, after players can own an energy tower, set in the
    generator PR.
-8. **Remaining three enemies.** Mimic, Decoy Beacon and Echo (the targeting tricks) are the last round.
+8. **Hologram displayed rank.** Draft: a hologram copies the Mirage's own (low) displayed rank, so it baits
+   First and Closest more than Strongest. Or give holograms a high fake rank so they bait Strongest too?
+9. **Holograms and their Mirage.** Draft: existing holograms vanish if their Mirage dies (they are
+   projections). Or they keep walking?
+10. **NEXT strip and Intel.** Do they list a trick enemy truthfully ("Masquerade") or as its disguise until
+    revealed? The Codex states the tricks plainly either way.
+11. **The Sensor Array upgrade.** Its name, position in the tree, cost and exact effect are for its own PR and
+    your approval; the upgrade data is generated from `design/upgrade_trees.md`.
+12. **Decoy's role in the priority.** It shows as a Tank-class unit, so the Support/Special priority ignores
+    it. Is that right?

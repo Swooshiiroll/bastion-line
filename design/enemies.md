@@ -225,9 +225,9 @@ Role, tier, job and counter are a draft. **Stats for every current and proposed 
 | Capacitor (was Surge Core) | Disruptor T4 | Higher tier | Charge and release: 2 s telegraph, then a radius-160 EMP for 3 s every 8 s | Stun or silence during the charge, burst |
 | Shifter (was Slipstream) | Evader T3 | Higher tier | Blinks 60 px every 5 s; the landing point boosts nearby enemies +20% speed for 2 s | Slow or stun to reset its charge |
 | Wraith | Evader T4 (parked) | Higher tier | Cloaked and immune to physical damage; only energy hurts it | Energy towers, Arc Coils, burn, Sensor Array |
-| Mimic | Evader or Special | Targeting trick | Shows a low rank (looks like T1) until first hit or below a set HP, then shows its real higher rank | Area damage reveals it early; First targeting |
-| Decoy Beacon | Special | Targeting trick | Shows a false high strength rank so Strongest towers aim at it while others get past; armored, does nothing else | Switch towers to First, splash |
-| Echo | Special | Targeting trick | Puts out hologram copies with the same rank and 1 HP that use up shots | Area and chain, sensors |
+| Masquerade (was Mimic) | Special | Targeting trick | Shows a T1-class rank and role until it drops below 50% health | First/Last/Closest targeting, area damage, the Sensor upgrade |
+| Decoy Beacon | Special | Targeting trick | Shows a false rank above every non-boss (below bosses) that never drops; armored, does nothing else | Switch tower mode, kill it, the Sensor upgrade |
+| Mirage (was Echo) | Special | Targeting trick | Every 6 s projects 2 translucent 1-HP holograms that walk to the core and vanish; they never leak | Area and chain, the Sensor upgrade |
 
 Nexus (Support T5) is cut: Support already has four tiers. The "22 enemy types" test count changes when
 these land (phase 4).
@@ -297,12 +297,16 @@ they exist.
 - **New enemies, round 3 (Evaders):** Shifter (Evader T3, blink plus a wake burst of +20% speed) and Wraith
   (Evader T4: cloak plus energy-only, no blink, parked until the damage-type PR). Energy means every
   non-projectile tower plus burn/damage over time and Arc Coils. Sheets in `design/new_enemies.md`.
+- **New enemies, round 4 (targeting tricks):** Masquerade (reveals below 50% health), Decoy Beacon (bait, fakes
+  a rank above every non-boss, never stops) and Mirage (2 holograms every 6 s that walk to the core without
+  leaking). The Support/Special priority and Strongest go by the **displayed** identity. A specific new
+  Sensor Array upgrade reveals tricks (its own PR). Sheets in `design/new_enemies.md`.
 - **Q13 Roster file:** the current and proposed enemies live in `design/enemy_roster.md`, with stats.
 - **Q11 Saves and waves:** one generator makes every round, identical on every playthrough, seeded by
   the round number alone, with introduction rounds baked in for new tiers, elites and modifiers. It goes
   on forever for Endless. Modifiers need no new save field and no version bump. See "Waves" in section 4.
 - **Q14 HP scaling:** lowered.
-- **Q16 Mimic and Decoy:** the field label hides the true rank until revealed, and the Codex states each
+- **Q16 Masquerade (was Mimic) and Decoy Beacon:** the field label hides the true rank until revealed, and the Codex states each
   trick plainly. The Codex "seen enemies" tracking is unchecked.
 - **Wraith (energy-only damage):** needs a physical/energy tag on every tower, a new system. It becomes
   a separate PR after the core rework; until then Wraith is a draft idea.
@@ -313,10 +317,10 @@ they exist.
 1. **Support and Special priority: details.** The game already has a per-tower priority (Any, Air,
    Ground). **Recommendation:** add a fourth entry (e.g. "Support") to `Tower.PRIORITY_NAMES`, so it
    uses the existing cycle button and needs no save version bump (old saves load with their stored
-   value). Questions: does "Special" include Phantom, Aegis Walker, Hydra Frame and the new Mimic, Decoy
-   Beacon and Echo? **Recommendation:** yes, and it goes by the enemy's *displayed* identity, so Mimic and
-   Decoy tricks still work until revealed. Which mode (First, Strongest...) orders targets inside the
-   priority? **Recommendation:** the tower's current mode.
+   value). **Decided:** it goes by the enemy's *displayed* identity, so the tricks (Masquerade, Decoy
+   Beacon) still work until revealed. Still open: does "Special" include Phantom, Aegis Walker, Hydra Frame,
+   Masquerade (once revealed), Decoy Beacon and Mirage? **Recommendation:** yes, by displayed identity. Which
+   mode (First, Strongest...) orders targets inside the priority? **Recommendation:** the tower's current mode.
 2. **Boss rounds: details.** Every 20 rounds. Which boss comes on which boss round (20, 40, 60, 80, 100,
    120)? Does the Dreadnought stop appearing every 5th round? Do the existing finales (e.g. round 40:
    two Dreadnoughts, a Leviathan, an Overmind) stay as the 40th-round boss wave?
