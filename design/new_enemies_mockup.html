@@ -1,0 +1,779 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>New Enemies Mockup</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    color-scheme: dark;
+    --ground: #06090e; --field: #0b1016; --panel: #08111a; --panel-2: #0d1a25; --rule: #1d3a4b; --wire: #2a5a70;
+    --text: #dcedf7; --dim: #86a0b1; --faint: #4f6a7b; --accent: #4de1ff; --gold: #ffc85a; --good: #66ff99; --bad: #ff5c66;
+    --display: "Chakra Petch", "Bahnschrift", "Segoe UI", sans-serif;
+    --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--text); font: 14px/1.5 var(--body); padding: 28px 16px 48px; }
+  .wrap { max-width: 1320px; margin: 0 auto; display: grid; gap: 22px; }
+  .eyebrow { font: 600 12px var(--display); letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
+  h1 { font: 700 30px/1.1 var(--display); margin: 4px 0 0; }
+  h2 { font: 700 20px/1.2 var(--display); margin: 0; letter-spacing: .04em; }
+  p.note { margin: 6px 0 0; color: var(--dim); max-width: 85ch; }
+  .controls { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center;
+    padding: 10px 12px; background: rgba(8,17,26,.94); border: 1px solid var(--rule); border-radius: 10px 2px 10px 2px; }
+  .controls .lbl { font: 600 11px var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--faint); }
+  .seg { display: inline-flex; border: 1px solid var(--wire); border-radius: 6px; overflow: hidden; }
+  button { font: 600 12px var(--display); letter-spacing: .06em; color: var(--text); background: var(--panel-2);
+    border: 0; padding: 6px 11px; cursor: pointer; }
+  .seg button + button { border-left: 1px solid var(--wire); }
+  button.on { background: var(--accent); color: #031018; }
+  button.solo { border: 1px solid var(--wire); border-radius: 6px; }
+  button:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
+  section.role { display: grid; gap: 10px; }
+  .role-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid var(--rule); padding-bottom: 6px; }
+  .role-head .job { color: var(--dim); font-size: 13px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 420px), 1fr)); gap: 12px; }
+  .card { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px 2px 12px 2px; padding: 10px 12px 12px; display: grid; gap: 8px; }
+  .card.new { border-color: var(--wire); box-shadow: 0 0 18px rgba(77,225,255,.08); }
+  .card-head { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .card-head .name { font: 700 16px var(--display); letter-spacing: .03em; }
+  .chip { font: 600 10px var(--display); letter-spacing: .12em; text-transform: uppercase; padding: 1px 7px; border-radius: 4px; border: 1px solid var(--wire); color: var(--dim); }
+  .chip.new { color: #031018; background: var(--accent); border-color: var(--accent); }
+  .chip.parked { color: var(--gold); border-color: var(--gold); }
+  .views { display: flex; gap: 10px; align-items: flex-end; flex-wrap: wrap; }
+  .view { display: grid; gap: 2px; justify-items: start; }
+  .view small { font: 500 10px var(--mono); color: var(--faint); letter-spacing: .04em; }
+  canvas { display: block; background: var(--field); border: 1px solid var(--rule); border-radius: 4px; }
+  .meta { font: 12px var(--mono); color: var(--dim); }
+  .meta b { color: var(--text); font-weight: 500; }
+  .desc { color: var(--dim); font-size: 13px; margin: 0; }
+  .act { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .frames { display: none; gap: 8px; flex-wrap: wrap; }
+  .frames figure { margin: 0; display: grid; gap: 2px; }
+  .frames img { width: 216px; height: 144px; border: 1px solid var(--rule); border-radius: 4px; background: var(--field); }
+  .frames figcaption { font: 500 10px var(--mono); color: var(--faint); }
+  .fx { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 460px), 1fr)); gap: 12px; }
+  .caps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; font: 11px var(--mono); color: var(--dim); }
+  .caps span { text-align: center; }
+  .flag { border-left: 3px solid var(--gold); padding: 6px 10px; background: rgba(255,200,90,.06); color: var(--text); font-size: 13px; }
+  body.print .controls, body.print .live, body.print .act button { display: none !important; }
+  body.print .frames { display: flex; }
+  @media print {
+    body { background: #fff; color: #000; padding: 0; }
+    .controls { display: none; }
+    .card, .card.new { break-inside: avoid; background: #fff; border-color: #999; box-shadow: none; }
+    .live { display: none !important; }
+    .frames { display: flex !important; }
+    .desc, .meta, .role-head .job, p.note { color: #333; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Bastion Line · Enemy rework · issue #53</div>
+    <h1>New enemies: visual mockup</h1>
+    <p class="note">The twelve new enemies from <code>design/new_enemies.md</code>, drawn with a canvas port of the game's
+      own drawing helpers (<code>Draw.gd</code>: plate, orb, strip, limb, glow dot) so each design translates directly into
+      GDScript. Each role shows its existing enemies next to the new ones, at <b>game scale (1x on a 48 px lane tile)</b>
+      and at <b>3x</b>. Radii, colours and shapes are drafts for you to mark up. Use a card's button to play its key
+      moment; <b>Print view</b> lays out key frames as still images.</p>
+  </header>
+
+  <div class="controls" role="toolbar" aria-label="Playback">
+    <button class="solo" id="play" aria-pressed="true">Pause</button>
+    <span class="lbl">Speed</span>
+    <span class="seg" id="speed"><button data-v="0.5">0.5x</button><button data-v="1" class="on">1x</button><button data-v="2">2x</button></span>
+    <span class="lbl">Trick tell</span>
+    <span class="seg" id="tell"><button data-v="dots" class="on">Dotted ring</button><button data-v="glitch">Glitch outline</button></span>
+    <button class="solo" id="printview" aria-pressed="false">Print view</button>
+  </div>
+
+  <div id="roles"></div>
+
+  <section class="role">
+    <div class="role-head"><h2>Effects</h2><span class="job">How the new rules look on the field. Shown at 2x.</span></div>
+    <div class="flag"><b>Flag:</b> the existing <b>Exposed</b> status (a Sensor Array strips immunities) is already a dashed
+      white ring that rotates around the enemy. A dotted-ring tell for disguised enemies could be mistaken for it.
+      The middle panel shows them side by side with an alternative "glitch outline" tell. Pick one; the
+      <b>Trick tell</b> toggle above switches the Masquerade and Decoy Beacon cards too.</div>
+    <div class="fx" id="fx"></div>
+  </section>
+</div>
+
+<script>
+"use strict";
+// ---- Colours and vectors (mirrors Draw.gd) -------------------------------------------------
+const OUTLINE = [0.03, 0.04, 0.06, 0.95], METAL_D = [0.10, 0.115, 0.14, 1], METAL = [0.18, 0.20, 0.24, 1], METAL_L = [0.30, 0.33, 0.38, 1];
+const LIGHT = [-0.6, -0.8];
+const WHITE = [1, 1, 1, 1];
+const A = (c, a) => [c[0], c[1], c[2], a];
+const dk = (c, k) => [c[0] * (1 - k), c[1] * (1 - k), c[2] * (1 - k), c[3] ?? 1];
+const lt = (c, k) => [c[0] + (1 - c[0]) * k, c[1] + (1 - c[1]) * k, c[2] + (1 - c[2]) * k, c[3] ?? 1];
+const mix = (a, b, k) => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k, (a[3] ?? 1) + ((b[3] ?? 1) - (a[3] ?? 1)) * k];
+const css = c => `rgba(${Math.round(c[0] * 255)},${Math.round(c[1] * 255)},${Math.round(c[2] * 255)},${c[3] ?? 1})`;
+const add = (a, b) => [a[0] + b[0], a[1] + b[1]];
+const sub = (a, b) => [a[0] - b[0], a[1] - b[1]];
+const mul = (a, k) => [a[0] * k, a[1] * k];
+const fa = a => [Math.cos(a), Math.sin(a)];
+const orth = v => [v[1], -v[0]];
+const dot = (a, b) => a[0] * b[0] + a[1] * b[1];
+const norm = v => { const l = Math.hypot(v[0], v[1]) || 1; return [v[0] / l, v[1] / l]; };
+const rot = (p, r) => [p[0] * Math.cos(r) - p[1] * Math.sin(r), p[0] * Math.sin(r) + p[1] * Math.cos(r)];
+const TAU = Math.PI * 2;
+const clamp01 = x => Math.max(0, Math.min(1, x));
+const ease = x => { x = clamp01(x); return x * x * (3 - 2 * x); };
+const fmod = (a, b) => ((a % b) + b) % b;
+
+// ---- Drawing primitives (one-to-one with Draw.gd) ------------------------------------------
+let X = null; // current 2D context
+function disc(c, r, col) { if (r <= 0) return; X.fillStyle = css(col); X.beginPath(); X.arc(c[0], c[1], r, 0, TAU); X.fill(); }
+function arc(c, r, a0, a1, col, w) { X.strokeStyle = css(col); X.lineWidth = w > 0 ? w : 1; X.beginPath(); X.arc(c[0], c[1], Math.max(0.01, r), a0, a1); X.stroke(); }
+function ring(c, r, col, w = 1.5) { arc(c, r, 0, TAU, col, w); }
+function line(a, b, col, w = 1) { X.strokeStyle = css(col); X.lineWidth = w > 0 ? w : 1; X.beginPath(); X.moveTo(a[0], a[1]); X.lineTo(b[0], b[1]); X.stroke(); }
+function polyline(pts, col, w = 1) { if (pts.length < 2) return; X.strokeStyle = css(col); X.lineWidth = w > 0 ? w : 1; X.beginPath(); X.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) X.lineTo(pts[i][0], pts[i][1]); X.stroke(); }
+function poly(pts, col) { X.fillStyle = css(col); X.beginPath(); X.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) X.lineTo(pts[i][0], pts[i][1]); X.closePath(); X.fill(); }
+function xform(c, pts, r, s) { return pts.map(p => add(c, rot(mul(p, s), r))); }
+function fill(c, pts, col, r = 0, s = 1) { poly(xform(c, pts, r, s), col); }
+function outline(c, pts, col, w, r = 0, s = 1) { const p = xform(c, pts, r, s); p.push(p[0]); polyline(p, col, w); }
+function solid(c, pts, col, r = 0, s = 1, lw = 1.2) { fill(c, pts, col, r, s); outline(c, pts, OUTLINE, lw, r, s); }
+function ellipse(c, rx, ry, col) { X.fillStyle = css(col); X.beginPath(); X.ellipse(c[0], c[1], Math.max(0.01, rx), Math.max(0.01, ry), 0, 0, TAU); X.fill(); }
+function rect(x, y, w, h, col) { X.fillStyle = css(col); X.fillRect(x, y, w, h); }
+function ngon(n, r, ph = 0) { const o = []; for (let i = 0; i < n; i++) { const a = ph + TAU * i / n; o.push([Math.cos(a) * r, Math.sin(a) * r]); } return o; }
+function rectPts(hw, hh) { return [[-hw, -hh], [hw, -hh], [hw, hh], [-hw, hh]]; }
+function glowDot(c, r, col) { disc(c, r * 2.2, A(col, 0.18 * (col[3] ?? 1))); disc(c, r * 1.4, A(col, 0.35 * (col[3] ?? 1))); disc(c, r, col); disc(c, r * 0.45, [1, 1, 1, 0.9 * (col[3] ?? 1)]); }
+function arcSegments(c, r, count, gap, rt, col, w) { const span = TAU / count; for (let i = 0; i < count; i++) { const a0 = rt + span * i + gap * 0.5; arc(c, r, a0, a0 + span - gap, col, w); } }
+function orb(p, r, col) {
+  disc(p, r + 1.1, OUTLINE); disc(p, r, dk(col, 0.3)); disc(add(p, mul(LIGHT, r * 0.12)), r * 0.8, col);
+  arc(p, r * 0.72, Math.PI * 1.05, Math.PI * 1.6, lt(col, 0.35), Math.max(0.8, r * 0.16));
+  disc(add(p, mul(LIGHT, r * 0.45)), Math.max(0.6, r * 0.13), [1, 1, 1, 0.55]);
+}
+function plate(c, pts, col, r = 0, s = 1, lw = 1.2) {
+  const p = xform(c, pts, r, s);
+  poly(p, dk(col, 0.22));
+  let ce = [0, 0]; for (const q of p) ce = add(ce, q); ce = mul(ce, 1 / p.length);
+  poly(p.map(q => add(ce, mul(sub(q, ce), 0.8))), col);
+  for (let i = 0; i < p.length; i++) {
+    const a = p[i], b = p[(i + 1) % p.length];
+    const m = norm(sub(mul(add(a, b), 0.5), ce));
+    const d = dot(m, LIGHT);
+    const a1 = add(a, mul(sub(ce, a), 0.1)), b1 = add(b, mul(sub(ce, b), 0.1));
+    if (d > 0.15) line(a1, b1, lt(col, 0.45), Math.max(0.8, lw * 0.8));
+    else if (d < -0.15) line(a1, b1, dk(col, 0.5), Math.max(0.8, lw * 0.8));
+  }
+  const cl = p.slice(); cl.push(p[0]); polyline(cl, OUTLINE, lw);
+}
+function rivets(c, pts, r, s, inset = 0.72, rr = 0.9) { for (const q of xform(c, pts, r, s)) { const p = add(c, mul(sub(q, c), inset)); disc(p, rr + 0.3, OUTLINE); disc(p, rr, lt(METAL_L, 0.15)); } }
+function bar(a, b, w, col) {
+  const d = norm(sub(b, a)); let n = orth(d); if (dot(n, LIGHT) < 0) n = mul(n, -1);
+  line(a, b, OUTLINE, w + 1.6); line(a, b, dk(col, 0.25), w);
+  line(add(a, mul(n, w * 0.18)), add(b, mul(n, w * 0.18)), col, w * 0.55);
+  line(add(a, mul(n, w * 0.3)), add(b, mul(n, w * 0.3)), lt(col, 0.4), Math.max(0.6, w * 0.16));
+}
+function strip(a, b, w, col) { line(a, b, A(col, 0.25 * (col[3] ?? 1)), w * 2.6); line(a, b, col, w); line(a, b, [1, 1, 1, 0.6 * (col[3] ?? 1)], Math.max(0.5, w * 0.35)); }
+function oval(c, rx, ry, r, col, ow = 0) {
+  const pts = []; for (let i = 0; i < 20; i++) { const a = TAU * i / 20; pts.push(add(c, rot([Math.cos(a) * rx, Math.sin(a) * ry], r))); }
+  if (ow > 0) poly(pts.map(p => add(c, mul(sub(p, c), 1 + ow / Math.max(rx, ry)))), OUTLINE);
+  poly(pts, col);
+}
+function shadedOval(c, rx, ry, r, col) {
+  const m = Math.min(rx, ry);
+  oval(c, rx, ry, r, dk(col, 0.3), 1.3); oval(add(c, mul(LIGHT, m * 0.12)), rx * 0.8, ry * 0.78, r, col);
+  disc(add(c, mul(LIGHT, m * 0.5)), Math.max(0.6, m * 0.14), [1, 1, 1, 0.45]);
+}
+function limb(pts, w, col) { polyline(pts, OUTLINE, w + 1.4); polyline(pts, col, w); for (let i = 1; i < pts.length - 1; i++) { disc(pts[i], w * 0.75 + 0.4, OUTLINE); disc(pts[i], w * 0.75, lt(col, 0.25)); } }
+
+// ---- Palettes (existing from Draw.gd ENEMY_BODY / ENEMY_COLOR; new ones are drafts) ----------
+const PAL = {
+  grunt: [[0.40, 0.42, 0.48, 1], [1.00, 0.28, 0.22, 1]], runner: [[0.30, 0.30, 0.32, 1], [1.00, 0.80, 0.20, 1]],
+  brute: [[0.40, 0.37, 0.33, 1], [1.00, 0.55, 0.15, 1]], swarmling: [[0.12, 0.30, 0.16, 1], [0.40, 1.00, 0.50, 1]],
+  bat: [[0.30, 0.32, 0.38, 1], [1.00, 0.35, 0.25, 1]], phantom: [[0.16, 0.20, 0.26, 1], [0.55, 0.95, 1.00, 1]],
+  aegis: [[0.30, 0.36, 0.46, 1], [0.40, 0.70, 1.00, 1]], hydra: [[0.36, 0.30, 0.22, 1], [1.00, 0.65, 0.25, 1]],
+  jammer: [[0.26, 0.28, 0.24, 1], [0.90, 1.00, 0.30, 1]], locust: [[0.30, 0.36, 0.22, 1], [0.75, 1.00, 0.35, 1]],
+  gunship: [[0.30, 0.33, 0.30, 1], [1.00, 0.45, 0.30, 1]], burrower: [[0.40, 0.33, 0.24, 1], [1.00, 0.70, 0.35, 1]],
+  stalker: [[0.22, 0.20, 0.30, 1], [0.75, 0.55, 1.00, 1]], rampart: [[0.36, 0.34, 0.30, 1], [1.00, 0.45, 0.35, 1]],
+  // new (draft)
+  needle: [[0.22, 0.24, 0.28, 1], [0.94, 0.95, 0.97, 1]], fury: [[0.25, 0.17, 0.24, 1], [1.00, 0.25, 0.75, 1]],
+  shrike: [[0.34, 0.36, 0.40, 1], [0.20, 0.90, 0.80, 1]], titan: [[0.28, 0.29, 0.32, 1], [1.00, 0.45, 0.10, 1]],
+  siphon: [[0.26, 0.28, 0.24, 1], [0.90, 1.00, 0.30, 1]], blackout: [[0.24, 0.26, 0.22, 1], [0.95, 1.00, 0.45, 1]],
+  capacitor: [[0.22, 0.24, 0.22, 1], [0.85, 1.00, 0.35, 1]], shifter: [[0.27, 0.25, 0.20, 1], [1.00, 0.88, 0.55, 1]],
+  wraith: [[0.12, 0.11, 0.24, 1], [0.86, 0.88, 1.00, 1]], masq: [[0.30, 0.20, 0.32, 1], [1.00, 0.40, 0.55, 1]],
+  decoy: [[0.30, 0.31, 0.33, 1], [1.00, 0.75, 0.30, 1]], mirage: [[0.20, 0.24, 0.30, 1], [0.80, 0.70, 1.00, 1]],
+};
+const FLYERS = new Set(["bat", "locust", "gunship", "shrike"]);
+const SELF_SHADOW = new Set(["siphon"]); // hovers: draws its own offset shadow
+let TELL = "dots";
+
+// ---- Existing enemies, ported from Draw.enemy ------------------------------------------------
+const DRAW = {};
+DRAW.grunt = (c, f, n, ang, rr, t, b, g) => {
+  disc(c, rr * 1.2, A(g, 0.07));
+  for (const side of [-1, 1]) { const pod = add(c, mul(n, side * rr * 0.95)); plate(pod, rectPts(0.5, 0.24), lt(METAL_D, 0.1), ang, rr, 1.0); strip(sub(sub(pod, mul(f, rr * 0.55)), mul(n, rr * 0.12)), add(sub(pod, mul(f, rr * 0.55)), mul(n, rr * 0.12)), 0.8, [0.4, 0.8, 1.0, 1]); }
+  bar(add(c, mul(f, rr * 0.3)), add(c, mul(f, rr * 1.3)), 2.0, METAL_L); disc(add(c, mul(f, rr * 1.3)), 1.1, [0.05, 0.05, 0.05, 1]);
+  orb(c, rr * 0.86, b); arcSegments(c, rr * 0.64, 6, 0.35, ang, dk(b, 0.35), 1.4);
+  const e = add(c, mul(f, rr * 0.12)); disc(e, rr * 0.4, OUTLINE); disc(e, rr * 0.33, [0.15, 0.03, 0.03, 1]); glowDot(e, rr * 0.2, g); disc(add(e, mul(LIGHT, rr * 0.15)), rr * 0.07, [1, 1, 1, 0.8]);
+};
+DRAW.runner = (c, f, n, ang, rr, t, b, g) => {
+  for (let i = 0; i < 3; i++) for (const side of [-1, 1]) {
+    const ph = t * 20 + i * 2.1 + (side > 0 ? Math.PI : 0);
+    const root = add(add(c, mul(f, (1 - i) * rr * 0.35)), mul(n, side * rr * 0.28));
+    const knee = add(add(root, mul(n, side * rr * 0.7)), mul(f, ((1 - i) * 0.35 + 0.22 * Math.sin(ph)) * rr));
+    const foot = add(add(knee, mul(n, side * rr * 0.3)), mul(f, (1 - i) * 0.45 * rr));
+    limb([root, knee, foot], 1.0, METAL_L);
+  }
+  shadedOval(sub(c, mul(f, rr * 0.35)), rr * 0.56, rr * 0.43, ang, b);
+  for (let k = 0; k < 2; k++) { const sp = sub(c, mul(f, rr * (0.2 + 0.25 * k))); line(sub(sp, mul(n, rr * 0.35)), add(sp, mul(n, rr * 0.35)), [0, 0, 0, 0.45], 1.0); }
+  strip(sub(c, mul(f, rr * 0.65)), sub(c, mul(f, rr * 0.1)), 0.8, g);
+  orb(add(c, mul(f, rr * 0.35)), rr * 0.35, lt(b, 0.15));
+  for (const side of [-1, 1]) { line(add(add(c, mul(f, rr * 0.6)), mul(n, side * rr * 0.12)), add(add(c, mul(f, rr * 0.85)), mul(n, side * rr * 0.04)), METAL_L, 1.0); glowDot(add(add(c, mul(f, rr * 0.5)), mul(n, side * rr * 0.14)), rr * 0.08, g); }
+};
+DRAW.brute = (c, f, n, ang, rr, t, b, g) => {
+  for (const side of [-1, 1]) {
+    const step = Math.sin(t * 5 + (side > 0 ? Math.PI : 0)) * rr * 0.35;
+    const hip = add(c, mul(n, side * rr * 0.45)), knee = add(add(hip, mul(n, side * rr * 0.2)), mul(f, step * 0.5)), foot = add(add(hip, mul(n, side * rr * 0.15)), mul(f, step));
+    limb([hip, knee, foot], 3.0, lt(METAL_D, 0.1)); plate(foot, rectPts(0.32, 0.2), METAL_L, ang, rr, 1.0);
+  }
+  const hull = ngon(6, 1.0); plate(c, hull, b, ang, rr * 0.84, 1.6); rivets(c, hull, ang, rr * 0.84, 0.78, 0.6);
+  fill(c, rectPts(0.3, 0.42), dk(b, 0.15), ang, rr);
+  for (const side of [-1, 1]) { const sh = add(c, mul(n, side * rr * 0.78)); plate(sh, rectPts(0.34, 0.3), METAL_L, ang, rr, 1.2); bar(add(sh, mul(f, rr * 0.2)), add(sh, mul(f, rr * 1.15)), 2.4, METAL_L); disc(add(sh, mul(f, rr * 1.15)), 1.4, [0.05, 0.05, 0.05, 1]); disc(add(sh, mul(f, rr * 1.15)), 0.8, A(g, 0.9)); }
+  const v = add(c, mul(f, rr * 0.42)); strip(sub(v, mul(n, rr * 0.28)), add(v, mul(n, rr * 0.28)), 1.6, g);
+};
+DRAW.swarmling = (c, f, n, ang, rr, t, b, g) => {
+  disc(c, rr * 1.7, A(g, 0.13));
+  for (let k = 0; k < 4; k++) { const p = add(c, mul(fa(t * 7 + TAU * k / 4), rr * 0.78)); solid(p, [[0.5, 0], [0, 0.35], [-0.5, 0], [0, -0.35]], lt(b, 0.35), t * 7, rr, 0.8); disc(p, rr * 0.11, g); }
+  orb(c, rr * 0.34, lt(b, 0.2)); glowDot(c, rr * 0.18, g);
+};
+DRAW.bat = (c, f, n, ang, rr, t, b, g) => {
+  ellipse(add(c, [0, rr * 2.4]), rr * 1.3, rr * 0.4, [0, 0, 0, 0.2]);
+  for (let k = 0; k < 4; k++) {
+    const a = ang + Math.PI / 4 + TAU * k / 4, tip = add(c, mul(fa(a), rr * 1.2));
+    bar(c, tip, 1.8, lt(METAL_D, 0.15)); disc(tip, rr * 0.62, [0.8, 0.86, 0.95, 0.12]); ring(tip, rr * 0.62, [0.8, 0.86, 0.95, 0.35], 0.8);
+    const spin = t * 38 * (k % 2 === 0 ? 1 : -1);
+    for (let q = 0; q < 2; q++) line(tip, add(tip, mul(fa(spin + q * Math.PI), rr * 0.58)), [0.85, 0.9, 1.0, 0.55], 1.2);
+    orb(tip, rr * 0.17, METAL_L);
+    const nav = k < 2 ? [1, 0.25, 0.25, 1] : [0.3, 1, 0.45, 1];
+    if (fmod(t * 1.5 + k * 0.25, 1) < 0.35) glowDot(add(c, mul(fa(a), rr * 0.72)), rr * 0.08, nav);
+  }
+  plate(c, [[0.62, 0], [0.35, 0.36], [-0.5, 0.3], [-0.62, 0], [-0.5, -0.3], [0.35, -0.36]], b, ang, rr, 1.2);
+  for (const side of [-1, 1]) { const pod = add(add(c, mul(n, side * rr * 0.34)), mul(f, rr * 0.1)); bar(pod, add(pod, mul(f, rr * 0.45)), 1.6, METAL_L); }
+  const cam = add(c, mul(f, rr * 0.42)); orb(cam, rr * 0.2, METAL); glowDot(add(cam, mul(f, rr * 0.06)), rr * 0.09, g);
+  strip(sub(sub(c, mul(f, rr * 0.35)), mul(n, rr * 0.12)), add(sub(c, mul(f, rr * 0.35)), mul(n, rr * 0.12)), 0.7, g);
+};
+DRAW.locust = (c, f, n, ang, rr, t, b, g) => {
+  ellipse(add(c, [0, rr * 2.6]), rr * 0.9, rr * 0.3, [0, 0, 0, 0.18]);
+  const flap = 0.55 + 0.45 * Math.sin(t * 60);
+  for (const side of [-1, 1]) for (let k = 0; k < 2; k++) { const root = add(c, mul(f, rr * (0.25 - 0.45 * k))); const tip = sub(add(root, mul(n, side * rr * (1.5 * flap + 0.3))), mul(f, rr * 0.35)); line(root, tip, [0.85, 0.95, 0.8, 0.45], 1.6); }
+  shadedOval(sub(c, mul(f, rr * 0.1)), rr * 0.9, rr * 0.42, ang, b); glowDot(add(c, mul(f, rr * 0.6)), rr * 0.3, g);
+};
+DRAW.gunship = (c, f, n, ang, rr, t, b, g) => {
+  ellipse(add(c, [0, rr * 2.0]), rr * 1.4, rr * 0.4, [0, 0, 0, 0.22]);
+  bar(sub(c, mul(f, rr * 0.4)), sub(c, mul(f, rr * 1.35)), 2.4, lt(METAL_D, 0.12)); plate(sub(c, mul(f, rr * 1.35)), rectPts(0.1, 0.42), METAL, ang, rr, 1.0);
+  for (const side of [-1, 1]) {
+    const fan = sub(add(c, mul(n, side * rr * 0.95)), mul(f, rr * 0.1));
+    disc(fan, rr * 0.5, OUTLINE); disc(fan, rr * 0.44, METAL_D);
+    for (let q = 0; q < 3; q++) line(fan, add(fan, mul(fa(t * 30 * side + TAU * q / 3), rr * 0.4)), [0.8, 0.85, 0.95, 0.5], 1.4);
+    ring(fan, rr * 0.47, METAL_L, 1.6); glowDot(sub(fan, mul(f, rr * 0.5)), rr * 0.08, side < 0 ? [1, 0.25, 0.25, 1] : [0.3, 1, 0.45, 1]);
+  }
+  const hull = [[0.95, 0], [0.55, 0.5], [-0.6, 0.55], [-0.85, 0.2], [-0.85, -0.2], [-0.6, -0.55], [0.55, -0.5]];
+  plate(c, hull, b, ang, rr * 0.8, 1.6); rivets(c, hull, ang, rr * 0.8, 0.72, 0.6);
+  line(sub(c, mul(f, rr * 0.4)), add(c, mul(f, rr * 0.45)), [0, 0, 0, 0.35], 1.0);
+  const tur = add(c, mul(f, rr * 0.55));
+  for (const side of [-1, 1]) bar(add(tur, mul(n, side * rr * 0.1)), add(add(tur, mul(n, side * rr * 0.1)), mul(f, rr * 0.6)), 1.8, METAL_L);
+  orb(tur, rr * 0.22, METAL); glowDot(add(c, mul(f, rr * 0.2)), rr * 0.1, g);
+};
+DRAW.rampart = (c, f, n, ang, rr, t, b, g) => {
+  const roll = fmod(t * 14, 5);
+  for (const side of [-1, 1]) { const tread = add(c, mul(n, side * rr * 0.82)); plate(tread, rectPts(1.05, 0.26), lt(METAL_D, 0.05), ang, rr, 1.3); for (let k = 0; k < 5; k++) { const lp = add(tread, mul(f, -rr * 0.95 + fmod(k * rr * 0.42 + roll, rr * 2.0))); line(sub(lp, mul(n, rr * 0.22)), add(lp, mul(n, rr * 0.22)), METAL_L, 1.0); } }
+  const hull = rectPts(0.78, 0.66); plate(c, hull, b, ang, rr, 1.8);
+  for (const cx of [-1, 1]) for (const cy of [-1, 1]) plate(add(add(c, mul(f, cx * rr * 0.62)), mul(n, cy * rr * 0.5)), rectPts(0.16, 0.16), lt(b, 0.12), ang, rr, 1.1);
+  rivets(c, hull, ang, rr, 0.7, 0.7);
+  bar(add(c, mul(f, rr * 0.7)), add(c, mul(f, rr * 1.25)), 4.0, METAL_L); plate(add(c, mul(f, rr * 1.2)), [[0.2, 0], [-0.05, 0.3], [-0.05, -0.3]], lt(METAL_L, 0.1), ang, rr, 1.0);
+  orb(c, rr * 0.28, dk(b, 0.2)); glowDot(c, rr * 0.13, g);
+};
+DRAW.jammer = (c, f, n, ang, rr, t, b, g) => {
+  const ping = fmod(t * 0.9, 1); arc(c, rr * (1.2 + 1.4 * ping), 0, TAU, A(g, 0.35 * (1 - ping)), 1.5);
+  for (const side of [-1, 1]) { const tr = add(c, mul(n, side * rr * 0.72)); plate(tr, rectPts(0.8, 0.22), lt(METAL_D, 0.08), ang, rr, 1.0); for (let k = 0; k < 3; k++) { const lp = add(tr, mul(f, (fmod(t * 6 + k * 0.5, 1.5) - 0.75) * rr)); line(sub(lp, mul(n, rr * 0.16)), add(lp, mul(n, rr * 0.16)), [0, 0, 0, 0.45], 0.9); } }
+  orb(c, rr * 0.72, b); const dir = fa(t * 2.5);
+  arc(c, rr * 0.55, t * 2.5 - 0.9, t * 2.5 + 0.9, OUTLINE, 3.6); arc(c, rr * 0.55, t * 2.5 - 0.9, t * 2.5 + 0.9, METAL_L, 2.2);
+  bar(c, add(c, mul(dir, rr * 0.9)), 1.2, METAL_L); glowDot(add(c, mul(dir, rr * 0.9)), rr * 0.14, g); glowDot(c, rr * 0.18, g);
+};
+DRAW.stalker = (c, f, n, ang, rr, t, b, g) => {
+  const echo = fmod(t * 1.1, 1);
+  const ghost = [[1.1, 0], [0.2, 0.45], [-0.7, 0.3], [-0.7, -0.3], [0.2, -0.45]];
+  outline(sub(c, mul(f, rr * (0.6 + 1.2 * echo))), ghost, A(g, 0.45 * (1 - echo)), 1.0, ang, rr);
+  for (const side of [-1, 1]) {
+    const ph = t * 12 + (side > 0 ? Math.PI : 0);
+    const hip = add(c, mul(n, side * rr * 0.3)), knee = add(add(hip, mul(n, side * rr * 0.45)), mul(f, rr * (0.45 + 0.25 * Math.sin(ph)))), foot = sub(add(knee, mul(n, side * rr * 0.1)), mul(f, rr * (0.55 - 0.3 * Math.sin(ph))));
+    limb([hip, knee, foot], 1.3, METAL_L);
+  }
+  plate(c, ghost, b, ang, rr * 0.8, 1.1); strip(sub(c, mul(f, rr * 0.45)), add(c, mul(f, rr * 0.55)), 0.8, g); glowDot(add(c, mul(f, rr * 0.6)), rr * 0.16, g);
+};
+DRAW.burrower = (c, f, n, ang, rr, t, b, g, o) => {
+  if (o.hidden) {
+    const dirt = [0.42, 0.33, 0.24, 1]; shadedOval(c, rr * 1.15, rr * 0.8, ang, dirt);
+    for (let k = 0; k < 5; k++) { const a = ang + TAU * k / 5 + t * 0.5; disc(add(c, mul(fa(a), rr * (0.85 + 0.15 * Math.sin(t * 9 + k)))), 1.4, lt(dirt, 0.2)); }
+    line(add(c, mul(f, rr * 0.6)), add(c, mul(f, rr * 1.05)), METAL_L, 2.0); glowDot(add(c, mul(f, rr * 0.2)), rr * 0.12, A(g, 0.6)); return;
+  }
+  for (const side of [-1, 1]) { const tr = add(c, mul(n, side * rr * 0.72)); plate(tr, rectPts(0.7, 0.2), lt(METAL_D, 0.08), ang, rr, 1.0); for (let k = 0; k < 3; k++) { const lp = add(tr, mul(f, (fmod(t * 7 + k * 0.45, 1.35) - 0.68) * rr)); line(sub(lp, mul(n, rr * 0.15)), add(lp, mul(n, rr * 0.15)), [0, 0, 0, 0.45], 0.9); } }
+  shadedOval(sub(c, mul(f, rr * 0.15)), rr * 0.7, rr * 0.58, ang, b);
+  for (let k = 0; k < 2; k++) { const sp = sub(c, mul(f, rr * (0.05 + 0.3 * k))); line(sub(sp, mul(n, rr * 0.5)), add(sp, mul(n, rr * 0.5)), [0, 0, 0, 0.35], 1.0); }
+  plate(c, [[1.45, 0], [0.5, 0.42], [0.5, -0.42]], METAL_L, ang, rr, 1.2);
+  for (let k = 0; k < 3; k++) { const fr = fmod(t * 5 + k / 3, 1), x = 0.55 + 0.8 * fr, hw = 0.42 * (1.45 - x) / 0.95; line(sub(add(c, mul(f, rr * x)), mul(n, rr * hw)), add(add(c, mul(f, rr * (x + 0.12))), mul(n, rr * hw)), [0, 0, 0, 0.45], 1.0); }
+  glowDot(sub(c, mul(f, rr * 0.2)), rr * 0.14, g);
+};
+DRAW.phantom = (c, f, n, ang, rr, t, b, g, o) => {
+  const blade = [[1.4, 0], [0.1, 0.55], [-0.9, 1.0], [-0.5, 0], [-0.9, -1.0], [0.1, -0.55]];
+  if (o.hidden) {
+    const a = 0.2 + 0.08 * Math.sin(t * 7), rp = fmod(t * 1.3, 1);
+    arc(c, rr * (1 + 0.8 * rp), 0, TAU, [0.8, 0.95, 1.0, 0.22 * (1 - rp)], 1.0);
+    outline(c, blade, A(g, a), 1.2, ang, rr); outline(add(c, mul(n, Math.sin(t * 11) * 1.5)), blade, A(g, a * 0.5), 1.0, ang, rr * 1.08); return;
+  }
+  plate(c, blade, b, ang, rr, 1.2); line(sub(c, mul(f, rr * 0.4)), add(c, mul(f, rr * 1.1)), A(g, 0.5), 1.0);
+  for (const side of [-1, 1]) { glowDot(add(add(c, mul(f, rr * 0.35)), mul(n, side * rr * 0.28)), rr * 0.13, g); strip(add(sub(c, mul(f, rr * 0.75)), mul(n, side * rr * 0.55)), add(sub(c, mul(f, rr * 0.55)), mul(n, side * rr * 0.4)), 0.8, g); }
+  ring(c, rr * 1.3, A(g, 0.35 + 0.2 * Math.sin(t * 5)), 1.0);
+};
+DRAW.aegis = (c, f, n, ang, rr, t, b, g) => {
+  for (let k = 0; k < 4; k++) { const ld = fa(ang + Math.PI / 4 + k * Math.PI / 2), step = Math.sin(t * 6 + k * Math.PI / 2) * rr * 0.18; const knee = add(add(c, mul(ld, rr * 0.75)), mul(f, step)); limb([add(c, mul(ld, rr * 0.3)), knee, add(knee, mul(ld, rr * 0.35))], 2.0, METAL_L); }
+  const hull = ngon(6, 1.0, Math.PI / 6); plate(c, hull, b, ang, rr * 0.74, 1.4); rivets(c, hull, ang, rr * 0.74, 0.75, 0.55);
+  orb(sub(c, mul(f, rr * 0.25)), rr * 0.2, dk(g, 0.3)); glowDot(sub(c, mul(f, rr * 0.25)), rr * 0.12, g);
+  const sc = add(c, mul(f, rr * 0.2));
+  arc(sc, rr * 0.95, ang - 0.95, ang + 0.95, OUTLINE, 5.6); arc(sc, rr * 0.95, ang - 0.95, ang + 0.95, METAL_L, 3.8); arc(sc, rr * 0.88, ang - 0.8, ang + 0.1, lt(METAL_L, 0.35), 1.0);
+  for (let k = 0; k < 3; k++) disc(add(sc, mul(fa(ang + (k - 1) * 0.55), rr * 0.95)), 0.9, A(g, 0.9));
+  arc(sc, rr * 1.04, ang - 0.9, ang + 0.9, A(g, 0.8), 1.2);
+  const hex = ngon(6, 1.0, t * 0.6); fill(c, hex, [0.4, 0.7, 1.0, 0.15], 0, rr + 6); outline(c, hex, [0.55, 0.8, 1.0, 0.75], 1.4, 0, rr + 6); // barrier (enemy_status)
+};
+DRAW.hydra = (c, f, n, ang, rr, t, b, g) => {
+  shadedOval(sub(c, mul(f, rr * 0.3)), rr * 0.52, rr * 0.48, ang, b); ring(sub(c, mul(f, rr * 0.3)), rr * 0.3, dk(b, 0.35), 1.3); glowDot(sub(c, mul(f, rr * 0.3)), rr * 0.1, g);
+  for (let k = 0; k < 3; k++) {
+    const ba = ang + (k - 1) * 0.7, pts = [];
+    for (let i = 0; i < 5; i++) { const q = i / 4, sway = Math.sin(t * 4 + k * 1.7 - q * 2) * rr * 0.22 * q; pts.push(add(add(c, mul(fa(ba), rr * (0.05 + 1.05 * q))), mul(fa(ba + Math.PI / 2), sway))); }
+    polyline(pts, OUTLINE, 5.0); polyline(pts, lt(b, 0.15), 3.2); for (let i = 1; i < 4; i++) disc(pts[i], 1.0, dk(b, 0.25));
+    const hd = norm(sub(pts[4], pts[3])), hp = add(pts[4], mul(hd, rr * 0.12));
+    plate(hp, [[0.6, 0], [0.05, 0.38], [-0.4, 0.3], [-0.4, -0.3], [0.05, -0.38]], lt(b, 0.1), Math.atan2(hd[1], hd[0]), rr * 0.5, 1.0);
+    const jaw = mul(orth(hd), rr * 0.1 * (1 + Math.sin(t * 8 + k))); line(add(add(hp, mul(hd, rr * 0.28)), jaw), add(hp, mul(hd, rr * 0.1)), METAL_L, 1.0); glowDot(add(hp, mul(hd, rr * 0.06)), rr * 0.1, g);
+  }
+};
+
+// ---- New enemies (draft designs) ---------------------------------------------------------------
+const CHEV = [[1.6, 0], [-0.55, 0.5], [-0.2, 0], [-0.55, -0.5]];
+DRAW.needle = (c, f, n, ang, rr, t, b, g) => {
+  for (let i = 0; i < 2; i++) for (const side of [-1, 1]) { const ph = t * 28 + i * 1.6 + (side > 0 ? Math.PI : 0); const root = add(add(c, mul(f, rr * (0.25 - 0.5 * i))), mul(n, side * rr * 0.2)); limb([root, add(add(root, mul(n, side * rr * 0.55)), mul(f, rr * 0.35 * Math.sin(ph)))], 0.8, METAL_L); }
+  plate(c, CHEV, b, ang, rr, 1.0); strip(sub(c, mul(f, rr * 0.15)), add(c, mul(f, rr * 1.15)), 0.7, g);
+  glowDot(sub(c, mul(f, rr * 0.45)), rr * 0.16, g); glowDot(add(c, mul(f, rr * 0.9)), rr * 0.1, g);
+};
+const FURY_HULL = [[1.25, 0], [0.35, 0.5], [-0.35, 0.42], [-0.9, 0.78], [-0.6, 0], [-0.9, -0.78], [-0.35, -0.42], [0.35, -0.5]];
+DRAW.fury = (c, f, n, ang, rr, t, b, g0, o) => {
+  const ad = o.adren || 0, g = mix(g0, [1, 0.92, 0.97, 1], ad * 0.7);
+  if (ad > 0) {
+    for (let k = 1; k <= 3; k++) outline(sub(c, mul(f, rr * 0.6 * k)), FURY_HULL, A(g, 0.35 * (1 - k / 4) * ad), 1.0, ang, rr * 0.95);
+    for (let k = 0; k < 3; k++) line(add(sub(c, mul(f, rr * (1.0 + 0.2 * k))), mul(n, rr * (k - 1) * 0.35)), add(sub(c, mul(f, rr * (1.8 + 0.3 * k))), mul(n, rr * (k - 1) * 0.35)), A(g, 0.45 * ad), 1.0);
+  }
+  for (const side of [-1, 1]) { const ph = t * 14 * (1 + 0.3 * ad) + (side > 0 ? Math.PI : 0); const hip = add(c, mul(n, side * rr * 0.32)); const knee = add(add(hip, mul(n, side * rr * 0.45)), mul(f, rr * (0.35 + 0.3 * Math.sin(ph)))); limb([hip, knee, sub(add(knee, mul(n, side * rr * 0.12)), mul(f, rr * (0.5 - 0.3 * Math.sin(ph))))], 1.2, METAL_L); }
+  plate(c, FURY_HULL, b, ang, rr * 0.95, 1.1);
+  for (const side of [-1, 1]) bar(add(add(c, mul(f, rr * 0.2)), mul(n, side * rr * 0.22)), add(add(c, mul(f, rr * 0.95)), mul(n, side * rr * 0.14)), 1.1, METAL_L);
+  strip(sub(sub(c, mul(f, rr * 0.55)), mul(n, rr * 0.18)), add(sub(c, mul(f, rr * 0.55)), mul(n, rr * 0.18)), 0.9, g);
+  glowDot(add(c, mul(f, rr * 0.35)), rr * (0.16 + 0.06 * ad), g);
+};
+DRAW.shrike = (c, f, n, ang, rr, t, b, g, o) => {
+  ellipse(add(c, [0, rr * 2.4]), rr * 1.0, rr * 0.32, [0, 0, 0, 0.18]);
+  const flap = 0.6 + 0.4 * Math.sin(t * 22 + (o.phase || 0));
+  for (const side of [-1, 1]) {
+    const wing = [[0.3, 0], [-0.2, side * (1.6 * flap + 0.2)], [-0.75, side * (1.35 * flap + 0.15)], [-0.45, 0]];
+    plate(c, wing, lt(b, 0.08), ang, rr, 0.9);
+    const w = xform(c, wing, ang, rr); strip(w[0], w[1], 0.6, g);
+  }
+  plate(c, [[1.1, 0], [0, 0.32], [-0.8, 0], [0, -0.32]], b, ang, rr, 1.0); glowDot(add(c, mul(f, rr * 0.5)), rr * 0.2, g);
+};
+DRAW.titan = (c, f, n, ang, rr, t, b, g, o) => {
+  const sh = o.shed || 0, done = sh >= 0.6 ? 1 : 0, flare = done ? 0.35 + 0.25 * Math.sin(t * 9) : 0;
+  for (let k = 0; k < 4; k++) { const ld = fa(ang + Math.PI / 4 + k * Math.PI / 2), step = Math.sin(t * 2.5 * (1 + 0.2 * done) + k * Math.PI / 2) * rr * 0.14; const knee = add(add(c, mul(ld, rr * 0.82)), mul(f, step)); limb([add(c, mul(ld, rr * 0.38)), knee, add(knee, mul(ld, rr * 0.32))], 3.6, METAL_L); orb(knee, rr * 0.1, METAL); }
+  const hull = rectPts(0.8, 0.62); plate(c, hull, b, ang, rr, 1.8); rivets(c, hull, ang, rr, 0.78, 0.7);
+  for (let k = 0; k < 3; k++) { const vp = sub(c, mul(f, rr * (0.15 + 0.2 * k))); strip(sub(vp, mul(n, rr * 0.3)), add(vp, mul(n, rr * 0.3)), 1.0, A(g, Math.min(1, 0.55 + 0.25 * Math.sin(t * 3 + k) + flare))); }
+  const e = clamp01(sh / 0.6);
+  if (sh <= 0 || e < 1) {
+    let i = 0;
+    for (const px of [-0.55, 0.55]) for (const py of [-0.5, 0.5]) {
+      const base = add(add(c, mul(f, rr * px)), mul(n, rr * py));
+      const out = norm(sub(base, c));
+      const p = add(add(base, mul(out, rr * 1.4 * e)), [0, rr * 0.8 * e * e]);
+      X.save(); X.globalAlpha *= 1 - e;
+      plate(p, rectPts(0.26, 0.2), lt(b, 0.15), ang + e * (i % 2 ? 1.2 : -1.2), rr, 1.2); rivets(p, rectPts(0.26, 0.2), ang, rr, 0.6, 0.5);
+      X.restore(); i++;
+    }
+  }
+  bar(add(c, mul(f, rr * 0.3)), add(c, mul(f, rr * 1.2)), 3.0, METAL_L);
+  orb(add(c, mul(f, rr * 0.25)), rr * 0.26, dk(b, 0.1)); glowDot(add(c, mul(f, rr * 0.25)), rr * (0.12 + 0.05 * flare), g);
+};
+DRAW.siphon = (c0, f, n, ang, rr, t, b, g) => {
+  ellipse(add(c0, [0, rr * 1.4]), rr * 1.0, rr * 0.35, [0, 0, 0, 0.22]);
+  const c = add(c0, [0, Math.sin(t * 2) * 1.0]);
+  arcSegments(c, rr * 2.2, 10, 0.3, t * 0.8, A(g, 0.3), 1.0);
+  for (let k = 0; k < 4; k++) { const p = add(c, mul(fa(ang + Math.PI / 4 + k * Math.PI / 2), rr * 0.7)); orb(p, rr * 0.16, lt(METAL_D, 0.15)); glowDot(p, rr * 0.06, A(g, 0.5)); }
+  orb(c, rr * 0.62, b);
+  for (let k = 0; k < 3; k++) ring(c, rr * (0.3 + 0.16 * k), A(g, 0.35 + 0.3 * Math.sin(t * 4 - k)), 1.0);
+  const dc = add(c, mul(f, rr * 0.15));
+  arc(dc, rr * 0.75, ang - 1.0, ang + 1.0, OUTLINE, 3.4); arc(dc, rr * 0.75, ang - 1.0, ang + 1.0, METAL_L, 2.0); glowDot(dc, rr * 0.16, g);
+};
+DRAW.blackout = (c, f, n, ang, rr, t, b, g) => {
+  const ping = fmod(t * 1.1, 1); arc(c, rr * (1.2 + 1.6 * ping), 0, TAU, A(g, 0.4 * (1 - ping)), 1.6);
+  const roll = fmod(t * 6, 1.5);
+  for (const side of [-1, 1]) { const tr = add(c, mul(n, side * rr * 0.8)); plate(tr, rectPts(0.95, 0.26), lt(METAL_D, 0.08), ang, rr, 1.2); for (let k = 0; k < 4; k++) { const lp = add(tr, mul(f, (fmod(roll + k * 0.45, 1.8) - 0.9) * rr)); line(sub(lp, mul(n, rr * 0.18)), add(lp, mul(n, rr * 0.18)), [0, 0, 0, 0.45], 0.9); } }
+  const hull = ngon(6, 1.0, Math.PI / 6); plate(c, hull, b, ang, rr * 0.78, 1.5); rivets(c, hull, ang, rr * 0.78, 0.75, 0.6);
+  const tips = [];
+  for (let k = 0; k < 4; k++) { const tp = add(c, mul(fa(ang + Math.PI / 4 + k * Math.PI / 2), rr * 0.95)); tips.push(tp); bar(c, tp, 1.6, METAL_L); glowDot(tp, rr * 0.1, g); }
+  if (fmod(t * 3.3, 1) < 0.18) { const k = Math.floor(fmod(t * 3.3, 4)); const a = tips[k], z = tips[(k + 1) % 4], m = add(mul(add(a, z), 0.5), mul(orth(norm(sub(z, a))), 3)); polyline([a, m, z], A(lt(g, 0.4), 0.9), 1.0); }
+  orb(c, rr * 0.5, lt(b, 0.06)); const dir = fa(t * 3.0);
+  arc(c, rr * 0.42, t * 3 - 1.0, t * 3 + 1.0, OUTLINE, 3.8); arc(c, rr * 0.42, t * 3 - 1.0, t * 3 + 1.0, METAL_L, 2.4);
+  bar(c, add(c, mul(dir, rr * 0.75)), 1.3, METAL_L); glowDot(add(c, mul(dir, rr * 0.75)), rr * 0.13, g); glowDot(c, rr * 0.18, g);
+};
+DRAW.capacitor = (c, f, n, ang, rr, t, b, g, o) => {
+  const fillv = o.fill ?? (0.15 + 0.08 * Math.sin(t * 1.5));
+  for (const side of [-1, 1]) { const tr = add(c, mul(n, side * rr * 0.78)); plate(tr, rectPts(0.7, 0.24), lt(METAL_D, 0.08), ang, rr, 1.1); }
+  const hull = ngon(8, 1.0, Math.PI / 8); plate(c, hull, b, ang, rr * 0.8, 1.6); rivets(c, hull, ang, rr * 0.8, 0.82, 0.6);
+  for (let k = 0; k < 4; k++) plate(add(c, mul(fa(ang + Math.PI / 4 + k * Math.PI / 2), rr * 0.62)), rectPts(0.14, 0.1), lt(b, 0.18), ang + Math.PI / 4 + k * Math.PI / 2, rr, 1.0);
+  ring(c, rr * 0.55, A(dk(g, 0.5), 0.6), 2.2);
+  arc(c, rr * 0.55, -Math.PI / 2, -Math.PI / 2 + TAU * fillv, mix(g, WHITE, fillv * 0.5), 2.2);
+  disc(c, rr * 0.38, OUTLINE); disc(c, rr * 0.32, dk(g, 0.6)); glowDot(c, rr * (0.12 + 0.14 * fillv), mix(g, WHITE, fillv * 0.6));
+};
+const SHIFT_HULL = [[1.15, 0], [0.25, 0.4], [-0.65, 0.35], [-0.4, 0], [-0.65, -0.35], [0.25, -0.4]];
+DRAW.shifter = (c, f, n, ang, rr, t, b, g) => {
+  const echo = fmod(t * 0.9, 1); outline(sub(c, mul(f, rr * (0.5 + 1.1 * echo))), SHIFT_HULL, A(g, 0.4 * (1 - echo)), 1.0, ang, rr * 0.85);
+  for (const side of [-1, 1]) { const ph = t * 11 + (side > 0 ? Math.PI : 0); const hip = add(c, mul(n, side * rr * 0.28)); const knee = add(add(hip, mul(n, side * rr * 0.42)), mul(f, rr * (0.4 + 0.25 * Math.sin(ph)))); limb([hip, knee, sub(add(knee, mul(n, side * rr * 0.1)), mul(f, rr * (0.5 - 0.3 * Math.sin(ph))))], 1.3, METAL_L); }
+  plate(c, SHIFT_HULL, b, ang, rr * 0.85, 1.1);
+  strip(sub(c, mul(f, rr * 0.4)), add(c, mul(f, rr * 0.5)), 0.8, g);
+  for (const side of [-1, 1]) glowDot(add(add(c, mul(f, rr * 0.45)), mul(n, side * rr * 0.16)), rr * 0.1, g);
+};
+const WRAITH = [[1.3, 0], [0.2, 0.62], [-1.0, 0.9], [-0.55, 0], [-1.0, -0.9], [0.2, -0.62]];
+DRAW.wraith = (c, f, n, ang, rr, t, b, g, o) => {
+  const rev = o.rev || 0;
+  if (rev < 1) {
+    const a = (0.18 + 0.08 * Math.sin(t * 7)) * (1 - rev), rp = fmod(t * 1.1, 1);
+    arc(c, rr * (1 + 0.8 * rp), 0, TAU, [0.85, 0.85, 1.0, 0.2 * (1 - rp) * (1 - rev)], 1.0);
+    outline(c, WRAITH, A(g, a), 1.2, ang, rr); outline(add(c, mul(n, Math.sin(t * 9) * 1.6)), WRAITH, A(g, a * 0.5), 1.0, ang, rr * 1.1);
+  }
+  if (rev > 0) {
+    X.save(); X.globalAlpha *= rev;
+    for (const side of [-1, 1]) for (let k = 0; k < 2; k++) { const s0 = add(sub(c, mul(f, rr * (0.7 + 0.2 * k))), mul(n, side * rr * (0.35 + 0.2 * k))); line(s0, add(s0, add(mul(f, -rr * 0.6), mul(n, side * rr * 0.2 * Math.sin(t * 6 + k)))), A(dk(b, 0.1), 0.9), 1.4); }
+    plate(c, WRAITH, b, ang, rr, 1.2);
+    outline(c, WRAITH, [1, 1, 1, 0.75], 1.3, ang, rr * 1.12);
+    for (const side of [-1, 1]) glowDot(add(add(c, mul(f, rr * 0.5)), mul(n, side * rr * 0.2)), rr * 0.1, g);
+    X.restore();
+  }
+};
+function tellRing(c, rr, t, col) {
+  if (TELL === "dots") { for (let k = 0; k < 16; k++) disc(add(c, mul(fa(t * 0.5 + TAU * k / 16), rr + 4)), 0.75, A(col, 0.6)); }
+  else { const j = Math.sin(t * 13) > 0.6 ? 1.6 : 0.8; ring(add(c, [j, 0]), rr + 1.5, [1, 0.3, 0.4, 0.45], 1.0); ring(add(c, [-j, 0]), rr + 1.5, [0.3, 0.9, 1.0, 0.45], 1.0); }
+}
+function masqTrue(c, f, n, ang, rr, t, b, g) {
+  for (let k = 0; k < 4; k++) { const ld = fa(ang + Math.PI / 4 + k * Math.PI / 2), step = Math.sin(t * 6 + k * Math.PI / 2) * rr * 0.12; const knee = add(add(c, mul(ld, rr * 0.7)), mul(f, step)); limb([add(c, mul(ld, rr * 0.3)), knee, add(knee, mul(ld, rr * 0.3))], 1.6, METAL_L); }
+  plate(c, ngon(6, 1.0, 0), b, ang, rr * 0.78, 1.4);
+  for (const k of [-1, 0, 1]) bar(add(c, mul(fa(ang + k * 0.45), rr * 0.4)), add(c, mul(fa(ang + k * 0.45), rr * 1.15)), 1.3, METAL_L);
+  ring(c, rr * 0.42, dk(b, 0.35), 1.2); glowDot(c, rr * 0.2, g);
+}
+DRAW.masq = (c, f, n, ang, rr, t, b, g, o) => {
+  const um = o.unmask || 0, dpal = PAL.swarmling;
+  if (um < 1) {
+    X.save(); X.globalAlpha *= 1 - ease(um / 0.6);
+    const spread = 1 + 1.4 * ease(um / 0.6);
+    disc(c, rr * 1.7, A(dpal[1], 0.13));
+    for (let k = 0; k < 4; k++) { const p = add(c, mul(fa(t * 7 + TAU * k / 4), rr * 0.78 * spread)); solid(p, [[0.5, 0], [0, 0.35], [-0.5, 0], [0, -0.35]], lt(dpal[0], 0.35), t * 7, rr, 0.8); disc(p, rr * 0.11, dpal[1]); }
+    orb(c, rr * 0.34, lt(dpal[0], 0.2)); glowDot(c, rr * 0.18, dpal[1]);
+    tellRing(c, rr, t, [1, 1, 1, 1]);
+    X.restore();
+  }
+  if (um > 0.3) { X.save(); X.globalAlpha *= ease((um - 0.3) / 0.4); masqTrue(c, f, n, ang, rr, t, b, g); X.restore(); }
+};
+DRAW.decoy = (c, f, n, ang, rr, t, b, g, o) => {
+  const roll = fmod(t * 9, 5);
+  for (const side of [-1, 1]) { const tread = add(c, mul(n, side * rr * 0.8)); plate(tread, rectPts(0.95, 0.24), lt(METAL_D, 0.05), ang, rr, 1.2); for (let k = 0; k < 5; k++) { const lp = add(tread, mul(f, -rr * 0.85 + fmod(k * rr * 0.4 + roll, rr * 1.8))); line(sub(lp, mul(n, rr * 0.2)), add(lp, mul(n, rr * 0.2)), METAL_L, 1.0); } }
+  const hull = rectPts(0.78, 0.58); plate(c, hull, b, ang, rr, 1.7); rivets(c, hull, ang, rr, 0.7, 0.65);
+  const top = add(c, [-rr * 0.1, -rr * 1.0]); bar(c, top, 1.8, METAL_L); orb(top, rr * 0.2, METAL);
+  const pg = fmod(t * 0.4, 1); arc(top, rr * (0.3 + 1.2 * pg), 0, TAU, A(g, 0.45 * (1 - pg)), 1.2);
+  if (o.ping > 0) { const p = o.ping; arc(top, rr * (0.5 + 3.5 * p), 0, TAU, A(g, 0.7 * (1 - p)), 2.0); }
+  glowDot(top, rr * (0.13 + 0.04 * Math.sin(t * 5)), g);
+  tellRing(c, rr, t, [1, 1, 1, 1]);
+};
+function mirageBody(c, f, n, ang, rr, t, b, g) {
+  for (let k = 0; k < 3; k++) { const ld = fa(ang + Math.PI + (k - 1) * 1.1), step = Math.sin(t * 7 + k * 2.1) * rr * 0.1; const knee = add(add(c, mul(ld, rr * 0.7)), mul(f, step)); limb([add(c, mul(ld, rr * 0.25)), knee, add(knee, mul(ld, rr * 0.3))], 1.2, METAL_L); }
+  orb(c, rr * 0.62, b);
+  const dc = add(c, mul(f, rr * 0.35)); arc(dc, rr * 0.55, ang - 1.1, ang + 1.1, OUTLINE, 3.0); arc(dc, rr * 0.55, ang - 1.1, ang + 1.1, METAL_L, 1.8);
+  glowDot(add(c, mul(f, rr * 0.55)), rr * 0.16, g);
+}
+function hologram(c, f, n, ang, rr, t, b, g, alpha) {
+  X.save(); X.globalAlpha *= alpha * (0.3 + 0.08 * Math.sin(t * 17));
+  mirageBody(c, f, n, ang, rr, t, mix(b, g, 0.5), g); X.restore();
+  const sy = c[1] - rr + fmod(t * 1.2, 1) * 2 * rr;
+  line([c[0] - rr * 0.9, sy], [c[0] + rr * 0.9, sy], A(g, 0.65 * alpha), 0.8);
+}
+DRAW.mirage = (c, f, n, ang, rr, t, b, g, o) => {
+  const pr = o.project ?? 1;
+  for (const side of [-1, 1]) {
+    const hc = add(add(c, mul(f, rr * 2.3 + 6 * fmod(t * 0.3, 1))), mul(n, side * rr * 1.35));
+    if (pr < 1) { const bt = clamp01(pr / 0.5); line(add(c, mul(f, rr * 0.55)), add(add(c, mul(f, rr * 0.55)), mul(sub(hc, add(c, mul(f, rr * 0.55))), bt)), A(g, 0.6 * (1 - pr)), 1.2); }
+    if (pr > 0.4) hologram(hc, f, n, ang, rr, t + side, b, g, ease((pr - 0.4) / 0.4));
+  }
+  mirageBody(c, f, n, ang, rr, t, b, g);
+};
+
+// ---- Tower stub (for effects) ----------------------------------------------------------------
+function towerStub(c, t, opt = {}) {
+  plate(c, ngon(6, 1.0, Math.PI / 6), [0.16, 0.19, 0.23, 1], 0, 17, 1.5); rivets(c, ngon(6, 1.0, Math.PI / 6), 0, 17, 0.8, 0.7);
+  ring(c, 12, [0.3, 0.88, 1.0, 0.5], 1.0);
+  const aim = opt.aim ?? 0; bar(c, add(c, mul(fa(aim), 14)), 3.0, METAL_L); orb(c, 7, [0.3, 0.33, 0.38, 1]);
+  if (opt.tint) { disc(c, 18, [0.62, 0.4, 1.0, 0.26]); ring(c, 18, [0.75, 0.55, 1.0, 0.7], 1.0);
+    const ic = add(c, [-11, -24]); ring(ic, 3.2, [0.85, 0.7, 1, 1], 1.0); poly([add(ic, [5, -2]), add(ic, [9, -2]), add(ic, [7, 2])], [0.85, 0.7, 1, 1]);
+    const ic2 = add(c, [4, -24]); polyline([add(ic2, [-2, -3]), add(ic2, [1, 0]), add(ic2, [-2, 3])], [0.85, 0.7, 1, 1], 1.1); polyline([add(ic2, [1, -3]), add(ic2, [4, 0]), add(ic2, [1, 3])], [0.85, 0.7, 1, 1], 1.1); poly([add(ic2, [7, -2]), add(ic2, [11, -2]), add(ic2, [9, 2])], [0.85, 0.7, 1, 1]); }
+  if (opt.disabled) { disc(c, 18, [0.1, 0.1, 0.14, 0.45]); const bc = add(c, [0, -24]); const pts = [add(bc, [1.5, -5]), add(bc, [-2, 0.5]), add(bc, [1, 0.5]), add(bc, [-1.5, 5.5])]; polyline(pts, [1, 0.95, 0.5, 0.25], 4); polyline(pts, [1, 0.95, 0.5, 1], 1.4); }
+}
+
+// ---- Scenes: how a card draws its enemy (handles pairs, clusters and moments) ----------------
+function drawEnemy(type, c, r, t, o = {}) {
+  const pal = o.pal || PAL[type] || PAL.grunt, f = [1, 0], n = orth(f), ang = 0;
+  if (!FLYERS.has(type) && !SELF_SHADOW.has(type) && !o.hidden && !o.noShadow) ellipse(add(c, [0, r * 0.75]), r * 1.1, r * 0.45, [0, 0, 0, 0.3]);
+  DRAW[type](c, f, n, ang, r, t, pal[0], pal[1], o);
+}
+function laneBg(W, H) {
+  rect(0, 0, W, H, [0.043, 0.063, 0.086, 1]);
+  const y0 = H / 2 - 24; rect(0, y0, W, 48, [0.075, 0.1, 0.13, 1]);
+  for (let x = 0; x <= W; x += 48) line([x, y0], [x, y0 + 48], [0.16, 0.24, 0.3, 0.45], 0.6);
+  line([0, y0], [W, y0], [0.2, 0.32, 0.4, 0.6], 0.8); line([0, y0 + 48], [W, y0 + 48], [0.2, 0.32, 0.4, 0.6], 0.8);
+}
+const ROLES = [
+  { role: "Swarm", job: "Overwhelm single-target towers. Counter: splash, chain.", list: [
+    { type: "swarmling", name: "Nanite", tier: "T1", r: 6, str: "13.38" },
+    { type: "locust", name: "Locust", tier: "T2", r: 5, str: "19.84" },
+    { type: "grunt", name: "Drone", tier: "T3", r: 11, str: "21.18" },
+    { type: "shrike", name: "Shrike", tier: "T4", r: 7, str: "44.55", isNew: true, desc: "Flying cluster of 5, 0.15 s apart. Steel grey blade-wings with a teal leading edge.", moment: { label: "Cluster flies in", dur: 1.8 } } ] },
+  { role: "Rusher", job: "Get past before damage lands. Counter: slows, burst.", list: [
+    { type: "runner", name: "Skitter", tier: "T1", r: 10, str: "49.61" },
+    { type: "needle", name: "Needle", tier: "T2", r: 8, str: "58.80", isNew: true, desc: "Slim chevron, chalk-white accent. Always arrives as a pair, 0.25 s apart on one lane.", moment: { label: "Pair spawns", dur: 1.6 } },
+    { type: "bat", name: "Strike Drone", tier: "T3", r: 9, str: "67.24" },
+    { type: "fury", name: "Fury Drone", tier: "T4", r: 10, str: "132.81", isNew: true, desc: "Angular hunter, hot magenta. Below half health the glow goes white-hot and a speed trail appears (+30% speed).", moment: { label: "Adrenaline", dur: 3.0 } } ] },
+  { role: "Tank", job: "Soak damage. Counter: armor shred, % damage.", list: [
+    { type: "brute", name: "Siege Mech", tier: "T1", r: 14, str: "254.40" },
+    { type: "rampart", name: "Rampart", tier: "T2", r: 16, str: "480.90" },
+    { type: "gunship", name: "Gunship", tier: "T3", r: 16, str: "529.20" },
+    { type: "titan", name: "Titan", tier: "T4", r: 18, str: "567.00", isNew: true, desc: "Broad gunmetal walker, four armor plates, molten orange vents. At half health the plates fall away (armor 9 to 5) and it walks 20% faster.", moment: { label: "Plates shed", dur: 3.2 } } ] },
+  { role: "Disruptor", job: "Switch off or weaken towers. Counter: range, burst, silence.", list: [
+    { type: "jammer", name: "Jammer", tier: "T1", r: 12, str: "37.50" },
+    { type: "siphon", name: "Siphon", tier: "T2", r: 12, str: "102.75", isNew: true, desc: "Hovering coil dish in the Jammer's acid yellow-green. Its 100 px aura drains towers: -20% fire rate, -15% range.", moment: { label: "Drains a tower", dur: 3.0 } },
+    { type: "blackout", name: "Blackout Rig", tier: "T3", r: 14, str: "179.71", isNew: true, desc: "Bulkier Jammer chassis on treads with four pylons and crackling arcs. EMP radius 130, towers offline 2.5 s every 4 s.", moment: { label: "EMP pulse", dur: 1.4 } },
+    { type: "capacitor", name: "Capacitor", tier: "T4", r: 15, str: "325.25", isNew: true, desc: "Squat octagonal core. A ring fills over a 2 s charge, then flashes white and pulses radius 160 (towers offline 3 s).", moment: { label: "Charge and release", dur: 2.8 } } ] },
+  { role: "Evader", job: "Dodge targeting. Counter: sensors, area.", list: [
+    { type: "stalker", name: "Blink Stalker", tier: "T1", r: 10, str: "53.90" },
+    { type: "burrower", name: "Burrower", tier: "T2", r: 11, str: "123.01", moment: { label: "Burrow", dur: 2.5 } },
+    { type: "shifter", name: "Shifter", tier: "T3", r: 11, str: "184.96", isNew: true, desc: "Lean walker with a white-gold afterimage. Blinks 60 px; the landing releases an 80 px wake (+20% speed to nearby enemies for 2 s).", moment: { label: "Blink and wake", dur: 1.8 } },
+    { type: "wraith", name: "Wraith", tier: "T4", r: 12, str: "284.75", isNew: true, parked: true, desc: "Dark indigo, nearly invisible: a cloak shimmer like the Phantom's. When revealed, a ghostly white outline. Only energy damage hurts it.", moment: { label: "Revealed", dur: 3.0 } } ] },
+  { role: "Special", job: "Break a rule. No tiers.", list: [
+    { type: "phantom", name: "Phantom", tier: "-", r: 10, str: "44.06", moment: { label: "Revealed", dur: 2.5 } },
+    { type: "aegis", name: "Aegis Walker", tier: "-", r: 13, str: "58.08" },
+    { type: "hydra", name: "Hydra Frame", tier: "-", r: 14, str: "120.61" },
+    { type: "masq", name: "Masquerade", tier: "-", r: 13, str: "345.60 (shows ~13)", isNew: true, desc: "Disguised as an oversized Nanite with the trick tell. Below half health the disguise peels away to its true hull.", moment: { label: "Unmask", dur: 1.8 } },
+    { type: "decoy", name: "Decoy Beacon", tier: "-", r: 15, str: "311.04 (shows top non-boss)", isNew: true, desc: "Heavy hull on treads with an amber beacon mast that pings. Carries the trick tell.", moment: { label: "Ping", dur: 1.6 } },
+    { type: "mirage", name: "Mirage", tier: "-", r: 11, str: "42.35", isNew: true, desc: "Tripod projector with a dish. Projects two translucent holograms with a scanline; they walk to the core and never leak.", moment: { label: "Project holograms", dur: 1.6 } } ] },
+];
+
+function scene(card, W, H, t, m) {
+  const c = [W / 2, H / 2], r = card.r, ty = card.type, o = {};
+  const active = m >= 0;
+  switch (ty) {
+    case "needle": {
+      for (let i = 0; i < 2; i++) {
+        const base = i === 0 ? add(c, [r * 1.0, -r * 0.55]) : add(c, [-r * 1.3, r * 0.55]);
+        let x = 0, a = 1;
+        if (active) { const k = ease((m * card.moment.dur - i * 0.25) / 0.8); x = -70 * (1 - k); a = k; }
+        X.save(); X.globalAlpha *= a; drawEnemy(ty, add(base, [x, 0]), r, t + i * 0.3); X.restore();
+      }
+      return;
+    }
+    case "shrike": {
+      const offs = [[0, 0], [-1.7, 1.4], [-1.7, -1.4], [-3.4, 2.8], [-3.4, -2.8]];
+      offs.forEach((q, i) => {
+        let x = 0, a = 1;
+        if (active) { const k = ease((m * card.moment.dur - i * 0.15) / 0.8); x = -80 * (1 - k); a = k; }
+        X.save(); X.globalAlpha *= a; drawEnemy(ty, add(add(c, [r * 1.6, 0]), [q[0] * r + x, q[1] * r]), r, t, { phase: i * 1.3 }); X.restore();
+      });
+      return;
+    }
+    case "fury": o.adren = active ? Math.min(ease(m / 0.15), ease((1 - m) / 0.15)) : 0; break;
+    case "titan": o.shed = active ? Math.min(1, m * card.moment.dur / 1.6) : 0; break;
+    case "siphon": {
+      drawEnemy(ty, add(c, [-10, 0]), r, t);
+      if (active) {
+        const tw = [W - 16, 14]; towerStub(tw, t, { tint: m > 0.15, aim: Math.PI * 0.8 });
+        const from = add(c, [-6, 0]); const k = Math.floor(t * 20);
+        for (let j = 0; j < 2; j++) { const pts = [from]; for (let q = 1; q < 6; q++) { const p = add(from, mul(sub(tw, from), q / 6)); pts.push(add(p, [((k * 7 + q * 13 + j * 5) % 7 - 3) * 0.9, ((k * 5 + q * 11 + j * 3) % 7 - 3) * 0.9])); } pts.push(tw); polyline(pts, A(PAL.siphon[1], 0.7 * Math.min(1, m * 6)), 0.9); }
+      }
+      return;
+    }
+    case "blackout": if (active) { const p = ease(m); disc(c, 130 * p, A(PAL.blackout[1], 0.12 * (1 - p))); ring(c, 130 * p, A(PAL.blackout[1], 0.8 * (1 - p)), 2); } break;
+    case "capacitor": {
+      if (active) {
+        const ts = m * card.moment.dur;
+        if (ts < 2.0) { o.fill = ts / 2.0; arc(c, r * (1.3 + 0.3 * Math.sin(t * 20)), 0, TAU, A(PAL.capacitor[1], 0.25 * o.fill), 1.2); }
+        else { const p = clamp01((ts - 2.0) / 0.8); o.fill = 0; disc(c, r * 1.4, [1, 1, 1, 0.8 * (1 - p)]); disc(c, 160 * p, A(PAL.capacitor[1], 0.1 * (1 - p))); ring(c, 160 * p, A(lt(PAL.capacitor[1], 0.5), 0.85 * (1 - p)), 2.2); }
+      }
+      break;
+    }
+    case "shifter": {
+      if (active) {
+        const ts = m * card.moment.dur, from = add(c, [-30, 0]), to = add(c, [30, 0]);
+        if (ts < 0.3) { X.save(); X.globalAlpha *= 1 - ts / 0.3; drawEnemy(ty, from, r, t); X.restore(); }
+        else {
+          const p = clamp01((ts - 0.3) / 0.7);
+          disc(to, 80 * p, A(PAL.shifter[1], 0.08 * (1 - p * 0.5))); arcSegments(to, 80 * p, 14, 0.25, t, A(PAL.shifter[1], 0.75 * (1 - p * 0.6)), 1.3);
+          outline(from, SHIFT_HULL, A(PAL.shifter[1], 0.5 * (1 - p)), 1.0, 0, r * 0.85);
+          X.save(); X.globalAlpha *= clamp01((ts - 0.3) / 0.15); drawEnemy(ty, to, r, t); X.restore();
+        }
+        return;
+      }
+      break;
+    }
+    case "wraith": { o.rev = active ? Math.min(ease(m / 0.2), ease((1 - m) / 0.2)) : 0; o.noShadow = o.rev < 0.5; if (active && m < 0.4) { const p = m / 0.4; ring(c, 70 * p, [0.4, 1.0, 0.85, 0.6 * (1 - p)], 1.2); } break; }
+    case "phantom": { o.hidden = !(active && m > 0.1 && m < 0.9); o.noShadow = o.hidden; if (active && m < 0.4) { const p = m / 0.4; ring(c, 70 * p, [0.4, 1.0, 0.85, 0.6 * (1 - p)], 1.2); } break; }
+    case "burrower": o.hidden = active && m > 0.05 && m < 0.95; break;
+    case "masq": o.unmask = active ? ease(m / 0.8) : 0; break;
+    case "decoy": o.ping = active ? m : 0; break;
+    case "mirage": o.project = active ? m : 1; break;
+  }
+  drawEnemy(ty, c, r, t, o);
+}
+
+// ---- Card build and render loop ---------------------------------------------------------------
+const DPR = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
+const W1 = 96, H1 = 64;
+const cards = [];
+let T = 0, playing = true, speed = 1;
+function mkCanvas(cssW, cssH) { const cv = document.createElement("canvas"); cv.width = Math.round(cssW * DPR); cv.height = Math.round(cssH * DPR); cv.style.width = cssW + "px"; cv.style.height = cssH + "px"; return cv; }
+function view(label, cv) { const v = document.createElement("div"); v.className = "view"; const s = document.createElement("small"); s.textContent = label; v.append(cv, s); return v; }
+function renderCard(card, ctx, scale, t, m) {
+  X = ctx; ctx.setTransform(DPR * scale, 0, 0, DPR * scale, 0, 0); ctx.lineCap = "round"; ctx.lineJoin = "round";
+  laneBg(W1, H1); ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W1, H1); ctx.clip(); scene(card, W1, H1, t, m); ctx.restore();
+}
+function buildRoles() {
+  const root = document.getElementById("roles");
+  for (const grp of ROLES) {
+    const sec = document.createElement("section"); sec.className = "role";
+    sec.innerHTML = `<div class="role-head"><h2>${grp.role}</h2><span class="job">${grp.job}</span></div>`;
+    const wrap = document.createElement("div"); wrap.className = "cards";
+    for (const card of grp.list) {
+      const el = document.createElement("article"); el.className = "card" + (card.isNew ? " new" : "");
+      const chips = (card.isNew ? '<span class="chip new">New</span>' : '<span class="chip">Existing</span>') + (card.parked ? '<span class="chip parked">Parked</span>' : "") + (card.tier !== "-" ? `<span class="chip">${card.tier}</span>` : "");
+      el.innerHTML = `<div class="card-head"><span class="name">${card.name}</span>${chips}</div>`;
+      const views = document.createElement("div"); views.className = "views live";
+      const c1 = mkCanvas(W1, H1), c3 = mkCanvas(W1 * 3, H1 * 3);
+      views.append(view("1x game scale", c1), view("3x", c3));
+      const meta = document.createElement("div"); meta.className = "meta";
+      meta.innerHTML = `radius <b>${card.r} px</b> · Str <b>${card.str}</b>${card.isNew ? " · draft" : ""}`;
+      el.append(views, meta);
+      if (card.desc) { const d = document.createElement("p"); d.className = "desc"; d.textContent = card.desc; el.append(d); }
+      const act = document.createElement("div"); act.className = "act";
+      if (card.moment) { const b = document.createElement("button"); b.className = "solo"; b.textContent = "▶ " + card.moment.label; b.addEventListener("click", () => { card.start = T; }); act.append(b); }
+      el.append(act);
+      const frames = document.createElement("div"); frames.className = "frames"; el.append(frames);
+      card.ctx1 = c1.getContext("2d"); card.ctx3 = c3.getContext("2d"); card.frames = frames; card.start = -99;
+      cards.push(card); wrap.append(el);
+    }
+    sec.append(wrap); root.append(sec);
+  }
+}
+
+// ---- Effects panels (2x) -----------------------------------------------------------------------
+const FX = [
+  { title: "Tower feedback", caps: ["Siphon aura: tint plus range-down and rate-down icons", "Disabled tower: bolt icon", "Aura and EMP rings"], W: 230, H: 120,
+    draw(t) {
+      rect(0, 0, 230, 120, [0.043, 0.063, 0.086, 1]); rect(0, 48, 230, 48, [0.075, 0.1, 0.13, 1]);
+      const sx = 70 + 10 * Math.sin(t * 0.6), sp = [sx, 72];
+      arcSegments(sp, 100, 26, 0.12, t * 0.3, A(PAL.siphon[1], 0.35), 1.0);
+      const tw = [118, 34]; towerStub(tw, t, { tint: true, aim: 2.4 });
+      const k = Math.floor(t * 20), pts = [sp]; for (let q = 1; q < 6; q++) { const p = add(sp, mul(sub(tw, sp), q / 6)); pts.push(add(p, [((k * 7 + q * 13) % 7 - 3) * 0.9, ((k * 5 + q * 11) % 7 - 3) * 0.9])); } pts.push(tw); polyline(pts, A(PAL.siphon[1], 0.6), 0.9);
+      drawEnemy("siphon", sp, 12, t);
+      const bp = [196, 72], ping = fmod(t * 0.25, 1); drawEnemy("blackout", bp, 14, t);
+      ring(bp, 130 * ping, A(PAL.blackout[1], 0.5 * (1 - ping)), 1.6);
+      towerStub([196, 32], t, { disabled: true, aim: 2 });
+    } },
+  { title: "Trick tells", caps: ["Masquerade: dotted ring", "Existing: Exposed (dashed ring)", "Alternative: glitch outline"], W: 230, H: 80,
+    draw(t) {
+      rect(0, 0, 230, 80, [0.043, 0.063, 0.086, 1]); rect(0, 16, 230, 48, [0.075, 0.1, 0.13, 1]);
+      const keep = TELL;
+      TELL = "dots"; drawEnemy("masq", [40, 40], 13, t);
+      drawEnemy("grunt", [115, 40], 11, t); arcSegments([115, 40], 11 + 7, 6, 0.5, -t * 1.5, [1, 1, 1, 0.55], 1.1);
+      TELL = "glitch"; drawEnemy("masq", [190, 40], 13, t);
+      TELL = keep;
+    } },
+  { title: "Evasion states", caps: ["Wraith cloaked", "Wraith revealed", "Shifter blink and wake"], W: 230, H: 80,
+    draw(t) {
+      rect(0, 0, 230, 80, [0.043, 0.063, 0.086, 1]); rect(0, 16, 230, 48, [0.075, 0.1, 0.13, 1]);
+      drawEnemy("wraith", [40, 40], 12, t, { rev: 0, noShadow: true });
+      drawEnemy("wraith", [115, 40], 12, t, { rev: 1 });
+      const cyc = fmod(t, 3), from = [168, 40], to = [205, 40];
+      if (cyc < 1.2) drawEnemy("shifter", from, 11, t);
+      else { const p = clamp01((cyc - 1.2) / 0.8); arcSegments(to, 80 * p, 14, 0.25, t, A(PAL.shifter[1], 0.7 * (1 - p * 0.6)), 1.2); outline(from, SHIFT_HULL, A(PAL.shifter[1], 0.5 * (1 - p)), 1.0, 0, 11 * 0.85); drawEnemy("shifter", to, 11, t); }
+    } },
+  { title: "Elite ring", caps: ["Drone as an elite (Plated)", "Siege Mech as an elite (Hasty)", "Ring: gold, 4 rotating marks, label above"], W: 230, H: 80,
+    draw(t) {
+      rect(0, 0, 230, 80, [0.043, 0.063, 0.086, 1]); rect(0, 16, 230, 48, [0.075, 0.1, 0.13, 1]);
+      const elite = (c, r, label) => {
+        disc(c, r + 6, [1, 0.78, 0.35, 0.08]); ring(c, r + 5, [1, 0.78, 0.35, 0.85], 1.3);
+        for (let k = 0; k < 4; k++) { const p = add(c, mul(fa(t * 0.8 + k * Math.PI / 2), r + 5)); solid(p, [[1, 0], [0, 0.6], [-1, 0], [0, -0.6]], [1, 0.85, 0.45, 1], t * 0.8 + k * Math.PI / 2, 2.2, 0.8); }
+        X.font = "600 6.5px 'Chakra Petch', sans-serif"; X.textAlign = "center";
+        const w = X.measureText(label).width + 6; rect(c[0] - w / 2, c[1] - r - 17, w, 9, [0.1, 0.08, 0.02, 0.85]);
+        X.fillStyle = css([1, 0.82, 0.4, 1]); X.fillText(label, c[0], c[1] - r - 10.5);
+      };
+      drawEnemy("grunt", [70, 44], 11, t); elite([70, 44], 11, "PLATED");
+      drawEnemy("brute", [160, 44], 14, t); elite([160, 44], 14, "HASTY");
+    } },
+];
+function buildFx() {
+  const root = document.getElementById("fx");
+  for (const fx of FX) {
+    const el = document.createElement("article"); el.className = "card new";
+    el.innerHTML = `<div class="card-head"><span class="name">${fx.title}</span></div>`;
+    const cv = mkCanvas(fx.W * 2, fx.H * 2); cv.classList.add("live"); el.append(cv);
+    const caps = document.createElement("div"); caps.className = "caps"; caps.innerHTML = fx.caps.map(s => `<span>${s}</span>`).join(""); el.append(caps);
+    const frames = document.createElement("div"); frames.className = "frames"; el.append(frames);
+    fx.ctx = cv.getContext("2d"); fx.frames = frames; root.append(el);
+  }
+}
+function renderFx(fx, ctx, t) { X = ctx; ctx.setTransform(DPR * 2, 0, 0, DPR * 2, 0, 0); ctx.lineCap = "round"; ctx.lineJoin = "round"; fx.draw(t); }
+
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.1, (now - last) / 1000); last = now;
+  if (playing) T += dt * speed;
+  for (const card of cards) {
+    let m = -1;
+    if (card.moment && T - card.start <= card.moment.dur) m = (T - card.start) / card.moment.dur;
+    renderCard(card, card.ctx1, 1, T, m); renderCard(card, card.ctx3, 3, T, m);
+  }
+  for (const fx of FX) renderFx(fx, fx.ctx, T);
+  requestAnimationFrame(frame);
+}
+
+// ---- Print view: key frames as still images ----------------------------------------------------
+function snapshot(w, h, fn) { const cv = document.createElement("canvas"); cv.width = w * DPR; cv.height = h * DPR; const ctx = cv.getContext("2d"); fn(ctx); return cv.toDataURL("image/png"); }
+function figure(src, cap) { const fg = document.createElement("figure"); const im = new Image(); im.src = src; im.alt = cap; const fc = document.createElement("figcaption"); fc.textContent = cap; fg.append(im, fc); return fg; }
+function buildPrint() {
+  for (const card of cards) {
+    card.frames.innerHTML = "";
+    const shots = [["Idle", 1.3, -1]];
+    if (card.moment) for (const k of [0.2, 0.55, 0.9]) shots.push([`${card.moment.label} ${Math.round(k * 100)}%`, 1.3 + k * card.moment.dur, k]);
+    for (const [cap, t, m] of shots) card.frames.append(figure(snapshot(W1 * 3, H1 * 3, ctx => renderCard(card, ctx, 3, t, m)), cap));
+  }
+  for (const fx of FX) { fx.frames.innerHTML = ""; for (const t of [0.8, 2.0]) fx.frames.append(figure(snapshot(fx.W * 2, fx.H * 2, ctx => renderFx(fx, ctx, t)), `t = ${t} s`)); }
+}
+function setPrint(on) { document.body.classList.toggle("print", on); const b = document.getElementById("printview"); b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); b.textContent = on ? "Live view" : "Print view"; if (on) buildPrint(); }
+
+// ---- Controls ----------------------------------------------------------------------------------
+document.getElementById("play").addEventListener("click", e => { playing = !playing; e.target.textContent = playing ? "Pause" : "Play"; e.target.setAttribute("aria-pressed", String(playing)); });
+for (const b of document.querySelectorAll("#speed button")) b.addEventListener("click", () => { speed = Number(b.dataset.v); document.querySelectorAll("#speed button").forEach(x => x.classList.toggle("on", x === b)); });
+for (const b of document.querySelectorAll("#tell button")) b.addEventListener("click", () => { TELL = b.dataset.v; document.querySelectorAll("#tell button").forEach(x => x.classList.toggle("on", x === b)); if (document.body.classList.contains("print")) buildPrint(); });
+document.getElementById("printview").addEventListener("click", () => setPrint(!document.body.classList.contains("print")));
+window.addEventListener("beforeprint", () => buildPrint());
+
+buildRoles(); buildFx(); requestAnimationFrame(frame);
+</script>
+</body>
+</html>

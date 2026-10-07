@@ -13,6 +13,14 @@ changes until the owner confirms the spec.**
 | 2 | Siphon, Blackout Rig, Capacitor (Disruptors) | Designed below |
 | 3 | Shifter, Wraith (Evaders) | Designed below (Wraith parked until the damage-type PR) |
 | 4 | Masquerade, Decoy Beacon, Mirage (targeting tricks) | Designed below |
+| Look | All twelve | Visual mockup: `design/new_enemies_mockup.html` |
+
+**Visual mockup.** `design/new_enemies_mockup.html` draws every new enemy with a canvas port of the game's own
+drawing helpers (`Draw.gd`), next to its role's existing enemies, at game scale (1x on a 48 px tile) and 3x.
+Each card plays its key moment, and Print view lays out key frames. It also shows the tower feedback, the trick
+tells, the evasion states and the elite ring. Open it in a browser. **Draft radii** (px) are set there:
+Needle 8, Fury Drone 10, Shrike 7, Titan 18, Siphon 12, Blackout Rig 14, Capacitor 15, Shifter 11, Wraith 12,
+Masquerade 13, Decoy Beacon 15, Mirage 11.
 
 ## Rules shared by all new enemies
 
@@ -376,3 +384,10 @@ trick is revealed.
     your approval; the upgrade data is generated from `design/upgrade_trees.md`.
 12. **Decoy and the Support priority (resolved).** The Support priority covers the Support role only, so it
     ignores every Special (Masquerade, Decoy Beacon, Mirage and its holograms). The tricks only fool Strongest.
+13. **Trick tell vs Exposed.** The existing Exposed status is a dashed white ring that rotates around the enemy,
+    so a dotted-ring tell for disguised enemies could be mistaken for it. The mockup shows both next to an
+    alternative "glitch outline" tell (a split red/cyan double outline). Which tell should Masquerade and Decoy
+    Beacon use?
+14. **Mockup review.** Silhouettes, palettes, radii and key moments in `design/new_enemies_mockup.html` are
+    drafts. Note: cloaked, the Wraith and the Phantom read alike (both are a faint wedge outline); the Wraith's
+    tattered tail and white outline only show once revealed.
