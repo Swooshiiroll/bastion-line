@@ -10,7 +10,7 @@ changes until the owner confirms the spec.**
 | Round | Enemies | State |
 |---|---|---|
 | 1 | Needle, Fury Drone, Shrike, Titan (the stat enemies) | Designed below |
-| 2 | Siphon, Blackout Rig, Surge Core (Disruptors) | To do |
+| 2 | Siphon, Blackout Rig, Capacitor (Disruptors) | Designed below |
 | 3 | Slipstream, Wraith (Evaders) | To do (Wraith waits for the damage-type PR) |
 | 4 | Mimic, Decoy Beacon, Echo (targeting tricks) | To do |
 
@@ -23,6 +23,12 @@ changes until the owner confirms the spec.**
 - **Leak cost** follows strength bands per unit, even for clusters. The bands are not defined yet.
 - **Introduction rounds** are set in the wave-generator PR; the mechanism is decided, the numbers are tuned
   there.
+- **Disable guard (Disruptors):** after a tower comes back online it can't be disabled again for **1 s**, so
+  overlapping EMPs (Jammer, Blackout Rig, Capacitor) can't lock a tower out. It applies to the existing
+  Jammer too, like the stun guard on enemies.
+- **Tower feedback:** a tower that is debuffed or disabled gets a violet tint and a small icon (range-down and
+  rate-down arrows for Siphon, a bolt for disabled), and the enemy's aura ring shows on the field. It is
+  drawn only while affected, so it costs nothing otherwise.
 - **Not built from scratch:** each is a body (HP, speed, size) plus traits from the registry in the spec
   (section 3). Needle and Shrike have no traits; Fury Drone and Titan each add one.
 
@@ -108,10 +114,85 @@ changes until the owner confirms the spec.**
 - **Edge cases:** healing above 50% doesn't restore plates. The speed bump is a plain speed change, so slows
   and Rally Beacon haste combine with it as normal. Not a boss.
 
+## Round 2: the Disruptors
+
+The Jammer today (`data/enemies.gd`): 150 HP, speed 50, armor 1, EMP radius 95, towers offline 2 s every 5 s
+(a 40% duty cycle). Its EMP sets `t.disabled` on every tower in radius (`Game._update_enemy`) and doesn't
+run while the enemy is silenced (`silenced(2)`). The new Disruptors follow it up in tier order: Siphon (T2),
+Blackout Rig (T3), Capacitor (T4).
+
+### Siphon (Disruptor T2)
+
+| HP | Speed | Armor | Fly | Str | Leak | Bounty |
+|---|---|---|---|---|---|---|
+| 190 | 52 | 2 | No | 102.75 | 2 | 12 |
+
+- **Behaviour:** an aura of **radius 100**. Towers inside it **fire 20% slower** and have **15% less range**
+  for as long as the Siphon is alive and not silenced. **Two Siphons don't add: the strongest applies**, the
+  way Rally Beacon and Nova auras use the larger value.
+- **Job:** weaken a defence without switching it off, so it is quieter than the Jammer but wears down every
+  tower it walks past.
+- **Counters:** range (kill it before it comes within 100 px of your towers), burst, focus first. A Nullifier
+  silences the aura.
+- **Implementation:** towers already have `buff_rate` and `buff_range`, reset each tick and read in
+  `Tower.eff_rate()` and `Tower.get_range()`. The debuff adds two small fields (`debuff_rate`,
+  `debuff_range`), reset each tick the same way, set by an aura pass like `Game._update_auras`, and applied
+  after the buffs.
+- **Look:** a hovering drone with a coil dish, in the Disruptor palette (the Jammer's acid yellow-green).
+  Thin siphon arcs to affected towers are an animated part (inside `Draw.dyn`). A low hum while any tower is
+  affected.
+- **Codex text (draft):** "Drains nearby towers: inside its 100 px aura they fire 20% slower and reach 15%
+  less far. Two Siphons don't stack. Kill it from range."
+- **Edge cases:** reduced range can drop a target out of reach. Flying enemies and bosses aren't affected as
+  enemies (the aura only touches towers). Towers with no range stat are unaffected.
+
+### Blackout Rig (Disruptor T3)
+
+| HP | Speed | Armor | Fly | Str | Leak | Bounty |
+|---|---|---|---|---|---|---|
+| 260 | 48 | 3 | No | 179.71 | 3 | 15 |
+
+- **Behaviour:** a **bigger Jammer**: EMP **radius 130**, towers offline **2.5 s every 4 s** (a 62.5% duty
+  cycle). The same code path as the Jammer with new numbers, so it is data only.
+- **Job:** switch off a cluster of towers for most of its walk. The heaviest of the three Disruptors.
+- **Counters:** long range, burst; a Nullifier silences the pulse. The 1 s disable guard stops it locking a
+  tower out together with a Jammer.
+- **Look:** a Jammer-family chassis, bulkier, with exposed pylons and brighter arcs (the same acid
+  yellow-green). The existing EMP ring effect, scaled to radius 130.
+- **Codex text (draft):** "A hulking Jammer. Its EMP reaches 130 px and knocks towers offline for 2.5 s every
+  4 s. Kill it from range."
+- **Edge cases:** it is not a boss, so Rally Beacon haste applies. A 62.5% duty cycle is flagged for
+  balancing.
+
+### Capacitor (Disruptor T4)
+
+*Placeholder name: Surge Core.*
+
+| HP | Speed | Armor | Fly | Str | Leak | Bounty |
+|---|---|---|---|---|---|---|
+| 420 | 44 | 4 | No | 325.25 | 3 | 20 |
+
+- **Behaviour (charge and release):** it shows a **2 s charge ring**, then pulses **radius 160**, taking
+  towers offline for **3 s**, once every **8 s**. **Silencing, stunning or killing it during the charge
+  cancels the pulse.**
+- **Job:** a big, telegraphed blackout the player can answer in time.
+- **Counters:** a stun or a Nullifier silence during the charge; burst; long range.
+- **Implementation:** a charge state (timer plus telegraph ring) and a cancel check on silence, stun and
+  death, next to the existing EMP code.
+- **Duty cycle:** 3 s of every 8 is **37.5%**, lower than the Blackout Rig's 62.5%, on purpose: the pulse is
+  bigger and telegraphed. Flagged for balancing.
+- **Look:** a squat core with a ring that fills during the charge in the Disruptor palette and flashes white
+  on release. A rising whine while it charges and a heavy discharge sound.
+- **Codex text (draft):** "Charges for 2 s, then blacks out every tower within 160 px for 3 s. Stun or silence
+  it during the charge to cancel the pulse."
+- **Edge cases:** if two Capacitors charge together, each pulses on its own timer, and the 1 s disable guard
+  applies to the second. It is not a boss.
+
 ## Implementation notes (for when the spec is confirmed)
 
 - **Registry:** all four go in `data/enemies.gd` (`ORDER` and `ENEMIES`). The "22 enemy types" test count
-  becomes 26 with these four, plus per-trait tests (pair spawn, adrenaline, plate shed, flying cluster).
+  becomes 26 with the round-1 four and 29 after round 2, plus per-trait tests (pair spawn, adrenaline, plate shed,
+  flying cluster, Siphon aura debuff and strongest-wins, Capacitor charge cancel, disable guard).
 - **Drawing:** follow the performance rules (`Draw.disc`, `ring`, `poly`, `polyline`; animated parts in
   `Draw.dyn`). Screenshots go to the owner for review.
 - **Sandbox Spawner:** new enemies appear in its grid once registered.
@@ -126,5 +207,8 @@ changes until the owner confirms the spec.**
    generator PR.
 3. **Introduction rounds.** The first round for Needle, Fury Drone, Shrike and Titan (Titan likely not
    before the 20th-round boss cadence matters).
-4. **Remaining eight enemies.** Names, behaviours and numbers for Siphon (debuffs both range and fire rate,
-   decided), Blackout Rig, Surge Core, Slipstream, Wraith, Mimic, Decoy Beacon and Echo are in later rounds.
+4. **Disruptor numbers.** Siphon's -20% fire rate and -15% range, the Blackout Rig's 62.5% duty cycle and the
+   Capacitor's 37.5% are tuned with the balance probe.
+5. **Jamming modifier.** Does the Jamming modifier (any elite) reuse the Jammer's EMP, a Siphon aura, or let
+   the wave generator choose?
+6. **Remaining five enemies.** Slipstream, Wraith, Mimic, Decoy Beacon and Echo are in later rounds.

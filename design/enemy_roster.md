@@ -24,7 +24,7 @@ built so each tier has more HP and/or speed than the one below it. No game code 
 | Rusher | Skitter | Needle (new) | Strike Drone | Fury Drone (new) |
 | Tank | Siege Mech | Rampart | Gunship | Titan (new) |
 | Support | Repair Bot | Rally Beacon | Bulwark | Mender Hulk |
-| Disruptor | Jammer | Siphon (new) | Blackout Rig (new) | Surge Core (new) |
+| Disruptor | Jammer | Siphon (new) | Blackout Rig (new) | Capacitor (new) |
 | Evader | Blink Stalker | Burrower | Slipstream (new) | Wraith (new) |
 
 **Special (no tiers):** Phantom, Aegis Walker, Hydra Frame, Mimic (new), Decoy Beacon (new), Echo (new).
@@ -49,18 +49,18 @@ built so each tier has more HP and/or speed than the one below it. No game code 
 | 12 | Needle | Rusher | T2 | 30 | 140 | 0 | 58.80 | 1 | 5 |  | Very fast, light hull; each spawn event sends a pair 0.25 s apart on one lane | Proposed (draft) |
 | 13 | Strike Drone | Rusher | T3 | 100 | 82 | 0 | 67.24 | 1 | 5 | Yes | Flies straight at the core, ignoring the lane (mortars can't hit it) | Current, adjusted (HP 64 to 100) |
 | 14 | Rally Beacon | Support | T2 | 170 | 48 | 2 | 78.34 | 2 | 12 |  | Aura radius 100: other non-boss enemies move 25% faster | Current |
-| 15 | Siphon | Disruptor | T2 | 190 | 52 | 2 | 102.75 | 2 | 12 |  | Aura radius 100: nearby towers fire 20% slower | Proposed (draft) |
+| 15 | Siphon | Disruptor | T2 | 190 | 52 | 2 | 102.75 | 2 | 12 |  | Aura radius 100: towers inside fire 20% slower and have 15% less range (strongest Siphon applies, no stacking) | Proposed (draft) |
 | 16 | Bulwark | Support | T3 | 200 | 42 | 3 | 105.84 | 2 | 13 |  | Every 6 s gives enemies within 100 px a barrier worth 25% of their health | Current |
 | 17 | Hydra Frame | Special | - | 190 | 46 | 3 | 120.61 | 2 | 8 |  | Splits into 3 Skitters when destroyed | Current |
 | 18 | Burrower | Evader | T2 | 160 | 62 | 2 | 123.01 | 2 | 9 |  | Burrows for 2.5 s every 5 s: can't be targeted or hurt | Current |
 | 19 | Fury Drone | Rusher | T4 | 85 | 125 | 1 | 132.81 | 2 | 9 |  | Adrenaline: +30% speed below half health (multiplies with Rally Beacon haste) | Proposed (draft) |
 | 20 | Mender Hulk | Support | T4 | 380 | 38 | 3 | 164.62 | 2 | 14 |  | Regenerates 4% of its health per second after 1.5 s without damage | Current |
-| 21 | Blackout Rig | Disruptor | T3 | 260 | 48 | 3 | 179.71 | 3 | 15 |  | EMP radius 130: towers offline 2.5 s every 4 s | Proposed (draft) |
+| 21 | Blackout Rig | Disruptor | T3 | 260 | 48 | 3 | 179.71 | 3 | 15 |  | Bigger Jammer: EMP radius 130, towers offline 2.5 s every 4 s | Proposed (draft) |
 | 22 | Slipstream | Evader | T3 | 200 | 68 | 2 | 184.96 | 2 | 13 |  | Burrows 2 s every 6 s and blinks 60 px every 5 s | Proposed (draft) |
 | 23 | Siege Mech | Tank | T1 | 265 | 40 | 6 | 254.40 | 2 | 10 |  | Armor plating | Current |
 | 24 | Wraith | Evader | T4 | 260 | 74 | 2 | 284.75 | 3 | 18 |  | Cloaked; visible 1 s after each blink; blinks 80 px every 5 s; only energy attacks hurt it (needs the damage-type PR) | Proposed (draft) |
 | 25 | Decoy Beacon | Special | - | 400 | 36 | 6 | 311.04 | 1 | 10 |  | Shows a false top rank so Strongest towers aim at it; does nothing else | Proposed (draft) |
-| 26 | Surge Core | Disruptor | T4 | 420 | 44 | 4 | 325.25 | 3 | 20 |  | EMP radius 160: towers offline 3 s every 6 s | Proposed (draft) |
+| 26 | Capacitor | Disruptor | T4 | 420 | 44 | 4 | 325.25 | 3 | 20 |  | Charge and release: 2 s telegraphed charge, then EMP radius 160, towers offline 3 s, every 8 s; silence, stun or death during the charge cancels it | Proposed (draft) |
 | 27 | Mimic | Special | - | 320 | 60 | 3 | 345.60 | 2 | 14 |  | Shows as a T1 until first hit or below half health, then shows its real rank | Proposed (draft) |
 | 28 | Rampart | Tank | T2 | 520 | 34 | 8 | 480.90 | 3 | 18 |  | Immune to slows, stuns and shoves | Current |
 | 29 | Gunship | Tank | T3 | 600 | 42 | 5 | 529.20 | 3 | 18 | Yes | Armored heavy flyer | Current, adjusted (HP 420 to 600) |
@@ -81,7 +81,7 @@ differ.
   adjustments below:
   - none
 - **Slots filled by new enemies:** Swarm T4, Rusher T2 and T4, Tank T4, Disruptor T2 to T4, Evader T3 and T4.
-  Surge Core and Slipstream are new placeholders for Disruptor T4 and Evader T3. Nexus is cut.
+  Capacitor and Slipstream are new placeholders for Disruptor T4 and Evader T3. Nexus is cut.
 - **Strike Drone at Rusher T3 is a flyer** in a role that is otherwise ground rushers.
 - **Wraith** waits for the damage-type PR, so Evader T4 may stay empty until then.
 

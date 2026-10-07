@@ -218,11 +218,11 @@ Role, tier, job and counter are a draft. **Stats for every current and proposed 
 |---|---|---|---|---|
 | Needle (was Dart) | Rusher T2 | Thin role | Very fast, light hull; each spawn event sends a pair | Slows, splash, rapid-fire towers |
 | Fury Drone (was Interceptor) | Rusher T4 | Higher tier | Adrenaline: +30% speed below half health | Burst, armor shred |
-| Siphon | Disruptor T2 | Thin role | Aura lowers the fire rate of nearby towers instead of switching them off | Range, focus fire |
-| Blackout Rig | Disruptor T3 | Thin role / higher tier | Armored Jammer with a larger EMP radius and a shorter cycle | Long range, burst |
+| Siphon | Disruptor T2 | Thin role | Aura (radius 100): towers inside fire 20% slower and have 15% less range | Range, focus fire |
+| Blackout Rig | Disruptor T3 | Thin role / higher tier | A bigger Jammer: EMP radius 130, offline 2.5 s every 4 s | Long range, burst |
 | Shrike (was Razor Swarm) | Swarm T4 | Higher tier | Flying cluster of 5 per spawn | Flak and chain, anti-air |
 | Titan | Tank T4 | Higher tier | Heaviest non-boss hull; plates shed at half health (armor 9 to 5, speed +20%) | Armor shred, big hitters, burst after the shed |
-| Surge Core | Disruptor T4 | Higher tier | Largest EMP radius and longest disable of the Disruptors | Long range, burst |
+| Capacitor (was Surge Core) | Disruptor T4 | Higher tier | Charge and release: 2 s telegraph, then a radius-160 EMP for 3 s every 8 s | Stun or silence during the charge, burst |
 | Slipstream | Evader T3 | Higher tier | Burrows and blinks in one body | Sensors, area |
 | Wraith | Evader T4 | Higher tier | Cloaked; visible for a moment after each blink | Sensors, area |
 | Mimic | Evader or Special | Targeting trick | Shows a low rank (looks like T1) until first hit or below a set HP, then shows its real higher rank | Area damage reveals it early; First targeting |
@@ -290,6 +290,10 @@ they exist.
   +30% speed below half health, multiplies with Rally Beacon haste), Shrike (Swarm T4, flying cluster of 5)
   and Titan (Tank T4, 700 HP, plates shed at half health). Sheets in `design/new_enemies.md`. Siphon will
   debuff both range and fire rate (round 2).
+- **New enemies, round 2 (Disruptors):** Siphon (Disruptor T2, aura -20% fire rate and -15% range, radius 100,
+  strongest wins), Blackout Rig (T3, a bigger Jammer: EMP radius 130, 2.5 s every 4 s) and Capacitor (T4,
+  charge and release). A 1 s **disable guard** applies to every Disruptor. Sheets in
+  `design/new_enemies.md`.
 - **Q13 Roster file:** the current and proposed enemies live in `design/enemy_roster.md`, with stats.
 - **Q11 Saves and waves:** one generator makes every round, identical on every playthrough, seeded by
   the round number alone, with introduction rounds baked in for new tiers, elites and modifiers. It goes
