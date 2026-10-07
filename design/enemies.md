@@ -81,15 +81,16 @@ so neither fits its draft slot well (deferred, see Deferred below).
 - Whether a modifier changes the rank **depends on the modifier**: each modifier's entry states its
   effect on rank.
 - **Rank comes from a formula (owner direction):** it is worked out from each enemy's base health, armor and
-  speed, not ordered by hand. The formula is speed x (armor x HP) (see "Strength rank" below),
+  speed, not ordered by hand. The formula is spd x (arm x hp) x spd (see "Strength rank" below),
   awaiting confirmation. Stronger enemies also **drain more shields** when they leak (section 5).
 - The rank is computed from the stats in the data table, so rebalancing stats rebalances the rank without
   code changes. It is shown in the Codex and Intel.
 
 #### Strength rank (owner formula)
 
-**Str = (speed / 100) x (armor x HP)**, using round-1 values from `data/enemies.gd`. Example from the
-owner: armor 50, HP 100, speed 45 gives 0.45 x (50 x 100) = 2250.
+**Str = spd x (arm x hp) x spd**, where spd is speed / 100, so **Str = (speed / 100)^2 x armor x HP**.
+It uses round-1 values from `data/enemies.gd`. Example from the owner: armor 50, HP 100, speed 45 gives
+0.45 x (50 x 100) x 0.45 = 1012.5.
 
 Two additions, both proposed and awaiting confirmation:
 - **Armor floor of 1.** Armor 0 would zero the score (six enemies have armor 0), so armor counts as 1 when
@@ -99,33 +100,35 @@ Two additions, both proposed and awaiting confirmation:
 
 | Enemy | HP | Speed | Armor | Str |
 |---|---|---|---|---|
-| Nanite | 22 | 78 | 0 | 17.16 |
-| Locust | 18 | 115 | 0 | 20.70 |
-| Drone | 70 | 55 | 0 | 38.50 |
-| Skitter | 45 | 105 | 0 | 47.25 |
-| Strike Drone | 64 | 82 | 0 | 52.48 |
-| Phantom | 85 | 72 | 0 | 61.20 |
-| Repair Bot | 125 | 50 | 1 | 62.50 |
-| Jammer | 150 | 50 | 1 | 75.00 |
-| Blink Stalker | 110 | 70 | 1 | 77.00 |
-| Aegis Walker | 150 | 44 | 2 | 132.00 |
-| Rally Beacon | 170 | 48 | 2 | 163.20 |
-| Burrower | 160 | 62 | 2 | 198.40 |
-| Bulwark | 200 | 42 | 3 | 252.00 |
-| Hydra Frame | 190 | 46 | 3 | 262.20 |
-| Mender Hulk | 380 | 38 | 3 | 433.20 |
-| Siege Mech | 265 | 40 | 6 | 636.00 |
-| Gunship | 420 | 42 | 5 | 882.00 |
-| Dreadnought (boss) | 800 | 32 | 5 | 1,280.00 |
-| Rampart | 520 | 34 | 8 | 1,414.40 |
-| Leviathan (boss) | 2,600 | 24 | 6 | 3,744.00 |
-| Overmind (boss) | 1,900 | 20 | 10 | 3,800.00 |
-| Colossus (boss) | 4,200 | 18 | 14 | 10,584.00 |
+| Nanite | 22 | 78 | 0 | 13.38 |
+| Drone | 70 | 55 | 0 | 21.18 |
+| Locust | 18 | 115 | 0 | 23.80 |
+| Repair Bot | 125 | 50 | 1 | 31.25 |
+| Jammer | 150 | 50 | 1 | 37.50 |
+| Strike Drone | 64 | 82 | 0 | 43.03 |
+| Phantom | 85 | 72 | 0 | 44.06 |
+| Skitter | 45 | 105 | 0 | 49.61 |
+| Blink Stalker | 110 | 70 | 1 | 53.90 |
+| Aegis Walker | 150 | 44 | 2 | 58.08 |
+| Rally Beacon | 170 | 48 | 2 | 78.34 |
+| Bulwark | 200 | 42 | 3 | 105.84 |
+| Hydra Frame | 190 | 46 | 3 | 120.61 |
+| Burrower | 160 | 62 | 2 | 123.01 |
+| Mender Hulk | 380 | 38 | 3 | 164.62 |
+| Siege Mech | 265 | 40 | 6 | 254.40 |
+| Gunship | 420 | 42 | 5 | 370.44 |
+| Dreadnought (boss) | 800 | 32 | 5 | 409.60 |
+| Rampart | 520 | 34 | 8 | 480.90 |
+| Overmind (boss) | 1,900 | 20 | 10 | 760.00 |
+| Leviathan (boss) | 2,600 | 24 | 6 | 898.56 |
+| Colossus (boss) | 4,200 | 18 | 14 | 1,905.12 |
 
 What it shows:
-- A fast fragile enemy (Skitter, 47.25) outranks the basic Drone (38.50).
-- Armor is a strong lever: Siege Mech (armor 6) outranks Mender Hulk (armor 3, more HP).
-- Rampart (1,414.40) outscores the Dreadnought boss (1,280.00), hence the boss rule.
+- Squaring speed rewards fast units: Locust (flyer, 23.80) now outranks the basic Drone (21.18), and
+  Skitter (49.61) outranks Strike Drone (43.03).
+- Support units rank low: Repair Bot (31.25) sits below Skitter. The score ignores abilities, so a
+  Support unit never ranks high under Strongest, which was one of the original complaints.
+- Rampart (480.90) outscores the Dreadnought boss (409.60), hence the boss rule.
 - Armor is flat damage removed per hit, and today's values run 0 to 14, so the score is a proxy. A
   different armor scale (the example uses 50) would change every rank.
 
@@ -252,9 +255,9 @@ they exist.
 
 ### Still open
 
-1. **Strength formula (Q4).** Str = (speed / 100) x (armor x HP), from the owner (table in section 2).
-   Still open: the armor floor of 1 for armor-0 enemies, and the boss-above-all rule. Is that how you want
-   zero armor and bosses handled? The formula also
+1. **Strength formula (Q4).** Str = spd x (arm x hp) x spd with spd = speed / 100, from the owner (table
+   in section 2). Still open: the armor floor of 1 for armor-0 enemies, the boss-above-all rule, and
+   whether Support units need an ability bonus so they rank high enough for Strongest. The formula also
    sets leak cost, so its bands need a mapping (e.g. score bands to 1, 2, 3 shields).
 2. **Waves (Q11).** The generator already runs forever (Endless) and is deterministic for a given seed.
    Making rounds identical on every playthrough means seeding it from the round number alone
