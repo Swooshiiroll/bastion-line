@@ -46,16 +46,17 @@ spec (repo CLAUDE.md, "Designing a feature first").
 
 Every enemy is a **role + tier**. Tier 1 is the basic version. Each higher tier has more HP and/or
 speed than the one before and keeps the role's job and counter. The placements below are a **draft
-for the owner to correct**.
+for the owner to correct**; the full grid with the proposed new enemies and all stats is in
+`design/enemy_roster.md`. Tiers are ordered by the strength score (section 2).
 
 | Role | Job | Counter | Today's enemies (draft tiers) |
 |---|---|---|---|
-| Swarm | Overwhelm single-target towers | Splash, chain | T1 Nanite, T2 Locust, T3 Drone |
-| Rusher | Get past before damage lands | Slows, burst | T1 Skitter, T2 Strike Drone |
+| Swarm | Overwhelm single-target towers | Splash, chain | T1 Nanite, T2 Drone, T3 Locust |
+| Rusher | Get past before damage lands | Slows, burst | T1 Strike Drone, T2 Skitter |
 | Tank | Soak damage | Armor shred, % damage | T1 Siege Mech, T2 Gunship, T3 Rampart |
 | Support | Make others harder | Focus first | T1 Repair Bot, T2 Rally Beacon, T3 Bulwark, T4 Mender Hulk |
 | Disruptor | Switch off towers | Range, reveal, burst | T1 Jammer |
-| Evader | Dodge targeting | Sensors, area | T1 Burrower, T2 Blink Stalker |
+| Evader | Dodge targeting | Sensors, area | T1 Blink Stalker, T2 Burrower |
 | Special | Break a rule | Barrier strip, area | Aegis Walker (barrier), Hydra Frame (split), Phantom (built-in cloak) |
 | Boss | Set-piece | Mixed defence | Dreadnought, Overmind, Leviathan, Colossus |
 
@@ -96,8 +97,8 @@ It uses round-1 values from `data/enemies.gd`. Example from the owner: armor 50,
 armor 0 and armor 1 both multiply by 1. This changes only the score: those enemies still take full damage
 from every hit, and the armor stat is unchanged.
 
-**Proposed, awaiting confirmation:** bosses rank above every non-boss, whatever their score (Rampart
-scores higher than the Dreadnought below).
+**Bosses rank above every non-boss (decided)**, whatever their score (Rampart scores higher than the
+Dreadnought below).
 
 | Enemy | HP | Speed | Armor | Str |
 |---|---|---|---|---|
@@ -150,16 +151,15 @@ What it shows:
   a difficulty knob. Each modifier has a threat cost in the wave budget, as enemy types do now.
 - **Announced** on the Intel panel and the NEXT strip. Elites get a ring and a label.
 - **First catalogue (about 10):** Hasty, Plated, Shielded, Regenerating, Cloaked, Splitting, Jamming,
-  Swarming (double count, half HP), Volatile (explodes on death, hurting towers), Resolute (resists
-  slow and stun), Commanding (aura). Each names its counter in the Codex.
+  Swarming (double count, half HP), Resolute (resists slow and stun), Commanding (aura). Each names its
+  counter in the Codex. **Volatile is shelved** (below).
 - **Cloaked** is a modifier for any enemy, alongside the Phantom's built-in cloak. **Splitting** may
   become a modifier too.
 - **Stacking and start round (decided):** set by balancing checks. The aim is a healthy mix of
   modifiers in the later rounds. Whether Easy has none is left to the same checks.
 - **Resolute has no counter, by design (decided):** it is a balancing tool.
-- **Volatile (proposed):** when the elite dies it explodes and **disables** towers in its radius for a
-  short time, once. It does not damage towers (the game has no tower health). Range and burst are the
-  counter: kill it before it reaches them. One elite per wave means one disable at a time.
+- **Volatile is shelved (decided).** For now towers are never destroyed or disabled by a modifier. It may
+  return later, or become its own game mode.
 - **Swarming** (double count, half HP) acts on a group, so it doesn't fit "single elites only". Its
   ruling is deferred.
 
@@ -167,6 +167,17 @@ What it shows:
 
 Per-round HP scaling is **lowered**, so late difficulty comes from the tier mix and from elites. The
 exact curve is set with the balance probe.
+
+### Waves (decided)
+
+- **One generator makes every round** (owner direction). It replaces the hand-authored rounds 1 to 25 in
+  `data/waves.gd` as well as rounds 26 and up, and it keeps going for Endless.
+- **Identical on every playthrough:** it is seeded by the round number alone, not the run's random seed.
+- **Introduction rounds are baked in as data** for each new tier, each elite kind and each modifier, so a
+  new threat always appears on a known round. Today's `INTRO` table (e.g. Rampart at round 40) is the
+  model. Modifiers and elites get their own entries.
+- Because rounds 1 to 25 change, the wave tests and the Easy and Medium bot playthroughs are re-pinned,
+  and the balance probe checks every mode.
 
 ### 5. Leak costs (closes #7)
 
@@ -184,8 +195,8 @@ list.
 
 The owner asked for three kinds: tiers for thin roles, enemies that trick targeting, and higher
 tiers so difficulty comes from the tier mix and not only from HP scaling. **Names are placeholders.**
-Role, tier, job and counter are a draft with no numbers yet. Each is built from the trait registry
-and has no modifiers by default.
+Role, tier, job and counter are a draft. **Stats for every current and proposed enemy are in
+`design/enemy_roster.md`.** Each is built from the trait registry and has no modifiers by default.
 
 | Placeholder | Role / tier | Gap it fills | Job | Counter |
 |---|---|---|---|---|
@@ -195,13 +206,15 @@ and has no modifiers by default.
 | Blackout Rig | Disruptor T3 | Thin role / higher tier | Armored Jammer with a larger EMP radius and a shorter cycle | Long range, burst |
 | Razor Swarm | Swarm T4 | Higher tier | Dense swarm of tougher small units | Splash and chain upgrades |
 | Titan | Tank T4 | Higher tier | Heaviest non-boss hull, between Rampart and the bosses | % damage, armor shred |
-| Nexus | Support T5 | Higher tier | Repairs and hastes in one aura; the "kill it first" priority late on | Focus first, range |
+| Surge Core | Disruptor T4 | Higher tier | Largest EMP radius and longest disable of the Disruptors | Long range, burst |
+| Slipstream | Evader T3 | Higher tier | Burrows and blinks in one body | Sensors, area |
 | Wraith | Evader T4 | Higher tier | Cloaked; visible for a moment after each blink | Sensors, area |
 | Mimic | Evader or Special | Targeting trick | Shows a low rank (looks like T1) until first hit or below a set HP, then shows its real higher rank | Area damage reveals it early; First targeting |
-| Decoy Beacon | Support | Targeting trick | Shows a false high strength rank so Strongest towers aim at it while others get past; armored, does nothing else | Switch towers to First, splash |
+| Decoy Beacon | Special | Targeting trick | Shows a false high strength rank so Strongest towers aim at it while others get past; armored, does nothing else | Switch towers to First, splash |
 | Echo | Special | Targeting trick | Puts out hologram copies with the same rank and 1 HP that use up shots | Area and chain, sensors |
 
-The "22 enemy types" test count changes when these land (phase 4).
+Nexus (Support T5) is cut: Support already has four tiers. The "22 enemy types" test count changes when
+these land (phase 4).
 
 ### 8. Presentation and tools
 
@@ -244,10 +257,15 @@ they exist.
 - **Q7 Modifiers and rank:** depends on the modifier.
 - **Q8 Stacking:** set by balancing checks. Later rounds should have a healthy mix of modifiers.
 - **Q9 Where modifiers go:** single elites.
-- **Q10 Counters:** Resolute gets no counter, as a balancing tool. Others are under Still open.
-- **Q11 Saves and waves:** rounds are **identical on every playthrough** and go on forever for Endless.
-  Wave generation is seeded by the round number alone, not the run's random seed. Modifiers need no new
-  save field and no version bump. See "Waves" below.
+- **Q10 Counters:** Resolute gets no counter, as a balancing tool. Small tower or research counters are
+  allowed where a modifier needs one (Cloaked), each in its own PR the owner approves.
+- **Boss above all:** bosses rank above every non-boss, whatever their score.
+- **Volatile:** shelved. Towers are not destroyed or disabled for now; it may return later or become its
+  own game mode.
+- **Q13 Roster file:** the current and proposed enemies live in `design/enemy_roster.md`, with stats.
+- **Q11 Saves and waves:** one generator makes every round, identical on every playthrough, seeded by
+  the round number alone, with introduction rounds baked in for new tiers, elites and modifiers. It goes
+  on forever for Endless. Modifiers need no new save field and no version bump. See "Waves" in section 4.
 - **Q14 HP scaling:** lowered.
 - **Q16 Mimic and Decoy:** the field label hides the true rank until revealed, and the Codex states each
   trick plainly. The Codex "seen enemies" tracking is unchecked.
@@ -257,24 +275,23 @@ they exist.
 
 ### Still open
 
-1. **Strength formula (Q4).** Str = spd² (arm x hp) with spd = speed / 100, from the owner (table
-   in section 2). Armor 0 counts as 1 (decided). Still open: the boss-above-all rule, and whether Support units
-   need an ability bonus so they rank high enough for Strongest. The formula also
-   sets leak cost, so its bands need a mapping (e.g. score bands to 1, 2, 3 shields).
-2. **Waves (Q11).** The generator already runs forever (Endless) and is deterministic for a given seed.
-   Making rounds identical on every playthrough means seeding it from the round number alone
-   (`Game._wave_rng`, now `seed_value * 1000 + n`), and the finale and bosses already come from a fixed
-   schedule per mode. Questions:
-   - Should the hand-authored rounds 1 to 25 stay as they are? **Recommendation:** yes.
-   - A changed seed rule alters rounds 26 and up for old saves once, at the update. Accept?
-   - Elites and modifiers are then placed by the same fixed rule, and the threat budget stays.
-3. **Volatile (proposed).** A disable on death, once, no damage. Confirm, or ask for a different effect.
-4. **Cloaked and Volatile counters (Q10).** Cloaked needs Sensor Array coverage; Volatile needs range or
-   burst. May small tower or research counters be added, each in its own PR you approve?
-   **Recommendation:** yes.
-5. **New roster (Q13).** The 11 draft enemies are Dart, Interceptor, Siphon, Blackout Rig, Razor Swarm,
-   Titan, Nexus, Wraith, Mimic, Decoy Beacon and Echo. Nexus is already cut or folded; Wraith waits for the
-   damage-type PR. A rough keep/drop list is enough for the rest.
+1. **Support bonus.** Repair Bot scores 31.25, below Skitter, so Strongest would rarely pick a Support unit.
+   Do Supports need an ability bonus in the score (or a role bonus)? The formula also sets leak cost, so
+   its bands need a mapping (e.g. score bands to 1, 2, 3 shields). **Recommendation:** a small bonus for
+   Support and Disruptor, tuned with the balance probe.
+2. **Replacing rounds 1 to 25.** One generator for every round means the 25 hand-authored rounds go away.
+   They set the early difficulty curve, and the bot playthroughs and wave tests depend on them.
+   **Recommendation:** have the generator reproduce today's rounds 1 to 25 as its output (check each
+   round matches), then tune from there. Say if you would rather start fresh.
+3. **First-boss round.** You wrote "like round 40 for the first boss". Today the Dreadnought boss arrives
+   at round 5, and round 40 is when Rampart is introduced. Did you mean the first new tier, or that the
+   first boss should move to round 40?
+4. **Old saves.** The new generator changes the remaining rounds of an old save once, at the update.
+   Accept?
+5. **Tier order and roster.** `design/enemy_roster.md` puts Drone at Swarm T2 and Locust at T3, and
+   Strike Drone at Rusher T1 and Skitter at T2, because the formula orders them that way. It adds Surge
+   Core (Disruptor T4) and Slipstream (Evader T3) to fill four tiers, and cuts Nexus. Do you agree with
+   those placements and the draft stats?
 
 ### Deferred
 
@@ -283,7 +300,9 @@ To be settled later or during implementation, as the owner said:
 - **Q3** Global ranked list as a hand-ordered table (replaced by the formula; its bands and the mapping
   stay open).
 - **Q12** Other enemies or mechanics (ranged, tower killers, lane blockers, other routes).
-- **Q15** First appearance round and difficulty for each new tier.
+- **Q15** The exact introduction round for each new tier, elite kind and modifier (the mechanism is decided,
+  the numbers are tuned during implementation).
 - **Q17** Whether Drone and Strike Drone need roles of their own, such as Line and Flyer.
 - **Swarming** ruling.
+- **Volatile**, if it returns, and any mode where towers can be destroyed.
 - **Damage types** (physical vs energy) and the Wraith that depends on them.
