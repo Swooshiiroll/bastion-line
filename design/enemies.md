@@ -81,45 +81,45 @@ so neither fits its draft slot well (deferred, see Deferred below).
 - Whether a modifier changes the rank **depends on the modifier**: each modifier's entry states its
   effect on rank.
 - **Rank comes from a formula (owner direction):** it is worked out from each enemy's base health and
-  speed, not ordered by hand. The proposed formula is HP x speed (see "Strength rank, proposed" below),
+  speed, not ordered by hand. The formula is HP x (speed / 100) (see "Strength rank, proposed" below),
   awaiting confirmation. Stronger enemies also **drain more shields** when they leak (section 5).
 - The rank is computed from the stats in the data table, so rebalancing stats rebalances the rank without
   code changes. It is shown in the Codex and Intel.
 
 #### Strength rank, proposed
 
-Score = base HP x speed, using round-1 values from `data/enemies.gd`. Armor and abilities are not in the
-score yet.
+Score = base HP x (speed / 100), using round-1 values from `data/enemies.gd`. An enemy with 1000 HP and
+speed 45 scores 1000 x 0.45 = 450. Armor and abilities are not in the score yet.
 
 | Enemy | HP | Speed | Score |
 |---|---|---|---|
-| Nanite | 22 | 78 | 1,716 |
-| Locust | 18 | 115 | 2,070 |
-| Drone | 70 | 55 | 3,850 |
-| Skitter | 45 | 105 | 4,725 |
-| Strike Drone | 64 | 82 | 5,248 |
-| Phantom | 85 | 72 | 6,120 |
-| Repair Bot | 125 | 50 | 6,250 |
-| Aegis Walker | 150 | 44 | 6,600 |
-| Jammer | 150 | 50 | 7,500 |
-| Blink Stalker | 110 | 70 | 7,700 |
-| Rally Beacon | 170 | 48 | 8,160 |
-| Bulwark | 200 | 42 | 8,400 |
-| Hydra Frame | 190 | 46 | 8,740 |
-| Burrower | 160 | 62 | 9,920 |
-| Siege Mech | 265 | 40 | 10,600 |
-| Mender Hulk | 380 | 38 | 14,440 |
-| Gunship | 420 | 42 | 17,640 |
-| Rampart | 520 | 34 | 17,680 |
-| Dreadnought | 800 | 32 | 25,600 |
-| Overmind | 1,900 | 20 | 38,000 |
-| Leviathan | 2,600 | 24 | 62,400 |
-| Colossus | 4,200 | 18 | 75,600 |
+| Nanite | 22 | 78 | 17.16 |
+| Locust | 18 | 115 | 20.70 |
+| Drone | 70 | 55 | 38.50 |
+| Skitter | 45 | 105 | 47.25 |
+| Strike Drone | 64 | 82 | 52.48 |
+| Phantom | 85 | 72 | 61.20 |
+| Repair Bot | 125 | 50 | 62.50 |
+| Aegis Walker | 150 | 44 | 66.00 |
+| Jammer | 150 | 50 | 75.00 |
+| Blink Stalker | 110 | 70 | 77.00 |
+| Rally Beacon | 170 | 48 | 81.60 |
+| Bulwark | 200 | 42 | 84.00 |
+| Hydra Frame | 190 | 46 | 87.40 |
+| Burrower | 160 | 62 | 99.20 |
+| Siege Mech | 265 | 40 | 106.00 |
+| Mender Hulk | 380 | 38 | 144.40 |
+| Gunship | 420 | 42 | 176.40 |
+| Rampart | 520 | 34 | 176.80 |
+| Dreadnought | 800 | 32 | 256.00 |
+| Overmind | 1,900 | 20 | 380.00 |
+| Leviathan | 2,600 | 24 | 624.00 |
+| Colossus | 4,200 | 18 | 756.00 |
 
 What it shows:
 - Bosses fall naturally at the top.
-- Gunship and Rampart are nearly tied (17,640 and 17,680), so the tie-break matters there.
-- A fast fragile enemy (Skitter, 4,725) outranks the basic Drone (3,850).
+- Gunship and Rampart are nearly tied (176.40 and 176.80), so the tie-break matters there.
+- A fast fragile enemy (Skitter, 47.25) outranks the basic Drone (38.50).
 - Armor is ignored, so Rampart (8 armor) undersells its toughness. A variant multiplies HP by an armor
   factor.
 
@@ -246,9 +246,9 @@ they exist.
 
 ### Still open
 
-1. **Strength formula (Q4).** Proposed: HP x speed (table in section 2). The owner's note read
-   "HP x 0.speed"; confirm that plain HP x speed is what is meant. Options: add an armor factor so
-   Rampart ranks above Gunship; or a tunable HP/speed weight the balance probe adjusts. The formula also
+1. **Strength formula (Q4).** HP x (speed / 100), as the owner's example shows (1000 HP, speed 45 scores
+   450); table in section 2. Still open: add an armor factor so Rampart ranks clearly above Gunship, or
+   a tunable HP/speed weight the balance probe adjusts. The formula also
    sets leak cost, so its bands need a mapping (e.g. score bands to 1, 2, 3 shields).
 2. **Waves (Q11).** The generator already runs forever (Endless) and is deterministic for a given seed.
    Making rounds identical on every playthrough means seeding it from the round number alone
