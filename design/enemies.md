@@ -134,14 +134,14 @@ Dreadnought below).
 The table uses today's stats. What it shows:
 - Squaring speed rewards fast units: Locust (flyer, 23.80) outranks the basic Drone (21.18), and
   Skitter (49.61) outranks Strike Drone (43.03). With the owner's tier grid (Locust T2, Drone T3; Strike
-  Drone T3 above Dart T2; Gunship T3 above Rampart T2) those orders are wrong.
+  Drone T3 above Needle T2; Gunship T3 above Rampart T2) those orders are wrong.
 - Support units rank low: Repair Bot (31.25) sits below Skitter. The score ignores abilities, so a
   Support unit never ranks high under Strongest, which was one of the original complaints.
 - Rampart (480.90) outscores the Dreadnought boss (409.60), hence the boss rule.
 
 **Stats adjusted to follow the tiers (owner request, draft).** So that strength rises with tier in every
 role, `design/enemy_roster.md` changes four HP values: Locust 18 to 15 (Str 19.84), Strike Drone 64 to 100
-(67.24), Gunship 420 to 600 (529.20), and the new Dart 40 to 30 (58.80). Nothing else changes. After that,
+(67.24), Gunship 420 to 600 (529.20), and the new Needle (was Dart) 40 to 30 (58.80). Nothing else changes. After that,
 no role has a higher tier scoring below a lower one. The roster lists the alternatives.
 - Armor is flat damage removed per hit, and today's values run 0 to 14, so the score is a proxy. A
   different armor scale (the example uses 50) would change every rank.
@@ -212,16 +212,16 @@ list.
 The owner asked for three kinds: tiers for thin roles, enemies that trick targeting, and higher
 tiers so difficulty comes from the tier mix and not only from HP scaling. **Names are placeholders.**
 Role, tier, job and counter are a draft. **Stats for every current and proposed enemy are in
-`design/enemy_roster.md`.** Each is built from the trait registry and has no modifiers by default.
+`design/enemy_roster.md`; behaviour and look for the new ones are in `design/new_enemies.md`.** Each is built from the trait registry and has no modifiers by default.
 
 | Placeholder | Role / tier | Gap it fills | Job | Counter |
 |---|---|---|---|---|
-| Dart | Rusher T3 | Thin role | Very fast, light hull; arrives in pairs | Slows, fast-firing towers |
-| Interceptor | Rusher T4 | Higher tier | Fast with light armor; speeds up when damaged | Burst, armor shred |
+| Needle (was Dart) | Rusher T2 | Thin role | Very fast, light hull; each spawn event sends a pair | Slows, splash, rapid-fire towers |
+| Fury Drone (was Interceptor) | Rusher T4 | Higher tier | Adrenaline: +30% speed below half health | Burst, armor shred |
 | Siphon | Disruptor T2 | Thin role | Aura lowers the fire rate of nearby towers instead of switching them off | Range, focus fire |
 | Blackout Rig | Disruptor T3 | Thin role / higher tier | Armored Jammer with a larger EMP radius and a shorter cycle | Long range, burst |
-| Razor Swarm | Swarm T4 | Higher tier | Dense swarm of tougher small units | Splash and chain upgrades |
-| Titan | Tank T4 | Higher tier | Heaviest non-boss hull, between Rampart and the bosses | % damage, armor shred |
+| Shrike (was Razor Swarm) | Swarm T4 | Higher tier | Flying cluster of 5 per spawn | Flak and chain, anti-air |
+| Titan | Tank T4 | Higher tier | Heaviest non-boss hull; plates shed at half health (armor 9 to 5, speed +20%) | Armor shred, big hitters, burst after the shed |
 | Surge Core | Disruptor T4 | Higher tier | Largest EMP radius and longest disable of the Disruptors | Long range, burst |
 | Slipstream | Evader T3 | Higher tier | Burrows and blinks in one body | Sensors, area |
 | Wraith | Evader T4 | Higher tier | Cloaked; visible for a moment after each blink | Sensors, area |
@@ -286,6 +286,10 @@ they exist.
 - **Roster placements and draft stats:** acceptable for now. The order is subject to change with
   balancing tweaks and stat changes. The owner's adjusted tier grid (Locust Swarm T2, Drone T3; Skitter
   Rusher T1, Strike Drone T3; Rampart Tank T2, Gunship T3) is in `design/enemy_roster.md`.
+- **New enemies, round 1 (stat enemies):** Needle (Rusher T2, pair spawn), Fury Drone (Rusher T4, adrenaline
+  +30% speed below half health, multiplies with Rally Beacon haste), Shrike (Swarm T4, flying cluster of 5)
+  and Titan (Tank T4, 700 HP, plates shed at half health). Sheets in `design/new_enemies.md`. Siphon will
+  debuff both range and fire rate (round 2).
 - **Q13 Roster file:** the current and proposed enemies live in `design/enemy_roster.md`, with stats.
 - **Q11 Saves and waves:** one generator makes every round, identical on every playthrough, seeded by
   the round number alone, with introduction rounds baked in for new tiers, elites and modifiers. It goes

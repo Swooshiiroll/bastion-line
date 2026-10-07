@@ -20,8 +20,8 @@ built so each tier has more HP and/or speed than the one below it. No game code 
 
 | Role | T1 | T2 | T3 | T4 |
 |---|---|---|---|---|
-| Swarm | Nanite | Locust | Drone | Razor Swarm (new) |
-| Rusher | Skitter | Dart (new) | Strike Drone | Interceptor (new) |
+| Swarm | Nanite | Locust | Drone | Shrike (new) |
+| Rusher | Skitter | Needle (new) | Strike Drone | Fury Drone (new) |
 | Tank | Siege Mech | Rampart | Gunship | Titan (new) |
 | Support | Repair Bot | Rally Beacon | Bulwark | Mender Hulk |
 | Disruptor | Jammer | Siphon (new) | Blackout Rig (new) | Surge Core (new) |
@@ -42,18 +42,18 @@ built so each tier has more HP and/or speed than the one below it. No game code 
 | 5 | Jammer | Disruptor | T1 | 150 | 50 | 1 | 37.50 | 2 | 12 |  | EMP radius 95: towers offline 2 s every 5 s | Current |
 | 6 | Echo | Special | - | 140 | 55 | 1 | 42.35 | 2 | 12 |  | Every 6 s drops 2 hologram copies (1 HP, same displayed rank) that use up shots | Proposed (draft) |
 | 7 | Phantom | Special | - | 85 | 72 | 0 | 44.06 | 1 | 7 |  | Built-in cloak: targetable only inside a Sensor Array field or briefly after area damage | Current |
-| 8 | Razor Swarm | Swarm | T4 | 55 | 90 | 0 | 44.55 | 2 | 3 |  | Dense swarm of tougher small units | Proposed (draft) |
+| 8 | Shrike | Swarm | T4 | 55 | 90 | 0 | 44.55 | 2 | 3 | Yes | Flying cluster: 5 per spawn event, 0.15 s apart; flies straight at the core | Proposed (draft) |
 | 9 | Skitter | Rusher | T1 | 45 | 105 | 0 | 49.61 | 1 | 4 |  | Fast, fragile crawler | Current |
 | 10 | Blink Stalker | Evader | T1 | 110 | 70 | 1 | 53.90 | 1 | 8 |  | Blinks 80 px down the lane every 4 s; slow or stun resets the charge | Current |
 | 11 | Aegis Walker | Special | - | 150 | 44 | 2 | 58.08 | 2 | 12 |  | Barrier 130, regenerates 0.25/s after 2.5 s; Arc Coils deal double to barriers | Current |
-| 12 | Dart | Rusher | T2 | 30 | 140 | 0 | 58.80 | 1 | 5 |  | Very fast, light hull; spawns in pairs | Proposed (draft) |
+| 12 | Needle | Rusher | T2 | 30 | 140 | 0 | 58.80 | 1 | 5 |  | Very fast, light hull; each spawn event sends a pair 0.25 s apart on one lane | Proposed (draft) |
 | 13 | Strike Drone | Rusher | T3 | 100 | 82 | 0 | 67.24 | 1 | 5 | Yes | Flies straight at the core, ignoring the lane (mortars can't hit it) | Current, adjusted (HP 64 to 100) |
 | 14 | Rally Beacon | Support | T2 | 170 | 48 | 2 | 78.34 | 2 | 12 |  | Aura radius 100: other non-boss enemies move 25% faster | Current |
 | 15 | Siphon | Disruptor | T2 | 190 | 52 | 2 | 102.75 | 2 | 12 |  | Aura radius 100: nearby towers fire 20% slower | Proposed (draft) |
 | 16 | Bulwark | Support | T3 | 200 | 42 | 3 | 105.84 | 2 | 13 |  | Every 6 s gives enemies within 100 px a barrier worth 25% of their health | Current |
 | 17 | Hydra Frame | Special | - | 190 | 46 | 3 | 120.61 | 2 | 8 |  | Splits into 3 Skitters when destroyed | Current |
 | 18 | Burrower | Evader | T2 | 160 | 62 | 2 | 123.01 | 2 | 9 |  | Burrows for 2.5 s every 5 s: can't be targeted or hurt | Current |
-| 19 | Interceptor | Rusher | T4 | 85 | 125 | 1 | 132.81 | 2 | 9 |  | Speeds up when damaged (+30% below half health) | Proposed (draft) |
+| 19 | Fury Drone | Rusher | T4 | 85 | 125 | 1 | 132.81 | 2 | 9 |  | Adrenaline: +30% speed below half health (multiplies with Rally Beacon haste) | Proposed (draft) |
 | 20 | Mender Hulk | Support | T4 | 380 | 38 | 3 | 164.62 | 2 | 14 |  | Regenerates 4% of its health per second after 1.5 s without damage | Current |
 | 21 | Blackout Rig | Disruptor | T3 | 260 | 48 | 3 | 179.71 | 3 | 15 |  | EMP radius 130: towers offline 2.5 s every 4 s | Proposed (draft) |
 | 22 | Slipstream | Evader | T3 | 200 | 68 | 2 | 184.96 | 2 | 13 |  | Burrows 2 s every 6 s and blinks 60 px every 5 s | Proposed (draft) |
@@ -64,7 +64,7 @@ built so each tier has more HP and/or speed than the one below it. No game code 
 | 27 | Mimic | Special | - | 320 | 60 | 3 | 345.60 | 2 | 14 |  | Shows as a T1 until first hit or below half health, then shows its real rank | Proposed (draft) |
 | 28 | Rampart | Tank | T2 | 520 | 34 | 8 | 480.90 | 3 | 18 |  | Immune to slows, stuns and shoves | Current |
 | 29 | Gunship | Tank | T3 | 600 | 42 | 5 | 529.20 | 3 | 18 | Yes | Armored heavy flyer | Current, adjusted (HP 420 to 600) |
-| 30 | Titan | Tank | T4 | 800 | 30 | 9 | 648.00 | 4 | 24 |  | Heaviest non-boss hull; slow resist 50% | Proposed (draft) |
+| 30 | Titan | Tank | T4 | 700 | 30 | 9 | 567.00 | 4 | 24 |  | Slow resist 50%; at half health its plates shed: armor 9 to 5 and speed +20% | Proposed (draft) |
 | 31 | Dreadnought | Boss | - | 800 | 32 | 5 | 409.60 | 6 | 120 |  | Boss. Slow resist 50% | Current |
 | 32 | Overmind | Boss | - | 1,900 | 20 | 10 | 760.00 | 20 | 500 |  | Boss. Slow resist 60%; spawns 3 Nanites every 5 s | Current |
 | 33 | Leviathan | Boss | - | 2,600 | 24 | 6 | 898.56 | 15 | 400 | Yes | Boss. Slow resist 50%; launches 6 Locusts every 6 s | Current |
@@ -94,9 +94,9 @@ These are draft changes to today's values in `data/enemies.gd`:
 | Enemy | Change | Str before | Str after | Why |
 |---|---|---|---|---|
 | Locust (Swarm T2) | HP 18 to 15 | 23.80 | 19.84 | Drone (T3) scores 21.18, so Locust drops just below it and stays above Nanite (13.38) |
-| Strike Drone (Rusher T3) | HP 64 to 100 | 43.03 | 67.24 | It must beat Dart (T2) and Skitter (T1, 49.61) and stay below Interceptor (T4, 132.81) |
-| Dart (Rusher T2, new) | HP 40 to 30 (draft) | 78.40 | 58.80 | Dart must sit between Skitter (49.61) and Strike Drone (67.24) |
-| Gunship (Tank T3) | HP 420 to 600 | 370.44 | 529.20 | It must beat Rampart (T2, 480.90) and stay below Titan (T4, 648.00) |
+| Strike Drone (Rusher T3) | HP 64 to 100 | 43.03 | 67.24 | It must beat Needle (T2) and Skitter (T1, 49.61) and stay below Fury Drone (T4, 132.81) |
+| Needle (Rusher T2, new) | HP 40 to 30 (draft) | 78.40 | 58.80 | Needle must sit between Skitter (49.61) and Strike Drone (67.24) |
+| Gunship (Tank T3) | HP 420 to 600 | 370.44 | 529.20 | It must beat Rampart (T2, 480.90) and stay below Titan (T4, 567.00) |
 
 Drone, Rampart and every other enemy keep their stats. Alternatives if a change is unwelcome: raise
 Gunship's armor to 7 (Str 518.62) instead of its HP, or lower Rampart's armor from 8 to 6 (Str 360.67);
