@@ -3,7 +3,7 @@
 Every current and proposed enemy with its stats, for the owner to mark up. It supports
 `design/enemies.md` (the rework spec); that spec holds the rules, this file holds the numbers.
 **Nothing here is confirmed.** Current stats come from `data/enemies.gd`. Proposed stats are my drafts,
-built so each role's tiers rise in strength and bosses sit on top. No game code or data changes.
+built so each tier has more HP and/or speed than the one below it. No game code or data changes.
 
 ## How to read it
 
@@ -19,9 +19,9 @@ built so each role's tiers rise in strength and bosses sit on top. No game code 
 
 | Role | T1 | T2 | T3 | T4 |
 |---|---|---|---|---|
-| Swarm | Nanite | Drone | Locust | Razor Swarm (new) |
-| Rusher | Strike Drone | Skitter | Dart (new) | Interceptor (new) |
-| Tank | Siege Mech | Gunship | Rampart | Titan (new) |
+| Swarm | Nanite | Locust | Drone | Razor Swarm (new) |
+| Rusher | Skitter | Dart (new) | Strike Drone | Interceptor (new) |
+| Tank | Siege Mech | Rampart | Gunship | Titan (new) |
 | Support | Repair Bot | Rally Beacon | Bulwark | Mender Hulk |
 | Disruptor | Jammer | Siphon (new) | Blackout Rig (new) | Surge Core (new) |
 | Evader | Blink Stalker | Burrower | Slipstream (new) | Wraith (new) |
@@ -35,19 +35,19 @@ built so each role's tiers rise in strength and bosses sit on top. No game code 
 | Rank | Enemy | Role | Tier | HP | Speed | Armor | Str | Leak | Bounty | Fly | Traits | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
 | 1 | Nanite | Swarm | T1 | 22 | 78 | 0 | 13.38 | 1 | 2 |  | Tiny self-replicating machines that come in swarms | Current |
-| 2 | Drone | Swarm | T2 | 70 | 55 | 0 | 21.18 | 1 | 4 |  | Basic combat drone | Current |
-| 3 | Locust | Swarm | T3 | 18 | 115 | 0 | 23.80 | 1 | 1 | Yes | Flies straight at the core in dense swarms | Current |
+| 2 | Drone | Swarm | T3 | 70 | 55 | 0 | 21.18 | 1 | 4 |  | Basic combat drone | Current |
+| 3 | Locust | Swarm | T2 | 18 | 115 | 0 | 23.80 | 1 | 1 | Yes | Flies straight at the core in dense swarms | Current |
 | 4 | Repair Bot | Support | T1 | 125 | 50 | 1 | 31.25 | 2 | 11 |  | Heals nearby enemies 8% every 2 s, radius 90 (not bosses) | Current |
 | 5 | Jammer | Disruptor | T1 | 150 | 50 | 1 | 37.50 | 2 | 12 |  | EMP radius 95: towers offline 2 s every 5 s | Current |
 | 6 | Echo | Special | - | 140 | 55 | 1 | 42.35 | 2 | 12 |  | Every 6 s drops 2 hologram copies (1 HP, same displayed rank) that use up shots | Proposed (draft) |
-| 7 | Strike Drone | Rusher | T1 | 64 | 82 | 0 | 43.03 | 1 | 5 | Yes | Flies straight at the core, ignoring the lane (mortars can't hit it) | Current |
+| 7 | Strike Drone | Rusher | T3 | 64 | 82 | 0 | 43.03 | 1 | 5 | Yes | Flies straight at the core, ignoring the lane (mortars can't hit it) | Current |
 | 8 | Phantom | Special | - | 85 | 72 | 0 | 44.06 | 1 | 7 |  | Built-in cloak: targetable only inside a Sensor Array field or briefly after area damage | Current |
 | 9 | Razor Swarm | Swarm | T4 | 55 | 90 | 0 | 44.55 | 2 | 3 |  | Dense swarm of tougher small units | Proposed (draft) |
-| 10 | Skitter | Rusher | T2 | 45 | 105 | 0 | 49.61 | 1 | 4 |  | Fast, fragile crawler | Current |
+| 10 | Skitter | Rusher | T1 | 45 | 105 | 0 | 49.61 | 1 | 4 |  | Fast, fragile crawler | Current |
 | 11 | Blink Stalker | Evader | T1 | 110 | 70 | 1 | 53.90 | 1 | 8 |  | Blinks 80 px down the lane every 4 s; slow or stun resets the charge | Current |
 | 12 | Aegis Walker | Special | - | 150 | 44 | 2 | 58.08 | 2 | 12 |  | Barrier 130, regenerates 0.25/s after 2.5 s; Arc Coils deal double to barriers | Current |
 | 13 | Rally Beacon | Support | T2 | 170 | 48 | 2 | 78.34 | 2 | 12 |  | Aura radius 100: other non-boss enemies move 25% faster | Current |
-| 14 | Dart | Rusher | T3 | 40 | 140 | 0 | 78.40 | 1 | 5 |  | Very fast, light hull; spawns in pairs | Proposed (draft) |
+| 14 | Dart | Rusher | T2 | 40 | 140 | 0 | 78.40 | 1 | 5 |  | Very fast, light hull; spawns in pairs | Proposed (draft) |
 | 15 | Siphon | Disruptor | T2 | 190 | 52 | 2 | 102.75 | 2 | 12 |  | Aura radius 100: nearby towers fire 20% slower | Proposed (draft) |
 | 16 | Bulwark | Support | T3 | 200 | 42 | 3 | 105.84 | 2 | 13 |  | Every 6 s gives enemies within 100 px a barrier worth 25% of their health | Current |
 | 17 | Hydra Frame | Special | - | 190 | 46 | 3 | 120.61 | 2 | 8 |  | Splits into 3 Skitters when destroyed | Current |
@@ -61,25 +61,28 @@ built so each role's tiers rise in strength and bosses sit on top. No game code 
 | 25 | Decoy Beacon | Special | - | 400 | 36 | 6 | 311.04 | 1 | 10 |  | Shows a false top rank so Strongest towers aim at it; does nothing else | Proposed (draft) |
 | 26 | Surge Core | Disruptor | T4 | 420 | 44 | 4 | 325.25 | 3 | 20 |  | EMP radius 160: towers offline 3 s every 6 s | Proposed (draft) |
 | 27 | Mimic | Special | - | 320 | 60 | 3 | 345.60 | 2 | 14 |  | Shows as a T1 until first hit or below half health, then shows its real rank | Proposed (draft) |
-| 28 | Gunship | Tank | T2 | 420 | 42 | 5 | 370.44 | 3 | 18 | Yes | Armored heavy flyer | Current |
-| 29 | Rampart | Tank | T3 | 520 | 34 | 8 | 480.90 | 3 | 18 |  | Immune to slows, stuns and shoves | Current |
+| 28 | Gunship | Tank | T3 | 420 | 42 | 5 | 370.44 | 3 | 18 | Yes | Armored heavy flyer | Current |
+| 29 | Rampart | Tank | T2 | 520 | 34 | 8 | 480.90 | 3 | 18 |  | Immune to slows, stuns and shoves | Current |
 | 30 | Titan | Tank | T4 | 800 | 30 | 9 | 648.00 | 4 | 24 |  | Heaviest non-boss hull; slow resist 50% | Proposed (draft) |
 | 31 | Dreadnought | Boss | - | 800 | 32 | 5 | 409.60 | 6 | 120 |  | Boss. Slow resist 50% | Current |
 | 32 | Overmind | Boss | - | 1,900 | 20 | 10 | 760.00 | 20 | 500 |  | Boss. Slow resist 60%; spawns 3 Nanites every 5 s | Current |
 | 33 | Leviathan | Boss | - | 2,600 | 24 | 6 | 898.56 | 15 | 400 | Yes | Boss. Slow resist 50%; launches 6 Locusts every 6 s | Current |
 | 34 | Colossus | Boss | - | 4,200 | 18 | 14 | 1,905.12 | 25 | 700 |  | Boss. Slow resist 60%, can't be stunned; at 66% and 33% health sheds 5 armor, speeds up 20% and drops 2 Siege Mechs | Current |
 
-## What the formula changed in the draft tiers
+## Tiering (owner-adjusted)
 
-- **Drone and Locust swap.** The first draft had Locust at Swarm T2 and Drone at T3, but Drone scores
-  21.18 and Locust 23.80, so a tier that rises in strength puts Drone at T2 and Locust at T3.
-- **Strike Drone and Skitter swap.** Strike Drone scores 43.03 and Skitter 49.61, so Strike Drone is
-  Rusher T1 and Skitter T2. That puts a flyer at T1 of a role that is otherwise ground rushers.
-- **Evader order.** Blink Stalker (53.90) is T1 and Burrower (123.01) T2.
-- **Support is already in order** (Repair Bot, Rally Beacon, Bulwark, Mender Hulk).
-- **Slots to fill:** four tiers per role needs new Swarm T4, Rusher T3 and T4, Tank T4, Disruptor T2 to
-  T4, and Evader T3 and T4. Surge Core and Slipstream are new placeholders for Disruptor T4 and Evader
-  T3; they were not in the spec's first roster.
+The tier grid is the owner's `Adjusted Roster Tiering` file (2026-10-07). A tier is a label: each tier has more HP
+and/or speed than the one below it. **Strongest targeting uses the strength score, not the tier**, so the two can
+differ.
+
+- **Tier rule check:** every tier beats the one below on HP or speed (all 18 steps pass).
+- **Where tier order and strength disagree** (a higher tier scores lower than the tier below):
+  - Swarm: T3 Drone (21.18) scores below T2 Locust (23.80)
+  - Rusher: T3 Strike Drone (43.03) scores below T2 Dart (78.40)
+  - Tank: T3 Gunship (370.44) scores below T2 Rampart (480.90)
+- **Slots filled by new enemies:** Swarm T4, Rusher T2 and T4, Tank T4, Disruptor T2 to T4, Evader T3 and T4.
+  Surge Core and Slipstream are new placeholders for Disruptor T4 and Evader T3. Nexus is cut.
+- **Strike Drone at Rusher T3 is a flyer** in a role that is otherwise ground rushers.
 - **Wraith** waits for the damage-type PR, so Evader T4 may stay empty until then.
 
 ## Notes

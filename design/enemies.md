@@ -47,13 +47,15 @@ spec (repo CLAUDE.md, "Designing a feature first").
 Every enemy is a **role + tier**. Tier 1 is the basic version. Each higher tier has more HP and/or
 speed than the one before and keeps the role's job and counter. The placements below are a **draft
 for the owner to correct**; the full grid with the proposed new enemies and all stats is in
-`design/enemy_roster.md`. Tiers are ordered by the strength score (section 2).
+`design/enemy_roster.md`. The owner adjusted the grid on 2026-10-07. A tier is a label (each has more HP
+and/or speed than the one below); Strongest targeting uses the strength score (section 2), so tier order
+and score can differ.
 
 | Role | Job | Counter | Today's enemies (draft tiers) |
 |---|---|---|---|
-| Swarm | Overwhelm single-target towers | Splash, chain | T1 Nanite, T2 Drone, T3 Locust |
-| Rusher | Get past before damage lands | Slows, burst | T1 Strike Drone, T2 Skitter |
-| Tank | Soak damage | Armor shred, % damage | T1 Siege Mech, T2 Gunship, T3 Rampart |
+| Swarm | Overwhelm single-target towers | Splash, chain | T1 Nanite, T2 Locust, T3 Drone |
+| Rusher | Get past before damage lands | Slows, burst | T1 Skitter, T3 Strike Drone (T2 is a new enemy) |
+| Tank | Soak damage | Armor shred, % damage | T1 Siege Mech, T2 Rampart, T3 Gunship |
 | Support | Make others harder | Focus first | T1 Repair Bot, T2 Rally Beacon, T3 Bulwark, T4 Mender Hulk |
 | Disruptor | Switch off towers | Range, reveal, burst | T1 Jammer |
 | Evader | Dodge targeting | Sensors, area | T1 Blink Stalker, T2 Burrower |
@@ -276,7 +278,8 @@ they exist.
 - **Boss rounds:** every 20 rounds.
 - **Old saves:** an old save's remaining rounds change once at the update. Accepted.
 - **Roster placements and draft stats:** acceptable for now. The order is subject to change with
-  balancing tweaks and stat changes.
+  balancing tweaks and stat changes. The owner's adjusted tier grid (Locust Swarm T2, Drone T3; Skitter
+  Rusher T1, Strike Drone T3; Rampart Tank T2, Gunship T3) is in `design/enemy_roster.md`.
 - **Q13 Roster file:** the current and proposed enemies live in `design/enemy_roster.md`, with stats.
 - **Q11 Saves and waves:** one generator makes every round, identical on every playthrough, seeded by
   the round number alone, with introduction rounds baked in for new tiers, elites and modifiers. It goes
