@@ -88,8 +88,19 @@ so neither fits its draft slot well (deferred, see Deferred below).
   awaiting confirmation. Stronger enemies also **drain more shields** when they leak (section 5).
 - **Support enemies get their own target priority (decided).** Strongest alone rarely picks them (Repair
   Bot scores low), so towers get a new priority choice that targets enemies **in the Support role** first,
-  instead of a score bonus. It does not cover Specials (owner: "nix Special"). Towers already have two choices: a mode (First, Last,
-  Strongest, Closest, `Tower.MODE_NAMES`) and a priority (Any, Air, Ground, `Tower.PRIORITY_NAMES`).
+  instead of a score bonus. It does not cover Specials (owner: "nix Special"). Towers already have two choices:
+  a mode (First, Last, Strongest, Closest, `Tower.MODE_NAMES`) and a priority (Any, Air, Ground,
+  `Tower.PRIORITY_NAMES`). **Among Support enemies in range the tower uses its current mode (decided):**
+
+  | Tower mode | With the Support priority it targets |
+  |---|---|
+  | First | the Support enemy furthest along the lane |
+  | Last | the Support enemy least far along |
+  | Strongest | the Support enemy with the highest strength score |
+  | Closest | the nearest Support enemy |
+
+  If no Support enemy is in range it falls back to all enemies under the same mode, as the Air and Ground
+  priorities do in `Game.pick_target`.
 - The rank is computed from the stats in the data table, so rebalancing stats rebalances the rank without
   code changes. It is shown in the Codex and Intel.
 
@@ -284,7 +295,10 @@ they exist.
 - **Volatile:** shelved. Towers are not destroyed or disabled for now; it may return later or become its
   own game mode.
 - **Support priority:** a new target priority for enemies in the **Support role** (Specials are not
-  included), not a score bonus.
+  included), not a score bonus. It orders targets by the **tower's current mode** (First, Last, Strongest,
+  Closest) and falls back to all enemies when no Support enemy is in range. Implementation: a fourth entry ("Support") in
+  `Tower.PRIORITY_NAMES`, using the existing cycle button; no save version bump (old saves load their stored
+  value).
 - **Rounds 1 to 25:** the generator starts fresh and does not reproduce today's rounds.
 - **Boss rounds:** every 20 rounds. **Once a boss round is passed, that boss can be a recurring enemy in
   later rounds.**
@@ -326,19 +340,13 @@ they exist.
 
 ### Still open
 
-1. **Support priority: details.** The game already has a per-tower priority (Any, Air, Ground).
-   **Recommendation:** add a fourth entry ("Support") to `Tower.PRIORITY_NAMES`, so it uses the existing
-   cycle button and needs no save version bump (old saves load with their stored value). **Decided:** it
-   targets enemies in the **Support role** only (Repair Bot, Rally Beacon, Bulwark, Mender Hulk), and it goes by
-   the enemy's *displayed* identity. Still open: which mode (First, Strongest...) orders targets inside the
-   priority? **Recommendation:** the tower's current mode.
-2. **Boss rounds: details.** Every 20 rounds, and a boss met once can recur in later rounds (decided). Which
+1. **Boss rounds: details.** Every 20 rounds, and a boss met once can recur in later rounds (decided). Which
    boss comes on which boss round (20, 40, 60, 80, 100, 120)? Does the Dreadnought stop appearing every 5th
    round? Do the existing finales (e.g. round 40: two Dreadnoughts, a Leviathan, an Overmind) stay as the
    40th-round boss wave? **Recommendation:** Dreadnought at 20, then the finales as they are, adding Colossus
    and Overmind appearances so each boss round is bigger than the last; recurrence then draws from the bosses
    already met.
-3. **Leak-cost bands (non-boss).** The strength score sets leak cost, so its bands need a mapping (e.g.
+2. **Leak-cost bands (non-boss).** The strength score sets leak cost, so its bands need a mapping (e.g.
    score bands to 1, 2, 3 shields). Proposed with the balance probe in phase 4.
 
 ### Deferred
