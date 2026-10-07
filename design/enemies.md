@@ -34,7 +34,9 @@ spec (repo CLAUDE.md, "Designing a feature first").
 - A leak costs a fixed number of shields per type (1 to 3; bosses 6, 15, 20, 25).
 - Heal, spawn, EMP and shield-grant share one timer, so an enemy can have only one of them.
 - Saves (`Game.to_save`, `SAVE_VERSION` 9) store the wave, towers, research, seed and spawn counter, not
-  enemies, and only between rounds. Each round's waves are generated from the seed.
+  enemies, and only between rounds. Rounds 1 to 25 are hand-authored (`data/waves.gd`); from round 26,
+  and in Endless, a generator builds each round from `seed_value * 1000 + round`. The run's seed is
+  random, so those later rounds differ between playthroughs.
 - Tests pin many numbers (waves, scaling, the "22 enemy types", Codex ability text). The Easy and
   Medium bot playthroughs must still earn medals.
 
@@ -61,7 +63,8 @@ Note: Drone (`grunt`) is the basic enemy, and Strike Drone (`bat`) is a flyer th
 so neither fits its draft slot well (deferred, see Deferred below).
 
 **Decided (owner):**
-- **Same tier count for every role.** The number itself is open (see Still open, "Tier count").
+- **Four tiers for every regular role** (approved), with Special and Boss as named exceptions. The draft
+  Nexus (Support T5) is cut or folded into T4.
 - **Flat tier stats.** Each tier has its own flat HP and speed stat, not a multiplier on the tier
   below.
 - **Phantom is a Special.** It keeps its built-in cloak as a specialized enemy. Cloaked is also a
@@ -77,9 +80,48 @@ so neither fits its draft slot well (deferred, see Deferred below).
   "Strongest ties").
 - Whether a modifier changes the rank **depends on the modifier**: each modifier's entry states its
   effect on rank.
-- The ranked list itself is deferred (see Deferred below).
-- The rank is stored in one data table, so it can be rebalanced without code changes. It is shown in
-  the Codex and Intel.
+- **Rank comes from a formula (owner direction):** it is worked out from each enemy's base health and
+  speed, not ordered by hand. The proposed formula is HP x speed (see "Strength rank, proposed" below),
+  awaiting confirmation. Stronger enemies also **drain more shields** when they leak (section 5).
+- The rank is computed from the stats in the data table, so rebalancing stats rebalances the rank without
+  code changes. It is shown in the Codex and Intel.
+
+#### Strength rank, proposed
+
+Score = base HP x speed, using round-1 values from `data/enemies.gd`. Armor and abilities are not in the
+score yet.
+
+| Enemy | HP | Speed | Score |
+|---|---|---|---|
+| Nanite | 22 | 78 | 1,716 |
+| Locust | 18 | 115 | 2,070 |
+| Drone | 70 | 55 | 3,850 |
+| Skitter | 45 | 105 | 4,725 |
+| Strike Drone | 64 | 82 | 5,248 |
+| Phantom | 85 | 72 | 6,120 |
+| Repair Bot | 125 | 50 | 6,250 |
+| Aegis Walker | 150 | 44 | 6,600 |
+| Jammer | 150 | 50 | 7,500 |
+| Blink Stalker | 110 | 70 | 7,700 |
+| Rally Beacon | 170 | 48 | 8,160 |
+| Bulwark | 200 | 42 | 8,400 |
+| Hydra Frame | 190 | 46 | 8,740 |
+| Burrower | 160 | 62 | 9,920 |
+| Siege Mech | 265 | 40 | 10,600 |
+| Mender Hulk | 380 | 38 | 14,440 |
+| Gunship | 420 | 42 | 17,640 |
+| Rampart | 520 | 34 | 17,680 |
+| Dreadnought | 800 | 32 | 25,600 |
+| Overmind | 1,900 | 20 | 38,000 |
+| Leviathan | 2,600 | 24 | 62,400 |
+| Colossus | 4,200 | 18 | 75,600 |
+
+What it shows:
+- Bosses fall naturally at the top.
+- Gunship and Rampart are nearly tied (17,640 and 17,680), so the tie-break matters there.
+- A fast fragile enemy (Skitter, 4,725) outranks the basic Drone (3,850).
+- Armor is ignored, so Rampart (8 armor) undersells its toughness. A variant multiplies HP by an armor
+  factor.
 
 ### 3. Traits as data-driven building blocks
 
@@ -104,8 +146,12 @@ so neither fits its draft slot well (deferred, see Deferred below).
   become a modifier too.
 - **Stacking and start round (decided):** set by balancing checks. The aim is a healthy mix of
   modifiers in the later rounds. Whether Easy has none is left to the same checks.
-- Note: **Swarming** (double count, half HP) acts on a group, so it doesn't fit "single elites only".
-  It needs a ruling (see Still open).
+- **Resolute has no counter, by design (decided):** it is a balancing tool.
+- **Volatile (proposed):** when the elite dies it explodes and **disables** towers in its radius for a
+  short time, once. It does not damage towers (the game has no tower health). Range and burst are the
+  counter: kill it before it reaches them. One elite per wave means one disable at a time.
+- **Swarming** (double count, half HP) acts on a group, so it doesn't fit "single elites only". Its
+  ruling is deferred.
 
 ### Round scaling (decided)
 
@@ -114,7 +160,8 @@ exact curve is set with the balance probe.
 
 ### 5. Leak costs (closes #7)
 
-Leak cost follows **tier**: a base cost per role-tier, +1 for elites, and bosses a fixed share of the
+Leak cost follows **strength** (owner: stronger enemies drain more shields): a base cost per strength
+band, derived from the rank formula, +1 for elites, and bosses a fixed share of the
 mode's shields (so Cataclysm's single shield still works). Checked with the balance probe on every
 difficulty.
 
@@ -158,7 +205,8 @@ Separate PRs, each confirmed by the owner:
 
 1. Role, tier and strength-rank data, plus the trait registry and per-trait timers. No gameplay change.
 2. Strongest targeting by strength rank (with its tests and Codex text).
-3. Modifier engine, wave generation and the Intel UI.
+3. Modifier engine, wave generation (rounds identical on every playthrough, see Open questions) and
+   the Intel UI.
 4. Roster changes and rebalance: tiers, new enemies, leak costs, boss kits.
 5. Codex, Sandbox picker and probe support.
 
@@ -169,76 +217,62 @@ Game code in this PR. Only this doc changes.
 
 ## Open questions
 
-Answered by the owner on 2026-10-07. Numbers match the first draft's question numbers.
+Reviewed by the owner on 2026-10-07 (two rounds). Numbers match the first draft's question numbers where
+they exist.
 
 ### Decided
 
+- **Q1 Tier count:** four tiers for every regular role; Special and Boss are named exceptions; the draft
+  Nexus (Support T5) is cut or folded into T4.
 - **Q2 Tier scaling:** each tier has a flat HP and speed stat.
+- **Q4 Strongest ties:** rank comes from a formula over base HP and speed, so ties are rare. Stronger
+  enemies also drain more shields. The formula itself is under Still open.
 - **Q5 Phantom:** keeps its built-in cloak as a specialized enemy; Cloaked is also a modifier for any
   enemy.
 - **Q6 Specials:** they stay specials. Splitting may become a modifier.
 - **Q7 Modifiers and rank:** depends on the modifier.
 - **Q8 Stacking:** set by balancing checks. Later rounds should have a healthy mix of modifiers.
 - **Q9 Where modifiers go:** single elites.
+- **Q10 Counters:** Resolute gets no counter, as a balancing tool. Others are under Still open.
+- **Q11 Saves and waves:** rounds are **identical on every playthrough** and go on forever for Endless.
+  Wave generation is seeded by the round number alone, not the run's random seed. Modifiers need no new
+  save field and no version bump. See "Waves" below.
 - **Q14 HP scaling:** lowered.
+- **Q16 Mimic and Decoy:** the field label hides the true rank until revealed, and the Codex states each
+  trick plainly. The Codex "seen enemies" tracking is unchecked.
+- **Wraith (energy-only damage):** needs a physical/energy tag on every tower, a new system. It becomes
+  a separate PR after the core rework; until then Wraith is a draft idea.
+- **Swarming:** ruling deferred.
 
 ### Still open
 
-Each item has a recommendation. Reply with a letter or a change.
-
-1. **Tier count (from Q1).** Every role gets the same number of tiers, but today's counts are Swarm 3,
-   Rusher 2, Tank 3, Support 4, Disruptor 1 and Evader 2 (Phantom moves to Special).
-   - **3 tiers:** Support loses a tier and Disruptor needs two new enemies.
-   - **4 tiers:** most roles gain new enemies, which fits the wish for higher tiers.
-   - **Recommendation: 4** for the regular roles, with Special and Boss as named exceptions. The draft
-     Nexus (Support T5) is then cut or folded into T4.
-2. **Strongest ties (Q4).** Strongest sorts by strength rank first. A tie means two enemies of the same
-   role and tier on the field, e.g. a wave of Gunships.
-   - **A:** highest current HP first, then path progress. Within a tier, Strongest still means "the
-     beefiest", as it does today. A fresh enemy at the back outranks a nearly dead one at the exit.
-   - **B:** path progress first. This stops leaks, but Strongest then behaves like First within a tier.
-   - **Recommendation: A.** First and Last already cover position.
-3. **Tower and research counters (Q10).** Some modifiers have no clean counter today:
-   - **Cloaked** needs Sensor Array coverage, so a cloaked elite in an uncovered lane is effectively
-     untouchable.
-   - **Volatile** hurts towers and needs range or burst to pop it early.
-   - **Resolute** shrugs off slows and stuns (Rampart and Colossus already show how awkward that is).
-
-   May I add or change tower upgrades and research nodes to counter them, or must modifiers work with
-   the current towers? Without counters, the catalogue shrinks to what current towers can answer.
-   **Recommendation:** allow small counters, each in its own PR you approve.
-4. **Saves (Q11).** Corrected after reading the save code:
-   - A save stores the wave, gold, lives, towers, research, the seed and the spawn counter
-     (`Game.to_save`, `SAVE_VERSION` 9). **It stores no enemies**, and saving only works between
-     rounds (`can_save`). Each round's waves come from `seed_value * 1000 + round`.
-   - If elites and their modifiers are picked from that same seed, **modifiers need no new save field
-     and no version bump.**
-   - What does change: the same seed produces different future waves after the update, so an old save's
-     remaining rounds differ. That is a balance change, not corruption.
-   - Old saves already load and re-save at the current version (tests cover v1 to v8). Dropping them
-     would break that pattern.
-   - **Recommendation:** no bump for modifiers. Bump `SAVE_VERSION` only if the tier or roster data
-     changes what a saved value means, and then migrate as the existing tests do.
+1. **Strength formula (Q4).** Proposed: HP x speed (table in section 2). The owner's note read
+   "HP x 0.speed"; confirm that plain HP x speed is what is meant. Options: add an armor factor so
+   Rampart ranks above Gunship; or a tunable HP/speed weight the balance probe adjusts. The formula also
+   sets leak cost, so its bands need a mapping (e.g. score bands to 1, 2, 3 shields).
+2. **Waves (Q11).** The generator already runs forever (Endless) and is deterministic for a given seed.
+   Making rounds identical on every playthrough means seeding it from the round number alone
+   (`Game._wave_rng`, now `seed_value * 1000 + n`), and the finale and bosses already come from a fixed
+   schedule per mode. Questions:
+   - Should the hand-authored rounds 1 to 25 stay as they are? **Recommendation:** yes.
+   - A changed seed rule alters rounds 26 and up for old saves once, at the update. Accept?
+   - Elites and modifiers are then placed by the same fixed rule, and the threat budget stays.
+3. **Volatile (proposed).** A disable on death, once, no damage. Confirm, or ask for a different effect.
+4. **Cloaked and Volatile counters (Q10).** Cloaked needs Sensor Array coverage; Volatile needs range or
+   burst. May small tower or research counters be added, each in its own PR you approve?
+   **Recommendation:** yes.
 5. **New roster (Q13).** The 11 draft enemies are Dart, Interceptor, Siphon, Blackout Rig, Razor Swarm,
-   Titan, Nexus, Wraith, Mimic, Decoy Beacon and Echo. Which to keep, cut or rename depends on item 1.
-   Nexus (Support T5) and Wraith (Evader T4) only exist if those roles reach that tier. With cloak now
-   a modifier, check whether Wraith is still needed. A rough keep/drop list is enough; names can wait.
-6. **Mimic and Decoy rank (Q16).** The field label hides the true rank until revealed (decided).
-   The open part is the Codex. **Recommendation:** the Codex states each trick plainly, as the Phantom's
-   entry does, but a player who has not met the enemy yet should not be spoiled. Check whether the
-   Codex tracks seen enemies; if not, state the trick plainly anyway.
-7. **Swarming.** It doubles the count at half HP, which acts on a group, not a single elite.
-   - **1:** drop it.
-   - **2:** rework it into an elite that spawns a pair of weaker copies on death (this overlaps
-     Splitting).
-   - **3:** keep it as a wave-level exception.
-   - **Recommendation: 1.** Splitting covers the idea.
+   Titan, Nexus, Wraith, Mimic, Decoy Beacon and Echo. Nexus is already cut or folded; Wraith waits for the
+   damage-type PR. A rough keep/drop list is enough for the rest.
 
 ### Deferred
 
 To be settled later or during implementation, as the owner said:
 
-- **Q3** Global ranked list: numbers or named bands, and where each role-tier lands.
+- **Q3** Global ranked list as a hand-ordered table (replaced by the formula; its bands and the mapping
+  stay open).
 - **Q12** Other enemies or mechanics (ranged, tower killers, lane blockers, other routes).
 - **Q15** First appearance round and difficulty for each new tier.
 - **Q17** Whether Drone and Strike Drone need roles of their own, such as Line and Flyer.
+- **Swarming** ruling.
+- **Damage types** (physical vs energy) and the Wraith that depends on them.
