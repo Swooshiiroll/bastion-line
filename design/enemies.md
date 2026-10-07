@@ -92,11 +92,12 @@ so neither fits its draft slot well (deferred, see Deferred below).
 It uses round-1 values from `data/enemies.gd`. Example from the owner: armor 50, HP 100, speed 45 gives
 0.45 x (50 x 100) x 0.45 = 1012.5.
 
-Two additions, both proposed and awaiting confirmation:
-- **Armor floor of 1.** Armor 0 would zero the score (six enemies have armor 0), so armor counts as 1 when
-  it is 0. Otherwise those six all tie at 0.
-- **Bosses rank above every non-boss**, whatever their score (Rampart scores higher than the Dreadnought
-  below).
+**Armor of 0 counts as 1 (decided).** A 0 would zero the score, and 1 is the multiplier for "no armor", so
+armor 0 and armor 1 both multiply by 1. This changes only the score: those enemies still take full damage
+from every hit, and the armor stat is unchanged.
+
+**Proposed, awaiting confirmation:** bosses rank above every non-boss, whatever their score (Rampart
+scores higher than the Dreadnought below).
 
 | Enemy | HP | Speed | Armor | Str |
 |---|---|---|---|---|
@@ -234,7 +235,8 @@ they exist.
 - **Q1 Tier count:** four tiers for every regular role; Special and Boss are named exceptions; the draft
   Nexus (Support T5) is cut or folded into T4.
 - **Q2 Tier scaling:** each tier has a flat HP and speed stat.
-- **Q4 Strongest ties:** rank comes from a formula over base HP, armor and speed, so ties are rare. Stronger
+- **Q4 Strongest ties:** rank comes from a formula over base HP, armor and speed, with armor 0 counted as 1,
+  so ties are rare. Stronger
   enemies also drain more shields. The formula itself is under Still open.
 - **Q5 Phantom:** keeps its built-in cloak as a specialized enemy; Cloaked is also a modifier for any
   enemy.
@@ -256,8 +258,8 @@ they exist.
 ### Still open
 
 1. **Strength formula (Q4).** Str = spd x (arm x hp) x spd with spd = speed / 100, from the owner (table
-   in section 2). Still open: the armor floor of 1 for armor-0 enemies, the boss-above-all rule, and
-   whether Support units need an ability bonus so they rank high enough for Strongest. The formula also
+   in section 2). Armor 0 counts as 1 (decided). Still open: the boss-above-all rule, and whether Support units
+   need an ability bonus so they rank high enough for Strongest. The formula also
    sets leak cost, so its bands need a mapping (e.g. score bands to 1, 2, 3 shields).
 2. **Waves (Q11).** The generator already runs forever (Endless) and is deterministic for a given seed.
    Making rounds identical on every playthrough means seeding it from the round number alone
