@@ -15,8 +15,8 @@ spec (repo CLAUDE.md, "Designing a feature first").
 
 - **Roles** stay (Swarm, Rusher, Tank, Support, Disruptor, Evader, Special, Boss).
 - **Each role has tiers.** A higher tier has more health and/or more speed than the one below it.
-- **No enemy has a modifier by default.** The possible exception is the Phantom's cloak (open
-  question 5).
+- **No enemy has a modifier by default.** The one exception is the Phantom's built-in cloak
+  (decided).
 - **Modifiers can apply to any enemy** and are what raises **wave difficulty**.
 - **Tiers drive "Strongest" targeting.** Each role's tiers sit in one overall ranked list, which
   decides the Strongest order across roles.
@@ -51,20 +51,31 @@ for the owner to correct**.
 | Tank | Soak damage | Armor shred, % damage | T1 Siege Mech, T2 Gunship, T3 Rampart |
 | Support | Make others harder | Focus first | T1 Repair Bot, T2 Rally Beacon, T3 Bulwark, T4 Mender Hulk |
 | Disruptor | Switch off towers | Range, reveal, burst | T1 Jammer |
-| Evader | Dodge targeting | Sensors, area | T1 Burrower, T2 Phantom, T3 Blink Stalker |
-| Special | Break a rule | Barrier strip, area | Aegis Walker (barrier), Hydra Frame (split) |
+| Evader | Dodge targeting | Sensors, area | T1 Burrower, T2 Blink Stalker |
+| Special | Break a rule | Barrier strip, area | Aegis Walker (barrier), Hydra Frame (split), Phantom (built-in cloak) |
 | Boss | Set-piece | Mixed defence | Dreadnought, Overmind, Leviathan, Colossus |
 
 Note: Drone (`grunt`) is the basic enemy, and Strike Drone (`bat`) is a flyer that ignores the lane,
-so neither fits its draft slot well (open question 17).
+so neither fits its draft slot well (deferred, see Deferred below).
+
+**Decided (owner):**
+- **Same tier count for every role.** The number itself is open (see Still open, "Tier count").
+- **Flat tier stats.** Each tier has its own flat HP and speed stat, not a multiplier on the tier
+  below.
+- **Phantom is a Special.** It keeps its built-in cloak as a specialized enemy. Cloaked is also a
+  modifier that any enemy can take (section 4).
+- **Special enemies stay specials** (Aegis, Hydra, Phantom). Splitting may also become a modifier.
 
 ### 2. Strength rank and Strongest targeting
 
 - One **global strength rank** that every role-tier slots into. Roles interleave, so "T2 Tank" can
   outrank "T3 Swarm". Bosses sit at the top.
 - **Strongest** becomes: highest strength rank first, then current HP, then path progress. This
-  replaces `e.hp` in `Game._score`. (Tie-break order is open question 4.)
-- A modifier does not change the rank by default (open question 7).
+  replaces `e.hp` in `Game._score`. The tie-break order is awaiting confirmation (see Still open,
+  "Strongest ties").
+- Whether a modifier changes the rank **depends on the modifier**: each modifier's entry states its
+  effect on rank.
+- The ranked list itself is deferred (see Deferred below).
 - The rank is stored in one data table, so it can be rebalanced without code changes. It is shown in
   the Codex and Intel.
 
@@ -79,13 +90,25 @@ so neither fits its draft slot well (open question 17).
 
 - **No modifiers by default.** A modifier is a reusable trait or stat change that can apply to any
   enemy of any role and tier.
-- **Wave difficulty:** the wave generator uses modifiers, alongside tier mix and count, as a
-  difficulty knob. Each modifier has a threat cost in the wave budget, as enemy types do now.
+- **Single elites only (decided).** A modifier goes on an individual elite enemy, never on a whole
+  wave.
+- **Wave difficulty:** the wave generator uses elites with modifiers, alongside tier mix and count, as
+  a difficulty knob. Each modifier has a threat cost in the wave budget, as enemy types do now.
 - **Announced** on the Intel panel and the NEXT strip. Elites get a ring and a label.
 - **First catalogue (about 10):** Hasty, Plated, Shielded, Regenerating, Cloaked, Splitting, Jamming,
   Swarming (double count, half HP), Volatile (explodes on death, hurting towers), Resolute (resists
   slow and stun), Commanding (aura). Each names its counter in the Codex.
-- How many stack, and from which round, is open (question 8).
+- **Cloaked** is a modifier for any enemy, alongside the Phantom's built-in cloak. **Splitting** may
+  become a modifier too.
+- **Stacking and start round (decided):** set by balancing checks. The aim is a healthy mix of
+  modifiers in the later rounds. Whether Easy has none is left to the same checks.
+- Note: **Swarming** (double count, half HP) acts on a group, so it doesn't fit "single elites only".
+  It needs a ruling (see Still open).
+
+### Round scaling (decided)
+
+Per-round HP scaling is **lowered**, so late difficulty comes from the tier mix and from elites. The
+exact curve is set with the balance probe.
 
 ### 5. Leak costs (closes #7)
 
@@ -141,32 +164,53 @@ Separate PRs, each confirmed by the owner:
 
 Game code in this PR. Only this doc changes.
 
+
 ## Open questions
 
-1. **Tiers:** how many per role? Are the draft placements right (e.g. is Drone really Swarm T3)? Does
-   every role need the same number of tiers?
-2. **Tier scaling:** does each tier add a flat step in HP and speed, a multiplier, or does it vary by
-   role (Tanks gain HP, Rushers gain speed)?
-3. **Ranked list:** one number (1 to 10) or named bands (Fodder / Standard / Heavy / Elite / Boss)?
-   Where does each role-tier land?
-4. **Strongest ties:** if two enemies share a rank, current HP or path progress first?
-5. **Phantom:** keep its built-in cloak, or make cloak a modifier that can apply to any enemy?
-6. **Special enemies** (Aegis barrier, Hydra split): roles with tiers, or one-offs that also become
-   modifiers (Shielded, Splitting)?
-7. **Modifiers and rank:** does a modifier raise the strength rank never, always, or only the heavy
-   ones?
-8. **Stacking:** how many modifiers per enemy and per wave, from which round, and is Easy
-   modifier-free?
-9. **Wave and elite:** modifiers on whole waves, on single elites, or both?
-10. **Tower and research changes** allowed where a modifier needs a counter?
-11. **Saves:** modifiers stored in mid-run saves need a version bump. Acceptable?
-12. **Other enemies or mechanics** you want that aren't here (ranged, tower killers, lane blockers,
-    enemies on other routes)?
-13. **New roster:** keep, cut or change which draft enemies? What should they be called?
-14. **Higher tiers and HP scaling:** once the top tiers exist, should per-round HP scaling be lowered
-    (or lowered after round 40) so late difficulty comes from the tier mix?
-15. **First appearance:** from which round (and on which difficulty) does each new tier start?
-16. **Targeting tricks:** how strong should they be? Should the Codex and Intel show a Mimic's or
-    Decoy's real rank, or keep it hidden until the trick is revealed?
-17. **Drone and Strike Drone:** Drone is the basic enemy and Strike Drone is a flyer that ignores the
-    lane. Do they need a role of their own, e.g. Line and Flyer?
+Answered by the owner on 2026-10-07. Numbers match the first draft's question numbers.
+
+### Decided
+
+- **Q2 Tier scaling:** each tier has a flat HP and speed stat.
+- **Q5 Phantom:** keeps its built-in cloak as a specialized enemy; Cloaked is also a modifier for any
+  enemy.
+- **Q6 Specials:** they stay specials. Splitting may become a modifier.
+- **Q7 Modifiers and rank:** depends on the modifier.
+- **Q8 Stacking:** set by balancing checks. Later rounds should have a healthy mix of modifiers.
+- **Q9 Where modifiers go:** single elites.
+- **Q14 HP scaling:** lowered.
+
+### Still open
+
+1. **Tier count (from Q1).** Every role gets the same number of tiers, but the draft has 1 to 4 per
+   role. What is the number? Do Disruptor, Rusher and the others get filled out to match? Are Special
+   and Boss exceptions?
+2. **Strongest ties (Q4).** Two enemies share a rank, e.g. two Gunships.
+   - **A:** highest current HP first, then path progress. This keeps today's feel within a tier, but a
+     fresh Gunship at the back outranks a nearly dead one at the exit.
+   - **B:** path progress first. This stops leaks but ignores HP.
+   - **Recommendation: A.**
+3. **Tower and research counters (Q10).** Some modifiers have no counter today (Cloaked needs a Sensor
+   Array, Volatile damages towers, Resolute shrugs off slows). May I add or change tower upgrades and
+   research nodes to counter them, or must modifiers work with the current towers?
+   **Recommendation:** allow small counters, each in its own PR you approve.
+4. **Saves (Q11).** A mid-run Continue save stores the field and the wave; modifiers and tiers add
+   fields old saves lack.
+   - **A:** bump the version and migrate, so old saves load with no modifiers.
+   - **B:** bump the version and drop old Continue saves.
+   - **Recommendation: A.** The save code is not yet checked; it gets read before either is chosen.
+5. **New roster (Q13).** Keep, cut or rename which of the 11 draft enemies? (No answer yet.)
+6. **Mimic and Decoy rank (Q16).** The field label hides the true rank until the trick is revealed
+   (the owner's "likely hidden until revealed"). Should the Codex entry also hide it, or explain the
+   trick plainly like the Phantom's entry? **Recommendation:** the Codex explains it.
+7. **Swarming.** It doubles the count at half HP, which acts on a group, not a single elite. Cut it,
+   rework it into a single-elite modifier, or allow it as an exception?
+
+### Deferred
+
+To be settled later or during implementation, as the owner said:
+
+- **Q3** Global ranked list: numbers or named bands, and where each role-tier lands.
+- **Q12** Other enemies or mechanics (ranged, tower killers, lane blockers, other routes).
+- **Q15** First appearance round and difficulty for each new tier.
+- **Q17** Whether Drone and Strike Drone need roles of their own, such as Line and Flyer.
