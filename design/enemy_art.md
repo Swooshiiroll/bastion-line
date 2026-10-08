@@ -108,7 +108,38 @@ black-red with magenta glow.
 
 **Picks:** Skitter _, Needle _, Strike Drone _, Fury Drone _ (look, animation, movement; notes)
 
+## Tank (role 3)
+
+Mockup: `design/enemy_art_tank.html`, the same format as Swarm and Rusher (three proposals each for look, animation
+and movement, notes boxes, no "today").
+
+**Tank family (draft):** built to take hits: riveted slab armour, a hazard-striped or plated front, a visor slit,
+exhaust stacks trailing smoke, and heavy running gear (stomping legs or treads). **Tiers evolve:** T1 Siege Mech is
+bare riveted plate; T2 Rampart is a moving wall; T3 Gunship is armoured and airborne; T4 Titan is sleek, with layered
+plates over a glowing frame. **Colour per enemy:** Siege Mech hazard yellow with black stripes, Rampart concrete grey
+with amber lamps, Gunship slate navy with red running lights, Titan bronze plates over a dark frame with cyan glow.
+
+**Titan plate shed:** every Titan look has its plates fall away at half health (armor 9 to 5, design/new_enemies.md),
+leaving the glowing frame. The previews loop it: plated for 5 s, the plates fall over 1 s, bare for 2 s.
+
+| Enemy (trait from the name) | Look A | Look B | Look C |
+|---|---|---|---|
+| Siege Mech, T1 ground (a walking siege engine: armoured, breaching) | Ram walker: boxy biped with a battering ram | Mortar strider: four legs and a siege mortar | Breacher crab: six legs behind a striped siege shield |
+| Rampart, T2 ground (a moving wall that can't be slowed, stunned or shoved) | Rolling wall: crenellated slab on treads, ram teeth | Bastion crawler: hexagonal fort with corner turrets | Shield-bearer: heavy walker behind a tower shield |
+| Gunship, T3 flyer (a flying gun platform: armoured, heavy) | Armoured quad-rotor with side gun pods | Hover barge on four lift thrusters, top turret | Tiltrotor gunship: wingtip rotors, chin cannon |
+| Titan, T4 ground (a giant; its plates shed at half health) | Colossus walker: biped with pauldrons, chest and back plates | Fortress tank: tracks, armour skirts, twin cannons | Quad-leg citadel: domed core ringed with plates |
+
+| Enemy | Animation A / B / C | Movement A / B / C |
+|---|---|---|
+| Siege Mech | Stomp / Recoil / Grind | Steady trudge / Stop and plant / Lumbering sway |
+| Rampart | Grind forward / Shudder / Brace | Unstoppable line / Grinding push / Lane-filling drift |
+| Gunship | Heavy hover / Yaw scan / Sag and lift | Patrol sweep / Hover and advance / Steady cruise |
+| Titan | Earth-shaker stride / Sway / Core pulse | Inexorable march / Heavy stride / Swaying march |
+
+**Picks:** Siege Mech _, Rampart _, Gunship _, Titan _ (look, animation, movement; notes)
+
 ## Open questions
 
 1. **Rusher picks**, and any change to the Rusher family traits.
-2. **Next role** after Rusher.
+2. **Tank picks**, and any change to the Tank family traits.
+3. **Next role** after Tank (remaining: Support, Disruptor, Evader, Special, Boss).
