@@ -141,7 +141,7 @@ leaving the glowing frame. The previews loop it: plated for 5 s, the plates fall
 | Titan | Earth-shaker stride / Sway / Core pulse | Inexorable march / Heavy stride / Swaying march |
 
 **Picks (owner, 2026-10-07):**
-- **Siege Mech:** look **open** (none of A to C was picked; round 2 offers three new looks), animation A Stomp,
+- **Siege Mech:** look **open** (none of A to C was picked; rounds 2 and 3 offer six new looks), animation A Stomp,
   movement A Steady trudge.
 - **Rampart:** look B Bastion crawler, animation B Shudder, movement A Unstoppable line.
 - **Gunship:** look A Armoured quad-rotor, animation A Heavy hover, movement C Steady cruise.
@@ -152,7 +152,13 @@ leaving the glowing frame. The previews loop it: plated for 5 s, the plates fall
 - **E Siege-tower walker:** a narrow stacked siege tower on four stubby legs, with a drop ramp at the front.
 - **F Wrecking-ball crawler:** a four-legged crawler with a crane boom swinging a wrecking ball.
 
+**Siege Mech look, round 3** (owner asked for three more). These lean into the "mech" in the name: walking war
+mechs, gritty early versions of the Titan's Colossus walker.
+- **G Chicken walker:** a cockpit pod on two backward-bending legs, with twin chin guns.
+- **H Cannon-shoulder mech:** a broad-shouldered mech with a siege cannon on one shoulder and a hydraulic claw arm.
+- **I Demolition loader:** a stocky loader mech hauling a huge demolition charge to the wall.
+
 ## Open questions
 
-1. **Siege Mech look:** pick one of D to F on the Tank page.
+1. **Siege Mech look:** pick one of D to I on the Tank page.
 2. **Next role** after Tank (remaining: Support, Disruptor, Evader, Special, Boss).
