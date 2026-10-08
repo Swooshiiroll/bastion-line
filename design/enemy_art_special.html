@@ -89,11 +89,11 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 7 of 8: Special</div>
+    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 7 of 8: Special (round 2)</div>
     <h1>Enemy art: Special</h1>
     <p class="note">A fresh start from the names: the machine army's <b>Special</b> role. For each enemy, pick its <b>look</b>, <b>animation</b> and
       <b>movement</b> separately from three proposals each (A to C), and add notes. Mix freely. The <b>Your combination</b> preview shows your
-      mix (option A until you pick). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
+      mix (option A until you pick). <b>Your picks are preselected</b> (Hydra Frame C/A/A; Decoy Beacon look B and movement A). From your notes: the <b>Phantom now flies</b> (looks, animations and movements D to F); bulkier Aegis Walkers (D to F); six more looks each for the Masquerade and Mirage (D to I); more Masquerade animations and movements, tank animations for the Decoy Beacon, and more Mirage movements (D to F). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
       Spec: <code>design/enemy_art.md</code>.</p>
     <ul class="rules">
       <li><b>Machine army;</b> each <b>name inspires a trait</b> (not a literal picture).</li>
@@ -484,6 +484,16 @@ function mirageFx(B, c, t, r, col) { const u = fmod(t, 6), a = u < 0.4 ? u / 0.4
     const off = fmod(t * 6, 1) * r * 0.14; for (let i = -3; i <= 3; i++) line(add(p, [-r * 0.55, i * r * 0.14 + off]), add(p, [r * 0.55, i * r * 0.14 + off]), A(col, 0.16 * a), 0.5); }
   B(c); }
 
+// The confirmed Jammer (Disruptor A, Antenna walker): a Masquerade disguise; as a fake its antennas never crackle
+const JAM = { hull: [0.15, 0.16, 0.18, 1], panel: [0.3, 0.32, 0.36, 1], dark: [0.07, 0.07, 0.08, 1], glow: [0.35, 0.65, 1, 1] };
+function jammerA(c, t, r) { const C = JAM;
+  for (const [x, y, ph] of [[1, 1, 0], [1, -1, Math.PI], [-1, 1, Math.PI], [-1, -1, 0]]) { const sw = Math.sin(t * 5 + ph), hip = add(c, [x * r * 0.3, y * r * 0.3]), ft = add(c, [x * r * 0.5 + sw * r * 0.12, y * r * 0.62]); limb([hip, ft], 1.3, C.panel); disc(ft, 1.1, OUTLINE); }
+  plate(c, ngon(8, 0.48, Math.PI / 8), C.hull, 0, r, 0.9); plate(c, rectPts(0.2, 0.2), C.panel, 0, r, 0.6);
+  for (let i = 0; i < 5; i++) { const a = Math.PI + (i - 2) * 0.55 + 0.08 * Math.sin(t * 4 + i), root = add(c, mul(fa(a), r * 0.2)), tip = add(c, mul(fa(a), r * (0.95 + 0.12 * (i % 2)))); line(root, tip, INK, 1.3); line(root, tip, C.panel, 0.6); glowDot(tip, 0.7, A(C.glow, 0.5)); }
+  slitS(add(c, [r * 0.38, 0]), r * 0.14, C.glow); }
+function fanS(p, rr, t, spd, col) { disc(p, rr, [0.92, 0.94, 0.97, 0.12]); for (let b = 0; b < 3; b++) line(p, add(p, mul(fa(t * spd + b * TAU / 3), rr * 0.9)), [0.92, 0.94, 0.97, 0.5], 0.6); ring(p, rr, OUTLINE, 2.0); ring(p, rr, col, 1.0); }
+const tri = x => 2 * Math.abs(2 * (x - Math.floor(x + 0.5))) - 1;
+
 const COL = {
   phantom: { hull: [0.32, 0.46, 0.47, 1], panel: [0.5, 0.64, 0.64, 1], dark: [0.16, 0.24, 0.25, 1], glow: [0.55, 1, 0.92, 1] },          // teal-grey active camo, pale teal shimmer
   aegis:   { hull: [0.9, 0.86, 0.74, 1], trim: [0.85, 0.64, 0.24, 1], dark: [0.42, 0.37, 0.28, 1], glow: [1, 0.78, 0.35, 1] },          // white-gold hull, amber hex barrier
@@ -515,6 +525,23 @@ const LOOKS = {
         for (let i = 0; i < 4; i++) fill(p, [[0, 0], d[i], d[(i + 1) % 4]], A(i % 2 ? C.panel : C.dark, 0.5 + 0.3 * Math.sin(t * 3 + i)), 0, r);
         protoMark(add(p, [-r * 0.25, 0]), r * 0.09, t); slitS(add(p, [r * 0.45, 0]), r * 0.1, C.glow); };
       camoFx(B, c, t, r, C.glow); } },
+    { key: "D", name: "Stealth drone", theme: "A flat diamond drone with its fans hidden inside the hull, in shimmering active camouflage; flies (owner); a blast reveals it for a moment (looped)", palette: "teal-grey camo panels, pale teal shimmer", r: 10, draw(c, t, r) {
+      const C = COL.phantom, B = p => { const d = [[0.85, 0], [0, 0.62], [-0.7, 0], [0, -0.62]]; plate(p, d, C.hull, 0, r, 0.8);
+        for (const sg of [-1, 1]) { const f = add(p, [-r * 0.05, sg * r * 0.3]); disc(f, r * 0.2, C.dark); for (let b = 0; b < 3; b++) line(f, add(f, mul(fa(t * 40 * sg + b * 2.1), r * 0.18)), A(C.panel, 0.7), 0.5); }
+        for (let i = 0; i < 4; i++) fill(p, [[0, 0], d[i], d[(i + 1) % 4]], A(i % 2 ? C.panel : C.dark, 0.3), 0, r);
+        protoMark(add(p, [-r * 0.4, 0]), r * 0.08, t); slitS(add(p, [r * 0.55, 0]), r * 0.1, C.glow); };
+      camoFx(B, c, t, r, C.glow); } },
+    { key: "E", name: "Camo glider", theme: "A slim glider on long swept wings whose camouflage ripples across them; flies (owner); a blast reveals it for a moment (looped)", palette: "teal-grey camo wings, pale teal shimmer", r: 10, draw(c, t, r) {
+      const C = COL.phantom, B = p => { for (const sg of [-1, 1]) { const w = [[0.15, sg * 0.1], [-0.4, sg * 0.95], [-0.55, sg * 0.9], [-0.3, sg * 0.1]]; fill(p, w, C.hull, 0, r); outline(p, w, A(OUTLINE, 0.9), 0.7, 0, r);
+          for (let k = 0; k < 3; k++) { const u = fmod(t * 0.8 + k / 3, 1); line(add(p, [r * (0.1 - 0.5 * u), sg * r * (0.15 + 0.7 * u)]), add(p, [r * (0.0 - 0.5 * u), sg * r * (0.2 + 0.7 * u)]), A(C.glow, 0.4), 0.6); } }
+        plate(p, [[0.85, 0], [0.4, 0.1], [-0.65, 0.08], [-0.75, 0], [-0.65, -0.08], [0.4, -0.1]], C.panel, 0, r, 0.7); protoMark(add(p, [-r * 0.3, 0]), r * 0.07, t); slitS(add(p, [r * 0.55, 0]), r * 0.08, C.glow); };
+      camoFx(B, c, t, r, C.glow); } },
+    { key: "F", name: "Chameleon rotor", theme: "A small rotor scout with a tail boom, its skin shifting to match the ground below; flies (owner); a blast reveals it for a moment (looped)", palette: "teal-grey camo skin, pale teal shimmer", r: 10, draw(c, t, r) {
+      const C = COL.phantom, B = p => { bar(p, add(p, [-r * 0.95, 0]), 1.2, C.dark); const tr = add(p, [-r * 0.95, 0]); line(add(tr, [0, -r * 0.2]), add(tr, [0, r * 0.2]), A(C.panel, 0.7), 0.8);
+        plate(p, [[0.55, 0], [0.35, 0.28], [-0.35, 0.26], [-0.5, 0], [-0.35, -0.26], [0.35, -0.28]], C.hull, 0, r, 0.8);
+        disc(p, r * 0.85, [0.92, 0.94, 0.97, 0.08]); for (let b = 0; b < 2; b++) line(add(p, mul(fa(t * 30 + b * Math.PI), r * 0.85)), add(p, mul(fa(t * 30 + b * Math.PI + Math.PI), r * 0.85)), [0.92, 0.94, 0.97, 0.35], 0.7);
+        disc(p, r * 0.1, INK); protoMark(add(p, [-r * 0.2, r * 0.12]), r * 0.07, t); slitS(add(p, [r * 0.42, 0]), r * 0.1, C.glow); };
+      camoFx(B, c, t, r, C.glow); } },
   ],
   aegis: [
     { key: "A", name: "Aegis strider", theme: "A biped with a barrier emitter on its back; its hex barrier cracks under fire, shatters, and rebuilds (looped)", palette: "white-gold hull, gold trim, amber barrier", r: 13, draw(c, t, r) {
@@ -534,6 +561,26 @@ const LOOKS = {
       for (const s of [-1, 1]) { const sh = add(c, [r * 0.2, s * r * 0.28]), pad = add(c, [r * 0.72, s * r * 0.36]); bar(sh, pad, 1.8, C.trim); disc(pad, r * 0.1, OUTLINE); disc(pad, r * 0.08, C.hull); glowDot(pad, r * 0.05, C.glow); }
       const body = rrPts(0.42, 0.32, 0.1); plate(c, body, C.hull, 0, r, 0.9); outline(c, body, C.trim, 0.7, 0, r * 0.8);
       protoMark(add(c, [-r * 0.2, 0]), r * 0.08, t); slitS(add(c, [r * 0.32, 0]), r * 0.12, C.glow); barrierFx(c, t, r, C.glow); } },
+    { key: "D", name: "Bulwark mech", theme: "A massive two-legged mech with huge gold-trimmed shoulder armour and a chest barrier emitter (owner: bulkier, heavy-duty); its barrier cracks, shatters and rebuilds (looped)", palette: "white-gold armour, gold trim, amber barrier", r: 13, draw(c, t, r) {
+      const C = COL.aegis, st = Math.sin(t * 3);
+      for (const sg of [-1, 1]) { const hip = add(c, [-r * 0.15, sg * r * 0.3]), ft = add(c, [r * (-0.1 + 0.28 * st * sg), sg * r * 0.55]); limb([hip, ft], 3.4, C.dark); foot(ft, C.dark, r, 0.28, 0.17); }
+      const body = [[0.45, 0], [0.32, 0.36], [-0.4, 0.38], [-0.55, 0], [-0.4, -0.38], [0.32, -0.36]]; plate(c, body, C.hull, 0, r, 1.1); rivets(c, body, 0, r, 0.8, 0.7);
+      for (const sg of [-1, 1]) { const pa = [[0.25, sg * 0.3], [0.2, sg * 0.75], [-0.35, sg * 0.78], [-0.45, sg * 0.32]]; plate(c, pa, C.hull, 0, r, 1.0); outline(c, pa, C.trim, 0.9, 0, r * 0.88); rivets(c, pa, 0, r, 0.75, 0.6); }
+      const e = add(c, [r * 0.12, 0]); disc(e, r * 0.18, OUTLINE); disc(e, r * 0.15, C.trim); glowDot(e, r * 0.07, C.glow);
+      protoMark(add(c, [-r * 0.35, 0]), r * 0.08, t); slitS(add(c, [r * 0.38, 0]), r * 0.12, C.glow); barrierFx(c, t, r, C.glow); } },
+    { key: "E", name: "Siege hexapod", theme: "A heavy six-legged walker on thick armoured legs, a barrier dome on its back (owner: bulkier, heavy-duty); its barrier cracks, shatters and rebuilds (looped)", palette: "white-gold shell, dark legs, amber barrier", r: 13, draw(c, t, r) {
+      const C = COL.aegis;
+      for (let i = 0; i < 3; i++) for (const sg of [-1, 1]) { const sw = Math.sin(t * 3 + i * 2.1 + (sg > 0 ? Math.PI : 0)), root = add(c, [r * (0.3 - i * 0.32), sg * r * 0.38]), knee = add(root, [r * (0.14 + 0.06 * sw), sg * r * 0.32]), ft = add(root, [r * (-0.04 + 0.12 * sw), sg * r * 0.55]); limb([root, knee, ft], 2.4, C.dark); disc(ft, 2.0, OUTLINE); disc(ft, 1.6, C.trim); }
+      const sh = rrPts(0.6, 0.42, 0.14); plate(c, sh, C.hull, 0, r, 1.1); rivets(c, sh, 0, r, 0.82, 0.7); for (const x of [-0.2, 0.2]) line(add(c, [x * r, -r * 0.4]), add(c, [x * r, r * 0.4]), C.trim, 0.8);
+      const dm = add(c, [-r * 0.15, 0]); disc(dm, r * 0.26, OUTLINE); disc(dm, r * 0.23, C.trim); glowDot(dm, r * 0.1, C.glow);
+      protoMark(add(c, [r * 0.3, r * 0.22]), r * 0.08, t); slitS(add(c, [r * 0.52, 0]), r * 0.13, C.glow); barrierFx(c, t, r, C.glow); } },
+    { key: "F", name: "Rhino walker", theme: "A low, heavy four-legged walker on stumpy armoured legs, a gold ram plate in front and two barrier horns (owner: bulkier, heavy-duty); its barrier cracks, shatters and rebuilds (looped)", palette: "white-gold body, gold ram and horns, amber barrier", r: 13, draw(c, t, r) {
+      const C = COL.aegis;
+      for (const [x, y, ph] of [[1, 1, 0], [1, -1, Math.PI], [-1, 1, Math.PI], [-1, -1, 0]]) { const sw = Math.sin(t * 3.5 + ph), hip = add(c, [x * r * 0.35, y * r * 0.3]), ft = add(c, [x * r * 0.42 + sw * r * 0.1, y * r * 0.55]); limb([hip, ft], 3.0, C.dark); foot(ft, C.dark, r, 0.16, 0.13); }
+      const body = rrPts(0.62, 0.36, 0.12); plate(c, body, C.hull, 0, r, 1.1); rivets(c, body, 0, r, 0.82, 0.7);
+      const ram = [[0.95, 0], [0.62, 0.42], [0.5, 0.36], [0.5, -0.36], [0.62, -0.42]]; plate(c, ram, C.trim, 0, r, 1.0);
+      for (const sg of [-1, 1]) { const h = add(c, [r * 0.85, sg * r * 0.28]); bar(add(c, [r * 0.55, sg * r * 0.22]), h, 1.6, C.dark); glowDot(h, r * 0.05, C.glow); }
+      protoMark(add(c, [-r * 0.35, 0]), r * 0.08, t); slitS(add(c, [r * 0.42, 0]), r * 0.14, C.glow); barrierFx(c, t, r, C.glow); } },
   ],
   hydra: [
     { key: "A", name: "Carrier frame", theme: "A triangular carrier frame with three of your Skitters clamped to its arms; destroyed, it bursts and the Skitters scatter (looped)", palette: "oxide-red frame, sand Skitters", r: 14, draw(c, t, r) {
@@ -569,6 +616,38 @@ const LOOKS = {
       const C = COL.masq, D = p => naniteHub(p, t, r * 0.62, C.glow, true),
         T = p => { disc(p, r * 0.6, A(C.glow, 0.12)); for (const s of [-1, 1]) fill(p, [[-0.1, s * 0.25], [-0.6, s * 0.6], [-0.55, s * 0.22]], C.dark, 0, r);
           const w = [[0.8, 0], [-0.4, 0.42], [-0.25, 0], [-0.4, -0.42]]; plate(p, w, C.hull, 0, r, 0.9); outline(p, w, A(C.glow, 0.5), 0.6, 0, r * 0.85); protoMark(add(p, [-r * 0.05, 0]), r * 0.08, t); slitS(add(p, [r * 0.42, 0]), r * 0.1, C.glow); };
+      masqFx(D, T, c, t, r, C.glow); } },
+    { key: "D", name: "Swarm cloak", theme: "Hides inside a cloud of fake Nanite bots. Tell: the bots hold a perfect ring, where a real Nanite swarm is messy (and the shadow is too big). Below half health the bots scatter to show a slim blade assassin (looped)", palette: "rust fake bots; plum assassin, violet glow", r: 12, draw(c, t, r) {
+      const C = COL.masq, D = p => { disc(p, r * 0.25, A(NAN.dark, 0.9)); for (let i = 0; i < 10; i++) { const a = i * TAU / 10 + t * 1.2, q = add(p, mul(fa(a), r * 0.55)); plate(q, rectPts(0.5, 0.5), NAN.hull, a, r * 0.2, 0.5); disc(q, r * 0.04, NAN.eye); } eyeN(p, r * 0.12, NAN.eye); },
+        T = p => { const st = Math.sin(t * 7); for (const sg of [-1, 1]) foot(add(p, [r * 0.3 * st * sg, sg * r * 0.25]), C.dark, r, 0.18, 0.1);
+          for (const sg of [-1, 1]) { const tip = add(p, [r * 1.0, sg * r * 0.18]); bar(add(p, [r * 0.15, sg * r * 0.22]), tip, 0.9, [0.85, 0.85, 0.9, 1]); }
+          const b = [[0.6, 0], [0.25, 0.2], [-0.45, 0.18], [-0.55, 0], [-0.45, -0.18], [0.25, -0.2]]; plate(p, b, C.hull, 0, r, 0.8); protoMark(add(p, [-r * 0.2, 0]), r * 0.08, t); slitS(add(p, [r * 0.4, 0]), r * 0.1, C.glow); };
+      masqFx(D, T, c, t, r, C.glow); } },
+    { key: "E", name: "Skitter skin", theme: "Wears the look of your confirmed Skitter instead. Tell: its legs scuttle far too slowly for a Skitter (and the shadow is too big). Below half health the skin splits to show a heavy brute (looped)", palette: "Skitter sand and red; plum brute, violet glow", r: 12, draw(c, t, r) {
+      const C = COL.masq, D = p => { skitter(p, t * 0.3, r * 0.72); protoMark(add(p, [-r * 0.15, r * 0.12]), r * 0.06, t); },
+        T = p => { for (const sg of [-1, 1]) { const sh = add(p, [r * 0.05, sg * r * 0.5]), fist = add(p, [r * 0.6, sg * r * 0.55]); bar(sh, fist, 3.0, C.dark); disc(fist, r * 0.15, OUTLINE); disc(fist, r * 0.12, C.panel); }
+          const b = rrPts(0.5, 0.45, 0.14); plate(p, b, C.hull, 0, r, 1.0); rivets(p, b, 0, r, 0.8, 0.6); protoMark(add(p, [-r * 0.2, 0]), r * 0.09, t); slitS(add(p, [r * 0.38, 0]), r * 0.14, C.glow); };
+      masqFx(D, T, c, t, r, C.glow); } },
+    { key: "F", name: "Jammer copy", theme: "Wears the look of your confirmed Jammer. Tell: its antennas never crackle and its EMP never fires (and the shadow is too big). Below half health the shell drops to show a pincered mauler (looped)", palette: "Jammer black and blue; plum mauler, violet glow", r: 12, draw(c, t, r) {
+      const C = COL.masq, D = p => jammerA(p, t, r * 0.75),
+        T = p => { for (let i = 0; i < 3; i++) for (const sg of [-1, 1]) { const ph = t * 6 + i * 2.1 + (sg > 0 ? Math.PI : 0), root = add(p, [r * (0.1 - i * 0.28), sg * r * 0.32]); limb([root, add(root, [r * 0.1 * Math.sin(ph), sg * r * 0.28]), add(root, [r * 0.18 * Math.sin(ph), sg * r * 0.45])], 1.0, C.dark); }
+          for (const sg of [-1, 1]) { const cl = add(p, [r * 0.62, sg * r * 0.35]), op = 0.2 + 0.12 * Math.sin(t * 4); bar(add(p, [r * 0.2, sg * r * 0.25]), cl, 1.8, C.dark); for (const q of [-1, 1]) polyline([cl, add(cl, [r * 0.22, (sg * 0.1 + q * op) * r])], C.panel, 1.4); }
+          const b = [[0.4, 0], [0.25, 0.35], [-0.45, 0.32], [-0.55, 0], [-0.45, -0.32], [0.25, -0.35]]; plate(p, b, C.hull, 0, r, 0.9); protoMark(add(p, [-r * 0.15, 0]), r * 0.08, t); slitS(add(p, [r * 0.3, 0]), r * 0.12, C.glow); };
+      masqFx(D, T, c, t, r, C.glow); } },
+    { key: "G", name: "Folding shell", theme: "A Nanite-shaped shell of six hinged panels. Tell: thin seams between the panels (and the shadow is too big). Below half health the panels fold open like petals and become armour wings around a violet core (looped)", palette: "rust hinged panels; plum core, violet glow", r: 12, draw(c, t, r) {
+      const C = COL.masq, D = p => { for (let i = 0; i < 6; i++) { const a = i * TAU / 6; fill(p, [[0, 0], mul(fa(a - 0.5), 0.46), mul(fa(a + 0.5), 0.46)], NAN.hull, 0, r); line(p, add(p, mul(fa(a + 0.52), r * 0.46)), A(INK, 0.6), 0.5); } eyeN(add(p, [r * 0.12, 0]), r * 0.12, NAN.eye); },
+        T = p => { glowDot(p, r * 0.16, C.glow); disc(p, r * 0.24, A(C.hull, 0.9)); for (let i = 0; i < 6; i++) { const a = i * TAU / 6 + Math.PI / 6, q = add(p, mul(fa(a), r * 0.62)); fill(q, [[0.3, 0], [-0.1, 0.22], [-0.25, 0], [-0.1, -0.22]], NAN.hull, a, r); outline(q, [[0.3, 0], [-0.1, 0.22], [-0.25, 0], [-0.1, -0.22]], A(C.glow, 0.6), 0.6, a, r); } protoMark(add(p, [-r * 0.05, 0]), r * 0.07, t); };
+      masqFx(D, T, c, t, r, C.glow); } },
+    { key: "H", name: "Puppet frame", theme: "A dark drone working a Nanite puppet on near-invisible wires. Tell: the faint wires (and the shadow is too big). Below half health it drops the puppet and shows itself, a four-rotor puppeteer (looped)", palette: "rust puppet, faint wires; plum drone, violet glow", r: 12, draw(c, t, r) {
+      const C = COL.masq, frame = add(c, [-r * 0.6, -r * 0.55]),
+        D = p => { naniteHub(p, t, r * 0.62); for (const q of [[-0.3, -0.2], [0.1, -0.35], [-0.35, 0.15]]) line(add(p, [q[0] * r * 0.6, q[1] * r * 0.6]), add(frame, [q[0] * r * 0.2, q[1] * r * 0.2]), A([0.9, 0.9, 1, 1], 0.42), 0.55); withAlpha(0.18, () => disc(frame, r * 0.25, C.dark)); },
+        T = p => { for (const [x, y] of [[0.42, 0.42], [0.42, -0.42], [-0.42, 0.42], [-0.42, -0.42]]) { const rp = add(p, [x * r, y * r]); bar(p, rp, 1.0, C.dark); fanS(rp, r * 0.22, t, 45 * Math.sign(x * y), C.panel); }
+          plate(p, rrPts(0.32, 0.28, 0.1), C.hull, 0, r, 0.8); for (const k of [-0.15, 0, 0.15]) line(add(p, [-r * 0.1, k * r]), add(p, [-r * 0.1 - r * 0.3, k * r + r * 0.25]), A([0.9, 0.9, 1, 1], 0.3), 0.4); protoMark(add(p, [-r * 0.05, 0]), r * 0.07, t); slitS(add(p, [r * 0.22, 0]), r * 0.1, C.glow); };
+      masqFx(D, T, c, t, r, C.glow); } },
+    { key: "I", name: "Split shell", theme: "A Nanite hub with a faint violet seam across it (the tell, with the oversized shadow). Below half health the two halves push apart to show a long plum lancer between them (looped)", palette: "rust shell halves; plum lancer, violet glow", r: 12, draw(c, t, r) {
+      const C = COL.masq, D = p => { naniteHub(p, t, r * 0.62); line(add(p, [-r * 0.32, -r * 0.08]), add(p, [r * 0.32, r * 0.08]), A(C.glow, 0.35 + 0.25 * Math.sin(t * 3)), 0.7); },
+        T = p => { for (const sg of [-1, 1]) { const h = add(p, [0, sg * r * 0.62]); fill(h, ngon(6, 0.3, Math.PI / 6).filter((q, i) => sg > 0 ? q[1] >= -0.01 : q[1] <= 0.01), NAN.hull, 0, r); outline(h, [[0.3, 0], [-0.3, 0]], A(C.glow, 0.6), 0.6, 0, r); }
+          const b = [[1.0, 0], [0.4, 0.1], [-0.6, 0.12], [-0.7, 0], [-0.6, -0.12], [0.4, -0.1]]; plate(p, b, C.hull, 0, r, 0.8); outline(p, b, A(C.glow, 0.5), 0.6, 0, r * 0.85); protoMark(add(p, [-r * 0.2, 0]), r * 0.07, t); slitS(add(p, [r * 0.5, 0]), r * 0.08, C.glow); };
       masqFx(D, T, c, t, r, C.glow); } },
   ],
   decoy: [
@@ -615,8 +694,42 @@ const LOOKS = {
         for (let i = 0; i < 5; i++) { const a = Math.PI + (i - 2) * 0.32, q = add(p, mul(fa(a), r * 0.55)); fill(q, [[0.3, -0.07], [0.3, 0.07], [-0.3, 0.1], [-0.3, -0.1]], C.hull, a, r); outline(q, [[0.3, -0.07], [0.3, 0.07], [-0.3, 0.1], [-0.3, -0.1]], A(C.glow, 0.4 + 0.4 * Math.sin(t * 4 + i)), 0.6, a, r); }
         disc(p, r * 0.32, OUTLINE); disc(p, r * 0.29, C.hull); ring(p, r * 0.18, C.dark, 0.7); protoMark(add(p, [-r * 0.08, 0]), r * 0.07, t); slitS(add(p, [r * 0.24, 0]), r * 0.1, C.glow); };
       mirageFx(B, c, t, r, C.glow); } },
+    { key: "D", name: "Holo-drone carrier", theme: "A hovering chrome pod with two small projector drones circling it; every 6 s they throw two hologram copies of it that walk ahead (looped)", palette: "chrome pod, cyan drone lenses and holograms", r: 12, draw(c, t, r) {
+      const C = COL.mirage, B = p => { disc(p, r * 0.55, A(C.glow, 0.1)); plate(p, rrPts(0.5, 0.32, 0.16), C.hull, 0, r, 0.8);
+        for (let i = 0; i < 2; i++) { const q = add(p, mul(fa(t * 1.6 + i * Math.PI), r * 0.78)); disc(q, r * 0.13, OUTLINE); disc(q, r * 0.1, C.dark); glowDot(q, r * 0.05, C.glow); }
+        protoMark(add(p, [-r * 0.22, 0]), r * 0.07, t); slitS(add(p, [r * 0.38, 0]), r * 0.1, C.glow); };
+      mirageFx(B, c, t, r, C.glow); } },
+    { key: "E", name: "Kaleidoscope orb", theme: "A low mirrored orb whose kaleidoscope facets turn and flash; every 6 s it throws two hologram copies of itself (looped)", palette: "mirror chrome facets, cyan and white flashes", r: 12, draw(c, t, r) {
+      const C = COL.mirage, B = p => { disc(p, r * 0.5, OUTLINE); disc(p, r * 0.47, C.hull);
+        for (let i = 0; i < 6; i++) { const a = i * TAU / 6 + t * 0.9; fill(p, [[0, 0], mul(fa(a), 0.46), mul(fa(a + TAU / 6), 0.46)], A(i % 2 ? C.glow : [1, 1, 1, 1], 0.12 + 0.15 * (0.5 + 0.5 * Math.sin(t * 5 + i))), 0, r); }
+        ring(p, r * 0.3, A(C.dark, 0.6), 0.6); protoMark(add(p, [-r * 0.15, 0]), r * 0.07, t); slitS(add(p, [r * 0.38, 0]), r * 0.1, C.glow); };
+      mirageFx(B, c, t, r, C.glow); } },
+    { key: "F", name: "Twin-lens tank", theme: "A small tracked unit with two big projector lenses side by side, one for each hologram; every 6 s it throws two copies of itself (looped)", palette: "chrome hull, dark treads, cyan lenses", r: 12, draw(c, t, r) {
+      const C = COL.mirage, B = p => { for (const sg of [-1, 1]) tread(add(p, [0, sg * r * 0.5]), r * 0.62, r * 0.16, t);
+        plate(p, rrPts(0.58, 0.38, 0.1), C.hull, 0, r, 0.9); for (const sg of [-1, 1]) { const l = add(p, [r * 0.3, sg * r * 0.18]); disc(l, r * 0.15, OUTLINE); disc(l, r * 0.12, C.dark); glowDot(l, r * 0.06, C.glow); }
+        protoMark(add(p, [-r * 0.3, 0]), r * 0.07, t); };
+      mirageFx(B, c, t, r, C.glow); } },
+    { key: "G", name: "Light-sail walker", theme: "A walker carrying a big translucent light sail on its back that flickers with images; every 6 s it throws two hologram copies of itself (looped)", palette: "chrome walker, pale flickering sail, cyan glow", r: 12, draw(c, t, r) {
+      const C = COL.mirage, B = p => { const st = Math.sin(t * 6); for (const sg of [-1, 1]) foot(add(p, [r * 0.3 * st * sg, sg * r * 0.3]), C.dark, r);
+        const sail = add(p, [-r * 0.5, 0]); fill(sail, rectPts(0.12, 0.8), A(C.glow, 0.15), 0, r); outline(sail, rectPts(0.12, 0.8), A(C.glow, 0.7), 0.6, 0, r); for (let i = -3; i <= 3; i++) line(add(sail, [-r * 0.1, i * r * 0.2]), add(sail, [r * 0.1, i * r * 0.2 + r * 0.05 * Math.sin(t * 7 + i)]), A(C.glow, 0.4), 0.5);
+        plate(p, [[0.45, 0], [0.25, 0.28], [-0.35, 0.26], [-0.45, 0], [-0.35, -0.26], [0.25, -0.28]], C.hull, 0, r, 0.8); protoMark(add(p, [-r * 0.15, 0]), r * 0.07, t); slitS(add(p, [r * 0.33, 0]), r * 0.1, C.glow); };
+      mirageFx(B, c, t, r, C.glow); } },
+    { key: "H", name: "Crystal spider", theme: "An eight-legged walker with a big crystal abdomen that splits light into colours; every 6 s it throws two hologram copies of itself (looped)", palette: "chrome legs, prismatic crystal, cyan glow", r: 12, draw(c, t, r) {
+      const C = COL.mirage, B = p => { for (let i = 0; i < 4; i++) for (const sg of [-1, 1]) { const ph = t * 7 + i * 1.6 + (sg > 0 ? Math.PI : 0), root = add(p, [r * (0.3 - i * 0.18), sg * r * 0.15]); limb([root, add(root, [r * 0.12 * Math.sin(ph), sg * r * 0.35]), add(root, [r * (0.2 * Math.sin(ph) - 0.05), sg * r * 0.58])], 0.7, C.dark); }
+        const cr = [[0.1, 0], [-0.25, 0.3], [-0.75, 0.22], [-0.9, 0], [-0.75, -0.22], [-0.25, -0.3]]; plate(p, cr, [0.85, 0.9, 1, 0.9], 0, r, 0.7);
+        const cols = [[1, 0.5, 0.6, 1], [1, 0.9, 0.4, 1], [0.5, 1, 0.6, 1], [0.4, 0.8, 1, 1], [0.8, 0.5, 1, 1]]; for (let i = 0; i < 5; i++) fill(p, [[-0.3, 0], cr[(i + 1) % 6], cr[(i + 2) % 6]], A(cols[i], 0.2 + 0.15 * Math.sin(t * 3 + i)), 0, r);
+        disc(add(p, [r * 0.3, 0]), r * 0.18, OUTLINE); disc(add(p, [r * 0.3, 0]), r * 0.15, C.hull); glowDot(add(p, [r * 0.38, 0]), 0.8, C.glow); protoMark(add(p, [-r * 0.45, 0]), r * 0.06, t); };
+      mirageFx(B, c, t, r, C.glow); } },
+    { key: "I", name: "Strobe sentinel", theme: "A slim tripod sentinel whose head spins a strobing beam; the copies appear in its flashes, every 6 s (looped)", palette: "chrome tripod, cyan strobe and holograms", r: 12, draw(c, t, r) {
+      const C = COL.mirage, B = p => { for (let i = 0; i < 3; i++) { const a = [0.9, -0.9, Math.PI][i], sw = Math.sin(t * 5 + i * 2.1), ft = add(p, mul(fa(a + 0.25 * sw), r * 0.75)); limb([add(p, mul(fa(a), r * 0.2)), add(p, mul(fa(a + 0.12 * sw), r * 0.5)), ft], 1.0, C.dark); }
+        const a = t * 5, b0 = add(p, mul(fa(a - 0.22), r * 1.3)), b1 = add(p, mul(fa(a + 0.22), r * 1.3)); poly([p, b0, b1], A(C.glow, fmod(t * 5, 1) < 0.5 ? 0.25 : 0.08));
+        disc(p, r * 0.24, OUTLINE); disc(p, r * 0.21, C.hull); glowDot(p, r * 0.09, C.glow); protoMark(add(p, [-r * 0.12, r * 0.1]), r * 0.06, t); };
+      mirageFx(B, c, t, r, C.glow); } },
   ],
 };
+
+// Phantom flies (owner, 2026-10-08): a close air shadow on every look, faint while cloaked
+for (const l of LOOKS.phantom) { l.shadowD = l.shadowD || 1.8; l.shadowK = l.shadowK || (t => 0.25 + 0.75 * camoK(t)); }
 
 // ---- Animations (per enemy) ---------------------------------------------------------------------------------
 const ANIMS = {
@@ -624,6 +737,9 @@ const ANIMS = {
     { key: "A", name: "Sneak", desc: "A low, careful sneak.", fx: (t) => ({ rot: 0.08 * Math.sin(t * 2), dy: 0.03 * Math.sin(t * 4) }) },
     { key: "B", name: "Freeze and dart", desc: "Freezes still, then darts.", fx: (t) => { const u = fmod(t, 1.8); return u < 1.3 ? {} : { dx: 0.2 * Math.sin((u - 1.3) / 0.5 * Math.PI) }; } },
     { key: "C", name: "Shimmer", desc: "Its outline shimmers like heat haze.", fx: (t) => ({ sx: 1 + 0.03 * Math.sin(t * 23), sy: 1 + 0.03 * Math.sin(t * 19) }) },
+    { key: "D", name: "Hover bob", desc: "A light, floating bob (now that it flies).", fx: (t) => ({ dy: 0.05 * Math.sin(t * 2.2), lift: 0.3 + 0.3 * Math.sin(t * 2.2) }) },
+    { key: "E", name: "Bank", desc: "Banks smoothly from side to side.", fx: (t) => ({ rot: 0.25 * Math.sin(t * 1.4), sy: 1 - 0.2 * Math.abs(Math.sin(t * 1.4)) }) },
+    { key: "F", name: "Camo flicker", desc: "Its camouflage flickers, fading in and out.", fx: (t) => ({ alpha: hash(Math.floor(t * 8)) < 0.2 ? 0.45 : 1 }) },
   ],
   aegis: [
     { key: "A", name: "Steady march", desc: "An even, measured stride.", fx: (t) => { const p = Math.abs(Math.sin(t * 4)); return { dy: 0.04 * (1 - p) }; } },
@@ -639,11 +755,17 @@ const ANIMS = {
     { key: "A", name: "Copycat bob", desc: "Bobs just like a Nanite.", fx: (t) => ({ dy: 0.06 * Math.sin(t * 8) }) },
     { key: "B", name: "Odd twitch", desc: "Bobs like a Nanite, but now and then twitches in a way no Nanite does.", fx: (t) => { const u = fmod(t, 2.5); return { dy: 0.06 * Math.sin(t * 8), rot: u < 0.1 ? 0.35 * Math.sin(u / 0.1 * Math.PI) : 0 }; } },
     { key: "C", name: "Glide", desc: "A smooth, unhurried glide.", fx: (t) => ({ dy: 0.03 * Math.sin(t * 2), rot: 0.04 * Math.sin(t * 1.5) }) },
+    { key: "D", name: "Nervous jitter", desc: "Tiny, nervous jitters, as if trying not to be noticed.", fx: (t) => { const s = Math.floor(t * 9); return { dx: (hash(s) - 0.5) * 0.06, dy: (hash(s + 5) - 0.5) * 0.06 }; } },
+    { key: "E", name: "Shell rattle", desc: "Now and then its shell rattles, as if something shifts inside.", fx: (t) => { const u = fmod(t, 2.2); return u < 0.3 ? { dx: 0.04 * Math.sin(u * 90), sx: 1 + 0.04 * Math.sin(u * 60) } : {}; } },
+    { key: "F", name: "Predator crouch", desc: "A low, menacing crouch and lean.", fx: (t) => ({ sx: 1.05, sy: 0.95, rot: 0.05 * Math.sin(t * 1.2), dx: 0.03 * Math.sin(t * 1.2) }) },
   ],
   decoy: [
     { key: "A", name: "Wobble", desc: "Wobbles a little too much for real armour.", fx: (t) => ({ sx: 1 + 0.04 * Math.sin(t * 3), sy: 1 - 0.04 * Math.sin(t * 3) }) },
     { key: "B", name: "Trundle", desc: "A heavy-looking trundle.", fx: (t) => { const p = Math.abs(Math.sin(t * 3)); return { dy: 0.03 * (1 - p) }; } },
     { key: "C", name: "Sway", desc: "A slow sway.", fx: (t) => ({ rot: 0.05 * Math.sin(t * 1.2) }) },
+    { key: "D", name: "Pivot steer", desc: "Pivots slowly on its tracks, steering like a heavy tank.", fx: (t) => ({ rot: 0.1 * Math.sin(t * 0.8) }) },
+    { key: "E", name: "Cannon recoil", desc: "Jolts back now and then as if firing its main gun.", fx: (t) => { const u = fmod(t, 3), j = u < 0.3 ? 1 - u / 0.3 : 0; return { dx: -0.12 * j, sx: 1 - 0.05 * j }; } },
+    { key: "F", name: "Track rumble", desc: "A low, constant engine and track rumble.", fx: (t) => ({ dy: 0.015 * Math.sin(t * 33), dx: 0.01 * Math.sin(t * 27) }) },
   ],
   mirage: [
     { key: "A", name: "Shimmer", desc: "Its chrome shimmers.", fx: (t) => ({ sx: 1 + 0.03 * Math.sin(t * 17), sy: 1 + 0.03 * Math.sin(t * 13) }) },
@@ -658,6 +780,9 @@ const MOVES = {
     { key: "A", name: "Infiltrate line", desc: "Dead straight at a constant speed.", f: t => [V * t, 0] },
     { key: "B", name: "Shadow weave", desc: "Weaves across the lane.", f: t => [V * t, 8 * Math.sin(t * 1.3)] },
     { key: "C", name: "Dart and freeze", desc: "Freezes, then darts ahead.", f: burst(1.8, 0.55) },
+    { key: "D", name: "Infiltration flight", desc: "A straight, quiet flight with a slight drift.", f: t => [V * t, 1.5 * Math.sin(t * 0.9)] },
+    { key: "E", name: "Slipstream weave", desc: "Wide, slow weaves across the lane.", f: t => [V * t, 12 * Math.sin(t * 0.8)] },
+    { key: "F", name: "Hover and dash", desc: "Hovers, then dashes ahead.", f: burst(2.0, 0.5) },
   ],
   aegis: [
     { key: "A", name: "Steady advance", desc: "Dead straight at a constant speed.", f: t => [V * t, 0] },
@@ -673,6 +798,9 @@ const MOVES = {
     { key: "A", name: "Mimic trickle", desc: "Wobbles along like a Nanite.", f: t => [V * t, 3 * Math.sin(t * 3) + 2 * Math.sin(t * 7.3)] },
     { key: "B", name: "Blend-in weave", desc: "Weaves to blend in with the crowd.", f: t => [V * t, 7 * Math.sin(t * 1.4)] },
     { key: "C", name: "Straight", desc: "Dead straight at a constant speed.", f: t => [V * t, 0] },
+    { key: "D", name: "Herd follower", desc: "Bobs along like one of the crowd, keeping up and falling back.", f: t => [V * t - V * 0.2 / 1.7 * Math.cos(t * 1.7), 4 * Math.sin(t * 2.3)] },
+    { key: "E", name: "Stalk and slip", desc: "Hangs back, then slips forward.", f: burst(1.6, 0.45) },
+    { key: "F", name: "Edge creep", desc: "Keeps to the edge of the lane, out of the way.", f: t => [V * t, 10 + 1.5 * Math.sin(t * 2)] },
   ],
   decoy: [
     { key: "A", name: "Lumbering line", desc: "Dead straight, slow and heavy-looking.", f: t => [V * t, 0] },
@@ -683,6 +811,9 @@ const MOVES = {
     { key: "A", name: "Glide", desc: "A smooth glide with a slight drift.", f: t => [V * t, 2 * Math.sin(t * 0.8)] },
     { key: "B", name: "Weave", desc: "Weaves across the lane.", f: t => [V * t, 9 * Math.sin(t * 1.2)] },
     { key: "C", name: "Side-step", desc: "Steps from side to side.", f: t => [V * t, 7 * (Math.floor(t / 1.5) % 2 ? 1 : -1)] },
+    { key: "D", name: "Split weave", desc: "A tight weave with a quick double-step.", f: t => [V * t, 6 * Math.sin(t * 1.8) + 3 * Math.sin(t * 4.1)] },
+    { key: "E", name: "Jink", desc: "Quick, sharp jinks from side to side.", f: t => [V * t, 8 * tri(t * 1.4)] },
+    { key: "F", name: "Stop and project", desc: "Pauses each time it projects, then moves up (every 6 s, shown faster here).", f: burst(3.0, 0.3) },
   ],
 };
 
@@ -696,7 +827,7 @@ const BATCHES = [
       white-gold with an amber barrier, Hydra Frame oxide red with sand Skitters, Masquerade a rust Nanite shell over plum, Decoy Beacon gunmetal fake
       hull on a tan frame with a magenta beacon, Mirage mirror chrome with cyan holograms.`,
     enemies: [
-      { id: "phantom", name: "Phantom", tier: "-", air: false, anims: "phantom", trait: "cloaked; a Sensor Array field or a blast reveals it", today: { r: 10 } },
+      { id: "phantom", name: "Phantom", tier: "-", air: true, anims: "phantom", trait: "flies (owner); cloaked; a Sensor Array field or a blast reveals it", today: { r: 10 } },
       { id: "aegis", name: "Aegis Walker", tier: "-", air: false, anims: "aegis", trait: "carries a 130 barrier that rebuilds; Arc Coils hit it double", today: { r: 13 } },
       { id: "hydra", name: "Hydra Frame", tier: "-", air: false, anims: "hydra", trait: "bursts into 3 Skitters when destroyed", today: { r: 14 } },
       { id: "masq", name: "Masquerade", tier: "-", air: false, anims: "masq", trait: "looks and ranks like a basic unit until below half health; new, 12 px proposed", today: { r: 12 } },
@@ -704,7 +835,16 @@ const BATCHES = [
       { id: "mirage", name: "Mirage", tier: "-", air: false, anims: "mirage", trait: "every 6 s throws 2 hologram copies that soak shots; new, 12 px proposed", today: { r: 12 } },
     ] },
 ];
-const STORE_KEY = "bl-enemy-art-special-v1";
+const STORE_KEY = "bl-enemy-art-special-v2";
+// Picks (owner, 2026-10-08): preselected. Hydra Frame confirmed; Decoy Beacon look B and movement A (animation open).
+const DEFAULTS = {
+  phantom: { look: null, anim: null, move: null },
+  aegis: { look: null, anim: null, move: null },
+  hydra: { look: "C", anim: "A", move: "A" },
+  masq: { look: null, anim: null, move: null },
+  decoy: { look: "B", anim: null, move: "A" },
+  mirage: { look: null, anim: null, move: null },
+};
 
 // ---- State (picks and notes, kept in this browser) -------------------------------------------------
 const STORE = STORE_KEY;

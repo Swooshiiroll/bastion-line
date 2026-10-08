@@ -428,11 +428,40 @@ Aegis Walker 13 and Hydra Frame 14 are today's.
 | Decoy Beacon | Wobble / Trundle / Sway | Lumbering line / Slow sway / Stop and go |
 | Mirage | Shimmer / Glide / Flicker step | Glide / Weave / Side-step |
 
-**Picks:** Phantom _, Aegis Walker _, Hydra Frame _, Masquerade _, Decoy Beacon _, Mirage _ (look, animation, movement;
-notes)
+**Picks (owner, 2026-10-08):**
+- **Phantom:** open. Owner: "Phantom should be a flyer", so it is now a **flyer** (gameplay change, recorded in
+  `design/enemies.md` and `design/enemy_roster.md`). Round 2 offers three flying looks plus flyer animations and
+  movements.
+- **Aegis Walker:** open. Owner: "Build more bulky / heavy duty walker". Round 2 offers three.
+- **Hydra Frame:** look **C Hive pod**, animation **A Clatter**, movement **A Trundle**. **Confirmed.**
+- **Masquerade:** open. Owner: six more look ideas, more animation ideas, more movement ideas.
+- **Decoy Beacon:** look **B Hologram heavy** (tell: the small projector shows through the flickering hologram),
+  movement **A Lumbering line**; animation open. Owner: "Give more options that a tank would have".
+- **Mirage:** open. Owner: six more look ideas, more movement ideas.
+
+**Round 2** (on the same page, with the picks above preselected):
+- **Phantom (now flies), looks:** D Stealth drone (a flat diamond with its fans inside), E Camo glider (long swept
+  wings with rippling camo), F Chameleon rotor (a small rotor scout with a tail boom). **Animations:** D Hover bob,
+  E Bank, F Camo flicker. **Movements:** D Infiltration flight, E Slipstream weave, F Hover and dash. Every Phantom
+  look now has a close air shadow that fades while cloaked.
+- **Aegis Walker, bulky looks:** D Bulwark mech (massive biped, huge gold-trimmed pauldrons, chest emitter), E Siege
+  hexapod (six thick armoured legs, barrier dome on its back), F Rhino walker (low, stumpy-legged, gold ram plate and
+  two barrier horns).
+- **Masquerade, six more looks** (each a disguise, a tell and a true form; the oversized shadow is a tell on all):
+  D Swarm cloak (fake Nanite bots in a too-perfect ring; a blade assassin), E Skitter skin (wears the confirmed
+  Skitter, legs far too slow; a heavy brute), F Jammer copy (wears the confirmed Jammer, antennas never crackle, EMP
+  never fires; a pincered mauler), G Folding shell (hinged panels with seams; they fold open into armour wings),
+  H Puppet frame (a drone working a Nanite puppet on faint wires; the puppeteer itself), I Split shell (a violet seam
+  across the hub; the halves push apart to show a lancer). **Animations:** D Nervous jitter, E Shell rattle,
+  F Predator crouch. **Movements:** D Herd follower, E Stalk and slip, F Edge creep.
+- **Decoy Beacon, tank animations:** D Pivot steer, E Cannon recoil, F Track rumble.
+- **Mirage, six more looks:** D Holo-drone carrier (two projector drones circle it), E Kaleidoscope orb (turning,
+  flashing mirror facets), F Twin-lens tank (two big projector lenses), G Light-sail walker (a flickering sail on its
+  back), H Crystal spider (a crystal abdomen that splits light), I Strobe sentinel (a spinning strobe; copies appear
+  in its flashes). **Movements:** D Split weave, E Jink, F Stop and project.
 
 ## Open questions
 
-1. **Special picks**, any change to the Special family traits or the proposed sizes, and the tells for the
-   Masquerade and Decoy Beacon.
+1. **Special picks:** Phantom, Aegis Walker, Masquerade and Mirage (look, animation, movement), Decoy Beacon animation;
+   any change to the proposed sizes (Masquerade 12, Decoy Beacon 15, Mirage 12 px).
 2. **Next role** after Special (remaining: Boss).

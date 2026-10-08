@@ -344,6 +344,9 @@ they exist.
 - **Wraith flies (owner, 2026-10-08):** the Wraith becomes a flyer (it was ground). Only towers that hit air can
   target it, so with its cloak and energy-only damage only energy towers that hit air can hurt it. Balance check in
   Still open, item 4.
+- **Phantom flies (owner, 2026-10-08):** the Phantom (today a ground unit) becomes a flyer. It keeps its built-in cloak
+  (a Sensor Array field or a blast reveals it), so only towers that hit air can target it once revealed. Balance check
+  in Still open, item 5.
 
 ### Still open
 
@@ -362,6 +365,8 @@ they exist.
    burrowing inside its field.
 4. **Wraith as a flyer: counters.** Cloaked, energy-only and now flying: which energy towers hit air, and is that
    enough? Checked with the balance probe when the Wraith is built (it is parked until the damage-type PR).
+5. **Phantom as a flyer: counters.** Cloaked and now flying: are there enough towers that hit air and can reveal or
+   splash it early in the game? Checked with the balance probe when the change is built.
 
 ### Deferred
 

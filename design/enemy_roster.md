@@ -43,7 +43,7 @@ built so each tier has more HP and/or speed than the one below it. No game code 
 | 4 | Repair Bot | Support | T1 | 125 | 50 | 1 | 31.25 | 2 | 11 |  | Heals nearby enemies 8% every 2 s, radius 90 (not bosses) | Current |
 | 5 | Jammer | Disruptor | T1 | 150 | 50 | 1 | 37.50 | 2 | 12 |  | EMP radius 95: towers offline 2 s every 5 s | Current |
 | 6 | Mirage | Special | - | 140 | 55 | 1 | 42.35 | 2 | 12 |  | Every 6 s projects 2 translucent 1-HP holograms that walk to the core and vanish (never leak, no bounty) and soak shots | Proposed (draft) |
-| 7 | Phantom | Special | - | 85 | 72 | 0 | 44.06 | 1 | 7 |  | Built-in cloak: targetable only inside a Sensor Array field or briefly after area damage | Current |
+| 7 | Phantom | Special | - | 85 | 72 | 0 | 44.06 | 1 | 7 | Yes | Flies. Built-in cloak: targetable only inside a Sensor Array field or briefly after area damage | Current |
 | 8 | Shrike | Swarm | T4 | 55 | 90 | 0 | 44.55 | 2 | 3 | Yes | Flying cluster: 5 per spawn event, 0.15 s apart; flies straight at the core | Proposed (draft) |
 | 9 | Skitter | Rusher | T1 | 45 | 105 | 0 | 49.61 | 1 | 4 |  | Fast, fragile crawler | Current |
 | 10 | Blink Stalker | Evader | T1 | 110 | 70 | 1 | 53.90 | 1 | 8 |  | Blinks 80 px down the lane every 4 s; slow or stun resets the charge | Current |
