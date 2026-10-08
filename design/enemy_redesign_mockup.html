@@ -1,0 +1,633 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Enemy Redesign Mockup</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    color-scheme: dark;
+    --ground: #06090e; --field: #0b1016; --panel: #08111a; --panel-2: #0d1a25; --rule: #1d3a4b; --wire: #2a5a70;
+    --text: #dcedf7; --dim: #86a0b1; --faint: #4f6a7b; --accent: #4de1ff; --gold: #ffc85a;
+    --display: "Chakra Petch", "Bahnschrift", "Segoe UI", sans-serif;
+    --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--text); font: 14px/1.5 var(--body); padding: 28px 16px 48px; }
+  .wrap { max-width: 1340px; margin: 0 auto; display: grid; gap: 22px; }
+  .eyebrow { font: 600 12px var(--display); letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
+  h1 { font: 700 30px/1.1 var(--display); margin: 4px 0 0; }
+  h2 { font: 700 20px/1.2 var(--display); margin: 0; letter-spacing: .04em; }
+  h3 { font: 700 16px var(--display); margin: 0; letter-spacing: .03em; }
+  p.note { margin: 6px 0 0; color: var(--dim); max-width: 90ch; }
+  ul.rules { margin: 8px 0 0; padding-left: 18px; color: var(--dim); max-width: 95ch; }
+  ul.rules b { color: var(--text); font-weight: 500; }
+  .controls { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center;
+    padding: 10px 12px; background: rgba(8,17,26,.94); border: 1px solid var(--rule); border-radius: 10px 2px 10px 2px; }
+  .controls .lbl { font: 600 11px var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--faint); }
+  .seg { display: inline-flex; border: 1px solid var(--wire); border-radius: 6px; overflow: hidden; }
+  button { font: 600 12px var(--display); letter-spacing: .06em; color: var(--text); background: var(--panel-2); border: 0; padding: 6px 11px; cursor: pointer; }
+  .seg button + button { border-left: 1px solid var(--wire); }
+  button.on { background: var(--accent); color: #031018; }
+  button.solo { border: 1px solid var(--wire); border-radius: 6px; }
+  button.pick.on { background: var(--gold); color: #1a1000; }
+  button:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
+  .batch { display: grid; gap: 14px; }
+  .batch-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid var(--rule); padding-bottom: 6px; }
+  .batch-head .job { color: var(--dim); font-size: 13px; }
+  .enemy { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px 2px 12px 2px; padding: 10px 12px 12px; display: grid; gap: 8px; }
+  .enemy-head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+  .enemy-head .sub { color: var(--dim); font: 12px var(--mono); }
+  .panels { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 10px; }
+  .panel { border: 1px solid var(--rule); border-radius: 8px; padding: 8px; display: grid; gap: 6px; align-content: start; background: #071019; }
+  .panel.today { border-style: dashed; }
+  .panel.picked { border-color: var(--gold); box-shadow: 0 0 14px rgba(255,200,90,.15); }
+  .ptitle { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font: 700 13px var(--display); }
+  .key { font: 700 11px var(--display); color: #031018; background: var(--accent); border-radius: 4px; padding: 0 6px; }
+  .panel.today .key { background: var(--faint); color: var(--text); }
+  .views { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
+  .view { display: grid; gap: 2px; justify-items: start; }
+  .view small { font: 500 10px var(--mono); color: var(--faint); }
+  canvas { display: block; background: var(--field); border: 1px solid var(--rule); border-radius: 4px; max-width: 100%; }
+  .meta { font: 12px var(--mono); color: var(--dim); }
+  .meta b { color: var(--text); font-weight: 500; }
+  .desc { color: var(--dim); font-size: 13px; margin: 0; }
+  .lineup { background: var(--panel); border: 1px solid var(--wire); border-radius: 12px 2px 12px 2px; padding: 10px 12px; display: grid; gap: 8px; }
+  .lineup .rowlbl { font: 600 11px var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
+  .picks { display: grid; gap: 6px; }
+  .picks textarea { width: 100%; min-height: 54px; background: #071019; color: var(--text); border: 1px solid var(--rule); border-radius: 6px; font: 12px var(--mono); padding: 8px; resize: vertical; }
+  .frames { display: none; gap: 8px; flex-wrap: wrap; }
+  .frames figure { margin: 0; display: grid; gap: 2px; }
+  .frames img { width: 216px; height: 144px; border: 1px solid var(--rule); border-radius: 4px; background: var(--field); }
+  .frames figcaption { font: 500 10px var(--mono); color: var(--faint); }
+  body.grey canvas, body.grey .frames img { filter: grayscale(1); }
+  body.print .controls, body.print .live, body.print button.pick { display: none !important; }
+  body.print .frames { display: flex; }
+  @media print {
+    body { background: #fff; color: #000; padding: 0; }
+    .controls { display: none; }
+    .enemy, .lineup, .panel { break-inside: avoid; background: #fff; border-color: #999; box-shadow: none; }
+    .live { display: none !important; }
+    .frames { display: flex !important; }
+    .desc, .meta, p.note, ul.rules { color: #333; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Bastion Line · Enemy visual redesign · batch 1 of 8</div>
+    <h1>Enemy redesign: every enemy unique</h1>
+    <p class="note">Redesigning all 34 enemies so no two look alike, one role at a time. Each enemy shows its
+      <b>today</b> look next to <b>three concepts</b>, at game scale (1x on a 48 px lane tile) and 3x. Pick one per
+      enemy with the gold buttons; the picks collect at the bottom of the batch for you to copy back. Spec:
+      <code>design/enemy_visuals.md</code>.</p>
+    <ul class="rules">
+      <li><b>Every enemy unique:</b> its own silhouette, theme and material; no shared families.</li>
+      <li><b>Shape first, colour second:</b> turn on <b>Greyscale</b>: each concept must still be recognisable.</li>
+      <li><b>Contrast with the towers:</b> towers are grey metal with neon accents on hex pads, so enemies carry
+        their identity in coloured bodies and distinct materials (glass, chitin, paper, plasma, lacquer...).</li>
+      <li><b>Movement unchanged;</b> <b>sizes are free</b> (every radius change is listed for balance).</li>
+    </ul>
+  </header>
+
+  <div class="controls" role="toolbar" aria-label="Playback">
+    <button class="solo" id="play" aria-pressed="true">Pause</button>
+    <span class="lbl">Speed</span>
+    <span class="seg" id="speed"><button data-v="0.5">0.5x</button><button data-v="1" class="on">1x</button><button data-v="2">2x</button></span>
+    <button class="solo" id="grey" aria-pressed="false">Greyscale</button>
+    <button class="solo" id="printview" aria-pressed="false">Print view</button>
+  </div>
+
+  <div id="batches"></div>
+</div>
+
+<script>
+"use strict";
+// Shared with design/new_enemies_mockup.html (canvas port of Draw.gd primitives and today's enemies).
+// ---- Colours and vectors (mirrors Draw.gd) -------------------------------------------------
+const OUTLINE = [0.03, 0.04, 0.06, 0.95], METAL_D = [0.10, 0.115, 0.14, 1], METAL = [0.18, 0.20, 0.24, 1], METAL_L = [0.30, 0.33, 0.38, 1];
+const LIGHT = [-0.6, -0.8];
+const WHITE = [1, 1, 1, 1];
+const A = (c, a) => [c[0], c[1], c[2], a];
+const dk = (c, k) => [c[0] * (1 - k), c[1] * (1 - k), c[2] * (1 - k), c[3] ?? 1];
+const lt = (c, k) => [c[0] + (1 - c[0]) * k, c[1] + (1 - c[1]) * k, c[2] + (1 - c[2]) * k, c[3] ?? 1];
+const mix = (a, b, k) => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k, (a[3] ?? 1) + ((b[3] ?? 1) - (a[3] ?? 1)) * k];
+const css = c => `rgba(${Math.round(c[0] * 255)},${Math.round(c[1] * 255)},${Math.round(c[2] * 255)},${c[3] ?? 1})`;
+const add = (a, b) => [a[0] + b[0], a[1] + b[1]];
+const sub = (a, b) => [a[0] - b[0], a[1] - b[1]];
+const mul = (a, k) => [a[0] * k, a[1] * k];
+const fa = a => [Math.cos(a), Math.sin(a)];
+const orth = v => [v[1], -v[0]];
+const dot = (a, b) => a[0] * b[0] + a[1] * b[1];
+const norm = v => { const l = Math.hypot(v[0], v[1]) || 1; return [v[0] / l, v[1] / l]; };
+const rot = (p, r) => [p[0] * Math.cos(r) - p[1] * Math.sin(r), p[0] * Math.sin(r) + p[1] * Math.cos(r)];
+const TAU = Math.PI * 2;
+const clamp01 = x => Math.max(0, Math.min(1, x));
+const ease = x => { x = clamp01(x); return x * x * (3 - 2 * x); };
+const fmod = (a, b) => ((a % b) + b) % b;
+
+// ---- Drawing primitives (one-to-one with Draw.gd) ------------------------------------------
+let X = null; // current 2D context
+function disc(c, r, col) { if (r <= 0) return; X.fillStyle = css(col); X.beginPath(); X.arc(c[0], c[1], r, 0, TAU); X.fill(); }
+function arc(c, r, a0, a1, col, w) { X.strokeStyle = css(col); X.lineWidth = w > 0 ? w : 1; X.beginPath(); X.arc(c[0], c[1], Math.max(0.01, r), a0, a1); X.stroke(); }
+function ring(c, r, col, w = 1.5) { arc(c, r, 0, TAU, col, w); }
+function line(a, b, col, w = 1) { X.strokeStyle = css(col); X.lineWidth = w > 0 ? w : 1; X.beginPath(); X.moveTo(a[0], a[1]); X.lineTo(b[0], b[1]); X.stroke(); }
+function polyline(pts, col, w = 1) { if (pts.length < 2) return; X.strokeStyle = css(col); X.lineWidth = w > 0 ? w : 1; X.beginPath(); X.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) X.lineTo(pts[i][0], pts[i][1]); X.stroke(); }
+function poly(pts, col) { X.fillStyle = css(col); X.beginPath(); X.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) X.lineTo(pts[i][0], pts[i][1]); X.closePath(); X.fill(); }
+function xform(c, pts, r, s) { return pts.map(p => add(c, rot(mul(p, s), r))); }
+function fill(c, pts, col, r = 0, s = 1) { poly(xform(c, pts, r, s), col); }
+function outline(c, pts, col, w, r = 0, s = 1) { const p = xform(c, pts, r, s); p.push(p[0]); polyline(p, col, w); }
+function solid(c, pts, col, r = 0, s = 1, lw = 1.2) { fill(c, pts, col, r, s); outline(c, pts, OUTLINE, lw, r, s); }
+function ellipse(c, rx, ry, col) { X.fillStyle = css(col); X.beginPath(); X.ellipse(c[0], c[1], Math.max(0.01, rx), Math.max(0.01, ry), 0, 0, TAU); X.fill(); }
+function rect(x, y, w, h, col) { X.fillStyle = css(col); X.fillRect(x, y, w, h); }
+function ngon(n, r, ph = 0) { const o = []; for (let i = 0; i < n; i++) { const a = ph + TAU * i / n; o.push([Math.cos(a) * r, Math.sin(a) * r]); } return o; }
+function rectPts(hw, hh) { return [[-hw, -hh], [hw, -hh], [hw, hh], [-hw, hh]]; }
+function glowDot(c, r, col) { disc(c, r * 2.2, A(col, 0.18 * (col[3] ?? 1))); disc(c, r * 1.4, A(col, 0.35 * (col[3] ?? 1))); disc(c, r, col); disc(c, r * 0.45, [1, 1, 1, 0.9 * (col[3] ?? 1)]); }
+function arcSegments(c, r, count, gap, rt, col, w) { const span = TAU / count; for (let i = 0; i < count; i++) { const a0 = rt + span * i + gap * 0.5; arc(c, r, a0, a0 + span - gap, col, w); } }
+function orb(p, r, col) {
+  disc(p, r + 1.1, OUTLINE); disc(p, r, dk(col, 0.3)); disc(add(p, mul(LIGHT, r * 0.12)), r * 0.8, col);
+  arc(p, r * 0.72, Math.PI * 1.05, Math.PI * 1.6, lt(col, 0.35), Math.max(0.8, r * 0.16));
+  disc(add(p, mul(LIGHT, r * 0.45)), Math.max(0.6, r * 0.13), [1, 1, 1, 0.55]);
+}
+function plate(c, pts, col, r = 0, s = 1, lw = 1.2) {
+  const p = xform(c, pts, r, s);
+  poly(p, dk(col, 0.22));
+  let ce = [0, 0]; for (const q of p) ce = add(ce, q); ce = mul(ce, 1 / p.length);
+  poly(p.map(q => add(ce, mul(sub(q, ce), 0.8))), col);
+  for (let i = 0; i < p.length; i++) {
+    const a = p[i], b = p[(i + 1) % p.length];
+    const m = norm(sub(mul(add(a, b), 0.5), ce));
+    const d = dot(m, LIGHT);
+    const a1 = add(a, mul(sub(ce, a), 0.1)), b1 = add(b, mul(sub(ce, b), 0.1));
+    if (d > 0.15) line(a1, b1, lt(col, 0.45), Math.max(0.8, lw * 0.8));
+    else if (d < -0.15) line(a1, b1, dk(col, 0.5), Math.max(0.8, lw * 0.8));
+  }
+  const cl = p.slice(); cl.push(p[0]); polyline(cl, OUTLINE, lw);
+}
+function rivets(c, pts, r, s, inset = 0.72, rr = 0.9) { for (const q of xform(c, pts, r, s)) { const p = add(c, mul(sub(q, c), inset)); disc(p, rr + 0.3, OUTLINE); disc(p, rr, lt(METAL_L, 0.15)); } }
+function bar(a, b, w, col) {
+  const d = norm(sub(b, a)); let n = orth(d); if (dot(n, LIGHT) < 0) n = mul(n, -1);
+  line(a, b, OUTLINE, w + 1.6); line(a, b, dk(col, 0.25), w);
+  line(add(a, mul(n, w * 0.18)), add(b, mul(n, w * 0.18)), col, w * 0.55);
+  line(add(a, mul(n, w * 0.3)), add(b, mul(n, w * 0.3)), lt(col, 0.4), Math.max(0.6, w * 0.16));
+}
+function strip(a, b, w, col) { line(a, b, A(col, 0.25 * (col[3] ?? 1)), w * 2.6); line(a, b, col, w); line(a, b, [1, 1, 1, 0.6 * (col[3] ?? 1)], Math.max(0.5, w * 0.35)); }
+function oval(c, rx, ry, r, col, ow = 0) {
+  const pts = []; for (let i = 0; i < 20; i++) { const a = TAU * i / 20; pts.push(add(c, rot([Math.cos(a) * rx, Math.sin(a) * ry], r))); }
+  if (ow > 0) poly(pts.map(p => add(c, mul(sub(p, c), 1 + ow / Math.max(rx, ry)))), OUTLINE);
+  poly(pts, col);
+}
+function shadedOval(c, rx, ry, r, col) {
+  const m = Math.min(rx, ry);
+  oval(c, rx, ry, r, dk(col, 0.3), 1.3); oval(add(c, mul(LIGHT, m * 0.12)), rx * 0.8, ry * 0.78, r, col);
+  disc(add(c, mul(LIGHT, m * 0.5)), Math.max(0.6, m * 0.14), [1, 1, 1, 0.45]);
+}
+function limb(pts, w, col) { polyline(pts, OUTLINE, w + 1.4); polyline(pts, col, w); for (let i = 1; i < pts.length - 1; i++) { disc(pts[i], w * 0.75 + 0.4, OUTLINE); disc(pts[i], w * 0.75, lt(col, 0.25)); } }
+
+// ---- Palettes (existing from Draw.gd ENEMY_BODY / ENEMY_COLOR; new ones are drafts) ----------
+const PAL = {
+  grunt: [[0.40, 0.42, 0.48, 1], [1.00, 0.28, 0.22, 1]], runner: [[0.30, 0.30, 0.32, 1], [1.00, 0.80, 0.20, 1]],
+  brute: [[0.40, 0.37, 0.33, 1], [1.00, 0.55, 0.15, 1]], swarmling: [[0.12, 0.30, 0.16, 1], [0.40, 1.00, 0.50, 1]],
+  bat: [[0.30, 0.32, 0.38, 1], [1.00, 0.35, 0.25, 1]], phantom: [[0.16, 0.20, 0.26, 1], [0.55, 0.95, 1.00, 1]],
+  aegis: [[0.30, 0.36, 0.46, 1], [0.40, 0.70, 1.00, 1]], hydra: [[0.36, 0.30, 0.22, 1], [1.00, 0.65, 0.25, 1]],
+  jammer: [[0.26, 0.28, 0.24, 1], [0.90, 1.00, 0.30, 1]], locust: [[0.30, 0.36, 0.22, 1], [0.75, 1.00, 0.35, 1]],
+  gunship: [[0.30, 0.33, 0.30, 1], [1.00, 0.45, 0.30, 1]], burrower: [[0.40, 0.33, 0.24, 1], [1.00, 0.70, 0.35, 1]],
+  stalker: [[0.22, 0.20, 0.30, 1], [0.75, 0.55, 1.00, 1]], rampart: [[0.36, 0.34, 0.30, 1], [1.00, 0.45, 0.35, 1]],
+  // new (draft)
+  needle: [[0.22, 0.24, 0.28, 1], [0.94, 0.95, 0.97, 1]], fury: [[0.25, 0.17, 0.24, 1], [1.00, 0.25, 0.75, 1]],
+  shrike: [[0.34, 0.36, 0.40, 1], [0.20, 0.90, 0.80, 1]], titan: [[0.28, 0.29, 0.32, 1], [1.00, 0.45, 0.10, 1]],
+  siphon: [[0.26, 0.28, 0.24, 1], [0.90, 1.00, 0.30, 1]], blackout: [[0.24, 0.26, 0.22, 1], [0.95, 1.00, 0.45, 1]],
+  capacitor: [[0.22, 0.24, 0.22, 1], [0.85, 1.00, 0.35, 1]], shifter: [[0.27, 0.25, 0.20, 1], [1.00, 0.88, 0.55, 1]],
+  wraith: [[0.12, 0.11, 0.24, 1], [0.86, 0.88, 1.00, 1]], masq: [[0.30, 0.20, 0.32, 1], [1.00, 0.40, 0.55, 1]],
+  decoy: [[0.30, 0.31, 0.33, 1], [1.00, 0.75, 0.30, 1]], mirage: [[0.20, 0.24, 0.30, 1], [0.80, 0.70, 1.00, 1]],
+};
+const FLYERS = new Set(["bat", "locust", "gunship", "shrike"]);
+const SELF_SHADOW = new Set(["siphon"]); // hovers: draws its own offset shadow
+let TELL = "dots";
+
+// ---- Existing enemies, ported from Draw.enemy ------------------------------------------------
+const DRAW = {};
+DRAW.grunt = (c, f, n, ang, rr, t, b, g) => {
+  disc(c, rr * 1.2, A(g, 0.07));
+  for (const side of [-1, 1]) { const pod = add(c, mul(n, side * rr * 0.95)); plate(pod, rectPts(0.5, 0.24), lt(METAL_D, 0.1), ang, rr, 1.0); strip(sub(sub(pod, mul(f, rr * 0.55)), mul(n, rr * 0.12)), add(sub(pod, mul(f, rr * 0.55)), mul(n, rr * 0.12)), 0.8, [0.4, 0.8, 1.0, 1]); }
+  bar(add(c, mul(f, rr * 0.3)), add(c, mul(f, rr * 1.3)), 2.0, METAL_L); disc(add(c, mul(f, rr * 1.3)), 1.1, [0.05, 0.05, 0.05, 1]);
+  orb(c, rr * 0.86, b); arcSegments(c, rr * 0.64, 6, 0.35, ang, dk(b, 0.35), 1.4);
+  const e = add(c, mul(f, rr * 0.12)); disc(e, rr * 0.4, OUTLINE); disc(e, rr * 0.33, [0.15, 0.03, 0.03, 1]); glowDot(e, rr * 0.2, g); disc(add(e, mul(LIGHT, rr * 0.15)), rr * 0.07, [1, 1, 1, 0.8]);
+};
+DRAW.runner = (c, f, n, ang, rr, t, b, g) => {
+  for (let i = 0; i < 3; i++) for (const side of [-1, 1]) {
+    const ph = t * 20 + i * 2.1 + (side > 0 ? Math.PI : 0);
+    const root = add(add(c, mul(f, (1 - i) * rr * 0.35)), mul(n, side * rr * 0.28));
+    const knee = add(add(root, mul(n, side * rr * 0.7)), mul(f, ((1 - i) * 0.35 + 0.22 * Math.sin(ph)) * rr));
+    const foot = add(add(knee, mul(n, side * rr * 0.3)), mul(f, (1 - i) * 0.45 * rr));
+    limb([root, knee, foot], 1.0, METAL_L);
+  }
+  shadedOval(sub(c, mul(f, rr * 0.35)), rr * 0.56, rr * 0.43, ang, b);
+  for (let k = 0; k < 2; k++) { const sp = sub(c, mul(f, rr * (0.2 + 0.25 * k))); line(sub(sp, mul(n, rr * 0.35)), add(sp, mul(n, rr * 0.35)), [0, 0, 0, 0.45], 1.0); }
+  strip(sub(c, mul(f, rr * 0.65)), sub(c, mul(f, rr * 0.1)), 0.8, g);
+  orb(add(c, mul(f, rr * 0.35)), rr * 0.35, lt(b, 0.15));
+  for (const side of [-1, 1]) { line(add(add(c, mul(f, rr * 0.6)), mul(n, side * rr * 0.12)), add(add(c, mul(f, rr * 0.85)), mul(n, side * rr * 0.04)), METAL_L, 1.0); glowDot(add(add(c, mul(f, rr * 0.5)), mul(n, side * rr * 0.14)), rr * 0.08, g); }
+};
+DRAW.brute = (c, f, n, ang, rr, t, b, g) => {
+  for (const side of [-1, 1]) {
+    const step = Math.sin(t * 5 + (side > 0 ? Math.PI : 0)) * rr * 0.35;
+    const hip = add(c, mul(n, side * rr * 0.45)), knee = add(add(hip, mul(n, side * rr * 0.2)), mul(f, step * 0.5)), foot = add(add(hip, mul(n, side * rr * 0.15)), mul(f, step));
+    limb([hip, knee, foot], 3.0, lt(METAL_D, 0.1)); plate(foot, rectPts(0.32, 0.2), METAL_L, ang, rr, 1.0);
+  }
+  const hull = ngon(6, 1.0); plate(c, hull, b, ang, rr * 0.84, 1.6); rivets(c, hull, ang, rr * 0.84, 0.78, 0.6);
+  fill(c, rectPts(0.3, 0.42), dk(b, 0.15), ang, rr);
+  for (const side of [-1, 1]) { const sh = add(c, mul(n, side * rr * 0.78)); plate(sh, rectPts(0.34, 0.3), METAL_L, ang, rr, 1.2); bar(add(sh, mul(f, rr * 0.2)), add(sh, mul(f, rr * 1.15)), 2.4, METAL_L); disc(add(sh, mul(f, rr * 1.15)), 1.4, [0.05, 0.05, 0.05, 1]); disc(add(sh, mul(f, rr * 1.15)), 0.8, A(g, 0.9)); }
+  const v = add(c, mul(f, rr * 0.42)); strip(sub(v, mul(n, rr * 0.28)), add(v, mul(n, rr * 0.28)), 1.6, g);
+};
+DRAW.swarmling = (c, f, n, ang, rr, t, b, g) => {
+  disc(c, rr * 1.7, A(g, 0.13));
+  for (let k = 0; k < 4; k++) { const p = add(c, mul(fa(t * 7 + TAU * k / 4), rr * 0.78)); solid(p, [[0.5, 0], [0, 0.35], [-0.5, 0], [0, -0.35]], lt(b, 0.35), t * 7, rr, 0.8); disc(p, rr * 0.11, g); }
+  orb(c, rr * 0.34, lt(b, 0.2)); glowDot(c, rr * 0.18, g);
+};
+DRAW.bat = (c, f, n, ang, rr, t, b, g) => {
+  ellipse(add(c, [0, rr * 2.4]), rr * 1.3, rr * 0.4, [0, 0, 0, 0.2]);
+  for (let k = 0; k < 4; k++) {
+    const a = ang + Math.PI / 4 + TAU * k / 4, tip = add(c, mul(fa(a), rr * 1.2));
+    bar(c, tip, 1.8, lt(METAL_D, 0.15)); disc(tip, rr * 0.62, [0.8, 0.86, 0.95, 0.12]); ring(tip, rr * 0.62, [0.8, 0.86, 0.95, 0.35], 0.8);
+    const spin = t * 38 * (k % 2 === 0 ? 1 : -1);
+    for (let q = 0; q < 2; q++) line(tip, add(tip, mul(fa(spin + q * Math.PI), rr * 0.58)), [0.85, 0.9, 1.0, 0.55], 1.2);
+    orb(tip, rr * 0.17, METAL_L);
+    const nav = k < 2 ? [1, 0.25, 0.25, 1] : [0.3, 1, 0.45, 1];
+    if (fmod(t * 1.5 + k * 0.25, 1) < 0.35) glowDot(add(c, mul(fa(a), rr * 0.72)), rr * 0.08, nav);
+  }
+  plate(c, [[0.62, 0], [0.35, 0.36], [-0.5, 0.3], [-0.62, 0], [-0.5, -0.3], [0.35, -0.36]], b, ang, rr, 1.2);
+  for (const side of [-1, 1]) { const pod = add(add(c, mul(n, side * rr * 0.34)), mul(f, rr * 0.1)); bar(pod, add(pod, mul(f, rr * 0.45)), 1.6, METAL_L); }
+  const cam = add(c, mul(f, rr * 0.42)); orb(cam, rr * 0.2, METAL); glowDot(add(cam, mul(f, rr * 0.06)), rr * 0.09, g);
+  strip(sub(sub(c, mul(f, rr * 0.35)), mul(n, rr * 0.12)), add(sub(c, mul(f, rr * 0.35)), mul(n, rr * 0.12)), 0.7, g);
+};
+DRAW.locust = (c, f, n, ang, rr, t, b, g) => {
+  ellipse(add(c, [0, rr * 2.6]), rr * 0.9, rr * 0.3, [0, 0, 0, 0.18]);
+  const flap = 0.55 + 0.45 * Math.sin(t * 60);
+  for (const side of [-1, 1]) for (let k = 0; k < 2; k++) { const root = add(c, mul(f, rr * (0.25 - 0.45 * k))); const tip = sub(add(root, mul(n, side * rr * (1.5 * flap + 0.3))), mul(f, rr * 0.35)); line(root, tip, [0.85, 0.95, 0.8, 0.45], 1.6); }
+  shadedOval(sub(c, mul(f, rr * 0.1)), rr * 0.9, rr * 0.42, ang, b); glowDot(add(c, mul(f, rr * 0.6)), rr * 0.3, g);
+};
+DRAW.gunship = (c, f, n, ang, rr, t, b, g) => {
+  ellipse(add(c, [0, rr * 2.0]), rr * 1.4, rr * 0.4, [0, 0, 0, 0.22]);
+  bar(sub(c, mul(f, rr * 0.4)), sub(c, mul(f, rr * 1.35)), 2.4, lt(METAL_D, 0.12)); plate(sub(c, mul(f, rr * 1.35)), rectPts(0.1, 0.42), METAL, ang, rr, 1.0);
+  for (const side of [-1, 1]) {
+    const fan = sub(add(c, mul(n, side * rr * 0.95)), mul(f, rr * 0.1));
+    disc(fan, rr * 0.5, OUTLINE); disc(fan, rr * 0.44, METAL_D);
+    for (let q = 0; q < 3; q++) line(fan, add(fan, mul(fa(t * 30 * side + TAU * q / 3), rr * 0.4)), [0.8, 0.85, 0.95, 0.5], 1.4);
+    ring(fan, rr * 0.47, METAL_L, 1.6); glowDot(sub(fan, mul(f, rr * 0.5)), rr * 0.08, side < 0 ? [1, 0.25, 0.25, 1] : [0.3, 1, 0.45, 1]);
+  }
+  const hull = [[0.95, 0], [0.55, 0.5], [-0.6, 0.55], [-0.85, 0.2], [-0.85, -0.2], [-0.6, -0.55], [0.55, -0.5]];
+  plate(c, hull, b, ang, rr * 0.8, 1.6); rivets(c, hull, ang, rr * 0.8, 0.72, 0.6);
+  line(sub(c, mul(f, rr * 0.4)), add(c, mul(f, rr * 0.45)), [0, 0, 0, 0.35], 1.0);
+  const tur = add(c, mul(f, rr * 0.55));
+  for (const side of [-1, 1]) bar(add(tur, mul(n, side * rr * 0.1)), add(add(tur, mul(n, side * rr * 0.1)), mul(f, rr * 0.6)), 1.8, METAL_L);
+  orb(tur, rr * 0.22, METAL); glowDot(add(c, mul(f, rr * 0.2)), rr * 0.1, g);
+};
+DRAW.rampart = (c, f, n, ang, rr, t, b, g) => {
+  const roll = fmod(t * 14, 5);
+  for (const side of [-1, 1]) { const tread = add(c, mul(n, side * rr * 0.82)); plate(tread, rectPts(1.05, 0.26), lt(METAL_D, 0.05), ang, rr, 1.3); for (let k = 0; k < 5; k++) { const lp = add(tread, mul(f, -rr * 0.95 + fmod(k * rr * 0.42 + roll, rr * 2.0))); line(sub(lp, mul(n, rr * 0.22)), add(lp, mul(n, rr * 0.22)), METAL_L, 1.0); } }
+  const hull = rectPts(0.78, 0.66); plate(c, hull, b, ang, rr, 1.8);
+  for (const cx of [-1, 1]) for (const cy of [-1, 1]) plate(add(add(c, mul(f, cx * rr * 0.62)), mul(n, cy * rr * 0.5)), rectPts(0.16, 0.16), lt(b, 0.12), ang, rr, 1.1);
+  rivets(c, hull, ang, rr, 0.7, 0.7);
+  bar(add(c, mul(f, rr * 0.7)), add(c, mul(f, rr * 1.25)), 4.0, METAL_L); plate(add(c, mul(f, rr * 1.2)), [[0.2, 0], [-0.05, 0.3], [-0.05, -0.3]], lt(METAL_L, 0.1), ang, rr, 1.0);
+  orb(c, rr * 0.28, dk(b, 0.2)); glowDot(c, rr * 0.13, g);
+};
+DRAW.jammer = (c, f, n, ang, rr, t, b, g) => {
+  const ping = fmod(t * 0.9, 1); arc(c, rr * (1.2 + 1.4 * ping), 0, TAU, A(g, 0.35 * (1 - ping)), 1.5);
+  for (const side of [-1, 1]) { const tr = add(c, mul(n, side * rr * 0.72)); plate(tr, rectPts(0.8, 0.22), lt(METAL_D, 0.08), ang, rr, 1.0); for (let k = 0; k < 3; k++) { const lp = add(tr, mul(f, (fmod(t * 6 + k * 0.5, 1.5) - 0.75) * rr)); line(sub(lp, mul(n, rr * 0.16)), add(lp, mul(n, rr * 0.16)), [0, 0, 0, 0.45], 0.9); } }
+  orb(c, rr * 0.72, b); const dir = fa(t * 2.5);
+  arc(c, rr * 0.55, t * 2.5 - 0.9, t * 2.5 + 0.9, OUTLINE, 3.6); arc(c, rr * 0.55, t * 2.5 - 0.9, t * 2.5 + 0.9, METAL_L, 2.2);
+  bar(c, add(c, mul(dir, rr * 0.9)), 1.2, METAL_L); glowDot(add(c, mul(dir, rr * 0.9)), rr * 0.14, g); glowDot(c, rr * 0.18, g);
+};
+DRAW.stalker = (c, f, n, ang, rr, t, b, g) => {
+  const echo = fmod(t * 1.1, 1);
+  const ghost = [[1.1, 0], [0.2, 0.45], [-0.7, 0.3], [-0.7, -0.3], [0.2, -0.45]];
+  outline(sub(c, mul(f, rr * (0.6 + 1.2 * echo))), ghost, A(g, 0.45 * (1 - echo)), 1.0, ang, rr);
+  for (const side of [-1, 1]) {
+    const ph = t * 12 + (side > 0 ? Math.PI : 0);
+    const hip = add(c, mul(n, side * rr * 0.3)), knee = add(add(hip, mul(n, side * rr * 0.45)), mul(f, rr * (0.45 + 0.25 * Math.sin(ph)))), foot = sub(add(knee, mul(n, side * rr * 0.1)), mul(f, rr * (0.55 - 0.3 * Math.sin(ph))));
+    limb([hip, knee, foot], 1.3, METAL_L);
+  }
+  plate(c, ghost, b, ang, rr * 0.8, 1.1); strip(sub(c, mul(f, rr * 0.45)), add(c, mul(f, rr * 0.55)), 0.8, g); glowDot(add(c, mul(f, rr * 0.6)), rr * 0.16, g);
+};
+DRAW.burrower = (c, f, n, ang, rr, t, b, g, o) => {
+  if (o.hidden) {
+    const dirt = [0.42, 0.33, 0.24, 1]; shadedOval(c, rr * 1.15, rr * 0.8, ang, dirt);
+    for (let k = 0; k < 5; k++) { const a = ang + TAU * k / 5 + t * 0.5; disc(add(c, mul(fa(a), rr * (0.85 + 0.15 * Math.sin(t * 9 + k)))), 1.4, lt(dirt, 0.2)); }
+    line(add(c, mul(f, rr * 0.6)), add(c, mul(f, rr * 1.05)), METAL_L, 2.0); glowDot(add(c, mul(f, rr * 0.2)), rr * 0.12, A(g, 0.6)); return;
+  }
+  for (const side of [-1, 1]) { const tr = add(c, mul(n, side * rr * 0.72)); plate(tr, rectPts(0.7, 0.2), lt(METAL_D, 0.08), ang, rr, 1.0); for (let k = 0; k < 3; k++) { const lp = add(tr, mul(f, (fmod(t * 7 + k * 0.45, 1.35) - 0.68) * rr)); line(sub(lp, mul(n, rr * 0.15)), add(lp, mul(n, rr * 0.15)), [0, 0, 0, 0.45], 0.9); } }
+  shadedOval(sub(c, mul(f, rr * 0.15)), rr * 0.7, rr * 0.58, ang, b);
+  for (let k = 0; k < 2; k++) { const sp = sub(c, mul(f, rr * (0.05 + 0.3 * k))); line(sub(sp, mul(n, rr * 0.5)), add(sp, mul(n, rr * 0.5)), [0, 0, 0, 0.35], 1.0); }
+  plate(c, [[1.45, 0], [0.5, 0.42], [0.5, -0.42]], METAL_L, ang, rr, 1.2);
+  for (let k = 0; k < 3; k++) { const fr = fmod(t * 5 + k / 3, 1), x = 0.55 + 0.8 * fr, hw = 0.42 * (1.45 - x) / 0.95; line(sub(add(c, mul(f, rr * x)), mul(n, rr * hw)), add(add(c, mul(f, rr * (x + 0.12))), mul(n, rr * hw)), [0, 0, 0, 0.45], 1.0); }
+  glowDot(sub(c, mul(f, rr * 0.2)), rr * 0.14, g);
+};
+DRAW.phantom = (c, f, n, ang, rr, t, b, g, o) => {
+  const blade = [[1.4, 0], [0.1, 0.55], [-0.9, 1.0], [-0.5, 0], [-0.9, -1.0], [0.1, -0.55]];
+  if (o.hidden) {
+    const a = 0.2 + 0.08 * Math.sin(t * 7), rp = fmod(t * 1.3, 1);
+    arc(c, rr * (1 + 0.8 * rp), 0, TAU, [0.8, 0.95, 1.0, 0.22 * (1 - rp)], 1.0);
+    outline(c, blade, A(g, a), 1.2, ang, rr); outline(add(c, mul(n, Math.sin(t * 11) * 1.5)), blade, A(g, a * 0.5), 1.0, ang, rr * 1.08); return;
+  }
+  plate(c, blade, b, ang, rr, 1.2); line(sub(c, mul(f, rr * 0.4)), add(c, mul(f, rr * 1.1)), A(g, 0.5), 1.0);
+  for (const side of [-1, 1]) { glowDot(add(add(c, mul(f, rr * 0.35)), mul(n, side * rr * 0.28)), rr * 0.13, g); strip(add(sub(c, mul(f, rr * 0.75)), mul(n, side * rr * 0.55)), add(sub(c, mul(f, rr * 0.55)), mul(n, side * rr * 0.4)), 0.8, g); }
+  ring(c, rr * 1.3, A(g, 0.35 + 0.2 * Math.sin(t * 5)), 1.0);
+};
+DRAW.aegis = (c, f, n, ang, rr, t, b, g) => {
+  for (let k = 0; k < 4; k++) { const ld = fa(ang + Math.PI / 4 + k * Math.PI / 2), step = Math.sin(t * 6 + k * Math.PI / 2) * rr * 0.18; const knee = add(add(c, mul(ld, rr * 0.75)), mul(f, step)); limb([add(c, mul(ld, rr * 0.3)), knee, add(knee, mul(ld, rr * 0.35))], 2.0, METAL_L); }
+  const hull = ngon(6, 1.0, Math.PI / 6); plate(c, hull, b, ang, rr * 0.74, 1.4); rivets(c, hull, ang, rr * 0.74, 0.75, 0.55);
+  orb(sub(c, mul(f, rr * 0.25)), rr * 0.2, dk(g, 0.3)); glowDot(sub(c, mul(f, rr * 0.25)), rr * 0.12, g);
+  const sc = add(c, mul(f, rr * 0.2));
+  arc(sc, rr * 0.95, ang - 0.95, ang + 0.95, OUTLINE, 5.6); arc(sc, rr * 0.95, ang - 0.95, ang + 0.95, METAL_L, 3.8); arc(sc, rr * 0.88, ang - 0.8, ang + 0.1, lt(METAL_L, 0.35), 1.0);
+  for (let k = 0; k < 3; k++) disc(add(sc, mul(fa(ang + (k - 1) * 0.55), rr * 0.95)), 0.9, A(g, 0.9));
+  arc(sc, rr * 1.04, ang - 0.9, ang + 0.9, A(g, 0.8), 1.2);
+  const hex = ngon(6, 1.0, t * 0.6); fill(c, hex, [0.4, 0.7, 1.0, 0.15], 0, rr + 6); outline(c, hex, [0.55, 0.8, 1.0, 0.75], 1.4, 0, rr + 6); // barrier (enemy_status)
+};
+DRAW.hydra = (c, f, n, ang, rr, t, b, g) => {
+  shadedOval(sub(c, mul(f, rr * 0.3)), rr * 0.52, rr * 0.48, ang, b); ring(sub(c, mul(f, rr * 0.3)), rr * 0.3, dk(b, 0.35), 1.3); glowDot(sub(c, mul(f, rr * 0.3)), rr * 0.1, g);
+  for (let k = 0; k < 3; k++) {
+    const ba = ang + (k - 1) * 0.7, pts = [];
+    for (let i = 0; i < 5; i++) { const q = i / 4, sway = Math.sin(t * 4 + k * 1.7 - q * 2) * rr * 0.22 * q; pts.push(add(add(c, mul(fa(ba), rr * (0.05 + 1.05 * q))), mul(fa(ba + Math.PI / 2), sway))); }
+    polyline(pts, OUTLINE, 5.0); polyline(pts, lt(b, 0.15), 3.2); for (let i = 1; i < 4; i++) disc(pts[i], 1.0, dk(b, 0.25));
+    const hd = norm(sub(pts[4], pts[3])), hp = add(pts[4], mul(hd, rr * 0.12));
+    plate(hp, [[0.6, 0], [0.05, 0.38], [-0.4, 0.3], [-0.4, -0.3], [0.05, -0.38]], lt(b, 0.1), Math.atan2(hd[1], hd[0]), rr * 0.5, 1.0);
+    const jaw = mul(orth(hd), rr * 0.1 * (1 + Math.sin(t * 8 + k))); line(add(add(hp, mul(hd, rr * 0.28)), jaw), add(hp, mul(hd, rr * 0.1)), METAL_L, 1.0); glowDot(add(hp, mul(hd, rr * 0.06)), rr * 0.1, g);
+  }
+};
+
+
+// Shrike as drafted in design/new_enemies_mockup.html (its 'today' look).
+DRAW.shrike = (c, f, n, ang, rr, t, b, g, o) => {
+  ellipse(add(c, [0, rr * 2.4]), rr * 1.0, rr * 0.32, [0, 0, 0, 0.18]);
+  const flap = 0.6 + 0.4 * Math.sin(t * 22 + (o.phase || 0));
+  for (const side of [-1, 1]) {
+    const wing = [[0.3, 0], [-0.2, side * (1.6 * flap + 0.2)], [-0.75, side * (1.35 * flap + 0.15)], [-0.45, 0]];
+    plate(c, wing, lt(b, 0.08), ang, rr, 0.9);
+    const w = xform(c, wing, ang, rr); strip(w[0], w[1], 0.6, g);
+  }
+  plate(c, [[1.1, 0], [0, 0.32], [-0.8, 0], [0, -0.32]], b, ang, rr, 1.0); glowDot(add(c, mul(f, rr * 0.5)), rr * 0.2, g);
+};
+
+// ---- Redesign page: concepts, panels, lineup, picks --------------------------------------------
+const F = [1, 0], N = orth(F);
+function groundShadow(c, r, k = 1) { ellipse(add(c, [0, r * 0.75]), r * 1.1 * k, r * 0.45 * k, [0, 0, 0, 0.3]); }
+function airShadow(c, r, d = 2.4) { ellipse(add(c, [0, r * d]), r * 1.0, r * 0.32, [0, 0, 0, 0.18]); }
+function ovalLine(c, rx, ry, r, col, w) { const pts = []; for (let i = 0; i <= 20; i++) { const a = TAU * i / 20; pts.push(add(c, rot([Math.cos(a) * rx, Math.sin(a) * ry], r))); } polyline(pts, col, w); }
+function today(type, c, r, t, o = {}) {
+  const pal = PAL[type], f = F, n = N;
+  if (!FLYERS.has(type) && !(SELF_SHADOW && SELF_SHADOW.has(type))) groundShadow(c, r);
+  DRAW[type](c, f, n, 0, r, t, pal[0], pal[1], o);
+}
+const CLUSTER = [[0, 0], [-1.7, 1.4], [-1.7, -1.4], [-3.4, 2.8], [-3.4, -2.8]];
+function cluster(c, r, t, unit) { CLUSTER.forEach((q, i) => unit(add(add(c, [r * 1.6, 0]), [q[0] * r, q[1] * r]), r, t, i * 1.3)); }
+
+// ---- Batch 1: Swarm ---------------------------------------------------------------------------
+const NANITE = [
+  { key: "A", name: "Glass-bead motes", theme: "Crystal / glass", palette: "pale aqua glass, white glints", r: 7,
+    draw(c, t, r) {
+      groundShadow(c, r, 0.8); disc(c, r * 1.6, [0.6, 0.9, 0.95, 0.08]);
+      disc(c, r * 0.3, [0.55, 0.85, 0.92, 0.5]); ring(c, r * 0.42, [0.8, 0.97, 1, 0.85], 1.1);
+      const facet = [[0.55, 0], [0.1, 0.4], [-0.45, 0.15], [-0.3, -0.35], [0.2, -0.4]];
+      for (let k = 0; k < 5; k++) { const a = t * 4 + TAU * k / 5, p = add(c, mul(fa(a), r * 0.85)); fill(p, facet, [0.55, 0.85, 0.92, 0.75], a * 1.5, r * 0.42); outline(p, facet, [0.92, 1, 1, 0.9], 0.6, a * 1.5, r * 0.42); disc(add(p, [-r * 0.08, -r * 0.1]), 0.55, [1, 1, 1, 0.95]); }
+    } },
+  { key: "B", name: "Chitin mite cluster", theme: "Biomech insect", palette: "glossy rust-brown chitin, pale yellow eyes", r: 7,
+    draw(c, t, r) {
+      groundShadow(c, r, 0.8);
+      for (let k = 0; k < 3; k++) {
+        const a = t * 2.2 + TAU * k / 3, p = add(c, mul(fa(a), r * 0.6)), d = fa(a + Math.PI / 2), n = orth(d), ang = Math.atan2(d[1], d[0]);
+        for (let i = 0; i < 3; i++) for (const side of [-1, 1]) { const b = add(p, mul(d, r * (0.15 - 0.15 * i))); line(b, add(add(b, mul(n, side * r * 0.32)), mul(d, r * 0.06 * Math.sin(t * 30 + i + side))), [0.25, 0.15, 0.1, 1], 0.7); }
+        shadedOval(p, r * 0.42, r * 0.28, ang, [0.45, 0.28, 0.18, 1]);
+        disc(add(p, mul(d, r * 0.38)), r * 0.15, [0.3, 0.18, 0.12, 1]);
+        for (const side of [-1, 1]) disc(add(add(p, mul(d, r * 0.45)), mul(n, side * r * 0.07)), 0.55, [1, 0.9, 0.5, 1]);
+      }
+    } },
+  { key: "C", name: "Sulphur spark wisps", theme: "Plasma / elemental", palette: "sulphur-white sparks, soot-black trails", r: 7,
+    draw(c, t, r) {
+      disc(c, r * 1.4, [1, 0.95, 0.6, 0.06]);
+      for (let k = 0; k < 3; k++) {
+        const a = t * 5 + TAU * k / 3, pts = [];
+        for (let i = 0; i < 7; i++) pts.push(add(c, mul(fa(a - i * 0.35), r * (0.35 + 0.11 * i))));
+        polyline(pts, [0.12, 0.1, 0.08, 0.55], 2.4); polyline(pts.slice(0, 4), [1, 0.92, 0.45, 0.9], 1.0);
+        glowDot(pts[0], r * 0.14, [1, 0.95, 0.6, 1]);
+      }
+      glowDot(c, r * 0.22, [1, 1, 0.85, 1]);
+    } },
+];
+const LOCUST = [
+  { key: "A", name: "Origami flyer", theme: "Folded paper", palette: "cream paper, red ink stamp", r: 6,
+    draw(c, t, r) {
+      airShadow(c, r, 2.6);
+      const flap = 0.5 + 0.5 * Math.sin(t * 40), paper = [0.92, 0.86, 0.7, 1], ink = [0.35, 0.3, 0.22, 0.9];
+      for (const side of [-1, 1]) { const w = [[0.3, 0], [-0.3, side * (1.5 * flap + 0.3)], [-0.55, 0]]; fill(c, w, side > 0 ? paper : lt(paper, 0.1), 0, r); outline(c, w, ink, 0.7, 0, r); const q = xform(c, w, 0, r); line(q[0], mul(add(q[1], q[2]), 0.5), A(ink, 0.5), 0.5); }
+      const body = [[1.2, 0], [0, 0.22], [-1.0, 0], [0, -0.22]]; fill(c, body, dk(paper, 0.12), 0, r); outline(c, body, ink, 0.7, 0, r);
+      line(add(c, [r * 1.2, 0]), add(c, [-r * 1.0, 0]), A(ink, 0.5), 0.5); disc(add(c, [r * 0.35, 0]), r * 0.13, [0.8, 0.15, 0.15, 0.9]);
+    } },
+  { key: "B", name: "Iridescent dragonfly", theme: "Biomech insect", palette: "teal metallic body, rainbow membrane wings", r: 6,
+    draw(c, t, r) {
+      airShadow(c, r, 2.6);
+      for (let k = 0; k < 2; k++) for (const side of [-1, 1]) {
+        const base = add(c, mul(F, r * (0.25 - 0.3 * k))), ang = side * (Math.PI / 2 - 0.25 + 0.15 * Math.sin(t * 50 + k)), wc = add(base, mul(fa(ang), r * 0.75));
+        oval(wc, r * 0.8, r * 0.22, ang, [0.75, 0.95, 0.95, 0.18]);
+        ovalLine(wc, r * 0.8, r * 0.22, ang, [0.5 + 0.5 * Math.sin(t * 3 + k), 0.5 + 0.5 * Math.sin(t * 3 + 2 + k), 0.5 + 0.5 * Math.sin(t * 3 + 4 + k), 0.7], 0.6);
+      }
+      for (let i = 0; i < 5; i++) { const p = sub(c, mul(F, r * (0.35 + 0.3 * i))); disc(p, r * (0.17 - 0.015 * i) + 0.6, OUTLINE); disc(p, r * (0.17 - 0.015 * i), [0.1, 0.42, 0.4, 1]); }
+      shadedOval(c, r * 0.35, r * 0.25, 0, [0.12, 0.45, 0.42, 1]);
+      for (const side of [-1, 1]) { const e = add(add(c, mul(F, r * 0.45)), mul(N, side * r * 0.15)); disc(e, r * 0.15 + 0.5, OUTLINE); disc(e, r * 0.15, [0.2, 0.85, 0.6, 1]); disc(add(e, [-0.4, -0.4]), 0.4, [1, 1, 1, 0.8]); }
+    } },
+  { key: "C", name: "Rotor seed (samara)", theme: "Botanical machine", palette: "sandy tan blade, brown seed pod", r: 6,
+    draw(c, t, r) {
+      airShadow(c, r, 2.6);
+      const spin = t * 25, leaf = [[0.2, 0], [0.9, 0.25], [1.8, 0.18], [2.0, 0], [1.7, -0.12], [0.8, -0.15]];
+      for (let k = 1; k <= 3; k++) arc(c, r * 1.25, spin - 0.25 * k - 0.3, spin - 0.25 * k, [0.85, 0.7, 0.42, 0.1], r * 0.45);
+      fill(c, leaf, [0.85, 0.7, 0.42, 0.95], spin, r); outline(c, leaf, [0.4, 0.3, 0.15, 0.9], 0.6, spin, r);
+      for (const v of [0.6, 1.0, 1.4]) line(add(c, rot([0.3 * r, 0], spin)), add(c, rot([v * r, 0.14 * r], spin)), [0.55, 0.42, 0.22, 0.7], 0.5);
+      shadedOval(c, r * 0.38, r * 0.3, spin, [0.55, 0.38, 0.2, 1]);
+    } },
+];
+const DRONE = [
+  { key: "A", name: "Hazard sentry ball", theme: "Industrial / hazard paint", palette: "yellow and black hazard stripes, red eye", r: 10,
+    draw(c, t, r) {
+      groundShadow(c, r);
+      for (const side of [-1, 1]) { const pod = add(c, mul(N, side * r * 0.95)); plate(pod, rectPts(0.35, 0.2), [0.15, 0.15, 0.16, 1], 0, r, 1.0); glowDot(sub(pod, mul(F, r * 0.3)), r * 0.08, [1, 0.6, 0.2, 1]); }
+      disc(c, r * 0.9 + 1.1, OUTLINE); disc(c, r * 0.9, [0.95, 0.78, 0.12, 1]);
+      X.save(); X.beginPath(); X.arc(c[0], c[1], r * 0.9, 0, TAU); X.clip();
+      for (let k = -3; k <= 3; k++) { const o = add(c, rot([k * r * 0.5, 0], -0.8)); fill(o, rectPts(0.12, 1.4), [0.08, 0.08, 0.08, 1], -0.8, r); }
+      X.restore();
+      arc(c, r * 0.65, Math.PI * 1.05, Math.PI * 1.6, [1, 1, 0.85, 0.6], r * 0.12); disc(add(c, mul(LIGHT, r * 0.45)), r * 0.12, [1, 1, 1, 0.55]);
+      const e = add(c, mul(F, r * 0.35)); disc(e, r * 0.3, OUTLINE); disc(e, r * 0.24, [0.1, 0.1, 0.1, 1]); glowDot(e, r * 0.12, [1, 0.3, 0.2, 1]);
+    } },
+  { key: "B", name: "Jellyfish bell", theme: "Bioluminescent", palette: "translucent orchid bell, glowing core", r: 12,
+    draw(c, t, r) {
+      groundShadow(c, r, 0.8);
+      for (let k = 0; k < 6; k++) {
+        const s0 = add(c, mul(fa(Math.PI - 0.9 + k * 0.36), r * 0.7)), pts = [s0];
+        for (let i = 1; i < 6; i++) pts.push(add(sub(s0, mul(F, r * 0.32 * i)), mul(N, Math.sin(t * 4 + i * 0.9 + k) * r * 0.12)));
+        polyline(pts, [0.85, 0.55, 0.95, 0.35], 1.2);
+      }
+      const s = 1 + 0.06 * Math.sin(t * 3);
+      disc(c, r * 0.85 * s, [0.85, 0.55, 0.95, 0.35]); ring(c, r * 0.85 * s, [0.96, 0.78, 1, 0.75], 1.2);
+      for (let k = 0; k < 8; k++) { const d = fa(TAU * k / 8 + 0.2); line(add(c, mul(d, r * 0.25)), add(c, mul(d, r * 0.8 * s)), [0.95, 0.8, 1, 0.4], 0.7); }
+      disc(c, r * 0.4, [1, 0.8, 1, 0.25]); glowDot(c, r * 0.15, [1, 0.85, 1, 1]);
+    } },
+  { key: "C", name: "Lantern-eye sphere", theme: "Bronze clockwork", palette: "dark bronze sphere and fins, pale mint lantern", r: 11,
+    draw(c, t, r) {
+      groundShadow(c, r);
+      for (let k = 0; k < 8; k++) { const a = t * 1.5 + TAU * k / 8; solid(add(c, mul(fa(a), r * 0.9)), [[0.35, 0], [-0.2, 0.18], [-0.2, -0.18]], [0.42, 0.28, 0.12, 1], a, r * 0.75, 0.8); }
+      orb(c, r * 0.72, [0.55, 0.38, 0.18, 1]); arcSegments(c, r * 0.5, 4, 0.5, 0, dk([0.55, 0.38, 0.18, 1], 0.4), 1.2);
+      const e = add(c, mul(F, r * 0.2)); disc(e, r * 0.34, OUTLINE); disc(e, r * 0.28, [1, 0.95, 0.8, 0.9]); glowDot(e, r * 0.16, [0.7, 1, 0.95, 1]);
+    } },
+];
+function shrikeA(c, r, t, ph) {
+  airShadow(c, r); const spin = t * 14 + ph, arm = [[0, -0.18], [1.2, -0.05], [1.2, 0.12], [0, 0.18]];
+  for (const a of [spin, spin + 2.1]) { plate(c, arm, [0.35, 0.42, 0.55, 1], a, r, 0.9); const q = xform(c, arm, a, r); line(q[0], q[1], [0.95, 0.97, 1, 0.8], 0.6); }
+  orb(c, r * 0.22, [0.25, 0.3, 0.4, 1]);
+}
+function shrikeB(c, r, t, ph) {
+  airShadow(c, r); const w = Math.sin(t * 6 + ph);
+  const body = [[1.0, 0], [0.2, 0.25], [-0.3, 1.1 + 0.2 * w], [-0.55, 0.3], [-0.9, 0], [-0.55, -0.3], [-0.3, -1.1 + 0.2 * w], [0.2, -0.25]];
+  const tail = []; for (let i = 0; i < 5; i++) tail.push(add(sub(c, mul(F, r * (0.9 + 0.3 * i))), mul(N, Math.sin(t * 6 + ph - i) * r * 0.12 * i)));
+  polyline(tail, [0.15, 0.13, 0.25, 1], 1.2);
+  plate(c, body, [0.2, 0.18, 0.35, 1], 0, r, 1.0);
+  for (const p of [[-0.1, 0.55], [-0.1, -0.55], [-0.35, 0.8], [-0.35, -0.8]]) glowDot(add(c, mul(p, r)), r * 0.07, [0.8, 1, 0.7, 0.85]);
+}
+function shrikeC(c, r, t, ph) {
+  airShadow(c, r); const flap = 0.6 + 0.4 * Math.sin(t * 18 + ph), gloss = [0.1, 0.1, 0.12, 1];
+  for (const side of [-1, 1]) { const w = [[0.25, 0], [-0.1, side * 0.3], [-0.55, side * (1.5 * flap + 0.2)], [-0.25, side * (0.8 * flap + 0.1)], [-0.05, side * 0.1]]; fill(c, w, gloss, 0, r); outline(c, w, [0.35, 0.36, 0.42, 0.9], 0.6, 0, r); }
+  for (const side of [-1, 1]) line(sub(c, mul(F, r * 0.5)), add(sub(c, mul(F, r * 1.15)), mul(N, side * r * 0.28)), gloss, 1.4);
+  shadedOval(c, r * 0.55, r * 0.2, 0, [0.12, 0.12, 0.14, 1]); disc(add(c, mul(F, r * 0.32)), r * 0.12, [0.95, 0.95, 0.9, 1]); disc(add(c, mul(F, r * 0.45)), 0.5, [1, 1, 1, 1]);
+}
+const SHRIKE = [
+  { key: "A", name: "Boomerang blades", theme: "Thrown steel", palette: "blued steel, white edge", r: 7, draw(c, t, r) { cluster(c, r, t, shrikeA); } },
+  { key: "B", name: "Manta-ray biomech", theme: "Deep-sea biomech", palette: "indigo skin, pale lime photophores", r: 8, draw(c, t, r) { cluster(c, r, t, shrikeB); } },
+  { key: "C", name: "Mechanical swifts", theme: "Bird / lacquer", palette: "gloss black, white throat", r: 7, draw(c, t, r) { cluster(c, r, t, shrikeC); } },
+];
+
+const BATCHES = [
+  { n: 1, role: "Swarm", job: "Overwhelm single-target towers. Counter: splash, chain.", enemies: [
+    { id: "nanite", name: "Nanite", tier: "T1", move: "orbiting cloud", today: { type: "swarmling", r: 6 }, concepts: NANITE },
+    { id: "locust", name: "Locust", tier: "T2", move: "flapping flyer", today: { type: "locust", r: 5 }, concepts: LOCUST },
+    { id: "drone", name: "Drone", tier: "T3", move: "hover disc", today: { type: "grunt", r: 11 }, concepts: DRONE },
+    { id: "shrike", name: "Shrike", tier: "T4 · new", move: "flying cluster of 5", today: { type: "shrike", r: 7, cluster: true }, concepts: SHRIKE },
+  ] },
+];
+
+// ---- Rendering -----------------------------------------------------------------------------------
+const DPR = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
+const W1 = 96, H1 = 64;
+const panels = [], lineups = [];
+const picks = {};
+let T = 0, playing = true, speed = 1;
+function mkCanvas(w, h) { const cv = document.createElement("canvas"); cv.width = Math.round(w * DPR); cv.height = Math.round(h * DPR); cv.style.width = w + "px"; cv.style.height = h + "px"; return cv; }
+function view(label, cv) { const v = document.createElement("div"); v.className = "view"; const s = document.createElement("small"); s.textContent = label; v.append(cv, s); return v; }
+function laneBg(W, H) {
+  rect(0, 0, W, H, [0.043, 0.063, 0.086, 1]);
+  const y0 = H / 2 - 24; rect(0, y0, W, 48, [0.075, 0.1, 0.13, 1]);
+  for (let x = 0; x <= W; x += 48) line([x, y0], [x, y0 + 48], [0.16, 0.24, 0.3, 0.45], 0.6);
+  line([0, y0], [W, y0], [0.2, 0.32, 0.4, 0.6], 0.8); line([0, y0 + 48], [W, y0 + 48], [0.2, 0.32, 0.4, 0.6], 0.8);
+}
+function drawSubject(subj, c, t) {
+  if (subj.concept) { subj.concept.draw(c, t, subj.concept.r); return; }
+  const td = subj.today;
+  if (td.cluster) cluster(c, td.r, t, (p, r, tt, ph) => today(td.type, p, r, tt, { phase: ph }));
+  else today(td.type, c, td.r, t);
+}
+function renderPanel(p, ctx, scale, t) {
+  X = ctx; ctx.setTransform(DPR * scale, 0, 0, DPR * scale, 0, 0); ctx.lineCap = "round"; ctx.lineJoin = "round";
+  laneBg(W1, H1); ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W1, H1); ctx.clip(); drawSubject(p.subj, [W1 / 2, H1 / 2], t); ctx.restore();
+}
+const LW = 260, LH = 64;
+function renderLineup(lu, ctx, scale, t) {
+  X = ctx; ctx.setTransform(DPR * scale, 0, 0, DPR * scale, 0, 0); ctx.lineCap = "round"; ctx.lineJoin = "round";
+  laneBg(LW, LH); ctx.save(); ctx.beginPath(); ctx.rect(0, 0, LW, LH); ctx.clip();
+  lu.batch.enemies.forEach((en, i) => {
+    const c = [32 + i * 64, LH / 2];
+    if (lu.mode === "today") drawSubject({ today: en.today }, c, t);
+    else { const k = picks[en.id]; const cp = en.concepts.find(x => x.key === k) || null; if (cp) drawSubject({ concept: cp }, c, t); else { X.save(); X.globalAlpha = 0.25; drawSubject({ today: en.today }, c, t); X.restore(); } }
+  });
+  ctx.restore();
+}
+function summary(batch) { return `Batch ${batch.n} (${batch.role}) picks: ` + batch.enemies.map(en => `${en.name}: ${picks[en.id] || "-"}`).join(", "); }
+function build() {
+  const root = document.getElementById("batches");
+  for (const batch of BATCHES) {
+    const sec = document.createElement("section"); sec.className = "batch";
+    sec.innerHTML = `<div class="batch-head"><h2>Batch ${batch.n}: ${batch.role}</h2><span class="job">${batch.job}</span></div>`;
+    const ta = document.createElement("textarea"); ta.readOnly = true; ta.setAttribute("aria-label", "Picks summary");
+    for (const en of batch.enemies) {
+      picks[en.id] = null;
+      const box = document.createElement("article"); box.className = "enemy";
+      box.innerHTML = `<div class="enemy-head"><h3>${en.name}</h3><span class="sub">${en.tier} · movement kept: ${en.move} · today radius ${en.today.r} px</span></div>`;
+      const grid = document.createElement("div"); grid.className = "panels";
+      const subjects = [{ label: "Today", today: en.today }].concat(en.concepts.map(cp => ({ label: cp.key, concept: cp })));
+      const pickBtns = [];
+      for (const subj of subjects) {
+        const pan = document.createElement("div"); pan.className = "panel" + (subj.today ? " today" : "");
+        const title = subj.today ? `<span class="key">Today</span> current look` : `<span class="key">${subj.concept.key}</span> ${subj.concept.name}`;
+        pan.innerHTML = `<div class="ptitle">${title}</div>`;
+        const views = document.createElement("div"); views.className = "views live";
+        const c1 = mkCanvas(W1, H1), c3 = mkCanvas(W1 * 3, H1 * 3); views.append(view("1x", c1), view("3x", c3)); pan.append(views);
+        const meta = document.createElement("div"); meta.className = "meta";
+        if (subj.concept) { const cp = subj.concept, d = cp.r - en.today.r; meta.innerHTML = `${cp.theme} · radius <b>${cp.r} px</b>${d ? ` (${d > 0 ? "+" : ""}${d})` : ""}`; }
+        else meta.textContent = "today's drawing, ported from Draw.gd";
+        pan.append(meta);
+        if (subj.concept) {
+          const dsc = document.createElement("p"); dsc.className = "desc"; dsc.textContent = "Palette: " + subj.concept.palette; pan.append(dsc);
+          const b = document.createElement("button"); b.className = "solo pick"; b.textContent = "Pick " + subj.concept.key; b.setAttribute("aria-pressed", "false");
+          b.addEventListener("click", () => {
+            picks[en.id] = picks[en.id] === subj.concept.key ? null : subj.concept.key;
+            pickBtns.forEach(o => { const on = picks[en.id] === o.key; o.b.classList.toggle("on", on); o.b.setAttribute("aria-pressed", String(on)); o.pan.classList.toggle("picked", on); });
+            ta.value = summary(batch);
+          });
+          pickBtns.push({ b, key: subj.concept.key, pan }); pan.append(b);
+        }
+        const frames = document.createElement("div"); frames.className = "frames"; pan.append(frames);
+        panels.push({ subj, ctx1: c1.getContext("2d"), ctx3: c3.getContext("2d"), frames });
+        grid.append(pan);
+      }
+      box.append(grid); sec.append(box);
+    }
+    const lu = document.createElement("div"); lu.className = "lineup";
+    lu.innerHTML = `<h3>Lineup: ${batch.role}</h3><p class="desc">The batch side by side on the lane, today versus your picks (faded until picked). Judge whether each reads as its own enemy at game scale.</p>`;
+    for (const mode of ["today", "picked"]) {
+      const lbl = document.createElement("div"); lbl.className = "rowlbl"; lbl.textContent = mode === "today" ? "Today" : "Your picks";
+      const vw = document.createElement("div"); vw.className = "views live";
+      const c1 = mkCanvas(LW, LH), c2 = mkCanvas(LW * 2, LH * 2); vw.append(view("1x", c1), view("2x", c2));
+      const frames = document.createElement("div"); frames.className = "frames";
+      lu.append(lbl, vw, frames);
+      lineups.push({ batch, mode, ctx1: c1.getContext("2d"), ctx2: c2.getContext("2d"), frames });
+    }
+    const pk = document.createElement("div"); pk.className = "picks";
+    const cp = document.createElement("button"); cp.className = "solo"; cp.textContent = "Copy picks";
+    cp.addEventListener("click", () => { try { navigator.clipboard.writeText(ta.value); cp.textContent = "Copied"; } catch (e) { ta.select(); } setTimeout(() => { cp.textContent = "Copy picks"; }, 1500); });
+    ta.value = summary(batch); pk.append(ta, cp); lu.append(pk);
+    sec.append(lu); root.append(sec);
+  }
+}
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.1, (now - last) / 1000); last = now;
+  if (playing) T += dt * speed;
+  for (const p of panels) { renderPanel(p, p.ctx1, 1, T); renderPanel(p, p.ctx3, 3, T); }
+  for (const lu of lineups) { renderLineup(lu, lu.ctx1, 1, T); renderLineup(lu, lu.ctx2, 2, T); }
+  requestAnimationFrame(frame);
+}
+function snapshot(w, h, fn) { const cv = document.createElement("canvas"); cv.width = w * DPR; cv.height = h * DPR; fn(cv.getContext("2d")); return cv.toDataURL("image/png"); }
+function figure(src, cap, w) { const fg = document.createElement("figure"); const im = new Image(); im.src = src; im.alt = cap; if (w) im.style.width = w + "px"; const fc = document.createElement("figcaption"); fc.textContent = cap; fg.append(im, fc); return fg; }
+function buildPrint() {
+  for (const p of panels) { p.frames.innerHTML = ""; for (const t of [1.0, 1.6]) p.frames.append(figure(snapshot(W1 * 3, H1 * 3, ctx => renderPanel(p, ctx, 3, t)), `t = ${t} s`)); }
+  for (const lu of lineups) { lu.frames.innerHTML = ""; lu.frames.append(figure(snapshot(LW * 2, LH * 2, ctx => renderLineup(lu, ctx, 2, 1.0)), lu.mode === "today" ? "Today" : "Your picks", 520)); }
+}
+function setPrint(on) { document.body.classList.toggle("print", on); const b = document.getElementById("printview"); b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); b.textContent = on ? "Live view" : "Print view"; if (on) buildPrint(); }
+document.getElementById("play").addEventListener("click", e => { playing = !playing; e.target.textContent = playing ? "Pause" : "Play"; e.target.setAttribute("aria-pressed", String(playing)); });
+for (const b of document.querySelectorAll("#speed button")) b.addEventListener("click", () => { speed = Number(b.dataset.v); document.querySelectorAll("#speed button").forEach(x => x.classList.toggle("on", x === b)); });
+document.getElementById("grey").addEventListener("click", e => { const on = !document.body.classList.contains("grey"); document.body.classList.toggle("grey", on); e.target.classList.toggle("on", on); e.target.setAttribute("aria-pressed", String(on)); });
+document.getElementById("printview").addEventListener("click", () => setPrint(!document.body.classList.contains("print")));
+window.addEventListener("beforeprint", () => buildPrint());
+build(); requestAnimationFrame(frame);
+
+</script>
+</body>
+</html>
