@@ -140,9 +140,8 @@ leaving the glowing frame. The previews loop it: plated for 5 s, the plates fall
 | Gunship | Heavy hover / Yaw scan / Sag and lift | Patrol sweep / Hover and advance / Steady cruise |
 | Titan | Earth-shaker stride / Sway / Core pulse | Inexorable march / Heavy stride / Swaying march |
 
-**Picks (owner, 2026-10-07):**
-- **Siege Mech:** look **open** (none of A to C was picked; rounds 2 and 3 offer six new looks), animation A Stomp,
-  movement A Steady trudge.
+**Tank confirmed (owner, 2026-10-07).** Final picks:
+- **Siege Mech:** look **H Cannon-shoulder mech** (from round 3), animation A Stomp, movement A Steady trudge.
 - **Rampart:** look B Bastion crawler, animation B Shudder, movement A Unstoppable line.
 - **Gunship:** look A Armoured quad-rotor, animation A Heavy hover, movement C Steady cruise.
 - **Titan:** look A Colossus walker, animation A Earth-shaker stride, movement A Inexorable march.
@@ -160,5 +159,4 @@ mechs, gritty early versions of the Titan's Colossus walker.
 
 ## Open questions
 
-1. **Siege Mech look:** pick one of D to I on the Tank page.
-2. **Next role** after Tank (remaining: Support, Disruptor, Evader, Special, Boss).
+1. **Next role** after Tank (remaining: Support, Disruptor, Evader, Special, Boss).

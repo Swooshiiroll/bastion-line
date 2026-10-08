@@ -89,11 +89,11 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 3 of 8: Tank (round 3)</div>
+    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 3 of 8: Tank (confirmed)</div>
     <h1>Enemy art: Tank</h1>
     <p class="note">A fresh start from the names: the machine army's <b>Tank</b> role. For each enemy, pick its <b>look</b>, <b>animation</b> and
       <b>movement</b> separately from three proposals each (A to C), and add notes. Mix freely. The <b>Your combination</b> preview shows your
-      mix. <b>Your picks are preselected</b>; Siege Mech has six new looks to choose from: D to F, and G to I, which lean into the <b>mech</b> in its name. Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
+      mix. <b>Tank is confirmed:</b> your final picks are preselected (Siege Mech H/A/A, Rampart B/B/A, Gunship A/A/C, Titan A/A/A). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
       Spec: <code>design/enemy_art.md</code>.</p>
     <ul class="rules">
       <li><b>Machine army;</b> each <b>name inspires a trait</b> (not a literal picture).</li>
@@ -662,10 +662,10 @@ const BATCHES = [
       { id: "titan", name: "Titan", tier: "T4", air: false, anims: "titan", trait: "a giant: towering; its plates shed at half health", today: { r: 18 } },
     ] },
 ];
-const STORE_KEY = "bl-enemy-art-tank-v2";
-// Picks (owner, 2026-10-07): preselected. Siege Mech's look is open (rounds 2 and 3 offer D to I).
+const STORE_KEY = "bl-enemy-art-tank-v3";
+// Final picks (owner, 2026-10-07): preselected.
 const DEFAULTS = {
-  siege: { look: null, anim: "A", move: "A" },
+  siege: { look: "H", anim: "A", move: "A" },
   rampart: { look: "B", anim: "B", move: "A" },
   gunship: { look: "A", anim: "A", move: "C" },
   titan: { look: "A", anim: "A", move: "A" },
