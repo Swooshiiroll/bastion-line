@@ -44,8 +44,34 @@ changes until the owner confirms** (repo CLAUDE.md, "Designing a feature first")
 | Special | Phantom, Aegis Walker, Hydra Frame, Masquerade, Decoy Beacon, Mirage |
 | Boss | Dreadnought, Overmind, Leviathan, Colossus |
 
+## Swarm (role 1)
+
+Mockup: `design/enemy_art_swarm.html` (open in a browser). It has a family sheet, then for each enemy **Look**,
+**Animation** and **Movement** pickers with three proposals each (A to C) and a notes box apiece. Any look mixes
+with any animation and movement. There is no "today" option. Picks and notes are copied from the bottom of the page.
+
+**Swarm family (draft):** mass-produced units of the machine army: stamped-metal hulls, one round sensor eye,
+a hive-link antenna fin with a blinking tip, and stencilled unit numbers. **Tiers evolve:** T1 Nanite is a bare,
+gritty frame; T2 Locust adds panels; T3 Drone is bigger and armoured; T4 Shrike is sleek, with glowing seams.
+**Colour per enemy:** Nanite rusted bare metal, Locust olive, Drone gunmetal blue, Shrike pearl white.
+
+| Enemy (trait from the name) | Look A | Look B | Look C |
+|---|---|---|---|
+| Nanite, T1 ground (tiny, countless, self-replicating) | Assembly hub: a mother unit whose bots orbit and dock | Grain carpet: rice-sized bots with a leader | Replicator triad: three bots that clip into a triangle and split |
+| Locust, T2 flyer (a devouring swarm) | Strip-miner drone with grinding cutter heads | Harvester rotor-drone with an intake funnel | Shredder dart with chewing nose rollers |
+| Drone, T3 ground (the army's standard soldier) | Infantry bot: armoured biped with a rifle | Sentry walker: four legs and a turret | Hover-trooper: hover sled with a front shield |
+| Shrike, T4 flyer x5 (an impaling hunter) | Impaler jets: needle-spike jets | Hook-wing hunters: hooked blade wingtips | Lancer squadron: forward-swept lance drones |
+
+| Enemy | Animation A / B / C | Movement A / B / C |
+|---|---|---|
+| Nanite | Churn / Dock-and-split / Ripple | Carpet creep / Split and merge / Trickle |
+| Locust | Hover-chew / Dive-bite / Flock-jitter | Feeding swoops / Zigzag / Cloud drift |
+| Drone | March / Brace-and-step / Hover-drift | Advance and halt / Steady march / Flanking weave |
+| Shrike | Stoop / Bank / Glide | Dive strikes / Formation sweep / Hunting circles |
+
+**Picks:** Nanite _, Locust _, Drone _, Shrike _ (look, animation, movement; notes)
+
 ## Open questions
 
-1. **Which role first?**
-2. **Presentation:** a drawn mockup page, as before, or written proposals first and drawings only for the
-   picks?
+1. **Swarm picks**, and any change to the Swarm family traits.
+2. **Next role** after Swarm.
