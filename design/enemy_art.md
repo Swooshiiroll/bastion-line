@@ -428,7 +428,22 @@ Aegis Walker 13 and Hydra Frame 14 are today's.
 | Decoy Beacon | Wobble / Trundle / Sway | Lumbering line / Slow sway / Stop and go |
 | Mirage | Shimmer / Glide / Flicker step | Glide / Weave / Side-step |
 
-**Picks (owner, 2026-10-08, fourth pass):**
+**Picks (owner, 2026-10-08, fifth pass):**
+- **Confirmed:** Phantom E/F/D, Aegis Walker E/B/A, Masquerade J/D/I, Decoy Beacon B/F/A.
+- **Hydra Frame: reopened.** Look open with the owner's note "Make 6 more ideas"; animation A Clatter and movement
+  A Trundle stay picked, with notes asking for more ideas for both. Round 8 adds six looks, three animations and three
+  movements.
+- **Mirage:** look **C Mirror-fan hover** (changed from O), movement C Side-step; animation open.
+
+**Round 8** (on the same page, with the picks above preselected):
+- **Hydra Frame looks** (all burst into the confirmed Skitters when destroyed): D Three-headed crawler (a true hydra:
+  three long necks, a Skitter for each head), E Skitter shell (a giant Skitter-shaped shell with three hidden inside),
+  F Skitter train (three Skitters coupled nose to tail on a spine), G Carousel carrier (three Skitters ride a turning
+  carousel), H Cluster pod (an armoured egg with three hatch seams, cargo hidden), I Mother scuttler (a huge scuttler
+  carrying three small Skitters on its back). **Animations:** D Heave, E Scuttle shimmy, F Restless rock.
+  **Movements:** D Skitter rush, E Weaving column, F Stutter crawl.
+
+**Earlier picks (owner, 2026-10-08, fourth pass):**
 - **Confirmed:** Phantom E Camo glider / F Camo flicker / D Infiltration flight; Aegis Walker E Siege hexapod /
   B Brace for hits / A Steady advance; Hydra Frame C Hive pod / A Clatter / A Trundle; **Masquerade J Unfolding
   stilt-walker / D Nervous jitter / I Scramble and dash** (the Drone's look, March and Steady march until uncovered);
@@ -515,7 +530,7 @@ Aegis Walker 13 and Hydra Frame 14 are today's.
 
 ## Open questions
 
-1. **Special picks:** the Mirage's animation (A to F), now that the hologram effect is reworked; any change to the
-   proposed sizes (Masquerade 12, Decoy Beacon 15, Mirage 12 px).
+1. **Special picks:** the Hydra Frame's look (A to I; animation and movement A unless changed) and the Mirage's
+   animation (A to F); any change to the proposed sizes (Masquerade 12, Decoy Beacon 15, Mirage 12 px).
 2. **Masquerade speed while disguised** (60, the Drone is 55): see `design/enemies.md`, Still open item 6.
 3. **Next role** after Special (remaining: Boss).

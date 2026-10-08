@@ -89,11 +89,11 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 7 of 8: Special (round 7)</div>
+    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 7 of 8: Special (round 8)</div>
     <h1>Enemy art: Special</h1>
     <p class="note">A fresh start from the names: the machine army's <b>Special</b> role. For each enemy, pick its <b>look</b>, <b>animation</b> and
       <b>movement</b> separately from three proposals each (A to C), and add notes. Mix freely. The <b>Your combination</b> preview shows your
-      mix (option A until you pick). <b>Your picks are preselected</b>: everything but the Mirage's animation is settled. From your note, the Mirage's copies now <b>shimmer like the Phantom's active camouflage</b> on every look: a faint doubled image and the Phantom's rapid flicker (the sweeping scan line is gone from both, as you asked), in step one in front and one behind. Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
+      mix (option A until you pick). <b>Your picks are preselected</b>. From your notes, the <b>Hydra Frame</b> has six new looks (D to I, all bursting into your Skitters), three new animations and three new movements (D to F); the Mirage is on C Mirror-fan hover with its animation still open. Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
       Spec: <code>design/enemy_art.md</code>.</p>
     <ul class="rules">
       <li><b>Machine army;</b> each <b>name inspires a trait</b> (not a literal picture).</li>
@@ -463,10 +463,10 @@ function barrierFx(c, t, r, col) { const s = aegisB(t), R = r * 1.25, u = fmod(t
   if (s.shat >= 0) for (let i = 0; i < 10; i++) { const a = i * TAU / 10 + hash(i) * 0.5, p = add(c, mul(fa(a), R * (1 + 0.8 * s.shat))); fill(p, [[0.5, 0], [-0.3, 0.35], [-0.3, -0.35]], A(col, 0.8 * (1 - s.shat)), a + s.shat * 3, R * 0.12); } }
 // Hydra Frame: splits into 3 Skitters when destroyed (loop 7 s: whole 5 s, bursts apart, reforms)
 const hydraK = t => { const u = fmod(t, 7); return u < 5 ? 0 : Math.min(1, (u - 5) / 0.8); };
-function hydraSplit(c, t, r, docks, frame, col) { const k = hydraK(t);
+function hydraSplit(c, t, r, docks, frame, col, opt = {}) { const k = hydraK(t), sc = opt.scale || 0.42;
   withAlpha(1 - k, () => frame(c));
   if (k > 0 && k < 1) { ring(c, r * (0.4 + 1.2 * k), A(col, 0.7 * (1 - k)), 1.2); for (let i = 0; i < 6; i++) { const a = hash(i * 3) * TAU, p = add(c, mul(fa(a), r * (0.3 + 0.9 * k))); fill(p, rectPts(0.5, 0.3), A(COL.hydra.hull, 1 - k), a + k * 4, r * 0.18); } }
-  docks.forEach(([x, y, dx, dy], i) => { const p = add(add(c, mul([x, y], r)), mul([dx, dy], r * 0.9 * k)); at(p, Math.atan2(dy, dx) * k * 0.5, q => skitter(q, t + i, r * 0.42, k > 0)); }); }
+  docks.forEach(([x, y, dx, dy], i) => { const p = add(add(c, mul([x, y], r)), mul([dx, dy], r * 0.9 * k)); withAlpha(opt.hidden ? Math.min(1, k * 3) : 1, () => at(p, Math.atan2(dy, dx) * k * 0.5, q => skitter(q, t + i, r * sc, k > 0))); }); }
 // Masquerade: disguised as a Nanite until below half health (loop 8 s: disguised 5 s, drops the disguise, true form)
 const masqK = t => { const u = fmod(t, 8); return u < 5 ? 0 : Math.min(1, (u - 5) / 0.6); };
 function masqFx(D, T, c, t, r, col) { const k = masqK(t), u = fmod(t, 8);
@@ -611,6 +611,41 @@ const LOOKS = {
         for (const [x, y] of docks) { const q = add(p, [x * r, y * r]); ellipse(q, r * 0.3, r * 0.2, INK); arc(q, r * 0.3, -2.4, -0.7, C.dark, 1.2); }
         slitS(add(p, [r * 0.72, 0]), r * 0.16, C.glow); protoMark(add(p, [-r * 0.05, 0]), r * 0.08, t); };
       hydraSplit(c, t, r, docks, frame, C.glow); } },
+    { key: "D", name: "Three-headed crawler", theme: "A true hydra: a heavy crawler with three long necks, a Skitter for each head; destroyed, the heads break free and scatter (looped)", palette: "oxide-red body and necks, sand Skitter heads", r: 14, draw(c, t, r) {
+      const C = COL.hydra, docks = [[0.95, 0, 1, 0], [0.7, 0.58, 0.6, 0.8], [0.7, -0.58, 0.6, -0.8]];
+      const frame = p => { for (let i = 0; i < 3; i++) for (const sg of [-1, 1]) { const ph = t * 5 + i * 2.1 + (sg > 0 ? Math.PI : 0), root = add(p, [r * (-0.05 - i * 0.25), sg * r * 0.32]); limb([root, add(root, [r * 0.1 * Math.sin(ph), sg * r * 0.25]), add(root, [r * 0.16 * Math.sin(ph), sg * r * 0.42])], 1.3, C.dark); }
+        docks.forEach(([x, y], i) => { const sw = 0.06 * Math.sin(t * 2 + i * 2); limb([add(p, [r * 0.1, y * r * 0.3]), add(p, [r * 0.45, (y * 0.55 + sw) * r]), add(p, [x * r * 0.85, y * r * 0.95])], 2.2, C.hull); });
+        plate(p, [[0.3, 0], [0.15, 0.36], [-0.65, 0.36], [-0.8, 0], [-0.65, -0.36], [0.15, -0.36]], C.hull, 0, r, 1.0); glowDot(add(p, [-r * 0.2, 0]), r * 0.07, C.glow); protoMark(add(p, [-r * 0.5, 0]), r * 0.07, t); };
+      hydraSplit(c, t, r, docks, frame, C.glow); } },
+    { key: "E", name: "Skitter shell", theme: "A giant Skitter-shaped shell, three real Skitters hidden inside; destroyed, the shell splits along its seams and they spill out (looped)", palette: "oxide-red giant shell, sand seams; sand Skitters inside", r: 14, draw(c, t, r) {
+      const C = COL.hydra, docks = [[0.35, 0, 0.8, 0.6], [-0.2, 0.22, -0.4, 0.9], [-0.2, -0.22, -0.4, -0.9]];
+      const frame = p => { for (let i = 0; i < 3; i++) for (const sg of [-1, 1]) { const ph = t * 9 + i * 2.1 + (sg > 0 ? Math.PI : 0), root = add(p, [r * (0.3 - i * 0.35), sg * r * 0.25]); limb([root, add(root, [r * 0.15 * Math.sin(ph), sg * r * 0.42]), add(root, [r * 0.25 * Math.sin(ph), sg * r * 0.66])], 1.4, C.dark); }
+        const sh = [[0.9, 0], [0.48, 0.32], [-0.7, 0.3], [-0.7, -0.3], [0.48, -0.32]]; plate(p, sh, C.hull, 0, r, 1.0);
+        for (const q of [[0.1, -0.31, 0.1, 0.31], [-0.35, -0.3, -0.35, 0.3], [0.48, 0, -0.7, 0]]) line(add(p, [q[0] * r, q[1] * r]), add(p, [q[2] * r, q[3] * r]), A(SKT.hull, 0.8), 0.6);
+        slitS(add(p, [r * 0.62, 0]), r * 0.16, C.glow); protoMark(add(p, [-r * 0.5, r * 0.15]), r * 0.07, t); };
+      hydraSplit(c, t, r, docks, frame, C.glow, { hidden: true }); } },
+    { key: "F", name: "Skitter train", theme: "Three Skitters coupled nose to tail on an armoured spine, scuttling as one; destroyed, the couplings blow and they scatter (looped)", palette: "oxide-red spine and couplers, sand Skitters", r: 14, draw(c, t, r) {
+      const C = COL.hydra, docks = [[0.62, 0, 0.7, -0.7], [0, 0, 0, 1], [-0.62, 0, -0.7, 0.7]];
+      const frame = p => { bar(add(p, [r * 0.85, 0]), add(p, [-r * 0.9, 0]), 2.2, C.dark); for (const x of [0.31, -0.31]) { const q = add(p, [x * r, 0]); plate(q, rectPts(0.08, 0.16), C.hull, 0, r, 0.6); disc(q, r * 0.05, C.glow); }
+        plate(add(p, [r * 0.95, 0]), [[0.12, 0], [0, 0.14], [-0.06, 0], [0, -0.14]], C.hull, 0, r, 0.6); protoMark(add(p, [-r * 0.95, 0]), r * 0.06, t); };
+      hydraSplit(c, t, r, docks, frame, C.glow); } },
+    { key: "G", name: "Carousel carrier", theme: "A round platform where three Skitters ride a slowly turning carousel around a glowing hub; destroyed, they fly off the rim (looped)", palette: "oxide-red platform, glowing hub, sand Skitters", r: 14, draw(c, t, r) {
+      const C = COL.hydra, a0 = t * 0.6, docks = [0, 1, 2].map(i => { const a = a0 + i * TAU / 3; return [Math.cos(a) * 0.55, Math.sin(a) * 0.55, Math.cos(a), Math.sin(a)]; });
+      const frame = p => { for (const [x, y, ph] of [[1, 1, 0], [1, -1, Math.PI], [-1, 1, Math.PI], [-1, -1, 0]]) { const sw = Math.sin(t * 4 + ph), ft = add(p, [x * r * 0.62 + sw * r * 0.1, y * r * 0.82]); limb([add(p, [x * r * 0.45, y * r * 0.5]), ft], 1.5, C.dark); }
+        disc(p, r * 0.85, OUTLINE); disc(p, r * 0.81, C.hull); ring(p, r * 0.62, C.dark, 1.0); arcSegments(p, r * 0.75, 12, 0.2, a0, A(C.glow, 0.5), 0.8);
+        disc(p, r * 0.18, OUTLINE); disc(p, r * 0.15, C.dark); glowDot(p, r * 0.08, C.glow); protoMark(add(p, [r * 0.3, r * 0.3]), r * 0.06, t); };
+      hydraSplit(c, t, r, docks, frame, C.glow); } },
+    { key: "H", name: "Cluster pod", theme: "An armoured egg of a pod with three hatch seams and tail fins, its cargo hidden; destroyed, the hatches blow and three Skitters burst out (looped)", palette: "oxide-red pod, dark seams, hidden sand Skitters", r: 14, draw(c, t, r) {
+      const C = COL.hydra, docks = [[0.25, 0.2, 0.6, 0.8], [0.25, -0.2, 0.6, -0.8], [-0.35, 0, -1, 0]];
+      const frame = p => { for (const sg of [-1, 1]) fill(p, [[-0.6, sg * 0.25], [-0.95, sg * 0.5], [-0.95, sg * 0.25]], C.dark, 0, r);
+        const pod = rrPts(0.75, 0.5, 0.42); plate(p, pod, C.hull, 0, r, 1.1); for (const a of [0.9, -0.9, Math.PI]) line(p, add(p, mul(fa(a), r * 0.55)), A(INK, 0.7), 0.8);
+        ring(p, r * 0.18, C.dark, 1.0); for (const sg of [-1, 1]) glowDot(add(p, [r * 0.55, sg * r * 0.18]), 0.9, A(C.glow, blink(t, 1.2, sg > 0 ? 0.5 : 0))); protoMark(add(p, [-r * 0.2, r * 0.32]), r * 0.07, t); };
+      hydraSplit(c, t, r, docks, frame, C.glow, { hidden: true }); } },
+    { key: "I", name: "Mother scuttler", theme: "A huge six-legged scuttler carrying three small Skitters on its back; destroyed, the riders leap off and scatter (looped)", palette: "oxide-red mother, sand riders", r: 14, draw(c, t, r) {
+      const C = COL.hydra, docks = [[0.05, 0, 0.8, 0.6], [-0.4, 0.22, -0.5, 0.85], [-0.4, -0.22, -0.5, -0.85]];
+      const frame = p => { for (let i = 0; i < 3; i++) for (const sg of [-1, 1]) { const ph = t * 8 + i * 2.1 + (sg > 0 ? Math.PI : 0), root = add(p, [r * (0.3 - i * 0.32), sg * r * 0.32]); limb([root, add(root, [r * 0.18 * Math.sin(ph), sg * r * 0.42]), add(root, [r * 0.28 * Math.sin(ph), sg * r * 0.72])], 2.0, C.dark); }
+        plate(p, [[0.85, 0], [0.5, 0.4], [-0.7, 0.38], [-0.82, 0], [-0.7, -0.38], [0.5, -0.4]], C.hull, 0, r, 1.1); slitS(add(p, [r * 0.65, 0]), r * 0.18, C.glow); protoMark(add(p, [r * 0.35, r * 0.22]), r * 0.07, t); };
+      hydraSplit(c, t, r, docks, frame, C.glow, { scale: 0.32 }); } },
   ],
   masq: [
     { key: "A", name: "Blade infiltrator", theme: "Disguised as the Drone (purple eye). Below half health the Drone shell shatters to show a bladed infiltrator (looped)", palette: "Drone shell, purple eye; plum true form, violet glow", r: 12, draw(c, t, r) {
@@ -809,6 +844,9 @@ const ANIMS = {
     { key: "A", name: "Clatter", desc: "Rattles as its passengers shift.", fx: (t) => { const s = Math.floor(t * 10); return { dx: (hash(s) - 0.5) * 0.06, dy: (hash(s + 3) - 0.5) * 0.06 }; } },
     { key: "B", name: "Lumber", desc: "A heavy side-to-side lumber.", fx: (t) => ({ rot: 0.06 * Math.sin(t * 1.6), dy: 0.04 * Math.sin(t * 3.2) }) },
     { key: "C", name: "Strain", desc: "Bulges now and then, as if its passengers push to get out.", fx: (t) => { const p = Math.pow(Math.max(0, Math.sin(t * 3)), 3); return { sx: 1 + 0.06 * p, sy: 1 + 0.06 * p }; } },
+    { key: "D", name: "Heave", desc: "Heaves in slow, heavy breaths as its passengers shift.", fx: (t) => { const p = 0.5 + 0.5 * Math.sin(t * 1.8); return { sx: 1 + 0.04 * p, sy: 1 + 0.05 * p, dy: -0.02 * p }; } },
+    { key: "E", name: "Scuttle shimmy", desc: "A fast, tiny shimmy, like the Skitters inside.", fx: (t) => ({ dy: 0.03 * Math.sin(t * 26), rot: 0.03 * Math.sin(t * 13) }) },
+    { key: "F", name: "Restless rock", desc: "Rocks unevenly from side to side, never quite settled.", fx: (t) => ({ rot: 0.07 * Math.sin(t * 1.7) + 0.03 * Math.sin(t * 4.3), dx: 0.02 * Math.sin(t * 3.1) }) },
   ],
   masq: [
     { key: "A", name: "Copycat bob", desc: "Bobs just like a Nanite.", fx: (t) => ({ dy: 0.06 * Math.sin(t * 8) }) },
@@ -855,6 +893,9 @@ const MOVES = {
     { key: "A", name: "Trundle", desc: "Straight ahead with a small step rhythm.", f: t => [V * t - V * 0.15 / 5 * Math.cos(t * 5), 0] },
     { key: "B", name: "Scuttle sway", desc: "A quick sway, like its Skitters.", f: t => [V * t, 6 * Math.sin(t * 2.2)] },
     { key: "C", name: "Lurch", desc: "Lurches forward, then slows.", f: t => [V * t - V * 0.45 / 2 * Math.cos(t * 2), 0] },
+    { key: "D", name: "Skitter rush", desc: "Quick rushes like a Skitter, but heavier.", f: burst(1.1, 0.35) },
+    { key: "E", name: "Weaving column", desc: "A gentle S down the lane.", f: t => [V * t, 6 * Math.sin(t * 1.2)] },
+    { key: "F", name: "Stutter crawl", desc: "Short stop-start steps.", f: t => [V * t - V * 0.35 / 7 * Math.cos(t * 7), 1.5 * Math.sin(t * 7)] },
   ],
   masq: [
     { key: "A", name: "Mimic trickle", desc: "Wobbles along like a Nanite.", f: t => [V * t, 3 * Math.sin(t * 3) + 2 * Math.sin(t * 7.3)] },
@@ -904,15 +945,15 @@ const BATCHES = [
       { id: "mirage", name: "Mirage", tier: "-", air: false, anims: "mirage", trait: "every 6 s throws 2 hologram copies that soak shots, one in front and one behind (owner); new, 12 px proposed", today: { r: 12 } },
     ] },
 ];
-const STORE_KEY = "bl-enemy-art-special-v5";
-// Picks (owner, 2026-10-08): preselected. Open: Mirage animation (the hologram effect was improved first).
+const STORE_KEY = "bl-enemy-art-special-v6";
+// Picks (owner, 2026-10-08): preselected. Open: Hydra Frame look (reopened; D to I new), Mirage animation.
 const DEFAULTS = {
   phantom: { look: "E", anim: "F", move: "D" },
   aegis: { look: "E", anim: "B", move: "A" },
-  hydra: { look: "C", anim: "A", move: "A" },
+  hydra: { look: null, anim: "A", move: "A" },
   masq: { look: "J", anim: "D", move: "I" },
   decoy: { look: "B", anim: "F", move: "A" },
-  mirage: { look: "O", anim: null, move: "C" },
+  mirage: { look: "C", anim: null, move: "C" },
 };
 
 // ---- State (picks and notes, kept in this browser) -------------------------------------------------
