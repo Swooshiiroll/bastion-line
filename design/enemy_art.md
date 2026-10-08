@@ -285,15 +285,16 @@ step up.
 | Shifter | Glide / Flicker / Stride | Phase steps / Side-shift / Smooth glide |
 | Wraith | Drift / Waver / Lurk | Ghost drift / Unseen line / Haunting weave |
 
-**Picks (owner, 2026-10-08):**
-- **Blink Stalker:** look open (pick from A to C); animation and movement **open** (none of A to C was picked; round 2
-  offers three new of each).
-- **Burrower:** look **open** (round 2 offers three new looks), animation C Rumble, movement C Dive and surface.
-  Owner's note: "Burrower should disappear when underground. No underground effect should be shown. Maybe a doppler
-  effect when in range of a radar tower." Done on every Burrower look; the gameplay side (specific towers or
-  upgrades can hit it underground in Sensor Array range) is recorded in `design/enemies.md`.
-- **Shifter:** look **open** (round 2 offers three new looks), animation A Glide, movement B Side-shift.
-- **Wraith:** look **open** (round 2 offers three new looks), animation A Drift, movement A Ghost drift.
+**Picks (owner, 2026-10-08, second pass):**
+- **Blink Stalker:** look **open** (none of A to C; round 3 offers three new looks), animation **E Phase shimmer**,
+  movement **D Blink zigzag**.
+- **Burrower:** look **C Tunnel borer**, with the owner's note "Create something like a drilling pod": round 3 offers
+  three drilling pods (G to I) to pick instead or keep C; animation C Rumble, movement C Dive and surface. Owner's
+  earlier note: "Burrower should disappear when underground. No underground effect should be shown. Maybe a doppler
+  effect when in range of a radar tower." Done on every Burrower look; the gameplay side (specific towers or upgrades
+  can hit it underground in Sensor Array range) is recorded in `design/enemies.md`.
+- **Shifter:** look **B Prism hover**, animation A Glide, movement B Side-shift. **Confirmed.**
+- **Wraith:** look **open** (none of A to F; round 3 offers three more), animation A Drift, movement A Ghost drift.
 
 **Round 2** (on the same page, with the picks above preselected):
 - **Blink Stalker animations:** D Head-snap, E Phase shimmer, F Slink. **Movements:** D Blink zigzag (blinks across
@@ -306,8 +307,18 @@ step up.
 - **Wraith looks:** **D Hollow frame** (floating armour plates around an empty glowing core), **E Halo walker** (a thin
   biped under a cloak-emitter halo), **F Stealth hover-tank** (a smooth hover tank with a dark glass canopy).
 
+**Round 3** (on the same page, with the picks above preselected):
+- **Blink Stalker looks:** **D Shard stalker** (a faceted shard of a body on three thin legs), **E Blink tripod** (a
+  light tripod slung around a glowing blink sphere that charges before each jump), **F Lens stalker** (a round, low
+  body on four thin legs, watching through one big lens that glints before it blinks).
+- **Burrower drilling pods** (from the owner's note): **G Drill pod** (a smooth capsule behind a big spinning cone
+  drill, pushed by two rear thrusters), **H Borer pod** (the Tunnel borer's toothed cutter face on a rounded pod with
+  side skids), **I Twin-drill pod** (a wide pod with two counter-rotating cone drills).
+- **Wraith looks**, grown from the Shifter's prism so the T3 and T4 tiers read as one line: **G Crystal prism** (a
+  hovering hexagonal crystal whose facets flicker clear), **H Bipyramid glider** (a long double-pointed crystal
+  gliding nose first), **I Prism stilt-walker** (a dark triangular prism on four tall, slow stilt legs).
+
 ## Open questions
 
-1. **Evader picks:** Blink Stalker look (A to C), animation and movement (A to F); Burrower, Shifter and Wraith looks
-   (D to F).
+1. **Evader looks:** Blink Stalker (A to F), Burrower (keep C Tunnel borer or a drilling pod G to I), Wraith (A to I).
 2. **Next role** after Evader (remaining: Special, Boss).
