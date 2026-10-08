@@ -552,6 +552,43 @@ sweeps that fan its mirrors across the lane).
   N Hooded lens (a cowled machine with one cold lens under the hood), O Shard halo (no visible body: mirror shards
   turning around a point of light). **Animations:** D Phase shimmer, E Silent float, F Space fold.
 
+## Boss (role 8)
+
+Mockup: `design/enemy_art_boss.html`, the same format as the other roles (three proposals each for look, animation and
+movement, notes boxes, no "today"), with bigger preview cards because the bosses are 22 to 32 px.
+
+**Boss family (draft):** the army's command-class war machines: massive riveted armour, a crimson-and-gold **command
+crest** (the boss sigil), heavy weapons, and each boss's **signature mechanic on a loop**. Each boss wears the colours of
+what it spawns. **Colour per boss:** Dreadnought dark iron with crimson lights, Overmind rust-bronze with an amber core
+(the Nanites' colours), Leviathan deep olive with yellow lights (the Locusts'), Colossus hazard yellow and bronze (the
+Siege Mech's and Titan's).
+
+**Mechanics in the previews (looped):**
+- **Dreadnought** (22 px, 50% slow resist): a frost ring forms and cracks away every 3 s (slows slide off it), and its
+  footfalls send out shock rings.
+- **Overmind** (26 px, 60% slow resist): prints three of the confirmed **Nanites** every 5 s from its bays.
+- **Leviathan** (30 px, flyer, 50% slow resist): launches six of the confirmed **Locusts** every 6 s from its bays.
+- **Colossus** (32 px, 60% slow resist, can't be stunned): at 66% and then 33% health a layer of armour falls away and
+  two of the confirmed **Siege Mechs** drop out (a 12 s loop: armoured, first shed, second shed).
+
+| Boss | Look A | Look B | Look C |
+|---|---|---|---|
+| Dreadnought | Dread walker: biped with twin shoulder cannons | Dread tank: land battleship on four tread units, three turrets | Dread hexapod: six-legged fortress, command tower, side cannons |
+| Overmind | Brain hive: neural core in a hex shell, three printer bays | Spider command: eight-legged walker with a brain dome | Lattice crawler: tracked, carrying a glowing brain lattice |
+| Leviathan | Sky carrier: launch deck on four rotor pods | Whale airship: vast hull, tail fins, engine pods | Manta mothership: manta-shaped flying wing, launch bays |
+| Colossus | Colossus mech: giant humanoid in layered plates | Siege citadel: walking fortress on eight legs, two wall rings | Crawler factory: tracked factory, skirts, roof plates, hangar |
+
+| Boss | Animation A / B / C | Movement A / B / C |
+|---|---|---|
+| Dreadnought | Heavy stride / Command sway / Recoil volley | Relentless advance / Command sweep / Stomp and stop |
+| Overmind | Thought pulse / Lumber / Print shudder | Slow creep / Pulsing advance / Hive drift |
+| Leviathan | Slow bank / Cruise bob / Launch lurch | Straight cruise / Wide patrol / Hover and launch |
+| Colossus | Earthquake stride / Grind / Shed shudder | Inexorable / Earthshaker / Titan sway |
+
+**Picks:** Dreadnought _, Overmind _, Leviathan _, Colossus _ (look, animation, movement; notes)
+
 ## Open questions
 
-1. **Next role** after Special (remaining: Boss).
+1. **Boss picks**, and any change to the Boss family traits.
+2. After Boss: the art direction is complete; implementation waits on the owner's confirmation of the full spec
+   (`design/enemies.md` has its own open questions).
