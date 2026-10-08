@@ -337,6 +337,10 @@ they exist.
 - **Wraith (energy-only damage):** needs a physical/energy tag on every tower, a new system. It becomes
   a separate PR after the core rework; until then Wraith is a draft idea.
 - **Swarming:** ruling deferred.
+- **Burrower and the Sensor Array (owner, 2026-10-08):** a burrowed Burrower vanishes completely, with no
+  underground effect. Inside a Sensor Array's range a doppler ping shows where it is, and **specific towers or
+  upgrades** can target and hurt it while it is underground. Which ones is still open (item 3 below). Art in
+  `design/enemy_art.md`.
 
 ### Still open
 
@@ -348,6 +352,8 @@ they exist.
    already met.
 2. **Leak-cost bands (non-boss).** The strength score sets leak cost, so its bands need a mapping (e.g.
    score bands to 1, 2, 3 shields). Proposed with the balance probe in phase 4.
+3. **Burrower underground: which towers or upgrades can hit it** inside a Sensor Array's range (decided that
+   some can; the list, and whether it is a tower trait or an upgrade, is open).
 
 ### Deferred
 

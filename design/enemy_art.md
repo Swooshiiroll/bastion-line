@@ -263,12 +263,13 @@ Burrower is armoured for digging; T3 Shifter is sleek with phase gear; T4 Wraith
 silver with aqua, Wraith smoked glass with a pale ghost-white shimmer.
 
 **Effects in the previews:** Blink Stalker charges, then blinks 80 px every 4 s, leaving an afterimage; Burrower digs
-in and is underground (a moving dirt mound) 2.5 s of every 5; Shifter blinks every 5 s and its landing throws a speed
+in and **vanishes** underground 2.5 s of every 5 (no mound, no shadow; owner, 2026-10-08), and inside a Sensor Array's
+range a doppler ping shows where it is (the previews show the ping for the second half of each dive); Shifter blinks every 5 s and its landing throws a speed
 wake (chevron ring); Wraith is cloaked (a faint, shimmering double image) and the previews reveal it 2 s of every 6,
 with a sensor reticle, as if inside a Sensor Array.
 
-**Sizes (proposed):** Shifter and Wraith are new and have no size yet. The mockup draws them at 12 and 13 px (Blink
-Stalker is 10 and Burrower 11 today) so the tiers step up; the owner can change these.
+**Sizes (owner, 2026-10-08):** Shifter 12 px, Wraith 13 px (Blink Stalker is 10 and Burrower 11 today), so the tiers
+step up.
 
 | Enemy (trait from the name) | Look A | Look B | Look C |
 |---|---|---|---|
@@ -284,9 +285,29 @@ Stalker is 10 and Burrower 11 today) so the tiers step up; the owner can change 
 | Shifter | Glide / Flicker / Stride | Phase steps / Side-shift / Smooth glide |
 | Wraith | Drift / Waver / Lurk | Ghost drift / Unseen line / Haunting weave |
 
-**Picks:** Blink Stalker _, Burrower _, Shifter _, Wraith _ (look, animation, movement; notes)
+**Picks (owner, 2026-10-08):**
+- **Blink Stalker:** look open (pick from A to C); animation and movement **open** (none of A to C was picked; round 2
+  offers three new of each).
+- **Burrower:** look **open** (round 2 offers three new looks), animation C Rumble, movement C Dive and surface.
+  Owner's note: "Burrower should disappear when underground. No underground effect should be shown. Maybe a doppler
+  effect when in range of a radar tower." Done on every Burrower look; the gameplay side (specific towers or
+  upgrades can hit it underground in Sensor Array range) is recorded in `design/enemies.md`.
+- **Shifter:** look **open** (round 2 offers three new looks), animation A Glide, movement B Side-shift.
+- **Wraith:** look **open** (round 2 offers three new looks), animation A Drift, movement A Ghost drift.
+
+**Round 2** (on the same page, with the picks above preselected):
+- **Blink Stalker animations:** D Head-snap, E Phase shimmer, F Slink. **Movements:** D Blink zigzag (blinks across
+  to the other side of the lane), E Edge hugger, F Feint and blink (steps back, then blinks forward).
+- **Burrower looks:** **D Auger crab** (driven by two spinning auger screws), **E Pile-driver quad** (four anchor legs
+  around a big downward drill), **F Plough skimmer** (a flat delta with V plough blades throwing up earth).
+- **Shifter looks:** **D Rift runner** (a long-legged runner with a rift ring that tears open), **E Phase cube walker**
+  (a cube on four legs that turns a quarter-turn each blink), **F Sail skimmer** (a hover skimmer with two rippling
+  phase sails).
+- **Wraith looks:** **D Hollow frame** (floating armour plates around an empty glowing core), **E Halo walker** (a thin
+  biped under a cloak-emitter halo), **F Stealth hover-tank** (a smooth hover tank with a dark glass canopy).
 
 ## Open questions
 
-1. **Evader picks**, and any change to the Evader family traits or the proposed sizes.
+1. **Evader picks:** Blink Stalker look (A to C), animation and movement (A to F); Burrower, Shifter and Wraith looks
+   (D to F).
 2. **Next role** after Evader (remaining: Special, Boss).

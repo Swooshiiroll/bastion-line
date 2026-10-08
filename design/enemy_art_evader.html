@@ -89,11 +89,11 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 6 of 8: Evader</div>
+    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 6 of 8: Evader (round 2)</div>
     <h1>Enemy art: Evader</h1>
     <p class="note">A fresh start from the names: the machine army's <b>Evader</b> role. For each enemy, pick its <b>look</b>, <b>animation</b> and
       <b>movement</b> separately from three proposals each (A to C), and add notes. Mix freely. The <b>Your combination</b> preview shows your
-      mix (option A until you pick). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
+      mix (option A until you pick). <b>Your picks are preselected</b>; Blink Stalker has three new animations and movements (D to F); Burrower, Shifter and Wraith each have three new looks (D to F). The Burrower now vanishes underground; a doppler ping shows it inside a Sensor Array's range. Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
       Spec: <code>design/enemy_art.md</code>.</p>
     <ul class="rules">
       <li><b>Machine army;</b> each <b>name inspires a trait</b> (not a literal picture).</li>
@@ -430,6 +430,11 @@ function wakeFx(c, t, r, col) { const u = fmod(t, 5) / 1.4; if (u > 1) return; c
   ring(c, rr, A(col, 0.7 * (1 - u)), 1.2); ring(c, rr, A(col, 0.15 * (1 - u)), 4); for (let i = 0; i < 6; i++) { const a = i * TAU / 6, p = add(c, mul(fa(a), rr)); polyline([add(p, mul(fa(a + 2.3), r * 0.18)), p, add(p, mul(fa(a - 2.3), r * 0.18))], A(col, 0.8 * (1 - u)), 0.9); } }
 // Burrower: under the lane for 2.5 s of every 5 (0.3 s to dig in and to surface)
 const burrowH = t => { const u = fmod(t, 5); return u < 2.2 ? 0 : u < 2.5 ? (u - 2.2) / 0.3 : u < 4.7 ? 1 : 1 - (u - 4.7) / 0.3; };
+const SENS = [0.4, 0.92, 1, 1];
+const pingK = t => { const u = fmod(t, 5); return u > 3.2 && u < 4.7 ? Math.min(1, (u - 3.2) / 0.2, (4.7 - u) / 0.2) : 0; };
+function pingFx(c, r, t, h) { const k = pingK(t); if (k <= 0 || h < 0.5) return;
+  for (let i = 0; i < 4; i++) { const age = fmod(t * 1.1 + i / 4, 1); ring(add(c, [-age * r * 1.3, 0]), r * (0.3 + 1.7 * age), A(SENS, 0.7 * (1 - age) * k), 1.0); }
+  glowDot(c, 1.2, A(SENS, k)); }
 function mound(c, r, t, h) { if (h <= 0) return; ellipse(c, r * 0.95, r * 0.6, [0.32, 0.24, 0.16, 0.85 * h]); ellipse(c, r * 0.65, r * 0.38, [0.42, 0.32, 0.2, 0.9 * h]);
   for (let i = 0; i < 5; i++) { const a = i * 1.26 + 0.3, p0 = add(c, mul(fa(a), r * 0.15)); line(p0, add(p0, mul(fa(a + 0.3), r * 0.5)), [0.18, 0.13, 0.08, 0.9 * h], 0.7); }
   for (let i = 0; i < 4; i++) { const u = fmod(t * 1.3 + i / 4, 1); disc(add(c, [-r * (0.5 + 0.9 * u), r * (hash(i) - 0.5) * 0.8]), r * (0.08 + 0.12 * u), [0.45, 0.36, 0.25, 0.6 * h * (1 - u)]); } }
@@ -468,23 +473,38 @@ const LOOKS = {
       blinkFx(B, c, t, r, 4, r * 2.6, C.glow); B(c); } },
   ],
   burrower: [
-    { key: "A", name: "Drill worm", theme: "A segmented machine worm behind a spinning drill head; underground 2.5 s of every 5", palette: "earth-brown segments, steel drill, amber lights", r: 11, draw(c, t, r) {
-      const C = COL.burrower, h = burrowH(t); mound(c, r, t, h);
+    { key: "A", name: "Drill worm", theme: "A segmented machine worm behind a spinning drill head; vanishes underground 2.5 s of every 5, and a doppler ping shows it inside a Sensor Array's range", palette: "earth-brown segments, steel drill, amber lights", r: 11, shadowK: t => 1 - burrowH(t), draw(c, t, r) {
+      const C = COL.burrower, h = burrowH(t); pingFx(c, r, t, h);
       withAlpha(1 - h, () => { for (let i = 3; i >= 1; i--) { const p = add(c, [-r * 0.42 * i, r * 0.12 * Math.sin(t * 5 - i)]); plate(p, ngon(8, 0.32 - 0.03 * i, Math.PI / 8), i % 2 ? C.hull : C.panel, 0, r, 0.7); }
         plate(c, ngon(8, 0.38, Math.PI / 8), C.hull, 0, r, 0.8); const d = add(c, [r * 0.42, 0]); plate(d, [[0.42, 0], [0, 0.3], [0, -0.3]], C.steel, 0, r, 0.8);
         for (let k = 0; k < 3; k++) { const x = 0.05 + fmod(t * 2.5 + k / 3, 1) * 0.32; line(add(d, [x * r, -(0.3 - x * 0.7) * r]), add(d, [(x + 0.06) * r, (0.3 - (x + 0.06) * 0.7) * r]), A(INK, 0.7), 0.9); }
         for (const s of [-1, 1]) disc(add(c, [r * 0.1, s * r * 0.24]), 0.8, C.glow); }); } },
-    { key: "B", name: "Mole digger", theme: "A stout digger with two big shovel claws and a nose drill; underground 2.5 s of every 5", palette: "earth-brown body, steel claws, amber visor", r: 11, draw(c, t, r) {
-      const C = COL.burrower, h = burrowH(t), dg = Math.sin(t * 6); mound(c, r, t, h);
+    { key: "B", name: "Mole digger", theme: "A stout digger with two big shovel claws and a nose drill; vanishes underground 2.5 s of every 5, and a doppler ping shows it inside a Sensor Array's range", palette: "earth-brown body, steel claws, amber visor", r: 11, shadowK: t => 1 - burrowH(t), draw(c, t, r) {
+      const C = COL.burrower, h = burrowH(t), dg = Math.sin(t * 6); pingFx(c, r, t, h);
       withAlpha(1 - h, () => { for (const s of [-1, 1]) { const sh = add(c, [r * 0.2, s * r * 0.42]), cl = add(c, [r * (0.7 + 0.08 * dg * s), s * r * 0.5]); bar(sh, cl, 2.0, C.dark); plate(cl, [[0.2, 0], [0.05, 0.18], [-0.1, 0.12], [-0.1, -0.12], [0.05, -0.18]], C.steel, s * 0.3, r, 0.7); }
         plate(c, [[0.55, 0], [0.35, 0.42], [-0.5, 0.45], [-0.65, 0], [-0.5, -0.45], [0.35, -0.42]], C.hull, 0, r, 0.9); rivets(c, [[0.35, 0.42], [-0.5, 0.45], [-0.5, -0.45], [0.35, -0.42]], 0, r, 0.75, 0.6);
         const d = add(c, [r * 0.55, 0]); disc(d, r * 0.16, OUTLINE); disc(d, r * 0.13, C.steel); line(d, add(d, mul(fa(t * 12), r * 0.13)), INK, 0.8); slitE(add(c, [r * 0.32, 0]), r * 0.14, C.glow); }); } },
-    { key: "C", name: "Tunnel borer", theme: "A squat tunnel-boring machine on short treads with a turning toothed cutter face; underground 2.5 s of every 5", palette: "earth-brown hull, steel cutter, amber lamps", r: 11, draw(c, t, r) {
-      const C = COL.burrower, h = burrowH(t); mound(c, r, t, h);
+    { key: "C", name: "Tunnel borer", theme: "A squat tunnel-boring machine on short treads with a turning toothed cutter face; vanishes underground 2.5 s of every 5, and a doppler ping shows it inside a Sensor Array's range", palette: "earth-brown hull, steel cutter, amber lamps", r: 11, shadowK: t => 1 - burrowH(t), draw(c, t, r) {
+      const C = COL.burrower, h = burrowH(t); pingFx(c, r, t, h);
       withAlpha(1 - h, () => { for (const s of [-1, 1]) tread(add(c, [-r * 0.15, s * r * 0.45]), r * 0.5, r * 0.15, t);
         plate(c, rectPts(0.55, 0.38), C.hull, 0, r, 0.9); for (const x of [-0.25, 0.05]) line(add(c, [x * r, -r * 0.34]), add(c, [x * r, r * 0.34]), C.dark, 0.7);
         const f = add(c, [r * 0.62, 0]); plate(f, rectPts(0.1, 0.46), C.dark, 0, r, 0.8); for (let k = 0; k < 6; k++) { const y = (fmod(t * 1.5 + k / 6, 1) * 2 - 1) * 0.42; fill(add(f, [r * 0.1, y * r]), [[0.12, 0], [0, 0.05], [0, -0.05]], C.steel, 0, r); }
         for (const s of [-1, 1]) glowDot(add(c, [r * 0.45, s * r * 0.3]), 0.8, C.glow); }); } },
+    { key: "D", name: "Auger crab", theme: "A low, wide crawler driven by two big spinning auger screws; vanishes underground 2.5 s of every 5, and a doppler ping shows it inside a Sensor Array's range", palette: "earth-brown body, steel augers, amber visor", r: 11, shadowK: t => 1 - burrowH(t), draw(c, t, r) {
+      const C = COL.burrower, h = burrowH(t); pingFx(c, r, t, h);
+      withAlpha(1 - h, () => { for (const sg of [-1, 1]) { const a = add(c, [-r * 0.05, sg * r * 0.55]); plate(a, rectPts(0.62, 0.15), C.steel, 0, r, 0.8); for (let k = 0; k < 6; k++) { const x = (fmod(t * 1.6 + k / 6, 1) * 2 - 1) * 0.55; line(add(a, [(x - 0.06) * r, -r * 0.13]), add(a, [(x + 0.06) * r, r * 0.13]), A(INK, 0.75), 0.9); } fill(add(a, [r * 0.62, 0]), [[0.16, 0], [0, 0.13], [0, -0.13]], C.steel, 0, r); }
+        plate(c, [[0.5, 0], [0.32, 0.38], [-0.5, 0.38], [-0.62, 0], [-0.5, -0.38], [0.32, -0.38]], C.hull, 0, r, 0.9); plate(c, rectPts(0.2, 0.18), C.panel, 0, r, 0.6); slitE(add(c, [r * 0.38, 0]), r * 0.14, C.glow); }); } },
+    { key: "E", name: "Pile-driver quad", theme: "Four splayed anchor legs around a big downward drill that spins as it digs; vanishes underground 2.5 s of every 5, and a doppler ping shows it inside a Sensor Array's range", palette: "earth-brown frame, steel drill, amber lamps", r: 11, shadowK: t => 1 - burrowH(t), draw(c, t, r) {
+      const C = COL.burrower, h = burrowH(t); pingFx(c, r, t, h);
+      withAlpha(1 - h, () => { for (const [x, y, ph] of [[1, 1, 0], [1, -1, Math.PI], [-1, 1, Math.PI], [-1, -1, 0]]) { const sw = Math.sin(t * 6 + ph), hip = add(c, [x * r * 0.35, y * r * 0.35]), ft = add(c, [x * r * 0.7 + sw * r * 0.1, y * r * 0.72]); limb([hip, ft], 1.6, C.dark); plate(ft, rectPts(0.1, 0.1), C.steel, Math.PI / 4, r, 0.5); }
+        plate(c, ngon(8, 0.5, Math.PI / 8), C.hull, 0, r, 0.9); disc(c, r * 0.32, OUTLINE); disc(c, r * 0.29, C.steel); for (const rr of [0.2, 0.11]) ring(c, r * rr, A(INK, 0.5), 0.6);
+        const sp = []; for (let i = 0; i <= 12; i++) sp.push(add(c, mul(fa(t * 5 + i * 0.45), r * 0.28 * (1 - i / 12)))); polyline(sp, A(INK, 0.8), 0.8);
+        for (const sg of [-1, 1]) glowDot(add(c, [r * 0.42, sg * r * 0.2]), 0.8, C.glow); }); } },
+    { key: "F", name: "Plough skimmer", theme: "A flat delta hull with V plough blades that throw up earth as it skims; vanishes underground 2.5 s of every 5, and a doppler ping shows it inside a Sensor Array's range", palette: "earth-brown hull, steel blades, amber visor", r: 11, shadowK: t => 1 - burrowH(t), draw(c, t, r) {
+      const C = COL.burrower, h = burrowH(t); pingFx(c, r, t, h);
+      withAlpha(1 - h, () => { for (const sg of [-1, 1]) for (let i = 0; i < 3; i++) { const u = fmod(t * 1.6 + i / 3 + (sg > 0 ? 0.15 : 0), 1); disc(add(c, [r * (0.5 - 0.6 * u), sg * r * (0.55 + 0.6 * u)]), r * (0.06 + 0.08 * u), [0.45, 0.36, 0.25, 0.7 * (1 - u)]); }
+        plate(c, [[0.75, 0], [-0.55, 0.62], [-0.4, 0], [-0.55, -0.62]], C.hull, 0, r, 0.9); plate(c, [[1.0, 0], [0.55, 0.42], [0.45, 0.36], [0.82, 0], [0.45, -0.36], [0.55, -0.42]], C.steel, 0, r, 0.8);
+        outline(c, [[0.4, 0], [-0.35, 0.36], [-0.25, 0], [-0.35, -0.36]], C.panel, 0.7, 0, r); slitE(add(c, [r * 0.28, 0]), r * 0.12, C.glow); }); } },
   ],
   shifter: [
     { key: "A", name: "Phase walker", theme: "A sleek biped with three phase fins; blinks 60 px every 5 s and leaves a speed wake where it lands", palette: "chrome silver, aqua fins and wake", r: 12, draw(c, t, r) {
@@ -504,6 +524,24 @@ const LOOKS = {
       const C = COL.shifter, B = p => { const a = t * 1.2, p1 = add(p, mul(fa(a), r * 0.45)), p2 = add(p, mul(fa(a + Math.PI), r * 0.45));
         line(p1, p2, A(C.glow, 0.3), 3.5); line(p1, p2, C.glow, 1.0);
         for (const q of [p1, p2]) { disc(q, r * 0.32, OUTLINE); disc(q, r * 0.29, C.hull); ring(q, r * 0.18, C.dark, 0.8); glowDot(q, r * 0.07, C.glow); } };
+      wakeFx(c, t, r, C.glow); blinkFx(B, c, t, r, 5, r * 2.2, C.glow); B(c); } },
+    { key: "D", name: "Rift runner", theme: "A sleek, long-legged runner carrying a rift ring that tears open as it blinks; blinks 60 px every 5 s and leaves a speed wake", palette: "chrome runner, aqua rift", r: 12, draw(c, t, r) {
+      const C = COL.shifter, B = p => { const st = Math.sin(t * 7);
+        for (const sg of [-1, 1]) { const hip = add(p, [-r * 0.1, sg * r * 0.2]), knee = add(p, [-r * 0.45, sg * r * 0.38]), ft = add(p, [r * (0.15 + 0.35 * st * sg), sg * r * 0.4]); limb([hip, knee, ft], 1.1, C.dark); }
+        plate(p, [[0.75, 0], [0.4, 0.2], [-0.35, 0.22], [-0.5, 0], [-0.35, -0.22], [0.4, -0.2]], C.hull, 0, r, 0.8);
+        const rg = add(p, [-r * 0.45, 0]); ring(rg, r * 0.32, OUTLINE, 2.6); ring(rg, r * 0.32, C.panel, 1.4); const tear = 0.08 + 0.18 * Math.max(0, Math.sin(t * 3)); line(add(rg, [0, -r * tear * 1.3]), add(rg, [0, r * tear * 1.3]), A(C.glow, 0.9), 1.4); glowDot(rg, r * 0.05, C.glow);
+        slitE(add(p, [r * 0.55, 0]), r * 0.1, C.glow); };
+      wakeFx(c, t, r, C.glow); blinkFx(B, c, t, r, 5, r * 2.2, C.glow); B(c); } },
+    { key: "E", name: "Phase cube walker", theme: "A chrome cube on four short legs that turns a quarter-turn each time it blinks; blinks 60 px every 5 s and leaves a speed wake", palette: "chrome cube, aqua edges", r: 12, draw(c, t, r) {
+      const C = COL.shifter, B = p => { const u = fmod(t, 5), k = Math.floor(t / 5), rot = (k + Math.min(1, u / 0.35)) * Math.PI / 2;
+        for (const [x, y, ph] of [[1, 1, 0], [1, -1, Math.PI], [-1, 1, Math.PI], [-1, -1, 0]]) { const sw = Math.sin(t * 6 + ph), hip = add(p, [x * r * 0.32, y * r * 0.32]), ft = add(p, [x * r * 0.5 + sw * r * 0.1, y * r * 0.6]); limb([hip, ft], 1.2, C.dark); }
+        plate(p, rectPts(0.48, 0.48), C.hull, rot, r, 0.9); fill(p, rectPts(0.3, 0.3), C.panel, rot, r); outline(p, rectPts(0.48, 0.48), A(C.glow, 0.8), 0.8, rot, r * 0.92); glowDot(p, r * 0.08, C.glow);
+        slitE(add(p, [r * 0.55, 0]), r * 0.1, C.glow); };
+      wakeFx(c, t, r, C.glow); blinkFx(B, c, t, r, 5, r * 2.2, C.glow); B(c); } },
+    { key: "F", name: "Sail skimmer", theme: "A hover skimmer with two tall rippling phase sails; the landing wake pours off them; blinks 60 px every 5 s", palette: "chrome hull, aqua-edged sails", r: 12, draw(c, t, r) {
+      const C = COL.shifter, B = p => { disc(p, r * 0.6, A(C.glow, 0.1));
+        for (const sg of [-1, 1]) { const pts = []; for (let i = 0; i <= 6; i++) { const u = i / 6; pts.push(add(p, [r * (0.35 - 0.95 * u), sg * r * (0.22 + 0.5 * Math.sin(u * Math.PI) + 0.05 * Math.sin(t * 6 - u * 5))])); } pts.push(add(p, [-r * 0.6, sg * r * 0.2])); poly(pts, A(C.panel, 0.85)); polyline(pts, A(C.glow, 0.85), 0.8); }
+        plate(p, [[0.8, 0], [0.45, 0.22], [-0.6, 0.2], [-0.7, 0], [-0.6, -0.2], [0.45, -0.22]], C.hull, 0, r, 0.8); slitE(add(p, [r * 0.55, 0]), r * 0.1, C.glow); };
       wakeFx(c, t, r, C.glow); blinkFx(B, c, t, r, 5, r * 2.2, C.glow); B(c); } },
   ],
   wraith: [
@@ -525,6 +563,24 @@ const LOOKS = {
         outline(p, [[0.7, 0], [-0.4, 0.5], [-0.25, 0], [-0.4, -0.5]], C.panel, 0.7, 0, r); outline(p, w, A(C.glow, 0.5 + 0.3 * Math.sin(t * 5)), 0.6, 0, r * 0.96);
         for (const s of [-1, 1]) glowDot(add(p, [-r * 0.5, s * r * 0.3]), 0.8, A(C.glow, 0.7)); slitE(add(p, [r * 0.45, 0]), r * 0.1, C.glow); };
       cloakFx(B, c, t, r, C.glow); } },
+    { key: "D", name: "Hollow frame", theme: "Floating armour plates around an empty, faintly glowing core: a shell with nothing inside; cloaked (shown revealed 2 s of every 6)", palette: "smoked-glass plates, pale core", r: 13, draw(c, t, r) {
+      const C = COL.wraith, B = p => { glowDot(p, r * 0.1, A(C.glow, 0.8));
+        const plates = [[[0.55, 0], [0.32, 0.18], [0.18, 0], [0.32, -0.18]], [[0.15, 0.3], [-0.05, 0.62], [-0.3, 0.52], [-0.12, 0.26]], [[0.15, -0.3], [-0.05, -0.62], [-0.3, -0.52], [-0.12, -0.26]], [[-0.3, 0.14], [-0.6, 0.18], [-0.6, -0.18], [-0.3, -0.14]]];
+        plates.forEach((pl, i) => { const o = add(p, [0, r * 0.04 * Math.sin(t * 2 + i * 1.7)]); plate(o, pl, C.hull, 0, r, 0.8); outline(o, pl, A(C.glow, 0.35), 0.5, 0, r * 0.9); });
+        slitE(add(p, [r * 0.42, 0]), r * 0.08, C.glow); };
+      cloakFx(B, c, t, r, C.glow); } },
+    { key: "E", name: "Halo walker", theme: "A thin biped under a hovering cloak-emitter halo that bends the light around it; cloaked (shown revealed 2 s of every 6)", palette: "smoked-glass frame, pale halo", r: 13, draw(c, t, r) {
+      const C = COL.wraith, B = p => { const st = Math.sin(t * 4);
+        for (const sg of [-1, 1]) { const hip = add(p, [-r * 0.1, sg * r * 0.2]), ft = add(p, [r * (0.05 + 0.3 * st * sg), sg * r * 0.45]); limb([hip, add(p, [-r * 0.3, sg * r * 0.4]), ft], 1.0, C.panel); }
+        plate(p, [[0.45, 0], [0.2, 0.22], [-0.35, 0.2], [-0.45, 0], [-0.35, -0.2], [0.2, -0.22]], C.hull, 0, r, 0.8);
+        const hc = add(p, [-r * 0.02, 0]); ring(hc, r * 0.62, A(C.glow, 0.25), 3); ring(hc, r * 0.62, A(C.glow, 0.8), 0.9); for (let i = 0; i < 8; i++) { const a = i * TAU / 8 + t * 0.8; line(add(hc, mul(fa(a), r * 0.66)), add(hc, mul(fa(a + 0.12), r * 0.78)), A(C.glow, 0.5), 0.6); }
+        slitE(add(p, [r * 0.32, 0]), r * 0.1, C.glow); };
+      cloakFx(B, c, t, r, C.glow); } },
+    { key: "F", name: "Stealth hover-tank", theme: "A smooth, glossy hover tank with a dark glass canopy and no visible running gear; cloaked (shown revealed 2 s of every 6)", palette: "smoked-glass hull, black canopy, pale underglow", r: 13, draw(c, t, r) {
+      const C = COL.wraith, B = p => { disc(p, r * 0.8, A(C.glow, 0.08)); for (const sg of [-1, 1]) line(add(p, [r * 0.55, sg * r * 0.5]), add(p, [-r * 0.6, sg * r * 0.5]), A(C.glow, 0.35 + 0.15 * Math.sin(t * 6)), 1.4);
+        plate(p, [[0.85, 0], [0.7, 0.4], [0.4, 0.52], [-0.65, 0.52], [-0.8, 0.3], [-0.8, -0.3], [-0.65, -0.52], [0.4, -0.52], [0.7, -0.4]], C.hull, 0, r, 0.9);
+        ellipse(add(p, [r * 0.15, 0]), r * 0.34, r * 0.24, INK); ellipse(add(p, [r * 0.08, -r * 0.06]), r * 0.12, r * 0.06, A(C.glow, 0.35)); slitE(add(p, [r * 0.7, 0]), r * 0.12, C.glow); };
+      cloakFx(B, c, t, r, C.glow); } },
   ],
 };
 
@@ -534,6 +590,9 @@ const ANIMS = {
     { key: "A", name: "Prowl", desc: "A low, smooth predator sway.", fx: (t) => ({ rot: 0.1 * Math.sin(t * 2.2), dy: 0.03 * Math.sin(t * 4.4) }) },
     { key: "B", name: "Crouch and spring", desc: "Crouches as the blink charges, then springs.", fx: (t) => { const u = fmod(t, 4), k = u > 3.55 ? (u - 3.55) / 0.45 : 0, s = u < 0.2 ? 1 - u / 0.2 : 0; return { sx: 1 - 0.12 * k + 0.12 * s, sy: 1 + 0.06 * k }; } },
     { key: "C", name: "Lope", desc: "A fast, bounding lope.", fx: (t) => { const p = Math.abs(Math.sin(t * 6)); return { dy: -0.05 * p, sx: 1 + 0.05 * p }; } },
+    { key: "D", name: "Head-snap", desc: "Holds still, then snaps toward a new target.", fx: (t) => { const k = Math.floor(t / 0.9), u = fmod(t, 0.9), a0 = (hash(k) - 0.5) * 0.5, a1 = (hash(k + 1) - 0.5) * 0.5; return { rot: u < 0.08 ? a0 + (a1 - a0) * (u / 0.08) : a1 }; } },
+    { key: "E", name: "Phase shimmer", desc: "Shimmers out of phase as the blink charges.", fx: (t) => { const u = fmod(t, 4), k = u > 3.2 ? (u - 3.2) / 0.8 : 0.15; return { sx: 1 + 0.07 * k * Math.sin(t * 60), sy: 1 + 0.07 * k * Math.sin(t * 53) }; } },
+    { key: "F", name: "Slink", desc: "Low and slow, rolling its shoulders as it creeps.", fx: (t) => ({ sy: 1 - 0.06 * Math.abs(Math.sin(t * 2.4)), rot: 0.06 * Math.sin(t * 2.4), dy: 0.03 * Math.sin(t * 4.8) }) },
   ],
   burrower: [
     { key: "A", name: "Dig-in bob", desc: "Nose-down bobbing, as if testing the ground.", fx: (t) => ({ sx: 1 + 0.05 * Math.sin(t * 5), dx: 0.04 * Math.sin(t * 5) }) },
@@ -559,6 +618,9 @@ const MOVES = {
     { key: "A", name: "Blink hops", desc: "Walks, then blinks ahead (every 4 s, shown faster here; the jump is the gap in the trail).", f: hops(2.0, 26) },
     { key: "B", name: "Prowl weave", desc: "Weaves across the lane like a hunter.", f: t => [V * t, 8 * Math.sin(t * 1.6)] },
     { key: "C", name: "Stalk and surge", desc: "Creeps, then surges.", f: t => [V * t - V * 0.5 / 2 * Math.cos(t * 2), 0] },
+    { key: "D", name: "Blink zigzag", desc: "Runs diagonally, then blinks across to the other side of the lane (every 4 s, shown faster).", f: t => { const p = 2.0, k = Math.floor(t / p), u = fmod(t, p) / p, sg = k % 2 ? 1 : -1; return [(V - 26 / p) * t + 26 * k, sg * (-6 + 8 * u)]; } },
+    { key: "E", name: "Edge hugger", desc: "Keeps to one edge of the lane and blinks along it.", f: t => [(V - 13) * t + 26 * Math.floor(t / 2), 11 + 1.5 * Math.sin(t * 2)] },
+    { key: "F", name: "Feint and blink", desc: "Steps back as if to retreat, then blinks forward.", f: t => { const p = 2.0, k = Math.floor(t / p), u = fmod(t, p) / p, back = u > 0.72 ? 9 * Math.sin((u - 0.72) / 0.28 * Math.PI) : 0; return [(V - 26 / p) * t + 26 * k - back, 0]; } },
   ],
   burrower: [
     { key: "A", name: "Steady tunnel", desc: "Dead straight at a constant speed, above and below ground.", f: t => [V * t, 0] },
@@ -580,19 +642,26 @@ const MOVES = {
 const BATCHES = [
   { n: 6, role: "Evader", job: "Dodge targeting. Counter: sensors, area.",
     family: `<b>Evader family (draft):</b> the army's infiltrators: <b>slim, angular stealth hulls</b>, a single <b>slit visor</b>, <b>phase fins</b>
-      or emitters, and a <b>visible evasion effect</b> on the spec timing (Blink Stalker blinks 80 px every 4 s, Burrower is underground 2.5 s of every
-      5, Shifter blinks every 5 s and leaves a speed wake, Wraith is cloaked; the previews reveal it 2 s of every 6, as inside a Sensor Array).
+      or emitters, and a <b>visible evasion effect</b> on the spec timing (Blink Stalker blinks 80 px every 4 s, Burrower vanishes underground 2.5 s of every 5 and a doppler ping gives it away inside a Sensor Array's range, Shifter blinks every 5 s and leaves a speed wake, Wraith is cloaked; the previews reveal it 2 s of every 6, as inside a Sensor Array).
       <b>Tiers evolve:</b> T1 Blink Stalker is a lean bare frame; T2 Burrower is armoured for digging; T3 Shifter is sleek with phase gear; T4 Wraith is
       the sleekest and nearly invisible. <b>Colour per enemy:</b> Blink Stalker graphite with neon orange, Burrower earth brown with a steel drill,
       Shifter chrome silver with aqua, Wraith smoked glass with a pale ghost-white shimmer.`,
     enemies: [
       { id: "stalker", name: "Blink Stalker", tier: "T1", air: false, anims: "stalker", trait: "a hunter that blinks 80 px ahead every 4 s", today: { r: 10 } },
-      { id: "burrower", name: "Burrower", tier: "T2", air: false, anims: "burrower", trait: "tunnels under the lane 2.5 s of every 5", today: { r: 11 } },
-      { id: "shifter", name: "Shifter", tier: "T3", air: false, anims: "shifter", trait: "blinks 60 px every 5 s; its landing wake speeds up nearby units; new, 12 px proposed", today: { r: 12 } },
-      { id: "wraith", name: "Wraith", tier: "T4", air: false, anims: "wraith", trait: "cloaked, and only energy hurts it; new, 13 px proposed", today: { r: 13 } },
+      { id: "burrower", name: "Burrower", tier: "T2", air: false, anims: "burrower", trait: "tunnels under the lane 2.5 s of every 5 (gone from sight; a doppler ping shows it in Sensor Array range)", today: { r: 11 } },
+      { id: "shifter", name: "Shifter", tier: "T3", air: false, anims: "shifter", trait: "blinks 60 px every 5 s; its landing wake speeds up nearby units; new, 12 px", today: { r: 12 } },
+      { id: "wraith", name: "Wraith", tier: "T4", air: false, anims: "wraith", trait: "cloaked, and only energy hurts it; new, 13 px", today: { r: 13 } },
     ] },
 ];
-const STORE_KEY = "bl-enemy-art-evader-v1";
+const STORE_KEY = "bl-enemy-art-evader-v2";
+// Picks (owner, 2026-10-08): preselected. Open: Blink Stalker look (A to C), animation and movement (A to F);
+// Burrower, Shifter and Wraith looks (new D to F).
+const DEFAULTS = {
+  stalker: { look: null, anim: null, move: null },
+  burrower: { look: null, anim: "C", move: "C" },
+  shifter: { look: null, anim: "A", move: "B" },
+  wraith: { look: null, anim: "A", move: "A" },
+};
 
 // ---- State (picks and notes, kept in this browser) -------------------------------------------------
 const STORE = STORE_KEY;
@@ -616,7 +685,7 @@ function drawUnit(en, look, anim, c, t, ph) {
   const r = look ? look.r : en.today.r, a = anim ? anim.fx(t + ph * 0.37) : {};
   const lift = a.lift || 0;
   if (en.air) { if (look) airShadow(c, r, (look.shadowD || 2.4) + lift, 1 - 0.2 * lift); }
-  else groundShadow(c, r, 1 - 0.35 * lift);
+  else { const sk = look && look.shadowK ? look.shadowK(t) : 1; if (sk > 0.01) { X.save(); X.globalAlpha *= sk; groundShadow(c, r, 1 - 0.35 * lift); X.restore(); } }
   X.save(); X.translate(c[0] + (a.dx || 0) * r, c[1] + (a.dy || 0) * r); X.rotate(a.rot || 0); X.scale(a.sx || 1, a.sy || 1); X.translate(-c[0], -c[1]);
   drawBody(en, look, c, t, ph); X.restore();
 }
