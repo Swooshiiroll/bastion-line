@@ -89,11 +89,11 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 6 of 8: Evader (round 4)</div>
+    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 6 of 8: Evader (round 5)</div>
     <h1>Enemy art: Evader</h1>
     <p class="note">A fresh start from the names: the machine army's <b>Evader</b> role. For each enemy, pick its <b>look</b>, <b>animation</b> and
       <b>movement</b> separately from three proposals each (A to C), and add notes. Mix freely. The <b>Your combination</b> preview shows your
-      mix (option A until you pick). <b>Your picks are preselected</b>; Burrower (G Drill pod) and Shifter (B Prism hover) are settled. From your notes, Blink Stalker has three drones and droids (G to I) and Wraith three ghostly robots (J to L). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
+      mix (option A until you pick). <b>Your picks are preselected</b>; Burrower (G Drill pod) and Shifter (B Prism hover) are settled. From your notes, Blink Stalker has three more hover looks (J to L; it stays a ground unit) and the <b>Wraith now flies</b>, with three flying looks (M to O). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
       Spec: <code>design/enemy_art.md</code>.</p>
     <ul class="rules">
       <li><b>Machine army;</b> each <b>name inspires a trait</b> (not a literal picture).</li>
@@ -515,6 +515,24 @@ const LOOKS = {
         plate(p, [[0.62, 0], [0.35, 0.22], [-0.5, 0.2], [-0.62, 0], [-0.5, -0.2], [0.35, -0.22]], C.hull, 0, r, 0.8); line(add(p, [-r * 0.3, 0]), add(p, [r * 0.2, 0]), C.panel, 0.7);
         const se = add(p, [r * 0.45, 0]); disc(se, r * 0.13, OUTLINE); disc(se, r * 0.1, C.dark); glowDot(add(se, [r * 0.04, 0]), r * 0.05, C.glow); };
       blinkFx(B, c, t, r, 4, r * 2.6, C.glow); B(c); } },
+    { key: "J", name: "Hover-blade drone", theme: "A sleek arrowhead drone floating on a glowing thruster ring, with two stabiliser fins (owner: more hover options; still a ground unit); blinks 80 px every 4 s", palette: "graphite blade, orange thruster ring", r: 10, draw(c, t, r) {
+      const C = COL.stalker, B = p => { const bob = Math.sin(t * 5) * 0.03 * r; const q = add(p, [0, bob]);
+        ring(q, r * 0.36, A(C.glow, 0.25 + 0.1 * Math.sin(t * 14)), 3.0); ring(q, r * 0.36, A(C.glow, 0.8), 0.8);
+        for (const sg of [-1, 1]) fill(q, [[-0.15, sg * 0.25], [-0.6, sg * 0.62], [-0.55, sg * 0.25]], C.dark, 0, r);
+        plate(q, [[0.95, 0], [0.15, 0.32], [-0.5, 0.22], [-0.35, 0], [-0.5, -0.22], [0.15, -0.32]], C.hull, 0, r, 0.8); line(add(q, [r * 0.7, 0]), add(q, [-r * 0.3, 0]), C.panel, 0.7);
+        slitE(add(q, [r * 0.5, 0]), r * 0.1, C.glow); };
+      blinkFx(B, c, t, r, 4, r * 2.6, C.glow); B(c); } },
+    { key: "K", name: "Twin-rotor scout", theme: "A small scout body slung between two rotors on outriggers, skimming low (still a ground unit); blinks 80 px every 4 s", palette: "graphite body, steel rotors, orange eye", r: 10, draw(c, t, r) {
+      const C = COL.stalker, B = p => { for (const sg of [-1, 1]) { const rp = add(p, [-r * 0.1, sg * r * 0.62]); bar(p, rp, 1.1, C.dark); fan(rp, r * 0.36, t, 50 * sg, C.panel); }
+        plate(p, [[0.62, 0], [0.35, 0.2], [-0.45, 0.18], [-0.6, 0], [-0.45, -0.18], [0.35, -0.2]], C.hull, 0, r, 0.8); line(add(p, [-r * 0.6, 0]), add(p, [-r * 0.95, 0]), C.dark, 1.0); disc(add(p, [-r * 0.95, 0]), 1.0, C.glow);
+        glowDot(add(p, [r * 0.45, 0]), r * 0.06, C.glow); };
+      blinkFx(B, c, t, r, 4, r * 2.6, C.glow); B(c); } },
+    { key: "L", name: "Mag-lev orb", theme: "A floating sensor orb held up by three small pods orbiting under it (still a ground unit); blinks 80 px every 4 s", palette: "graphite orb, steel pods, orange eye", r: 10, draw(c, t, r) {
+      const C = COL.stalker, B = p => { disc(p, r * 0.7, A(C.glow, 0.08));
+        for (let i = 0; i < 3; i++) { const a = t * 1.6 + i * TAU / 3, q = add(p, mul(fa(a), r * 0.62)); line(p, q, A(C.glow, 0.25), 0.6); disc(q, r * 0.13, OUTLINE); disc(q, r * 0.1, C.panel); disc(q, r * 0.04, C.glow); }
+        disc(p, r * 0.4, OUTLINE); disc(p, r * 0.37, C.hull); ring(p, r * 0.26, C.dark, 0.6);
+        const ey = add(p, [r * 0.16, 0]); disc(ey, r * 0.14, [0.06, 0.05, 0.05, 1]); glowDot(ey, r * 0.06, C.glow); };
+      blinkFx(B, c, t, r, 4, r * 2.6, C.glow); B(c); } },
   ],
   burrower: [
     { key: "A", name: "Drill worm", theme: "A segmented machine worm behind a spinning drill head; vanishes underground 2.5 s of every 5, and a doppler ping shows it inside a Sensor Array's range", palette: "earth-brown segments, steel drill, amber lights", r: 11, shadowK: t => 1 - burrowH(t), draw(c, t, r) {
@@ -681,8 +699,32 @@ const LOOKS = {
           plate(q, [[0.5, 0], [0.28, 0.3], [-0.32, 0.28], [-0.45, 0], [-0.32, -0.28], [0.28, -0.3]], C.hull, 0, r, 0.9); plate(add(q, [r * 0.2, 0]), rectPts(0.12, 0.14), C.dark, 0, r, 0.6); slitE(add(q, [r * 0.34, 0]), r * 0.1, C.glow); },
         B = p => { for (const e of [3, 2, 1]) withAlpha(0.12 * (4 - e), () => B0(add(p, [-e * r * 0.48, Math.sin(t * 2 + e) * r * 0.05]), t - e * 0.18)); B0(p, t); };
       cloakFx(B, c, t, r, C.glow); } },
+    { key: "M", name: "Skeletal wing drone", theme: "A gaunt flying drone: bare wing struts strung with faint, tattered energy panels and a sensor-skull nose; flies, cloaked (shown revealed 2 s of every 6)", palette: "smoked-glass struts, pale energy panels", r: 13, draw(c, t, r) {
+      const C = COL.wraith, B = p => { const fl = 0.06 * Math.sin(t * 2.2);
+        for (const sg of [-1, 1]) { const root = add(p, [r * 0.05, sg * r * 0.15]), el = add(p, [-r * 0.2, sg * r * (0.62 + fl)]), tip = add(p, [-r * 0.65, sg * r * (1.0 + fl)]);
+          poly([root, el, tip, add(p, [-r * 0.75, sg * r * 0.55]), add(p, [-r * 0.55, sg * r * 0.25])], A(lt(C.panel, 0.25), 0.35 + 0.1 * Math.sin(t * 5 + sg)));
+          for (const k of [0.45, 0.75]) line(el, add(p, [-r * (0.4 + 0.3 * k), sg * r * (0.25 + 0.3 * k)]), A(C.glow, 0.35), 0.5);
+          limb([root, el, tip], 1.1, C.panel); }
+        plate(p, [[0.55, 0], [0.25, 0.16], [-0.6, 0.1], [-0.75, 0], [-0.6, -0.1], [0.25, -0.16]], C.hull, 0, r, 0.8);
+        const sk = add(p, [r * 0.5, 0]); plate(sk, [[0.2, 0], [0.06, 0.13], [-0.1, 0.1], [-0.1, -0.1], [0.06, -0.13]], C.dark, 0, r, 0.6); for (const sg of [-1, 1]) glowDot(add(sk, [r * 0.04, sg * r * 0.05]), 0.7, C.glow); };
+      cloakFx(B, c, t, r, C.glow); } },
+    { key: "N", name: "Ghost rotorcraft", theme: "A sleek dark rotor drone whose four rotor discs shimmer like mist, trailing a pale wake; flies, cloaked (shown revealed 2 s of every 6)", palette: "smoked-glass body, pale misty rotors", r: 13, draw(c, t, r) {
+      const C = COL.wraith, B = p => {
+        for (let i = 0; i < 4; i++) { const u = fmod(t * 0.9 + i / 4, 1); disc(add(p, [-r * (0.6 + 0.9 * u), Math.sin(t * 2 + i) * r * 0.1]), r * (0.12 + 0.15 * u), A(lt(C.panel, 0.3), 0.35 * (1 - u))); }
+        for (const [x, y] of [[0.42, 0.55], [0.42, -0.55], [-0.42, 0.55], [-0.42, -0.55]]) { const rp = add(p, [x * r, y * r]); bar(p, rp, 1.2, C.dark); disc(rp, r * 0.34, A(C.glow, 0.1 + 0.05 * Math.sin(t * 9 + x * 5))); ring(rp, r * 0.34, A(C.glow, 0.45), 0.6); for (let b = 0; b < 2; b++) line(rp, add(rp, mul(fa(t * 40 * Math.sign(x * y) + b * Math.PI), r * 0.32)), A(C.glow, 0.4), 0.5); }
+        plate(p, [[0.55, 0], [0.3, 0.24], [-0.4, 0.24], [-0.55, 0], [-0.4, -0.24], [0.3, -0.24]], C.hull, 0, r, 0.8); ellipse(add(p, [r * 0.15, 0]), r * 0.18, r * 0.12, INK); glowDot(add(p, [r * 0.2, 0]), 0.8, C.glow); };
+      cloakFx(B, c, t, r, C.glow); } },
+    { key: "O", name: "Lantern drone", theme: "A caged lantern of a drone: a pale core in a ribbed cage, held up by four thin rotor arms and trailing ion wisps; flies, cloaked (shown revealed 2 s of every 6)", palette: "smoked-glass cage, pale core and wisps", r: 13, draw(c, t, r) {
+      const C = COL.wraith, B = p => {
+        for (let i = 0; i < 3; i++) { const pts = []; for (let k = 0; k <= 6; k++) { const u = k / 6; pts.push(add(p, [-r * (0.35 + 0.8 * u), r * ((i - 1) * 0.18 * (1 + u) + 0.08 * Math.sin(t * 4 - u * 4 + i))])); } polyline(pts, A(C.glow, 0.3), 0.8); }
+        for (let i = 0; i < 4; i++) { const a = Math.PI / 4 + i * Math.PI / 2, rp = add(p, mul(fa(a), r * 0.72)); line(add(p, mul(fa(a), r * 0.38)), rp, C.panel, 1.0); disc(rp, r * 0.2, [0.92, 0.94, 0.97, 0.1]); line(rp, add(rp, mul(fa(t * 45 + i), r * 0.2)), A(C.glow, 0.4), 0.5); }
+        glowDot(p, r * 0.16, C.glow); ring(p, r * 0.36, OUTLINE, 2.2); ring(p, r * 0.36, C.hull, 1.2); for (let i = 0; i < 6; i++) { const a = i * TAU / 6 + t * 0.3; line(add(p, mul(fa(a), r * 0.12)), add(p, mul(fa(a), r * 0.36)), C.hull, 0.8); } };
+      cloakFx(B, c, t, r, C.glow); } },
   ],
 };
+
+// Wraith flies (owner, 2026-10-08): a close air shadow on every look, faint while cloaked
+for (const l of LOOKS.wraith) { l.shadowD = l.shadowD || 1.7; l.shadowK = l.shadowK || (t => 0.25 + 0.75 * revealK(t)); }
 
 // ---- Animations (per enemy) ---------------------------------------------------------------------------------
 const ANIMS = {
@@ -742,7 +784,7 @@ const MOVES = {
 const BATCHES = [
   { n: 6, role: "Evader", job: "Dodge targeting. Counter: sensors, area.",
     family: `<b>Evader family (draft):</b> the army's infiltrators: <b>slim, angular stealth hulls</b>, a single <b>slit visor</b>, <b>phase fins</b>
-      or emitters, and a <b>visible evasion effect</b> on the spec timing (Blink Stalker blinks 80 px every 4 s, Burrower vanishes underground 2.5 s of every 5 and a doppler ping gives it away inside a Sensor Array's range, Shifter blinks every 5 s and leaves a speed wake, Wraith is cloaked; the previews reveal it 2 s of every 6, as inside a Sensor Array).
+      or emitters, and a <b>visible evasion effect</b> on the spec timing (Blink Stalker blinks 80 px every 4 s, Burrower vanishes underground 2.5 s of every 5 and a doppler ping gives it away inside a Sensor Array's range, Shifter blinks every 5 s and leaves a speed wake, Wraith flies and is cloaked; the previews reveal it 2 s of every 6, as inside a Sensor Array).
       <b>Tiers evolve:</b> T1 Blink Stalker is a lean bare frame; T2 Burrower is armoured for digging; T3 Shifter is sleek with phase gear; T4 Wraith is
       the sleekest and nearly invisible. <b>Colour per enemy:</b> Blink Stalker graphite with neon orange, Burrower earth brown with a steel drill,
       Shifter chrome silver with aqua, Wraith smoked glass with a pale ghost-white shimmer.`,
@@ -750,12 +792,12 @@ const BATCHES = [
       { id: "stalker", name: "Blink Stalker", tier: "T1", air: false, anims: "stalker", trait: "a hunter that blinks 80 px ahead every 4 s", today: { r: 10 } },
       { id: "burrower", name: "Burrower", tier: "T2", air: false, anims: "burrower", trait: "tunnels under the lane 2.5 s of every 5 (gone from sight; a doppler ping shows it in Sensor Array range)", today: { r: 11 } },
       { id: "shifter", name: "Shifter", tier: "T3", air: false, anims: "shifter", trait: "blinks 60 px every 5 s; its landing wake speeds up nearby units; new, 12 px", today: { r: 12 } },
-      { id: "wraith", name: "Wraith", tier: "T4", air: false, anims: "wraith", trait: "cloaked, and only energy hurts it; new, 13 px", today: { r: 13 } },
+      { id: "wraith", name: "Wraith", tier: "T4", air: true, anims: "wraith", trait: "flies, cloaked, and only energy hurts it; new, 13 px", today: { r: 13 } },
     ] },
 ];
-const STORE_KEY = "bl-enemy-art-evader-v4";
-// Picks (owner, 2026-10-08): preselected. Open: Blink Stalker look (drones and droids G to I from the owner's note)
-// and Wraith look (ghostly robots J to L from the owner's note).
+const STORE_KEY = "bl-enemy-art-evader-v5";
+// Picks (owner, 2026-10-08): preselected. Open: Blink Stalker look (hover options J to L from the owner's note) and
+// Wraith look (flying M to O; the Wraith is now a flyer).
 const DEFAULTS = {
   stalker: { look: null, anim: "E", move: "F" },
   burrower: { look: "G", anim: "C", move: "C" },
@@ -784,7 +826,7 @@ function drawBody(en, look, c, t, ph) {
 function drawUnit(en, look, anim, c, t, ph) {
   const r = look ? look.r : en.today.r, a = anim ? anim.fx(t + ph * 0.37) : {};
   const lift = a.lift || 0;
-  if (en.air) { if (look) airShadow(c, r, (look.shadowD || 2.4) + lift, 1 - 0.2 * lift); }
+  if (en.air) { if (look) { const sk = look.shadowK ? look.shadowK(t) : 1; if (sk > 0.01) { X.save(); X.globalAlpha *= sk; airShadow(c, r, (look.shadowD || 2.4) + lift, 1 - 0.2 * lift); X.restore(); } } }
   else { const sk = look && look.shadowK ? look.shadowK(t) : 1; if (sk > 0.01) { X.save(); X.globalAlpha *= sk; groundShadow(c, r, 1 - 0.35 * lift); X.restore(); } }
   X.save(); X.translate(c[0] + (a.dx || 0) * r, c[1] + (a.dy || 0) * r); X.rotate(a.rot || 0); X.scale(a.sx || 1, a.sy || 1); X.translate(-c[0], -c[1]);
   drawBody(en, look, c, t, ph); X.restore();

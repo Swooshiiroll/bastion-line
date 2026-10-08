@@ -240,7 +240,7 @@ Role, tier, job and counter are a draft. **Stats for every current and proposed 
 | Titan | Tank T4 | Higher tier | Heaviest non-boss hull; plates shed at half health (armor 9 to 5, speed +20%) | Armor shred, big hitters, burst after the shed |
 | Capacitor (was Surge Core) | Disruptor T4 | Higher tier | Charge and release: 2 s telegraph, then a radius-160 EMP for 3 s every 8 s | Stun or silence during the charge, burst |
 | Shifter (was Slipstream) | Evader T3 | Higher tier | Blinks 60 px every 5 s; the landing point boosts nearby enemies +20% speed for 2 s | Slow or stun to reset its charge |
-| Wraith | Evader T4 (parked) | Higher tier | Cloaked and immune to physical damage; only energy hurts it | Energy towers, Arc Coils, burn, Sensor Array |
+| Wraith | Evader T4 (parked) | Higher tier | Flies; cloaked and immune to physical damage; only energy hurts it | Energy towers that hit air, Arc Coils, burn, Sensor Array |
 | Masquerade (was Mimic) | Special | Targeting trick | Shows a T1-class rank and role until it drops below 50% health | First/Last/Closest targeting, area damage, the Sensor upgrade |
 | Decoy Beacon | Special | Targeting trick | Shows a false rank above every non-boss (below bosses) that never drops; armored, does nothing else | Switch tower mode, kill it, the Sensor upgrade |
 | Mirage (was Echo) | Special | Targeting trick | Every 6 s projects 2 translucent 1-HP holograms that walk to the core and vanish; they never leak | Area and chain, the Sensor upgrade |
@@ -341,6 +341,9 @@ they exist.
   underground effect. Inside a Sensor Array's range a doppler ping shows where it is, and **specific towers or
   upgrades** can target and hurt it while it is underground. Which ones is still open (item 3 below). Art in
   `design/enemy_art.md`.
+- **Wraith flies (owner, 2026-10-08):** the Wraith becomes a flyer (it was ground). Only towers that hit air can
+  target it, so with its cloak and energy-only damage only energy towers that hit air can hurt it. Balance check in
+  Still open, item 4.
 
 ### Still open
 
@@ -353,7 +356,12 @@ they exist.
 2. **Leak-cost bands (non-boss).** The strength score sets leak cost, so its bands need a mapping (e.g.
    score bands to 1, 2, 3 shields). Proposed with the balance probe in phase 4.
 3. **Burrower underground: which towers or upgrades can hit it** inside a Sensor Array's range (decided that
-   some can; the list, and whether it is a tower trait or an upgrade, is open).
+   some can; the list, and whether it is a tower trait or an upgrade, is open). Today, without any Sensor Array,
+   the Plasma Mortar's C branch (Bunker Buster, Seismic Charge, Tectonic Lance) and the Drone Bay's Strike Wing
+   already hit burrowed enemies (`hits_burrowed`), and the Sensor Array's own Disruptor upgrade (C branch) stops
+   burrowing inside its field.
+4. **Wraith as a flyer: counters.** Cloaked, energy-only and now flying: which energy towers hit air, and is that
+   enough? Checked with the balance probe when the Wraith is built (it is parked until the damage-type PR).
 
 ### Deferred
 

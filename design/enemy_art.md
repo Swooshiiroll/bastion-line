@@ -265,7 +265,7 @@ silver with aqua, Wraith smoked glass with a pale ghost-white shimmer.
 **Effects in the previews:** Blink Stalker charges, then blinks 80 px every 4 s, leaving an afterimage; Burrower digs
 in and **vanishes** underground 2.5 s of every 5 (no mound, no shadow; owner, 2026-10-08), and inside a Sensor Array's
 range a doppler ping shows where it is (the previews show the ping for the second half of each dive); Shifter blinks every 5 s and its landing throws a speed
-wake (chevron ring); Wraith is cloaked (a faint, shimmering double image) and the previews reveal it 2 s of every 6,
+wake (chevron ring); Wraith (now a flyer) is cloaked (a faint, shimmering double image) and the previews reveal it 2 s of every 6,
 with a sensor reticle, as if inside a Sensor Array.
 
 **Sizes (owner, 2026-10-08):** Shifter 12 px, Wraith 13 px (Blink Stalker is 10 and Burrower 11 today), so the tiers
@@ -276,7 +276,7 @@ step up.
 | Blink Stalker, T1 ground (a hunter that blinks ahead) | Stalker biped: lean hunter, long sensor head | Blink hound: four-legged, blink coil on its back | Phase skiff: blade-thin hover, blink ring at the tail |
 | Burrower, T2 ground (tunnels under the lane) | Drill worm: segmented, drill head | Mole digger: shovel claws, nose drill | Tunnel borer: short treads, toothed cutter face |
 | Shifter, T3 ground (blinks; its wake speeds others up) | Phase walker: biped, three phase fins | Prism hover: flashing triangular prism | Twin-pod shifter: two pods on a phase beam |
-| Wraith, T4 ground (cloaked; only energy hurts it) | Spectre frame: tall skeletal walker | Shroud drifter: hooded hover, trailing panels | Mirage blade: stealth wedge, light-bending edges |
+| Wraith, T4 flyer since 2026-10-08 (cloaked; only energy hurts it) | Spectre frame: tall skeletal walker | Shroud drifter: hooded hover, trailing panels | Mirage blade: stealth wedge, light-bending edges |
 
 | Enemy | Animation A / B / C | Movement A / B / C |
 |---|---|---|
@@ -285,15 +285,16 @@ step up.
 | Shifter | Glide / Flicker / Stride | Phase steps / Side-shift / Smooth glide |
 | Wraith | Drift / Waver / Lurk | Ghost drift / Unseen line / Haunting weave |
 
-**Picks (owner, 2026-10-08, third pass):**
-- **Blink Stalker:** look **open**, with the owner's note "Create something along the lines of a drone or a droid"
-  (round 4 offers three); animation **E Phase shimmer**, movement **F Feint and blink**.
-- **Burrower:** look **G Drill pod** (from round 3, the owner's drilling-pod note), animation C Rumble, movement C Dive
-  and surface. **Confirmed.** It vanishes underground, and a doppler ping shows it inside a Sensor Array's range; the
-  gameplay side is in `design/enemies.md`.
+**Picks (owner, 2026-10-08, fourth pass):**
+- **Blink Stalker:** look **open**, with the owner's note "Make more hover / flying options" (round 5 offers three
+  hover looks; the owner chose that it **stays a ground unit**); animation **E Phase shimmer**, movement **F Feint
+  and blink**.
+- **Burrower:** look **G Drill pod**, animation C Rumble, movement C Dive and surface. **Confirmed.** It vanishes
+  underground, and a doppler ping shows it inside a Sensor Array's range; the gameplay side is in `design/enemies.md`.
 - **Shifter:** look B Prism hover, animation A Glide, movement B Side-shift. **Confirmed.**
-- **Wraith:** look **open**, with the owner's note "Something ghostly but mechanical/robotic" (round 4 offers three);
-  animation A Drift, movement A Ghost drift.
+- **Wraith:** look **open**, with the owner's note "Should be hovering or flying". The owner chose a **real flyer**:
+  the Wraith now flies (recorded in `design/enemies.md`, `design/new_enemies.md` and `design/enemy_roster.md`).
+  Round 5 offers three flying looks; animation A Drift, movement A Ghost drift.
 
 **Round 2** (on the same page, with the picks above preselected):
 - **Blink Stalker animations:** D Head-snap, E Phase shimmer, F Slink. **Movements:** D Blink zigzag (blinks across
@@ -326,8 +327,17 @@ step up.
   sensor skull and a pale core caged inside), **L Echo walker** (a sleek robot walker leaving fading echoes of itself
   behind).
 
+**Round 5** (from the owner's notes, on the same page with the picks above preselected):
+- **Blink Stalker, hover looks** (still a ground unit): **J Hover-blade drone** (a sleek arrowhead floating on a
+  glowing thruster ring, with two stabiliser fins), **K Twin-rotor scout** (a small body slung between two rotors on
+  outriggers), **L Mag-lev orb** (a floating sensor orb held up by three small orbiting pods).
+- **Wraith, flying looks** (the Wraith is now a flyer; every Wraith look gets a close air shadow that fades while
+  cloaked): **M Skeletal wing drone** (bare wing struts strung with faint, tattered energy panels and a sensor-skull
+  nose), **N Ghost rotorcraft** (a sleek rotor drone whose four rotor discs shimmer like mist), **O Lantern drone** (a
+  pale core in a ribbed cage, held up by four thin rotor arms and trailing ion wisps).
+
 ## Open questions
 
-1. **Evader looks:** Blink Stalker (any of A to I; G to I are the drones and droids) and Wraith (any of A to L; J to L
-   are the ghostly robots).
+1. **Evader looks:** Blink Stalker (any of A to L; J to L are the hover looks) and Wraith (any of A to O; M to O are
+   the flying looks).
 2. **Next role** after Evader (remaining: Special, Boss).

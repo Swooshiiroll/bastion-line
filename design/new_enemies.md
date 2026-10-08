@@ -204,11 +204,14 @@ reveals them (`Enemy.is_hidden()`). The two new Evaders extend the role in tier 
 
 | HP | Speed | Armor | Fly | Str | Leak | Bounty |
 |---|---|---|---|---|---|---|
-| 260 | 74 | 2 | No | 284.75 | 3 | 18 |
+| 260 | 74 | 2 | Yes | 284.75 | 3 | 18 |
 
 **Parked:** the Wraith needs damage types, which are a separate PR after the core rework. It is designed here
 and not built first; until then **Evader T4 stays empty**. The other three Tier 4 enemies ship without it.
 
+- **Flyer (owner, 2026-10-08):** the Wraith **flies**, so only towers that hit air can target it. Together with the
+  cloak and energy-only damage, only **energy towers that hit air** can hurt it; its counters need a balance check
+  when it is built (see `design/enemies.md`, Still open).
 - **Behaviour:** two evasions, **no blink**:
   - **Cloaked** (the Phantom's rule): towers can target it only inside a Sensor Array field, or for a moment
     after it takes damage.
