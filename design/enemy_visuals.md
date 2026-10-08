@@ -22,7 +22,8 @@ Today many enemies read as the same thing (owner-confirmed look-alike groups):
 - **Every enemy unique:** no shared silhouette or colour families, not even within a role.
 - **Full restyle, theme chosen per enemy, within sci-fi** (owner, round 3: "keep the sci-fi theme"). Every
   option is a machine, energy form or alien tech: force fields, anodized metal, ceramic, ferrofluid, plasma,
-  cryo-crystal, hologram and so on. Organic, botanical and folk-object themes are out.
+  cryo-crystal, hologram and so on. Organic, botanical and folk-object themes are out. *(Narrowed by the
+  round 4 and round 5 rules below: built, mechanized machines only.)*
 - **Built tech only** (owner, round 4: "sci-fi and tech"): every option must read as a **built machine**
   (drone, robot, vehicle, pod) with a visible machine body. Energy effects such as plasma, holograms, shields
   and frost appear only as part of a machine, never as the whole enemy.
