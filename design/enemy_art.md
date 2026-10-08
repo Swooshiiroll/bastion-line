@@ -106,7 +106,11 @@ black-red with magenta glow.
 | Strike Drone | Bank / Strafe-roll / Nose-dip | Strafing runs / Dive passes / Straight intercept |
 | Fury Drone | Lunge / Rage-shake / Lean | Charge bursts / Berserk swerve / Relentless chase |
 
-**Picks:** Skitter _, Needle _, Strike Drone _, Fury Drone _ (look, animation, movement; notes)
+**Rusher confirmed (owner, 2026-10-07).** Final picks:
+- **Skitter:** look A Six-leg scuttler, animation C Scuttle sway, movement C Skittish swerves.
+- **Needle:** look A Needle racer, animation C Hover-hum, movement B Twin weave.
+- **Strike Drone:** look B Twin-rotor attack drone, animation C Nose-dip, movement C Straight intercept.
+- **Fury Drone:** look C One-wheel spike bike, animation B Rage-shake, movement B Berserk swerve.
 
 ## Tank (role 3)
 
@@ -140,6 +144,5 @@ leaving the glowing frame. The previews loop it: plated for 5 s, the plates fall
 
 ## Open questions
 
-1. **Rusher picks**, and any change to the Rusher family traits.
-2. **Tank picks**, and any change to the Tank family traits.
-3. **Next role** after Tank (remaining: Support, Disruptor, Evader, Special, Boss).
+1. **Tank picks**, and any change to the Tank family traits.
+2. **Next role** after Tank (remaining: Support, Disruptor, Evader, Special, Boss).

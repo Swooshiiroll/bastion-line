@@ -89,11 +89,11 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 2 of 8: Rusher</div>
+    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 2 of 8: Rusher (confirmed)</div>
     <h1>Enemy art: Rusher</h1>
     <p class="note">A fresh start from the names: the machine army's <b>Rusher</b> role. For each enemy, pick its <b>look</b>, <b>animation</b> and
       <b>movement</b> separately from three proposals each (A to C), and add notes. Mix freely. The <b>Your combination</b> preview shows your
-      mix (option A until you pick). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
+      mix. <b>Rusher is confirmed:</b> your final picks are preselected (Skitter A/C/C, Needle A/C/B, Strike Drone B/C/C, Fury Drone C/B/B). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
       Spec: <code>design/enemy_art.md</code>.</p>
     <ul class="rules">
       <li><b>Machine army;</b> each <b>name inspires a trait</b> (not a literal picture).</li>
@@ -564,7 +564,14 @@ const BATCHES = [
       { id: "fury", name: "Fury Drone", tier: "T4", air: false, anims: "fury", trait: "berserk rage", today: { r: 10 } },
     ] },
 ];
-const STORE_KEY = "bl-enemy-art-rusher-v1";
+const STORE_KEY = "bl-enemy-art-rusher-v2";
+// Final picks (owner, 2026-10-07): preselected.
+const DEFAULTS = {
+  skitter: { look: "A", anim: "C", move: "C" },
+  needle: { look: "A", anim: "C", move: "B" },
+  strikedrone: { look: "B", anim: "C", move: "C" },
+  fury: { look: "C", anim: "B", move: "B" },
+};
 
 // ---- State (picks and notes, kept in this browser) -------------------------------------------------
 const STORE = STORE_KEY;
