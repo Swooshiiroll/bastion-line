@@ -58,6 +58,16 @@
   .lineup .rowlbl { font: 600 11px var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
   .picks { display: grid; gap: 6px; }
   .picks textarea { width: 100%; min-height: 54px; background: #071019; color: var(--text); border: 1px solid var(--rule); border-radius: 6px; font: 12px var(--mono); padding: 8px; resize: vertical; }
+  .combo { display: grid; gap: 4px; border: 1px solid var(--gold); border-radius: 8px; padding: 8px; background: rgba(255,200,90,.04); }
+  .combo .rowlbl, .lineup .rowlbl { font: 600 11px var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--gold); }
+  .dim { display: grid; gap: 8px; }
+  .dim h4 { font: 700 14px var(--display); letter-spacing: .06em; margin: 6px 0 0; color: var(--accent); text-transform: uppercase; }
+  .dim h4 .hint { font: 400 12px var(--body); color: var(--faint); text-transform: none; letter-spacing: 0; margin-left: 6px; }
+  .panels.small { grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr)); }
+  label.notes { display: grid; gap: 4px; }
+  label.notes .lbl { font: 600 11px var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
+  label.notes textarea { width: 100%; min-height: 44px; background: #071019; color: var(--text); border: 1px solid var(--rule); border-radius: 6px; font: 13px var(--body); padding: 6px 8px; resize: vertical; }
+  .picks button + button { margin-left: 8px; }
   .frames { display: none; gap: 8px; flex-wrap: wrap; }
   .frames figure { margin: 0; display: grid; gap: 2px; }
   .frames img { width: 216px; height: 144px; border: 1px solid var(--rule); border-radius: 4px; background: var(--field); }
@@ -78,18 +88,20 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Enemy visual redesign · batch 1 of 8</div>
+    <div class="eyebrow">Bastion Line · Enemy visual redesign · batch 1 of 8 (round 2)</div>
     <h1>Enemy redesign: every enemy unique</h1>
-    <p class="note">Redesigning all 34 enemies so no two look alike, one role at a time. Each enemy shows its
-      <b>today</b> look next to <b>three concepts</b>, at game scale (1x on a 48 px lane tile) and 3x. Pick one per
-      enemy with the gold buttons; the picks collect at the bottom of the batch for you to copy back. Spec:
-      <code>design/enemy_visuals.md</code>.</p>
+    <p class="note">Redesigning all 34 enemies so no two look or move alike, one role at a time. For each enemy you pick
+      three things separately: its <b>look</b>, its <b>animation</b> (how it moves its body) and its <b>movement</b> (its path
+      pattern on the lane). Each has <b>six options: today plus A to E</b>, and its own notes box. The <b>Your combination</b>
+      preview at the top of each enemy shows your current mix. Picks and notes are kept in this browser; copy them from the
+      bottom of the batch and send them back. Spec: <code>design/enemy_visuals.md</code>.</p>
     <ul class="rules">
       <li><b>Every enemy unique:</b> its own silhouette, theme and material; no shared families.</li>
       <li><b>Shape first, colour second:</b> turn on <b>Greyscale</b>: each concept must still be recognisable.</li>
       <li><b>Contrast with the towers:</b> towers are grey metal with neon accents on hex pads, so enemies carry
         their identity in coloured bodies and distinct materials (glass, chitin, paper, plasma, lacquer...).</li>
-      <li><b>Movement unchanged;</b> <b>sizes are free</b> (every radius change is listed for balance).</li>
+      <li><b>Movement can change</b> (animation and path pattern) at the <b>same average speed</b>; <b>flyers stay flyers and ground
+        stays ground</b>. Shown in place; movement is a diagram. <b>Sizes are free</b> (radius changes listed for balance).</li>
     </ul>
   </header>
 
@@ -371,254 +383,360 @@ DRAW.shrike = (c, f, n, ang, rr, t, b, g, o) => {
   plate(c, [[1.1, 0], [0, 0.32], [-0.8, 0], [0, -0.32]], b, ang, rr, 1.0); glowDot(add(c, mul(f, rr * 0.5)), rr * 0.2, g);
 };
 
-// ---- Redesign page: concepts, panels, lineup, picks --------------------------------------------
+// ---- Redesign page: looks, animation layer, movement diagrams, pickers ---------------------------
 const F = [1, 0], N = orth(F);
 function groundShadow(c, r, k = 1) { ellipse(add(c, [0, r * 0.75]), r * 1.1 * k, r * 0.45 * k, [0, 0, 0, 0.3]); }
-function airShadow(c, r, d = 2.4) { ellipse(add(c, [0, r * d]), r * 1.0, r * 0.32, [0, 0, 0, 0.18]); }
+function airShadow(c, r, d = 2.4, k = 1) { ellipse(add(c, [0, r * d]), r * 1.0 * k, r * 0.32 * k, [0, 0, 0, 0.18]); }
 function ovalLine(c, rx, ry, r, col, w) { const pts = []; for (let i = 0; i <= 20; i++) { const a = TAU * i / 20; pts.push(add(c, rot([Math.cos(a) * rx, Math.sin(a) * ry], r))); } polyline(pts, col, w); }
-function today(type, c, r, t, o = {}) {
-  const pal = PAL[type], f = F, n = N;
-  if (!FLYERS.has(type) && !(SELF_SHADOW && SELF_SHADOW.has(type))) groundShadow(c, r);
-  DRAW[type](c, f, n, 0, r, t, pal[0], pal[1], o);
-}
-const CLUSTER = [[0, 0], [-1.7, 1.4], [-1.7, -1.4], [-3.4, 2.8], [-3.4, -2.8]];
-function cluster(c, r, t, unit) { CLUSTER.forEach((q, i) => unit(add(add(c, [r * 1.6, 0]), [q[0] * r, q[1] * r]), r, t, i * 1.3)); }
+const iri = (t, a = 0.9) => [0.5 + 0.5 * Math.sin(t), 0.5 + 0.5 * Math.sin(t + 2.1), 0.5 + 0.5 * Math.sin(t + 4.2), a];
+const hash = n => { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
+function gearPts(teeth, ro, ri) { const o = []; for (let i = 0; i < teeth * 2; i++) { const a = Math.PI * i / teeth, rr = i % 2 ? ri : ro; o.push([Math.cos(a - 0.12) * rr, Math.sin(a - 0.12) * rr], [Math.cos(a + 0.12) * rr, Math.sin(a + 0.12) * rr]); } return o; }
 
-// ---- Batch 1: Swarm ---------------------------------------------------------------------------
-const NANITE = [
-  { key: "A", name: "Glass-bead motes", theme: "Crystal / glass", palette: "pale aqua glass, white glints", r: 7,
-    draw(c, t, r) {
-      groundShadow(c, r, 0.8); disc(c, r * 1.6, [0.6, 0.9, 0.95, 0.08]);
-      disc(c, r * 0.3, [0.55, 0.85, 0.92, 0.5]); ring(c, r * 0.42, [0.8, 0.97, 1, 0.85], 1.1);
-      const facet = [[0.55, 0], [0.1, 0.4], [-0.45, 0.15], [-0.3, -0.35], [0.2, -0.4]];
-      for (let k = 0; k < 5; k++) { const a = t * 4 + TAU * k / 5, p = add(c, mul(fa(a), r * 0.85)); fill(p, facet, [0.55, 0.85, 0.92, 0.75], a * 1.5, r * 0.42); outline(p, facet, [0.92, 1, 1, 0.9], 0.6, a * 1.5, r * 0.42); disc(add(p, [-r * 0.08, -r * 0.1]), 0.55, [1, 1, 1, 0.95]); }
-    } },
-  { key: "B", name: "Chitin mite cluster", theme: "Biomech insect", palette: "glossy rust-brown chitin, pale yellow eyes", r: 7,
-    draw(c, t, r) {
-      groundShadow(c, r, 0.8);
-      for (let k = 0; k < 3; k++) {
-        const a = t * 2.2 + TAU * k / 3, p = add(c, mul(fa(a), r * 0.6)), d = fa(a + Math.PI / 2), n = orth(d), ang = Math.atan2(d[1], d[0]);
-        for (let i = 0; i < 3; i++) for (const side of [-1, 1]) { const b = add(p, mul(d, r * (0.15 - 0.15 * i))); line(b, add(add(b, mul(n, side * r * 0.32)), mul(d, r * 0.06 * Math.sin(t * 30 + i + side))), [0.25, 0.15, 0.1, 1], 0.7); }
-        shadedOval(p, r * 0.42, r * 0.28, ang, [0.45, 0.28, 0.18, 1]);
-        disc(add(p, mul(d, r * 0.38)), r * 0.15, [0.3, 0.18, 0.12, 1]);
-        for (const side of [-1, 1]) disc(add(add(p, mul(d, r * 0.45)), mul(n, side * r * 0.07)), 0.55, [1, 0.9, 0.5, 1]);
-      }
-    } },
-  { key: "C", name: "Sulphur spark wisps", theme: "Plasma / elemental", palette: "sulphur-white sparks, soot-black trails", r: 7,
-    draw(c, t, r) {
-      disc(c, r * 1.4, [1, 0.95, 0.6, 0.06]);
-      for (let k = 0; k < 3; k++) {
-        const a = t * 5 + TAU * k / 3, pts = [];
-        for (let i = 0; i < 7; i++) pts.push(add(c, mul(fa(a - i * 0.35), r * (0.35 + 0.11 * i))));
-        polyline(pts, [0.12, 0.1, 0.08, 0.55], 2.4); polyline(pts.slice(0, 4), [1, 0.92, 0.45, 0.9], 1.0);
-        glowDot(pts[0], r * 0.14, [1, 0.95, 0.6, 1]);
-      }
-      glowDot(c, r * 0.22, [1, 1, 0.85, 1]);
-    } },
-];
-const LOCUST = [
-  { key: "A", name: "Origami flyer", theme: "Folded paper", palette: "cream paper, red ink stamp", r: 6,
-    draw(c, t, r) {
-      airShadow(c, r, 2.6);
-      const flap = 0.5 + 0.5 * Math.sin(t * 40), paper = [0.92, 0.86, 0.7, 1], ink = [0.35, 0.3, 0.22, 0.9];
-      for (const side of [-1, 1]) { const w = [[0.3, 0], [-0.3, side * (1.5 * flap + 0.3)], [-0.55, 0]]; fill(c, w, side > 0 ? paper : lt(paper, 0.1), 0, r); outline(c, w, ink, 0.7, 0, r); const q = xform(c, w, 0, r); line(q[0], mul(add(q[1], q[2]), 0.5), A(ink, 0.5), 0.5); }
-      const body = [[1.2, 0], [0, 0.22], [-1.0, 0], [0, -0.22]]; fill(c, body, dk(paper, 0.12), 0, r); outline(c, body, ink, 0.7, 0, r);
-      line(add(c, [r * 1.2, 0]), add(c, [-r * 1.0, 0]), A(ink, 0.5), 0.5); disc(add(c, [r * 0.35, 0]), r * 0.13, [0.8, 0.15, 0.15, 0.9]);
-    } },
-  { key: "B", name: "Iridescent dragonfly", theme: "Biomech insect", palette: "teal metallic body, rainbow membrane wings", r: 6,
-    draw(c, t, r) {
-      airShadow(c, r, 2.6);
-      for (let k = 0; k < 2; k++) for (const side of [-1, 1]) {
-        const base = add(c, mul(F, r * (0.25 - 0.3 * k))), ang = side * (Math.PI / 2 - 0.25 + 0.15 * Math.sin(t * 50 + k)), wc = add(base, mul(fa(ang), r * 0.75));
-        oval(wc, r * 0.8, r * 0.22, ang, [0.75, 0.95, 0.95, 0.18]);
-        ovalLine(wc, r * 0.8, r * 0.22, ang, [0.5 + 0.5 * Math.sin(t * 3 + k), 0.5 + 0.5 * Math.sin(t * 3 + 2 + k), 0.5 + 0.5 * Math.sin(t * 3 + 4 + k), 0.7], 0.6);
-      }
-      for (let i = 0; i < 5; i++) { const p = sub(c, mul(F, r * (0.35 + 0.3 * i))); disc(p, r * (0.17 - 0.015 * i) + 0.6, OUTLINE); disc(p, r * (0.17 - 0.015 * i), [0.1, 0.42, 0.4, 1]); }
-      shadedOval(c, r * 0.35, r * 0.25, 0, [0.12, 0.45, 0.42, 1]);
-      for (const side of [-1, 1]) { const e = add(add(c, mul(F, r * 0.45)), mul(N, side * r * 0.15)); disc(e, r * 0.15 + 0.5, OUTLINE); disc(e, r * 0.15, [0.2, 0.85, 0.6, 1]); disc(add(e, [-0.4, -0.4]), 0.4, [1, 1, 1, 0.8]); }
-    } },
-  { key: "C", name: "Rotor seed (samara)", theme: "Botanical machine", palette: "sandy tan blade, brown seed pod", r: 6,
-    draw(c, t, r) {
-      airShadow(c, r, 2.6);
-      const spin = t * 25, leaf = [[0.2, 0], [0.9, 0.25], [1.8, 0.18], [2.0, 0], [1.7, -0.12], [0.8, -0.15]];
-      for (let k = 1; k <= 3; k++) arc(c, r * 1.25, spin - 0.25 * k - 0.3, spin - 0.25 * k, [0.85, 0.7, 0.42, 0.1], r * 0.45);
-      fill(c, leaf, [0.85, 0.7, 0.42, 0.95], spin, r); outline(c, leaf, [0.4, 0.3, 0.15, 0.9], 0.6, spin, r);
-      for (const v of [0.6, 1.0, 1.4]) line(add(c, rot([0.3 * r, 0], spin)), add(c, rot([v * r, 0.14 * r], spin)), [0.55, 0.42, 0.22, 0.7], 0.5);
-      shadedOval(c, r * 0.38, r * 0.3, spin, [0.55, 0.38, 0.2, 1]);
-    } },
-];
-const DRONE = [
-  { key: "A", name: "Hazard sentry ball", theme: "Industrial / hazard paint", palette: "yellow and black hazard stripes, red eye", r: 10,
-    draw(c, t, r) {
-      groundShadow(c, r);
-      for (const side of [-1, 1]) { const pod = add(c, mul(N, side * r * 0.95)); plate(pod, rectPts(0.35, 0.2), [0.15, 0.15, 0.16, 1], 0, r, 1.0); glowDot(sub(pod, mul(F, r * 0.3)), r * 0.08, [1, 0.6, 0.2, 1]); }
-      disc(c, r * 0.9 + 1.1, OUTLINE); disc(c, r * 0.9, [0.95, 0.78, 0.12, 1]);
-      X.save(); X.beginPath(); X.arc(c[0], c[1], r * 0.9, 0, TAU); X.clip();
-      for (let k = -3; k <= 3; k++) { const o = add(c, rot([k * r * 0.5, 0], -0.8)); fill(o, rectPts(0.12, 1.4), [0.08, 0.08, 0.08, 1], -0.8, r); }
-      X.restore();
-      arc(c, r * 0.65, Math.PI * 1.05, Math.PI * 1.6, [1, 1, 0.85, 0.6], r * 0.12); disc(add(c, mul(LIGHT, r * 0.45)), r * 0.12, [1, 1, 1, 0.55]);
-      const e = add(c, mul(F, r * 0.35)); disc(e, r * 0.3, OUTLINE); disc(e, r * 0.24, [0.1, 0.1, 0.1, 1]); glowDot(e, r * 0.12, [1, 0.3, 0.2, 1]);
-    } },
-  { key: "B", name: "Jellyfish bell", theme: "Bioluminescent", palette: "translucent orchid bell, glowing core", r: 12,
-    draw(c, t, r) {
-      groundShadow(c, r, 0.8);
-      for (let k = 0; k < 6; k++) {
-        const s0 = add(c, mul(fa(Math.PI - 0.9 + k * 0.36), r * 0.7)), pts = [s0];
-        for (let i = 1; i < 6; i++) pts.push(add(sub(s0, mul(F, r * 0.32 * i)), mul(N, Math.sin(t * 4 + i * 0.9 + k) * r * 0.12)));
-        polyline(pts, [0.85, 0.55, 0.95, 0.35], 1.2);
-      }
-      const s = 1 + 0.06 * Math.sin(t * 3);
-      disc(c, r * 0.85 * s, [0.85, 0.55, 0.95, 0.35]); ring(c, r * 0.85 * s, [0.96, 0.78, 1, 0.75], 1.2);
-      for (let k = 0; k < 8; k++) { const d = fa(TAU * k / 8 + 0.2); line(add(c, mul(d, r * 0.25)), add(c, mul(d, r * 0.8 * s)), [0.95, 0.8, 1, 0.4], 0.7); }
-      disc(c, r * 0.4, [1, 0.8, 1, 0.25]); glowDot(c, r * 0.15, [1, 0.85, 1, 1]);
-    } },
-  { key: "C", name: "Lantern-eye sphere", theme: "Bronze clockwork", palette: "dark bronze sphere and fins, pale mint lantern", r: 11,
-    draw(c, t, r) {
-      groundShadow(c, r);
-      for (let k = 0; k < 8; k++) { const a = t * 1.5 + TAU * k / 8; solid(add(c, mul(fa(a), r * 0.9)), [[0.35, 0], [-0.2, 0.18], [-0.2, -0.18]], [0.42, 0.28, 0.12, 1], a, r * 0.75, 0.8); }
-      orb(c, r * 0.72, [0.55, 0.38, 0.18, 1]); arcSegments(c, r * 0.5, 4, 0.5, 0, dk([0.55, 0.38, 0.18, 1], 0.4), 1.2);
-      const e = add(c, mul(F, r * 0.2)); disc(e, r * 0.34, OUTLINE); disc(e, r * 0.28, [1, 0.95, 0.8, 0.9]); glowDot(e, r * 0.16, [0.7, 1, 0.95, 1]);
-    } },
-];
-function shrikeA(c, r, t, ph) {
-  airShadow(c, r); const spin = t * 14 + ph, arm = [[0, -0.18], [1.2, -0.05], [1.2, 0.12], [0, 0.18]];
-  for (const a of [spin, spin + 2.1]) { plate(c, arm, [0.35, 0.42, 0.55, 1], a, r, 0.9); const q = xform(c, arm, a, r); line(q[0], q[1], [0.95, 0.97, 1, 0.8], 0.6); }
-  orb(c, r * 0.22, [0.25, 0.3, 0.4, 1]);
-}
-function shrikeB(c, r, t, ph) {
-  airShadow(c, r); const w = Math.sin(t * 6 + ph);
-  const body = [[1.0, 0], [0.2, 0.25], [-0.3, 1.1 + 0.2 * w], [-0.55, 0.3], [-0.9, 0], [-0.55, -0.3], [-0.3, -1.1 + 0.2 * w], [0.2, -0.25]];
-  const tail = []; for (let i = 0; i < 5; i++) tail.push(add(sub(c, mul(F, r * (0.9 + 0.3 * i))), mul(N, Math.sin(t * 6 + ph - i) * r * 0.12 * i)));
-  polyline(tail, [0.15, 0.13, 0.25, 1], 1.2);
-  plate(c, body, [0.2, 0.18, 0.35, 1], 0, r, 1.0);
-  for (const p of [[-0.1, 0.55], [-0.1, -0.55], [-0.35, 0.8], [-0.35, -0.8]]) glowDot(add(c, mul(p, r)), r * 0.07, [0.8, 1, 0.7, 0.85]);
-}
-function shrikeC(c, r, t, ph) {
-  airShadow(c, r); const flap = 0.6 + 0.4 * Math.sin(t * 18 + ph), gloss = [0.1, 0.1, 0.12, 1];
-  for (const side of [-1, 1]) { const w = [[0.25, 0], [-0.1, side * 0.3], [-0.55, side * (1.5 * flap + 0.2)], [-0.25, side * (0.8 * flap + 0.1)], [-0.05, side * 0.1]]; fill(c, w, gloss, 0, r); outline(c, w, [0.35, 0.36, 0.42, 0.9], 0.6, 0, r); }
-  for (const side of [-1, 1]) line(sub(c, mul(F, r * 0.5)), add(sub(c, mul(F, r * 1.15)), mul(N, side * r * 0.28)), gloss, 1.4);
-  shadedOval(c, r * 0.55, r * 0.2, 0, [0.12, 0.12, 0.14, 1]); disc(add(c, mul(F, r * 0.32)), r * 0.12, [0.95, 0.95, 0.9, 1]); disc(add(c, mul(F, r * 0.45)), 0.5, [1, 1, 1, 1]);
-}
-const SHRIKE = [
-  { key: "A", name: "Boomerang blades", theme: "Thrown steel", palette: "blued steel, white edge", r: 7, draw(c, t, r) { cluster(c, r, t, shrikeA); } },
-  { key: "B", name: "Manta-ray biomech", theme: "Deep-sea biomech", palette: "indigo skin, pale lime photophores", r: 8, draw(c, t, r) { cluster(c, r, t, shrikeB); } },
-  { key: "C", name: "Mechanical swifts", theme: "Bird / lacquer", palette: "gloss black, white throat", r: 7, draw(c, t, r) { cluster(c, r, t, shrikeC); } },
-];
+// ---- Looks (bodies; idle details only, no shadow: the renderer adds shadows and animation) --------
+const LOOKS = {
+  nanite: [
+    { key: "A", name: "Ink-bubble cluster", theme: "Oil / soap film", palette: "oily black bubbles, iridescent rims", r: 7, draw(c, t, r) {
+      for (let k = 0; k < 4; k++) { const a = t * 1.5 + k * TAU / 4, p = add(c, mul(fa(a), r * 0.55 * (0.7 + 0.3 * Math.sin(t * 2 + k)))), br = r * (0.38 + 0.08 * Math.sin(t * 3 + k));
+        disc(p, br, [0.08, 0.06, 0.12, 0.88]); ring(p, br, iri(t * 2 + k), 0.9); disc(add(p, [-br * 0.35, -br * 0.35]), br * 0.18, [1, 1, 1, 0.8]); } } },
+    { key: "B", name: "Pollen puffballs", theme: "Botanical spores", palette: "mustard fuzz, pale tips", r: 7, draw(c, t, r) {
+      for (let k = 0; k < 3; k++) { const p = add(c, mul(fa(t * 0.8 + k * TAU / 3), r * 0.55)), br = r * 0.36;
+        for (let i = 0; i < 12; i++) { const d = fa(TAU * i / 12 + k), L = br * (1.25 + 0.15 * Math.sin(t * 9 + i)); line(add(p, mul(d, br * 0.6)), add(p, mul(d, L)), [1, 0.92, 0.55, 0.8], 0.6); }
+        disc(p, br, [0.85, 0.68, 0.15, 1]); disc(p, br * 0.45, [0.6, 0.45, 0.08, 1]); } } },
+    { key: "C", name: "Brass cog tumblers", theme: "Clockwork brass", palette: "polished brass, dark hubs", r: 7, draw(c, t, r) {
+      [[0, -0.5, 1], [-0.45, 0.4, -1], [0.5, 0.35, -1]].forEach(([x, y, d], k) => { const p = add(c, [x * r, y * r]), g = gearPts(7, 1, 0.78);
+        plate(p, g, [0.78, 0.6, 0.25, 1], t * 4 * d + k, r * 0.42, 0.7); disc(p, r * 0.12, [0.3, 0.22, 0.1, 1]); }); } },
+    { key: "D", name: "Mercury droplets", theme: "Liquid metal", palette: "chrome silver, white highlights", r: 7, draw(c, t, r) {
+      for (let k = 0; k < 3; k++) { const p = add(c, mul(fa(t * 1.1 + k * TAU / 3), r * 0.42 * (0.6 + 0.4 * Math.sin(t * 1.7 + k)))), br = r * (0.42 + 0.06 * Math.sin(t * 4 + k));
+        disc(p, br + 0.7, [0.2, 0.22, 0.26, 1]); disc(p, br, [0.75, 0.78, 0.82, 1]); disc(add(p, [br * 0.15, br * 0.2]), br * 0.6, [0.55, 0.58, 0.64, 1]); disc(add(p, [-br * 0.35, -br * 0.35]), br * 0.22, [1, 1, 1, 0.95]); } } },
+    { key: "E", name: "Glitch pixels", theme: "Digital corruption", palette: "magenta and cyan squares", r: 7, draw(c, t, r) {
+      const st = Math.floor(t * 12);
+      for (let i = 0; i < 9; i++) { if (hash(st * 9 + i) < 0.25) continue; const gx = (i % 3) - 1, gy = Math.floor(i / 3) - 1, o = [(hash(st + i * 3) - 0.5) * r * 0.3, (hash(st * 2 + i) - 0.5) * r * 0.3];
+        const p = add(add(c, [gx * r * 0.45, gy * r * 0.45]), o), s = r * 0.18, col = (i + st) % 2 ? [1, 0.2, 0.8, 1] : [0.2, 0.95, 1, 1];
+        rect(p[0] - s, p[1] - s, s * 2, s * 2, col); } } },
+  ],
+  locust: [
+    { key: "A", name: "Dust moth", theme: "Felted insect", palette: "dusty beige wings, dark eye-spots", r: 6, draw(c, t, r) {
+      const flap = 0.6 + 0.4 * Math.sin(t * 30), wing = [0.62, 0.56, 0.48, 1];
+      for (const side of [-1, 1]) for (const [fx, sz] of [[0.15, 1.0], [-0.35, 0.8]]) { const w = [[fx, 0], [fx + 0.5 * sz, side * 1.3 * sz * flap], [fx - 0.2, side * 1.5 * sz * flap], [fx - 0.5, side * 0.4]]; fill(c, w, wing, 0, r); outline(c, w, [0.35, 0.3, 0.25, 0.9], 0.6, 0, r);
+        if (sz < 1) { const sp = add(c, [r * (fx - 0.1), side * r * 0.9 * flap]); disc(sp, r * 0.16, [0.2, 0.15, 0.12, 1]); ring(sp, r * 0.16, [0.85, 0.8, 0.7, 1], 0.5); } }
+      shadedOval(c, r * 0.6, r * 0.22, 0, [0.45, 0.36, 0.28, 1]);
+      for (const side of [-1, 1]) polyline([add(c, [r * 0.5, 0]), add(c, [r * 0.95, side * r * 0.35]), add(c, [r * 1.15, side * r * 0.5])], [0.55, 0.48, 0.4, 1], 0.6); } },
+    { key: "B", name: "Cave bat", theme: "Leathery creature", palette: "dusky violet membrane, amber eyes", r: 7, draw(c, t, r) {
+      const span = 0.65 + 0.35 * Math.sin(t * 14), skin = [0.52, 0.38, 0.6, 1];
+      for (const side of [-1, 1]) { const w = [[0.2, 0], [0.1, side * 0.9 * span + side * 0.2], [-0.2, side * 1.6 * span + side * 0.2], [-0.35, side * 1.0 * span], [-0.55, side * 1.25 * span], [-0.5, side * 0.4], [-0.3, 0]]; fill(c, w, skin, 0, r); outline(c, w, [0.78, 0.64, 0.86, 1], 0.7, 0, r);
+        for (const q of [1, 2, 4]) line(c, xform(c, w, 0, r)[q], [0.3, 0.2, 0.36, 0.9], 0.6); }
+      shadedOval(c, r * 0.42, r * 0.26, 0, [0.4, 0.28, 0.46, 1]);
+      for (const side of [-1, 1]) { fill(add(c, [r * 0.35, side * r * 0.12]), [[0.35, 0], [0, 0.18], [0, -0.18]], [0.22, 0.15, 0.26, 1], -side * 0.5, r); disc(add(c, [r * 0.38, side * r * 0.08]), 0.6, [1, 0.75, 0.3, 1]); } } },
+    { key: "C", name: "Firefly", theme: "Bioluminescent beetle", palette: "dark olive shell, warm gold lamp", r: 6, draw(c, t, r) {
+      const on = fmod(t, 1.2) < 0.35 ? 1 : 0.15;
+      for (const side of [-1, 1]) { oval(add(c, [-r * 0.1, side * r * 0.55]), r * 0.75, r * 0.22, side * 0.35 + Math.sin(t * 40) * 0.1 * side, [0.85, 0.9, 0.95, 0.22]); }
+      disc(sub(c, [r * 0.55, 0]), r * 0.55 * (1 + on), [1, 0.95, 0.4, 0.12 * on]); glowDot(sub(c, [r * 0.55, 0]), r * 0.32, [1, 0.95, 0.45, on]);
+      shadedOval(add(c, [r * 0.15, 0]), r * 0.55, r * 0.3, 0, [0.25, 0.28, 0.15, 1]); line(add(c, [r * 0.15, -r * 0.28]), add(c, [r * 0.15, r * 0.28]), [0.12, 0.14, 0.08, 1], 0.6);
+      disc(add(c, [r * 0.7, 0]), r * 0.18, [0.15, 0.15, 0.1, 1]); } },
+    { key: "D", name: "Quill feather", theme: "Feather", palette: "bone white vanes, indigo tip", r: 7, draw(c, t, r) {
+      const vane = [[1.3, 0], [0.6, 0.38], [-0.4, 0.42], [-1.1, 0.15], [-1.1, -0.15], [-0.4, -0.42], [0.6, -0.38]];
+      fill(c, vane, [0.92, 0.9, 0.86, 1], 0, r); outline(c, vane, [0.55, 0.52, 0.5, 1], 0.6, 0, r);
+      fill(c, [[1.3, 0], [0.95, 0.25], [0.95, -0.25]], [0.25, 0.25, 0.55, 1], 0, r);
+      for (let i = 1; i < 7; i++) for (const side of [-1, 1]) { const x = -1.0 + i * 0.3; line(add(c, [x * r, 0]), add(c, [(x + 0.25) * r, side * r * 0.36]), [0.7, 0.68, 0.64, 0.8], 0.4); }
+      line(add(c, [-r * 1.5, 0]), add(c, [r * 1.25, 0]), [0.6, 0.55, 0.48, 1], 0.8); } },
+    { key: "E", name: "Sky ribbon", theme: "Fabric creature", palette: "teal and coral ribbon, black eyes", r: 7, draw(c, t, r) {
+      const pts = []; for (let i = 0; i < 12; i++) pts.push(add(c, [-i * r * 0.28 + r * 0.6, Math.sin(t * 6 - i * 0.6) * r * 0.35 * (i / 11)]));
+      for (let i = 0; i < pts.length - 1; i++) line(pts[i], pts[i + 1], i % 2 ? [0.95, 0.5, 0.45, 1] : [0.15, 0.7, 0.68, 1], r * 0.32);
+      shadedOval(add(pts[0], [r * 0.15, 0]), r * 0.32, r * 0.24, 0, [0.15, 0.7, 0.68, 1]);
+      for (const side of [-1, 1]) disc(add(pts[0], [r * 0.3, side * r * 0.1]), 0.55, [0.02, 0.02, 0.02, 1]); } },
+  ],
+  drone: [
+    { key: "A", name: "Tumbleweed cage", theme: "Wire / scrap", palette: "rusted tan wire, ember core", r: 11, draw(c, t, r) {
+      disc(c, r * 0.3, [1, 0.6, 0.2, 0.25]); glowDot(c, r * 0.12, [1, 0.62, 0.25, 1]);
+      for (let k = 0; k < 5; k++) ovalLine(c, r * 0.92, r * 0.92 * Math.abs(Math.cos(t * 1.5 + k * 0.63)) + 0.5, k * 0.63, [0.65, 0.52, 0.36, 0.85], 0.9);
+      ring(c, r * 0.92, [0.5, 0.4, 0.28, 1], 1.0); } },
+    { key: "B", name: "Pillbug", theme: "Armoured crustacean", palette: "slate blue-grey plates", r: 11, draw(c, t, r) {
+      for (let i = 0; i < 7; i++) for (const side of [-1, 1]) { const x = (0.6 - i * 0.18) * r, ph = Math.sin(t * 18 + i * 0.8 + side); line(add(c, [x, side * r * 0.5]), add(c, [x + ph * r * 0.08, side * r * 0.72]), [0.25, 0.28, 0.32, 1], 0.8); }
+      shadedOval(c, r * 0.85, r * 0.55, 0, [0.45, 0.52, 0.62, 1]);
+      for (let i = 0; i < 6; i++) { const x = (0.55 - i * 0.2) * r; arc(add(c, [x - r * 0.4, 0]), r * 0.55, -0.85, 0.85, [0.3, 0.35, 0.42, 1], 0.8); }
+      disc(add(c, [r * 0.82, 0]), r * 0.2, [0.32, 0.36, 0.44, 1]); for (const side of [-1, 1]) line(add(c, [r * 0.95, side * r * 0.08]), add(c, [r * 1.25, side * r * 0.3]), [0.3, 0.34, 0.4, 1], 0.6); } },
+    { key: "C", name: "Unicycle bot", theme: "Toy-like robot", palette: "cream body, mint stripe, black tyre", r: 10, draw(c, t, r) {
+      plate(c, rectPts(0.85, 0.16), [0.12, 0.12, 0.13, 1], 0, r, 0.9);
+      for (let k = 0; k < 4; k++) { const x = (fmod(t * 3 + k * 0.5, 2) - 1) * 0.8 * r; line(add(c, [x, -r * 0.14]), add(c, [x, r * 0.14]), [0.3, 0.3, 0.32, 1], 0.6); }
+      for (const side of [-1, 1]) limb([add(c, [0, side * r * 0.35]), add(c, [r * 0.1 * Math.sin(t * 4 + side), side * r * 0.75]), add(c, [r * 0.2 * Math.sin(t * 4 + side), side * r * 0.95])], 1.0, [0.85, 0.82, 0.72, 1]);
+      orb(c, r * 0.48, [0.92, 0.88, 0.76, 1]); arc(c, r * 0.48, -0.6, 0.6, [0.4, 0.85, 0.7, 1], 1.6); disc(add(c, [r * 0.28, 0]), r * 0.1, [0.1, 0.1, 0.1, 1]); } },
+    { key: "D", name: "Stone totem", theme: "Carved stone", palette: "sandstone layers, moss-green rune", r: 12, draw(c, t, r) {
+      const stone = (k, s, col) => { const pts = []; for (let i = 0; i < 9; i++) { const a = TAU * i / 9, rr = s * (0.85 + 0.15 * hash(k * 9 + i)); pts.push([Math.cos(a) * rr, Math.sin(a) * rr]); } plate(c, pts, col, k * 0.4, r, 1.0); };
+      stone(1, 1.0, [0.55, 0.48, 0.38, 1]); stone(2, 0.72, [0.62, 0.55, 0.43, 1]); stone(3, 0.45, [0.7, 0.62, 0.48, 1]);
+      disc(add(c, [-r * 0.55, r * 0.35]), r * 0.12, [0.35, 0.5, 0.25, 0.8]); disc(add(c, [r * 0.4, -r * 0.55]), r * 0.1, [0.35, 0.5, 0.25, 0.8]);
+      const g = [0.6, 1, 0.5, 0.6 + 0.3 * Math.sin(t * 2)]; polyline([add(c, [-r * 0.15, -r * 0.2]), add(c, [r * 0.12, 0]), add(c, [-r * 0.15, r * 0.2])], g, 1.2); line(add(c, [r * 0.12, -r * 0.22]), add(c, [r * 0.12, r * 0.22]), g, 1.2); } },
+    { key: "E", name: "Spinning top", theme: "Lacquered toy", palette: "lacquer red and cream wedges, gold knob", r: 11, draw(c, t, r) {
+      const sp = t * 18;
+      for (let k = 0; k < 8; k++) { const a0 = sp + k * TAU / 8; poly([c, add(c, mul(fa(a0), r * 0.92)), add(c, mul(fa(a0 + TAU / 16), r * 0.95)), add(c, mul(fa(a0 + TAU / 8), r * 0.92))], k % 2 ? [0.95, 0.9, 0.8, 1] : [0.75, 0.12, 0.15, 1]); }
+      ring(c, r * 0.93, OUTLINE, 1.2); for (let k = 1; k <= 3; k++) arc(c, r * 0.7, sp - 0.4 * k, sp - 0.4 * k + 0.3, [1, 1, 1, 0.12], r * 0.3);
+      orb(c, r * 0.22, [0.9, 0.72, 0.25, 1]); } },
+  ],
+  shrike: [
+    { key: "A", name: "Icicle shards", theme: "Ice crystal", palette: "pale blue-white ice, bright edges", r: 7, unit(c, t, r, ph) {
+      const sh = [[1.4, 0], [0.2, 0.3], [-0.9, 0.12], [-1.1, 0], [-0.9, -0.12], [0.2, -0.3]];
+      fill(c, sh, [0.75, 0.9, 1, 0.75], 0, r); outline(c, sh, [0.95, 1, 1, 1], 0.7, 0, r); line(add(c, [r * 1.4, 0]), add(c, [-r * 1.0, 0]), [1, 1, 1, 0.6], 0.5);
+      if (fmod(t * 2 + ph, 1) < 0.15) glowDot(add(c, [r * 0.3, -r * 0.2]), r * 0.12, [1, 1, 1, 1]); } },
+    { key: "B", name: "Starling", theme: "Bird flock", palette: "glossy purple-green sheen, white speckles", r: 6, unit(c, t, r, ph) {
+      const flap = 0.55 + 0.45 * Math.sin(t * 20 + ph), body = [0.18, 0.15, 0.22, 1];
+      for (const side of [-1, 1]) { const w = [[0.2, 0], [-0.25, side * (1.6 * flap + 0.2)], [-0.45, side * (1.2 * flap + 0.1)], [-0.35, 0]]; fill(c, w, body, 0, r); outline(c, w, iri(t + ph, 0.7), 0.6, 0, r); }
+      shadedOval(c, r * 0.6, r * 0.22, 0, body); fill(sub(c, [r * 0.6, 0]), [[0, 0], [-0.45, 0.22], [-0.45, -0.22]], body, 0, r);
+      for (const p of [[0.1, 0.08], [-0.2, -0.06], [0.3, -0.05]]) disc(add(c, mul(p, r)), 0.45, [1, 1, 1, 0.9]); line(add(c, [r * 0.55, 0]), add(c, [r * 0.85, 0]), [0.9, 0.75, 0.3, 1], 0.8); } },
+    { key: "C", name: "Leaf storm", theme: "Autumn leaves", palette: "burnt orange and brown leaves", r: 7, unit(c, t, r, ph) {
+      const a = t * 2 + ph, leaf = []; for (let i = 0; i < 10; i++) { const q = TAU * i / 10, rr = i % 2 ? 0.55 : 1.0; leaf.push([Math.cos(q) * rr, Math.sin(q) * rr * 0.9]); }
+      const col = ph % 2.6 < 1.3 ? [0.85, 0.45, 0.15, 1] : [0.6, 0.32, 0.12, 1];
+      plate(c, leaf, col, a, r * 0.85, 0.7); for (let i = 0; i < 5; i++) line(c, add(c, rot([r * 0.8, 0], a + TAU * i / 5)), A(dk(col, 0.4), 0.9), 0.5);
+      line(c, add(c, rot([-r * 1.1, 0], a)), [0.4, 0.25, 0.1, 1], 0.8); } },
+    { key: "D", name: "Squid jets", theme: "Cephalopod", palette: "coral-pink mantle, deep red spots", r: 7, unit(c, t, r, ph) {
+      const pulse = 0.85 + 0.15 * Math.sin(t * 6 + ph);
+      for (let i = 0; i < 6; i++) { const pts = [], y0 = (i - 2.5) * 0.12 * r; for (let j = 0; j < 5; j++) pts.push(add(c, [-r * (0.4 + 0.3 * j), y0 * (1 + j * 0.3 * pulse) + Math.sin(t * 8 + i + j) * r * 0.06])); polyline(pts, [0.9, 0.5, 0.52, 0.9], 0.8); }
+      oval(add(c, [r * 0.25, 0]), r * 0.75 * (1.1 - 0.1 * pulse), r * 0.3 * pulse, 0, [0.95, 0.56, 0.55, 1], 0.8);
+      fill(add(c, [r * 0.9, 0]), [[0.35, 0], [-0.1, 0.32], [-0.1, -0.32]], [0.98, 0.65, 0.62, 1], 0, r);
+      for (const p of [[0.4, 0.1], [0.1, -0.12], [0.6, -0.08]]) disc(add(c, mul(p, r)), 0.6, [0.6, 0.12, 0.2, 0.9]); } },
+    { key: "E", name: "Comet sparks", theme: "Fire / meteor", palette: "white-gold head, pale blue tail", r: 6, unit(c, t, r, ph) {
+      for (let i = 1; i <= 8; i++) { const p = sub(c, [r * 0.5 * i, Math.sin(t * 5 + ph + i * 0.4) * r * 0.08 * i]); disc(p, r * (0.45 - i * 0.045), [0.6, 0.8, 1, 0.5 - i * 0.055]); }
+      glowDot(c, r * 0.4, [1, 0.88, 0.5, 1]); } },
+  ],
+};
 
+// ---- Animations (a locomotion layer applied around the body centre) -------------------------------
+const ANIMS = {
+  ground: [
+    { key: "A", name: "Roll", desc: "The whole body rolls forward.", fx: (t) => ({ rot: t * 4 }) },
+    { key: "B", name: "Hop", desc: "Bounces with squash on landing.", fx: (t) => { const p = fmod(t / 0.6, 1), h = Math.sin(p * Math.PI); const sq = (p < 0.1 || p > 0.9) ? 1 : 0; return { dy: -h * 0.7, sx: 1 + 0.15 * sq, sy: 1 - 0.15 * sq, lift: h }; } },
+    { key: "C", name: "Ooze", desc: "Pulses and stretches like a blob.", fx: (t) => ({ sx: 1 + 0.14 * Math.sin(t * 6), sy: 1 - 0.14 * Math.sin(t * 6) }) },
+    { key: "D", name: "Wobble", desc: "Sways side to side as it goes.", fx: (t) => ({ rot: 0.3 * Math.sin(t * 5), dy: -0.05 * Math.abs(Math.sin(t * 5)) }) },
+    { key: "E", name: "Jitter", desc: "Twitches in sharp little jumps.", fx: (t) => { const s = Math.floor(t * 10); return { dx: (hash(s) - 0.5) * 0.5, dy: (hash(s + 77) - 0.5) * 0.5 }; } },
+  ],
+  air: [
+    { key: "A", name: "Flutter", desc: "Erratic fluttering wobble.", fx: (t) => ({ dx: 0.3 * Math.sin(t * 13) + 0.15 * Math.sin(t * 7.3), dy: 0.25 * Math.sin(t * 11.7), rot: 0.25 * Math.sin(t * 11) }) },
+    { key: "B", name: "Swoop", desc: "Banks and climbs, then dives.", fx: (t) => ({ rot: 0.5 * Math.sin(t * 2), sx: 1 + 0.15 * Math.cos(t * 2), sy: 1 + 0.15 * Math.cos(t * 2), lift: 0.5 + 0.5 * Math.cos(t * 2) }) },
+    { key: "C", name: "Hover-bob", desc: "Hangs in the air, bobbing.", fx: (t) => ({ dy: 0.25 * Math.sin(t * 3) }) },
+    { key: "D", name: "Glide-spin", desc: "Glides while slowly spinning.", fx: (t) => ({ rot: t * 1.2 }) },
+    { key: "E", name: "Undulate", desc: "Waves side to side like a fish.", fx: (t) => ({ dy: 0.5 * Math.sin(t * 4), rot: 0.3 * Math.cos(t * 4) }) },
+  ],
+};
+
+// ---- Movements (path pattern diagrams at the same average speed V) ----------------------------------
+const V = 34; // diagram px per second
+const steady = t => [V * t, 0];
+const MOVES = {
+  nanite: [
+    { key: "A", name: "Weave", desc: "Drifts in a slow weave across the lane.", f: t => [V * t, 9 * Math.sin(t * 2.4)] },
+    { key: "B", name: "Stop-go hops", desc: "Pauses, then hops forward at double speed.", f: t => { const p = 0.8, k = Math.floor(t / p), u = fmod(t, p) / p; return [V * p * (k + Math.min(1, u * 2)), -6 * Math.max(0, Math.sin(Math.min(1, u * 2) * Math.PI))]; } },
+    { key: "C", name: "Rhythmic surges", desc: "Speeds up and slows down in a beat.", f: t => [V * t - V * 0.7 / 4 * Math.cos(t * 4), 0] },
+    { key: "D", name: "S-slither", desc: "Slithers in tight S-curves.", f: t => [V * t, 7 * Math.sin(V * t / 6)] },
+    { key: "E", name: "Micro-blinks", desc: "Teleports forward in small steps.", f: t => [V * 0.4 * Math.floor(t / 0.4), 0], blink: true },
+  ],
+  locust: [
+    { key: "A", name: "Jittery zigzag", desc: "Zigzags with sudden twitches.", f: t => [V * t, 10 * (2 * Math.abs(fmod(t * 1.5, 2) - 1) - 1) + 3 * (hash(Math.floor(t * 8)) - 0.5)] },
+    { key: "B", name: "Wide swoops", desc: "Sweeps in wide arcs, fastest on the downswing.", f: t => [V * t + 6 * Math.sin(t * 1.4), 14 * Math.sin(t * 1.4)] },
+    { key: "C", name: "Pause-and-dart", desc: "Hangs still, then darts forward at triple speed.", f: t => { const p = 1.2, k = Math.floor(t / p), u = fmod(t, p) / p; return [V * p * (k + Math.min(1, Math.max(0, (u - 0.67) * 3))), 0]; } },
+    { key: "D", name: "Glide and sway", desc: "Glides straight with a gentle sway.", f: t => [V * t, 4 * Math.sin(t * 1.1)] },
+    { key: "E", name: "Sine undulation", desc: "Undulates in an even wave.", f: t => [V * t, 9 * Math.sin(t * 4)] },
+  ],
+  drone: [
+    { key: "A", name: "Bouncy surges", desc: "Rolls in bursts, bouncing a little.", f: t => [V * t - V * 0.6 / 3 * Math.cos(t * 3), 3 * Math.abs(Math.sin(t * 3))] },
+    { key: "B", name: "Walk then roll", desc: "Walks slowly, then rolls ahead fast.", f: t => { const k = Math.floor(t / 1.8), u = fmod(t, 1.8); return [V * (k * 1.8 + (u < 1.2 ? u * 0.6 : 0.72 + (u - 1.2) * 1.8)), 0]; } },
+    { key: "C", name: "Wobbling weave", desc: "Weaves and wobbles as it balances.", f: t => [V * t, 7 * Math.sin(t * 3) + 2 * Math.sin(t * 9)] },
+    { key: "D", name: "Heavy hops", desc: "Long pauses, then a heavy hop.", f: t => { const p = 1.0, k = Math.floor(t / p), u = fmod(t, p) / p; const m = Math.min(1, Math.max(0, (u - 0.6) / 0.4)); return [V * p * (k + m), -7 * Math.sin(m * Math.PI)]; } },
+    { key: "E", name: "Precessing loops", desc: "Spirals forward in small loops.", f: t => [V * t + 8 * Math.cos(t * 4), 8 * Math.sin(t * 4)] },
+  ],
+  shrike: [
+    { key: "A", name: "Tight V, regroups", desc: "Holds a V that spreads, then snaps tight.", f: t => [V * t, 0], spread: t => 0.6 + 0.4 * Math.sin(t * 1.5) },
+    { key: "B", name: "Murmuration swirl", desc: "The flock swirls around its centre.", f: t => [V * t, 0], swirl: true },
+    { key: "C", name: "Gust surges", desc: "Blown forward in gusts, drifting sideways.", f: t => [V * t - V * 0.7 / 2 * Math.cos(t * 2), 8 * Math.sin(t * 0.9)] },
+    { key: "D", name: "Pulse-jets", desc: "Jets forward in sharp pulses.", f: t => { const p = 0.7, k = Math.floor(t / p), u = fmod(t, p) / p; return [V * p * (k + Math.sqrt(Math.min(1, u * 2.5))), 0]; } },
+    { key: "E", name: "Streaking surges", desc: "Long fast streaks, then slow drifts.", f: t => [V * t - V * 0.9 / 1.5 * Math.cos(t * 1.5), 0] },
+  ],
+};
+
+// ---- Batch -------------------------------------------------------------------------------------------
 const BATCHES = [
   { n: 1, role: "Swarm", job: "Overwhelm single-target towers. Counter: splash, chain.", enemies: [
-    { id: "nanite", name: "Nanite", tier: "T1", move: "orbiting cloud", today: { type: "swarmling", r: 6 }, concepts: NANITE },
-    { id: "locust", name: "Locust", tier: "T2", move: "flapping flyer", today: { type: "locust", r: 5 }, concepts: LOCUST },
-    { id: "drone", name: "Drone", tier: "T3", move: "hover disc", today: { type: "grunt", r: 11 }, concepts: DRONE },
-    { id: "shrike", name: "Shrike", tier: "T4 · new", move: "flying cluster of 5", today: { type: "shrike", r: 7, cluster: true }, concepts: SHRIKE },
+    { id: "nanite", name: "Nanite", tier: "T1", air: false, today: { type: "swarmling", r: 6, anim: "orbiting cloud", move: "steady" } },
+    { id: "locust", name: "Locust", tier: "T2", air: true, today: { type: "locust", r: 5, anim: "flapping wings", move: "steady" } },
+    { id: "drone", name: "Drone", tier: "T3", air: false, today: { type: "grunt", r: 11, anim: "hover disc", move: "steady" } },
+    { id: "shrike", name: "Shrike", tier: "T4 · new", air: true, cluster: true, today: { type: "shrike", r: 7, anim: "flapping blade-wings", move: "steady" } },
   ] },
 ];
 
-// ---- Rendering -----------------------------------------------------------------------------------
-const DPR = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
-const W1 = 96, H1 = 64;
-const panels = [], lineups = [];
-const picks = {};
-let T = 0, playing = true, speed = 1;
-function mkCanvas(w, h) { const cv = document.createElement("canvas"); cv.width = Math.round(w * DPR); cv.height = Math.round(h * DPR); cv.style.width = w + "px"; cv.style.height = h + "px"; return cv; }
-function view(label, cv) { const v = document.createElement("div"); v.className = "view"; const s = document.createElement("small"); s.textContent = label; v.append(cv, s); return v; }
+// ---- State (picks and notes, kept in this browser) -------------------------------------------------
+const STORE = "bl-enemy-redesign-batch1-v2";
+let state = {};
+try { state = JSON.parse(localStorage.getItem(STORE) || "{}") || {}; } catch (e) { state = {}; }
+function st(id) { if (!state[id]) state[id] = { look: null, anim: null, move: null, notes: { look: "", anim: "", move: "" } }; return state[id]; }
+function save() { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) { /* storage unavailable */ } }
+const lookOf = en => { const k = st(en.id).look; return k && k !== "T" ? LOOKS[en.id].find(l => l.key === k) : null; };
+const animOf = en => { const k = st(en.id).anim; return k && k !== "T" ? ANIMS[en.air ? "air" : "ground"].find(a => a.key === k) : null; };
+const moveOf = en => { const k = st(en.id).move; return k && k !== "T" ? MOVES[en.id].find(m => m.key === k) : null; };
+
+// ---- Drawing a subject: look + animation, with shadows outside the animation transform -------------
+const CLUSTER = [[0, 0], [-1.7, 1.4], [-1.7, -1.4], [-3.4, 2.8], [-3.4, -2.8]];
+function drawBody(en, look, c, t, ph) {
+  if (look) { if (look.unit) look.unit(c, t, look.r, ph); else look.draw(c, t, look.r); return; }
+  const td = en.today, pal = PAL[td.type]; DRAW[td.type](c, F, N, 0, td.r, t, pal[0], pal[1], { phase: ph });
+}
+function drawUnit(en, look, anim, c, t, ph) {
+  const r = look ? look.r : en.today.r, a = anim ? anim.fx(t + ph * 0.37) : {};
+  const lift = a.lift || 0;
+  if (en.air) { if (look) airShadow(c, r, 2.4 + lift, 1 - 0.2 * lift); }
+  else groundShadow(c, r, 1 - 0.35 * lift);
+  X.save(); X.translate(c[0] + (a.dx || 0) * r, c[1] + (a.dy || 0) * r); X.rotate(a.rot || 0); X.scale(a.sx || 1, a.sy || 1); X.translate(-c[0], -c[1]);
+  drawBody(en, look, c, t, ph); X.restore();
+}
+function drawSubject(en, look, anim, c, t) {
+  const cl = en.cluster, r = look ? look.r : en.today.r;
+  if (cl) CLUSTER.forEach((q, i) => drawUnit(en, look, anim, add(add(c, [r * 1.6, 0]), [q[0] * r, q[1] * r]), t, i * 1.3));
+  else drawUnit(en, look, anim, c, t, 0);
+}
 function laneBg(W, H) {
   rect(0, 0, W, H, [0.043, 0.063, 0.086, 1]);
   const y0 = H / 2 - 24; rect(0, y0, W, 48, [0.075, 0.1, 0.13, 1]);
   for (let x = 0; x <= W; x += 48) line([x, y0], [x, y0 + 48], [0.16, 0.24, 0.3, 0.45], 0.6);
   line([0, y0], [W, y0], [0.2, 0.32, 0.4, 0.6], 0.8); line([0, y0 + 48], [W, y0 + 48], [0.2, 0.32, 0.4, 0.6], 0.8);
 }
-function drawSubject(subj, c, t) {
-  if (subj.concept) { subj.concept.draw(c, t, subj.concept.r); return; }
-  const td = subj.today;
-  if (td.cluster) cluster(c, td.r, t, (p, r, tt, ph) => today(td.type, p, r, tt, { phase: ph }));
-  else today(td.type, c, td.r, t);
+const MW = 160, MH = 52;
+function drawMove(en, mv, t) {
+  rect(0, 0, MW, MH, [0.043, 0.063, 0.086, 1]); rect(0, MH / 2 - 18, MW, 36, [0.075, 0.1, 0.13, 1]);
+  line([0, MH / 2], [MW, MH / 2], [0.2, 0.32, 0.4, 0.35], 0.6);
+  const f = mv ? mv.f : steady, span = MW + 30, col = [0.3, 0.88, 1, 1];
+  const pos = tt => { const p = f(tt); return [fmod(p[0], span) - 15, MH / 2 + p[1]]; };
+  const lap = span / V, tb = Math.floor(t / lap) * lap; let tp = null;
+  for (let k = 0; k <= 160; k++) { const q = pos(tb + k * lap / 160); if (tp && Math.abs(q[0] - tp[0]) < 20) line(tp, q, A(col, 0.22), 1.0); tp = q; }
+  for (let k = 0; k < 48; k++) disc(pos(tb + k * lap / 48), 0.9, A(col, 0.5)); // equal time steps: bunched = slow, spread = fast
+  let prev = null;
+  for (let k = 14; k >= 0; k--) { const tt = t - k * 0.08, p = pos(tt); if (prev && Math.abs(p[0] - prev[0]) < 20) line(prev, p, A(col, 0.6 * (1 - k / 15)), 1.4); prev = p; }
+  const p = pos(t);
+  if (en.cluster) {
+    const sp = mv && mv.spread ? mv.spread(t) : 1;
+    CLUSTER.forEach((q, i) => { let o = [q[0] * 3.2 * sp, q[1] * 3.2 * sp]; if (mv && mv.swirl) o = rot(o, t * 1.6); disc(add(p, o), 2.2, i ? A(col, 0.8) : col); });
+  } else { disc(p, 5.5, A(col, 0.2)); disc(p, 3.4, col); }
+  if (mv && mv.blink && fmod(t, 0.4) < 0.08) ring(p, 6, A(col, 0.7), 1);
 }
-function renderPanel(p, ctx, scale, t) {
-  X = ctx; ctx.setTransform(DPR * scale, 0, 0, DPR * scale, 0, 0); ctx.lineCap = "round"; ctx.lineJoin = "round";
-  laneBg(W1, H1); ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W1, H1); ctx.clip(); drawSubject(p.subj, [W1 / 2, H1 / 2], t); ctx.restore();
+
+// ---- Build UI ------------------------------------------------------------------------------------------
+const DPR = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
+const W1 = 96, H1 = 64;
+const jobs = []; // { kind, cv, ctx, scale, fn, visible }
+const io = typeof IntersectionObserver === "undefined" ? null : new IntersectionObserver(es => es.forEach(e => { const j = jobs.find(x => x.cv === e.target); if (j) j.visible = e.isIntersecting; }), { rootMargin: "200px" });
+function mkCanvas(w, h) { const cv = document.createElement("canvas"); cv.width = Math.round(w * DPR); cv.height = Math.round(h * DPR); cv.style.width = w + "px"; cv.style.height = h + "px"; return cv; }
+function job(cv, w, h, scale, fn, frames) { const j = { cv, w, h, ctx: cv.getContext("2d"), scale, fn, visible: !io, frames }; jobs.push(j); if (io) io.observe(cv); return j; }
+function paint(ctx, scale, w, h, fn, t) { X = ctx; ctx.setTransform(DPR * scale, 0, 0, DPR * scale, 0, 0); ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.save(); ctx.beginPath(); ctx.rect(0, 0, w, h); ctx.clip(); fn(t); ctx.restore(); }
+function view(label, cv) { const v = document.createElement("div"); v.className = "view"; const s = document.createElement("small"); s.textContent = label; v.append(cv, s); return v; }
+function el(tag, cls, html) { const e = document.createElement(tag); if (cls) e.className = cls; if (html !== undefined) e.innerHTML = html; return e; }
+const pickButtons = [];
+function lookLabel(en) { const k = st(en.id).look; return k === "T" ? "Today" : k ? `${k} ${LOOKS[en.id].find(l => l.key === k).name}` : "-"; }
+function animLabel(en) { const k = st(en.id).anim; return k === "T" ? "Today" : k ? `${k} ${ANIMS[en.air ? "air" : "ground"].find(a => a.key === k).name}` : "-"; }
+function moveLabel(en) { const k = st(en.id).move; return k === "T" ? "Today" : k ? `${k} ${MOVES[en.id].find(m => m.key === k).name}` : "-"; }
+function enemyLine(en) {
+  const s = st(en.id), notes = ["look", "anim", "move"].map(d => s.notes[d] ? `${d === "anim" ? "animation" : d === "move" ? "movement" : "look"}: ${s.notes[d].replace(/\s+/g, " ").trim()}` : "").filter(Boolean);
+  return `${en.name}: look ${lookLabel(en)}, animation ${animLabel(en)}, movement ${moveLabel(en)}` + (notes.length ? `; notes: ${notes.join(" | ")}` : "");
 }
-const LW = 260, LH = 64;
-function renderLineup(lu, ctx, scale, t) {
-  X = ctx; ctx.setTransform(DPR * scale, 0, 0, DPR * scale, 0, 0); ctx.lineCap = "round"; ctx.lineJoin = "round";
-  laneBg(LW, LH); ctx.save(); ctx.beginPath(); ctx.rect(0, 0, LW, LH); ctx.clip();
-  lu.batch.enemies.forEach((en, i) => {
-    const c = [32 + i * 64, LH / 2];
-    if (lu.mode === "today") drawSubject({ today: en.today }, c, t);
-    else { const k = picks[en.id]; const cp = en.concepts.find(x => x.key === k) || null; if (cp) drawSubject({ concept: cp }, c, t); else { X.save(); X.globalAlpha = 0.25; drawSubject({ today: en.today }, c, t); X.restore(); } }
-  });
-  ctx.restore();
+const summaries = [];
+function refresh() {
+  for (const b of pickButtons) { const on = st(b.id)[b.dim] === b.key; b.btn.classList.toggle("on", on); b.btn.setAttribute("aria-pressed", String(on)); b.pan.classList.toggle("picked", on); }
+  for (const s of summaries) s.ta.value = `Batch ${s.batch.n} (${s.batch.role})\n` + s.batch.enemies.map(enemyLine).join("\n");
+  for (const c of combos) c.txt.textContent = enemyLine(c.en).replace(/^[^:]+: /, "");
 }
-function summary(batch) { return `Batch ${batch.n} (${batch.role}) picks: ` + batch.enemies.map(en => `${en.name}: ${picks[en.id] || "-"}`).join(", "); }
+const combos = [], notesFields = [];
+function pickPanel(en, dim, key, title, pan) {
+  const b = el("button", "solo pick", key === "T" ? "Keep today" : "Pick " + key); b.setAttribute("aria-pressed", "false");
+  b.addEventListener("click", () => { const s = st(en.id); s[dim] = s[dim] === key ? null : key; save(); refresh(); });
+  pickButtons.push({ id: en.id, dim, key, btn: b, pan }); pan.append(b);
+}
+function notesBox(en, dim, label) {
+  const wrap = el("label", "notes"); wrap.append(el("span", "lbl", label));
+  const ta = document.createElement("textarea"); ta.placeholder = "Anything else? (e.g. mix B's colours with D's shape, faster, bigger...)";
+  ta.value = st(en.id).notes[dim] || ""; ta.addEventListener("input", () => { st(en.id).notes[dim] = ta.value; save(); refresh(); });
+  notesFields.push({ en, ta }); wrap.append(ta); return wrap;
+}
 function build() {
   const root = document.getElementById("batches");
   for (const batch of BATCHES) {
-    const sec = document.createElement("section"); sec.className = "batch";
-    sec.innerHTML = `<div class="batch-head"><h2>Batch ${batch.n}: ${batch.role}</h2><span class="job">${batch.job}</span></div>`;
-    const ta = document.createElement("textarea"); ta.readOnly = true; ta.setAttribute("aria-label", "Picks summary");
+    const sec = el("section", "batch", `<div class="batch-head"><h2>Batch ${batch.n}: ${batch.role}</h2><span class="job">${batch.job}</span></div>`);
     for (const en of batch.enemies) {
-      picks[en.id] = null;
-      const box = document.createElement("article"); box.className = "enemy";
-      box.innerHTML = `<div class="enemy-head"><h3>${en.name}</h3><span class="sub">${en.tier} · movement kept: ${en.move} · today radius ${en.today.r} px</span></div>`;
-      const grid = document.createElement("div"); grid.className = "panels";
-      const subjects = [{ label: "Today", today: en.today }].concat(en.concepts.map(cp => ({ label: cp.key, concept: cp })));
-      const pickBtns = [];
-      for (const subj of subjects) {
-        const pan = document.createElement("div"); pan.className = "panel" + (subj.today ? " today" : "");
-        const title = subj.today ? `<span class="key">Today</span> current look` : `<span class="key">${subj.concept.key}</span> ${subj.concept.name}`;
-        pan.innerHTML = `<div class="ptitle">${title}</div>`;
-        const views = document.createElement("div"); views.className = "views live";
-        const c1 = mkCanvas(W1, H1), c3 = mkCanvas(W1 * 3, H1 * 3); views.append(view("1x", c1), view("3x", c3)); pan.append(views);
-        const meta = document.createElement("div"); meta.className = "meta";
-        if (subj.concept) { const cp = subj.concept, d = cp.r - en.today.r; meta.innerHTML = `${cp.theme} · radius <b>${cp.r} px</b>${d ? ` (${d > 0 ? "+" : ""}${d})` : ""}`; }
-        else meta.textContent = "today's drawing, ported from Draw.gd";
-        pan.append(meta);
-        if (subj.concept) {
-          const dsc = document.createElement("p"); dsc.className = "desc"; dsc.textContent = "Palette: " + subj.concept.palette; pan.append(dsc);
-          const b = document.createElement("button"); b.className = "solo pick"; b.textContent = "Pick " + subj.concept.key; b.setAttribute("aria-pressed", "false");
-          b.addEventListener("click", () => {
-            picks[en.id] = picks[en.id] === subj.concept.key ? null : subj.concept.key;
-            pickBtns.forEach(o => { const on = picks[en.id] === o.key; o.b.classList.toggle("on", on); o.b.setAttribute("aria-pressed", String(on)); o.pan.classList.toggle("picked", on); });
-            ta.value = summary(batch);
-          });
-          pickBtns.push({ b, key: subj.concept.key, pan }); pan.append(b);
-        }
-        const frames = document.createElement("div"); frames.className = "frames"; pan.append(frames);
-        panels.push({ subj, ctx1: c1.getContext("2d"), ctx3: c3.getContext("2d"), frames });
-        grid.append(pan);
+      const box = el("article", "enemy", `<div class="enemy-head"><h3>${en.name}</h3><span class="sub">${en.tier} · ${en.air ? "flyer" : "ground"} (stays ${en.air ? "a flyer" : "on the ground"}) · today: ${en.today.anim}, ${en.today.move} speed, radius ${en.today.r} px</span></div>`);
+      // combination preview
+      const combo = el("div", "combo");
+      const cc1 = mkCanvas(W1, H1), cc3 = mkCanvas(W1 * 3, H1 * 3), cm = mkCanvas(MW * 1.5, MH * 1.5);
+      const fr = el("div", "frames");
+      job(cc1, W1, H1, 1, t => { laneBg(W1, H1); drawSubject(en, lookOf(en), animOf(en), [W1 / 2, H1 / 2], t); }, fr);
+      job(cc3, W1, H1, 3, t => { laneBg(W1, H1); drawSubject(en, lookOf(en), animOf(en), [W1 / 2, H1 / 2], t); }, fr);
+      job(cm, MW, MH, 1.5, t => drawMove(en, moveOf(en), t), fr);
+      const cv = el("div", "views live"); cv.append(view("1x", cc1), view("3x", cc3), view("movement", cm));
+      const txt = el("p", "desc"); combos.push({ en, txt });
+      combo.append(el("div", "rowlbl", "Your combination"), cv, txt, fr); box.append(combo);
+      // look
+      const ls = el("div", "dim", `<h4>Look</h4>`); const lg = el("div", "panels");
+      for (const lk of [null].concat(LOOKS[en.id])) {
+        const key = lk ? lk.key : "T", pan = el("div", "panel" + (lk ? "" : " today"), `<div class="ptitle"><span class="key">${lk ? key : "Today"}</span> ${lk ? lk.name : "current look"}</div>`);
+        const c1 = mkCanvas(W1, H1), c3 = mkCanvas(W1 * 3, H1 * 3), frames = el("div", "frames");
+        job(c1, W1, H1, 1, t => { laneBg(W1, H1); drawSubject(en, lk, null, [W1 / 2, H1 / 2], t); }, frames);
+        job(c3, W1, H1, 3, t => { laneBg(W1, H1); drawSubject(en, lk, null, [W1 / 2, H1 / 2], t); }, frames);
+        const vw = el("div", "views live"); vw.append(view("1x", c1), view("3x", c3)); pan.append(vw);
+        if (lk) { const d = lk.r - en.today.r; pan.append(el("div", "meta", `${lk.theme} · radius <b>${lk.r} px</b>${d ? ` (${d > 0 ? "+" : ""}${d})` : ""}`), el("p", "desc", "Palette: " + lk.palette)); }
+        else pan.append(el("div", "meta", "today's drawing, ported from Draw.gd"));
+        pickPanel(en, "look", key, lk ? lk.name : "Today", pan); pan.append(frames); lg.append(pan);
       }
-      box.append(grid); sec.append(box);
+      ls.append(lg, notesBox(en, "look", "Look notes")); box.append(ls);
+      // animation
+      const as = el("div", "dim", `<h4>Animation <span class="hint">shown on your selected look (today's until you pick one)</span></h4>`); const ag = el("div", "panels small");
+      for (const an of [null].concat(ANIMS[en.air ? "air" : "ground"])) {
+        const key = an ? an.key : "T", pan = el("div", "panel" + (an ? "" : " today"), `<div class="ptitle"><span class="key">${an ? key : "Today"}</span> ${an ? an.name : en.today.anim}</div>`);
+        const c2 = mkCanvas(W1 * 2, H1 * 2), frames = el("div", "frames");
+        job(c2, W1, H1, 2, t => { laneBg(W1, H1); drawSubject(en, lookOf(en), an, [W1 / 2, H1 / 2], t); }, frames);
+        const vw = el("div", "views live"); vw.append(view("2x", c2)); pan.append(vw, el("p", "desc", an ? an.desc : "The look's own idle animation, no extra locomotion."));
+        pickPanel(en, "anim", key, "", pan); pan.append(frames); ag.append(pan);
+      }
+      as.append(ag, notesBox(en, "anim", "Animation notes")); box.append(as);
+      // movement
+      const ms = el("div", "dim", `<h4>Movement <span class="hint">path pattern on the lane, same average speed (diagram)</span></h4>`); const mg = el("div", "panels small");
+      for (const mv of [null].concat(MOVES[en.id])) {
+        const key = mv ? mv.key : "T", pan = el("div", "panel" + (mv ? "" : " today"), `<div class="ptitle"><span class="key">${mv ? key : "Today"}</span> ${mv ? mv.name : "Steady"}</div>`);
+        const c = mkCanvas(MW * 1.5, MH * 1.5), frames = el("div", "frames");
+        job(c, MW, MH, 1.5, t => drawMove(en, mv, t), frames);
+        const vw = el("div", "views live"); vw.append(view("diagram", c)); pan.append(vw, el("p", "desc", mv ? mv.desc : "Moves at a steady speed (today)."));
+        pickPanel(en, "move", key, "", pan); pan.append(frames); mg.append(pan);
+      }
+      ms.append(mg, notesBox(en, "move", "Movement notes")); box.append(ms);
+      sec.append(box);
     }
-    const lu = document.createElement("div"); lu.className = "lineup";
-    lu.innerHTML = `<h3>Lineup: ${batch.role}</h3><p class="desc">The batch side by side on the lane, today versus your picks (faded until picked). Judge whether each reads as its own enemy at game scale.</p>`;
+    // lineup and summary
+    const lu = el("div", "lineup", `<h3>Lineup: ${batch.role}</h3><p class="desc">The batch side by side on the lane: today versus your combinations (look and animation).</p>`);
+    const LW = 260, LH = 64;
     for (const mode of ["today", "picked"]) {
-      const lbl = document.createElement("div"); lbl.className = "rowlbl"; lbl.textContent = mode === "today" ? "Today" : "Your picks";
-      const vw = document.createElement("div"); vw.className = "views live";
-      const c1 = mkCanvas(LW, LH), c2 = mkCanvas(LW * 2, LH * 2); vw.append(view("1x", c1), view("2x", c2));
-      const frames = document.createElement("div"); frames.className = "frames";
-      lu.append(lbl, vw, frames);
-      lineups.push({ batch, mode, ctx1: c1.getContext("2d"), ctx2: c2.getContext("2d"), frames });
+      const c1 = mkCanvas(LW, LH), c2 = mkCanvas(LW * 2, LH * 2), frames = el("div", "frames");
+      const fn = t => { laneBg(LW, LH); batch.enemies.forEach((en, i) => drawSubject(en, mode === "today" ? null : lookOf(en), mode === "today" ? null : animOf(en), [32 + i * 64, LH / 2], t)); };
+      job(c1, LW, LH, 1, fn, frames); job(c2, LW, LH, 2, fn, frames);
+      const vw = el("div", "views live"); vw.append(view("1x", c1), view("2x", c2));
+      lu.append(el("div", "rowlbl", mode === "today" ? "Today" : "Your combinations"), vw, frames);
     }
-    const pk = document.createElement("div"); pk.className = "picks";
-    const cp = document.createElement("button"); cp.className = "solo"; cp.textContent = "Copy picks";
-    cp.addEventListener("click", () => { try { navigator.clipboard.writeText(ta.value); cp.textContent = "Copied"; } catch (e) { ta.select(); } setTimeout(() => { cp.textContent = "Copy picks"; }, 1500); });
-    ta.value = summary(batch); pk.append(ta, cp); lu.append(pk);
-    sec.append(lu); root.append(sec);
+    const pk = el("div", "picks"); const ta = document.createElement("textarea"); ta.readOnly = true; ta.rows = 6; ta.setAttribute("aria-label", "Picks summary");
+    const cp = el("button", "solo", "Copy picks and notes");
+    cp.addEventListener("click", () => { try { navigator.clipboard.writeText(ta.value); cp.textContent = "Copied"; } catch (e) { ta.select(); } setTimeout(() => { cp.textContent = "Copy picks and notes"; }, 1500); });
+    const rs = el("button", "solo", "Clear batch picks");
+    rs.addEventListener("click", () => { batch.enemies.forEach(en => { delete state[en.id]; }); save(); notesFields.filter(f => batch.enemies.includes(f.en)).forEach(f => { f.ta.value = ""; }); refresh(); });
+    summaries.push({ batch, ta }); pk.append(ta, cp, rs); lu.append(pk); sec.append(lu); root.append(sec);
   }
+  refresh();
 }
-let last = performance.now();
+
+// ---- Loop, print view, controls ---------------------------------------------------------------------
+let T = 0, playing = true, speed = 1, last = performance.now();
 function frame(now) {
-  const dt = Math.min(0.1, (now - last) / 1000); last = now;
-  if (playing) T += dt * speed;
-  for (const p of panels) { renderPanel(p, p.ctx1, 1, T); renderPanel(p, p.ctx3, 3, T); }
-  for (const lu of lineups) { renderLineup(lu, lu.ctx1, 1, T); renderLineup(lu, lu.ctx2, 2, T); }
+  const dt = Math.min(0.1, (now - last) / 1000); last = now; if (playing) T += dt * speed;
+  for (const j of jobs) if (j.visible) paint(j.ctx, j.scale, j.w, j.h, j.fn, T);
   requestAnimationFrame(frame);
 }
-function snapshot(w, h, fn) { const cv = document.createElement("canvas"); cv.width = w * DPR; cv.height = h * DPR; fn(cv.getContext("2d")); return cv.toDataURL("image/png"); }
-function figure(src, cap, w) { const fg = document.createElement("figure"); const im = new Image(); im.src = src; im.alt = cap; if (w) im.style.width = w + "px"; const fc = document.createElement("figcaption"); fc.textContent = cap; fg.append(im, fc); return fg; }
 function buildPrint() {
-  for (const p of panels) { p.frames.innerHTML = ""; for (const t of [1.0, 1.6]) p.frames.append(figure(snapshot(W1 * 3, H1 * 3, ctx => renderPanel(p, ctx, 3, t)), `t = ${t} s`)); }
-  for (const lu of lineups) { lu.frames.innerHTML = ""; lu.frames.append(figure(snapshot(LW * 2, LH * 2, ctx => renderLineup(lu, ctx, 2, 1.0)), lu.mode === "today" ? "Today" : "Your picks", 520)); }
+  const seen = new Set();
+  for (const j of jobs) {
+    if (!seen.has(j.frames)) { j.frames.innerHTML = ""; seen.add(j.frames); }
+    if (j.scale === 1 && j.w === W1) continue; // skip 1x look thumbnails in print
+    const cv = document.createElement("canvas"); cv.width = j.w * j.scale * DPR; cv.height = j.h * j.scale * DPR;
+    paint(cv.getContext("2d"), j.scale, j.w, j.h, j.fn, 1.0);
+    const fg = document.createElement("figure"), im = new Image(); im.src = cv.toDataURL("image/png"); im.alt = "frame"; im.style.width = Math.min(260, j.w * j.scale) + "px"; fg.append(im); j.frames.append(fg);
+  }
 }
 function setPrint(on) { document.body.classList.toggle("print", on); const b = document.getElementById("printview"); b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); b.textContent = on ? "Live view" : "Print view"; if (on) buildPrint(); }
 document.getElementById("play").addEventListener("click", e => { playing = !playing; e.target.textContent = playing ? "Pause" : "Play"; e.target.setAttribute("aria-pressed", String(playing)); });

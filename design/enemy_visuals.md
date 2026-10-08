@@ -22,13 +22,16 @@ Today many enemies read as the same thing (owner-confirmed look-alike groups):
 - **Every enemy unique:** no shared silhouette or colour families, not even within a role.
 - **Full restyle, theme chosen per enemy** (glass, chitin, paper, plasma, lacquer, clockwork and so on).
 - **Contrast with the towers on purpose.** The towers stay as they are.
-- **Movement unchanged:** each enemy keeps its locomotion (orbiting cloud, flapping flight, hover, legs,
-  treads, burrowing, blinking).
+- **Movement can change (round 2):** both the **animation** (how the body moves: roll, hop, flutter...) and the
+  **path pattern** on the lane (weave, bursts, surges, loops...), at the **same average speed**. **Flyers stay
+  flyers and ground stays ground**, so anti-air and mortar counters still work.
 - **Sizes are free.** Radius is also the hit size for splash and chains, so every change is listed per enemy
   for balance.
 - **Shape first, colour second:** each enemy must be recognisable in greyscale. Colours are then chosen to be
   distinct and to avoid red/green-only differences.
-- **Process:** 2 or 3 concepts per enemy; the owner picks one (or mixes); batches by role.
+- **Process (round 2):** for each enemy the owner picks **look, animation and movement separately**, each from
+  **six options: today plus A to E**, and each has a **notes box** for extra input. Batches by role. Shown in
+  place; movement is shown as a lane diagram.
 
 ## Contrast rule (towers vs enemies)
 
@@ -46,7 +49,8 @@ violet, red, gold, magenta, mint and more), so "avoid tower colours" cannot work
 2. Its own theme or material.
 3. A body colour and glow pair that no other enemy uses.
 4. No grey-metal-with-neon look (that belongs to the towers).
-5. Movement unchanged; radius change listed.
+5. A new animation and path pattern at the same average speed; flyer or ground unchanged; radius change listed;
+   gameplay note if the path pattern affects targeting.
 6. **Lore check:** if the theme changes what the enemy *is* (for example organic instead of machine), its name,
    Codex text and lore need a follow-up.
 
@@ -54,7 +58,7 @@ violet, red, gold, magenta, mint and more), so "avoid tower colours" cannot work
 
 | # | Role | Enemies | State |
 |---|---|---|---|
-| 1 | Swarm | Nanite, Locust, Drone, Shrike | **Concepts ready for picks** |
+| 1 | Swarm | Nanite, Locust, Drone, Shrike | **Round 2 options ready for picks** (round 1 concepts dropped) |
 | 2 | Rusher | Skitter, Needle, Strike Drone, Fury Drone | To do |
 | 3 | Tank | Siege Mech, Rampart, Gunship, Titan | To do |
 | 4 | Support | Repair Bot, Rally Beacon, Bulwark, Mender Hulk | To do |
@@ -66,60 +70,86 @@ violet, red, gold, magenta, mint and more), so "avoid tower colours" cannot work
 Each later batch is checked against the picks already made, so a new concept can't repeat an earlier enemy's
 silhouette, material or colours.
 
-## Batch 1: Swarm (decision records)
+## Batch 1: Swarm (decision records, round 2)
 
-The mockup shows each enemy's **today** look next to concepts **A, B and C** at 1x and 3x, plus a lineup of the
-batch on the lane. Pick buttons collect a copyable summary at the bottom of the batch.
+Round 1's three concepts per enemy were dropped at the owner's request; this is a fresh set. In the mockup,
+each enemy has a **Your combination** preview, then **Look**, **Animation** and **Movement** pickers (today plus A
+to E), each with a notes box. **Animations** are a locomotion layer that the page applies to whichever look is
+selected, so any look can be tried with any animation. **Movements** are path-pattern diagrams: dots at equal
+time steps bunch up where the enemy is slow and spread out where it's fast. Picks and notes stay in the
+browser and are copied back from the bottom of the batch.
 
-### Nanite (T1, orbiting cloud; today radius 6)
+**Animation options** (the same set within ground and within flyers):
+- **Ground** (Nanite, Drone): A Roll, B Hop (squash on landing), C Ooze (pulsing stretch), D Wobble (sway), E
+  Jitter.
+- **Flyers** (Locust, Shrike): A Flutter (erratic), B Swoop (bank and altitude), C Hover-bob, D Glide-spin, E
+  Undulate.
 
-| | Concept | Theme | Palette | Radius | Lore impact |
-|---|---|---|---|---|---|
-| A | Glass-bead motes: faceted glass shards orbiting a hollow ring | Crystal / glass | pale aqua glass, white glints | 7 (+1) | none (still machines) |
-| B | Chitin mite cluster: three mites circling each other | Biomech insect | glossy rust-brown chitin, pale yellow eyes | 7 (+1) | "Nanite" becomes organic: rename and Codex |
-| C | Sulphur spark wisps: three spark heads with soot trails | Plasma / elemental | sulphur-white sparks, soot-black trails | 7 (+1) | "self-replicating machines" becomes energy: Codex |
+### Nanite (T1, ground; today: orbiting cloud, steady, radius 6)
 
-**Pick:** _pending_
+| Look | Theme | Palette | Radius | Lore impact |
+|---|---|---|---|---|
+| A Ink-bubble cluster | Oil / soap film | oily black bubbles, iridescent rims | 7 (+1) | none |
+| B Pollen puffballs | Botanical spores | mustard fuzz, pale tips | 7 (+1) | organic: Codex |
+| C Brass cog tumblers | Clockwork brass | polished brass, dark hubs | 7 (+1) | none |
+| D Mercury droplets | Liquid metal | chrome silver, white highlights | 7 (+1) | none |
+| E Glitch pixels | Digital corruption | magenta and cyan squares | 7 (+1) | fits "self-replicating" |
 
-### Locust (T2, flapping flyer; today radius 5)
+**Movement:** A Weave, B Stop-go hops, C Rhythmic surges, D S-slither, E Micro-blinks.
+**Picks:** look _, animation _, movement _; notes _
 
-| | Concept | Theme | Palette | Radius | Lore impact |
-|---|---|---|---|---|---|
-| A | Origami flyer: folded paper wings and body, red ink stamp | Folded paper | cream paper, red ink | 6 (+1) | none |
-| B | Iridescent dragonfly: four membrane wings, segmented abdomen | Biomech insect | teal metallic body, rainbow wings | 6 (+1) | organic: Codex |
-| C | Rotor seed (samara): one spinning blade around a seed pod | Botanical machine | sandy tan blade, brown pod | 6 (+1) | Codex wording |
+### Locust (T2, flyer; today: flapping wings, steady, radius 5)
 
-**Pick:** _pending_
+| Look | Theme | Palette | Radius | Lore impact |
+|---|---|---|---|---|
+| A Dust moth | Felted insect | dusty beige wings, dark eye-spots | 6 (+1) | organic: Codex |
+| B Cave bat | Leathery creature | violet membrane, amber eyes | 7 (+2) | organic: Codex |
+| C Firefly | Bioluminescent beetle | dark olive shell, warm gold lamp | 6 (+1) | organic: Codex |
+| D Quill feather | Feather | bone white vanes, indigo tip | 7 (+2) | Codex wording |
+| E Sky ribbon | Fabric creature | teal and coral ribbon | 7 (+2) | Codex wording |
 
-### Drone (T3, hover disc; today radius 11)
+**Movement:** A Jittery zigzag, B Wide swoops, C Pause-and-dart, D Glide and sway, E Sine undulation.
+**Picks:** look _, animation _, movement _; notes _
 
-| | Concept | Theme | Palette | Radius | Lore impact |
-|---|---|---|---|---|---|
-| A | Hazard sentry ball: hazard-striped sphere, side thrusters, one eye | Industrial / hazard paint | yellow and black stripes, red eye | 10 (-1) | none |
-| B | Jellyfish bell: pulsing translucent bell, trailing filaments | Bioluminescent | translucent orchid, glowing core | 12 (+1) | organic: rename and Codex |
-| C | Lantern-eye sphere: bronze sphere, rotating fin ring, lantern eye | Bronze clockwork | dark bronze, pale mint lantern | 11 | none |
+### Drone (T3, ground; today: hover disc, steady, radius 11)
 
-**Pick:** _pending_
+| Look | Theme | Palette | Radius | Lore impact |
+|---|---|---|---|---|
+| A Tumbleweed cage | Wire / scrap | rusted tan wire, ember core | 11 | none |
+| B Pillbug | Armoured crustacean | slate blue-grey plates | 11 | organic: rename and Codex |
+| C Unicycle bot | Toy-like robot | cream body, mint stripe, black tyre | 10 (-1) | none |
+| D Stone totem | Carved stone | sandstone layers, moss-green rune | 12 (+1) | Codex wording |
+| E Spinning top | Lacquered toy | lacquer red and cream wedges, gold knob | 11 | none |
 
-### Shrike (T4, flying cluster of 5; drafted radius 7)
+**Movement:** A Bouncy surges, B Walk then roll, C Wobbling weave, D Heavy hops, E Precessing loops.
+**Picks:** look _, animation _, movement _; notes _
 
-| | Concept | Theme | Palette | Radius | Lore impact |
-|---|---|---|---|---|---|
-| A | Boomerang blades: spinning two-armed blades | Thrown steel | blued steel, white edge | 7 | none |
-| B | Manta-ray biomech: undulating ray with a whip tail | Deep-sea biomech | indigo skin, pale lime photophores | 8 (+1) | organic: Codex |
-| C | Mechanical swifts: swept wings, forked tail | Bird / lacquer | gloss black, white throat | 7 | fits the name "Shrike" |
+### Shrike (T4, flyer, cluster of 5; today: flapping blade-wings, steady, radius 7)
 
-**Pick:** _pending_
+| Look | Theme | Palette | Radius | Lore impact |
+|---|---|---|---|---|
+| A Icicle shards | Ice crystal | pale blue-white ice, bright edges | 7 | none |
+| B Starling | Bird flock | glossy purple-green sheen, white speckles | 6 (-1) | fits the name |
+| C Leaf storm | Autumn leaves | burnt orange and brown leaves | 7 | Codex wording |
+| D Squid jets | Cephalopod | coral-pink mantle, deep red spots | 7 | organic: Codex |
+| E Comet sparks | Fire / meteor | white-gold head, pale blue tail | 6 (-1) | none |
+
+**Movement:** A Tight V that regroups, B Murmuration swirl, C Gust surges, D Pulse-jets, E Streaking surges.
+**Picks:** look _, animation _, movement _; notes _
 
 ## Implementation (after every batch is confirmed)
 
 One PR that replaces the enemy drawings in `scripts/view/Draw.gd` (`Draw.enemy`, `ENEMY_BODY`, `ENEMY_COLOR`)
 with the picked designs, using the same primitives as the mockup. It runs `tools/dev.sh tour` for screenshots
 and the perf check (`check`, `compare`, `perf`), and updates radii in `data/enemies.gd` with balance-probe
-runs. Name and Codex changes flagged above go in with it, or in their own PR.
+runs. Picked **animations** go into the drawings; picked **path patterns** need movement code in `Enemy.step`
+(`scripts/entities/Enemy.gd`) that keeps each enemy's average speed, with unit tests for that. Name and Codex changes flagged above go in with it, or in their own PR.
 
 ## Open questions
 
-1. **Batch 1 picks:** one concept per Swarm enemy (or a mix, e.g. "A's body with B's colours").
+1. **Batch 1 picks:** look, animation and movement for each Swarm enemy, plus any notes (copied from the mockup).
 2. **Lore direction:** themes like chitin, jellyfish or manta make some enemies organic. Is a mixed roster
    (machines next to creatures) fine, or should picks keep the "machines" lore?
+3. **Path patterns change gameplay.** Bursts and weaving make projectile towers miss more (they lead the
+   target); hops and pauses change how long an enemy stays in range. The balance probe checks the picked
+   patterns before they ship.
