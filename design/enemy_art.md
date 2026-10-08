@@ -380,6 +380,59 @@ and "Offer more animations as well"):
   and back), H Dodge slip (sudden sideways dodges, smearing as it moves), I Vanishing sway (wide sways that fade at
   each edge). The mockup's animation system gained a transparency channel for these.
 
+## Special (role 7)
+
+Mockup: `design/enemy_art_special.html`, the same format as the other roles (three proposals each for look, animation
+and movement, notes boxes, no "today"), with six enemies.
+
+**Special family (draft):** one-off prototypes, each breaking one rule. They share a violet-white **X prototype mark**
+(on the disguised units it is the **tell**), an exposed core cell, and a **looped effect** showing the rule each one
+breaks. **No tiers:** every Special is its own thing. **Colour per enemy:** Phantom teal-grey camo, Aegis Walker
+white-gold with an amber barrier, Hydra Frame oxide red with sand Skitters, Masquerade a rust Nanite shell over plum,
+Decoy Beacon a gunmetal fake hull on a tan frame with a magenta beacon, Mirage mirror chrome with cyan holograms.
+
+**Effects in the previews (looped):**
+- **Phantom:** active camouflage (a faint double image with a refraction band sweeping across); a blast flashes on it
+  and reveals it for a moment, with the sensor reticle.
+- **Aegis Walker:** an amber hex barrier that cracks under fire, shatters, stays down, then rebuilds.
+- **Hydra Frame:** visibly carries three of the confirmed Skitters (Rusher A, Six-leg scuttler); destroyed, it bursts
+  and the three scatter.
+- **Masquerade:** wears the confirmed Nanite's look (Swarm A, Assembly hub) until it drops below half health, then the
+  shell shatters to show its true form. Its **shadow is always its true size**, too big for a Nanite: a tell on every
+  look.
+- **Decoy Beacon:** draws as a heavy hull with a pulsing **rank badge** (three chevrons) for its fake high rank; each
+  look has its own tell.
+- **Mirage:** every 6 s throws two translucent, scanlined hologram copies of itself that walk ahead and fade.
+
+**The tells** (`design/new_enemies.md`: "what it looks like is decided with the visual redesign"): proposed here as
+part of each look; once picked they go into `design/new_enemies.md`.
+
+**Sizes (proposed):** Masquerade 12 px, Decoy Beacon 15 px, Mirage 12 px (new enemies, no size yet). Phantom 10,
+Aegis Walker 13 and Hydra Frame 14 are today's.
+
+| Enemy (rule it breaks) | Look A | Look B | Look C |
+|---|---|---|---|
+| Phantom (cloaked) | Camo stalker: slim biped in active camo | Cloak sled: skid sled under a cloak emitter | Mirror quad: four-legged mirror diamond |
+| Aegis Walker (barrier) | Aegis strider: biped, emitter on its back | Emitter tripod: tripod under a dome emitter | Shield-arm walker: barrier from two forward arms |
+| Hydra Frame (splits into 3 Skitters) | Carrier frame: Skitters clamped to three arms | Stack walker: three Skitters nose to tail in a cage | Hive pod: a Skitter peeking from each of three bays |
+| Masquerade (disguised as a Nanite) | Hollow hub: tell is a prototype X glint; true form a bladed infiltrator | Mask shell: tell is a glitch that flashes its true outline; true form a four-legged hunter | Wrong-eye hub: tell is a violet eye and lockstep bots; true form a finned hover wedge |
+| Decoy Beacon (fake high rank) | Inflatable heavy: hull breathes, barrel droops, treads never turn | Hologram heavy: a small projector shows through a flickering tank hologram | Hung-plate frame: armour plates swing on chains, with gaps |
+| Mirage (hologram copies) | Projector walker: three-lens head | Prism rover: turning, sparkling prism | Mirror-fan hover: five angled mirror panels |
+
+| Enemy | Animation A / B / C | Movement A / B / C |
+|---|---|---|
+| Phantom | Sneak / Freeze and dart / Shimmer | Infiltrate line / Shadow weave / Dart and freeze |
+| Aegis Walker | Steady march / Brace for hits / Hum | Steady advance / Shield-wall drift / Escort weave |
+| Hydra Frame | Clatter / Lumber / Strain | Trundle / Scuttle sway / Lurch |
+| Masquerade | Copycat bob / Odd twitch / Glide | Mimic trickle / Blend-in weave / Straight |
+| Decoy Beacon | Wobble / Trundle / Sway | Lumbering line / Slow sway / Stop and go |
+| Mirage | Shimmer / Glide / Flicker step | Glide / Weave / Side-step |
+
+**Picks:** Phantom _, Aegis Walker _, Hydra Frame _, Masquerade _, Decoy Beacon _, Mirage _ (look, animation, movement;
+notes)
+
 ## Open questions
 
-1. **Next role** after Evader (remaining: Special, Boss).
+1. **Special picks**, any change to the Special family traits or the proposed sizes, and the tells for the
+   Masquerade and Decoy Beacon.
+2. **Next role** after Special (remaining: Boss).
