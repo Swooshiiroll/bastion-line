@@ -89,11 +89,11 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 7 of 8: Special (round 3)</div>
+    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 7 of 8: Special (round 4)</div>
     <h1>Enemy art: Special</h1>
     <p class="note">A fresh start from the names: the machine army's <b>Special</b> role. For each enemy, pick its <b>look</b>, <b>animation</b> and
       <b>movement</b> separately from three proposals each (A to C), and add notes. Mix freely. The <b>Your combination</b> preview shows your
-      mix (option A until you pick). <b>Your picks are preselected</b>: Phantom, Aegis Walker, Hydra Frame and Decoy Beacon are settled. From your notes: every <b>Masquerade</b> look now disguises as your <b>Drone</b> (purple eye) and marches and moves like it until uncovered, then uses the animation and movement you pick (three new true forms, J to L); the <b>Mirage</b> now projects one copy in front and one behind, with three new designs (J to L). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
+      mix (option A until you pick). <b>Your picks are preselected</b>. From your notes: the Phantom's Camo flicker is much more rapid; the Masquerade has three frantic-flee movements for after it is uncovered (G to I; it still marches like the Drone until then); the Mirage's copies now stay <b>in step</b> with it (fixed spacing in front and behind), with three more mysterious designs (M to O) and three new animations (D to F). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
       Spec: <code>design/enemy_art.md</code>.</p>
     <ul class="rules">
       <li><b>Machine army;</b> each <b>name inspires a trait</b> (not a literal picture).</li>
@@ -478,9 +478,9 @@ function masqFx(D, T, c, t, r, col) { const k = masqK(t), u = fmod(t, 8);
 function rankBadge(p, t, col) { const pulse = 0.6 + 0.4 * Math.sin(t * 4); for (let i = 0; i < 3; i++) { const q = add(p, [i * 2.4, 0]); polyline([add(q, [-1.5, -2.2]), add(q, [0.6, 0]), add(q, [-1.5, 2.2])], OUTLINE, 2.0); polyline([add(q, [-1.5, -2.2]), add(q, [0.6, 0]), add(q, [-1.5, 2.2])], A(col, pulse), 1.0); } }
 // Mirage: every 6 s it throws 2 hologram copies of itself that walk ahead and fade
 function mirageFx(B, c, t, r, col) { const u = fmod(t, 6), a = u < 0.4 ? u / 0.4 : u > 5.4 ? (6 - u) / 0.6 : 1;
-  if (u < 0.3) ring(c, r * (0.5 + 2 * u), A(col, 0.8 * (1 - u / 0.3)), 1.2);
-  // owner: one projection in front, one behind
-  for (const s of [1, -1]) { const p = add(c, [s * r * Math.min(1.6, 0.4 + u / 0.4 * 1.2) + r * 0.2 * u, 0]);
+  // owner: one copy in front and one behind, locked in step with it (fixed spacing, same stride)
+  for (const s of [1, -1]) { const p = add(c, [s * r * 1.7, 0]);
+    if (u < 0.35) ring(p, r * (0.3 + 1.4 * u), A(col, 0.8 * (1 - u / 0.35)), 1.0);
     withAlpha(0.35 * a, () => B(p)); X.save(); X.globalCompositeOperation = "lighter"; withAlpha(0.22 * a, () => B(p)); X.restore();
     const off = fmod(t * 6, 1) * r * 0.14; for (let i = -3; i <= 3; i++) line(add(p, [-r * 0.55, i * r * 0.14 + off]), add(p, [r * 0.55, i * r * 0.14 + off]), A(col, 0.16 * a), 0.5); }
   B(c); }
@@ -769,6 +769,22 @@ const LOOKS = {
         for (const sg of [-1, 1]) { const d = add(p, [sg * r * 0.62, 0]), dish = []; for (let i = 0; i <= 8; i++) dish.push(mul(fa((sg > 0 ? 0 : Math.PI) - 1.0 + 2.0 * i / 8), 0.3)); for (let i = 8; i >= 0; i--) dish.push(mul(fa((sg > 0 ? 0 : Math.PI) - 1.0 + 2.0 * i / 8), 0.2)); plate(d, dish, C.dark, 0, r, 0.6); glowDot(d, r * 0.06, C.glow); }
         protoMark(p, r * 0.07, t); };
       mirageFx(B, c, t, r, C.glow); } },
+    { key: "M", name: "Veiled monolith", theme: "A floating slab of black glass, faint cyan glyphs crawling across it; every 6 s two copies of it appear in step, one in front and one behind (looped)", palette: "obsidian slab, faint cyan glyphs", r: 12, draw(c, t, r) {
+      const C = COL.mirage, B = p => { disc(p, r * 0.6, A(C.glow, 0.07)); const sl = rectPts(0.36, 0.55); plate(p, sl, [0.06, 0.07, 0.1, 1], 0.08 * Math.sin(t * 0.7), r, 0.9);
+        for (let i = 0; i < 6; i++) { const y = -0.42 + 0.17 * i, k = hash(i * 5 + Math.floor(t * 2)); if (k > 0.35) line(add(p, [-r * 0.22, y * r]), add(p, [r * (-0.22 + 0.4 * k), y * r]), A(C.glow, 0.25 + 0.3 * Math.sin(t * 3 + i)), 0.6); }
+        outline(p, sl, A(C.glow, 0.25), 0.5, 0.08 * Math.sin(t * 0.7), r * 0.92); protoMark(add(p, [r * 0.18, r * 0.4]), r * 0.05, t, 0.6); };
+      mirageFx(B, c, t, r, C.glow); } },
+    { key: "N", name: "Hooded lens", theme: "A cowled machine, its face hidden under a dark hood except for one cold cyan lens, a tattered hem trailing; every 6 s two copies of it appear in step, in front and behind (looped)", palette: "dark cowl, single cyan lens, tattered hem", r: 12, draw(c, t, r) {
+      const C = COL.mirage, B = p => {
+        for (let i = -2; i <= 2; i++) { const pts = []; for (let k = 0; k <= 4; k++) pts.push(add(p, [-r * (0.3 + 0.18 * k), r * (i * 0.14 * (1 + 0.15 * k) + 0.04 * Math.sin(t * 4 - k + i))])); polyline(pts, A([0.12, 0.13, 0.17, 1], 0.9), 1.6); }
+        const hood = [[0.5, 0], [0.25, 0.42], [-0.35, 0.45], [-0.45, 0], [-0.35, -0.45], [0.25, -0.42]]; plate(p, hood, [0.1, 0.11, 0.15, 1], 0, r, 0.9);
+        fill(add(p, [r * 0.15, 0]), [[0.3, 0], [0, 0.22], [-0.12, 0], [0, -0.22]], [0.02, 0.02, 0.03, 1], 0, r); glowDot(add(p, [r * 0.25, 0]), r * 0.07, C.glow); protoMark(add(p, [-r * 0.25, r * 0.25]), r * 0.05, t, 0.6); };
+      mirageFx(B, c, t, r, C.glow); } },
+    { key: "O", name: "Shard halo", theme: "No body you can see: a ring of floating mirror shards turning around one faint point of light; every 6 s two copies of it appear in step, in front and behind (looped)", palette: "mirror shards, a faint cyan point of light", r: 12, draw(c, t, r) {
+      const C = COL.mirage, B = p => { glowDot(p, r * 0.07, A(C.glow, 0.7 + 0.3 * Math.sin(t * 3)));
+        for (let i = 0; i < 7; i++) { const a = t * 0.9 + i * TAU / 7, d = r * (0.5 + 0.08 * Math.sin(t * 2 + i)), q = add(p, mul(fa(a), d)); fill(q, [[0.18, 0], [0, 0.07], [-0.14, 0], [0, -0.07]], C.hull, a + t, r); outline(q, [[0.18, 0], [0, 0.07], [-0.14, 0], [0, -0.07]], A(C.glow, 0.5), 0.5, a + t, r); }
+        protoMark(add(p, [0, r * 0.18]), r * 0.04, t, 0.5); };
+      mirageFx(B, c, t, r, C.glow); } },
   ],
 };
 
@@ -783,7 +799,7 @@ const ANIMS = {
     { key: "C", name: "Shimmer", desc: "Its outline shimmers like heat haze.", fx: (t) => ({ sx: 1 + 0.03 * Math.sin(t * 23), sy: 1 + 0.03 * Math.sin(t * 19) }) },
     { key: "D", name: "Hover bob", desc: "A light, floating bob (now that it flies).", fx: (t) => ({ dy: 0.05 * Math.sin(t * 2.2), lift: 0.3 + 0.3 * Math.sin(t * 2.2) }) },
     { key: "E", name: "Bank", desc: "Banks smoothly from side to side.", fx: (t) => ({ rot: 0.25 * Math.sin(t * 1.4), sy: 1 - 0.2 * Math.abs(Math.sin(t * 1.4)) }) },
-    { key: "F", name: "Camo flicker", desc: "Its camouflage flickers, fading in and out.", fx: (t) => ({ alpha: hash(Math.floor(t * 8)) < 0.2 ? 0.45 : 1 }) },
+    { key: "F", name: "Camo flicker", desc: "Its camouflage flickers rapidly in and out (made faster at the owner's request).", fx: (t) => { const k = Math.floor(t * 24); return { alpha: hash(k) < 0.45 ? 0.25 + 0.25 * hash(k + 7) : 1 }; } },
   ],
   aegis: [
     { key: "A", name: "Steady march", desc: "An even, measured stride.", fx: (t) => { const p = Math.abs(Math.sin(t * 4)); return { dy: 0.04 * (1 - p) }; } },
@@ -815,6 +831,9 @@ const ANIMS = {
     { key: "A", name: "Shimmer", desc: "Its chrome shimmers.", fx: (t) => ({ sx: 1 + 0.03 * Math.sin(t * 17), sy: 1 + 0.03 * Math.sin(t * 13) }) },
     { key: "B", name: "Glide", desc: "A smooth glide.", fx: (t) => ({ dy: 0.05 * Math.sin(t * 1.6) }) },
     { key: "C", name: "Flicker step", desc: "Now and then it flickers a step to one side.", fx: (t) => { const k = Math.floor(t / 1.5), u = fmod(t, 1.5); return u < 0.1 ? { dy: (hash(k) - 0.5) * 0.4 } : {}; } },
+    { key: "D", name: "Phase shimmer", desc: "Its image wavers and dims, never quite solid.", fx: (t) => ({ alpha: 0.72 + 0.28 * Math.sin(t * 2.3), sx: 1 + 0.02 * Math.sin(t * 19) }) },
+    { key: "E", name: "Silent float", desc: "Floats slowly, turning a little, without a sound.", fx: (t) => ({ dy: 0.05 * Math.sin(t * 1.1), rot: 0.06 * Math.sin(t * 0.7), lift: 0.3 + 0.2 * Math.sin(t * 1.1) }) },
+    { key: "F", name: "Space fold", desc: "Every few seconds it folds thin, as if stepping sideways out of the world, and unfolds.", fx: (t) => { const u = fmod(t, 3.2), f = u < 0.25 ? u / 0.25 : u < 0.5 ? 1 - (u - 0.25) / 0.25 : 0; return { sy: 1 - 0.65 * f, sx: 1 + 0.1 * f, alpha: 1 - 0.3 * f }; } },
   ],
 };
 
@@ -845,6 +864,9 @@ const MOVES = {
     { key: "D", name: "Herd follower", desc: "Bobs along like one of the crowd, keeping up and falling back.", f: t => [V * t - V * 0.2 / 1.7 * Math.cos(t * 1.7), 4 * Math.sin(t * 2.3)] },
     { key: "E", name: "Stalk and slip", desc: "Hangs back, then slips forward.", f: burst(1.6, 0.45) },
     { key: "F", name: "Edge creep", desc: "Keeps to the edge of the lane, out of the way.", f: t => [V * t, 10 + 1.5 * Math.sin(t * 2)] },
+    { key: "G", name: "Frantic flee", desc: "Bolts in jagged, panicked surges, as if trying to flee.", f: t => [V * t - V * 0.6 / 4.5 * Math.cos(t * 4.5), 9 * tri(t * 2.6) + 3 * Math.sin(t * 11)] },
+    { key: "H", name: "Panic zigzag", desc: "Wide, sharp zigzags across the whole lane.", f: t => [V * t, 11 * tri(t * 3.2)] },
+    { key: "I", name: "Scramble and dash", desc: "Scrambles from side to side, then dashes.", f: t => { const k = Math.floor(t / 0.7), x = burst(0.7, 0.3)(t)[0]; return [x, 8 * (hash(k) - 0.5) * 2]; } },
   ],
   decoy: [
     { key: "A", name: "Lumbering line", desc: "Dead straight, slow and heavy-looking.", f: t => [V * t, 0] },
@@ -883,13 +905,13 @@ const BATCHES = [
       { id: "mirage", name: "Mirage", tier: "-", air: false, anims: "mirage", trait: "every 6 s throws 2 hologram copies that soak shots, one in front and one behind (owner); new, 12 px proposed", today: { r: 12 } },
     ] },
 ];
-const STORE_KEY = "bl-enemy-art-special-v3";
-// Picks (owner, 2026-10-08): preselected. Open: Masquerade look (J to L new), Mirage look, animation and movement.
+const STORE_KEY = "bl-enemy-art-special-v4";
+// Picks (owner, 2026-10-08): preselected. Open: Masquerade movement (A, or the flee movements G to I), Mirage.
 const DEFAULTS = {
   phantom: { look: "E", anim: "F", move: "D" },
   aegis: { look: "E", anim: "B", move: "A" },
   hydra: { look: "C", anim: "A", move: "A" },
-  masq: { look: null, anim: "D", move: "A" },
+  masq: { look: "J", anim: "D", move: "A" },
   decoy: { look: "B", anim: "F", move: "A" },
   mirage: { look: null, anim: null, move: null },
 };

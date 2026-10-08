@@ -428,7 +428,18 @@ Aegis Walker 13 and Hydra Frame 14 are today's.
 | Decoy Beacon | Wobble / Trundle / Sway | Lumbering line / Slow sway / Stop and go |
 | Mirage | Shimmer / Glide / Flicker step | Glide / Weave / Side-step |
 
-**Picks (owner, 2026-10-08, second pass):**
+**Picks (owner, 2026-10-08, third pass):**
+- **Phantom:** E Camo glider / F Camo flicker / D Infiltration flight. **Confirmed.** Owner's note: "Give a more rapid
+  flickering", so Camo flicker now flickers much faster.
+- **Aegis Walker** (E/B/A), **Hydra Frame** (C/A/A) and **Decoy Beacon** (B/F/A): **confirmed** as before.
+- **Masquerade:** look **J Unfolding stilt-walker**, animation **D Nervous jitter** (both confirmed; Drone disguise and
+  Drone march and movement until uncovered). Movement: A Mimic trickle picked, with the owner's note "Make a movement
+  like it's trying to flee frantically"; round 4 adds three flee movements (G to I) to pick from.
+- **Mirage:** open. Owner: "The projections are drifting. They should stay in-step with the main enemy. Make more
+  designs that are more mysterious", and more animation ideas. The copies now hold a fixed spacing in front and behind
+  and move in step with it.
+
+**Earlier picks (owner, 2026-10-08, second pass):**
 - **Phantom:** look **E Camo glider**, animation **F Camo flicker**, movement **D Infiltration flight**. **Confirmed.** A flyer.
 - **Aegis Walker:** look **E Siege hexapod**, animation **B Brace for hits**, movement **A Steady advance**. **Confirmed.**
 - **Hydra Frame:** look C Hive pod, animation A Clatter, movement A Trundle. **Confirmed.**
@@ -481,9 +492,16 @@ Aegis Walker 13 and Hydra Frame 14 are today's.
 - **Mirage looks** (copies in front and behind): J Hologram drum (a spinning lens ring on short legs), K Two-way
   lantern (one lens forward, one back), L Bow-and-stern projector (a dish at each end).
 
+**Round 4** (on the same page, with the picks above preselected):
+- **Masquerade, flee movements** (used once it is uncovered; it marches like the Drone before): G Frantic flee (jagged,
+  panicked surges), H Panic zigzag (wide, sharp zigzags), I Scramble and dash.
+- **Mirage, more mysterious looks:** M Veiled monolith (a floating slab of black glass with faint crawling glyphs),
+  N Hooded lens (a cowled machine with one cold lens under the hood), O Shard halo (no visible body: mirror shards
+  turning around a point of light). **Animations:** D Phase shimmer, E Silent float, F Space fold.
+
 ## Open questions
 
-1. **Special picks:** Masquerade look (A to L), Mirage look, animation and movement; any change to the proposed sizes
-   (Masquerade 12, Decoy Beacon 15, Mirage 12 px).
+1. **Special picks:** Masquerade movement (A, or the flee movements G to I), Mirage look, animation and movement; any
+   change to the proposed sizes (Masquerade 12, Decoy Beacon 15, Mirage 12 px).
 2. **Masquerade speed while disguised** (60, the Drone is 55): see `design/enemies.md`, Still open item 6.
 3. **Next role** after Special (remaining: Boss).
