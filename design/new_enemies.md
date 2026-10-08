@@ -13,14 +13,6 @@ changes until the owner confirms the spec.**
 | 2 | Siphon, Blackout Rig, Capacitor (Disruptors) | Designed below |
 | 3 | Shifter, Wraith (Evaders) | Designed below (Wraith parked until the damage-type PR) |
 | 4 | Masquerade, Decoy Beacon, Mirage (targeting tricks) | Designed below |
-| Look | All twelve | Visual mockup: `design/new_enemies_mockup.html` |
-
-**Visual mockup.** `design/new_enemies_mockup.html` draws every new enemy with a canvas port of the game's own
-drawing helpers (`Draw.gd`), next to its role's existing enemies, at game scale (1x on a 48 px tile) and 3x.
-Each card plays its key moment, and Print view lays out key frames. It also shows the tower feedback, the trick
-tells, the evasion states and the elite ring. Open it in a browser. **Draft radii** (px) are set there:
-Needle 8, Fury Drone 10, Shrike 7, Titan 18, Siphon 12, Blackout Rig 14, Capacitor 15, Shifter 11, Wraith 12,
-Masquerade 13, Decoy Beacon 15, Mirage 11.
 
 ## Rules shared by all new enemies
 
@@ -53,8 +45,6 @@ Masquerade 13, Decoy Beacon 15, Mirage 11.
 - **Behaviour:** each spawn event sends **two Needles 0.25 s apart on the same lane**. No ability.
 - **Job:** slip past before single-target towers land a shot. A pair doubles the problem.
 - **Counters:** slows, splash and chain, rapid-fire towers.
-- **Look:** a slim chevron, chalk-white accent on a dark cool hull (Skitter's accent is amber and Phantom's
-  cyan, so they read apart). The pair keeps a tight formation. One short high-pitched whine per spawn.
 - **Codex text (draft):** "Hair-thin sprinter that always arrives in pairs. Single-target towers can't keep
   up. Slows, splash and rapid fire can."
 - **Edge cases:** lanes alternate by spawn group as in normal waves, and the pair shares a lane. Rally Beacon
@@ -75,9 +65,6 @@ Masquerade 13, Decoy Beacon 15, Mirage 11.
   adrenaline is a **separate multiplier** so the two compound.
 - **Job:** punish chip damage. Burst kills it before it matters; many weak hits make it faster.
 - **Counters:** burst and armor shred. Slows still apply on top of the boosts.
-- **Look:** an angular hunter drone, hot magenta accent (Strike Drone is red, Blink Stalker violet, Skitter amber). Below half health the
-  engine glow turns white-hot and a short speed trail appears (an animated part, so inside `Draw.dyn`). A
-  rising rev sound plays once when adrenaline starts.
 - **Codex text (draft):** "Hunter drone that overclocks when hurt: below half health it runs 30% faster.
   Kill it in one burst, and watch for Rally Beacons, because the boosts multiply."
 - **Edge cases:** adrenaline starts once and can't be undone by healing above 50% (Repair Bot, Mender Hulk).
@@ -95,8 +82,6 @@ Masquerade 13, Decoy Beacon 15, Mirage 11.
   straight at the core like Locust and Strike Drone, ignoring the lane.
 - **Job:** a stronger Locust. Locust is 15 HP, Shrike 55 HP, so it takes more than one flak burst.
 - **Counters:** flak and chain towers pay off most; only anti-air can touch it, and **mortars can't hit it**.
-- **Look:** winged blade silhouettes in steel grey with a teal accent edge, flapping as a tight cluster (an
-  animated part, inside `Draw.dyn`). A faint buzz for the cluster, not per unit.
 - **Codex text (draft):** "Winged blade clusters, five at a time, flying straight at the core. Mortars can't
   hit them. Flak and chain towers shred them."
 - **Edge cases:** leak cost is **per unit by strength band**, as the spec says. At the draft band of 2, one
@@ -115,8 +100,6 @@ Masquerade 13, Decoy Beacon 15, Mirage 11.
   and Gunship but below the bosses.
 - **Job:** soak damage, then turn into a faster, easier-to-hurt target.
 - **Counters:** armor shred, big hitters and beams before the shed; burst and slows after it.
-- **Look:** a broad gunmetal walker with visible plates and molten orange vents. At half health 2 or 3 plate
-  polygons fall away (a one-shot effect) and the vents flare. A heavy thud on the shed.
 - **Codex text (draft):** "Walking fortress with 9 armor and half resistance to slows. At half health its plates
   shed: armor drops to 5, but it speeds up 20%. Bring armor shredders and big hitters."
 - **Edge cases:** healing above 50% doesn't restore plates. The speed bump is a plain speed change, so slows
@@ -146,9 +129,6 @@ Blackout Rig (T3), Capacitor (T4).
   `Tower.eff_rate()` and `Tower.get_range()`. The debuff adds two small fields (`debuff_rate`,
   `debuff_range`), reset each tick the same way, set by an aura pass like `Game._update_auras`, and applied
   after the buffs.
-- **Look:** a hovering drone with a coil dish, in the Disruptor palette (the Jammer's acid yellow-green).
-  Thin siphon arcs to affected towers are an animated part (inside `Draw.dyn`). A low hum while any tower is
-  affected.
 - **Codex text (draft):** "Drains nearby towers: inside its 100 px aura they fire 20% slower and reach 15%
   less far. Two Siphons don't stack. Kill it from range."
 - **Edge cases:** reduced range can drop a target out of reach. Flying enemies and bosses aren't affected as
@@ -165,8 +145,6 @@ Blackout Rig (T3), Capacitor (T4).
 - **Job:** switch off a cluster of towers for most of its walk. The heaviest of the three Disruptors.
 - **Counters:** long range, burst; a Nullifier silences the pulse. The 1 s disable guard stops it locking a
   tower out together with a Jammer.
-- **Look:** a Jammer-family chassis, bulkier, with exposed pylons and brighter arcs (the same acid
-  yellow-green). The existing EMP ring effect, scaled to radius 130.
 - **Codex text (draft):** "A hulking Jammer. Its EMP reaches 130 px and knocks towers offline for 2.5 s every
   4 s. Kill it from range."
 - **Edge cases:** it is not a boss, so Rally Beacon haste applies. A 62.5% duty cycle is flagged for
@@ -189,8 +167,6 @@ Blackout Rig (T3), Capacitor (T4).
   death, next to the existing EMP code.
 - **Duty cycle:** 3 s of every 8 is **37.5%**, lower than the Blackout Rig's 62.5%, on purpose: the pulse is
   bigger and telegraphed. Flagged for balancing.
-- **Look:** a squat core with a ring that fills during the charge in the Disruptor palette and flashes white
-  on release. A rising whine while it charges and a heavy discharge sound.
 - **Codex text (draft):** "Charges for 2 s, then blacks out every tower within 160 px for 3 s. Stun or silence
   it during the charge to cancel the pulse."
 - **Edge cases:** if two Capacitors charge together, each pulses on its own timer, and the 1 s disable guard
@@ -219,9 +195,6 @@ reveals them (`Enemy.is_hidden()`). The two new Evaders extend the role in tier 
 - **Job:** a Support-adjacent Evader: it dodges single-target fire and speeds the group up behind it.
 - **Counters:** slows and stuns reset its blink charge (the existing Blink Stalker rule, `_reset_blink`),
   silence stops the blink, and killing it before it blinks removes the boost.
-- **Look:** a lean angular walker with a faint afterimage, in a white-gold accent (the Evaders already use
-  cyan, violet and orange). The wake burst is a one-shot expanding ring at the landing point. A soft
-  whoosh on each blink.
 - **Codex text (draft):** "Blinks 60 px every 5 s and speeds up nearby enemies by 20% for 2 s where it
   lands. Slow or stun it to reset its charge."
 - **Edge cases:** bosses aren't boosted (as with Rally Beacon). The burst ignores flying status of the
@@ -248,8 +221,6 @@ and not built first; until then **Evader T4 stays empty**. The other three Tier 
   (the owner's intent: "build energy towers").
 - **Counters:** Arc Coils, beam and field towers, burn and damage-over-time, and a Sensor Array to see it.
   Slows from field towers still apply.
-- **Look:** a dark indigo hull that is nearly invisible until revealed, then a ghostly white outline, using
-  the Phantom's cloak shimmer. A faint hiss while visible.
 - **Codex text (draft):** "Cloaked and immune to physical damage. Only energy hurts it: beams, chains, fields,
   burning and Arc Coils. Bring a Sensor Array to see it."
 - **Edge cases:** physical hits do 0 damage and don't reveal it (the reveal-on-damage rule fires only for
@@ -271,8 +242,8 @@ trick is revealed.
 - **Displayed vs true:** Strongest targeting and the new **Support priority both go by the displayed
   identity** (decided), so a disguise works until it is revealed. First, Last and Closest don't read rank,
   so they are never fooled.
-- **A subtle tell:** a disguised enemy (Masquerade, Decoy Beacon) carries a thin **dotted ring**; the shape
-  is the tell, so the colour follows the hull. The Codex states each trick plainly (decided earlier), and a
+- **A subtle tell:** a disguised enemy (Masquerade, Decoy Beacon) carries a visible tell; what it looks like is
+  decided with the visual redesign. The Codex states each trick plainly (decided earlier), and a
   player who has met one can spot it.
 - **Revealing early:** a **specific new Sensor Array upgrade** reveals the true rank and identity of tricks
   inside its field and marks holograms as fake. It is **not** part of the base Sensor Array. Its name, tree
@@ -293,9 +264,6 @@ trick is revealed.
 - **Job:** soak real damage while looking harmless; it punishes defences that rely on Strongest.
 - **Counters:** First, Last or Closest targeting, area damage that happens to hit it, and the Sensor Array
   upgrade. Once below half health it is an ordinary Special.
-- **Look:** drawn with a Nanite-style hull on its own (larger) body, so its size is a second tell, plus the
-  dotted ring. When revealed the disguise peels away to its true hull (a one-shot effect). A glassy crack on
-  reveal.
 - **Codex text (draft):** "Looks like a basic unit and ranks like one, so Strongest targeting ignores it.
   Below half health it drops the disguise. Use First or Closest targeting, or a Sensor Array upgrade, to see
   it."
@@ -314,8 +282,6 @@ trick is revealed.
 - **Job:** bait: Strongest towers waste fire on it while the real threats walk past.
 - **Counters:** switch the tower to First, Last or Closest, kill it (it has real HP and armor 6), or the
   Sensor Array upgrade.
-- **Look:** a heavy, slow gunmetal hull with a beacon mast and the dotted ring. A low ping every few seconds
-  (the "beacon").
 - **Codex text (draft):** "Ranks as a heavy unit so Strongest towers aim at it, but it does nothing else.
   Switch tower targeting, or kill it, to stop wasting fire."
 - **Edge cases:** because it displays below the bosses, real bosses keep their priority. It leaks for 1
@@ -334,8 +300,6 @@ trick is revealed.
   displayed rank. Any hit kills one, so splash and chain clear several at once.
 - **Job:** a shot sink: towers waste shots on 1-HP copies.
 - **Counters:** area and chain towers, and the Sensor Array upgrade, which marks holograms as fake.
-- **Look:** a projector dish; the holograms are a translucent copy of the Mirage with a scanline (an alpha
-  plus a line, cheap to draw). A soft chime per pair.
 - **Codex text (draft):** "Projects two translucent copies every 6 s that soak shots and walk to the core. A
   single hit kills one. Splash and chain towers clear them."
 - **Edge cases:** holograms are live enemies until they vanish at the core, so a round does not end while any
@@ -384,10 +348,3 @@ trick is revealed.
     your approval; the upgrade data is generated from `design/upgrade_trees.md`.
 12. **Decoy and the Support priority (resolved).** The Support priority covers the Support role only, so it
     ignores every Special (Masquerade, Decoy Beacon, Mirage and its holograms). The tricks only fool Strongest.
-13. **Trick tell vs Exposed.** The existing Exposed status is a dashed white ring that rotates around the enemy,
-    so a dotted-ring tell for disguised enemies could be mistaken for it. The mockup shows both next to an
-    alternative "glitch outline" tell (a split red/cyan double outline). Which tell should Masquerade and Decoy
-    Beacon use?
-14. **Mockup review.** Silhouettes, palettes, radii and key moments in `design/new_enemies_mockup.html` are
-    drafts. Note: cloaked, the Wraith and the Phantom read alike (both are a faint wedge outline); the Wraith's
-    tattered tail and white outline only show once revealed.
