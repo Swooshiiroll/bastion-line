@@ -226,9 +226,9 @@ step up.
 
 **Picks (owner, 2026-10-08):**
 - **Jammer:** look A Antenna walker, animation A Static jitter, movement A Steady advance.
-- **Siphon:** look and animation **open** (none of A to C was picked; round 2 offers three new of each),
+- **Siphon:** look and animation **open** (none of A to C was picked; rounds 2 and 3 offer new looks D to I and animations D to F),
   movement C Drain and lurch.
-- **Blackout Rig:** look and animation **open** (round 2 offers three new of each), movement C Stop and pulse.
+- **Blackout Rig:** look and animation **open** (rounds 2 and 3 offer new looks D to I and animations D to F), movement C Stop and pulse.
 - **Capacitor:** look C Ring-reactor tank, animation B Hum, movement A Inexorable advance.
 
 **Round 2** (on the same page, with the picks above preselected):
@@ -241,7 +241,18 @@ step up.
   (a black orb on three legs; its ultraviolet corona flares on each pulse).
 - **Blackout Rig animations:** D Lumber, E Rock, F Power sag.
 
+**Round 3** (owner asked for three new designs each). These evolve from the Jammer pick (a four-legged antenna walker)
+toward the Capacitor pick (a ring tank on treads), so the tiers read as one line:
+- **Siphon looks:** **G Hose walker** (the Jammer's four-legged frame, grown, with two ribbed siphon hoses reaching
+  forward and energy flowing back up them), **H Tether sapper** (a six-legged crawler whose three masts throw lime
+  drain tethers out to the towers around it), **I Vacuum sled** (a low skid sled with a wide intake mouth and a
+  glass cyclone canister).
+- **Blackout Rig looks:** **G Blackout tank** (a heavy tank with a stubby EMP cannon on its turret and the Jammer's
+  whip antennas trailing behind), **H Spider rig** (the Jammer grown huge: a six-legged armoured spider with a full
+  crown of crackling antennas), **I Shroud crawler** (six black shroud panels open like a flower just before each
+  pulse and fold shut after).
+
 ## Open questions
 
-1. **Siphon and Blackout Rig:** look and animation for each, from D to F on the Disruptor page.
+1. **Siphon and Blackout Rig:** a look (D to I) and an animation (D to F) for each, on the Disruptor page.
 2. **Next role** after Disruptor (remaining: Evader, Special, Boss).
