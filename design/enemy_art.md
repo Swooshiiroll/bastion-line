@@ -251,6 +251,42 @@ toward the Capacitor pick (a ring tank on treads), so the tiers read as one line
   crown of crackling antennas), **I Shroud crawler** (six black shroud panels open like a flower just before each
   pulse and fold shut after).
 
+## Evader (role 6)
+
+Mockup: `design/enemy_art_evader.html`, the same format as the other roles (three proposals each for look, animation
+and movement, notes boxes, no "today").
+
+**Evader family (draft):** the army's infiltrators: slim, angular stealth hulls, a single slit visor, phase fins or
+emitters, and a visible evasion effect on the spec timing. **Tiers evolve:** T1 Blink Stalker is a lean bare frame; T2
+Burrower is armoured for digging; T3 Shifter is sleek with phase gear; T4 Wraith is the sleekest and nearly invisible.
+**Colour per enemy:** Blink Stalker graphite with neon orange, Burrower earth brown with a steel drill, Shifter chrome
+silver with aqua, Wraith smoked glass with a pale ghost-white shimmer.
+
+**Effects in the previews:** Blink Stalker charges, then blinks 80 px every 4 s, leaving an afterimage; Burrower digs
+in and is underground (a moving dirt mound) 2.5 s of every 5; Shifter blinks every 5 s and its landing throws a speed
+wake (chevron ring); Wraith is cloaked (a faint, shimmering double image) and the previews reveal it 2 s of every 6,
+with a sensor reticle, as if inside a Sensor Array.
+
+**Sizes (proposed):** Shifter and Wraith are new and have no size yet. The mockup draws them at 12 and 13 px (Blink
+Stalker is 10 and Burrower 11 today) so the tiers step up; the owner can change these.
+
+| Enemy (trait from the name) | Look A | Look B | Look C |
+|---|---|---|---|
+| Blink Stalker, T1 ground (a hunter that blinks ahead) | Stalker biped: lean hunter, long sensor head | Blink hound: four-legged, blink coil on its back | Phase skiff: blade-thin hover, blink ring at the tail |
+| Burrower, T2 ground (tunnels under the lane) | Drill worm: segmented, drill head | Mole digger: shovel claws, nose drill | Tunnel borer: short treads, toothed cutter face |
+| Shifter, T3 ground (blinks; its wake speeds others up) | Phase walker: biped, three phase fins | Prism hover: flashing triangular prism | Twin-pod shifter: two pods on a phase beam |
+| Wraith, T4 ground (cloaked; only energy hurts it) | Spectre frame: tall skeletal walker | Shroud drifter: hooded hover, trailing panels | Mirage blade: stealth wedge, light-bending edges |
+
+| Enemy | Animation A / B / C | Movement A / B / C |
+|---|---|---|
+| Blink Stalker | Prowl / Crouch and spring / Lope | Blink hops / Prowl weave / Stalk and surge |
+| Burrower | Dig-in bob / Wriggle / Rumble | Steady tunnel / Snake / Dive and surface |
+| Shifter | Glide / Flicker / Stride | Phase steps / Side-shift / Smooth glide |
+| Wraith | Drift / Waver / Lurk | Ghost drift / Unseen line / Haunting weave |
+
+**Picks:** Blink Stalker _, Burrower _, Shifter _, Wraith _ (look, animation, movement; notes)
+
 ## Open questions
 
-1. **Next role** after Disruptor (remaining: Evader, Special, Boss).
+1. **Evader picks**, and any change to the Evader family traits or the proposed sizes.
+2. **Next role** after Evader (remaining: Special, Boss).
