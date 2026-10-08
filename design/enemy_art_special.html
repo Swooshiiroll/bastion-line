@@ -89,11 +89,11 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 7 of 8: Special (round 5)</div>
+    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 7 of 8: Special (round 6)</div>
     <h1>Enemy art: Special</h1>
     <p class="note">A fresh start from the names: the machine army's <b>Special</b> role. For each enemy, pick its <b>look</b>, <b>animation</b> and
       <b>movement</b> separately from three proposals each (A to C), and add notes. Mix freely. The <b>Your combination</b> preview shows your
-      mix (option A until you pick). <b>Your picks are preselected</b>: everything but the Mirage's animation is settled. From your note, the Mirage's <b>hologram projection is reworked</b> on every look: light beams from the Mirage, a scan line that materialises each copy, a cyan tint with a slight colour split, moving scanlines, flicker and glitch tears, and a glitching break-up as they fade. Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
+      mix (option A until you pick). <b>Your picks are preselected</b>: everything but the Mirage's animation is settled. From your note, the Mirage's copies now <b>shimmer like the Phantom's active camouflage</b> on every look: a faint doubled image, a light band sweeping across, and the Phantom's rapid flicker, in step one in front and one behind. Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
       Spec: <code>design/enemy_art.md</code>.</p>
     <ul class="rules">
       <li><b>Machine army;</b> each <b>name inspires a trait</b> (not a literal picture).</li>
@@ -477,23 +477,13 @@ function masqFx(D, T, c, t, r, col) { const k = masqK(t), u = fmod(t, 8);
 // Decoy Beacon: advertises a false high rank (a pulsing rank badge)
 function rankBadge(p, t, col) { const pulse = 0.6 + 0.4 * Math.sin(t * 4); for (let i = 0; i < 3; i++) { const q = add(p, [i * 2.4, 0]); polyline([add(q, [-1.5, -2.2]), add(q, [0.6, 0]), add(q, [-1.5, 2.2])], OUTLINE, 2.0); polyline([add(q, [-1.5, -2.2]), add(q, [0.6, 0]), add(q, [-1.5, 2.2])], A(col, pulse), 1.0); } }
 // Mirage: every 6 s it throws 2 hologram copies of itself that walk ahead and fade
-const HOLO_TINT = "grayscale(1) sepia(1) hue-rotate(140deg) saturate(5) brightness(1.25)", HOLO_SPLIT = "grayscale(1) sepia(1) hue-rotate(250deg) saturate(5)";
-function holoCopy(B, p, r, t, a, col, rev, d) { if (a <= 0.01 || rev <= 0.01) return;
-  const k = Math.floor(t * 12), fl = hash(k * 3) < 0.12 + 0.3 * d ? 0.45 : 1, box = r * 1.4;
-  X.save(); X.beginPath(); X.rect(p[0] - box, p[1] - box, box * 2 * rev, box * 2); X.clip();
-  X.filter = HOLO_SPLIT; withAlpha(0.2 * a * fl, () => B(add(p, [-1.0, 0]))); X.filter = HOLO_TINT; withAlpha(0.55 * a * fl, () => B(p)); X.filter = "none";
-  X.globalCompositeOperation = "lighter"; withAlpha(0.14 * a * fl, () => B(p)); X.globalCompositeOperation = "source-over";
-  const off = fmod(t * 5, 1) * r * 0.16; for (let i = -5; i <= 5; i++) line(add(p, [-box * 0.8, i * r * 0.16 + off]), add(p, [box * 0.8, i * r * 0.16 + off]), A(col, 0.14 * a), 0.5);
-  for (let j = 0; j < 2; j++) if (hash(k * 7 + j) > 0.86 - 0.5 * d) { const y0 = p[1] + (hash(k * 5 + j) - 0.5) * r * 1.6, h = r * (0.12 + 0.18 * hash(k + j)), dx = (hash(k * 9 + j) - 0.5) * r * (0.5 + 1.2 * d);
-    X.save(); X.beginPath(); X.rect(p[0] - box, y0, box * 2, h); X.clip(); X.filter = HOLO_TINT; withAlpha(0.7 * a, () => B(add(p, [dx, 0]))); X.filter = "none"; X.restore(); }
-  X.restore();
-  if (rev < 1) { const x = p[0] - box + box * 2 * rev; line([x, p[1] - box * 0.8], [x, p[1] + box * 0.8], A([1, 1, 1, 1], 0.8), 1.0); line([x, p[1] - box * 0.8], [x, p[1] + box * 0.8], A(col, 0.4), 3); } }
-function mirageFx(B, c, t, r, col) { const u = fmod(t, 6), rev = Math.min(1, u / 0.6), d = u > 5.2 ? (u - 5.2) / 0.8 : 0, a = 1 - d;
-  // owner: one copy in front and one behind, locked in step; projected along light beams from the Mirage
-  for (const sg of [1, -1]) { const p = add(c, [sg * r * 1.7, 0]), bA = (u < 0.6 ? 0.4 : 0.1 + 0.05 * Math.sin(t * 5)) * a;
-    for (const q of [-0.6, 0, 0.6]) line(c, add(p, [0, q * r]), A(col, bA * (q ? 0.55 : 1)), q ? 0.5 : 0.8);
-    for (let i = 0; i < 3; i++) { const v = fmod(t * 1.5 + i / 3, 1); disc(add(c, mul(sub(p, c), v)), 0.7, A(col, 0.6 * a * Math.sin(v * Math.PI))); }
-    holoCopy(B, p, r, t + sg, a, col, rev, d); }
+// Mirage copies shimmer like the Phantom's active camouflage (owner): a faint doubled image, a light band sweeping
+// across, and the Phantom's rapid Camo flicker. One in front and one behind, in step; they shimmer in and out.
+function mirageFx(B, c, t, r, col) { const u = fmod(t, 6), a = u < 0.5 ? u / 0.5 : u > 5.3 ? (6 - u) / 0.7 : 1;
+  for (const sg of [1, -1]) { const p = add(c, [sg * r * 1.7, 0]), k = Math.floor(t * 24) + (sg > 0 ? 0 : 7), fl = hash(k) < 0.3 ? 0.45 : 1;
+    withAlpha(0.16 * a * fl, () => B(add(p, [r * 0.06, 0]))); withAlpha(0.16 * a * fl, () => B(add(p, [-r * 0.06, r * 0.04])));
+    withAlpha(0.3 * a * fl, () => B(p));
+    const sx = (fmod(t * 0.8 + (sg > 0 ? 0 : 0.5), 1) * 2 - 1) * r * 0.9; line(add(p, [sx, -r * 0.6]), add(p, [sx + r * 0.25, r * 0.6]), A(col, 0.4 * a), 1.2); line(add(p, [sx - r * 0.2, -r * 0.5]), add(p, [sx + r * 0.05, r * 0.5]), A(col, 0.2 * a), 0.8); }
   B(c); }
 
 // The confirmed Jammer (Disruptor A, Antenna walker): a Masquerade disguise; as a fake its antennas never crackle
