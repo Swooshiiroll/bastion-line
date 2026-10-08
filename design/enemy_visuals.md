@@ -69,8 +69,8 @@ violet, red, gold, magenta, mint and more), so "avoid tower colours" cannot work
 
 | # | Role | Enemies | State |
 |---|---|---|---|
-| 1 | Swarm | Nanite, Locust, Drone, Shrike | **Round 5 options ready for picks** (all-new mechanized concepts; flyers are drones) |
-| 2 | Rusher | Skitter, Needle, Strike Drone, Fury Drone | To do |
+| 1 | Swarm | Nanite, Locust, Drone, Shrike | **Picked** (Drone movement pending) |
+| 2 | Rusher | Skitter, Needle, Strike Drone, Fury Drone | **Options ready for picks** (`design/enemy_redesign_batch2.html`) |
 | 3 | Tank | Siege Mech, Rampart, Gunship, Titan | To do |
 | 4 | Support | Repair Bot, Rally Beacon, Bulwark, Mender Hulk | To do |
 | 5 | Disruptor | Jammer, Siphon, Blackout Rig, Capacitor | To do |
@@ -104,7 +104,7 @@ Shrike): A Flutter, B Swoop, C Hover-bob, D Glide-spin, E Undulate.
 | E Piston pogo-bots | three hopping piston cylinders | brushed steel, lime status rings | 8 (+2) |
 
 **Movement:** A Weave, B Stop-go hops, C Rhythmic surges, D S-slither, E Micro-blinks.
-**Picks:** look _, animation _, movement _; notes _
+**Picks (owner):** look **Today**, animation **Today**, movement **Today**. Nanite keeps its current look and motion.
 
 ### Locust (T2, flyer drone; today: flapping wings, steady, radius 5)
 
@@ -117,7 +117,7 @@ Shrike): A Flutter, B Swoop, C Hover-bob, D Glide-spin, E Undulate.
 | E Rotor-ring | ring airframe, eight micro-rotors | bronze ring, cyan rotor tips | 7 (+2) |
 
 **Movement:** A Jittery zigzag, B Wide swoops, C Pause-and-dart, D Glide and sway, E Sine undulation.
-**Picks:** look _, animation _, movement _; notes _
+**Picks (owner):** look **A Tricopter** (radius 6), animation **E Undulate**, movement **D Glide and sway**.
 
 ### Drone (T3, ground; today: hover disc, steady, radius 11)
 
@@ -130,7 +130,7 @@ Shrike): A Flutter, B Swoop, C Hover-bob, D Glide-spin, E Undulate.
 | E Screw-drive crawler | twin Archimedean screws | steel-blue body, brass screws | 11 |
 
 **Movement:** A Bouncy surges, B Walk then roll, C Wobbling weave, D Heavy hops, E Precessing loops.
-**Picks:** look _, animation _, movement _; notes _
+**Picks (owner):** look **Today**, animation **Today**, movement **pending** (not picked yet).
 
 ### Shrike (T4, flyer drones, cluster of 5; today: flapping blade-wings, steady, radius 7)
 
@@ -143,6 +143,70 @@ Shrike): A Flutter, B Swoop, C Hover-bob, D Glide-spin, E Undulate.
 | E Paraglider drones | parafoil canopy over a motor pod | orange-and-white canopy, black pod | 8 (+1) |
 
 **Movement:** A Tight V that regroups, B Murmuration swirl, C Gust surges, D Pulse-jets, E Streaking surges.
+**Picks (owner):** look **Today** (the drafted blade-wing drone), animation **C Hover-bob**, movement **Today**.
+
+**Batch 1 note:** Locust's Tricopter and today's Strike Drone (a quad-rotor) are both multi-rotor drones, so batch 2
+offers no multi-rotor for Strike Drone.
+
+## Batch 2: Rusher (decision records)
+
+Mockup: `design/enemy_redesign_batch2.html`, the same format as batch 1 (today plus A to E for look, animation and
+movement, with notes boxes). The rules are the same: mechanized, nothing biological, flyers are drones, and no
+look offered in batch 1 (any round) or any enemy's today look returns. Rushers get **speed-focused animations**:
+ground: A Lean, B Wheelie bounce, C Sprint stretch, D Drift skid, E Engine rumble. Strike Drone: A Bank-roll,
+B Pitch-dive, C Strafe slide, D Barrel-roll, E Yaw-hunt. Needle always spawns as a pair, so its looks show two
+units and its movements describe how the pair moves together.
+
+### Skitter (T1, ground; today: six-leg scuttle, radius 10)
+
+| Look | Machine | Palette | Radius |
+|---|---|---|---|
+| A Dirt-bike bot | two-wheel robot bike | lime-green frame, black tyres | 10 |
+| B Tadpole trike | two wheels front, one rear | electric-blue body, white stripes | 10 |
+| C Wheg runner | four rotating wheel-legs on a plated hull | copper-red hull, black whegs | 10 |
+| D Go-kart bot | open-frame kart with a checkered spoiler | racing yellow, black tyres | 10 |
+| E Land-yacht bot | wind-sail wheeled racer | navy hull, white sail | 11 (+1) |
+
+**Movement:** A Slalom, B Burst and coast, C Edge-hugger, D Drift slides, E Stutter-step.
+**Picks:** look _, animation _, movement _; notes _
+
+### Needle (T2, ground, pair; today: light-leg sprint, radius 8)
+
+| Look | Machine | Palette | Radius |
+|---|---|---|---|
+| A Dragster | needle-nose drag racer, big rear slicks | pearl white, violet stripes | 8 |
+| B Inline skater bot | humanoid skating robot | teal shell, white skates | 8 |
+| C Hover-lance | spike-nosed hover racer | matte black, cyan seams and underglow | 8 |
+| D Ground-effect arrow | delta skimmer | coral-red delta, white fin | 8 |
+| E Outrigger jet-car | jet car on two outrigger wheels | lemon yellow, black outriggers | 8 |
+
+**Movement (pair):** A Drafting, B Braided weave, C Leapfrog, D Side by side, E Split and rejoin.
+**Picks:** look _, animation _, movement _; notes _
+
+### Strike Drone (T3, flyer drone; today: quad-rotor, radius 9)
+
+| Look | Drone | Palette | Radius |
+|---|---|---|---|
+| A Canard jet drone | canard delta jet | slate-teal, hazard-yellow nose | 9 |
+| B Autogyro drone | free-spinning rotor, pusher prop | sunset-orange pod, white rotor | 9 |
+| C Twin-boom recon drone | high wing, twin booms, pusher prop | desert sand, black sensor ball | 9 |
+| D Cyclocopter | two barrel rotors | violet body, silver drums | 9 |
+| E X-wing strike drone | four-wing jet | white wings, red stripes, blue engines | 9 |
+
+**Movement:** A Strafing sweeps, B Dive and climb, C Figure-eight, D Hover and dash, E Corkscrew.
+**Picks:** look _, animation _, movement _; notes _
+
+### Fury Drone (T4, ground; today: hunter stride, radius 10)
+
+| Look | Machine | Palette | Radius |
+|---|---|---|---|
+| A Assault buggy | roll-cage combat buggy with a roof gun | desert tan, red roll bars | 11 (+1) |
+| B Wedge hover-tank | faceted hover tank, twin barrels | deep magenta armour, violet hover glow | 11 (+1) |
+| C Drum crusher | spiked roller drum on arms | hazard-striped drum, steel arms | 11 (+1) |
+| D Jump-jet mech | stocky biped with jump jets | navy armour, orange jets | 11 (+1) |
+| E Spiked ram-car | plough-fronted ram car | rust hull, chrome spikes | 11 (+1) |
+
+**Movement:** A Ram charges, B Swerving pursuit, C Rumbling surge, D Juke steps, E Wall-bounce.
 **Picks:** look _, animation _, movement _; notes _
 
 ## Implementation (after every batch is confirmed)
@@ -155,7 +219,7 @@ runs. Picked **animations** go into the drawings; picked **path patterns** need 
 
 ## Open questions
 
-1. **Batch 1 picks:** look, animation and movement for each Swarm enemy, plus any notes (copied from the mockup).
+1. **Batch 1:** Drone's movement is still to pick. **Batch 2 picks:** look, animation and movement for each Rusher.
 2. **Lore direction (decided, rounds 3 to 5):** mechanized tech, so the "machines" lore stays as it is.
 3. **Path patterns change gameplay.** Bursts and weaving make projectile towers miss more (they lead the
    target); hops and pauses change how long an enemy stays in range. The balance probe checks the picked
