@@ -285,16 +285,15 @@ step up.
 | Shifter | Glide / Flicker / Stride | Phase steps / Side-shift / Smooth glide |
 | Wraith | Drift / Waver / Lurk | Ghost drift / Unseen line / Haunting weave |
 
-**Picks (owner, 2026-10-08, second pass):**
-- **Blink Stalker:** look **open** (none of A to C; round 3 offers three new looks), animation **E Phase shimmer**,
-  movement **D Blink zigzag**.
-- **Burrower:** look **C Tunnel borer**, with the owner's note "Create something like a drilling pod": round 3 offers
-  three drilling pods (G to I) to pick instead or keep C; animation C Rumble, movement C Dive and surface. Owner's
-  earlier note: "Burrower should disappear when underground. No underground effect should be shown. Maybe a doppler
-  effect when in range of a radar tower." Done on every Burrower look; the gameplay side (specific towers or upgrades
-  can hit it underground in Sensor Array range) is recorded in `design/enemies.md`.
-- **Shifter:** look **B Prism hover**, animation A Glide, movement B Side-shift. **Confirmed.**
-- **Wraith:** look **open** (none of A to F; round 3 offers three more), animation A Drift, movement A Ghost drift.
+**Picks (owner, 2026-10-08, third pass):**
+- **Blink Stalker:** look **open**, with the owner's note "Create something along the lines of a drone or a droid"
+  (round 4 offers three); animation **E Phase shimmer**, movement **F Feint and blink**.
+- **Burrower:** look **G Drill pod** (from round 3, the owner's drilling-pod note), animation C Rumble, movement C Dive
+  and surface. **Confirmed.** It vanishes underground, and a doppler ping shows it inside a Sensor Array's range; the
+  gameplay side is in `design/enemies.md`.
+- **Shifter:** look B Prism hover, animation A Glide, movement B Side-shift. **Confirmed.**
+- **Wraith:** look **open**, with the owner's note "Something ghostly but mechanical/robotic" (round 4 offers three);
+  animation A Drift, movement A Ghost drift.
 
 **Round 2** (on the same page, with the picks above preselected):
 - **Blink Stalker animations:** D Head-snap, E Phase shimmer, F Slink. **Movements:** D Blink zigzag (blinks across
@@ -318,7 +317,17 @@ step up.
   hovering hexagonal crystal whose facets flicker clear), **H Bipyramid glider** (a long double-pointed crystal
   gliding nose first), **I Prism stilt-walker** (a dark triangular prism on four tall, slow stilt legs).
 
+**Round 4** (from the owner's notes, on the same page with the picks above preselected):
+- **Blink Stalker, drones and droids** (they hover low but stay ground units): **G Ball droid** (a rolling ball with
+  a dome head riding on top and a whip antenna), **H Hover-eye droid** (a disc droid skimming on its underglow, one
+  big eye and two small grabber arms), **I Duct-fan drone** (a sleek pod on two ducted fans with a chin sensor).
+- **Wraith, ghostly but mechanical:** **J Phantom droid** (a robot torso with grasping arms and two pale eyes, no
+  legs, trailing off into a fading ion tail), **K Ribcage drifter** (a floating mechanical spine and ribcage with a
+  sensor skull and a pale core caged inside), **L Echo walker** (a sleek robot walker leaving fading echoes of itself
+  behind).
+
 ## Open questions
 
-1. **Evader looks:** Blink Stalker (A to F), Burrower (keep C Tunnel borer or a drilling pod G to I), Wraith (A to I).
+1. **Evader looks:** Blink Stalker (any of A to I; G to I are the drones and droids) and Wraith (any of A to L; J to L
+   are the ghostly robots).
 2. **Next role** after Evader (remaining: Special, Boss).
