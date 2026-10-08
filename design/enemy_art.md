@@ -192,6 +192,41 @@ aura; Bulwark charges, then throws a sky-blue barrier every 6 s; Mender Hulk's s
 - **Bulwark:** look C Shield-wing bot, animation B Hum, movement C Brace and advance.
 - **Mender Hulk:** look B Repair-arm crawler, animation C Hunched lurch, movement A Relentless plod.
 
+## Disruptor (role 5)
+
+Mockup: `design/enemy_art_disruptor.html`, the same format as the other roles (three proposals each for look,
+animation and movement, notes boxes, no "today").
+
+**Disruptor family (draft):** the army's electronic-warfare rigs: antenna arrays and dishes, exposed coils,
+crackling arcs, blinking warning LEDs, and a visible effect on the spec timing. **Tiers evolve:** T1 Jammer is a small
+bare rig; T2 Siphon adds panels and intakes; T3 Blackout Rig is a big armoured hauler; T4 Capacitor is sleek, with
+glowing coils. **Colour per enemy:** Jammer matte black with electric blue, Siphon deep indigo with acid lime,
+Blackout Rig storm grey with ultraviolet, Capacitor ceramic white with copper coils and white-hot arcs.
+
+**Effects in the previews:** Jammer fires a crackling EMP ring every 5 s; Siphon has a drain aura pulling energy
+motes in; Blackout Rig throws a darkening ultraviolet pulse every 4 s; Capacitor charges for 2 s (a dashed warning
+ring closes in, arcs build), then fires a huge EMP, every 8 s. Rings are drawn small to fit the cards.
+
+**Sizes:** Siphon, Blackout Rig and Capacitor are new and have no size yet. The mockup draws them at 13, 15 and
+16 px (Jammer is 12 today) so the tiers step up; the owner can change these.
+
+| Enemy (trait from the name) | Look A | Look B | Look C |
+|---|---|---|---|
+| Jammer, T1 ground (jams towers) | Antenna walker: four legs, crackling whip antennas | Dish crawler: treads, scanning jammer dish | Mast roller: two big wheels, spinning mast |
+| Siphon, T2 ground (drains towers) | Cable leech: crawler trailing plug cables | Funnel walker: swirling intake funnel | Drain-spire tank: forward spire, sloshing glass tank |
+| Blackout Rig, T3 ground (a big Jammer) | Generator truck: six wheels, finned EMP drum | Transformer walker: ribbed box, arcing insulators | Twin-dish crawler: back-to-back turning dishes |
+| Capacitor, T4 ground (charges, then releases) | Tesla walker: copper coil, electrode prongs | Coil-bank crawler: cells light up during the charge | Ring-reactor tank: ring spins up during the charge |
+
+| Enemy | Animation A / B / C | Movement A / B / C |
+|---|---|---|
+| Jammer | Static jitter / Scan / Bob | Steady advance / Signal zigzag / Pause to jam |
+| Siphon | Gulp / Sway / Shiver | Steady drift / Lane weave / Drain and lurch |
+| Blackout Rig | Heavy rumble / Pulse recoil / Sway | Steady haul / Heavy sway / Stop and pulse |
+| Capacitor | Charge shake / Hum / Stride | Inexorable advance / Charge halt / Slow sway |
+
+**Picks:** Jammer _, Siphon _, Blackout Rig _, Capacitor _ (look, animation, movement; notes)
+
 ## Open questions
 
-1. **Next role** after Support (remaining: Disruptor, Evader, Special, Boss).
+1. **Disruptor picks**, and any change to the Disruptor family traits or the proposed sizes.
+2. **Next role** after Disruptor (remaining: Evader, Special, Boss).
