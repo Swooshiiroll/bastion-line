@@ -441,9 +441,10 @@ function mound(c, r, t, h) { if (h <= 0) return; ellipse(c, r * 0.95, r * 0.6, [
 // Wraith: cloaked; the preview shows it revealed 2 s of every 6, as if inside a Sensor Array
 const revealK = t => { const u = fmod(t, 6); return u < 4 ? 0 : u < 4.3 ? (u - 4) / 0.3 : u < 5.7 ? 1 : 1 - (u - 5.7) / 0.3; };
 function ghostTail(c, r, t, col, amt) { if (amt <= 0.01) return;
-  for (const [wk, al] of [[1.5, 0.05], [1.15, 0.08], [0.8, 0.12], [0.5, 0.16], [0.25, 0.22]]) { const top = [], bot = [];
-    for (let i = 0; i <= 12; i++) { const u = i / 12, x = -0.15 - 2.1 * u, w = (0.5 * Math.pow(1 - u, 0.8) + 0.03) * wk, y = Math.sin(t * 3 - u * 6) * 0.2 * u; top.push(add(c, mul([x, y + w], r))); bot.push(add(c, mul([x, y - w], r))); }
-    poly(top.concat(bot.reverse()), A(col, al * amt)); }
+  // a chain of soft, overlapping glow puffs: no hard edge anywhere; it grows out from under the hull and thins and fades to the tip
+  for (let i = 0; i <= 14; i++) { const u = i / 14, ramp = Math.sin(Math.min(1, u / 0.3) * Math.PI / 2), rad = r * (0.48 * Math.pow(1 - u, 0.75) + 0.05) * ramp,
+      p = add(c, mul([0.12 - 2.35 * u, Math.sin(t * 3 - u * 6) * 0.2 * u], r)), al = amt * Math.pow(1 - u, 0.7);
+    if (rad < 0.4) continue; disc(p, rad, A(col, 0.08 * al)); disc(p, rad * 0.5, A(col, 0.12 * al)); }
   for (let i = 0; i < 5; i++) { const u = fmod(t * 0.7 + i / 5, 1), y = Math.sin(t * 3 - u * 6) * 0.2 * u + (hash(i * 3) - 0.5) * 0.7 * u; disc(add(c, mul([-0.3 - 2.0 * u, y], r)), r * (0.04 + 0.05 * (1 - u)), A(col, 0.6 * amt * (1 - u))); } }
 function cloakFx(B, c, t, r, col) { const k = revealK(t), un = 1 - k, j = r * 0.11 * un;
   ghostTail(c, r, t, col, 0.25 + 0.75 * un);

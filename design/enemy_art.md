@@ -367,7 +367,8 @@ and "Offer more animations as well"):
 
 **Round 9** (from the owner's notes):
 - **Stronger ghosting while undetected, on every Wraith look:** a long, soft spectral ghost tail streams and ripples
-  behind it with drifting wisps, two faint copies trail it, a cold glow pass flickers over it, and the body itself
+  behind it with drifting wisps (soft glow puffs that grow out from under the hull, with no hard edge; reworked after
+  the owner found the flat front of the first tail too noticeable), two faint copies trail it, a cold glow pass flickers over it, and the body itself
   is fainter. A faint tail stays when it is revealed.
 - **Y Comet wraith:** a small mechanical sensor head whose body streams back into a long, luminous ghost tail.
 - **Z Revenant glider:** a long-winged glider drone trailing three rippling spectral streamers, from each wingtip and
