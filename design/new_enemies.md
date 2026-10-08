@@ -264,7 +264,8 @@ trick is revealed.
 - **Behaviour (disguise updated by the owner, 2026-10-08):** it is **disguised as the Drone**: it looks, animates
   (March) and moves (Steady march) exactly like the confirmed Drone and shows the **Drone's strength (21.18) and
   role (Swarm T3)**, so Strongest and the Support priority ignore it. Its tell is a **purple eye** where the Drone's
-  is white. It keeps the disguise **until it drops below 50% health**, then shows its
+  is white. **Speed (owner, 2026-10-08):** it moves at the Drone's **55** while disguised and **faster once
+  uncovered** (the uncovered speed is open in `design/enemies.md`; 60 today). It keeps the disguise **until it drops below 50% health**, then shows its
   real rank and role (a short flash and a label change).
 - **Job:** soak real damage while looking harmless; it punishes defences that rely on Strongest.
 - **Counters:** First, Last or Closest targeting, area damage that happens to hit it, and the Sensor Array

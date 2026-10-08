@@ -407,8 +407,8 @@ Decoy Beacon a gunmetal fake hull on a tan frame with a magenta beacon, Mirage m
 **The tells** (`design/new_enemies.md`: "what it looks like is decided with the visual redesign"): proposed here as
 part of each look; once picked they go into `design/new_enemies.md`.
 
-**Sizes (proposed):** Masquerade 12 px, Decoy Beacon 15 px, Mirage 12 px (new enemies, no size yet). Phantom 10,
-Aegis Walker 13 and Hydra Frame 14 are today's.
+**Sizes (owner, 2026-10-08):** Masquerade 12 px, Decoy Beacon 15 px, Mirage 12 px. Phantom 10, Aegis Walker 13 and
+Hydra Frame 14 are today's.
 
 | Enemy (rule it breaks) | Look A | Look B | Look C |
 |---|---|---|---|
@@ -427,6 +427,24 @@ Aegis Walker 13 and Hydra Frame 14 are today's.
 | Masquerade | Copycat bob / Odd twitch / Glide | Mimic trickle / Blend-in weave / Straight |
 | Decoy Beacon | Wobble / Trundle / Sway | Lumbering line / Slow sway / Stop and go |
 | Mirage | Shimmer / Glide / Flicker step | Glide / Weave / Side-step |
+
+**Special confirmed (owner, 2026-10-08).** Final picks:
+- **Phantom:** look **E Camo glider**, animation **F Camo flicker** (made faster), movement **D Infiltration flight**.
+  A **flyer** (owner); active camouflage as a faint double image (no scan line), revealed by a blast or a Sensor
+  Array field.
+- **Aegis Walker:** look **E Siege hexapod**, animation **B Brace for hits**, movement **A Steady advance**; the amber
+  hex barrier cracks, shatters and rebuilds.
+- **Hydra Frame:** look **H Cluster pod**, animation **A Clatter**, movement **A Trundle**; destroyed, the hatches
+  blow and three of the confirmed Skitters burst out.
+- **Masquerade:** look **J Unfolding stilt-walker**, animation **D Nervous jitter**, movement **I Scramble and dash**.
+  Until uncovered it is the confirmed Drone with a purple eye, marching and moving like it, **at the Drone's speed
+  (55)**; uncovered, it **moves faster** (owner; how much is open in `design/enemies.md`).
+- **Decoy Beacon:** look **B Hologram heavy**, animation **F Track rumble**, movement **A Lumbering line**; a small
+  projector shows through its flickering tank hologram, under a pulsing rank badge.
+- **Mirage:** look **C Mirror-fan hover**, animation **B Glide**, movement **C Side-step**; every 6 s two copies appear,
+  one in front and one behind, in step, shimmering like the Phantom's camouflage (faint doubles with a rapid flicker).
+
+**Sizes (owner, 2026-10-08):** Masquerade 12 px, Decoy Beacon 15 px, Mirage 12 px.
 
 **Picks (owner, 2026-10-08, sixth pass):** Phantom E/F/D, Aegis Walker E/B/A, **Hydra Frame H Cluster pod / A Clatter /
 A Trundle**, Masquerade J/D/I and Decoy Beacon B/F/A are **confirmed**. Mirage: C Mirror-fan hover / C Side-step, animation
@@ -536,7 +554,4 @@ sweeps that fan its mirrors across the lane).
 
 ## Open questions
 
-1. **Special picks:** the Mirage's animation (A to I); any change to the proposed sizes (Masquerade 12, Decoy Beacon
-   15, Mirage 12 px).
-2. **Masquerade speed while disguised** (60, the Drone is 55): see `design/enemies.md`, Still open item 6.
-3. **Next role** after Special (remaining: Boss).
+1. **Next role** after Special (remaining: Boss).

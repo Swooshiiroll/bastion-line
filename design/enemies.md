@@ -349,7 +349,8 @@ they exist.
   in Still open, item 5.
 - **Masquerade disguise (owner, 2026-10-08):** disguised as the **Drone**: it looks, animates and moves exactly like
   the confirmed Drone and shows the Drone's rank (21.18) and role (Swarm T3) until it drops below half health. Tell:
-  a purple eye. Speed: Still open, item 6.
+  a purple eye. **Speed (owner):** the Drone's 55 while disguised, faster once uncovered; how much faster is Still
+  open, item 6.
 
 ### Still open
 
@@ -370,8 +371,9 @@ they exist.
    enough? Checked with the balance probe when the Wraith is built (it is parked until the damage-type PR).
 5. **Phantom as a flyer: counters.** Cloaked and now flying: are there enough towers that hit air and can reveal or
    splash it early in the game? Checked with the balance probe when the change is built.
-6. **Masquerade speed while disguised.** It moves at 60 and the Drone at 55, so a sharp-eyed player could spot it
-   by speed. Match the Drone (55) until uncovered, or keep 60 as a second tell?
+6. **Masquerade speed once uncovered.** Decided: 55 (the Drone's) while disguised, faster once uncovered. Open: the
+   uncovered speed (its base 60, or a bigger flee boost to suit its Scramble and dash), set with the balance probe.
+   Its strength score uses speed, so it moves with this.
 
 ### Deferred
 

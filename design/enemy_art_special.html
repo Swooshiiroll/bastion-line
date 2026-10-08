@@ -89,11 +89,11 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 7 of 8: Special (round 9)</div>
+    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 7 of 8: Special (confirmed)</div>
     <h1>Enemy art: Special</h1>
     <p class="note">A fresh start from the names: the machine army's <b>Special</b> role. For each enemy, pick its <b>look</b>, <b>animation</b> and
       <b>movement</b> separately from three proposals each (A to C), and add notes. Mix freely. The <b>Your combination</b> preview shows your
-      mix (option A until you pick). <b>Your picks are preselected</b>: everything but the Mirage's animation is settled. As you asked, the Mirage has three more animations (G Projection flare, H Echo stutter, I Mirror sweep). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
+      mix (option A until you pick). <b>Special is confirmed:</b> your final picks are preselected (Phantom E/F/D, Aegis Walker E/B/A, Hydra Frame H/A/A, Masquerade J/D/I, Decoy Beacon B/F/A, Mirage C/B/C). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
       Spec: <code>design/enemy_art.md</code>.</p>
     <ul class="rules">
       <li><b>Machine army;</b> each <b>name inspires a trait</b> (not a literal picture).</li>
@@ -943,20 +943,20 @@ const BATCHES = [
       { id: "phantom", name: "Phantom", tier: "-", air: true, anims: "phantom", trait: "flies (owner); cloaked; a Sensor Array field or a blast reveals it", today: { r: 10 } },
       { id: "aegis", name: "Aegis Walker", tier: "-", air: false, anims: "aegis", trait: "carries a 130 barrier that rebuilds; Arc Coils hit it double", today: { r: 13 } },
       { id: "hydra", name: "Hydra Frame", tier: "-", air: false, anims: "hydra", trait: "bursts into 3 Skitters when destroyed", today: { r: 14 } },
-      { id: "masq", name: "Masquerade", tier: "-", air: false, anims: "masq", trait: "looks, ranks, animates and moves like the Drone until below half health (owner); new, 12 px proposed", today: { r: 12 } },
-      { id: "decoy", name: "Decoy Beacon", tier: "-", air: false, anims: "decoy", trait: "fakes a high rank so Strongest towers aim at it; does nothing else; new, 15 px proposed", today: { r: 15 } },
-      { id: "mirage", name: "Mirage", tier: "-", air: false, anims: "mirage", trait: "every 6 s throws 2 hologram copies that soak shots, one in front and one behind (owner); new, 12 px proposed", today: { r: 12 } },
+      { id: "masq", name: "Masquerade", tier: "-", air: false, anims: "masq", trait: "looks, ranks, animates and moves like the Drone until below half health (owner); new, 12 px", today: { r: 12 } },
+      { id: "decoy", name: "Decoy Beacon", tier: "-", air: false, anims: "decoy", trait: "fakes a high rank so Strongest towers aim at it; does nothing else; new, 15 px", today: { r: 15 } },
+      { id: "mirage", name: "Mirage", tier: "-", air: false, anims: "mirage", trait: "every 6 s throws 2 hologram copies that soak shots, one in front and one behind (owner); new, 12 px", today: { r: 12 } },
     ] },
 ];
-const STORE_KEY = "bl-enemy-art-special-v7";
-// Picks (owner, 2026-10-08): preselected. Open: Mirage animation (G to I new).
+const STORE_KEY = "bl-enemy-art-special-v8";
+// Final picks (owner, 2026-10-08): preselected.
 const DEFAULTS = {
   phantom: { look: "E", anim: "F", move: "D" },
   aegis: { look: "E", anim: "B", move: "A" },
   hydra: { look: "H", anim: "A", move: "A" },
   masq: { look: "J", anim: "D", move: "I" },
   decoy: { look: "B", anim: "F", move: "A" },
-  mirage: { look: "C", anim: null, move: "C" },
+  mirage: { look: "C", anim: "B", move: "C" },
 };
 
 // ---- State (picks and notes, kept in this browser) -------------------------------------------------
