@@ -89,11 +89,11 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 6 of 8: Evader (round 5)</div>
+    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 6 of 8: Evader (round 6)</div>
     <h1>Enemy art: Evader</h1>
     <p class="note">A fresh start from the names: the machine army's <b>Evader</b> role. For each enemy, pick its <b>look</b>, <b>animation</b> and
       <b>movement</b> separately from three proposals each (A to C), and add notes. Mix freely. The <b>Your combination</b> preview shows your
-      mix (option A until you pick). <b>Your picks are preselected</b>; Burrower (G Drill pod) and Shifter (B Prism hover) are settled. From your notes, Blink Stalker has three more hover looks (J to L; it stays a ground unit) and the <b>Wraith now flies</b>, with three flying looks (M to O). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
+      mix (option A until you pick). <b>Your picks are preselected</b>; Blink Stalker (L Mag-lev orb), Burrower (G Drill pod) and Shifter (B Prism hover) are settled. The Wraith (now a flyer) has three more ghostly, phantasmic looks from your note (P to R). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
       Spec: <code>design/enemy_art.md</code>.</p>
     <ul class="rules">
       <li><b>Machine army;</b> each <b>name inspires a trait</b> (not a literal picture).</li>
@@ -720,6 +720,37 @@ const LOOKS = {
         for (let i = 0; i < 4; i++) { const a = Math.PI / 4 + i * Math.PI / 2, rp = add(p, mul(fa(a), r * 0.72)); line(add(p, mul(fa(a), r * 0.38)), rp, C.panel, 1.0); disc(rp, r * 0.2, [0.92, 0.94, 0.97, 0.1]); line(rp, add(rp, mul(fa(t * 45 + i), r * 0.2)), A(C.glow, 0.4), 0.5); }
         glowDot(p, r * 0.16, C.glow); ring(p, r * 0.36, OUTLINE, 2.2); ring(p, r * 0.36, C.hull, 1.2); for (let i = 0; i < 6; i++) { const a = i * TAU / 6 + t * 0.3; line(add(p, mul(fa(a), r * 0.12)), add(p, mul(fa(a), r * 0.36)), C.hull, 0.8); } };
       cloakFx(B, c, t, r, C.glow); } },
+    { key: "P", name: "Banshee mask", theme: "A floating machine faceplate with hollow, pale-lit eye sockets, trailing a long, rippling spectral veil that ends in tatters; now and then it lets out a wail (rings from the mask); flies, cloaked (shown revealed 2 s of every 6)", palette: "smoked-glass faceplate, pale translucent veil", r: 13, draw(c, t, r) {
+      const C = COL.wraith, B = p => { const top = [], bot = [], tat = [];
+        for (let k = 0; k <= 8; k++) { const u = k / 8, x = 0.05 - 1.25 * u; top.push([x, (0.42 + 0.22 * u) + 0.12 * Math.sin(t * 3 - u * 5) * u]); bot.push([x, -(0.42 + 0.22 * u) + 0.12 * Math.sin(t * 3 - u * 5 + 1.3) * u]); }
+        for (let k = 0; k <= 6; k++) { const y = 0.64 - 1.28 * k / 6; tat.push([-1.2 - (k % 2 ? 0.18 + 0.06 * Math.sin(t * 6 + k) : 0), y]); }
+        const veil = top.concat(tat, bot.slice().reverse()); fill(p, veil, A(lt(C.panel, 0.35), 0.4), 0, r); outline(p, veil, A(C.glow, 0.45), 0.6, 0, r);
+        for (let k = 1; k < 4; k++) { const pts = []; for (let i = 0; i <= 8; i++) { const u = i / 8; pts.push(add(p, mul([0.05 - 1.15 * u, (k - 2) * 0.22 * (1 + 0.4 * u) + 0.06 * Math.sin(t * 3 - u * 5 + k)], r))); } polyline(pts, A(C.glow, 0.18), 0.6); }
+        const w = fmod(t, 3); if (w < 0.9) for (let i = 0; i < 2; i++) { const rr = r * (0.5 + 1.3 * (w / 0.9) - 0.25 * i); if (rr > r * 0.4) arc(add(p, [r * 0.2, 0]), rr, -0.9, 0.9, A(C.glow, 0.6 * (1 - w / 0.9)), 0.9); }
+        const mk = [[0.48, 0], [0.32, 0.34], [-0.05, 0.4], [-0.16, 0], [-0.05, -0.4], [0.32, -0.34]]; plate(p, mk, C.hull, 0, r, 0.9); outline(p, mk, A(C.glow, 0.35), 0.5, 0, r * 0.88);
+        for (const sg of [-1, 1]) { ellipse(add(p, [r * 0.16, sg * r * 0.15]), r * 0.1, r * 0.08, INK); glowDot(add(p, [r * 0.17, sg * r * 0.15]), 0.8, A(C.glow, 0.7 + 0.3 * Math.sin(t * 4 + sg))); }
+        line(add(p, [r * 0.36, -r * 0.08]), add(p, [r * 0.36, r * 0.08]), INK, 1.4); };
+      cloakFx(B, c, t, r, C.glow); } },
+    { key: "Q", name: "Wisp cluster", theme: "A caged core of cold, pale flame with three little wisp drones circling it on fading trails, each flickering in and out; flies, cloaked (shown revealed 2 s of every 6)", palette: "pale violet-white flame, smoked-glass cage, flickering wisps", r: 13, draw(c, t, r) {
+      const C = COL.wraith, B = p => {
+        for (let i = 0; i < 3; i++) { const on = hash(Math.floor(t * 5) + i * 13) > 0.18 ? 1 : 0.15, ph = t * 2.2 + i * TAU / 3, trail = [];
+          for (let k = 0; k <= 10; k++) { const a = ph - k * 0.12; trail.push(add(p, mul(fa(a), r * (0.85 + 0.08 * Math.sin(a * 3))))); }
+          polyline(trail, A(C.glow, 0.3 * on), 1.2); const w = trail[0]; glowDot(w, r * 0.07, A(C.glow, on)); ring(w, r * 0.1, A(C.panel, on), 0.6); }
+        const fl = []; for (let i = 0; i < 14; i++) { const a = i * TAU / 14, k = i % 2 ? 0.55 : 1; fl.push(mul(fa(a), (0.26 + 0.14 * k * (0.6 + 0.4 * Math.sin(t * 9 + i * 1.7))) )); }
+        fill(p, fl, A(C.glow, 0.35), t * 0.5, r); fill(p, fl, A([1, 1, 1, 1], 0.5), t * 0.5, r * 0.55); glowDot(p, r * 0.1, C.glow);
+        ring(p, r * 0.46, OUTLINE, 2.0); ring(p, r * 0.46, C.hull, 1.0); for (let i = 0; i < 3; i++) { const a = i * TAU / 3 + Math.PI / 2; line(add(p, mul(fa(a), r * 0.2)), add(p, mul(fa(a), r * 0.46)), C.hull, 0.8); } };
+      cloakFx(B, c, t, r, C.glow); } },
+    { key: "R", name: "Glitch spectre", theme: "A robot that is only a flickering hologram: a pale wireframe torso, arms and head drawn in scanlines, tearing sideways in glitches; flies, cloaked (shown revealed 2 s of every 6)", palette: "pale hologram scanlines, violet glitch tears", r: 13, draw(c, t, r) {
+      const C = COL.wraith, body = (q, a) => {
+        for (const sg of [-1, 1]) { const arm = [add(q, [r * 0.05, sg * r * 0.3]), add(q, [r * 0.35, sg * r * 0.55]), add(q, [r * 0.7, sg * r * 0.42])]; polyline(arm, A(C.glow, 0.2 * a), 2.6); polyline(arm, A(C.glow, 0.8 * a), 0.8); for (const j of arm) disc(j, 0.9, A(C.glow, 0.6 * a)); }
+        const tor = [[0.35, 0], [0.22, 0.3], [-0.3, 0.26], [-0.55, 0], [-0.3, -0.26], [0.22, -0.3]]; fill(q, tor, A(C.glow, 0.22 * a), 0, r); outline(q, tor, A(C.glow, 0.85 * a), 0.7, 0, r);
+        for (let i = -3; i <= 3; i++) line(add(q, [-r * 0.45, i * r * 0.08]), add(q, [r * 0.25, i * r * 0.08]), A(C.glow, 0.25 * a), 0.4);
+        disc(add(q, [r * 0.42, 0]), r * 0.15, A(C.glow, 0.25 * a)); ring(add(q, [r * 0.42, 0]), r * 0.15, A(C.glow, 0.85 * a), 0.7); };
+      const B = p => { const step = Math.floor(t * 8);
+        for (let k = 0; k < 6; k++) { const y0 = p[1] - r * 0.9 + k * r * 0.3, g = hash(step * 7 + k) > 0.78 ? (hash(step * 3 + k) - 0.5) * r * 0.6 : 0;
+          X.save(); X.beginPath(); X.rect(p[0] - r * 2, y0, r * 4, r * 0.3); X.clip(); body(add(p, [g, 0]), g ? 0.6 : 1); if (g) body(add(p, [g * 1.6, 0]), 0.25); X.restore(); }
+        if (hash(step) > 0.7) line(add(p, [-r * 0.8, r * (hash(step + 1) - 0.5) * 1.4]), add(p, [r * 0.8, r * (hash(step + 1) - 0.5) * 1.4]), A([0.7, 0.45, 1, 1], 0.7), 0.8); };
+      cloakFx(B, c, t, r, C.glow); } },
   ],
 };
 
@@ -795,11 +826,10 @@ const BATCHES = [
       { id: "wraith", name: "Wraith", tier: "T4", air: true, anims: "wraith", trait: "flies, cloaked, and only energy hurts it; new, 13 px", today: { r: 13 } },
     ] },
 ];
-const STORE_KEY = "bl-enemy-art-evader-v5";
-// Picks (owner, 2026-10-08): preselected. Open: Blink Stalker look (hover options J to L from the owner's note) and
-// Wraith look (flying M to O; the Wraith is now a flyer).
+const STORE_KEY = "bl-enemy-art-evader-v6";
+// Picks (owner, 2026-10-08): preselected. Open: Wraith look (ghostly, phantasmic P to R from the owner's note).
 const DEFAULTS = {
-  stalker: { look: null, anim: "E", move: "F" },
+  stalker: { look: "L", anim: "E", move: "F" },
   burrower: { look: "G", anim: "C", move: "C" },
   shifter: { look: "B", anim: "A", move: "B" },
   wraith: { look: null, anim: "A", move: "A" },

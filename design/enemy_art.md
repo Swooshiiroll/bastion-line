@@ -285,16 +285,14 @@ step up.
 | Shifter | Glide / Flicker / Stride | Phase steps / Side-shift / Smooth glide |
 | Wraith | Drift / Waver / Lurk | Ghost drift / Unseen line / Haunting weave |
 
-**Picks (owner, 2026-10-08, fourth pass):**
-- **Blink Stalker:** look **open**, with the owner's note "Make more hover / flying options" (round 5 offers three
-  hover looks; the owner chose that it **stays a ground unit**); animation **E Phase shimmer**, movement **F Feint
-  and blink**.
+**Picks (owner, 2026-10-08, fifth pass):**
+- **Blink Stalker:** look **L Mag-lev orb** (from round 5), animation **E Phase shimmer**, movement **F Feint and
+  blink**. **Confirmed.** It stays a ground unit.
 - **Burrower:** look **G Drill pod**, animation C Rumble, movement C Dive and surface. **Confirmed.** It vanishes
   underground, and a doppler ping shows it inside a Sensor Array's range; the gameplay side is in `design/enemies.md`.
 - **Shifter:** look B Prism hover, animation A Glide, movement B Side-shift. **Confirmed.**
-- **Wraith:** look **open**, with the owner's note "Should be hovering or flying". The owner chose a **real flyer**:
-  the Wraith now flies (recorded in `design/enemies.md`, `design/new_enemies.md` and `design/enemy_roster.md`).
-  Round 5 offers three flying looks; animation A Drift, movement A Ghost drift.
+- **Wraith:** look **open**, with the owner's note "Build more ghost / phantasmic ideas" (round 6 offers three);
+  animation A Drift, movement A Ghost drift. A real flyer since round 5 (owner).
 
 **Round 2** (on the same page, with the picks above preselected):
 - **Blink Stalker animations:** D Head-snap, E Phase shimmer, F Slink. **Movements:** D Blink zigzag (blinks across
@@ -336,8 +334,15 @@ step up.
   nose), **N Ghost rotorcraft** (a sleek rotor drone whose four rotor discs shimmer like mist), **O Lantern drone** (a
   pale core in a ribbed cage, held up by four thin rotor arms and trailing ion wisps).
 
+**Round 6** (from the owner's note "Build more ghost / phantasmic ideas"; all fly and stay mechanical):
+- **P Banshee mask:** a floating machine faceplate with hollow, pale-lit eye sockets, trailing a long, rippling
+  spectral veil that ends in tatters; now and then it wails (rings from the mask).
+- **Q Wisp cluster:** a caged core of cold, pale flame with three little wisp drones circling it on fading trails,
+  each flickering in and out.
+- **R Glitch spectre:** a robot that is only a flickering hologram (a pale wireframe torso, arms and head in
+  scanlines) that tears sideways in glitches.
+
 ## Open questions
 
-1. **Evader looks:** Blink Stalker (any of A to L; J to L are the hover looks) and Wraith (any of A to O; M to O are
-   the flying looks).
+1. **Wraith look:** any of A to R (P to R are the ghostly, phantasmic looks; M to O the flying drones).
 2. **Next role** after Evader (remaining: Special, Boss).
