@@ -89,11 +89,11 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 1 of 8: Swarm (round 2)</div>
+    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 1 of 8: Swarm (confirmed)</div>
     <h1>Enemy art: Swarm</h1>
     <p class="note">A fresh start from the names: the machine army's <b>Swarm</b> role. For each enemy, pick its <b>look</b>, <b>animation</b> and
       <b>movement</b> separately from three proposals each (A to C), and add notes. Mix freely. The <b>Your combination</b> preview shows your
-      mix. <b>Your picks are preselected</b>; Locust has three new looks (D to F) to choose from, and Shrike has the new <b>Smooth and straight</b> movement. Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
+      mix. <b>Swarm is confirmed:</b> your final picks are preselected (Nanite A/B/B, Locust F/A/C, Drone B/A/B, Shrike C/C/D). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
       Spec: <code>design/enemy_art.md</code>.</p>
     <ul class="rules">
       <li><b>Machine army;</b> each <b>name inspires a trait</b> (not a literal picture).</li>
@@ -571,11 +571,11 @@ const BATCHES = [
       { id: "shrike", name: "Shrike", tier: "T4", air: true, cluster: true, anims: "shrike", trait: "an impaling hunter (flies as a cluster of 5)", today: { r: 7 } },
     ] },
 ];
-const STORE_KEY = "bl-enemy-art-swarm-v2";
-// Owner's picks (2026-10-07) shown by default; Locust's look is open (new options D to F).
+const STORE_KEY = "bl-enemy-art-swarm-v3";
+// Owner's picks (2026-10-07) shown by default; all four confirmed.
 const DEFAULTS = {
   nanite: { look: "A", anim: "B", move: "B" },
-  locust: { look: null, anim: "A", move: "C" },
+  locust: { look: "F", anim: "A", move: "C" },
   drone: { look: "B", anim: "A", move: "B" },
   shrike: { look: "C", anim: "C", move: "D" },
 };

@@ -69,10 +69,9 @@ gritty frame; T2 Locust adds panels; T3 Drone is bigger and armoured; T4 Shrike 
 | Drone | March / Brace-and-step / Hover-drift | Advance and halt / Steady march / Flanking weave |
 | Shrike | Stoop / Bank / Glide | Dive strikes / Formation sweep / Hunting circles |
 
-**Picks (owner, 2026-10-07):**
+**Swarm confirmed (owner, 2026-10-07).** Final picks:
 - **Nanite:** look A Assembly hub, animation B Dock-and-split, movement B Split and merge.
-- **Locust:** look **open** (none of A to C was picked; round 2 offers three new looks), animation A Hover-chew,
-  movement C Cloud drift.
+- **Locust:** look **F Cutter-wing flyer** (from round 2), animation A Hover-chew, movement C Cloud drift.
 - **Drone:** look B Sentry walker, animation A March, movement B Steady march.
 - **Shrike:** look C Lancer squadron, animation C Glide, movement **D Smooth and straight**: constant speed, nearly
   straight, only a slight drift. This was added from the owner's note "smooth flight path".
@@ -111,6 +110,5 @@ black-red with magenta glow.
 
 ## Open questions
 
-1. **Locust look:** pick one of D to F on the Swarm page.
-2. **Rusher picks**, and any change to the Rusher family traits.
-3. **Next role** after Rusher.
+1. **Rusher picks**, and any change to the Rusher family traits.
+2. **Next role** after Rusher.
