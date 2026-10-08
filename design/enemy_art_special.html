@@ -89,11 +89,11 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 7 of 8: Special (round 8)</div>
+    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 7 of 8: Special (round 9)</div>
     <h1>Enemy art: Special</h1>
     <p class="note">A fresh start from the names: the machine army's <b>Special</b> role. For each enemy, pick its <b>look</b>, <b>animation</b> and
       <b>movement</b> separately from three proposals each (A to C), and add notes. Mix freely. The <b>Your combination</b> preview shows your
-      mix (option A until you pick). <b>Your picks are preselected</b>. From your notes, the <b>Hydra Frame</b> has six new looks (D to I, all bursting into your Skitters), three new animations and three new movements (D to F); the Mirage is on C Mirror-fan hover with its animation still open. Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
+      mix (option A until you pick). <b>Your picks are preselected</b>: everything but the Mirage's animation is settled. As you asked, the Mirage has three more animations (G Projection flare, H Echo stutter, I Mirror sweep). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
       Spec: <code>design/enemy_art.md</code>.</p>
     <ul class="rules">
       <li><b>Machine army;</b> each <b>name inspires a trait</b> (not a literal picture).</li>
@@ -871,6 +871,9 @@ const ANIMS = {
     { key: "D", name: "Phase shimmer", desc: "Its image wavers and dims, never quite solid.", fx: (t) => ({ alpha: 0.72 + 0.28 * Math.sin(t * 2.3), sx: 1 + 0.02 * Math.sin(t * 19) }) },
     { key: "E", name: "Silent float", desc: "Floats slowly, turning a little, without a sound.", fx: (t) => ({ dy: 0.05 * Math.sin(t * 1.1), rot: 0.06 * Math.sin(t * 0.7), lift: 0.3 + 0.2 * Math.sin(t * 1.1) }) },
     { key: "F", name: "Space fold", desc: "Every few seconds it folds thin, as if stepping sideways out of the world, and unfolds.", fx: (t) => { const u = fmod(t, 3.2), f = u < 0.25 ? u / 0.25 : u < 0.5 ? 1 - (u - 0.25) / 0.25 : 0; return { sy: 1 - 0.65 * f, sx: 1 + 0.1 * f, alpha: 1 - 0.3 * f }; } },
+    { key: "G", name: "Projection flare", desc: "Swells and brightens each time it throws its copies (every 6 s), then settles into a slow bob.", fx: (t) => { const u = fmod(t, 6), f = u < 0.45 ? Math.sin(u / 0.45 * Math.PI) : 0; return { sx: 1 + 0.15 * f, sy: 1 + 0.15 * f, dy: 0.03 * Math.sin(t * 1.6), alpha: 1 }; } },
+    { key: "H", name: "Echo stutter", desc: "Stutters back and forth in quick bursts, as if its image repeats.", fx: (t) => { const u = fmod(t, 1.6); return u < 0.32 ? { dx: 0.1 * Math.sign(Math.sin(u * 60)), alpha: 0.7 } : { dy: 0.02 * Math.sin(t * 2) }; } },
+    { key: "I", name: "Mirror sweep", desc: "Slow, deliberate sweeps that fan its mirrors across the lane.", fx: (t) => { const w = Math.sin(t * 0.9); return { rot: 0.3 * w * w * w, dy: 0.03 * Math.sin(t * 1.8) }; } },
   ],
 };
 
@@ -945,12 +948,12 @@ const BATCHES = [
       { id: "mirage", name: "Mirage", tier: "-", air: false, anims: "mirage", trait: "every 6 s throws 2 hologram copies that soak shots, one in front and one behind (owner); new, 12 px proposed", today: { r: 12 } },
     ] },
 ];
-const STORE_KEY = "bl-enemy-art-special-v6";
-// Picks (owner, 2026-10-08): preselected. Open: Hydra Frame look (reopened; D to I new), Mirage animation.
+const STORE_KEY = "bl-enemy-art-special-v7";
+// Picks (owner, 2026-10-08): preselected. Open: Mirage animation (G to I new).
 const DEFAULTS = {
   phantom: { look: "E", anim: "F", move: "D" },
   aegis: { look: "E", anim: "B", move: "A" },
-  hydra: { look: null, anim: "A", move: "A" },
+  hydra: { look: "H", anim: "A", move: "A" },
   masq: { look: "J", anim: "D", move: "I" },
   decoy: { look: "B", anim: "F", move: "A" },
   mirage: { look: "C", anim: null, move: "C" },

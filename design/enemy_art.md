@@ -428,7 +428,13 @@ Aegis Walker 13 and Hydra Frame 14 are today's.
 | Decoy Beacon | Wobble / Trundle / Sway | Lumbering line / Slow sway / Stop and go |
 | Mirage | Shimmer / Glide / Flicker step | Glide / Weave / Side-step |
 
-**Picks (owner, 2026-10-08, fifth pass):**
+**Picks (owner, 2026-10-08, sixth pass):** Phantom E/F/D, Aegis Walker E/B/A, **Hydra Frame H Cluster pod / A Clatter /
+A Trundle**, Masquerade J/D/I and Decoy Beacon B/F/A are **confirmed**. Mirage: C Mirror-fan hover / C Side-step, animation
+open; asked, the owner wanted more ideas, so **round 9** adds G Projection flare (swells and brightens each time it
+throws its copies), H Echo stutter (quick back-and-forth bursts, as if its image repeats) and I Mirror sweep (slow
+sweeps that fan its mirrors across the lane).
+
+**Earlier picks (owner, 2026-10-08, fifth pass):**
 - **Confirmed:** Phantom E/F/D, Aegis Walker E/B/A, Masquerade J/D/I, Decoy Beacon B/F/A.
 - **Hydra Frame: reopened.** Look open with the owner's note "Make 6 more ideas"; animation A Clatter and movement
   A Trundle stay picked, with notes asking for more ideas for both. Round 8 adds six looks, three animations and three
@@ -530,7 +536,7 @@ Aegis Walker 13 and Hydra Frame 14 are today's.
 
 ## Open questions
 
-1. **Special picks:** the Hydra Frame's look (A to I; animation and movement A unless changed) and the Mirage's
-   animation (A to F); any change to the proposed sizes (Masquerade 12, Decoy Beacon 15, Mirage 12 px).
+1. **Special picks:** the Mirage's animation (A to I); any change to the proposed sizes (Masquerade 12, Decoy Beacon
+   15, Mirage 12 px).
 2. **Masquerade speed while disguised** (60, the Drone is 55): see `design/enemies.md`, Still open item 6.
 3. **Next role** after Special (remaining: Boss).
