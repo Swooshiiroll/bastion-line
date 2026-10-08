@@ -89,11 +89,11 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 6 of 8: Evader (round 7)</div>
+    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 6 of 8: Evader (round 8)</div>
     <h1>Enemy art: Evader</h1>
     <p class="note">A fresh start from the names: the machine army's <b>Evader</b> role. For each enemy, pick its <b>look</b>, <b>animation</b> and
       <b>movement</b> separately from three proposals each (A to C), and add notes. Mix freely. The <b>Your combination</b> preview shows your
-      mix (option A until you pick). <b>Your picks are preselected</b>; Blink Stalker (L Mag-lev orb), Burrower (G Drill pod) and Shifter (B Prism hover) are settled. The Wraith (now a flyer) has three ghostly planes and jets from your latest note (S to U). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
+      mix (option A until you pick). <b>Your picks are preselected</b>; Blink Stalker (L Mag-lev orb), Burrower (G Drill pod) and Shifter (B Prism hover) are settled. The Wraith (now a flyer) has three more aircraft from your latest note (V to X: S, T and U with stronger ghost effects) and three new animations (D to F). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
       Spec: <code>design/enemy_art.md</code>.</p>
     <ul class="rules">
       <li><b>Machine army;</b> each <b>name inspires a trait</b> (not a literal picture).</li>
@@ -450,6 +450,16 @@ function flutes(c, x0, len, hw, t, r, spd = 2.5) { for (let k = 0; k < 3; k++) {
 
 function fan(p, rr, t, spd, col) { disc(p, rr, [0.92, 0.94, 0.97, 0.12]); for (let b = 0; b < 3; b++) line(p, add(p, mul(fa(t * spd + b * TAU / 3), rr * 0.9)), [0.92, 0.94, 0.97, 0.55], 0.6); disc(p, 0.6, INK); ring(p, rr, OUTLINE, 2.2); ring(p, rr, col, 1.2); }
 
+// Ghost effects for the Wraith aircraft (round 8): a fade wave that sweeps nose to tail, ectoplasm trails,
+// particles peeling off the edges, and cold spectral engine flames
+function ghostBands(B0, p, r, t, n = 8, x0 = -1.0, x1 = 1.25) { const w = (x1 - x0) / n;
+  for (let k = 0; k < n; k++) { const xm = x0 + w * (k + 0.5), a = 0.2 + 0.8 * (0.5 + 0.5 * Math.sin(t * 2.2 - xm * 3.2));
+    X.save(); X.beginPath(); X.rect(p[0] + r * (x0 + w * k) - 0.3, p[1] - r * 1.6, r * w + 0.6, r * 3.2); X.clip(); withAlpha(a, () => B0(p)); X.restore(); } }
+function ecto(p, r, t, y, len, col, ph = 0) { for (let i = 1; i <= 12; i++) { const u = i / 12; disc(add(p, [-r * len * u, r * y + Math.sin(t * 3.5 - u * 7 + ph) * r * 0.12 * u]), r * (0.05 + 0.12 * u), A(col, 0.4 * (1 - u))); }
+  for (let i = 0; i < 2; i++) { const u = fmod(t * 0.6 + i / 2 + ph, 1); disc(add(p, [-r * len * (0.4 + 0.8 * u), r * (y + (hash(i + 3) - 0.5) * 0.5 * u)]), r * 0.05, A(col, 0.5 * (1 - u))); } }
+function peel(p, r, t, pts, col) { pts.forEach((q, i) => { for (let k = 0; k < 2; k++) { const u = fmod(t * 0.9 + k / 2 + i * 0.37, 1); disc(add(p, mul([q[0] - 0.55 * u, q[1] + (hash(i * 5 + k) - 0.5) * 0.25 * u], r)), r * (0.035 + 0.03 * (1 - u)), A(col, 0.75 * (1 - u))); } }); }
+function ghostFlame(p, r, t, col) { for (let i = 0; i < 3; i++) { const len = 0.35 + 0.15 * Math.sin(t * 13 + i * 2.1), w = 0.07 - 0.015 * i; fill(p, [[0, w], [-len * (1 - 0.2 * i), (i - 1) * 0.04], [0, -w]], A(col, 0.55 - 0.12 * i), 0, r); } }
+
 const COL = {
   stalker:  { hull: [0.24, 0.25, 0.28, 1], panel: [0.4, 0.42, 0.46, 1], dark: [0.12, 0.12, 0.14, 1], glow: [1, 0.5, 0.15, 1] },          // graphite, neon-orange blink
   burrower: { hull: [0.45, 0.32, 0.2, 1], panel: [0.6, 0.45, 0.3, 1], dark: [0.25, 0.18, 0.11, 1], steel: [0.62, 0.64, 0.68, 1], glow: [1, 0.72, 0.25, 1] }, // earth brown, steel drill, amber
@@ -777,6 +787,33 @@ const LOOKS = {
           ellipse(add(q, [r * 0.38, 0]), r * 0.14, r * 0.06, A(INK, a)); glowDot(add(q, [-r * 0.92, 0]), 0.9, A(C.glow, a)); },
         B = p => { for (const e of [2, 1]) J(add(p, [-e * r * 0.75, Math.sin(t * 3 + e) * r * 0.08]), 0.18 * (3 - e)); J(p, 1); };
       cloakFx(B, c, t, r, C.glow); } },
+    { key: "V", name: "Wraith fighter", theme: "The Ghost fighter, more ghostly: a fade wave sweeps it nose to tail so parts of the airframe vanish and return, long ectoplasm contrails, mist peeling off the wingtips and cold spectral flames for engines; flies, cloaked (shown revealed 2 s of every 6)", palette: "smoked-glass airframe, pale violet-white ghost effects", r: 13, draw(c, t, r) {
+      const C = COL.wraith, G = lt(C.panel, 0.45), B0 = q => {
+          for (const sg of [-1, 1]) { const wing = [[0.2, sg * 0.12], [-0.35, sg * 0.8], [-0.55, sg * 0.8], [-0.4, sg * 0.12]]; fill(q, wing, C.hull, 0, r); outline(q, wing, A(C.glow, 0.5), 0.6, 0, r); fill(q, [[-0.5, sg * 0.1], [-0.72, sg * 0.34], [-0.8, sg * 0.3], [-0.7, sg * 0.1]], C.panel, 0, r); }
+          const fus = [[1.0, 0], [0.6, 0.12], [-0.7, 0.12], [-0.82, 0], [-0.7, -0.12], [0.6, -0.12]]; plate(q, fus, C.hull, 0, r, 0.8); ellipse(add(q, [r * 0.45, 0]), r * 0.16, r * 0.07, INK); },
+        B = p => { for (const sg of [-1, 1]) ecto(add(p, [-r * 0.82, sg * r * 0.07]), r, t, 0, 1.9, G, sg);
+          for (const sg of [-1, 1]) { const e = add(p, [-r * 0.82, sg * r * 0.07]); ghostFlame(e, r, t, C.glow); }
+          ghostBands(B0, p, r, t); for (const sg of [-1, 1]) outline(p, [[0.2, sg * 0.12], [-0.35, sg * 0.8], [-0.55, sg * 0.8], [-0.4, sg * 0.12]], A(C.glow, 0.3), 0.5, 0, r);
+          peel(p, r, t, [[-0.35, 0.8], [-0.55, 0.8], [-0.35, -0.8], [-0.55, -0.8], [-0.8, 0.3], [-0.8, -0.3]], G); };
+      cloakFx(B, c, t, r, C.glow); } },
+    { key: "W", name: "Spectre wing", theme: "The Phantom flying wing, more ghostly: a see-through skin over a glowing skeleton, a trailing double image, and its edges constantly peeling away into drifting motes; flies, cloaked (shown revealed 2 s of every 6)", palette: "translucent smoked-glass skin, glowing pale skeleton", r: 13, draw(c, t, r) {
+      const C = COL.wraith, G = lt(C.panel, 0.45), half = [[0.55, 0], [-0.25, 0.95], [-0.45, 0.85], [-0.35, 0.58], [-0.55, 0.42], [-0.4, 0.2], [-0.55, 0]],
+        wing = half.concat(half.slice(1, -1).reverse().map(([x, y]) => [x, -y])),
+        B0 = (q, a) => { fill(q, wing, A(C.hull, 0.42 * a), 0, r); outline(q, wing, A(C.glow, 0.6 * a), 0.7, 0, r);
+          line(add(q, [r * 0.55, 0]), add(q, [-r * 0.55, 0]), A(C.glow, 0.75 * a), 1.0);
+          for (const sg of [-1, 1]) for (const k of [0.2, 0.4, 0.6, 0.8]) line(add(q, [r * (0.5 - 0.7 * k), 0]), add(q, [r * (0.5 - 0.75 * k - 0.1), sg * r * 0.92 * k]), A(C.glow, 0.5 * a), 0.6); },
+        B = p => { B0(add(p, [-r * 0.4, Math.sin(t * 2) * r * 0.08]), 0.3); B0(p, 1); glowDot(p, r * (0.08 + 0.03 * Math.sin(t * 3)), C.glow);
+          peel(p, r, t, [[-0.25, 0.95], [-0.45, 0.85], [-0.55, 0.42], [-0.55, 0], [-0.55, -0.42], [-0.45, -0.85], [-0.25, -0.95], [0.15, 0.48], [0.15, -0.48]], G); };
+      cloakFx(B, c, t, r, C.glow); } },
+    { key: "X", name: "Phantom interceptor", theme: "The Spectral interceptor, more ghostly: four phasing echoes stream behind it, its wings flicker in and out, a cold spectral flame burns at the tail and the air ripples around it; flies, cloaked (shown revealed 2 s of every 6)", palette: "smoked-glass needle jet, pale flickering echoes", r: 13, draw(c, t, r) {
+      const C = COL.wraith, J = (q, a, flick) => {
+          for (const sg of [-1, 1]) { const wa = flick ? a * (hash(Math.floor(t * 9) + sg) > 0.3 ? 1 : 0.2) : a, w = [[-0.12, sg * 0.1], [0.22, sg * 0.72], [0.06, sg * 0.76], [-0.38, sg * 0.12]]; fill(q, w, A(C.hull, wa), 0, r); outline(q, w, A(C.glow, 0.6 * wa), 0.6, 0, r);
+            fill(q, [[0.62, sg * 0.06], [0.5, sg * 0.26], [0.42, sg * 0.24], [0.48, sg * 0.06]], A(C.panel, a), 0, r); fill(q, [[-0.62, sg * 0.08], [-0.82, sg * 0.3], [-0.88, sg * 0.26], [-0.8, sg * 0.08]], A(C.panel, a), 0, r); }
+          const f = [[1.2, 0], [0.55, 0.1], [-0.8, 0.12], [-0.92, 0], [-0.8, -0.12], [0.55, -0.1]]; fill(q, f, A(C.hull, a), 0, r); outline(q, f, A(C.glow, 0.5 * a), 0.7, 0, r); ellipse(add(q, [r * 0.38, 0]), r * 0.14, r * 0.06, A(INK, a)); },
+        B = p => { const rip = fmod(t, 2.5); if (rip < 1) ring(p, r * (0.6 + 0.9 * rip), A(C.glow, 0.3 * (1 - rip)), 0.8);
+          for (const e of [4, 3, 2, 1]) J(add(p, [-e * r * 0.6, Math.sin(t * 3 + e * 1.3) * r * 0.1 * e]), 0.1 * (5 - e), false);
+          ghostFlame(add(p, [-r * 0.92, 0]), r, t, C.glow); J(p, 1, true); };
+      cloakFx(B, c, t, r, C.glow); } },
   ],
 };
 
@@ -807,6 +844,9 @@ const ANIMS = {
     { key: "A", name: "Drift", desc: "A slow, floaty bob.", fx: (t) => ({ dy: 0.06 * Math.sin(t * 1.4), rot: 0.04 * Math.sin(t * 0.9) }) },
     { key: "B", name: "Waver", desc: "Its outline wavers like heat haze.", fx: (t) => ({ sx: 1 + 0.05 * Math.sin(t * 7), sy: 1 + 0.05 * Math.sin(t * 7 + 1.6) }) },
     { key: "C", name: "Lurk", desc: "A slow, menacing lean.", fx: (t) => ({ rot: 0.1 * Math.sin(t * 0.8), dx: 0.04 * Math.sin(t * 0.8) }) },
+    { key: "D", name: "Phase flicker", desc: "Glides smoothly, then skips out of phase for a split second: a jump, a squash, and back.", fx: (t) => { const k = Math.floor(t / 1.6), u = fmod(t, 1.6); if (u < 0.12) { const j = 1 - u / 0.12; return { dx: (hash(k) - 0.5) * 0.5 * j, dy: (hash(k + 7) - 0.5) * 0.5 * j, sx: 1 + 0.15 * j, sy: 1 - 0.25 * j }; } return { dy: 0.03 * Math.sin(t * 2) }; } },
+    { key: "E", name: "Banking glide", desc: "Long, slow banks from side to side, like a glider riding the air.", fx: (t) => ({ rot: 0.18 * Math.sin(t * 0.9), sy: 1 - 0.18 * Math.abs(Math.sin(t * 0.9)), lift: 0.3 + 0.2 * Math.sin(t * 1.8) }) },
+    { key: "F", name: "Spectral lunge", desc: "Lunges forward, stretching thin, then drifts back and settles.", fx: (t) => { const u = fmod(t, 2.4), p = u < 0.25 ? u / 0.25 : u < 1.4 ? 1 - (u - 0.25) / 1.15 : 0; return { dx: 0.3 * p, sx: 1 + 0.2 * p * (u < 0.25 ? 1 : 0.5), sy: 1 - 0.1 * p }; } },
   ],
 };
 
@@ -852,13 +892,14 @@ const BATCHES = [
       { id: "wraith", name: "Wraith", tier: "T4", air: true, anims: "wraith", trait: "flies, cloaked, and only energy hurts it; new, 13 px", today: { r: 13 } },
     ] },
 ];
-const STORE_KEY = "bl-enemy-art-evader-v7";
-// Picks (owner, 2026-10-08): preselected. Open: Wraith look (ghostly planes and jets S to U from the owner's note).
+const STORE_KEY = "bl-enemy-art-evader-v8";
+// Picks (owner, 2026-10-08): preselected. Open: Wraith look (V to X: S to U with stronger ghost effects, from the
+// owner's note) and Wraith animation (left blank; the owner asked for more, so D to F are new).
 const DEFAULTS = {
   stalker: { look: "L", anim: "E", move: "F" },
   burrower: { look: "G", anim: "C", move: "C" },
   shifter: { look: "B", anim: "A", move: "B" },
-  wraith: { look: null, anim: "A", move: "A" },
+  wraith: { look: null, anim: null, move: "B" },
 };
 
 // ---- State (picks and notes, kept in this browser) -------------------------------------------------

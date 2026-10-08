@@ -291,8 +291,10 @@ step up.
 - **Burrower:** look **G Drill pod**, animation C Rumble, movement C Dive and surface. **Confirmed.** It vanishes
   underground, and a doppler ping shows it inside a Sensor Array's range; the gameplay side is in `design/enemies.md`.
 - **Shifter:** look B Prism hover, animation A Glide, movement B Side-shift. **Confirmed.**
-- **Wraith:** look **open**, with the owner's notes "Build more ghost / phantasmic ideas" (round 6) and then "Build
-  ghosty / phantasmal plane/jet-like" (round 7); animation A Drift, movement A Ghost drift. A real flyer since round 5.
+- **Wraith:** look **open**, with the owner's notes "Build more ghost / phantasmic ideas" (round 6), "Build ghosty /
+  phantasmal plane/jet-like" (round 7) and "Create more similar to S, T, and U, but add more of ghost-like affects to
+  them" (round 8); animation **open** (left blank; the owner then asked for more animations), movement **B Unseen
+  line**. A real flyer since round 5.
 
 **Round 2** (on the same page, with the picks above preselected):
 - **Blink Stalker animations:** D Head-snap, E Phase shimmer, F Slink. **Movements:** D Blink zigzag (blinks across
@@ -350,8 +352,19 @@ step up.
 - **U Spectral interceptor:** a needle-nosed interceptor with forward-swept wings and canards, trailed by two fading
   echoes of itself as it phases.
 
+**Round 8** (from the owner's note "Create more similar to S, T, and U, but add more of ghost-like affects to them",
+and "Offer more animations as well"):
+- **V Wraith fighter** (S, ghostlier): a fade wave sweeps the airframe nose to tail so parts vanish and return; long
+  ectoplasm contrails, mist peeling off the wingtips, cold spectral engine flames.
+- **W Spectre wing** (T, ghostlier): a see-through skin over a glowing skeleton (spar and ribs), a trailing double
+  image, and edges constantly peeling into drifting motes around a pulsing core.
+- **X Phantom interceptor** (U, ghostlier): four phasing echoes stream behind it, its wings flicker in and out, a
+  spectral flame burns at the tail and the air ripples around it.
+- **Wraith animations:** D Phase flicker (glides, then skips out of phase for a split second), E Banking glide (long,
+  slow banks like a glider), F Spectral lunge (lunges forward stretching thin, then drifts back).
+
 ## Open questions
 
-1. **Wraith look:** any of A to U (S to U are the ghostly planes and jets; P to R the phantasmic looks; M to O the
-   flying drones).
+1. **Wraith look and animation:** look any of A to X (V to X are the ghostlier aircraft, S to U the first planes and
+   jets), animation any of A to F (D to F are new).
 2. **Next role** after Evader (remaining: Special, Boss).
