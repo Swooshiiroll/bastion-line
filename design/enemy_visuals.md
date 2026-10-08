@@ -20,7 +20,9 @@ Today many enemies read as the same thing (owner-confirmed look-alike groups):
 ## Decisions (owner)
 
 - **Every enemy unique:** no shared silhouette or colour families, not even within a role.
-- **Full restyle, theme chosen per enemy** (glass, chitin, paper, plasma, lacquer, clockwork and so on).
+- **Full restyle, theme chosen per enemy, within sci-fi** (owner, round 3: "keep the sci-fi theme"). Every
+  option is a machine, energy form or alien tech: force fields, anodized metal, ceramic, ferrofluid, plasma,
+  cryo-crystal, hologram and so on. Organic, botanical and folk-object themes are out.
 - **Contrast with the towers on purpose.** The towers stay as they are.
 - **Movement can change (round 2):** both the **animation** (how the body moves: roll, hop, flutter...) and the
   **path pattern** on the lane (weave, bursts, surges, loops...), at the **same average speed**. **Flyers stay
@@ -51,14 +53,14 @@ violet, red, gold, magenta, mint and more), so "avoid tower colours" cannot work
 4. No grey-metal-with-neon look (that belongs to the towers).
 5. A new animation and path pattern at the same average speed; flyer or ground unchanged; radius change listed;
    gameplay note if the path pattern affects targeting.
-6. **Lore check:** if the theme changes what the enemy *is* (for example organic instead of machine), its name,
-   Codex text and lore need a follow-up.
+6. **Sci-fi check:** the option is a machine, energy form or alien tech, so the "they're all machines" lore
+   still holds. Energy forms may need Codex wording.
 
 ## Batches
 
 | # | Role | Enemies | State |
 |---|---|---|---|
-| 1 | Swarm | Nanite, Locust, Drone, Shrike | **Round 2 options ready for picks** (round 1 concepts dropped) |
+| 1 | Swarm | Nanite, Locust, Drone, Shrike | **Round 3 options ready for picks** (sci-fi looks; rounds 1 and 2 looks dropped) |
 | 2 | Rusher | Skitter, Needle, Strike Drone, Fury Drone | To do |
 | 3 | Tank | Siege Mech, Rampart, Gunship, Titan | To do |
 | 4 | Support | Repair Bot, Rally Beacon, Bulwark, Mender Hulk | To do |
@@ -70,9 +72,10 @@ violet, red, gold, magenta, mint and more), so "avoid tower colours" cannot work
 Each later batch is checked against the picks already made, so a new concept can't repeat an earlier enemy's
 silhouette, material or colours.
 
-## Batch 1: Swarm (decision records, round 2)
+## Batch 1: Swarm (decision records, round 3)
 
-Round 1's three concepts per enemy were dropped at the owner's request; this is a fresh set. In the mockup,
+Round 1's concepts were dropped, and round 2's looks were re-themed as sci-fi in round 3. Each keeps its round 2
+silhouette and movement idea where possible. In the mockup,
 each enemy has a **Your combination** preview, then **Look**, **Animation** and **Movement** pickers (today plus A
 to E), each with a notes box. **Animations** are a locomotion layer that the page applies to whichever look is
 selected, so any look can be tried with any animation. **Movements** are path-pattern diagrams: dots at equal
@@ -89,11 +92,11 @@ browser and are copied back from the bottom of the batch.
 
 | Look | Theme | Palette | Radius | Lore impact |
 |---|---|---|---|---|
-| A Ink-bubble cluster | Oil / soap film | oily black bubbles, iridescent rims | 7 (+1) | none |
-| B Pollen puffballs | Botanical spores | mustard fuzz, pale tips | 7 (+1) | organic: Codex |
-| C Brass cog tumblers | Clockwork brass | polished brass, dark hubs | 7 (+1) | none |
-| D Mercury droplets | Liquid metal | chrome silver, white highlights | 7 (+1) | none |
-| E Glitch pixels | Digital corruption | magenta and cyan squares | 7 (+1) | fits "self-replicating" |
+| A Force-bubble nanites | Containment fields | iridescent force-field rims, white-hot cores | 7 (+1) | none |
+| B Spike-mine swarm | Proximity mines | hazard-amber shells, steel spikes, white LEDs | 7 (+1) | none |
+| C Microturbines | Anodized rotors | anodized copper blades, cyan hub lights | 7 (+1) | none |
+| D Ferrofluid nanobots | Liquid-metal nanotech | black ferrofluid, violet sheen | 7 (+1) | none |
+| E Corrupted hologram | Digital glitch | magenta and cyan pixels | 7 (+1) | Codex wording |
 
 **Movement:** A Weave, B Stop-go hops, C Rhythmic surges, D S-slither, E Micro-blinks.
 **Picks:** look _, animation _, movement _; notes _
@@ -102,11 +105,11 @@ browser and are copied back from the bottom of the batch.
 
 | Look | Theme | Palette | Radius | Lore impact |
 |---|---|---|---|---|
-| A Dust moth | Felted insect | dusty beige wings, dark eye-spots | 6 (+1) | organic: Codex |
-| B Cave bat | Leathery creature | violet membrane, amber eyes | 7 (+2) | organic: Codex |
-| C Firefly | Bioluminescent beetle | dark olive shell, warm gold lamp | 6 (+1) | organic: Codex |
-| D Quill feather | Feather | bone white vanes, indigo tip | 7 (+2) | Codex wording |
-| E Sky ribbon | Fabric creature | teal and coral ribbon | 7 (+2) | Codex wording |
+| A Solar moth drone | Photovoltaic flyer | deep blue solar cells, silver frames | 6 (+1) | none |
+| B Bat-wing UAV | Stealth flying wing | violet carbon skin, amber wingtip lights | 7 (+2) | none |
+| C Beacon mite | Micro-rotor drone | olive drab hull, gold blinking beacon | 6 (+1) | none |
+| D Flechette dart | Ceramic kinetic dart | white ceramic, indigo tip, blue engine glow | 7 (+2) | none |
+| E Plasma serpent | Linked energy segments | teal-to-coral plasma beads | 7 (+2) | Codex wording |
 
 **Movement:** A Jittery zigzag, B Wide swoops, C Pause-and-dart, D Glide and sway, E Sine undulation.
 **Picks:** look _, animation _, movement _; notes _
@@ -115,11 +118,11 @@ browser and are copied back from the bottom of the batch.
 
 | Look | Theme | Palette | Radius | Lore impact |
 |---|---|---|---|---|
-| A Tumbleweed cage | Wire / scrap | rusted tan wire, ember core | 11 | none |
-| B Pillbug | Armoured crustacean | slate blue-grey plates | 11 | organic: rename and Codex |
-| C Unicycle bot | Toy-like robot | cream body, mint stripe, black tyre | 10 (-1) | none |
-| D Stone totem | Carved stone | sandstone layers, moss-green rune | 12 (+1) | Codex wording |
-| E Spinning top | Lacquered toy | lacquer red and cream wedges, gold knob | 11 | none |
+| A Gyro-cage | Orbital rings | cobalt rings, white-hot core | 11 | none |
+| B Roller bot | Segmented armour robot | slate-blue plates, rivets, cyan sensor | 11 | none |
+| C Unicycle bot | Balancing robot | cream body, mint stripe, black tyre | 10 (-1) | none |
+| D Monolith stack | Alien obsidian tech | obsidian hex blocks, emerald glyphs | 12 (+1) | Codex wording |
+| E Saucer | Hover saucer | pearl hull, glass dome, chasing amber lights | 11 | none |
 
 **Movement:** A Bouncy surges, B Walk then roll, C Wobbling weave, D Heavy hops, E Precessing loops.
 **Picks:** look _, animation _, movement _; notes _
@@ -128,11 +131,11 @@ browser and are copied back from the bottom of the batch.
 
 | Look | Theme | Palette | Radius | Lore impact |
 |---|---|---|---|---|
-| A Icicle shards | Ice crystal | pale blue-white ice, bright edges | 7 | none |
-| B Starling | Bird flock | glossy purple-green sheen, white speckles | 6 (-1) | fits the name |
-| C Leaf storm | Autumn leaves | burnt orange and brown leaves | 7 | Codex wording |
-| D Squid jets | Cephalopod | coral-pink mantle, deep red spots | 7 | organic: Codex |
-| E Comet sparks | Fire / meteor | white-gold head, pale blue tail | 6 (-1) | none |
+| A Cryo shards | Cryo-tech crystal darts | pale blue-white ice, frost thruster | 7 | none |
+| B Wingbot jets | Micro-jet flock | gloss purple-black, iridescent edges, orange burners | 6 (-1) | none |
+| C Scrap storm | Salvage debris | rust-orange and steel scrap plates | 7 | none |
+| D Jet-squid drones | Cable-tentacle drone | anodized coral pod, steel cables, blue thrust | 7 | none |
+| E Plasma comets | Plasma bolts | white-gold head, pale blue tail | 6 (-1) | Codex wording |
 
 **Movement:** A Tight V that regroups, B Murmuration swirl, C Gust surges, D Pulse-jets, E Streaking surges.
 **Picks:** look _, animation _, movement _; notes _
@@ -148,8 +151,8 @@ runs. Picked **animations** go into the drawings; picked **path patterns** need 
 ## Open questions
 
 1. **Batch 1 picks:** look, animation and movement for each Swarm enemy, plus any notes (copied from the mockup).
-2. **Lore direction:** themes like chitin, jellyfish or manta make some enemies organic. Is a mixed roster
-   (machines next to creatures) fine, or should picks keep the "machines" lore?
+2. **Lore direction (decided, round 3):** sci-fi throughout, so the "machines" lore stays. Energy forms (corrupted
+   hologram, plasma serpent, plasma comets) and the alien monolith need Codex wording only.
 3. **Path patterns change gameplay.** Bursts and weaving make projectile towers miss more (they lead the
    target); hops and pauses change how long an enemy stays in range. The balance probe checks the picked
    patterns before they ship.
