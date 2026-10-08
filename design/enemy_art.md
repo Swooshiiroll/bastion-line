@@ -585,6 +585,21 @@ Siege Mech's and Titan's).
 | Leviathan | Slow bank / Cruise bob / Launch lurch | Straight cruise / Wide patrol / Hover and launch |
 | Colossus | Earthquake stride / Grind / Shed shudder | Inexorable / Earthshaker / Titan sway |
 
+**Boss confirmed (owner, 2026-10-08).** Final picks:
+- **Dreadnought:** look **B Dread tank**, animation **A Heavy stride**, movement **A Relentless advance**; a land
+  battleship on four tread units with three turrets and a command tower; its frost ring forms and cracks away every
+  3 s (slows slide off it), and its weight sends faint shock rings through the ground.
+- **Overmind:** look **A Brain hive**, animation **C Print shudder**, movement **A Slow creep**; the domed neural core
+  in its hex shell walks on eight long, jointed arachnid legs (owner), and shudders as it prints three Nanites every
+  5 s.
+- **Leviathan:** look **K Jet carrier**, animation **I Dive and climb**, movement **A Straight cruise**; a giant
+  airliner-like carrier (long fuselage, swept wings with four jet pods, a high tail) that launches six Locusts every
+  6 s from the doors along its spine, slowly dipping and climbing (its shadow tightens and spreads).
+- **Colossus:** look **A Colossus mech**, animation **E Lumbering sway**, movement **A Inexorable**; a giant humanoid
+  in layered hazard-yellow and bronze plates; at 66% and 33% health a layer falls away and two Siege Mechs drop out.
+
+**Sizes:** unchanged (Dreadnought 22, Overmind 26, Leviathan 30, Colossus 32 px).
+
 **Picks (owner, 2026-10-08, second pass):**
 - **Confirmed:** Dreadnought **B Dread tank** / A Heavy stride / A Relentless advance (look changed from A); Overmind
   A Brain hive (arachnid legs) / C Print shudder / A Slow creep; Colossus **A Colossus mech** / **E Lumbering sway** /
@@ -624,6 +639,6 @@ Siege Mech's and Titan's).
 
 ## Open questions
 
-1. **Boss picks:** the Leviathan's look (A to L; J to L are the mothership, jet and plane designs).
-2. After Boss: the art direction is complete; implementation waits on the owner's confirmation of the full spec
-   (`design/enemies.md` has its own open questions).
+1. **Sign-off.** All eight roles are confirmed (2026-10-08), so the art direction is complete. Implementation
+   (Process, step 3) waits on the owner's confirmation of the full spec; `design/enemies.md` has its own open
+   questions.

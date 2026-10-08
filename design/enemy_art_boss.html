@@ -89,11 +89,11 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 8 of 8: Boss (round 4)</div>
+    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 8 of 8: Boss (confirmed)</div>
     <h1>Enemy art: Boss</h1>
     <p class="note">A fresh start from the names: the machine army's <b>Boss</b> role. For each enemy, pick its <b>look</b>, <b>animation</b> and
       <b>movement</b> separately from three proposals each (A to C), and add notes. Mix freely. The <b>Your combination</b> preview shows your
-      mix (option A until you pick). <b>Your picks are preselected</b>: everything but the Leviathan's look is settled. From your note, the Leviathan has three mothership, jet and plane designs (J to L). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
+      mix (option A until you pick). <b>Boss is confirmed:</b> your final picks are preselected (Dreadnought B/A/A, Overmind A/C/A, Leviathan K/I/A, Colossus A/E/A). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
       Spec: <code>design/enemy_art.md</code>.</p>
     <ul class="rules">
       <li><b>Machine army;</b> each <b>name inspires a trait</b> (not a literal picture).</li>
@@ -768,12 +768,12 @@ const BATCHES = [
       { id: "colo", name: "Colossus", tier: "Boss", air: false, anims: "colo", trait: "the last boss: sheds armour at 66% and 33% health, speeds up, and drops 2 Siege Mechs each time; can't be stunned", today: { r: 32 } },
     ] },
 ];
-const STORE_KEY = "bl-enemy-art-boss-v3";
-// Picks (owner, 2026-10-08): preselected. Open: Leviathan look (J to L: mothership, jet and plane designs).
+const STORE_KEY = "bl-enemy-art-boss-v4";
+// Final picks (owner, 2026-10-08): preselected.
 const DEFAULTS = {
   dread: { look: "B", anim: "A", move: "A" },
   over: { look: "A", anim: "C", move: "A" },
-  levi: { look: null, anim: "I", move: "A" },
+  levi: { look: "K", anim: "I", move: "A" },
   colo: { look: "A", anim: "E", move: "A" },
 };
 
