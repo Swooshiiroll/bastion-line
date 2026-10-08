@@ -140,9 +140,19 @@ leaving the glowing frame. The previews loop it: plated for 5 s, the plates fall
 | Gunship | Heavy hover / Yaw scan / Sag and lift | Patrol sweep / Hover and advance / Steady cruise |
 | Titan | Earth-shaker stride / Sway / Core pulse | Inexorable march / Heavy stride / Swaying march |
 
-**Picks:** Siege Mech _, Rampart _, Gunship _, Titan _ (look, animation, movement; notes)
+**Picks (owner, 2026-10-07):**
+- **Siege Mech:** look **open** (none of A to C was picked; round 2 offers three new looks), animation A Stomp,
+  movement A Steady trudge.
+- **Rampart:** look B Bastion crawler, animation B Shudder, movement A Unstoppable line.
+- **Gunship:** look A Armoured quad-rotor, animation A Heavy hover, movement C Steady cruise.
+- **Titan:** look A Colossus walker, animation A Earth-shaker stride, movement A Inexorable march.
+
+**Siege Mech look, round 2** (on the same page, with the picks above preselected):
+- **D Drill sapper:** a squat tracked sapper driving a huge spinning breaching drill.
+- **E Siege-tower walker:** a narrow stacked siege tower on four stubby legs, with a drop ramp at the front.
+- **F Wrecking-ball crawler:** a four-legged crawler with a crane boom swinging a wrecking ball.
 
 ## Open questions
 
-1. **Tank picks**, and any change to the Tank family traits.
+1. **Siege Mech look:** pick one of D to F on the Tank page.
 2. **Next role** after Tank (remaining: Support, Disruptor, Evader, Special, Boss).

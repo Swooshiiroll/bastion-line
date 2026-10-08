@@ -89,11 +89,11 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 3 of 8: Tank</div>
+    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 3 of 8: Tank (round 2)</div>
     <h1>Enemy art: Tank</h1>
     <p class="note">A fresh start from the names: the machine army's <b>Tank</b> role. For each enemy, pick its <b>look</b>, <b>animation</b> and
       <b>movement</b> separately from three proposals each (A to C), and add notes. Mix freely. The <b>Your combination</b> preview shows your
-      mix (option A until you pick). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
+      mix. <b>Your picks are preselected</b>; Siege Mech has three new looks (D to F) to choose from. Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
       Spec: <code>design/enemy_art.md</code>.</p>
     <ul class="rules">
       <li><b>Machine army;</b> each <b>name inspires a trait</b> (not a literal picture).</li>
@@ -467,6 +467,34 @@ const LOOKS = {
       const sh = arcPts(-0.75, 0.96, 1.24, -0.82, 0.82); plate(c, sh, C.hull, 0, r, 1.2);
       for (let k = -4; k <= 4; k++) { const a = k * 0.17, p0 = add(c, mul([-0.75 + Math.cos(a - 0.06) * 1.0, Math.sin(a - 0.06) * 1.0], r)), p1 = add(c, mul([-0.75 + Math.cos(a + 0.06) * 1.2, Math.sin(a + 0.06) * 1.2], r)); line(p0, p1, INK, 1.7); }
       visor(add(c, [r * 0.05, 0]), r * 0.16, C.glow, t); stack(add(c, [-r * 0.5, 0]), r * 0.09, t); } },
+    { key: "D", name: "Drill sapper", theme: "A squat tracked sapper driving a huge spinning breaching drill", palette: "hazard yellow hull, steel drill, black treads", r: 14, draw(c, t, r) {
+      const C = COL.siege;
+      for (const s of [-1, 1]) tread(add(c, [-r * 0.15, s * r * 0.5]), r * 0.55, r * 0.17, t);
+      const body = [[0.36, -0.42], [0.36, 0.42], [-0.62, 0.4], [-0.72, 0], [-0.62, -0.4]]; plate(c, body, C.hull, 0, r, 1.0); rivets(c, body, 0, r, 0.78, 0.6);
+      const cone = [[1.28, 0], [0.42, 0.36], [0.42, -0.36]]; plate(c, cone, C.steel, 0, r, 0.9);
+      for (let k = 0; k < 4; k++) { const x = 0.45 + fmod(t * 2.2 + k / 4, 1) * 0.72, hw = h => 0.36 * (1.28 - h) / 0.86; line(add(c, [x * r, -hw(x) * r * 0.9]), add(c, [(x + 0.12) * r, hw(x + 0.12) * r * 0.9]), A(INK, 0.75), 1.1); }
+      plate(add(c, [r * 0.4, 0]), rectPts(0.07, 0.44), C.dark, 0, r, 0.8);
+      hazard(c, 0.22, 0.36, 0.06, C.hull, r); visor(add(c, [r * 0.02, 0]), r * 0.2, C.glow, t); stack(add(c, [-r * 0.48, r * 0.22]), r * 0.09, t); } },
+    { key: "E", name: "Siege-tower walker", theme: "A narrow stacked siege tower on four stubby legs, with a drop ramp at the front", palette: "dark base, hazard-yellow tiers, steel ramp", r: 14, draw(c, t, r) {
+      const C = COL.siege;
+      for (const [x, y, ph] of [[1, 1, 0], [1, -1, Math.PI], [-1, 1, Math.PI], [-1, -1, 0]]) { const sw = Math.sin(t * 4 + ph), hip = add(c, [x * r * 0.4, y * r * 0.4]), ft = add(c, [x * r * 0.62 + sw * r * 0.12, y * r * 0.7]); limb([hip, ft], 2.2, C.dark); foot(ft, C.steel, r, 0.13, 0.1); }
+      const lift = 0.5 + 0.5 * Math.sin(t * 1.3), rp = add(c, [r * (0.6 + 0.14 * lift), 0]), rk = rectPts(0.1 + 0.14 * lift, 0.3), RAMP = lt(C.steel, 0.35);
+      plate(rp, rk, RAMP, 0, r, 0.8); for (const x of [-0.5, 0, 0.5]) line(add(rp, [x * r * (0.1 + 0.14 * lift), -r * 0.26]), add(rp, [x * r * (0.1 + 0.14 * lift), r * 0.26]), A(INK, 0.6), 0.7);
+      hazard(rp, 0.1 + 0.14 * lift - 0.03, 0.3, 0.03, C.hull, r, 4);
+      const SH = [0, 0, 0, 0.4], base = rectPts(0.5, 0.5); plate(c, base, C.dark, 0, r, 1.0); rivets(c, base, 0, r, 0.86, 0.6);
+      const t2 = add(c, [-r * 0.08, -r * 0.08]), k2 = rectPts(0.4, 0.38); fill(add(t2, [r * 0.1, r * 0.1]), k2, SH, 0, r); plate(t2, k2, C.hull, 0, r, 0.9); hazard(t2, 0.34, 0.32, 0.05, C.hull, r, 4);
+      const t3 = add(c, [-r * 0.17, -r * 0.17]), k3 = rectPts(0.26, 0.24); fill(add(t3, [r * 0.1, r * 0.1]), k3, SH, 0, r); plate(t3, k3, lt(C.hull, 0.25), 0, r, 0.8);
+      for (const [x, y] of [[0.26, 0.24], [0.26, -0.24], [-0.26, 0.24], [-0.26, -0.24]]) plate(add(t3, [x * r, y * r]), rectPts(0.07, 0.07), C.dark, 0, r, 0.5);
+      visor(add(t3, [r * 0.18, 0]), r * 0.14, C.glow, t); stack(add(c, [-r * 0.45, r * 0.38]), r * 0.08, t); } },
+    { key: "F", name: "Wrecking-ball crawler", theme: "A four-legged crawler with a crane boom swinging a wrecking ball", palette: "hazard yellow body and boom, dark steel ball", r: 14, draw(c, t, r) {
+      const C = COL.siege, sw = Math.sin(t * 1.6);
+      for (const [x, y, ph] of [[1, 1, 0], [1, -1, Math.PI], [-1, 1, Math.PI], [-1, -1, 0]]) { const st = Math.sin(t * 4 + ph), hip = add(c, [x * r * 0.3, y * r * 0.35]), knee = add(c, [x * r * 0.55 + st * r * 0.08, y * r * 0.72]), ft = add(c, [x * r * 0.75 + st * r * 0.14, y * r * 0.8]); limb([hip, knee, ft], 1.6, C.dark); disc(ft, 1.6, OUTLINE); disc(ft, 1.2, C.steel); }
+      const body = [[0.42, 0], [0.28, 0.44], [-0.5, 0.44], [-0.62, 0], [-0.5, -0.44], [0.28, -0.44]]; plate(c, body, C.hull, 0, r, 1.0); rivets(c, body, 0, r, 0.78, 0.6);
+      hazard(c, -0.45, 0.3, 0.06, C.hull, r, 3); plate(add(c, [r * 0.12, r * 0.26]), rectPts(0.16, 0.13), C.dark, 0, r, 0.7); visor(add(c, [r * 0.24, r * 0.26]), r * 0.09, C.glow, t);
+      const pv = add(c, [-r * 0.05, -r * 0.05]), a = 0.85 * sw, tip = add(pv, mul(fa(a), r * 0.95)), ball = add(tip, mul(fa(a - 0.5 * Math.cos(t * 1.6)), r * 0.3));
+      disc(pv, r * 0.17, OUTLINE); disc(pv, r * 0.14, C.steel); bar(pv, tip, 2.4, C.hull); for (const u of [0.3, 0.55, 0.8]) disc(add(pv, mul(fa(a), r * 0.95 * u)), 0.7, INK);
+      line(tip, ball, INK, 0.8); disc(ball, r * 0.25 + 0.6, OUTLINE); disc(ball, r * 0.25, [0.24, 0.24, 0.26, 1]); disc(add(ball, [-r * 0.07, -r * 0.07]), r * 0.07, [0.55, 0.55, 0.58, 1]);
+      stack(add(c, [-r * 0.35, r * 0.2]), r * 0.08, t); } },
   ],
   rampart: [
     { key: "A", name: "Rolling wall", theme: "A crenellated wall slab on twin treads, studded with ram teeth", palette: "concrete grey, amber lamps, steel teeth", r: 16, draw(c, t, r) {
@@ -612,7 +640,14 @@ const BATCHES = [
       { id: "titan", name: "Titan", tier: "T4", air: false, anims: "titan", trait: "a giant: towering; its plates shed at half health", today: { r: 18 } },
     ] },
 ];
-const STORE_KEY = "bl-enemy-art-tank-v1";
+const STORE_KEY = "bl-enemy-art-tank-v2";
+// Picks (owner, 2026-10-07): preselected. Siege Mech's look is open (round 2 offers D to F).
+const DEFAULTS = {
+  siege: { look: null, anim: "A", move: "A" },
+  rampart: { look: "B", anim: "B", move: "A" },
+  gunship: { look: "A", anim: "A", move: "C" },
+  titan: { look: "A", anim: "A", move: "A" },
+};
 
 // ---- State (picks and notes, kept in this browser) -------------------------------------------------
 const STORE = STORE_KEY;
