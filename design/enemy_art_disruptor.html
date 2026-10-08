@@ -89,11 +89,11 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 5 of 8: Disruptor (round 3)</div>
+    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 5 of 8: Disruptor (confirmed)</div>
     <h1>Enemy art: Disruptor</h1>
     <p class="note">A fresh start from the names: the machine army's <b>Disruptor</b> role. For each enemy, pick its <b>look</b>, <b>animation</b> and
       <b>movement</b> separately from three proposals each (A to C), and add notes. Mix freely. The <b>Your combination</b> preview shows your
-      mix. <b>Your picks are preselected</b>; Siphon and Blackout Rig each have six new looks (D to F, and G to I, which evolve from your Jammer and Capacitor picks) and three new animations (D to F) to choose from. Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
+      mix. <b>Disruptor is confirmed:</b> your final picks are preselected (Jammer A/A/A, Siphon H/A/A, Blackout Rig H/E/C, Capacitor C/B/A). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
       Spec: <code>design/enemy_art.md</code>.</p>
     <ul class="rules">
       <li><b>Machine army;</b> each <b>name inspires a trait</b> (not a literal picture).</li>
@@ -709,12 +709,12 @@ const BATCHES = [
       { id: "capacitor", name: "Capacitor", tier: "T4", air: false, anims: "capacitor", trait: "charges 2 s, then EMP 160 px, offline 3 s, every 8 s; new, 16 px", today: { r: 16 } },
     ] },
 ];
-const STORE_KEY = "bl-enemy-art-disruptor-v2";
-// Picks (owner, 2026-10-08): preselected. Siphon and Blackout Rig: look and animation open (looks D to I, animations D to F).
+const STORE_KEY = "bl-enemy-art-disruptor-v3";
+// Final picks (owner, 2026-10-08): preselected.
 const DEFAULTS = {
   jammer: { look: "A", anim: "A", move: "A" },
-  siphon: { look: null, anim: null, move: "C" },
-  blackout: { look: null, anim: null, move: "C" },
+  siphon: { look: "H", anim: "A", move: "A" },
+  blackout: { look: "H", anim: "E", move: "C" },
   capacitor: { look: "C", anim: "B", move: "A" },
 };
 

@@ -224,11 +224,10 @@ step up.
 | Blackout Rig | Heavy rumble / Pulse recoil / Sway | Steady haul / Heavy sway / Stop and pulse |
 | Capacitor | Charge shake / Hum / Stride | Inexorable advance / Charge halt / Slow sway |
 
-**Picks (owner, 2026-10-08):**
+**Disruptor confirmed (owner, 2026-10-08).** Final picks:
 - **Jammer:** look A Antenna walker, animation A Static jitter, movement A Steady advance.
-- **Siphon:** look and animation **open** (none of A to C was picked; rounds 2 and 3 offer new looks D to I and animations D to F),
-  movement C Drain and lurch.
-- **Blackout Rig:** look and animation **open** (rounds 2 and 3 offer new looks D to I and animations D to F), movement C Stop and pulse.
+- **Siphon:** look **H Tether sapper** (from round 3), animation A Gulp, movement A Steady drift.
+- **Blackout Rig:** look **H Spider rig** (from round 3), animation **E Rock** (from round 2), movement C Stop and pulse.
 - **Capacitor:** look C Ring-reactor tank, animation B Hum, movement A Inexorable advance.
 
 **Round 2** (on the same page, with the picks above preselected):
@@ -254,5 +253,4 @@ toward the Capacitor pick (a ring tank on treads), so the tiers read as one line
 
 ## Open questions
 
-1. **Siphon and Blackout Rig:** a look (D to I) and an animation (D to F) for each, on the Disruptor page.
-2. **Next role** after Disruptor (remaining: Evader, Special, Boss).
+1. **Next role** after Disruptor (remaining: Evader, Special, Boss).
