@@ -89,11 +89,11 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 4 of 8: Support</div>
+    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 4 of 8: Support (confirmed)</div>
     <h1>Enemy art: Support</h1>
     <p class="note">A fresh start from the names: the machine army's <b>Support</b> role. For each enemy, pick its <b>look</b>, <b>animation</b> and
       <b>movement</b> separately from three proposals each (A to C), and add notes. Mix freely. The <b>Your combination</b> preview shows your
-      mix (option A until you pick). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
+      mix. <b>Support is confirmed:</b> your final picks are preselected (Repair Bot B/A/B, Rally Beacon A/C/A, Bulwark C/B/C, Mender Hulk B/C/A). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
       Spec: <code>design/enemy_art.md</code>.</p>
     <ul class="rules">
       <li><b>Machine army;</b> each <b>name inspires a trait</b> (not a literal picture).</li>
@@ -606,7 +606,14 @@ const BATCHES = [
       { id: "mender", name: "Mender Hulk", tier: "T4", air: false, anims: "mender", trait: "a big unit that repairs itself (after 1.5 s unhurt)", today: { r: 15 } },
     ] },
 ];
-const STORE_KEY = "bl-enemy-art-support-v1";
+const STORE_KEY = "bl-enemy-art-support-v2";
+// Final picks (owner, 2026-10-08): preselected.
+const DEFAULTS = {
+  repair: { look: "B", anim: "A", move: "B" },
+  rally: { look: "A", anim: "C", move: "A" },
+  bulwark: { look: "C", anim: "B", move: "C" },
+  mender: { look: "B", anim: "C", move: "A" },
+};
 
 // ---- State (picks and notes, kept in this browser) -------------------------------------------------
 const STORE = STORE_KEY;

@@ -186,9 +186,12 @@ aura; Bulwark charges, then throws a sky-blue barrier every 6 s; Mender Hulk's s
 | Bulwark | Brace / Hum / Guard sway | Steady guard / Shield-wall drift / Brace and advance |
 | Mender Hulk | Heavy plod / Breathing / Hunched lurch | Relentless plod / Lumber / Rest and repair |
 
-**Picks:** Repair Bot _, Rally Beacon _, Bulwark _, Mender Hulk _ (look, animation, movement; notes)
+**Support confirmed (owner, 2026-10-08).** Final picks:
+- **Repair Bot:** look B Nano-sprayer walker, animation A Tinker, movement B Weave between units.
+- **Rally Beacon:** look A Banner walker, animation C Strut, movement A Lead the charge.
+- **Bulwark:** look C Shield-wing bot, animation B Hum, movement C Brace and advance.
+- **Mender Hulk:** look B Repair-arm crawler, animation C Hunched lurch, movement A Relentless plod.
 
 ## Open questions
 
-1. **Support picks**, and any change to the Support family traits.
-2. **Next role** after Support (remaining: Disruptor, Evader, Special, Boss).
+1. **Next role** after Support (remaining: Disruptor, Evader, Special, Boss).
