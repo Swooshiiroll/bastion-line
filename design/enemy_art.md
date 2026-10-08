@@ -291,8 +291,8 @@ step up.
 - **Burrower:** look **G Drill pod**, animation C Rumble, movement C Dive and surface. **Confirmed.** It vanishes
   underground, and a doppler ping shows it inside a Sensor Array's range; the gameplay side is in `design/enemies.md`.
 - **Shifter:** look B Prism hover, animation A Glide, movement B Side-shift. **Confirmed.**
-- **Wraith:** look **open**, with the owner's note "Build more ghost / phantasmic ideas" (round 6 offers three);
-  animation A Drift, movement A Ghost drift. A real flyer since round 5 (owner).
+- **Wraith:** look **open**, with the owner's notes "Build more ghost / phantasmic ideas" (round 6) and then "Build
+  ghosty / phantasmal plane/jet-like" (round 7); animation A Drift, movement A Ghost drift. A real flyer since round 5.
 
 **Round 2** (on the same page, with the picks above preselected):
 - **Blink Stalker animations:** D Head-snap, E Phase shimmer, F Slink. **Movements:** D Blink zigzag (blinks across
@@ -342,7 +342,16 @@ step up.
 - **R Glitch spectre:** a robot that is only a flickering hologram (a pale wireframe torso, arms and head in
   scanlines) that tears sideways in glitches.
 
+**Round 7** (from the owner's note "Build ghosty / phantasmal plane/jet-like"; all fly):
+- **S Ghost fighter:** a sleek twin-tailed fighter jet whose wingtips dissolve into mist, its cold pale engines
+  leaving fading contrails.
+- **T Phantom flying wing:** a tailless flying wing, half see-through, its ribs showing through the skin and its
+  sawtooth trailing edge fraying into wisps.
+- **U Spectral interceptor:** a needle-nosed interceptor with forward-swept wings and canards, trailed by two fading
+  echoes of itself as it phases.
+
 ## Open questions
 
-1. **Wraith look:** any of A to R (P to R are the ghostly, phantasmic looks; M to O the flying drones).
+1. **Wraith look:** any of A to U (S to U are the ghostly planes and jets; P to R the phantasmic looks; M to O the
+   flying drones).
 2. **Next role** after Evader (remaining: Special, Boss).
