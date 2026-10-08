@@ -157,6 +157,38 @@ mechs, gritty early versions of the Titan's Colossus walker.
 - **H Cannon-shoulder mech:** a broad-shouldered mech with a siege cannon on one shoulder and a hydraulic claw arm.
 - **I Demolition loader:** a stocky loader mech hauling a huge demolition charge to the wall.
 
+## Support (role 4)
+
+Mockup: `design/enemy_art_support.html`, the same format as the other roles (three proposals each for look, animation
+and movement, notes boxes, no "today").
+
+**Support family (draft):** the army's field crews: a ringed emitter node with a blinking tip, white service
+chevrons, a scanning status light bar, and a visible effect drawn on the game's real timing. **Tiers evolve:** T1
+Repair Bot is a small bare service bot; T2 Rally Beacon adds a mast and panels; T3 Bulwark is armoured; T4 Mender Hulk
+is big and sleek, with gold trim and glowing seams. **Colour per enemy:** Repair Bot mint green and white, Rally Beacon
+violet with gold light, Bulwark ivory with a sky-blue barrier, Mender Hulk dark emerald with gold trim.
+
+**Effects in the previews:** Repair Bot sends a green repair pulse every 2 s; Rally Beacon has a turning gold speed
+aura; Bulwark charges, then throws a sky-blue barrier every 6 s; Mender Hulk's self-repair kicks in after 1.5 s unhurt
+(looped: 1.5 s hurt, then repair). The rings are drawn small to fit the cards; in game they follow the real radii.
+
+| Enemy (trait from the name) | Look A | Look B | Look C |
+|---|---|---|---|
+| Repair Bot, T1 ground (fixes the units around it) | Welder crawler: treads, two sparking welding arms | Nano-sprayer walker: backpack tank, repair mist | Dish rover: four wheels, turning repair dish |
+| Rally Beacon, T2 ground (rallies the units around it) | Banner walker: four legs, holo-banner on a mast | Siren crawler: treads, rotating siren beam | Drum-signal hexapod: six legs, pumping speaker cone |
+| Bulwark, T3 ground (shields the units around it) | Pylon walker: three shield pylons, hex barrier | Dome generator: treads, charging dome, barrier bubble | Shield-wing bot: biped, energy wings open to fire |
+| Mender Hulk, T4 ground (a big unit that repairs itself) | Nanoforge hulk: hunched, forge core, big fists | Repair-arm crawler: six legs, arms welding its hull | Cocoon tank: segmented shell, two mender drones |
+
+| Enemy | Animation A / B / C | Movement A / B / C |
+|---|---|---|
+| Repair Bot | Tinker / Bob / Scan sweep | Follow the pack / Weave between units / Stop to repair |
+| Rally Beacon | Pulse beat / Wave / Strut | Lead the charge / Rally sweeps / Marching beat |
+| Bulwark | Brace / Hum / Guard sway | Steady guard / Shield-wall drift / Brace and advance |
+| Mender Hulk | Heavy plod / Breathing / Hunched lurch | Relentless plod / Lumber / Rest and repair |
+
+**Picks:** Repair Bot _, Rally Beacon _, Bulwark _, Mender Hulk _ (look, animation, movement; notes)
+
 ## Open questions
 
-1. **Next role** after Tank (remaining: Support, Disruptor, Evader, Special, Boss).
+1. **Support picks**, and any change to the Support family traits.
+2. **Next role** after Support (remaining: Disruptor, Evader, Special, Boss).
