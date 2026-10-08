@@ -88,7 +88,7 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Enemy visual redesign · batch 1 of 8 (round 4: sci-fi, built tech)</div>
+    <div class="eyebrow">Bastion Line · Enemy visual redesign · batch 1 of 8 (round 5: mechanized tech, flyers are drones)</div>
     <h1>Enemy redesign: every enemy unique</h1>
     <p class="note">Redesigning all 34 enemies so no two look or move alike, one role at a time. For each enemy you pick
       three things separately: its <b>look</b>, its <b>animation</b> (how it moves its body) and its <b>movement</b> (its path
@@ -96,7 +96,7 @@
       preview at the top of each enemy shows your current mix. Picks and notes are kept in this browser; copy them from the
       bottom of the batch and send them back. Spec: <code>design/enemy_visuals.md</code>.</p>
     <ul class="rules">
-      <li><b>Sci-fi, built tech only:</b> every option is a built machine (drone, robot, vehicle, pod) with a visible machine body; energy effects only as part of a machine. Within that, every enemy is unique in silhouette, theme and material.</li>
+      <li><b>Mechanized tech, nothing biological:</b> every option is a machine with working parts (tracks, wheels, jointed legs, skids, screws, pistons). <b>Flyers are drones</b> (rotor, prop or airship). All-new concepts this round: nothing from rounds 1 to 4 returns.</li>
       <li><b>Shape first, colour second:</b> turn on <b>Greyscale</b>: each concept must still be recognisable.</li>
       <li><b>Contrast with the towers:</b> towers are grey metal with neon accents on hex pads, so enemies carry
         their identity in coloured bodies and distinct materials (force fields, anodized metal, ceramic, ferrofluid, plasma, cryo-crystal, hologram...).</li>
@@ -393,118 +393,129 @@ const hash = n => { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s
 function gearPts(teeth, ro, ri) { const o = []; for (let i = 0; i < teeth * 2; i++) { const a = Math.PI * i / teeth, rr = i % 2 ? ri : ro; o.push([Math.cos(a - 0.12) * rr, Math.sin(a - 0.12) * rr], [Math.cos(a + 0.12) * rr, Math.sin(a + 0.12) * rr]); } return o; }
 
 // ---- Looks (bodies; idle details only, no shadow: the renderer adds shadows and animation) --------
+// Round 5: mechanized tech looks; flyers are drones. Shared mechanical helpers first.
+function rotor(p, rr, t, spd, blades = 2, col = [0.92, 0.94, 0.97, 1]) {
+  disc(p, rr, A(col, 0.12)); ring(p, rr, A(col, 0.32), 0.6);
+  for (let b = 0; b < blades; b++) line(p, add(p, mul(fa(t * spd + b * TAU / blades), rr)), A(col, 0.65), 0.8);
+  disc(p, Math.max(0.6, rr * 0.16), [0.18, 0.18, 0.2, 1]);
+}
+function tread(p, hw, hh, t, rate, s) {
+  plate(p, rectPts(hw, hh), [0.12, 0.12, 0.13, 1], 0, s, 0.7);
+  for (let k = 0; k < 4; k++) { const x = (fmod(t * rate + k * 0.5, 2) - 1) * hw * s; line(add(p, [x, -hh * s * 0.85]), add(p, [x, hh * s * 0.85]), [0.38, 0.38, 0.42, 1], 0.5); }
+}
+function wheel(p, rx, ry, t) { plate(p, rectPts(rx, ry), [0.1, 0.1, 0.11, 1], 0, 1, 0.6); const x = (fmod(t * 3, 1) - 0.5) * rx * 1.6; line(add(p, [x, -ry * 0.8]), add(p, [x, ry * 0.8]), [0.35, 0.35, 0.38, 1], 0.5); }
+const TRIO = [[0.55, -0.68], [-0.62, 0], [0.55, 0.68]];
+
 const LOOKS = {
   nanite: [
-    { key: "A", name: "Bubble-shield drones", theme: "Shield-emitter micro-drones", palette: "violet hex chassis, iridescent shield bubbles", r: 7, draw(c, t, r) {
-      for (let k = 0; k < 4; k++) { const a = t * 1.5 + k * TAU / 4, p = add(c, mul(fa(a), r * 0.55 * (0.7 + 0.3 * Math.sin(t * 2 + k)))), br = r * (0.38 + 0.06 * Math.sin(t * 3 + k));
-        disc(p, br, [0.25, 0.15, 0.4, 0.3]); ring(p, br, iri(t * 2 + k, 0.8), 0.8);
-        plate(p, ngon(6, 1.0, a), [0.42, 0.3, 0.6, 1], 0, br * 0.55, 0.6); ring(p, br * 0.3, [0.85, 0.75, 1, 0.9], 0.5); disc(p, br * 0.12, [1, 1, 1, 0.95]); } } },
-    { key: "B", name: "Spike-mine swarm", theme: "Proximity mines", palette: "hazard-amber shells, steel spikes, white LEDs", r: 7, draw(c, t, r) {
-      for (let k = 0; k < 3; k++) { const p = add(c, mul(fa(t * 0.8 + k * TAU / 3), r * 0.55)), br = r * 0.32;
-        for (let i = 0; i < 8; i++) { const d = fa(TAU * i / 8 + k * 0.4); line(add(p, mul(d, br * 0.8)), add(p, mul(d, br * 1.6)), [0.72, 0.75, 0.8, 1], 0.8); disc(add(p, mul(d, br * 1.6)), 0.45, [0.85, 0.88, 0.92, 1]); }
-        orb(p, br, [0.92, 0.6, 0.1, 1]); if (fmod(t * 1.5 + k * 0.33, 1) < 0.2) glowDot(p, br * 0.3, [1, 1, 1, 1]); else disc(p, br * 0.2, [0.3, 0.2, 0.05, 1]); } } },
-    { key: "C", name: "Microturbines", theme: "Anodized rotors", palette: "anodized copper blades, cyan hub lights", r: 7, draw(c, t, r) {
-      [[0, -0.5, 1], [-0.45, 0.4, -1], [0.5, 0.35, -1]].forEach(([x, y, d], k) => { const p = add(c, [x * r, y * r]), sp = t * 9 * d + k;
-        disc(p, r * 0.42, [0.2, 0.12, 0.08, 1]);
-        for (let i = 0; i < 5; i++) { const a = sp + TAU * i / 5; fill(p, [[0.15, 0], [0.9, 0.18], [0.95, 0.42], [0.25, 0.2]], [0.78, 0.45, 0.3, 1], a, r * 0.42); }
-        ring(p, r * 0.42, [0.5, 0.28, 0.18, 1], 0.8); glowDot(p, r * 0.1, [0.3, 0.95, 1, 1]); }); } },
-    { key: "D", name: "Ferrofluid core-bots", theme: "Magnet-core nanobots", palette: "black ferrofluid, chrome cores, violet magnet rings", r: 7, draw(c, t, r) {
-      for (let k = 0; k < 3; k++) { const p = add(c, mul(fa(t * 1.1 + k * TAU / 3), r * 0.42 * (0.6 + 0.4 * Math.sin(t * 1.7 + k)))), br = r * (0.42 + 0.04 * Math.sin(t * 4 + k));
-        for (let i = 0; i < 7; i++) { const d = fa(TAU * i / 7 + t * 0.6 + k), h = br * (1.2 + 0.2 * Math.sin(t * 7 + i)); poly([add(p, mul(rot(d, 0.35), br * 0.8)), add(p, mul(d, h)), add(p, mul(rot(d, -0.35), br * 0.8))], [0.06, 0.05, 0.09, 1]); }
-        disc(p, br, [0.06, 0.05, 0.09, 1]); ring(p, br * 0.75, [0.62, 0.46, 0.92, 0.95], 0.9);
-        orb(p, br * 0.4, [0.78, 0.8, 0.85, 1]); for (let q = 0; q < 4; q++) disc(add(p, mul(fa(t * 3 + q * Math.PI / 2 + k), br * 0.75)), 0.45, [0.9, 0.8, 1, 1]); } } },
-    { key: "E", name: "Glitch projector cubes", theme: "Hologram projector bots", palette: "gunmetal-magenta cubes, glitching magenta/cyan holograms", r: 7, draw(c, t, r) {
-      const st = Math.floor(t * 12);
-      for (const [x, y, k] of [[-0.45, -0.3, 0], [0.4, 0.35, 1]]) {
-        const p = add(c, [x * r, y * r]);
-        for (let i = 0; i < 4; i++) { if (hash(st * 4 + i + k * 9) < 0.3) continue; const o = add(p, [(hash(st + i + k) - 0.5) * r * 0.9, (hash(st * 3 + i + k) - 0.5) * r * 0.9]), s = r * 0.12; rect(o[0] - s, o[1] - s, s * 2, s * 2, (i + st + k) % 2 ? [1, 0.2, 0.8, 0.85] : [0.2, 0.95, 1, 0.85]); }
-        plate(p, rectPts(0.5, 0.5), [0.35, 0.22, 0.35, 1], 0, r * 0.5, 0.7); disc(p, r * 0.14, [0.1, 0.1, 0.12, 1]); glowDot(p, r * 0.08, (st + k) % 2 ? [1, 0.3, 0.85, 1] : [0.3, 0.95, 1, 1]); } } },
+    { key: "A", name: "Micro-crawler tanks", theme: "Tracked micro-tanks", palette: "khaki hulls, dark tracks, white headlights", r: 8, draw(c, t, r) {
+      TRIO.forEach(([x, y], k) => { const p = add(c, [x * r, y * r]), u = r * 0.6;
+        for (const s of [-1, 1]) tread(add(p, [0, s * u * 0.5]), 0.9, 0.2, t + k, 2.5, u);
+        plate(p, rectPts(0.7, 0.35), [0.58, 0.56, 0.34, 1], 0, u, 0.6); orb(p, u * 0.28, [0.48, 0.46, 0.28, 1]); bar(p, add(p, [u * 0.95, 0]), 0.6, METAL_L);
+        glowDot(add(p, [u * 0.7, -u * 0.25]), 0.5, [1, 1, 0.9, 1]); }); } },
+    { key: "B", name: "Six-leg micro-walkers", theme: "Hexapod micro-robots", palette: "teal-anodized bodies, white sensor eyes", r: 8, draw(c, t, r) {
+      TRIO.forEach(([x, y], k) => { const p = add(c, [x * r, y * r]), u = r * 0.58;
+        for (let i = 0; i < 3; i++) for (const s of [-1, 1]) { const ph = t * 14 + i * 2.1 + (s > 0 ? Math.PI : 0) + k; const root = add(p, [(0.5 - i * 0.5) * u, s * u * 0.3]); const knee = add(root, [0.25 * u * Math.sin(ph), s * u * 0.55]); limb([root, knee, add(knee, [0.15 * u * Math.sin(ph), s * u * 0.3])], 0.6, [0.55, 0.58, 0.6, 1]); }
+        plate(p, ngon(6, 1.0, 0), [0.2, 0.58, 0.6, 1], 0, u * 0.5, 0.6); glowDot(add(p, [u * 0.35, 0]), 0.6, [0.95, 1, 1, 1]); }); } },
+    { key: "C", name: "Micro-rovers", theme: "Four-wheel survey rovers", palette: "sand-yellow bodies, black wheels, white dishes", r: 8, draw(c, t, r) {
+      TRIO.forEach(([x, y], k) => { const p = add(c, [x * r, y * r]), u = r * 0.6;
+        for (const wx of [-0.5, 0.5]) for (const s of [-1, 1]) wheel(add(p, [wx * u, s * u * 0.55]), u * 0.24, u * 0.13, t + k);
+        plate(p, rectPts(0.65, 0.38), [0.85, 0.72, 0.35, 1], 0, u, 0.6);
+        const d = fa(t * 1.5 + k); arc(add(p, [-u * 0.15, 0]), u * 0.3, Math.atan2(d[1], d[0]) - 1, Math.atan2(d[1], d[0]) + 1, [0.95, 0.95, 0.95, 1], 1.0); disc(add(p, [-u * 0.15, 0]), 0.5, [0.3, 0.3, 0.3, 1]); }); } },
+    { key: "D", name: "Hover-skid sleds", theme: "Skid sled bots", palette: "cobalt hulls, silver skids, cyan thrusters", r: 8, draw(c, t, r) {
+      TRIO.forEach(([x, y], k) => { const p = add(c, [x * r, y * r]), u = r * 0.6;
+        for (const s of [-1, 1]) bar(add(p, [-u * 0.7, s * u * 0.45]), add(p, [u * 0.85, s * u * 0.45]), 0.7, [0.8, 0.82, 0.86, 1]);
+        plate(p, [[0.9, 0], [0.2, 0.35], [-0.6, 0.35], [-0.6, -0.35], [0.2, -0.35]], [0.22, 0.32, 0.72, 1], 0, u, 0.6);
+        glowDot(add(p, [-u * 0.75, 0]), u * (0.2 + 0.05 * Math.sin(t * 25 + k)), [0.4, 0.95, 1, 1]); }); } },
+    { key: "E", name: "Piston pogo-bots", theme: "Piston-leg hoppers", palette: "brushed steel cylinders, lime status rings", r: 8, draw(c, t, r) {
+      TRIO.forEach(([x, y], k) => { const p = add(c, [x * r, y * r]), u = r * 0.5, h = Math.abs(Math.sin(t * 4 + k * 2.1)), s = 1 + 0.18 * h;
+        disc(add(p, [0, u * 0.9]), u * 0.35 * (1.2 - h * 0.5), [0, 0, 0, 0.35]);
+        disc(p, u * s + 0.8, OUTLINE); disc(p, u * s, [0.62, 0.64, 0.68, 1]); ring(p, u * s * 0.72, [0.45, 0.47, 0.5, 1], 0.8);
+        ring(p, u * s * 0.45, [0.55, 1, 0.3, 0.9], 1.0); disc(add(p, [-u * 0.35 * s, -u * 0.35 * s]), u * 0.15, [1, 1, 1, 0.5]); }); } },
   ],
   locust: [
-    { key: "A", name: "Solar moth drone", theme: "Photovoltaic flyer", palette: "deep blue solar cells, silver frames", r: 6, draw(c, t, r) {
-      const flap = 0.6 + 0.4 * Math.sin(t * 30), cell = [0.12, 0.2, 0.5, 1], frame = [0.8, 0.82, 0.86, 1];
-      for (const side of [-1, 1]) for (const [fx, sz] of [[0.15, 1.0], [-0.35, 0.8]]) { const w = [[fx, 0], [fx + 0.4 * sz, side * 1.3 * sz * flap], [fx - 0.3, side * 1.4 * sz * flap], [fx - 0.45, side * 0.3]]; fill(c, w, cell, 0, r); outline(c, w, frame, 0.6, 0, r);
-        const q = xform(c, w, 0, r); line(mul(add(q[0], q[3]), 0.5), mul(add(q[1], q[2]), 0.5), A(frame, 0.7), 0.4); }
-      plate(c, [[0.7, 0], [0.2, 0.18], [-0.6, 0.12], [-0.6, -0.12], [0.2, -0.18]], [0.72, 0.74, 0.78, 1], 0, r, 0.6);
-      glowDot(add(c, [r * 0.55, 0]), r * 0.1, [0.6, 0.85, 1, 1]); for (const side of [-1, 1]) line(add(c, [r * 0.6, 0]), add(c, [r * 1.1, side * r * 0.45]), frame, 0.5); } },
-    { key: "B", name: "Bat-wing UAV", theme: "Stealth flying wing", palette: "violet carbon skin, amber wingtip lights", r: 7, draw(c, t, r) {
-      const span = 0.85 + 0.15 * Math.sin(t * 8), skin = [0.42, 0.3, 0.52, 1];
-      const wing = [[0.9, 0], [-0.1, 1.5 * span], [-0.45, 1.35 * span], [-0.3, 1.0 * span], [-0.55, 0.75 * span], [-0.35, 0.4], [-0.6, 0], [-0.35, -0.4], [-0.55, -0.75 * span], [-0.3, -1.0 * span], [-0.45, -1.35 * span], [-0.1, -1.5 * span]];
-      plate(c, wing, skin, 0, r, 0.9); line(add(c, [r * 0.9, 0]), add(c, [-r * 0.5, 0]), [0.3, 0.2, 0.38, 1], 0.6);
-      for (const side of [-1, 1]) if (fmod(t * 1.3 + (side > 0 ? 0.5 : 0), 1) < 0.4) glowDot(add(c, [-r * 0.1, side * r * 1.5 * span]), r * 0.12, [1, 0.72, 0.25, 1]);
-      glowDot(add(c, [r * 0.35, 0]), r * 0.12, [1, 0.72, 0.25, 0.8]); } },
-    { key: "C", name: "Beacon mite", theme: "Micro-rotor drone", palette: "olive drab hull, gold blinking beacon", r: 6, draw(c, t, r) {
-      const on = fmod(t, 1.2) < 0.35 ? 1 : 0.15;
-      for (const side of [-1, 1]) { const rp = add(c, [r * 0.1, side * r * 0.65]); disc(rp, r * 0.42, [0.85, 0.9, 0.95, 0.15]); for (let b = 0; b < 2; b++) line(rp, add(rp, mul(fa(t * 40 * side + b * Math.PI), r * 0.4)), [0.9, 0.95, 1, 0.5], 0.7); orb(rp, r * 0.12, METAL_L); }
-      plate(c, rectPts(0.6, 0.35), [0.35, 0.38, 0.22, 1], 0, r, 0.8);
-      disc(sub(c, [r * 0.3, 0]), r * 0.6 * (1 + on), [1, 0.88, 0.35, 0.1 * on]); glowDot(sub(c, [r * 0.3, 0]), r * 0.24, [1, 0.88, 0.4, on]); } },
-    { key: "D", name: "Flechette dart", theme: "Ceramic kinetic dart", palette: "white ceramic, indigo tip, blue engine glow", r: 7, draw(c, t, r) {
-      for (const side of [-1, 1]) fill(c, [[-0.5, 0], [-1.05, side * 0.55], [-1.1, side * 0.15]], [0.86, 0.86, 0.9, 1], 0, r);
-      plate(c, [[1.4, 0], [0.4, 0.16], [-1.0, 0.13], [-1.0, -0.13], [0.4, -0.16]], [0.92, 0.92, 0.95, 1], 0, r, 0.6);
-      fill(c, [[1.4, 0], [0.95, 0.12], [0.95, -0.12]], [0.25, 0.25, 0.6, 1], 0, r);
-      glowDot(add(c, [-r * 1.1, 0]), r * (0.16 + 0.04 * Math.sin(t * 30)), [0.5, 0.75, 1, 1]); } },
-    { key: "E", name: "Segment snake drone", theme: "Linked vertebra drone", palette: "brushed teal plates, coral joint lights", r: 7, draw(c, t, r) {
-      const pts = []; for (let i = 0; i < 8; i++) pts.push(add(c, [-i * r * 0.4 + r * 0.6, Math.sin(t * 6 - i * 0.7) * r * 0.4 * (i / 7)]));
-      for (let i = pts.length - 1; i >= 1; i--) { const d = norm(sub(pts[i - 1], pts[i])), ang = Math.atan2(d[1], d[0]), w = 0.3 - 0.022 * i;
-        plate(pts[i], rectPts(0.55, w * 1.3), [0.25, 0.55, 0.55, 1], ang, r * 0.5, 0.6); glowDot(mul(add(pts[i], pts[i - 1]), 0.5), r * 0.06, [1, 0.5, 0.42, 0.9]); }
-      plate(pts[0], [[0.7, 0], [0.1, 0.45], [-0.5, 0.32], [-0.5, -0.32], [0.1, -0.45]], [0.3, 0.62, 0.62, 1], 0, r * 0.65, 0.7);
-      for (const side of [-1, 1]) glowDot(add(pts[0], [r * 0.18, side * r * 0.12]), r * 0.06, [1, 0.5, 0.42, 1]); } },
+    { key: "A", name: "Tricopter", theme: "Y-frame three-rotor drone", palette: "matte white frame, lime LEDs", r: 6, draw(c, t, r) {
+      const arms = [0, TAU / 3, -TAU / 3].map(a => add(c, mul(fa(a + Math.PI / 3 + Math.PI), r * 0.95)));
+      arms.forEach((p, i) => { bar(c, p, 1.0, [0.88, 0.88, 0.9, 1]); rotor(p, r * 0.55, t, 40 * (i % 2 ? 1 : -1)); });
+      plate(c, [[0.6, 0], [0.1, 0.35], [-0.4, 0.25], [-0.4, -0.25], [0.1, -0.35]], [0.92, 0.92, 0.94, 1], 0, r * 0.75, 0.6);
+      glowDot(add(c, [r * 0.4, 0]), r * 0.1, [0.6, 1, 0.35, 1]); } },
+    { key: "B", name: "Coaxial rotor pod", theme: "Stacked counter-rotating rotors", palette: "plum pod, white blades", r: 6, draw(c, t, r) {
+      disc(c, r * 1.1, [0.95, 0.95, 1, 0.1]); ring(c, r * 1.1, [0.95, 0.95, 1, 0.28], 0.6);
+      for (const d of [1, -1]) for (let b = 0; b < 2; b++) line(sub(c, mul(fa(t * 45 * d + b * Math.PI), r * 1.05)), add(c, mul(fa(t * 45 * d + b * Math.PI), r * 1.05)), [0.95, 0.95, 1, 0.55], 0.8);
+      orb(c, r * 0.45, [0.48, 0.22, 0.42, 1]); disc(add(c, [r * 0.3, 0]), r * 0.1, [0.15, 0.1, 0.12, 1]); glowDot(add(c, [r * 0.3, 0]), r * 0.06, [1, 0.95, 0.95, 1]); } },
+    { key: "C", name: "Pusher-prop micro-plane", theme: "Fixed-wing UAV", palette: "safety-yellow airframe, black prop", r: 7, draw(c, t, r) {
+      fill(c, [[0.25, 0], [0.05, 1.25], [-0.15, 1.25], [-0.1, 0], [-0.15, -1.25], [0.05, -1.25]], [0.95, 0.8, 0.15, 1], 0, r); outline(c, [[0.25, 0], [0.05, 1.25], [-0.15, 1.25], [-0.1, 0], [-0.15, -1.25], [0.05, -1.25]], OUTLINE, 0.6, 0, r);
+      for (const s of [-1, 1]) fill(c, [[-0.75, 0], [-0.95, s * 0.45], [-1.05, s * 0.45], [-0.95, 0]], [0.85, 0.7, 0.12, 1], 0, r);
+      plate(c, [[1.0, 0], [0.6, 0.15], [-0.95, 0.1], [-0.95, -0.1], [0.6, -0.15]], [0.98, 0.85, 0.2, 1], 0, r, 0.6);
+      const pp = add(c, [-r * 1.05, 0]); for (let b = 0; b < 2; b++) line(pp, add(pp, [0, Math.sin(t * 60 + b * Math.PI) * r * 0.5]), [0.1, 0.1, 0.1, 0.8], 0.9); disc(pp, 0.7, [0.1, 0.1, 0.1, 1]); } },
+    { key: "D", name: "Tilt-rotor", theme: "Wingtip tilt-rotor drone", palette: "sky-blue fuselage, white stripes", r: 7, draw(c, t, r) {
+      plate(c, rectPts(0.18, 0.95), [0.45, 0.7, 0.95, 1], 0, r, 0.6);
+      for (const s of [-1, 1]) { const p = add(c, [0, s * r * 1.0]); orb(p, r * 0.16, [0.85, 0.88, 0.92, 1]); rotor(p, r * 0.62, t, 38 * s, 3); }
+      plate(c, [[1.0, 0], [0.55, 0.2], [-0.9, 0.12], [-0.9, -0.12], [0.55, -0.2]], [0.5, 0.75, 0.98, 1], 0, r, 0.6); line(add(c, [r * 0.8, 0]), add(c, [-r * 0.8, 0]), [1, 1, 1, 0.8], 0.6);
+      for (const s of [-1, 1]) fill(c, [[-0.75, 0], [-0.95, s * 0.35], [-1.0, s * 0.3], [-0.9, 0]], [0.4, 0.62, 0.88, 1], 0, r); } },
+    { key: "E", name: "Rotor-ring", theme: "Ring airframe, eight micro-rotors", palette: "bronze ring, cyan rotor tips", r: 7, draw(c, t, r) {
+      ring(c, r * 0.8, OUTLINE, 3.2); ring(c, r * 0.8, [0.7, 0.5, 0.25, 1], 2.0);
+      for (let k = 0; k < 8; k++) { const p = add(c, mul(fa(TAU * k / 8), r * 0.8)); disc(p, r * 0.24, [0.5, 0.95, 1, 0.12]); line(sub(p, mul(fa(t * 50 + k), r * 0.22)), add(p, mul(fa(t * 50 + k), r * 0.22)), [0.5, 0.95, 1, 0.7], 0.6); }
+      for (const a of [Math.PI / 4, -Math.PI / 4]) line(add(c, mul(fa(a), r * 0.8)), add(c, mul(fa(a + Math.PI), r * 0.8)), [0.55, 0.4, 0.2, 1], 0.6);
+      orb(c, r * 0.18, [0.6, 0.45, 0.22, 1]); glowDot(c, r * 0.07, [0.5, 0.95, 1, 1]); } },
   ],
   drone: [
-    { key: "A", name: "Gyro-cage", theme: "Gimbal-ring drone", palette: "cobalt gimbal rings, chrome core with white light", r: 11, draw(c, t, r) {
-      for (let k = 0; k < 3; k++) { const ry = r * 0.88 * Math.abs(Math.cos(t * 1.4 + k * 1.05)) + 0.6; ovalLine(c, r * 0.88, ry, k * 1.05, OUTLINE, 3.0); ovalLine(c, r * 0.88, ry, k * 1.05, [0.25, 0.42, 0.88, 1], 1.8); }
-      for (const side of [-1, 1]) bar(add(c, [0, side * r * 0.38]), add(c, [0, side * r * 0.85]), 1.3, [0.6, 0.62, 0.68, 1]);
-      orb(c, r * 0.38, [0.72, 0.74, 0.8, 1]); arcSegments(c, r * 0.26, 4, 0.5, t, [0.3, 0.32, 0.38, 1], 0.9); glowDot(c, r * 0.1, [0.95, 0.97, 1, 1]); } },
-    { key: "B", name: "Roller bot", theme: "Segmented armour robot", palette: "slate-blue plates, rivets, cyan sensor", r: 11, draw(c, t, r) {
-      for (let i = 0; i < 4; i++) for (const side of [-1, 1]) { const x = (0.45 - i * 0.3) * r; disc(add(c, [x, side * r * 0.6]), r * 0.13, [0.15, 0.16, 0.18, 1]); ring(add(c, [x, side * r * 0.6]), r * 0.13, [0.4, 0.42, 0.46, 1], 0.6); }
-      shadedOval(c, r * 0.85, r * 0.55, 0, [0.45, 0.52, 0.62, 1]);
-      for (let i = 0; i < 5; i++) { const x = (0.5 - i * 0.24) * r; line(add(c, [x, -r * 0.5]), add(c, [x, r * 0.5]), [0.28, 0.32, 0.4, 1], 0.9); disc(add(c, [x, -r * 0.42]), 0.5, [0.75, 0.8, 0.88, 1]); disc(add(c, [x, r * 0.42]), 0.5, [0.75, 0.8, 0.88, 1]); }
-      plate(add(c, [r * 0.8, 0]), rectPts(0.18, 0.28), [0.32, 0.36, 0.44, 1], 0, r, 0.8); strip(add(c, [r * 0.9, -r * 0.18]), add(c, [r * 0.9, r * 0.18]), 0.9, [0.4, 0.95, 1, 1]); } },
-    { key: "C", name: "Unicycle bot", theme: "Balancing robot", palette: "cream body, mint stripe, black tyre", r: 10, draw(c, t, r) {
-      plate(c, rectPts(0.85, 0.16), [0.12, 0.12, 0.13, 1], 0, r, 0.9);
-      for (let k = 0; k < 4; k++) { const x = (fmod(t * 3 + k * 0.5, 2) - 1) * 0.8 * r; line(add(c, [x, -r * 0.14]), add(c, [x, r * 0.14]), [0.3, 0.3, 0.32, 1], 0.6); }
-      for (const side of [-1, 1]) limb([add(c, [0, side * r * 0.35]), add(c, [r * 0.1 * Math.sin(t * 4 + side), side * r * 0.75]), add(c, [r * 0.2 * Math.sin(t * 4 + side), side * r * 0.95])], 1.0, [0.85, 0.82, 0.72, 1]);
-      orb(c, r * 0.52, [0.92, 0.88, 0.76, 1]); arc(c, r * 0.52, -0.6, 0.6, [0.4, 0.85, 0.7, 1], 1.6); disc(add(c, [r * 0.3, 0]), r * 0.1, [0.1, 0.1, 0.1, 1]); glowDot(add(c, [r * 0.3, 0]), r * 0.05, [0.5, 1, 0.85, 1]); } },
-    { key: "D", name: "Hex-core construct", theme: "Bolted hex-block machine", palette: "obsidian hex blocks, steel brackets, emerald lights", r: 12, draw(c, t, r) {
-      const g = [0.35, 1, 0.55, 0.6 + 0.35 * Math.sin(t * 2)];
-      plate(c, ngon(6, 1.0, Math.PI / 6), [0.12, 0.12, 0.15, 1], 0, r, 1.2);
-      for (let k = 0; k < 6; k++) { const a = Math.PI / 6 + k * TAU / 6; plate(add(c, mul(fa(a), r * 0.82)), rectPts(0.2, 0.12), [0.55, 0.58, 0.62, 1], a, r, 0.7); }
-      plate(c, ngon(6, 1.0, 0), [0.18, 0.18, 0.22, 1], 0, r * 0.62, 1.0);
-      for (let k = 0; k < 3; k++) glowDot(add(c, mul(fa(t + k * TAU / 3), r * 0.45)), r * 0.06, g);
-      disc(add(c, [r * 0.2, 0]), r * 0.22, OUTLINE); disc(add(c, [r * 0.2, 0]), r * 0.17, [0.05, 0.1, 0.06, 1]); glowDot(add(c, [r * 0.2, 0]), r * 0.1, g); } },
-    { key: "E", name: "Saucer", theme: "Hover saucer", palette: "pearl hull, glass dome, chasing amber lights", r: 11, draw(c, t, r) {
-      disc(c, r * 0.95 + 1, OUTLINE); disc(c, r * 0.95, [0.82, 0.83, 0.88, 1]); ring(c, r * 0.72, [0.6, 0.62, 0.68, 1], 1.0);
-      for (let k = 0; k < 10; k++) { const on = Math.floor(t * 8) % 10 === k; const p = add(c, mul(fa(TAU * k / 10), r * 0.84)); if (on) glowDot(p, r * 0.09, [1, 0.75, 0.3, 1]); else disc(p, r * 0.06, [0.55, 0.45, 0.3, 1]); }
-      disc(c, r * 0.45, [0.4, 0.75, 0.95, 0.55]); ring(c, r * 0.45, [0.85, 0.95, 1, 0.8], 0.8); disc(add(c, [-r * 0.15, -r * 0.15]), r * 0.1, [1, 1, 1, 0.7]); } },
+    { key: "A", name: "Hovercraft", theme: "Air-cushion vehicle", palette: "mint deck, black rubber skirt, caged rear fan", r: 11, draw(c, t, r) {
+      const skirt = []; for (let i = 0; i < 20; i++) { const a = TAU * i / 20; skirt.push([Math.cos(a) * 0.95 + (Math.cos(a) > 0 ? 0.05 : 0), Math.sin(a) * 0.72 * (1 + 0.03 * Math.sin(t * 20 + i))]); }
+      fill(c, skirt, [0.08, 0.08, 0.09, 1], 0, r); outline(c, skirt, [0.25, 0.25, 0.27, 1], 0.8, 0, r);
+      plate(c, [[0.75, 0], [0.5, 0.48], [-0.55, 0.5], [-0.55, -0.5], [0.5, -0.48]], [0.45, 0.82, 0.68, 1], 0, r, 0.9);
+      const fp = add(c, [-r * 0.55, 0]); ring(fp, r * 0.42, METAL_L, 1.4); for (let b = 0; b < 4; b++) line(fp, add(fp, mul(fa(t * 30 + b * Math.PI / 2), r * 0.38)), [0.85, 0.88, 0.9, 0.6], 0.8);
+      for (const s of [-1, 1]) line(add(c, [-r * 0.98, s * r * 0.2]), add(c, [-r * 1.15, s * r * 0.2]), METAL_L, 1.2);
+      plate(add(c, [r * 0.3, 0]), rectPts(0.18, 0.24), [0.3, 0.55, 0.48, 1], 0, r, 0.6); glowDot(add(c, [r * 0.6, 0]), r * 0.07, [1, 1, 0.9, 1]); } },
+    { key: "B", name: "Chicken-walker", theme: "Reverse-knee biped mech", palette: "desert-tan armour, red sensor slit", r: 11, draw(c, t, r) {
+      for (const s of [-1, 1]) { const ph = t * 5 + (s > 0 ? Math.PI : 0), hip = add(c, [0, s * r * 0.4]); const knee = add(hip, [-r * 0.35 + Math.sin(ph) * r * 0.2, s * r * 0.3]); const foot = add(knee, [r * 0.55 + Math.sin(ph) * r * 0.35, s * r * 0.05]);
+        limb([hip, knee, foot], 2.2, [0.55, 0.5, 0.4, 1]); plate(foot, [[0.35, 0], [-0.1, 0.18], [-0.15, 0], [-0.1, -0.18]], METAL_L, 0, r * 0.6, 0.6); }
+      plate(c, [[0.75, 0], [0.35, 0.5], [-0.55, 0.45], [-0.55, -0.45], [0.35, -0.5]], [0.78, 0.68, 0.48, 1], 0, r * 0.85, 1.1);
+      strip(add(c, [r * 0.5, -r * 0.18]), add(c, [r * 0.5, r * 0.18]), 1.0, [1, 0.3, 0.25, 1]);
+      for (const s of [-1, 1]) bar(add(c, [r * 0.2, s * r * 0.48]), add(c, [r * 0.9, s * r * 0.48]), 1.2, METAL_L); } },
+    { key: "C", name: "Splayed rover", theme: "Rocker-bogie rover, wheels on long arms", palette: "white body, gold-foil core, black wheels", r: 12, draw(c, t, r) {
+      for (const [ax, ay] of [[0.85, 0.75], [0, 1.0], [-0.85, 0.75]]) for (const s of [-1, 1]) { const w = add(c, [ax * r, s * ay * r]); bar(c, w, 1.1, METAL_L); wheel(w, r * 0.2, r * 0.1, t + ax); }
+      disc(c, r * 0.48 + 0.8, OUTLINE); disc(c, r * 0.48, [0.92, 0.92, 0.94, 1]); disc(c, r * 0.3, [0.85, 0.68, 0.25, 1]);
+      for (let k = 0; k < 6; k++) line(c, add(c, mul(fa(k * TAU / 6), r * 0.3)), [0.6, 0.45, 0.15, 1], 0.5);
+      const mp = add(c, [r * 0.3, -r * 0.35]); bar(c, mp, 0.9, METAL_L); orb(mp, r * 0.1, [0.3, 0.3, 0.32, 1]); glowDot(add(mp, [r * 0.08, 0]), r * 0.04, [0.6, 0.9, 1, 1]); } },
+    { key: "D", name: "Road-train", theme: "Articulated cab with two linked cargo pods", palette: "rust-red cab, steel pods, black wheels", r: 12, draw(c, t, r) {
+      const cars = [[0.75, 0.32, [0.66, 0.2, 0.15, 1]], [0.05, 0.3, [0.58, 0.6, 0.64, 1]], [-0.68, 0.3, [0.52, 0.54, 0.58, 1]]];
+      cars.forEach(([x, w, col], i) => { const yo = i ? Math.sin(t * 3 - i) * r * 0.08 : 0, p = add(c, [x * r, yo]);
+        for (const s of [-1, 1]) wheel(add(p, [0, s * r * 0.36]), r * 0.13, r * 0.08, t + i);
+        plate(p, rectPts(w, 0.3), col, 0, r, 0.8); if (i) { line(add(p, [w * r, 0]), add(c, [(cars[i - 1][0] - cars[i - 1][1]) * r, i > 1 ? Math.sin(t * 3 - i + 1) * r * 0.08 : 0]), METAL_L, 1.2); for (let k = -1; k <= 1; k++) line(add(p, [k * r * 0.15, -r * 0.27]), add(p, [k * r * 0.15, r * 0.27]), [0.35, 0.36, 0.4, 1], 0.5); } });
+      fill(add(c, [r * 0.95, 0]), rectPts(0.07, 0.24), [0.5, 0.75, 0.9, 0.85], 0, r); for (const s of [-1, 1]) glowDot(add(c, [r * 1.06, s * r * 0.22]), r * 0.05, [1, 1, 0.85, 1]); } },
+    { key: "E", name: "Screw-drive crawler", theme: "Twin Archimedean screws", palette: "steel-blue body, brass screws", r: 11, draw(c, t, r) {
+      for (const s of [-1, 1]) { const p = add(c, [0, s * r * 0.58]); plate(p, rectPts(1.0, 0.22), [0.72, 0.58, 0.28, 1], 0, r, 0.8);
+        for (let k = 0; k < 7; k++) { const x = (fmod(t * 2 * s + k / 7, 1) * 2 - 1) * r * 0.95; line(add(p, [x - r * 0.08, -r * 0.2]), add(p, [x + r * 0.08, r * 0.2]), [0.45, 0.35, 0.15, 1], 0.9); }
+        fill(add(p, [r * 1.0, 0]), [[0.25, 0], [0, 0.2], [0, -0.2]], [0.8, 0.66, 0.32, 1], 0, r); }
+      plate(c, rectPts(0.75, 0.35), [0.3, 0.42, 0.6, 1], 0, r, 1.0); rivets(c, rectPts(0.75, 0.35), 0, r, 0.8, 0.6);
+      orb(add(c, [r * 0.35, 0]), r * 0.18, [0.35, 0.48, 0.66, 1]); glowDot(add(c, [r * 0.48, 0]), r * 0.06, [1, 0.9, 0.5, 1]); } },
   ],
   shrike: [
-    { key: "A", name: "Cryo dart drones", theme: "Frost-coated dart drones", palette: "steel dart, ice-crystal fins, blue cryo thruster", r: 7, unit(c, t, r, ph) {
-      for (const side of [-1, 1]) { const fin = [[-0.2, 0], [-0.75, side * 0.6], [-0.95, side * 0.5], [-0.7, 0]]; fill(c, fin, [0.78, 0.92, 1, 0.75], 0, r); outline(c, fin, [0.95, 1, 1, 1], 0.5, 0, r); }
-      plate(c, [[1.3, 0], [0.3, 0.2], [-0.9, 0.16], [-0.9, -0.16], [0.3, -0.2]], [0.55, 0.62, 0.7, 1], 0, r, 0.7);
-      line(add(c, [r * 1.25, 0]), add(c, [r * 0.3, 0]), [0.85, 0.97, 1, 0.8], 0.5);
-      glowDot(add(c, [-r * 1.05, 0]), r * (0.15 + 0.03 * Math.sin(t * 30 + ph)), [0.6, 0.9, 1, 1]); } },
-    { key: "B", name: "Wingbot jets", theme: "Micro-jet flock", palette: "gloss purple-black, iridescent edges, orange burners", r: 6, unit(c, t, r, ph) {
-      const sweep = 0.85 + 0.15 * Math.sin(t * 6 + ph), body = [0.18, 0.15, 0.22, 1];
-      const w = [[1.1, 0], [-0.3, 1.4 * sweep], [-0.55, 1.3 * sweep], [-0.35, 0.3], [-0.7, 0], [-0.35, -0.3], [-0.55, -1.3 * sweep], [-0.3, -1.4 * sweep]];
-      fill(c, w, body, 0, r); outline(c, w, iri(t + ph, 0.8), 0.6, 0, r);
-      for (const side of [-1, 1]) glowDot(add(c, [-r * 0.7, side * r * 0.18]), r * (0.12 + 0.04 * Math.sin(t * 25 + side)), [1, 0.6, 0.2, 1]); disc(add(c, [r * 0.5, 0]), r * 0.12, [0.6, 0.85, 1, 0.9]); } },
-    { key: "C", name: "Junk rotor drones", theme: "Salvage-built drones", palette: "rust-orange and steel scrap plates, one green eye", r: 7, unit(c, t, r, ph) {
-      const sc = []; for (let i = 0; i < 6; i++) { const q = TAU * i / 6 + hash(ph * 7 + i) * 0.5; sc.push([Math.cos(q) * (0.6 + 0.3 * hash(ph * 3 + i)), Math.sin(q) * (0.55 + 0.25 * hash(ph * 5 + i))]); }
-      const col = ph % 2.6 < 1.3 ? [0.72, 0.38, 0.18, 1] : [0.55, 0.58, 0.62, 1];
-      const rp = add(c, [-r * 0.1, -r * 0.75]); disc(rp, r * 0.55, [0.85, 0.85, 0.9, 0.12]); for (let b = 0; b < 2; b++) line(rp, add(rp, mul(fa(t * 35 + ph + b * Math.PI), r * 0.52)), [0.9, 0.9, 0.95, 0.5], 0.7); bar(c, rp, 0.9, METAL_L);
-      plate(c, sc, col, 0.3 * Math.sin(t * 2 + ph), r, 0.8); rivets(c, sc, 0, r, 0.6, 0.45);
-      glowDot(add(c, [r * 0.35, 0]), r * 0.12, [0.55, 1, 0.45, 1]); } },
-    { key: "D", name: "Jet-squid drones", theme: "Cable-tentacle drone", palette: "anodized coral pod, steel cables, blue thrust", r: 7, unit(c, t, r, ph) {
-      const pulse = 0.85 + 0.15 * Math.sin(t * 6 + ph);
-      for (let i = 0; i < 4; i++) { const pts = [], y0 = (i - 1.5) * 0.16 * r; for (let j = 0; j < 5; j++) pts.push(add(c, [-r * (0.4 + 0.3 * j), y0 * (1 + j * 0.35 * pulse) + Math.sin(t * 8 + i + j) * r * 0.05])); polyline(pts, [0.62, 0.66, 0.72, 1], 0.7); disc(pts[4], 0.6, [0.8, 0.85, 0.9, 1]); }
-      glowDot(add(c, [-r * 0.45, 0]), r * 0.18 * pulse, [0.45, 0.75, 1, 0.9]);
-      plate(c, [[1.1, 0], [0.7, 0.32], [-0.35, 0.3 * pulse], [-0.45, 0], [-0.35, -0.3 * pulse], [0.7, -0.32]], [0.95, 0.52, 0.48, 1], 0, r, 0.8);
-      for (const x of [0.5, 0.15]) line(add(c, [x * r, -r * 0.28]), add(c, [x * r, r * 0.28]), [0.6, 0.3, 0.28, 1], 0.6); glowDot(add(c, [r * 0.85, 0]), r * 0.08, [0.6, 0.85, 1, 1]); } },
-    { key: "E", name: "Plasma-jet pods", theme: "Rocket pods", palette: "white-gold pod, steel nozzle, pale blue plasma tail", r: 6, unit(c, t, r, ph) {
-      for (let i = 1; i <= 7; i++) { const p = sub(c, [r * 0.55 * i + r * 0.6, Math.sin(t * 5 + ph + i * 0.4) * r * 0.08 * i]); disc(p, r * (0.42 - i * 0.045), [0.6, 0.8, 1, 0.5 - i * 0.06]); }
-      plate(sub(c, [r * 0.55, 0]), rectPts(0.18, 0.34), [0.5, 0.52, 0.58, 1], 0, r, 0.6); glowDot(sub(c, [r * 0.75, 0]), r * 0.2, [0.7, 0.9, 1, 1]);
-      plate(c, [[0.9, 0], [0.5, 0.36], [-0.45, 0.36], [-0.45, -0.36], [0.5, -0.36]], [0.95, 0.85, 0.55, 1], 0, r, 0.7);
-      for (const side of [-1, 1]) fill(c, [[-0.1, side * 0.36], [-0.45, side * 0.7], [-0.45, side * 0.36]], [0.7, 0.6, 0.38, 1], 0, r); disc(add(c, [r * 0.45, 0]), r * 0.12, [0.25, 0.4, 0.7, 1]); } },
+    { key: "A", name: "Mini-helicopters", theme: "Single main rotor helicopter drones", palette: "crimson body, white main rotor", r: 7, unit(c, t, r, ph) {
+      bar(c, add(c, [-r * 1.25, 0]), 1.0, [0.6, 0.15, 0.15, 1]); rotor(add(c, [-r * 1.25, r * 0.15]), r * 0.25, t + ph, 70, 2);
+      plate(c, [[0.75, 0], [0.4, 0.35], [-0.4, 0.3], [-0.55, 0], [-0.4, -0.3], [0.4, -0.35]], [0.78, 0.16, 0.18, 1], 0, r, 0.7);
+      fill(add(c, [r * 0.42, 0]), rectPts(0.18, 0.22), [0.5, 0.75, 0.95, 0.8], 0, r);
+      rotor(c, r * 1.15, t + ph, 32, 2); } },
+    { key: "B", name: "Ring-wing drones", theme: "Annular-wing UAV", palette: "white ring wing, blue band, centre prop", r: 7, unit(c, t, r, ph) {
+      ovalLine(c, r * 0.35, r * 0.9, 0, OUTLINE, 3.6); ovalLine(c, r * 0.35, r * 0.9, 0, [0.95, 0.95, 0.97, 1], 2.4); ovalLine(c, r * 0.35, r * 0.9, 0, [0.25, 0.45, 0.9, 1], 0.7);
+      plate(c, [[1.0, 0], [0.4, 0.14], [-0.8, 0.1], [-0.8, -0.1], [0.4, -0.14]], [0.85, 0.87, 0.92, 1], 0, r, 0.6);
+      const pp = add(c, [r * 1.05, 0]); for (let b = 0; b < 2; b++) line(pp, add(pp, [0, Math.sin(t * 60 + ph + b * Math.PI) * r * 0.45]), [0.2, 0.2, 0.25, 0.8], 0.8); } },
+    { key: "C", name: "Blimp drones", theme: "Mini airships", palette: "pale-yellow envelope, red fins, side props", r: 8, unit(c, t, r, ph) {
+      for (const s of [-1, 1]) fill(c, [[-0.7, s * 0.25], [-1.05, s * 0.55], [-1.1, s * 0.2]], [0.85, 0.2, 0.18, 1], 0, r);
+      oval(c, r * 1.0, r * 0.42, 0, [0.95, 0.9, 0.6, 1], 1.0); for (const x of [-0.5, 0, 0.5]) line(add(c, [x * r, -r * 0.38]), add(c, [x * r, r * 0.38]), [0.8, 0.75, 0.45, 1], 0.5);
+      disc(add(c, [-r * 0.35, -r * 0.12]), r * 0.12, [1, 1, 1, 0.5]);
+      for (const s of [-1, 1]) { const pp = add(c, [-r * 0.1, s * r * 0.55]); disc(pp, r * 0.2, [0.9, 0.9, 0.95, 0.15]); line(sub(pp, [0, r * 0.18 * Math.sin(t * 50 + ph)]), add(pp, [0, r * 0.18 * Math.sin(t * 50 + ph)]), [0.2, 0.2, 0.22, 0.8], 0.7); } } },
+    { key: "D", name: "Tandem-rotor drones", theme: "Twin-rotor heavy-lift drones", palette: "olive-tan fuselage, white rotors", r: 7, unit(c, t, r, ph) {
+      plate(c, [[1.0, 0], [0.8, 0.28], [-0.8, 0.28], [-1.0, 0], [-0.8, -0.28], [0.8, -0.28]], [0.6, 0.58, 0.4, 1], 0, r, 0.7);
+      for (let i = -1; i <= 1; i++) disc(add(c, [i * r * 0.35, 0]), 0.6, [0.35, 0.34, 0.24, 1]);
+      rotor(add(c, [r * 0.85, 0]), r * 0.85, t + ph, 30, 3); rotor(add(c, [-r * 0.85, 0]), r * 0.85, t + ph, -30, 3); } },
+    { key: "E", name: "Paraglider drones", theme: "Powered parafoil drones", palette: "orange-and-white canopy cells, black motor pod", r: 8, unit(c, t, r, ph) {
+      const sway = 0.08 * Math.sin(t * 2 + ph);
+      for (const s of [-1, 1]) line(add(c, [-r * 0.6, 0]), add(c, [r * 0.15, s * r * 1.05]), [0.8, 0.8, 0.8, 0.6], 0.4);
+      for (let i = 0; i < 7; i++) { const y = (i - 3) * 0.3; plate(add(c, [r * 0.2, (y + sway) * r]), rectPts(0.28, 0.14), i % 2 ? [0.95, 0.95, 0.95, 1] : [1, 0.5, 0.15, 1], 0, r, 0.4); }
+      plate(add(c, [-r * 0.6, 0]), rectPts(0.28, 0.16), [0.1, 0.1, 0.12, 1], 0, r, 0.6);
+      const pp = add(c, [-r * 0.92, 0]); disc(pp, r * 0.32, [0.8, 0.8, 0.85, 0.12]); line(sub(pp, [0, r * 0.3 * Math.sin(t * 55 + ph)]), add(pp, [0, r * 0.3 * Math.sin(t * 55 + ph)]), [0.2, 0.2, 0.22, 0.8], 0.7); } },
   ],
 };
 
@@ -571,7 +582,7 @@ const BATCHES = [
 ];
 
 // ---- State (picks and notes, kept in this browser) -------------------------------------------------
-const STORE = "bl-enemy-redesign-batch1-v4";
+const STORE = "bl-enemy-redesign-batch1-v5";
 let state = {};
 try { state = JSON.parse(localStorage.getItem(STORE) || "{}") || {}; } catch (e) { state = {}; }
 function st(id) { if (!state[id]) state[id] = { look: null, anim: null, move: null, notes: { look: "", anim: "", move: "" } }; return state[id]; }

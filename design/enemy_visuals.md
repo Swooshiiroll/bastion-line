@@ -26,6 +26,10 @@ Today many enemies read as the same thing (owner-confirmed look-alike groups):
 - **Built tech only** (owner, round 4: "sci-fi and tech"): every option must read as a **built machine**
   (drone, robot, vehicle, pod) with a visible machine body. Energy effects such as plasma, holograms, shields
   and frost appear only as part of a machine, never as the whole enemy.
+- **Mechanized tech, nothing biological; flyers are drones** (owner, round 5). Every option is a machine with
+  working mechanical parts (tracks, wheels, jointed legs, skids, screws, pistons, rotors, props). Flying enemies
+  are unmanned aircraft. No biological shapes or names. **No concept reuse:** rounds 1 to 4 had re-skinned the
+  same ideas, so round 5 is all-new concepts and none of the earlier looks may return.
 - **Contrast with the towers on purpose.** The towers stay as they are.
 - **Movement can change (round 2):** both the **animation** (how the body moves: roll, hop, flutter...) and the
   **path pattern** on the lane (weave, bursts, surges, loops...), at the **same average speed**. **Flyers stay
@@ -56,14 +60,15 @@ violet, red, gold, magenta, mint and more), so "avoid tower colours" cannot work
 4. No grey-metal-with-neon look (that belongs to the towers).
 5. A new animation and path pattern at the same average speed; flyer or ground unchanged; radius change listed;
    gameplay note if the path pattern affects targeting.
-6. **Built-tech check:** the option is a built machine with a visible body (chassis, hull, rotor, nozzle), so the
-   "they're all machines" lore holds as it is.
+6. **Mechanized check:** a machine with working parts and no biological shape or name; flyers are unmanned
+   aircraft that don't copy another enemy's airframe (Strike Drone is a quad-rotor, Gunship has ducted fans).
+7. **New-concept check:** not a re-skin of any earlier option or today's look.
 
 ## Batches
 
 | # | Role | Enemies | State |
 |---|---|---|---|
-| 1 | Swarm | Nanite, Locust, Drone, Shrike | **Round 4 options ready for picks** (sci-fi, built tech only) |
+| 1 | Swarm | Nanite, Locust, Drone, Shrike | **Round 5 options ready for picks** (all-new mechanized concepts; flyers are drones) |
 | 2 | Rusher | Skitter, Needle, Strike Drone, Fury Drone | To do |
 | 3 | Tank | Siege Mech, Rampart, Gunship, Titan | To do |
 | 4 | Support | Repair Bot, Rally Beacon, Bulwark, Mender Hulk | To do |
@@ -75,70 +80,66 @@ violet, red, gold, magenta, mint and more), so "avoid tower colours" cannot work
 Each later batch is checked against the picks already made, so a new concept can't repeat an earlier enemy's
 silhouette, material or colours.
 
-## Batch 1: Swarm (decision records, round 3)
+## Batch 1: Swarm (decision records, round 5)
 
-Round 1's concepts were dropped; round 2's looks were re-themed as sci-fi in round 3, and in round 4 every look
-got a visible machine body (built tech only). Each keeps its round 2 silhouette and movement idea where possible. In the mockup,
-each enemy has a **Your combination** preview, then **Look**, **Animation** and **Movement** pickers (today plus A
-to E), each with a notes box. **Animations** are a locomotion layer that the page applies to whichever look is
-selected, so any look can be tried with any animation. **Movements** are path-pattern diagrams: dots at equal
-time steps bunch up where the enemy is slow and spread out where it's fast. Picks and notes stay in the
-browser and are copied back from the bottom of the batch.
+Rounds 1 to 4 were dropped: the owner found they re-skinned the same concepts. Round 5 is all-new
+**mechanized** concepts, and the flyers are **drones**. In the mockup, each enemy has a **Your combination**
+preview, then **Look**, **Animation** and **Movement** pickers (today plus A to E), each with a notes box.
+Animations are a layer that works on any look. Movements are path-pattern diagrams in which dots at equal time
+steps bunch up where the enemy is slow. Picks and notes stay in the browser and are copied back from the
+bottom of the batch.
 
-**Animation options** (the same set within ground and within flyers):
-- **Ground** (Nanite, Drone): A Roll, B Hop (squash on landing), C Ooze (pulsing stretch), D Wobble (sway), E
-  Jitter.
-- **Flyers** (Locust, Shrike): A Flutter (erratic), B Swoop (bank and altitude), C Hover-bob, D Glide-spin, E
-  Undulate.
+**Animation options:** ground (Nanite, Drone): A Roll, B Hop, C Ooze, D Wobble, E Jitter. Flyers (Locust,
+Shrike): A Flutter, B Swoop, C Hover-bob, D Glide-spin, E Undulate.
 
 ### Nanite (T1, ground; today: orbiting cloud, steady, radius 6)
 
-| Look | Theme | Palette | Radius | Lore impact |
-|---|---|---|---|---|
-| A Bubble-shield drones | Shield-emitter micro-drones | violet hex chassis, iridescent shield bubbles | 7 (+1) | none |
-| B Spike-mine swarm | Proximity mines | hazard-amber shells, steel spikes, white LEDs | 7 (+1) | none |
-| C Microturbines | Anodized rotors | anodized copper blades, cyan hub lights | 7 (+1) | none |
-| D Ferrofluid core-bots | Magnet-core nanobots | black ferrofluid, chrome cores, violet magnet rings | 7 (+1) | none |
-| E Glitch projector cubes | Hologram projector bots | gunmetal-magenta cubes, glitching holograms | 7 (+1) | none |
+| Look | Machine | Palette | Radius |
+|---|---|---|---|
+| A Micro-crawler tanks | three tiny tracked tanks with turrets | khaki hulls, dark tracks, white headlights | 8 (+2) |
+| B Six-leg micro-walkers | three hexapod micro-robots | teal-anodized bodies, white sensor eyes | 8 (+2) |
+| C Micro-rovers | three four-wheel survey rovers with dishes | sand-yellow bodies, black wheels, white dishes | 8 (+2) |
+| D Hover-skid sleds | three skid sleds with rear thrusters | cobalt hulls, silver skids, cyan thrusters | 8 (+2) |
+| E Piston pogo-bots | three hopping piston cylinders | brushed steel, lime status rings | 8 (+2) |
 
 **Movement:** A Weave, B Stop-go hops, C Rhythmic surges, D S-slither, E Micro-blinks.
 **Picks:** look _, animation _, movement _; notes _
 
-### Locust (T2, flyer; today: flapping wings, steady, radius 5)
+### Locust (T2, flyer drone; today: flapping wings, steady, radius 5)
 
-| Look | Theme | Palette | Radius | Lore impact |
-|---|---|---|---|---|
-| A Solar moth drone | Photovoltaic flyer | deep blue solar cells, silver frames | 6 (+1) | none |
-| B Bat-wing UAV | Stealth flying wing | violet carbon skin, amber wingtip lights | 7 (+2) | none |
-| C Beacon mite | Micro-rotor drone | olive drab hull, gold blinking beacon | 6 (+1) | none |
-| D Flechette dart | Ceramic kinetic dart | white ceramic, indigo tip, blue engine glow | 7 (+2) | none |
-| E Segment snake drone | Linked vertebra drone | brushed teal plates, coral joint lights | 7 (+2) | none |
+| Look | Drone | Palette | Radius |
+|---|---|---|---|
+| A Tricopter | Y-frame, three rotors | matte white frame, lime LEDs | 6 (+1) |
+| B Coaxial rotor pod | round pod, stacked counter-rotating rotors | plum pod, white blades | 6 (+1) |
+| C Pusher-prop micro-plane | fixed wing, V-tail, rear prop | safety-yellow airframe, black prop | 7 (+2) |
+| D Tilt-rotor | two wingtip rotors | sky-blue fuselage, white stripes | 7 (+2) |
+| E Rotor-ring | ring airframe, eight micro-rotors | bronze ring, cyan rotor tips | 7 (+2) |
 
 **Movement:** A Jittery zigzag, B Wide swoops, C Pause-and-dart, D Glide and sway, E Sine undulation.
 **Picks:** look _, animation _, movement _; notes _
 
 ### Drone (T3, ground; today: hover disc, steady, radius 11)
 
-| Look | Theme | Palette | Radius | Lore impact |
-|---|---|---|---|---|
-| A Gyro-cage | Gimbal-ring drone | cobalt gimbal rings, chrome core with white light | 11 | none |
-| B Roller bot | Segmented armour robot | slate-blue plates, rivets, cyan sensor | 11 | none |
-| C Unicycle bot | Balancing robot | cream body, mint stripe, black tyre | 10 (-1) | none |
-| D Hex-core construct | Bolted hex-block machine | obsidian hex blocks, steel brackets, emerald lights | 12 (+1) | none |
-| E Saucer | Hover saucer | pearl hull, glass dome, chasing amber lights | 11 | none |
+| Look | Machine | Palette | Radius |
+|---|---|---|---|
+| A Hovercraft | air-cushion skirt, caged rear fan | mint deck, black rubber skirt | 11 |
+| B Chicken-walker | reverse-knee biped mech | desert-tan armour, red sensor slit | 11 |
+| C Splayed rover | rocker-bogie, six wheels on long arms | white body, gold-foil core | 12 (+1) |
+| D Road-train | articulated cab with two linked cargo pods | rust-red cab, steel pods | 12 (+1) |
+| E Screw-drive crawler | twin Archimedean screws | steel-blue body, brass screws | 11 |
 
 **Movement:** A Bouncy surges, B Walk then roll, C Wobbling weave, D Heavy hops, E Precessing loops.
 **Picks:** look _, animation _, movement _; notes _
 
-### Shrike (T4, flyer, cluster of 5; today: flapping blade-wings, steady, radius 7)
+### Shrike (T4, flyer drones, cluster of 5; today: flapping blade-wings, steady, radius 7)
 
-| Look | Theme | Palette | Radius | Lore impact |
-|---|---|---|---|---|
-| A Cryo dart drones | Frost-coated dart drones | steel dart, ice-crystal fins, blue cryo thruster | 7 | none |
-| B Wingbot jets | Micro-jet flock | gloss purple-black, iridescent edges, orange burners | 6 (-1) | none |
-| C Junk rotor drones | Salvage-built drones | rust-orange and steel scrap, one green eye | 7 | none |
-| D Jet-squid drones | Cable-tentacle drone | anodized coral pod, steel cables, blue thrust | 7 | none |
-| E Plasma-jet pods | Rocket pods | white-gold pod, steel nozzle, pale blue plasma tail | 6 (-1) | none |
+| Look | Drone | Palette | Radius |
+|---|---|---|---|
+| A Mini-helicopters | main rotor and tail rotor | crimson body, white main rotor | 7 |
+| B Ring-wing drones | annular wing, nose prop | white ring wing, blue band | 7 |
+| C Blimp drones | mini airship with fins and side props | pale-yellow envelope, red fins | 8 (+1) |
+| D Tandem-rotor drones | front and rear rotors | olive-tan fuselage, white rotors | 7 |
+| E Paraglider drones | parafoil canopy over a motor pod | orange-and-white canopy, black pod | 8 (+1) |
 
 **Movement:** A Tight V that regroups, B Murmuration swirl, C Gust surges, D Pulse-jets, E Streaking surges.
 **Picks:** look _, animation _, movement _; notes _
@@ -154,7 +155,7 @@ runs. Picked **animations** go into the drawings; picked **path patterns** need 
 ## Open questions
 
 1. **Batch 1 picks:** look, animation and movement for each Swarm enemy, plus any notes (copied from the mockup).
-2. **Lore direction (decided, rounds 3 and 4):** sci-fi and built tech only, so the "machines" lore stays as it is.
+2. **Lore direction (decided, rounds 3 to 5):** mechanized tech, so the "machines" lore stays as it is.
 3. **Path patterns change gameplay.** Bursts and weaving make projectile towers miss more (they lead the
    target); hops and pauses change how long an enemy stays in range. The balance probe checks the picked
    patterns before they ship.
