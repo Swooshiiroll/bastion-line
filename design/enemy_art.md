@@ -392,7 +392,7 @@ white-gold with an amber barrier, Hydra Frame oxide red with sand Skitters, Masq
 Decoy Beacon a gunmetal fake hull on a tan frame with a magenta beacon, Mirage mirror chrome with cyan holograms.
 
 **Effects in the previews (looped):**
-- **Phantom:** active camouflage (a faint double image with a refraction band sweeping across); a blast flashes on it
+- **Phantom:** active camouflage (a faint double image; its sweeping scan line was removed at the owner's request); a blast flashes on it
   and reveals it for a moment, with the sensor reticle.
 - **Aegis Walker:** an amber hex barrier that cracks under fire, shatters, stays down, then rebuilds.
 - **Hydra Frame:** visibly carries three of the confirmed Skitters (Rusher A, Six-leg scuttler); destroyed, it bursts
@@ -439,8 +439,8 @@ Aegis Walker 13 and Hydra Frame 14 are today's.
   split, moving scanlines, flicker and glitch tears; and they break up into glitching slices as they fade. They stay
   in step, one in front and one behind.
   **Round 6 (owner: "Make the effect for mirage similar to the visual effect of the phantom"):** the hologram look
-  above is replaced. The copies now shimmer like the Phantom's active camouflage: a faint doubled image, a light band
-  sweeping across, and the Phantom's rapid flicker, shimmering in and out every 6 s (no beams, tint or scanlines).
+  above is replaced. The copies now shimmer like the Phantom's active camouflage: a faint doubled image and the
+  Phantom's rapid flicker (owner: the sweeping scan line removed from both), shimmering in and out every 6 s (no beams, tint or scanlines).
 
 **Earlier picks (owner, 2026-10-08, third pass):**
 - **Phantom:** E Camo glider / F Camo flicker / D Infiltration flight. **Confirmed.** Owner's note: "Give a more rapid
