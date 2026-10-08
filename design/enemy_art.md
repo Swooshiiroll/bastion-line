@@ -294,7 +294,9 @@ step up.
 - **Wraith:** look **open**, with the owner's notes "Build more ghost / phantasmic ideas" (round 6), "Build ghosty /
   phantasmal plane/jet-like" (round 7) and "Create more similar to S, T, and U, but add more of ghost-like affects to
   them" (round 8); animation **open** (left blank; the owner then asked for more animations), movement **B Unseen
-  line**. A real flyer since round 5.
+  line**. A real flyer since round 5. Round 9 notes: look "Enemy should have more of a ghosting effect when
+  undetected. Create more of a ghost tail and spectral appearance"; animation "Give some more options that better
+  fit the design goal for this enemy".
 
 **Round 2** (on the same page, with the picks above preselected):
 - **Blink Stalker animations:** D Head-snap, E Phase shimmer, F Slink. **Movements:** D Blink zigzag (blinks across
@@ -363,8 +365,19 @@ and "Offer more animations as well"):
 - **Wraith animations:** D Phase flicker (glides, then skips out of phase for a split second), E Banking glide (long,
   slow banks like a glider), F Spectral lunge (lunges forward stretching thin, then drifts back).
 
+**Round 9** (from the owner's notes):
+- **Stronger ghosting while undetected, on every Wraith look:** a long, soft spectral ghost tail streams and ripples
+  behind it with drifting wisps, two faint copies trail it, a cold glow pass flickers over it, and the body itself
+  is fainter. A faint tail stays when it is revealed.
+- **Y Comet wraith:** a small mechanical sensor head whose body streams back into a long, luminous ghost tail.
+- **Z Revenant glider:** a long-winged glider drone trailing three rippling spectral streamers, from each wingtip and
+  its tail.
+- **Wraith animations for its design goal (hard to see, hard to track):** G Fade pulse (fades almost out of sight
+  and back), H Dodge slip (sudden sideways dodges, smearing as it moves), I Vanishing sway (wide sways that fade at
+  each edge). The mockup's animation system gained a transparency channel for these.
+
 ## Open questions
 
-1. **Wraith look and animation:** look any of A to X (V to X are the ghostlier aircraft, S to U the first planes and
-   jets), animation any of A to F (D to F are new).
+1. **Wraith look and animation:** look any of A to Z (Y and Z are built around the ghost tail; every look now ghosts
+   harder while undetected), animation any of A to I (G to I fit its job of being hard to see and track).
 2. **Next role** after Evader (remaining: Special, Boss).
