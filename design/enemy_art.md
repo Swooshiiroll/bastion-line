@@ -585,7 +585,16 @@ Siege Mech's and Titan's).
 | Leviathan | Slow bank / Cruise bob / Launch lurch | Straight cruise / Wide patrol / Hover and launch |
 | Colossus | Earthquake stride / Grind / Shed shudder | Inexorable / Earthshaker / Titan sway |
 
-**Picks (owner, 2026-10-08):**
+**Picks (owner, 2026-10-08, second pass):**
+- **Confirmed:** Dreadnought **B Dread tank** / A Heavy stride / A Relentless advance (look changed from A); Overmind
+  A Brain hive (arachnid legs) / C Print shudder / A Slow creep; Colossus **A Colossus mech** / **E Lumbering sway** /
+  A Inexorable.
+- **Leviathan:** animation **I Dive and climb**, movement **A Straight cruise**; look open. Owner's note: "Make more of a
+  mothership/jet/plane design". Round 4 adds J Flying-wing mothership (a vast tailless wing with buried engines and a
+  sawtooth trailing edge), K Jet carrier (an airliner-like carrier with four jet pods and a high tail) and L Delta
+  mothership (a huge delta with a command ridge and a bank of exhausts).
+
+**Earlier picks (owner, 2026-10-08, first pass):**
 - **Dreadnought:** look **A Dread walker**, animation **A Heavy stride**, movement **A Relentless advance**. **Confirmed.**
 - **Overmind:** look **A Brain hive**, animation **C Print shudder**, movement **A Slow creep**. Owner's note: "Make the
   legs more arachnid like", so the Brain hive now walks on eight long, jointed spider legs.
@@ -615,7 +624,6 @@ Siege Mech's and Titan's).
 
 ## Open questions
 
-1. **Boss picks:** Overmind (A/C/A with arachnid legs) to confirm; Leviathan look, animation and movement; Colossus
-   look and animation (movement A unless changed).
+1. **Boss picks:** the Leviathan's look (A to L; J to L are the mothership, jet and plane designs).
 2. After Boss: the art direction is complete; implementation waits on the owner's confirmation of the full spec
    (`design/enemies.md` has its own open questions).

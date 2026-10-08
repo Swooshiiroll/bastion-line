@@ -89,11 +89,11 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 8 of 8: Boss (round 3)</div>
+    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 8 of 8: Boss (round 4)</div>
     <h1>Enemy art: Boss</h1>
     <p class="note">A fresh start from the names: the machine army's <b>Boss</b> role. For each enemy, pick its <b>look</b>, <b>animation</b> and
       <b>movement</b> separately from three proposals each (A to C), and add notes. Mix freely. The <b>Your combination</b> preview shows your
-      mix (option A until you pick). <b>Your picks are preselected</b>. From your notes: the Overmind's Brain hive now walks on <b>arachnid legs</b>; the Leviathan has six new looks and animations (D to I); the Colossus has six new looks and animations (D to I) and three new movements (D to F). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
+      mix (option A until you pick). <b>Your picks are preselected</b>: everything but the Leviathan's look is settled. From your note, the Leviathan has three mothership, jet and plane designs (J to L). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
       Spec: <code>design/enemy_art.md</code>.</p>
     <ul class="rules">
       <li><b>Machine army;</b> each <b>name inspires a trait</b> (not a literal picture).</li>
@@ -577,6 +577,26 @@ const LOOKS = {
       for (let i = 0; i < 7; i++) disc(add(c, [r * (0.65 - i * 0.2), 0]), 0.8, A(C.glow, blink(t, 1.5, i * 0.14)));
       for (const [x, y] of [[0.45, 0.18], [0.1, -0.2], [-0.25, 0.18]]) { const tu = add(c, [x * r, y * r]), a = 0.3 * Math.sin(t * 0.6 + x * 4); bar(tu, add(tu, mul(fa(a), r * 0.26)), 1.8, C.dark); disc(tu, r * 0.08, OUTLINE); disc(tu, r * 0.065, C.panel); }
       plate(add(c, [-r * 0.5, 0]), rrPts(0.12, 0.1, 0.03), C.panel, 0, r, 0.8); crest(add(c, [-r * 0.5, 0]), r * 0.06, t); leviFx(c, t, r, bays); } },
+    { key: "J", name: "Flying-wing mothership", theme: "A vast tailless flying wing with a sawtooth trailing edge, four engines buried in its back and launch bays along its belly; launches 6 Locusts every 6 s from the trailing edge (looped)", palette: "deep olive wing, glowing engines, yellow bay lights, gold crest", r: 30, shadowD: 1.0, draw(c, t, r) {
+      const C = COL.levi, half = [[0.7, 0], [-0.15, 1.0], [-0.35, 0.92], [-0.25, 0.65], [-0.45, 0.48], [-0.35, 0.25], [-0.5, 0]], wing = half.concat(half.slice(1, -1).reverse().map(([x, y]) => [x, -y]));
+      plate(c, wing, C.hull, 0, r, 1.2); outline(c, wing, A(C.panel, 0.7), 0.8, 0, r * 0.82);
+      for (const y of [-0.42, -0.15, 0.15, 0.42]) { const e = add(c, [-r * 0.1, y * r]); plate(e, rrPts(0.14, 0.06, 0.05), C.dark, 0, r, 0.6); glowDot(add(e, [-r * 0.15, 0]), r * 0.035 * (0.9 + 0.15 * Math.sin(t * 22 + y * 7)), [1, 0.85, 0.45, 1]); }
+      for (const sg of [-1, 1]) glowDot(add(c, [-r * 0.15, sg * r * 0.98]), r * 0.025, A([1, 0.3, 0.25, 1], blink(t, 1.2, sg > 0 ? 0.5 : 0)));
+      crest(add(c, [r * 0.3, 0]), r * 0.08, t); leviFx(c, t, r, [[-0.25, 0.65, -0.6, 0.8], [-0.25, -0.65, -0.6, -0.8], [-0.35, 0.25, -0.9, 0.4], [-0.35, -0.25, -0.9, -0.4], [-0.45, 0.48, -0.7, 0.7], [-0.45, -0.48, -0.7, -0.7]]); } },
+    { key: "K", name: "Jet carrier", theme: "A giant airliner-like jet carrier: a long fuselage, swept wings with four jet pods, a high tail, and launch doors along its spine; launches 6 Locusts every 6 s (looped)", palette: "deep olive fuselage and wings, glowing jet pods, yellow lights, gold crest", r: 30, shadowD: 1.0, draw(c, t, r) {
+      const C = COL.levi;
+      for (const sg of [-1, 1]) { const w = [[0.2, sg * 0.12], [-0.3, sg * 1.0], [-0.45, sg * 0.98], [-0.25, sg * 0.12]]; plate(c, w, C.hull, 0, r, 1.0);
+        for (const k of [0.4, 0.75]) { const e = add(c, [r * (0.02 - 0.42 * k), sg * r * (0.12 + 0.82 * k)]); plate(e, rrPts(0.12, 0.05, 0.04), C.dark, 0, r, 0.6); glowDot(add(e, [-r * 0.13, 0]), r * 0.03 * (0.9 + 0.15 * Math.sin(t * 22 + k * 9)), [1, 0.85, 0.45, 1]); }
+        fill(c, [[-0.8, sg * 0.06], [-1.0, sg * 0.35], [-1.06, sg * 0.32], [-0.98, sg * 0.06]], C.panel, 0, r); }
+      const fus = [[1.05, 0], [0.8, 0.13], [-0.95, 0.1], [-1.05, 0], [-0.95, -0.1], [0.8, -0.13]]; plate(c, fus, C.panel, 0, r, 1.0);
+      for (let i = 0; i < 6; i++) plate(add(c, [r * (0.55 - i * 0.22), 0]), rectPts(0.05, 0.05), C.dark, 0, r, 0.5); ellipse(add(c, [r * 0.85, 0]), r * 0.1, r * 0.05, INK);
+      crest(add(c, [r * 0.62, 0]), r * 0.05, t); leviFx(c, t, r, [0, 1, 2, 3, 4, 5].map(i => [0.55 - i * 0.22, 0, 0.3, i % 2 ? 1 : -1])); } },
+    { key: "L", name: "Delta mothership", theme: "A huge delta-wing mothership with a raised command ridge, a bank of engine exhausts at its stern and carrier bays along the trailing edge; launches 6 Locusts every 6 s (looped)", palette: "deep olive delta, glowing exhausts, yellow ridge lights, gold crest", r: 30, shadowD: 1.0, draw(c, t, r) {
+      const C = COL.levi, delta = [[1.05, 0], [-0.75, 0.95], [-0.6, 0], [-0.75, -0.95]];
+      plate(c, delta, C.hull, 0, r, 1.2); outline(c, [[0.8, 0], [-0.55, 0.7], [-0.45, 0], [-0.55, -0.7]], A(C.panel, 0.8), 0.8, 0, r);
+      plate(c, [[0.75, 0], [0.3, 0.1], [-0.55, 0.1], [-0.55, -0.1], [0.3, -0.1]], C.panel, 0, r, 0.8); for (let i = 0; i < 5; i++) disc(add(c, [r * (0.5 - i * 0.22), 0]), 0.8, A(C.glow, blink(t, 1.4, i * 0.2)));
+      for (const y of [-0.28, -0.1, 0.1, 0.28]) glowDot(add(c, [-r * 0.66, y * r]), r * 0.035 * (0.9 + 0.15 * Math.sin(t * 22 + y * 9)), [1, 0.85, 0.45, 1]);
+      crest(add(c, [r * 0.15, 0]), r * 0.07, t); leviFx(c, t, r, [[-0.62, 0.8, -0.5, 0.9], [-0.62, -0.8, -0.5, -0.9], [-0.6, 0.55, -0.8, 0.6], [-0.6, -0.55, -0.8, -0.6], [-0.58, 0.3, -1, 0.3], [-0.58, -0.3, -1, -0.3]]); } },
   ],
   colo: [
     { key: "A", name: "Colossus mech", theme: "A giant humanoid mech in layered hazard-yellow and bronze plates; at 66% and 33% health a layer of plates falls away and two Siege Mechs drop from its back bay (looped)", palette: "hazard yellow and bronze plates, dark frame, orange glow, gold crest", r: 32, draw(c, t, r) {
@@ -748,14 +768,13 @@ const BATCHES = [
       { id: "colo", name: "Colossus", tier: "Boss", air: false, anims: "colo", trait: "the last boss: sheds armour at 66% and 33% health, speeds up, and drops 2 Siege Mechs each time; can't be stunned", today: { r: 32 } },
     ] },
 ];
-const STORE_KEY = "bl-enemy-art-boss-v2";
-// Picks (owner, 2026-10-08): preselected. Dreadnought confirmed; Overmind A (arachnid legs), C, A; Leviathan open;
-// Colossus movement A (look and animation open).
+const STORE_KEY = "bl-enemy-art-boss-v3";
+// Picks (owner, 2026-10-08): preselected. Open: Leviathan look (J to L: mothership, jet and plane designs).
 const DEFAULTS = {
-  dread: { look: "A", anim: "A", move: "A" },
+  dread: { look: "B", anim: "A", move: "A" },
   over: { look: "A", anim: "C", move: "A" },
-  levi: { look: null, anim: null, move: null },
-  colo: { look: null, anim: null, move: "A" },
+  levi: { look: null, anim: "I", move: "A" },
+  colo: { look: "A", anim: "E", move: "A" },
 };
 
 // ---- State (picks and notes, kept in this browser) -------------------------------------------------
