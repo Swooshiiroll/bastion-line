@@ -585,10 +585,28 @@ Siege Mech's and Titan's).
 | Leviathan | Slow bank / Cruise bob / Launch lurch | Straight cruise / Wide patrol / Hover and launch |
 | Colossus | Earthquake stride / Grind / Shed shudder | Inexorable / Earthshaker / Titan sway |
 
-**Picks:** Dreadnought _, Overmind _, Leviathan _, Colossus _ (look, animation, movement; notes)
+**Picks (owner, 2026-10-08):**
+- **Dreadnought:** look **A Dread walker**, animation **A Heavy stride**, movement **A Relentless advance**. **Confirmed.**
+- **Overmind:** look **A Brain hive**, animation **C Print shudder**, movement **A Slow creep**. Owner's note: "Make the
+  legs more arachnid like", so the Brain hive now walks on eight long, jointed spider legs.
+- **Leviathan:** open. Owner: more look ideas, more animation ideas.
+- **Colossus:** look and animation open, movement A Inexorable picked. Owner: more ideas for look, animation and
+  movement.
+
+**Round 2** (on the same page, with the picks above preselected):
+- **Leviathan looks:** D Hive dreadship (a hexagonal hive-ship whose honeycomb cells launch the Locusts, rotor arrays
+  around it), E Sky serpent (a long segmented sky-ship rippling like a serpent, fin rotors along its body), F Rotor
+  fortress (a round flying fortress ringed by ten rotors, launch rails to the rim). **Animations:** D Undulate, E Rotor
+  thrum, F Majestic glide.
+- **Colossus looks:** D Titan-king (the Titan's colossus grown into a crowned giant, armour skirts like a cape),
+  E Walking foundry (four legs, a molten furnace core, a crane on its back; the Siege Mechs climb down), F Centaur
+  tank-mech (a tracked hull carrying a giant mech torso with a cannon arm and a crusher claw). **Animations:**
+  D Furnace pulse, E Lumbering sway, F Ground slam. **Movements:** D Shed surge (slow at first, faster after each shed,
+  as in the game), E Wide stomp, F Halt and drop.
 
 ## Open questions
 
-1. **Boss picks**, and any change to the Boss family traits.
+1. **Boss picks:** Overmind (A/C/A with arachnid legs) to confirm; Leviathan look, animation and movement; Colossus
+   look and animation (movement A unless changed).
 2. After Boss: the art direction is complete; implementation waits on the owner's confirmation of the full spec
    (`design/enemies.md` has its own open questions).
