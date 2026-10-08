@@ -428,7 +428,18 @@ Aegis Walker 13 and Hydra Frame 14 are today's.
 | Decoy Beacon | Wobble / Trundle / Sway | Lumbering line / Slow sway / Stop and go |
 | Mirage | Shimmer / Glide / Flicker step | Glide / Weave / Side-step |
 
-**Picks (owner, 2026-10-08, third pass):**
+**Picks (owner, 2026-10-08, fourth pass):**
+- **Confirmed:** Phantom E Camo glider / F Camo flicker / D Infiltration flight; Aegis Walker E Siege hexapod /
+  B Brace for hits / A Steady advance; Hydra Frame C Hive pod / A Clatter / A Trundle; **Masquerade J Unfolding
+  stilt-walker / D Nervous jitter / I Scramble and dash** (the Drone's look, March and Steady march until uncovered);
+  Decoy Beacon B Hologram heavy / F Track rumble / A Lumbering line.
+- **Mirage:** look **O Shard halo**, movement **C Side-step**; animation open. Owner's note: "The projection/hologram
+  effect could be improved". Round 5 reworks the projection on every Mirage look: light beams run from the Mirage to
+  each copy; each copy materialises behind a sweeping scan line; the copies are tinted cyan with a slight colour
+  split, moving scanlines, flicker and glitch tears; and they break up into glitching slices as they fade. They stay
+  in step, one in front and one behind.
+
+**Earlier picks (owner, 2026-10-08, third pass):**
 - **Phantom:** E Camo glider / F Camo flicker / D Infiltration flight. **Confirmed.** Owner's note: "Give a more rapid
   flickering", so Camo flicker now flickers much faster.
 - **Aegis Walker** (E/B/A), **Hydra Frame** (C/A/A) and **Decoy Beacon** (B/F/A): **confirmed** as before.
@@ -501,7 +512,7 @@ Aegis Walker 13 and Hydra Frame 14 are today's.
 
 ## Open questions
 
-1. **Special picks:** Masquerade movement (A, or the flee movements G to I), Mirage look, animation and movement; any
-   change to the proposed sizes (Masquerade 12, Decoy Beacon 15, Mirage 12 px).
+1. **Special picks:** the Mirage's animation (A to F), now that the hologram effect is reworked; any change to the
+   proposed sizes (Masquerade 12, Decoy Beacon 15, Mirage 12 px).
 2. **Masquerade speed while disguised** (60, the Drone is 55): see `design/enemies.md`, Still open item 6.
 3. **Next role** after Special (remaining: Boss).
