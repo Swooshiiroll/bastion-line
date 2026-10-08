@@ -428,7 +428,21 @@ Aegis Walker 13 and Hydra Frame 14 are today's.
 | Decoy Beacon | Wobble / Trundle / Sway | Lumbering line / Slow sway / Stop and go |
 | Mirage | Shimmer / Glide / Flicker step | Glide / Weave / Side-step |
 
-**Picks (owner, 2026-10-08):**
+**Picks (owner, 2026-10-08, second pass):**
+- **Phantom:** look **E Camo glider**, animation **F Camo flicker**, movement **D Infiltration flight**. **Confirmed.** A flyer.
+- **Aegis Walker:** look **E Siege hexapod**, animation **B Brace for hits**, movement **A Steady advance**. **Confirmed.**
+- **Hydra Frame:** look C Hive pod, animation A Clatter, movement A Trundle. **Confirmed.**
+- **Masquerade:** look open; animation **D Nervous jitter** and movement **A Mimic trickle**, used once it is
+  uncovered. Owner: "when disguised, it looks and animates just like the Drone, but keep the purple eye. Make some more
+  designs"; animation and movement "should move just like the drone until uncovered". So on every look it now wears
+  the confirmed Drone (Sentry walker) with a purple eye, marches like it and moves like it (Steady march) until
+  uncovered (recorded in `design/new_enemies.md` and `design/enemies.md`). Looks A to I are renamed for their true
+  forms (the shared disguise replaced their old ones); round 3 adds J to L.
+- **Decoy Beacon:** look **B Hologram heavy**, animation **F Track rumble**, movement **A Lumbering line**. **Confirmed.**
+- **Mirage:** open. Owner: "Make the projections in front and in back. Make more design ideas". The copies now appear
+  one in front and one behind on every look; round 3 adds J to L.
+
+**Earlier picks (owner, 2026-10-08, first pass):**
 - **Phantom:** open. Owner: "Phantom should be a flyer", so it is now a **flyer** (gameplay change, recorded in
   `design/enemies.md` and `design/enemy_roster.md`). Round 2 offers three flying looks plus flyer animations and
   movements.
@@ -460,8 +474,16 @@ Aegis Walker 13 and Hydra Frame 14 are today's.
   back), H Crystal spider (a crystal abdomen that splits light), I Strobe sentinel (a spinning strobe; copies appear
   in its flashes). **Movements:** D Split weave, E Jink, F Stop and project.
 
+**Round 3** (on the same page, with the picks above preselected):
+- **Masquerade true forms** (all disguised as the Drone with a purple eye): J Unfolding stilt-walker (its short legs
+  unfold into tall stilts), K Uncoiling serpent (a segmented serpent uncoils out of the shell), L Shield knight (a
+  heavy knight-mech behind a tall shield, with a long blade).
+- **Mirage looks** (copies in front and behind): J Hologram drum (a spinning lens ring on short legs), K Two-way
+  lantern (one lens forward, one back), L Bow-and-stern projector (a dish at each end).
+
 ## Open questions
 
-1. **Special picks:** Phantom, Aegis Walker, Masquerade and Mirage (look, animation, movement), Decoy Beacon animation;
-   any change to the proposed sizes (Masquerade 12, Decoy Beacon 15, Mirage 12 px).
-2. **Next role** after Special (remaining: Boss).
+1. **Special picks:** Masquerade look (A to L), Mirage look, animation and movement; any change to the proposed sizes
+   (Masquerade 12, Decoy Beacon 15, Mirage 12 px).
+2. **Masquerade speed while disguised** (60, the Drone is 55): see `design/enemies.md`, Still open item 6.
+3. **Next role** after Special (remaining: Boss).

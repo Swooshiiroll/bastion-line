@@ -259,15 +259,17 @@ trick is revealed.
 
 | HP | Speed | Armor | Fly | True Str | Shown as | Leak | Bounty |
 |---|---|---|---|---|---|---|---|
-| 320 | 60 | 3 | No | 345.60 | A T1 (Nanite-class, about 13) | 2 | 14 |
+| 320 | 60 | 3 | No | 345.60 | The Drone (Swarm T3, 21.18) | 2 | 14 |
 
-- **Behaviour:** it shows a **low, T1-class strength** and a T1-class role, so Strongest and the
-  Support priority ignore it. It keeps the disguise **until it drops below 50% health**, then shows its
+- **Behaviour (disguise updated by the owner, 2026-10-08):** it is **disguised as the Drone**: it looks, animates
+  (March) and moves (Steady march) exactly like the confirmed Drone and shows the **Drone's strength (21.18) and
+  role (Swarm T3)**, so Strongest and the Support priority ignore it. Its tell is a **purple eye** where the Drone's
+  is white. It keeps the disguise **until it drops below 50% health**, then shows its
   real rank and role (a short flash and a label change).
 - **Job:** soak real damage while looking harmless; it punishes defences that rely on Strongest.
 - **Counters:** First, Last or Closest targeting, area damage that happens to hit it, and the Sensor Array
   upgrade. Once below half health it is an ordinary Special.
-- **Codex text (draft):** "Looks like a basic unit and ranks like one, so Strongest targeting ignores it.
+- **Codex text (draft):** "Looks, moves and ranks like a Drone, so Strongest targeting ignores it; watch for the purple eye.
   Below half health it drops the disguise. Use First or Closest targeting, or a Sensor Array upgrade, to see
   it."
 - **Edge cases:** the 50% threshold is a one-way change (healing above it doesn't re-disguise it). Rally

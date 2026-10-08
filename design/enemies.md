@@ -241,7 +241,7 @@ Role, tier, job and counter are a draft. **Stats for every current and proposed 
 | Capacitor (was Surge Core) | Disruptor T4 | Higher tier | Charge and release: 2 s telegraph, then a radius-160 EMP for 3 s every 8 s | Stun or silence during the charge, burst |
 | Shifter (was Slipstream) | Evader T3 | Higher tier | Blinks 60 px every 5 s; the landing point boosts nearby enemies +20% speed for 2 s | Slow or stun to reset its charge |
 | Wraith | Evader T4 (parked) | Higher tier | Flies; cloaked and immune to physical damage; only energy hurts it | Energy towers that hit air, Arc Coils, burn, Sensor Array |
-| Masquerade (was Mimic) | Special | Targeting trick | Shows a T1-class rank and role until it drops below 50% health | First/Last/Closest targeting, area damage, the Sensor upgrade |
+| Masquerade (was Mimic) | Special | Targeting trick | Disguised as the Drone (look, movement, rank and role) until it drops below 50% health | First/Last/Closest targeting, area damage, the Sensor upgrade |
 | Decoy Beacon | Special | Targeting trick | Shows a false rank above every non-boss (below bosses) that never drops; armored, does nothing else | Switch tower mode, kill it, the Sensor upgrade |
 | Mirage (was Echo) | Special | Targeting trick | Every 6 s projects 2 translucent 1-HP holograms that walk to the core and vanish; they never leak | Area and chain, the Sensor upgrade |
 
@@ -347,6 +347,9 @@ they exist.
 - **Phantom flies (owner, 2026-10-08):** the Phantom (today a ground unit) becomes a flyer. It keeps its built-in cloak
   (a Sensor Array field or a blast reveals it), so only towers that hit air can target it once revealed. Balance check
   in Still open, item 5.
+- **Masquerade disguise (owner, 2026-10-08):** disguised as the **Drone**: it looks, animates and moves exactly like
+  the confirmed Drone and shows the Drone's rank (21.18) and role (Swarm T3) until it drops below half health. Tell:
+  a purple eye. Speed: Still open, item 6.
 
 ### Still open
 
@@ -367,6 +370,8 @@ they exist.
    enough? Checked with the balance probe when the Wraith is built (it is parked until the damage-type PR).
 5. **Phantom as a flyer: counters.** Cloaked and now flying: are there enough towers that hit air and can reveal or
    splash it early in the game? Checked with the balance probe when the change is built.
+6. **Masquerade speed while disguised.** It moves at 60 and the Drone at 55, so a sharp-eyed player could spot it
+   by speed. Match the Drone (55) until uncovered, or keep 60 as a second tell?
 
 ### Deferred
 
