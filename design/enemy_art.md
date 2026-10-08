@@ -207,8 +207,8 @@ Blackout Rig storm grey with ultraviolet, Capacitor ceramic white with copper co
 motes in; Blackout Rig throws a darkening ultraviolet pulse every 4 s; Capacitor charges for 2 s (a dashed warning
 ring closes in, arcs build), then fires a huge EMP, every 8 s. Rings are drawn small to fit the cards.
 
-**Sizes:** Siphon, Blackout Rig and Capacitor are new and have no size yet. The mockup draws them at 13, 15 and
-16 px (Jammer is 12 today) so the tiers step up; the owner can change these.
+**Sizes (owner, 2026-10-08):** Siphon 13 px, Blackout Rig 15 px, Capacitor 16 px (Jammer is 12 today), so the tiers
+step up.
 
 | Enemy (trait from the name) | Look A | Look B | Look C |
 |---|---|---|---|
@@ -224,9 +224,24 @@ ring closes in, arcs build), then fires a huge EMP, every 8 s. Rings are drawn s
 | Blackout Rig | Heavy rumble / Pulse recoil / Sway | Steady haul / Heavy sway / Stop and pulse |
 | Capacitor | Charge shake / Hum / Stride | Inexorable advance / Charge halt / Slow sway |
 
-**Picks:** Jammer _, Siphon _, Blackout Rig _, Capacitor _ (look, animation, movement; notes)
+**Picks (owner, 2026-10-08):**
+- **Jammer:** look A Antenna walker, animation A Static jitter, movement A Steady advance.
+- **Siphon:** look and animation **open** (none of A to C was picked; round 2 offers three new of each),
+  movement C Drain and lurch.
+- **Blackout Rig:** look and animation **open** (round 2 offers three new of each), movement C Stop and pulse.
+- **Capacitor:** look C Ring-reactor tank, animation B Hum, movement A Inexorable advance.
+
+**Round 2** (on the same page, with the picks above preselected):
+- **Siphon looks:** **D Probe stilt-walker** (four tall stilt legs, a long drain probe forward, an energy bulb
+  behind), **E Battery hauler** (four wheels; battery cells fill one by one, fed by a front collector),
+  **F Magnet crawler** (treads; a horseshoe electromagnet whose field drags energy in).
+- **Siphon animations:** D Pump, E Rocking roll, F Stutter step.
+- **Blackout Rig looks:** **D Derrick walker** (a braced lattice rig on four legs, the core at its heart),
+  **E Smoke-stack crawler** (treads; stacks belch black smoke that spreads behind it), **F Eclipse orb walker**
+  (a black orb on three legs; its ultraviolet corona flares on each pulse).
+- **Blackout Rig animations:** D Lumber, E Rock, F Power sag.
 
 ## Open questions
 
-1. **Disruptor picks**, and any change to the Disruptor family traits or the proposed sizes.
+1. **Siphon and Blackout Rig:** look and animation for each, from D to F on the Disruptor page.
 2. **Next role** after Disruptor (remaining: Evader, Special, Boss).

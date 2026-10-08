@@ -89,11 +89,11 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 5 of 8: Disruptor</div>
+    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 5 of 8: Disruptor (round 2)</div>
     <h1>Enemy art: Disruptor</h1>
     <p class="note">A fresh start from the names: the machine army's <b>Disruptor</b> role. For each enemy, pick its <b>look</b>, <b>animation</b> and
       <b>movement</b> separately from three proposals each (A to C), and add notes. Mix freely. The <b>Your combination</b> preview shows your
-      mix (option A until you pick). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
+      mix. <b>Your picks are preselected</b>; Siphon and Blackout Rig each have three new looks and three new animations (D to F) to choose from. Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
       Spec: <code>design/enemy_art.md</code>.</p>
     <ul class="rules">
       <li><b>Machine army;</b> each <b>name inspires a trait</b> (not a literal picture).</li>
@@ -436,6 +436,8 @@ function capWarn(c, r, t, col) { const k = capCharge(t); if (k <= 0) return; con
 function drain(c, r, t, col) { arcSegments(c, r * 2.3, 12, 0.2, -t * 0.6, A(col, 0.22), 0.8);
   for (let i = 0; i < 8; i++) { const u = fmod(t * 0.6 + i / 8, 1), a = i * TAU / 8 + u * 1.3, p = add(c, mul(fa(a), r * (2.3 - 1.7 * u))); disc(p, 0.9 + 0.5 * u, A(col, 0.75 * Math.sin(u * Math.PI))); } }
 
+function arcPts2(cx, r0, r1, a0, a1, n = 6) { const o = []; for (let i = 0; i <= n; i++) { const a = a0 + (a1 - a0) * i / n; o.push([cx + Math.cos(a) * r1, Math.sin(a) * r1]); } for (let i = n; i >= 0; i--) { const a = a0 + (a1 - a0) * i / n; o.push([cx + Math.cos(a) * r0, Math.sin(a) * r0]); } return o; }
+
 const COL = {
   jammer:   { hull: [0.15, 0.16, 0.18, 1], panel: [0.3, 0.32, 0.36, 1], dark: [0.07, 0.07, 0.08, 1], glow: [0.35, 0.65, 1, 1] },           // matte black, electric-blue static
   siphon:   { hull: [0.22, 0.18, 0.44, 1], panel: [0.36, 0.31, 0.62, 1], dark: [0.11, 0.09, 0.23, 1], glow: [0.72, 1, 0.25, 1] },          // deep indigo, acid-lime drain
@@ -488,6 +490,29 @@ const LOOKS = {
       const tk = add(c, [-r * 0.15, 0]), lvl = 0.5 + 0.35 * Math.sin(t * 0.9); plate(tk, rectPts(0.36, 0.26), [0.75, 0.85, 0.95, 0.25], 0, r, 0.8);
       fill(tk, [[-0.34, -0.24], [-0.34 + 0.68 * lvl, -0.24 + 0.04 * Math.sin(t * 5)], [-0.34 + 0.68 * lvl, 0.24 + 0.04 * Math.sin(t * 5 + 1)], [-0.34, 0.24]], A(C.glow, 0.7), 0, r);
       for (let i = 0; i < 3; i++) disc(add(tk, [r * (-0.25 + 0.6 * lvl * hash(i + Math.floor(t * 3))), r * (hash(i * 5 + Math.floor(t * 3)) - 0.5) * 0.4]), 0.6, [1, 1, 1, 0.7]); } },
+    { key: "D", name: "Probe stilt-walker", theme: "A small body on four tall stilt legs, with a long drain probe forward and an energy bulb behind; drain aura around it", palette: "indigo body, steel probe, acid-lime bulb", r: 13, draw(c, t, r) {
+      const C = COL.siphon; drain(c, r, t, C.glow);
+      for (const [x, y, ph] of [[1, 1, 0], [1, -1, Math.PI], [-1, 1, Math.PI], [-1, -1, 0]]) { const sw = Math.sin(t * 4 + ph), hip = add(c, [x * r * 0.2, y * r * 0.2]), knee = add(c, [x * r * 0.55 + sw * r * 0.08, y * r * 0.72]), ft = add(c, [x * r * 0.8 + sw * r * 0.16, y * r * 0.8]); limb([hip, knee, ft], 1.1, C.panel); disc(ft, 1.2, OUTLINE); }
+      const tip = add(c, [r * 1.25, 0]); bar(add(c, [r * 0.25, 0]), tip, 1.2, METAL_L); glowDot(tip, 1.0, C.glow);
+      for (let i = 0; i < 2; i++) { const u = fmod(t * 1.4 + i / 2, 1); disc(add(c, [r * (1.2 - 0.95 * u), 0]), 0.9, A(C.glow, 0.9)); }
+      plate(c, ngon(8, 0.38, Math.PI / 8), C.hull, 0, r, 0.9); slitD(add(c, [r * 0.3, 0]), r * 0.12, C.glow);
+      const bl = add(c, [-r * 0.5, 0]), lv = 0.55 + 0.3 * Math.sin(t * 1.4); disc(bl, r * 0.3, OUTLINE); disc(bl, r * 0.27, [0.75, 0.85, 0.95, 0.25]); disc(bl, r * 0.27 * lv, A(C.glow, 0.75)); disc(add(bl, [-r * 0.08, -r * 0.08]), 0.8, [1, 1, 1, 0.8]); } },
+    { key: "E", name: "Battery hauler", theme: "A four-wheeled carrier whose battery cells fill one by one with drained energy, fed by a front collector; drain aura around it", palette: "indigo chassis, glass cells, acid-lime charge", r: 13, draw(c, t, r) {
+      const C = COL.siphon; drain(c, r, t, C.glow);
+      for (const [x, y] of [[0.5, 0.5], [0.5, -0.5], [-0.5, 0.5], [-0.5, -0.5]]) wheel(add(c, [x * r, y * r]), r * 0.18, t);
+      plate(c, rectPts(0.75, 0.42), C.hull, 0, r, 0.9);
+      const pr = []; for (const y of [-0.22, 0, 0.22]) { const a = add(c, [r * 0.72, y * r]), b = add(c, [r * 1.05, y * r * 1.3]); line(a, b, INK, 1.6); line(a, b, METAL_L, 0.8); disc(b, 0.9, C.glow); pr.push(b); }
+      if (fmod(t, 0.7) < 0.3) bolt(pr[0], pr[2], C.glow, Math.floor(t * 15));
+      const fillAll = fmod(t * 0.35, 1) * 3;
+      for (let i = 0; i < 3; i++) { const p = add(c, [r * (0.35 - i * 0.38), 0]), lv = Math.max(0, Math.min(1, fillAll - i)); plate(p, rectPts(0.14, 0.32), [0.75, 0.85, 0.95, 0.25], 0, r, 0.7); if (lv > 0) fill(add(p, [0, r * 0.3 * (1 - lv)]), rectPts(0.11, 0.29 * lv), A(C.glow, 0.8), 0, r); plate(add(p, [r * 0.2, 0]), rectPts(0.03, 0.08), METAL_L, 0, r, 0.4); } } },
+    { key: "F", name: "Magnet crawler", theme: "A tracked crawler pushing a big horseshoe electromagnet whose field drags energy in; drain aura around it", palette: "indigo hull, steel magnet, acid-lime field", r: 13, draw(c, t, r) {
+      const C = COL.siphon; drain(c, r, t, C.glow);
+      for (const s of [-1, 1]) tread(add(c, [-r * 0.15, s * r * 0.52]), r * 0.62, r * 0.17, t);
+      plate(c, [[0.25, -0.4], [0.25, 0.4], [-0.68, 0.4], [-0.78, 0], [-0.68, -0.4]], C.hull, 0, r, 0.9); slitD(add(c, [r * 0.1, 0]), r * 0.14, C.glow);
+      plate(c, arcPts2(0.3, 0.32, 0.55, -1.45, 1.45), [0.6, 0.62, 0.68, 1], 0, r, 1.0);
+      for (const sg of [-1, 1]) plate(add(c, [r * 0.38, sg * r * 0.44]), rectPts(0.1, 0.09), C.glow, 0, r, 0.6);
+      for (let k = 0; k < 3; k++) { const pts = [], bulge = 0.55 + 0.25 * k; for (let i = 0; i <= 10; i++) { const u = i / 10; pts.push(add(c, [r * (0.48 + bulge * Math.sin(u * Math.PI)), r * (-0.44 + 0.88 * u)])); } polyline(pts, A(C.glow, 0.45 - 0.1 * k + 0.15 * Math.sin(t * 6 + k)), 0.7); }
+      for (let i = 0; i < 3; i++) { const u = fmod(t * 0.9 + i / 3, 1); disc(add(c, [r * (1.4 - 0.9 * u), r * 0.3 * Math.sin(i * 2.1) * (1 - u)]), 0.9, A(C.glow, 0.9 * Math.sin(u * Math.PI))); } } },
   ],
   blackout: [
     { key: "A", name: "Generator truck", theme: "A six-wheeled heavy truck hauling a finned EMP drum; blackout pulse every 4 s", palette: "storm grey truck, dark drum, ultraviolet core", r: 15, draw(c, t, r) {
@@ -510,6 +535,27 @@ const LOOKS = {
       plate(c, [[0.72, -0.3], [0.72, 0.3], [0.5, 0.45], [-0.6, 0.45], [-0.72, 0], [-0.6, -0.45], [0.5, -0.45]], C.hull, 0, r, 1.0); slitD(add(c, [r * 0.6, 0]), r * 0.16, C.glow);
       const a = t * 0.8; for (const s of [0, Math.PI]) { const dish = []; for (let i = 0; i <= 10; i++) dish.push(mul(fa(s - 1.0 + 2.0 * i / 10), 0.55)); for (let i = 10; i >= 0; i--) dish.push(mul(fa(s - 1.0 + 2.0 * i / 10), 0.4)); plate(c, dish, C.panel, a, r, 0.8); }
       disc(c, r * 0.22, OUTLINE); disc(c, r * 0.19, C.dark); glowDot(c, r * 0.1 * (1 + 0.6 * Math.max(0, 1 - blackU(t))), C.glow); } },
+    { key: "D", name: "Derrick walker", theme: "A walking rig: a braced lattice derrick on four legs, with the blackout core at its heart; blackout pulse every 4 s", palette: "storm grey lattice, warning lights, ultraviolet core", r: 15, draw(c, t, r) {
+      const C = COL.blackout; emp(c, r * 0.6, r * 2.3, blackU(t), C.glow, t, 0.25);
+      for (const [x, y, ph] of [[1, 1, 0], [1, -1, Math.PI], [-1, 1, Math.PI], [-1, -1, 0]]) { const sw = Math.sin(t * 3.5 + ph), hip = add(c, [x * r * 0.42, y * r * 0.42]), ft = add(c, [x * r * 0.62 + sw * r * 0.14, y * r * 0.82]); limb([hip, ft], 2.2, C.dark); foot(ft, C.panel, r, 0.1, 0.08); }
+      const o = rectPts(0.52, 0.52), inn = rectPts(0.28, 0.28); plate(c, o, A(C.dark, 0.85), 0, r, 1.0);
+      const O = xform(c, o, 0, r), I = xform(c, inn, 0, r); for (let i = 0; i < 4; i++) { line(O[i], I[i], C.hull, 1.4); line(O[i], O[(i + 1) % 4], C.hull, 1.6); line(O[i], I[(i + 1) % 4], A(C.hull, 0.6), 0.8); }
+      outline(c, inn, C.panel, 1.2, 0, r); for (const p of O) glowDot(p, 0.9, A([1, 0.3, 0.25, 1], blink(t, 1.2)));
+      glowDot(c, r * 0.12 * (1 + 0.6 * Math.max(0, 1 - blackU(t))), C.glow); slitD(add(c, [r * 0.52, 0]), r * 0.2, C.glow); } },
+    { key: "E", name: "Smoke-stack crawler", theme: "A heavy tracked crawler whose stacks belch black blackout smoke that spreads behind it; blackout pulse every 4 s", palette: "storm grey hull, black smoke, ultraviolet slits", r: 15, draw(c, t, r) {
+      const C = COL.blackout; emp(c, r * 0.6, r * 2.3, blackU(t), C.glow, t, 0.25);
+      for (const s of [-1, 1]) tread(add(c, [0, s * r * 0.58]), r * 0.8, r * 0.19, t);
+      plate(c, [[0.8, -0.3], [0.8, 0.3], [0.6, 0.45], [-0.75, 0.45], [-0.75, -0.45], [0.6, -0.45]], C.hull, 0, r, 1.0); slitD(add(c, [r * 0.68, 0]), r * 0.18, C.glow);
+      for (const y of [-0.22, 0.22]) slitD(add(c, [r * 0.25, y * r]), r * 0.06, A(C.glow, 0.7));
+      const stacks = [add(c, [-r * 0.3, -r * 0.2]), add(c, [-r * 0.3, r * 0.2])];
+      stacks.forEach((p, j) => { for (let i = 0; i < 4; i++) { const u = fmod(t * 0.5 + i / 4 + j * 0.12, 1); disc(add(p, [-u * r * 1.4, (j ? 1 : -1) * u * r * 0.5]), r * (0.12 + 0.3 * u), [0.04, 0.04, 0.06, 0.55 * (1 - u)]); } });
+      for (const p of stacks) { disc(p, r * 0.13, OUTLINE); disc(p, r * 0.11, C.dark); disc(p, r * 0.06, [0.02, 0.02, 0.03, 1]); } } },
+    { key: "F", name: "Eclipse orb walker", theme: "A black orb on three legs, ringed by an ultraviolet corona that flares on each blackout pulse; every 4 s", palette: "black orb, storm grey legs, ultraviolet corona", r: 15, draw(c, t, r) {
+      const C = COL.blackout, fl = Math.max(0, 1 - blackU(t)); emp(c, r * 0.6, r * 2.3, blackU(t), C.glow, t, 0.25);
+      for (let i = 0; i < 3; i++) { const a = i * TAU / 3 + Math.PI / 3, sw = Math.sin(t * 3.5 + i * 2.1), hip = add(c, mul(fa(a), r * 0.4)), knee = add(c, mul(fa(a + 0.15 * sw), r * 0.75)), ft = add(c, mul(fa(a + 0.25 * sw), r * 0.88)); limb([hip, knee, ft], 2.0, C.hull); disc(ft, 1.6, OUTLINE); disc(ft, 1.2, C.panel); }
+      ring(c, r * 0.62, A(C.glow, 0.15 + 0.3 * fl), 3 + 4 * fl); ring(c, r * 0.58, A(C.glow, 0.6 + 0.4 * fl), 1.2 + fl);
+      disc(c, r * 0.55, OUTLINE); disc(c, r * 0.53, [0.03, 0.03, 0.05, 1]); arc(c, r * 0.5, -2.4, -0.9, A([0.85, 0.75, 1, 1], 0.7), 1.0);
+      slitD(add(c, [r * 0.42, 0]), r * 0.12, C.glow); } },
   ],
   capacitor: [
     { key: "A", name: "Tesla walker", theme: "A biped carrying a tall copper Tesla coil; it charges for 2 s (warning ring closes in), then fires a huge EMP; every 8 s", palette: "ceramic white, copper coil, white-hot arcs", r: 16, draw(c, t, r) {
@@ -551,11 +597,17 @@ const ANIMS = {
     { key: "A", name: "Gulp", desc: "Swells as it draws energy in, again and again.", fx: (t) => { const p = Math.pow(Math.max(0, Math.sin(t * 2.2)), 2); return { sx: 1 + 0.06 * p, sy: 1 + 0.06 * p }; } },
     { key: "B", name: "Sway", desc: "A slow, heavy sway.", fx: (t) => ({ rot: 0.1 * Math.sin(t * 1.2) }) },
     { key: "C", name: "Shiver", desc: "A constant fine shiver, like a humming coil.", fx: (t) => ({ dx: 0.015 * Math.sin(t * 47), dy: 0.015 * Math.sin(t * 43) }) },
+    { key: "D", name: "Pump", desc: "Squeezes and stretches like a pump drawing energy in.", fx: (t) => { const p = Math.sin(t * 3.2); return { sx: 1 + 0.08 * p, sy: 1 - 0.06 * p }; } },
+    { key: "E", name: "Rocking roll", desc: "Rolls gently side to side as it goes.", fx: (t) => ({ sy: 1 - 0.1 * Math.abs(Math.sin(t * 1.8)), dy: 0.05 * Math.sin(t * 1.8) }) },
+    { key: "F", name: "Stutter step", desc: "Moves in small, jerky stutters.", fx: (t) => { const k = Math.floor(t * 4), u = fmod(t * 4, 1); return { dx: 0.08 * (u < 0.3 ? u / 0.3 : 1) - 0.04, rot: (hash(k) - 0.5) * 0.08 }; } },
   ],
   blackout: [
     { key: "A", name: "Heavy rumble", desc: "A low, heavy engine rumble.", fx: (t) => ({ dy: 0.02 * Math.sin(t * 29), dx: 0.015 * Math.sin(t * 23) }) },
     { key: "B", name: "Pulse recoil", desc: "Jolts on each blackout pulse.", fx: (t) => { const u = fmod(t, 4), j = u < 0.3 ? 1 - u / 0.3 : 0; return { sx: 1 + 0.08 * j, sy: 1 + 0.08 * j, dx: -0.06 * j }; } },
     { key: "C", name: "Sway", desc: "A slow side-to-side sway.", fx: (t) => ({ rot: 0.07 * Math.sin(t * 1.3) }) },
+    { key: "D", name: "Lumber", desc: "Heavy weight shifts from side to side.", fx: (t) => ({ rot: 0.05 * Math.sin(t * 2.4), dy: 0.05 * Math.sin(t * 2.4) }) },
+    { key: "E", name: "Rock", desc: "Rocks slowly forward and back on its frame.", fx: (t) => ({ dx: 0.06 * Math.sin(t * 1.5), sx: 1 + 0.03 * Math.sin(t * 1.5) }) },
+    { key: "F", name: "Power sag", desc: "Sags as it powers down for each pulse, then straightens up.", fx: (t) => { const u = fmod(t, 4), d = u > 3.4 ? (u - 3.4) / 0.6 : u < 0.4 ? 1 - u / 0.4 : 0; return { sx: 1 - 0.06 * d, sy: 1 - 0.06 * d, dy: 0.04 * d }; } },
   ],
   capacitor: [
     { key: "A", name: "Charge shake", desc: "Calm, then shakes harder and harder through the 2 s charge.", fx: (t) => { const k = capCharge(t); return { dx: 0.06 * k * Math.sin(t * 50), dy: 0.06 * k * Math.sin(t * 43), sx: 1 + 0.04 * k, sy: 1 + 0.04 * k }; } },
@@ -600,12 +652,19 @@ const BATCHES = [
       ultraviolet, Capacitor ceramic white with copper coils and white-hot arcs.`,
     enemies: [
       { id: "jammer", name: "Jammer", tier: "T1", air: false, anims: "jammer", trait: "jams towers (EMP 95 px, offline 2 s, every 5 s)", today: { r: 12 } },
-      { id: "siphon", name: "Siphon", tier: "T2", air: false, anims: "siphon", trait: "drains towers (aura 100 px: 20% slower fire, 15% less range); new, size proposed", today: { r: 13 } },
-      { id: "blackout", name: "Blackout Rig", tier: "T3", air: false, anims: "blackout", trait: "a big Jammer (EMP 130 px, offline 2.5 s, every 4 s); new, size proposed", today: { r: 15 } },
-      { id: "capacitor", name: "Capacitor", tier: "T4", air: false, anims: "capacitor", trait: "charges 2 s, then EMP 160 px, offline 3 s, every 8 s; new, size proposed", today: { r: 16 } },
+      { id: "siphon", name: "Siphon", tier: "T2", air: false, anims: "siphon", trait: "drains towers (aura 100 px: 20% slower fire, 15% less range); new, 13 px", today: { r: 13 } },
+      { id: "blackout", name: "Blackout Rig", tier: "T3", air: false, anims: "blackout", trait: "a big Jammer (EMP 130 px, offline 2.5 s, every 4 s); new, 15 px", today: { r: 15 } },
+      { id: "capacitor", name: "Capacitor", tier: "T4", air: false, anims: "capacitor", trait: "charges 2 s, then EMP 160 px, offline 3 s, every 8 s; new, 16 px", today: { r: 16 } },
     ] },
 ];
-const STORE_KEY = "bl-enemy-art-disruptor-v1";
+const STORE_KEY = "bl-enemy-art-disruptor-v2";
+// Picks (owner, 2026-10-08): preselected. Siphon and Blackout Rig: look and animation open (round 2 offers D to F).
+const DEFAULTS = {
+  jammer: { look: "A", anim: "A", move: "A" },
+  siphon: { look: null, anim: null, move: "C" },
+  blackout: { look: null, anim: null, move: "C" },
+  capacitor: { look: "C", anim: "B", move: "A" },
+};
 
 // ---- State (picks and notes, kept in this browser) -------------------------------------------------
 const STORE = STORE_KEY;
