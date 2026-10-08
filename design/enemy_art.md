@@ -285,18 +285,21 @@ step up.
 | Shifter | Glide / Flicker / Stride | Phase steps / Side-shift / Smooth glide |
 | Wraith | Drift / Waver / Lurk | Ghost drift / Unseen line / Haunting weave |
 
-**Picks (owner, 2026-10-08, fifth pass):**
-- **Blink Stalker:** look **L Mag-lev orb** (from round 5), animation **E Phase shimmer**, movement **F Feint and
-  blink**. **Confirmed.** It stays a ground unit.
-- **Burrower:** look **G Drill pod**, animation C Rumble, movement C Dive and surface. **Confirmed.** It vanishes
-  underground, and a doppler ping shows it inside a Sensor Array's range; the gameplay side is in `design/enemies.md`.
-- **Shifter:** look B Prism hover, animation A Glide, movement B Side-shift. **Confirmed.**
-- **Wraith:** look **open**, with the owner's notes "Build more ghost / phantasmic ideas" (round 6), "Build ghosty /
-  phantasmal plane/jet-like" (round 7) and "Create more similar to S, T, and U, but add more of ghost-like affects to
-  them" (round 8); animation **open** (left blank; the owner then asked for more animations), movement **B Unseen
-  line**. A real flyer since round 5. Round 9 notes: look "Enemy should have more of a ghosting effect when
-  undetected. Create more of a ghost tail and spectral appearance"; animation "Give some more options that better
-  fit the design goal for this enemy".
+**Evader confirmed (owner, 2026-10-08).** Final picks:
+- **Blink Stalker:** look **L Mag-lev orb** (round 5), animation **E Phase shimmer** (round 2), movement **F Feint and
+  blink** (round 2). A ground unit.
+- **Burrower:** look **G Drill pod** (round 3, from the owner's drilling-pod note), animation C Rumble, movement C Dive
+  and surface. It **vanishes underground** (no mound, no shadow), and a doppler ping shows it inside a Sensor Array's
+  range; specific towers or upgrades can hit it there (which ones is open in `design/enemies.md`).
+- **Shifter:** look **B Prism hover**, animation A Glide, movement B Side-shift.
+- **Wraith:** look **W Spectre wing** (round 8), animation A Drift, movement **C Haunting weave**. It is a **flyer**
+  (owner, round 5) and ghosts while undetected: a soft spectral tail, faint trailing copies and a cold glow (round 9).
+
+The owner's notes over the rounds, in order: Burrower "should disappear when underground" and "something like a
+drilling pod"; Blink Stalker "a drone or a droid", then "more hover / flying options"; Wraith "ghostly but
+mechanical/robotic", "hovering or flying", "more ghost / phantasmic ideas", "plane/jet-like", "more ghost-like
+effects", then "more of a ghosting effect when undetected", "a ghost tail", and "the flat front of the tail is too
+noticeable".
 
 **Round 2** (on the same page, with the picks above preselected):
 - **Blink Stalker animations:** D Head-snap, E Phase shimmer, F Slink. **Movements:** D Blink zigzag (blinks across
@@ -379,6 +382,4 @@ and "Offer more animations as well"):
 
 ## Open questions
 
-1. **Wraith look and animation:** look any of A to Z (Y and Z are built around the ghost tail; every look now ghosts
-   harder while undetected), animation any of A to I (G to I fit its job of being hard to see and track).
-2. **Next role** after Evader (remaining: Special, Boss).
+1. **Next role** after Evader (remaining: Special, Boss).

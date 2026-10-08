@@ -89,11 +89,11 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 6 of 8: Evader (round 9)</div>
+    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 6 of 8: Evader (confirmed)</div>
     <h1>Enemy art: Evader</h1>
     <p class="note">A fresh start from the names: the machine army's <b>Evader</b> role. For each enemy, pick its <b>look</b>, <b>animation</b> and
       <b>movement</b> separately from three proposals each (A to C), and add notes. Mix freely. The <b>Your combination</b> preview shows your
-      mix (option A until you pick). <b>Your picks are preselected</b>; Blink Stalker (L Mag-lev orb), Burrower (G Drill pod) and Shifter (B Prism hover) are settled. From your notes, every Wraith look now <b>ghosts harder while undetected</b> (a long spectral tail, drifting wisps, a cold glow, a fainter shimmering body); two new looks are built around the tail (Y, Z) and three new animations fit its job of being hard to see and track (G to I). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
+      mix (option A until you pick). <b>Evader is confirmed:</b> your final picks are preselected (Blink Stalker L/E/F, Burrower G/C/C, Shifter B/A/B, Wraith W/A/C). The Burrower vanishes underground (a doppler ping shows it in Sensor Array range); the Wraith flies and ghosts while undetected. Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
       Spec: <code>design/enemy_art.md</code>.</p>
     <ul class="rules">
       <li><b>Machine army;</b> each <b>name inspires a trait</b> (not a literal picture).</li>
@@ -916,14 +916,13 @@ const BATCHES = [
       { id: "wraith", name: "Wraith", tier: "T4", air: true, anims: "wraith", trait: "flies, cloaked, and only energy hurts it; new, 13 px", today: { r: 13 } },
     ] },
 ];
-const STORE_KEY = "bl-enemy-art-evader-v9";
-// Picks (owner, 2026-10-08): preselected. Open: Wraith look (V to X: S to U with stronger ghost effects, from the
-// owner's note), Y and Z (ghost tails) and Wraith animation (G to I fit its design goal: hard to see, hard to track).
+const STORE_KEY = "bl-enemy-art-evader-v10";
+// Final picks (owner, 2026-10-08): preselected.
 const DEFAULTS = {
   stalker: { look: "L", anim: "E", move: "F" },
   burrower: { look: "G", anim: "C", move: "C" },
   shifter: { look: "B", anim: "A", move: "B" },
-  wraith: { look: null, anim: null, move: "B" },
+  wraith: { look: "W", anim: "A", move: "C" },
 };
 
 // ---- State (picks and notes, kept in this browser) -------------------------------------------------
