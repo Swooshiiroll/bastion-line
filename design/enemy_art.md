@@ -69,9 +69,48 @@ gritty frame; T2 Locust adds panels; T3 Drone is bigger and armoured; T4 Shrike 
 | Drone | March / Brace-and-step / Hover-drift | Advance and halt / Steady march / Flanking weave |
 | Shrike | Stoop / Bank / Glide | Dive strikes / Formation sweep / Hunting circles |
 
-**Picks:** Nanite _, Locust _, Drone _, Shrike _ (look, animation, movement; notes)
+**Picks (owner, 2026-10-07):**
+- **Nanite:** look A Assembly hub, animation B Dock-and-split, movement B Split and merge.
+- **Locust:** look **open** (none of A to C was picked; round 2 offers three new looks), animation A Hover-chew,
+  movement C Cloud drift.
+- **Drone:** look B Sentry walker, animation A March, movement B Steady march.
+- **Shrike:** look C Lancer squadron, animation C Glide, movement **D Smooth and straight**: constant speed, nearly
+  straight, only a slight drift. This was added from the owner's note "smooth flight path".
+
+**Locust look, round 2** (on the same page, with the picks above preselected):
+- **D Maw drone:** a round drone with a wide grinding maw ring and two small rotors.
+- **E Saw-rim disc:** a disc drone whose rim is a spinning saw blade.
+- **F Cutter-wing flyer:** wings with serrated cutter edges and a tail rotor.
+
+## Rusher (role 2)
+
+Mockup: `design/enemy_art_rusher.html`, the same format as Swarm (three proposals each for look, animation and
+movement, notes boxes, no "today").
+
+**Rusher family (draft):** built for speed: a low-slung chassis with a forward-raked prow, swept fins, exposed
+thrusters, and a speed-stripe ID along the spine. **Tiers evolve:** T1 Skitter is a bare, light frame; T2 Needle
+adds sharp panels; T3 Strike Drone is armoured; T4 Fury Drone is sleek, with glowing seams. **Colour per enemy:**
+Skitter sand with a red stripe, Needle ice white with cobalt, Strike Drone matte teal with orange, Fury Drone
+black-red with magenta glow.
+
+| Enemy (trait from the name) | Look A | Look B | Look C |
+|---|---|---|---|
+| Skitter, T1 ground (darting, skittish) | Six-leg scuttler | Spring-foot hopper | Caster-wheel skimmer |
+| Needle, T2 ground, pair (thin, piercing, fast) | Needle racer | Lance sprinter | Rail-skimmer |
+| Strike Drone, T3 flyer (a fast attack drone) | Delta strike jet | Twin-rotor attack drone | Winged missile drone |
+| Fury Drone, T4 ground (berserk rage) | Berserker biped | Blade-prow ram buggy | One-wheel spike bike |
+
+| Enemy | Animation A / B / C | Movement A / B / C |
+|---|---|---|
+| Skitter | Twitch / Hop / Scuttle sway | Darting zigzag / Hop bursts / Skittish swerves |
+| Needle | Lean-in / Stride / Hover-hum | Tandem line / Twin weave / Parallel lances (pair) |
+| Strike Drone | Bank / Strafe-roll / Nose-dip | Strafing runs / Dive passes / Straight intercept |
+| Fury Drone | Lunge / Rage-shake / Lean | Charge bursts / Berserk swerve / Relentless chase |
+
+**Picks:** Skitter _, Needle _, Strike Drone _, Fury Drone _ (look, animation, movement; notes)
 
 ## Open questions
 
-1. **Swarm picks**, and any change to the Swarm family traits.
-2. **Next role** after Swarm.
+1. **Locust look:** pick one of D to F on the Swarm page.
+2. **Rusher picks**, and any change to the Rusher family traits.
+3. **Next role** after Rusher.
