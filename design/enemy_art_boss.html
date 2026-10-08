@@ -89,11 +89,11 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 8 of 8: Boss (round 2)</div>
+    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 8 of 8: Boss (round 3)</div>
     <h1>Enemy art: Boss</h1>
     <p class="note">A fresh start from the names: the machine army's <b>Boss</b> role. For each enemy, pick its <b>look</b>, <b>animation</b> and
       <b>movement</b> separately from three proposals each (A to C), and add notes. Mix freely. The <b>Your combination</b> preview shows your
-      mix (option A until you pick). <b>Your picks are preselected</b>. From your notes: the Overmind's Brain hive now walks on <b>arachnid legs</b>; the Leviathan has three new looks and animations (D to F); the Colossus has three new looks, animations and movements (D to F). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
+      mix (option A until you pick). <b>Your picks are preselected</b>. From your notes: the Overmind's Brain hive now walks on <b>arachnid legs</b>; the Leviathan has six new looks and animations (D to I); the Colossus has six new looks and animations (D to I) and three new movements (D to F). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
       Spec: <code>design/enemy_art.md</code>.</p>
     <ul class="rules">
       <li><b>Machine army;</b> each <b>name inspires a trait</b> (not a literal picture).</li>
@@ -557,6 +557,26 @@ const LOOKS = {
       disc(c, r * 0.78, OUTLINE); disc(c, r * 0.74, C.hull); ring(c, r * 0.55, C.dark, 1.2);
       for (const [x, y] of bays) line(add(c, mul([x, y], r * 0.4)), add(c, mul([x, y], r)), A(C.glow, 0.6), 1.0);
       disc(c, r * 0.26, OUTLINE); disc(c, r * 0.23, C.panel); crest(c, r * 0.1, t); leviFx(c, t, r, bays); } },
+    { key: "G", name: "Kraken carrier", theme: "An armoured carrier hull trailing six long mechanical tentacle-cranes, each ending in a launch claw that releases the Locusts; every 6 s (looped)", palette: "deep olive hull and cable segments, yellow claw lights, gold crest", r: 30, shadowD: 1.0, draw(c, t, r) {
+      const C = COL.levi, angs = [2.2, 2.65, 3.0, -3.0, -2.65, -2.2], tips = [];
+      angs.forEach((a, i) => { const pts = []; for (let k = 0; k <= 8; k++) { const u = k / 8, w = 0.12 * Math.sin(t * 1.6 - u * 4 + i) * u; pts.push(add(c, mul(fa(a + w), r * (0.35 + 0.75 * u)))); }
+        polyline(pts, OUTLINE, 3.6); polyline(pts, C.dark, 2.4); for (let k = 1; k <= 8; k += 2) disc(pts[k], 1.3, C.panel); const tip = pts[8]; tips.push(tip); disc(tip, r * 0.06, OUTLINE); glowDot(tip, r * 0.03, C.glow); });
+      const hull = []; for (let i = 0; i <= 18; i++) { const a = i * TAU / 18; hull.push([Math.cos(a) * 0.6, Math.sin(a) * 0.4]); } plate(c, hull, C.hull, 0, r, 1.2);
+      for (const x of [-0.25, 0.1, 0.4]) line(add(c, [x * r, -r * 0.36]), add(c, [x * r, r * 0.36]), A(C.dark, 0.6), 0.8);
+      for (const sg of [-1, 1]) glowDot(add(c, [r * 0.48, sg * r * 0.12]), r * 0.03, C.glow); crest(add(c, [r * 0.15, 0]), r * 0.08, t);
+      leviFx(c, t, r, tips.map((q, i) => [(q[0] - c[0]) / r, (q[1] - c[1]) / r, Math.cos(angs[i]) * 0.6, Math.sin(angs[i])])); } },
+    { key: "H", name: "Swarm-cloud mothership", theme: "A command core hidden inside a slowly turning cloud of its own Locusts; every 6 s six peel off and attack (looped)", palette: "deep olive core, an orbiting Locust swarm, gold crest", r: 30, shadowD: 1.0, draw(c, t, r) {
+      const C = COL.levi;
+      for (let i = 0; i < 14; i++) { const ring = i < 8 ? 0.72 : 0.48, n = i < 8 ? 8 : 6, j = i < 8 ? i : i - 8, a = (i < 8 ? t * 0.5 : -t * 0.7) + j * TAU / n, p = add(c, mul(fa(a), r * ring)); at(p, a + (i < 8 ? Math.PI / 2 : -Math.PI / 2), o => locustF(o, t + i, r * 0.2)); }
+      disc(c, r * 0.3, OUTLINE); disc(c, r * 0.27, C.hull); ring(c, r * 0.2, C.dark, 1.0); glowDot(c, r * 0.06, C.glow); crest(add(c, [0, -r * 0.12]), r * 0.06, t);
+      leviFx(c, t, r, [0, 1, 2, 3, 4, 5].map(i => { const a = i * TAU / 6 + t * 0.5; return [Math.cos(a) * 0.72, Math.sin(a) * 0.72, Math.cos(a), Math.sin(a)]; })); } },
+    { key: "I", name: "Anvil battlecruiser", theme: "An angular capital ship: a wedge hull with a long flight deck, three gun turrets, a command bridge and engines glowing at the stern; launches 6 Locusts every 6 s from its side bays (looped)", palette: "deep olive armour, yellow deck lights and engines, gold crest", r: 30, shadowD: 1.0, draw(c, t, r) {
+      const C = COL.levi, bays = [[0.3, 0.38, 0.3, 1], [0.3, -0.38, 0.3, -1], [-0.2, 0.5, 0, 1], [-0.2, -0.5, 0, -1], [-0.6, 0.5, -0.3, 1], [-0.6, -0.5, -0.3, -1]];
+      for (const y of [-0.3, 0, 0.3]) { const e = add(c, [-r * 0.95, y * r]); glowDot(e, r * (0.05 + 0.01 * Math.sin(t * 20 + y * 9)), [1, 0.85, 0.4, 1]); }
+      const hull = [[1.05, 0], [0.2, 0.5], [-0.85, 0.56], [-0.95, 0], [-0.85, -0.56], [0.2, -0.5]]; plate(c, hull, C.hull, 0, r, 1.2); outline(c, [[0.8, 0], [0.1, 0.32], [-0.7, 0.36], [-0.7, -0.36], [0.1, -0.32]], A(C.dark, 0.7), 0.8, 0, r);
+      for (let i = 0; i < 7; i++) disc(add(c, [r * (0.65 - i * 0.2), 0]), 0.8, A(C.glow, blink(t, 1.5, i * 0.14)));
+      for (const [x, y] of [[0.45, 0.18], [0.1, -0.2], [-0.25, 0.18]]) { const tu = add(c, [x * r, y * r]), a = 0.3 * Math.sin(t * 0.6 + x * 4); bar(tu, add(tu, mul(fa(a), r * 0.26)), 1.8, C.dark); disc(tu, r * 0.08, OUTLINE); disc(tu, r * 0.065, C.panel); }
+      plate(add(c, [-r * 0.5, 0]), rrPts(0.12, 0.1, 0.03), C.panel, 0, r, 0.8); crest(add(c, [-r * 0.5, 0]), r * 0.06, t); leviFx(c, t, r, bays); } },
   ],
   colo: [
     { key: "A", name: "Colossus mech", theme: "A giant humanoid mech in layered hazard-yellow and bronze plates; at 66% and 33% health a layer of plates falls away and two Siege Mechs drop from its back bay (looped)", palette: "hazard yellow and bronze plates, dark frame, orange glow, gold crest", r: 32, draw(c, t, r) {
@@ -616,6 +636,36 @@ const LOOKS = {
       for (const sg of [-1, 1]) shedPlate(c, [[0.55, sg * 0.5], [0.55, sg * 0.78], [-0.85, sg * 0.78], [-0.85, sg * 0.5]], [0, sg], s.s1, C.plate, r);
       shedPlate(tor, [[0.3, 0.3], [0.3, -0.3], [-0.25, -0.32], [-0.3, 0], [-0.25, 0.32]], [0.5, -1], s.s2, C.plate, r);
       slitB(add(tor, [r * 0.24, 0]), r * 0.1, C.glow); crest(add(c, [-r * 0.4, 0]), r * 0.1, t); } },
+    { key: "G", name: "Skyscraper walker", theme: "A tower block on four huge legs: stacked tiers lit by window lights, an outer wall and a middle tier of armour; at 66% and 33% health a tier falls away and two Siege Mechs march out of its gates (looped)", palette: "hazard yellow walls, bronze middle tier, dark frame, orange windows, gold crest", r: 32, draw(c, t, r) {
+      const C = COL.colo, s = colStage(t), bays = [[-0.62, 0.15, -1, 0.3], [-0.62, -0.15, -1, -0.3]];
+      colDrops(c, t, r, bays);
+      for (const [x, y, ph] of [[1, 1, 0], [1, -1, Math.PI], [-1, 1, Math.PI], [-1, -1, 0]]) { const sw = Math.sin(t * 1.5 + ph), hip = add(c, [x * r * 0.45, y * r * 0.45]), ft = add(c, [x * r * 0.62 + sw * r * 0.08, y * r * 0.8]); limb([hip, ft], 4.8, C.frame); foot(ft, C.frame, r, 0.14, 0.14); }
+      plate(c, rectPts(0.55, 0.55), C.frame, 0, r, 1.2);
+      for (let i = 0; i < 4; i++) { const a = i * Math.PI / 2, d = fa(a), pts = [0, 1, 2, 3].map(k => rot([[0.62, -0.62], [0.62, 0.62], [0.48, 0.48], [0.48, -0.48]][k], a)); shedPlate(c, pts, d, s.s1, C.plate, r); }
+      for (let i = 0; i < 4; i++) { const a = i * Math.PI / 2, pts = [0, 1, 2, 3].map(k => rot([[0.44, -0.44], [0.44, 0.44], [0.3, 0.3], [0.3, -0.3]][k], a)); shedPlate(c, pts, fa(a), s.s2, C.trim, r); }
+      const top = add(c, [-r * 0.04, -r * 0.04]); plate(top, rectPts(0.26, 0.26), lt(C.frame, 0.12), 0, r, 0.9);
+      for (let i = 0; i < 9; i++) { const q = add(top, [r * (-0.16 + 0.16 * (i % 3)), r * (-0.16 + 0.16 * Math.floor(i / 3))]); disc(q, r * 0.025, A(C.glow, blink(t, 0.6, i * 0.23))); }
+      crest(top, r * 0.07, t); } },
+    { key: "H", name: "Bucket-wheel excavator", theme: "A giant tracked excavator with a long boom and a turning bucket wheel that chews through anything ahead; at 66% and 33% health its armour comes away and two Siege Mechs roll out of its rear (looped)", palette: "hazard yellow skirts and boom, bronze cab, dark frame, orange glow, gold crest", r: 32, draw(c, t, r) {
+      const C = COL.colo, s = colStage(t), bays = [[-0.75, 0.2, -1, 0.3], [-0.75, -0.2, -1, -0.3]];
+      colDrops(c, t, r, bays);
+      for (const sg of [-1, 1]) tread(add(c, [-r * 0.15, sg * r * 0.55]), r * 0.68, r * 0.2, t);
+      plate(c, rrPts(0.65, 0.42, 0.08), C.frame, 0, r, 1.1); plate(add(c, [-r * 0.6, 0]), rectPts(0.12, 0.3), C.trim, 0, r, 0.8);
+      const wc = add(c, [r * 1.0, 0]); bar(add(c, [r * 0.2, 0]), wc, 4.0, C.plate); disc(wc, r * 0.32, OUTLINE); disc(wc, r * 0.28, C.frame);
+      for (let i = 0; i < 8; i++) { const a = t * 1.2 + i * TAU / 8, q = add(wc, mul(fa(a), r * 0.3)); fill(q, rectPts(0.07, 0.05), C.plate, a, r); outline(q, rectPts(0.07, 0.05), OUTLINE, 0.6, a, r); }
+      disc(wc, r * 0.08, C.trim);
+      for (const sg of [-1, 1]) shedPlate(c, [[0.6, sg * 0.5], [0.6, sg * 0.76], [-0.9, sg * 0.76], [-0.9, sg * 0.5]], [0, sg], s.s1, C.plate, r);
+      shedPlate(c, [[0.3, 0.3], [0.3, -0.3], [-0.2, -0.3], [-0.2, 0.3]], [0.3, -1], s.s2, C.trim, r);
+      glowDot(c, r * (0.05 + 0.03 * s.s2), C.glow); crest(add(c, [-r * 0.3, 0]), r * 0.09, t); } },
+    { key: "I", name: "Gun-fortress walker", theme: "A six-legged walking gun platform under one massive double-barrelled artillery turret, ringed by armour; at 66% and 33% health a ring of armour falls away and two Siege Mechs drop from its belly (looped)", palette: "hazard yellow ring armour, bronze turret plates, dark frame, orange glow, gold crest", r: 32, draw(c, t, r) {
+      const C = COL.colo, s = colStage(t), bays = [[-0.3, 0.3, -0.7, 0.7], [-0.3, -0.3, -0.7, -0.7]];
+      colDrops(c, t, r, bays);
+      for (let i = 0; i < 3; i++) for (const sg of [-1, 1]) { const sw = Math.sin(t * 1.8 + i * 2.1 + (sg > 0 ? Math.PI : 0)), root = add(c, [r * (0.3 - i * 0.3), sg * r * 0.42]), knee = add(root, [r * (0.12 + 0.05 * sw), sg * r * 0.3]), ft = add(root, [r * (-0.04 + 0.1 * sw), sg * r * 0.5]); limb([root, knee, ft], 3.6, C.frame); disc(ft, 2.6, OUTLINE); disc(ft, 2.0, C.trim); }
+      disc(c, r * 0.6, OUTLINE); disc(c, r * 0.56, C.frame);
+      for (let i = 0; i < 8; i++) { const a = i * TAU / 8; shedPlate(c, [[Math.cos(a - 0.36) * 0.66, Math.sin(a - 0.36) * 0.66], [Math.cos(a + 0.36) * 0.66, Math.sin(a + 0.36) * 0.66], [Math.cos(a + 0.36) * 0.5, Math.sin(a + 0.36) * 0.5], [Math.cos(a - 0.36) * 0.5, Math.sin(a - 0.36) * 0.5]], fa(a), s.s1, C.plate, r); }
+      const aim = 0.25 * Math.sin(t * 0.5); for (const sg of [-1, 1]) bar(add(c, rot([0.1, sg * 0.1], aim).map(v => v * r)), add(c, rot([1.25, sg * 0.1], aim).map(v => v * r)), 3.4, C.frame);
+      disc(c, r * 0.36, OUTLINE); disc(c, r * 0.33, C.frame); shedPlate(c, ngon(8, 0.33, Math.PI / 8), [-0.7, -0.7], s.s2, C.trim, r);
+      glowDot(c, r * (0.06 + 0.03 * s.s2), C.glow); crest(add(c, [-r * 0.15, 0]), r * 0.08, t); } },
   ],
 };
 
@@ -638,6 +688,9 @@ const ANIMS = {
     { key: "D", name: "Undulate", desc: "A slow, rolling undulation through its whole length.", fx: (t) => ({ rot: 0.05 * Math.sin(t * 1.2), sy: 1 - 0.05 * Math.sin(t * 2.4), dy: 0.02 * Math.sin(t * 1.2) }) },
     { key: "E", name: "Rotor thrum", desc: "A deep, constant thrum from all its rotors.", fx: (t) => ({ dx: 0.008 * Math.sin(t * 37), dy: 0.008 * Math.sin(t * 31), lift: 0.3 }) },
     { key: "F", name: "Majestic glide", desc: "Glides slowly, tilting gently like a ship under sail.", fx: (t) => ({ rot: 0.04 * Math.sin(t * 0.5), dy: 0.03 * Math.sin(t * 0.8), lift: 0.25 + 0.15 * Math.sin(t * 0.8) }) },
+    { key: "G", name: "Heavy yaw", desc: "Slow, deliberate turns of its whole bulk.", fx: (t) => ({ rot: 0.1 * Math.sin(t * 0.45) }) },
+    { key: "H", name: "Swarm churn", desc: "A restless churn, as if the whole ship hums with Locusts.", fx: (t) => ({ dx: 0.012 * Math.sin(t * 17), dy: 0.012 * Math.sin(t * 13), sx: 1 + 0.02 * Math.sin(t * 2), sy: 1 + 0.02 * Math.sin(t * 2.3) }) },
+    { key: "I", name: "Dive and climb", desc: "Slowly dips low, then climbs again (its shadow tightens and spreads).", fx: (t) => { const h = 0.5 + 0.5 * Math.sin(t * 0.7); return { lift: h * 0.6, sx: 0.96 + 0.06 * h, sy: 0.96 + 0.06 * h }; } },
   ],
   colo: [
     { key: "A", name: "Earthquake stride", desc: "Huge, slow footfalls that rock the whole machine.", fx: (t) => { const p = Math.abs(Math.sin(t * 1.8)); return { dy: 0.04 * (1 - p), rot: 0.03 * Math.sin(t * 1.8) }; } },
@@ -646,6 +699,9 @@ const ANIMS = {
     { key: "D", name: "Furnace pulse", desc: "Swells with each pulse of its core.", fx: (t) => { const p = Math.pow(Math.max(0, Math.sin(t * 1.6)), 3); return { sx: 1 + 0.03 * p, sy: 1 + 0.03 * p }; } },
     { key: "E", name: "Lumbering sway", desc: "A slow, ponderous side-to-side sway.", fx: (t) => ({ rot: 0.05 * Math.sin(t * 0.9), dy: 0.02 * Math.sin(t * 1.8) }) },
     { key: "F", name: "Ground slam", desc: "Now and then it slams down, shaking everything around it.", fx: (t) => { const u = fmod(t, 3.5), j = u < 0.35 ? Math.sin(u / 0.35 * Math.PI) : 0; return { sx: 1 + 0.06 * j, sy: 1 - 0.06 * j, dy: 0.04 * j }; } },
+    { key: "G", name: "Tower lean", desc: "Leans slowly forward and back as it walks.", fx: (t) => ({ dx: 0.04 * Math.sin(t * 0.9), sx: 1 + 0.03 * Math.sin(t * 0.9) }) },
+    { key: "H", name: "Hydraulic hiss", desc: "Sinks a little on its hydraulics now and then, then rises.", fx: (t) => { const u = fmod(t, 2.6), d = u < 0.2 ? u / 0.2 : u < 0.9 ? 1 - (u - 0.2) / 0.7 : 0; return { sx: 1 - 0.03 * d, sy: 1 - 0.03 * d, dy: 0.02 * d }; } },
+    { key: "I", name: "Crushing step", desc: "Heavier than heavy: each step drops and rocks the whole machine.", fx: (t) => { const p = Math.abs(Math.sin(t * 1.4)), sgn = Math.sign(Math.sin(t * 1.4)); return { dy: 0.05 * (1 - p), rot: 0.04 * sgn * (1 - p) }; } },
   ],
 };
 

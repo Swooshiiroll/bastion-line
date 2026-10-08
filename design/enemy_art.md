@@ -604,6 +604,15 @@ Siege Mech's and Titan's).
   D Furnace pulse, E Lumbering sway, F Ground slam. **Movements:** D Shed surge (slow at first, faster after each shed,
   as in the game), E Wide stomp, F Halt and drop.
 
+**Round 3** (owner: "Create new ideas for Leviathan and Colossus"):
+- **Leviathan looks:** G Kraken carrier (an armoured hull trailing six mechanical tentacle-cranes whose claws release
+  the Locusts), H Swarm-cloud mothership (a command core hidden inside a slowly turning cloud of its own Locusts),
+  I Anvil battlecruiser (a wedge-hulled capital ship with a flight deck, three turrets and glowing engines).
+  **Animations:** G Heavy yaw, H Swarm churn, I Dive and climb.
+- **Colossus looks:** G Skyscraper walker (a tower block on four legs; tiers fall away), H Bucket-wheel excavator (a
+  tracked excavator with a turning bucket wheel on a long boom), I Gun-fortress walker (a six-legged platform under a
+  massive double-barrelled turret). **Animations:** G Tower lean, H Hydraulic hiss, I Crushing step.
+
 ## Open questions
 
 1. **Boss picks:** Overmind (A/C/A with arachnid legs) to confirm; Leviathan look, animation and movement; Colossus
