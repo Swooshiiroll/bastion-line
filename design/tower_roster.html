@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tower Roster</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    color-scheme: dark;
+    --ground: #06090e; --field: #0b1016; --panel: #08111a; --panel-2: #0d1a25; --rule: #1d3a4b; --wire: #2a5a70;
+    --text: #dcedf7; --dim: #86a0b1; --faint: #4f6a7b; --accent: #4de1ff; --gold: #ffc85a; --red: #ff6b6b;
+    --display: "Chakra Petch", "Bahnschrift", "Segoe UI", sans-serif;
+    --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--text); font: 14px/1.5 var(--body); padding: 28px 16px 48px; }
+  .wrap { max-width: 1340px; margin: 0 auto; display: grid; gap: 22px; }
+  .eyebrow { font: 600 12px var(--display); letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
+  h1 { font: 700 30px/1.1 var(--display); margin: 4px 0 0; }
+  h2 { font: 700 20px/1.2 var(--display); margin: 0; letter-spacing: .04em; }
+  h3 { font: 700 16px var(--display); margin: 0; letter-spacing: .03em; }
+  p.note { margin: 6px 0 0; color: var(--dim); max-width: 95ch; }
+  ul.rules { margin: 8px 0 0; padding-left: 18px; color: var(--dim); max-width: 100ch; }
+  ul.rules b, p.note b { color: var(--text); font-weight: 500; }
+  code { font: 12px var(--mono); color: var(--accent); }
+  section { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px 2px 12px 2px; padding: 12px 14px 14px; display: grid; gap: 10px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 10px; }
+  .card { border: 1px solid var(--rule); border-radius: 8px; padding: 10px; display: grid; gap: 7px; align-content: start; background: #071019; }
+  .card.removed { opacity: .45; border-style: dashed; }
+  .card.added { border-color: var(--gold); }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .key { font: 700 11px var(--display); color: #031018; background: var(--accent); border-radius: 4px; padding: 0 6px; }
+  .tag { font: 600 11px var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
+  .ref { color: var(--dim); font-size: 12.5px; }
+  label { display: grid; gap: 3px; font: 600 11px var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+  input, textarea, select { width: 100%; background: var(--field); color: var(--text); border: 1px solid var(--rule); border-radius: 6px;
+    font: 13px var(--body); padding: 6px 8px; text-transform: none; letter-spacing: 0; }
+  textarea { min-height: 44px; resize: vertical; }
+  input:focus, textarea:focus, select:focus { outline: 1px solid var(--accent); border-color: var(--accent); }
+  button { font: 600 12px var(--display); letter-spacing: .06em; color: var(--text); background: var(--panel-2); border: 1px solid var(--wire);
+    border-radius: 6px; padding: 6px 11px; cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  button.on { background: var(--accent); color: #031018; border-color: var(--accent); }
+  button.danger.on { background: var(--red); border-color: var(--red); color: #1a0505; }
+  button.big { width: 100%; padding: 9px; }
+  .seg { display: inline-flex; gap: 0; }
+  .seg button { border-radius: 0; }
+  .seg button:first-child { border-radius: 6px 0 0 6px; }
+  .seg button:last-child { border-radius: 0 6px 6px 0; }
+  .tower { border: 1px solid var(--rule); border-radius: 8px; padding: 10px; background: #071019; display: grid; gap: 8px;
+    grid-template-columns: 34px minmax(0, 1fr); }
+  .tower .num { font: 700 18px var(--display); color: var(--gold); text-align: center; padding-top: 18px; }
+  .tower .fields { display: grid; gap: 8px; grid-template-columns: minmax(150px, 1fr) minmax(150px, 1fr) minmax(0, 2.2fr); }
+  .tower .paths { display: grid; gap: 8px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .tower .tools { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+  .span2 { grid-column: span 2; }
+  .stack { display: grid; gap: 8px; }
+  details { border: 1px solid var(--rule); border-radius: 8px; padding: 8px 10px; background: #071019; }
+  summary { cursor: pointer; font: 600 13px var(--display); letter-spacing: .05em; color: var(--dim); }
+  .tablewrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 12.5px; margin-top: 8px; }
+  th, td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  th { font: 600 11px var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+  td { color: var(--dim); }
+  td:first-child { color: var(--text); white-space: nowrap; }
+  #summary { min-height: 120px; font: 12px var(--mono); }
+  .empty { color: var(--faint); font-style: italic; }
+  @media (max-width: 760px) {
+    .tower { grid-template-columns: minmax(0, 1fr); }
+    .tower .num { text-align: left; padding-top: 0; }
+    .tower .fields, .tower .paths { grid-template-columns: minmax(0, 1fr); }
+    .span2 { grid-column: auto; }
+    h1 { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Bastion Line · Tower rework · Roster · round 1</div>
+    <h1>Tower roster</h1>
+    <p class="note">Two parts. <b>1. Role set:</b> my draft of the tower role families. Keep, rename, edit or remove each role, and add your own.
+      <b>2. Your tower list:</b> write the towers: a name, a role, and a description (the art is drawn from these later). The three path purposes
+      are optional here; we settle them in the next rounds. Everything is kept in this browser; copy it from the bottom of the page and send it back.
+      Spec: <code>design/towers.md</code> (issue #55).</p>
+    <ul class="rules">
+      <li><b>Each tower has 3 paths</b>, each with a purpose decided per tower (your examples: Power, Range, Speed, Effect, Buff).</li>
+      <li><b>Primary/secondary stays:</b> climb two paths until one gets its 3rd upgrade; that one is the primary, the other is capped.</li>
+      <li><b>Counters</b> to the reworked enemies come only through branch upgrades; no tower exists just to counter.</li>
+      <li><b>Gameplay first, then art:</b> looks and animations come later, from your names and descriptions, with per-path looks (#6).</li>
+    </ul>
+  </header>
+
+  <section id="roles-sec">
+    <div class="row" style="justify-content: space-between">
+      <h2>1. Role set (draft)</h2>
+      <button id="add-role">+ Add a role</button>
+    </div>
+    <p class="note" style="margin:0">"Answers" is which enemy roles it's built to beat. "Today's towers" is for reference only; your roster replaces them.</p>
+    <div class="grid" id="roles"></div>
+  </section>
+
+  <section>
+    <div class="row" style="justify-content: space-between">
+      <h2>2. Your tower list</h2>
+      <button id="add-tower">+ Add a tower</button>
+    </div>
+    <div class="stack" id="towers"></div>
+    <button class="big" id="add-tower-2">+ Add a tower</button>
+    <details>
+      <summary>Today's 15 towers (reference only)</summary>
+      <div class="tablewrap"><table id="today"><thead><tr><th>Tower</th><th>Hits</th><th>Job today</th><th>Branches A / B / C</th></tr></thead><tbody></tbody></table></div>
+    </details>
+  </section>
+
+  <section class="out">
+    <h2>Roster and notes</h2>
+    <label>General notes<textarea id="general" placeholder="Anything else: how many towers you're aiming for, themes, what to keep from today's set..."></textarea></label>
+    <textarea id="summary" readonly></textarea>
+    <button class="big" id="copy">Copy roster and notes</button>
+    <button class="big" id="clear">Clear everything</button>
+  </section>
+</div>
+
+<script>
+const STORE = "bl-tower-roster-v1";
+const ROLES = [
+  { id: "assault", name: "Assault", job: "Steady single-target fire; the backbone", answers: "Rusher, Swarm, Evader", today: "Pulse Turret, Drone Bay" },
+  { id: "artillery", name: "Artillery", job: "Area damage: splash, chain, burn", answers: "Swarm, packs, Support clusters", today: "Plasma Mortar, Arc Coil, Nova Reactor" },
+  { id: "breaker", name: "Breaker", job: "Heavy hits and armour piercing", answers: "Tank, Boss", today: "Railgun, Laser Lance" },
+  { id: "control", name: "Control", job: "Slow, stun, pull", answers: "Rusher, Evader, Boss", today: "Cryo Emitter, Graviton Projector" },
+  { id: "antiair", name: "Anti-air", job: "Flyer specialists", answers: "The flyers", today: "Flak Battery, Missile Battery" },
+  { id: "support", name: "Support", job: "Buffs, reveal, cleanse", answers: "Disruptor, enemy Support, Evader cloak, Special tricks", today: "Amplifier Pylon, Sensor Array, Nullifier" },
+  { id: "economy", name: "Economy", job: "Income and discounts", answers: "(pays for the rest)", today: "Scrapyard" },
+];
+const TODAY = [
+  ["Pulse Turret", "air + ground", "Rapid single-target bolts", "Gatling Pulse / Shredder / Flechette"],
+  ["Plasma Mortar", "ground", "Splash damage", "Siege Mortar / Plasma Burn / Bunker Buster"],
+  ["Cryo Emitter", "air + ground", "Area slow plus light damage", "Stasis Field / Shatter Field / Cryo Lock"],
+  ["Railgun", "air + ground", "Huge range, ignores armour", "Deadeye / Piercing Rail / Null Slug"],
+  ["Arc Coil", "air + ground", "Chain lightning, double damage to barriers", "Storm Coil / Overload / Ion Storm"],
+  ["Laser Lance", "air + ground", "Ramping beam, ignores armour", "Prism Array / Focus Lens / Sweeper"],
+  ["Missile Battery", "air + ground", "Homing salvos, double damage to flyers", "Swarm Pods / Hellfire / Cluster Munitions"],
+  ["Amplifier Pylon", "support", "Boosts nearby towers' damage", "Overclock Pylon / Targeting Array / Suppression Pylon"],
+  ["Flak Battery", "air", "Airbursts that hit every flyer in the blast", "Sky Shredder / Proximity Burst / Dual Purpose"],
+  ["Sensor Array", "support", "Reveals cloaked enemies, marks targets", "Deep Scan / Target Painter / Disruptor"],
+  ["Graviton Projector", "ground", "Gravity pulses that move enemies along the lane", "Repulsor / Crush Field / Gravity Well"],
+  ["Nullifier", "air + ground", "Strips barriers, armour and immunities", "Purge Emitter / Dampener / Feedback Loop"],
+  ["Nova Reactor", "air + ground", "360° shockwave", "Supernova / Pulse Reactor / Solar Flare"],
+  ["Drone Bay", "air + ground", "Hunter drones that chase enemies anywhere", "Interceptor Wing / Bomber Wing / Hunter-Killer"],
+  ["Scrapyard", "none (economy)", "Credits from wreckage", "Credit Mint / Scrap Collector / Supply Depot"],
+];
+
+const blankState = () => ({ roles: {}, added: [], towers: [{}], general: "", seq: 1 });
+let S;
+try { S = JSON.parse(localStorage.getItem(STORE) || "null"); } catch (e) { S = null; }
+if (!S || typeof S !== "object") S = blankState();
+S.roles = S.roles || {}; S.added = S.added || []; S.towers = S.towers || []; S.seq = S.seq || 1; S.general = S.general || "";
+function save() { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) { /* storage unavailable */ } summary(); }
+
+const $ = (id) => document.getElementById(id);
+function el(tag, attrs, kids) {
+  const n = document.createElement(tag);
+  for (const k in (attrs || {})) { if (k === "text") n.textContent = attrs[k]; else if (k === "cls") n.className = attrs[k]; else n.setAttribute(k, attrs[k]); }
+  for (const c of (kids || [])) n.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
+  return n;
+}
+function field(label, value, onInput, opts) {
+  opts = opts || {};
+  const inp = el(opts.area ? "textarea" : "input", opts.ph ? { placeholder: opts.ph } : {});
+  inp.value = value || "";
+  inp.addEventListener("input", () => onInput(inp.value));
+  return el("label", { cls: opts.cls || "" }, [label, inp]);
+}
+
+// Roles: the draft ones carry edits in S.roles[id]; added ones live in S.added.
+function roleList() {
+  const list = [];
+  for (const r of ROLES) { const e = S.roles[r.id] || {}; if (e.status !== "remove") list.push({ id: r.id, name: (e.name || "").trim() || r.name }); }
+  for (const a of S.added) list.push({ id: a.id, name: (a.name || "").trim() || "(new role)" });
+  return list;
+}
+function renderRoles() {
+  const box = $("roles"); box.textContent = "";
+  for (const r of ROLES) {
+    const e = S.roles[r.id] = S.roles[r.id] || {};
+    const card = el("div", { cls: "card" + (e.status === "remove" ? " removed" : "") });
+    const keep = el("button", { text: "Keep" }), rem = el("button", { text: "Remove", cls: "danger" });
+    const sync = () => { keep.classList.toggle("on", e.status !== "remove"); rem.classList.toggle("on", e.status === "remove"); card.classList.toggle("removed", e.status === "remove"); };
+    keep.addEventListener("click", () => { e.status = "keep"; sync(); save(); renderTowers(); });
+    rem.addEventListener("click", () => { e.status = "remove"; sync(); save(); renderTowers(); });
+    sync();
+    card.appendChild(el("div", { cls: "row", style: "justify-content: space-between" }, [el("h3", { text: r.name }), el("div", { cls: "seg" }, [keep, rem])]));
+    card.appendChild(field("Name", e.name === undefined ? r.name : e.name, (v) => { e.name = v; save(); renderTowerRoleOptions(); }));
+    card.appendChild(field("Job", e.job === undefined ? r.job : e.job, (v) => { e.job = v; save(); }));
+    card.appendChild(field("Answers (enemy roles)", e.answers === undefined ? r.answers : e.answers, (v) => { e.answers = v; save(); }));
+    card.appendChild(el("div", { cls: "ref" }, [el("span", { cls: "tag", text: "Today's towers: " }), r.today]));
+    card.appendChild(field("Notes", e.notes, (v) => { e.notes = v; save(); }, { area: true }));
+    box.appendChild(card);
+  }
+  for (const a of S.added) {
+    const card = el("div", { cls: "card added" });
+    const del = el("button", { text: "Delete", cls: "danger" });
+    del.addEventListener("click", () => { S.added = S.added.filter((x) => x !== a); save(); renderRoles(); renderTowers(); });
+    card.appendChild(el("div", { cls: "row", style: "justify-content: space-between" }, [el("h3", { text: "New role" }), del]));
+    card.appendChild(field("Name", a.name, (v) => { a.name = v; save(); renderTowerRoleOptions(); }, { ph: "e.g. Siege" }));
+    card.appendChild(field("Job", a.job, (v) => { a.job = v; save(); }));
+    card.appendChild(field("Answers (enemy roles)", a.answers, (v) => { a.answers = v; save(); }));
+    card.appendChild(field("Notes", a.notes, (v) => { a.notes = v; save(); }, { area: true }));
+    box.appendChild(card);
+  }
+}
+
+const roleSelects = [];
+function fillRoleSelect(sel, t) {
+  const roles = roleList(); sel.textContent = "";
+  sel.appendChild(el("option", { value: "", text: "Pick a role" }));
+  for (const r of roles) sel.appendChild(el("option", { value: r.id, text: r.name }));
+  sel.appendChild(el("option", { value: "other", text: "Other (write it in notes)" }));
+  if (t.role && t.role !== "other" && !roles.some((r) => r.id === t.role)) t.role = "";
+  sel.value = t.role || "";
+}
+function renderTowerRoleOptions() { for (const [sel, t] of roleSelects) fillRoleSelect(sel, t); summary(); }
+function renderTowers() {
+  const box = $("towers"); box.textContent = ""; roleSelects.length = 0;
+  if (!S.towers.length) box.appendChild(el("div", { cls: "empty", text: "No towers yet. Add one to start." }));
+  S.towers.forEach((t, i) => {
+    t.paths = t.paths || ["", "", ""];
+    const sel = el("select"); fillRoleSelect(sel, t); roleSelects.push([sel, t]);
+    sel.addEventListener("change", () => { t.role = sel.value; save(); });
+    const up = el("button", { text: "▲", title: "Move up" }), dn = el("button", { text: "▼", title: "Move down" }), del = el("button", { text: "Delete", cls: "danger" });
+    up.addEventListener("click", () => { if (i > 0) { [S.towers[i - 1], S.towers[i]] = [S.towers[i], S.towers[i - 1]]; save(); renderTowers(); } });
+    dn.addEventListener("click", () => { if (i < S.towers.length - 1) { [S.towers[i + 1], S.towers[i]] = [S.towers[i], S.towers[i + 1]]; save(); renderTowers(); } });
+    del.addEventListener("click", () => { S.towers.splice(i, 1); save(); renderTowers(); });
+    const fields = el("div", { cls: "fields" }, [
+      field("Name", t.name, (v) => { t.name = v; save(); }, { ph: "Tower name" }),
+      el("label", {}, ["Role", sel]),
+      field("Description", t.desc, (v) => { t.desc = v; save(); }, { area: true, ph: "What it is, what it does, how it looks or feels" }),
+    ]);
+    const paths = el("div", { cls: "paths" }, [0, 1, 2].map((k) => field("Path " + (k + 1) + " purpose (optional)", t.paths[k], (v) => { t.paths[k] = v; save(); }, { ph: ["e.g. Power", "e.g. Range", "e.g. Effect"][k] })));
+    const body = el("div", { cls: "stack" }, [fields, paths, field("Notes", t.notes, (v) => { t.notes = v; save(); }, { area: true }), el("div", { cls: "tools" }, [up, dn, del])]);
+    box.appendChild(el("div", { cls: "tower" }, [el("div", { cls: "num", text: String(i + 1) }), body]));
+  });
+  summary();
+}
+
+function clean(s) { return String(s || "").replace(/\s+/g, " ").trim(); }
+function summary() {
+  const out = ["Tower roster (round 1)", "Roles:"];
+  for (const r of ROLES) {
+    const e = S.roles[r.id] || {};
+    if (e.status === "remove") { out.push("- " + r.name + ": remove" + (clean(e.notes) ? "; notes: " + clean(e.notes) : "")); continue; }
+    const bits = [];
+    const nm = clean(e.name);
+    if (e.name !== undefined && nm && nm !== r.name) bits.push("renamed to " + nm);
+    if (e.job !== undefined && clean(e.job) !== r.job) bits.push("job: " + (clean(e.job) || "-"));
+    if (e.answers !== undefined && clean(e.answers) !== r.answers) bits.push("answers: " + (clean(e.answers) || "-"));
+    if (clean(e.notes)) bits.push("notes: " + clean(e.notes));
+    out.push("- " + r.name + ": keep" + (bits.length ? "; " + bits.join("; ") : ""));
+  }
+  for (const a of S.added) {
+    const bits = ["job: " + (clean(a.job) || "-"), "answers: " + (clean(a.answers) || "-")];
+    if (clean(a.notes)) bits.push("notes: " + clean(a.notes));
+    out.push("- New role " + (clean(a.name) || "(unnamed)") + ": " + bits.join("; "));
+  }
+  const names = {}; for (const r of roleList()) names[r.id] = r.name;
+  const towers = S.towers.filter((t) => clean(t.name) || clean(t.desc) || clean(t.notes) || t.role || (t.paths || []).some(clean));
+  out.push("Towers (" + towers.length + "):");
+  towers.forEach((t, i) => {
+    const role = t.role === "other" ? "other" : (names[t.role] || "-");
+    const p = (t.paths || []).map((x) => clean(x) || "-");
+    const bits = ["role " + role, "description: " + (clean(t.desc) || "-")];
+    if (p.some((x) => x !== "-")) bits.push("paths: " + p.join(" / "));
+    if (clean(t.notes)) bits.push("notes: " + clean(t.notes));
+    out.push((i + 1) + ". " + (clean(t.name) || "(unnamed)") + ": " + bits.join("; "));
+  });
+  if (clean(S.general)) out.push("General notes: " + clean(S.general));
+  $("summary").value = out.join("\n"); $("summary").rows = out.length + 1;
+}
+
+for (const row of TODAY) { const tr = el("tr"); for (const c of row) tr.appendChild(el("td", { text: c })); $("today").querySelector("tbody").appendChild(tr); }
+const addTower = () => { S.towers.push({}); save(); renderTowers(); };
+$("add-tower").addEventListener("click", addTower);
+$("add-tower-2").addEventListener("click", addTower);
+$("add-role").addEventListener("click", () => { S.added.push({ id: "new" + (S.seq++) }); save(); renderRoles(); renderTowerRoleOptions(); });
+$("general").value = S.general;
+$("general").addEventListener("input", () => { S.general = $("general").value; save(); });
+$("copy").addEventListener("click", () => {
+  const ta = $("summary"), b = $("copy");
+  const done = () => { b.textContent = "Copied"; setTimeout(() => { b.textContent = "Copy roster and notes"; }, 1500); };
+  try { navigator.clipboard.writeText(ta.value).then(done, () => { ta.select(); }); } catch (e) { ta.select(); }
+});
+$("clear").addEventListener("click", () => {
+  if (!confirm("Clear the role edits, every tower and all notes?")) return;
+  S = blankState(); $("general").value = ""; save(); renderRoles(); renderTowers();
+});
+renderRoles(); renderTowers();
+</script>
+</body>
+</html>
