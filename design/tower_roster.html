@@ -74,44 +74,44 @@
     .span2 { grid-column: auto; }
     h1 { font-size: 24px; }
   }
+  .classes { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; }
+  .cls { border: 1px solid var(--rule); border-left: 3px solid var(--accent); border-radius: 6px; padding: 7px 10px; background: #071019; display: grid; gap: 3px; }
+  .cls.proposed { border-left-color: var(--gold); border-style: dashed; border-left-style: solid; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Tower rework · Roster · round 1</div>
+    <div class="eyebrow">Bastion Line · Tower rework · Roster · round 2</div>
     <h1>Tower roster</h1>
-    <p class="note">Two parts. <b>1. Role set:</b> my draft of the tower role families. Keep, rename, edit or remove each role, and add your own.
-      <b>2. Your tower list:</b> write the towers: a name, a role, and a description (the art is drawn from these later). The three path purposes
-      are optional here; we settle them in the next rounds. Everything is kept in this browser; copy it from the bottom of the page and send it back.
-      Spec: <code>design/towers.md</code> (issue #55).</p>
+    <p class="note">Write your towers: a <b>name</b>, a <b>weapon class</b> and a <b>description</b> (the art is drawn from these later). The three path
+      purposes are optional here; we settle them in the next rounds. Everything is kept in this browser; copy it from the bottom of the page and send it back.
+      Spec: <code>design/towers.md</code> (issue #55). The classes come from the reference sheet <code>design/tower_classes.md</code>; edit the classes there.</p>
     <ul class="rules">
-      <li><b>Each tower has 3 paths</b>, each with a purpose decided per tower (your examples: Power, Range, Speed, Effect, Buff).</li>
+      <li><b>Weapon classes replace the roles</b> (your call, 2026-10-09): every tower has <b>exactly one</b>, and the class groups the shop. What else it does is TBD.</li>
+      <li><b>Each tower has 3 paths</b> of 4 upgrades and a mastery, each path with a purpose decided per tower (your examples: Power, Range, Speed, Effect, Buff),
+        plus an <b>optional Retrofit</b> designed for the tower.</li>
       <li><b>Primary/secondary stays:</b> climb two paths until one gets its 3rd upgrade; that one is the primary, the other is capped.</li>
-      <li><b>Counters</b> to the reworked enemies come only through branch upgrades; no tower exists just to counter.</li>
-      <li><b>Gameplay first, then art:</b> looks and animations come later, from your names and descriptions, with per-path looks (#6).</li>
+      <li><b>Counters</b> to the reworked enemies come only through path upgrades; no tower exists just to counter.</li>
     </ul>
   </header>
 
-  <section id="roles-sec">
-    <div class="row" style="justify-content: space-between">
-      <h2>1. Role set (draft)</h2>
-      <button id="add-role">+ Add a role</button>
-    </div>
-    <p class="note" style="margin:0">"Answers" is which enemy roles it's built to beat. "Today's towers" is for reference only; your roster replaces them.</p>
-    <div class="grid" id="roles"></div>
+  <section>
+    <h2>Weapon classes (draft)</h2>
+    <p class="note" style="margin:0">From <code>design/tower_classes.md</code>. Field and Deployable are proposals you can accept or drop there.</p>
+    <div class="classes" id="classes"></div>
   </section>
 
   <section>
     <div class="row" style="justify-content: space-between">
-      <h2>2. Your tower list</h2>
+      <h2>Your tower list</h2>
       <button id="add-tower">+ Add a tower</button>
     </div>
     <div class="stack" id="towers"></div>
     <button class="big" id="add-tower-2">+ Add a tower</button>
     <details>
       <summary>Today's 15 towers (reference only)</summary>
-      <div class="tablewrap"><table id="today"><thead><tr><th>Tower</th><th>Hits</th><th>Job today</th><th>Branches A / B / C</th></tr></thead><tbody></tbody></table></div>
+      <div class="tablewrap"><table id="today"><thead><tr><th>Tower</th><th>Suggested class</th><th>Hits</th><th>Job today</th><th>Branches A / B / C</th></tr></thead><tbody></tbody></table></div>
     </details>
   </section>
 
@@ -125,39 +125,50 @@
 </div>
 
 <script>
-const STORE = "bl-tower-roster-v1";
-const ROLES = [
-  { id: "assault", name: "Assault", job: "Steady single-target fire; the backbone", answers: "Rusher, Swarm, Evader", today: "Pulse Turret, Drone Bay" },
-  { id: "artillery", name: "Artillery", job: "Area damage: splash, chain, burn", answers: "Swarm, packs, Support clusters", today: "Plasma Mortar, Arc Coil, Nova Reactor" },
-  { id: "breaker", name: "Breaker", job: "Heavy hits and armour piercing", answers: "Tank, Boss", today: "Railgun, Laser Lance" },
-  { id: "control", name: "Control", job: "Slow, stun, pull", answers: "Rusher, Evader, Boss", today: "Cryo Emitter, Graviton Projector" },
-  { id: "antiair", name: "Anti-air", job: "Flyer specialists", answers: "The flyers", today: "Flak Battery, Missile Battery" },
-  { id: "support", name: "Support", job: "Buffs, reveal, cleanse", answers: "Disruptor, enemy Support, Evader cloak, Special tricks", today: "Amplifier Pylon, Sensor Array, Nullifier" },
-  { id: "economy", name: "Economy", job: "Income and discounts", answers: "(pays for the rest)", today: "Scrapyard" },
+const STORE = "bl-tower-roster-v2", OLD_STORE = "bl-tower-roster-v1";
+// Mirrors design/tower_classes.md (draft, 2026-10-09).
+const CLASSES = [
+  { id: "ballistic", name: "Ballistic", line: "Physical projectiles at a target: slugs, bolts, rounds, flechettes, rails." },
+  { id: "energy", name: "Energy", line: "Beams, lasers and lightning: no flight time; chains jump between targets." },
+  { id: "explosive", name: "Explosive", line: "Shells, missiles and bombs that burst where they land (and what the blast leaves)." },
+  { id: "utility", name: "Utility", line: "Doesn't attack: boosts towers, reveals and marks enemies, strips defences." },
+  { id: "economy", name: "Economy", line: "Doesn't fight: makes or saves credits." },
+  { id: "field", name: "Field", proposed: true, line: "Pulses, auras and shockwaves centred on the tower, covering its radius." },
+  { id: "deployable", name: "Deployable", proposed: true, line: "Launched units (drones) that act on their own away from the tower." },
 ];
 const TODAY = [
-  ["Pulse Turret", "air + ground", "Rapid single-target bolts", "Gatling Pulse / Shredder / Flechette"],
-  ["Plasma Mortar", "ground", "Splash damage", "Siege Mortar / Plasma Burn / Bunker Buster"],
-  ["Cryo Emitter", "air + ground", "Area slow plus light damage", "Stasis Field / Shatter Field / Cryo Lock"],
-  ["Railgun", "air + ground", "Huge range, ignores armour", "Deadeye / Piercing Rail / Null Slug"],
-  ["Arc Coil", "air + ground", "Chain lightning, double damage to barriers", "Storm Coil / Overload / Ion Storm"],
-  ["Laser Lance", "air + ground", "Ramping beam, ignores armour", "Prism Array / Focus Lens / Sweeper"],
-  ["Missile Battery", "air + ground", "Homing salvos, double damage to flyers", "Swarm Pods / Hellfire / Cluster Munitions"],
-  ["Amplifier Pylon", "support", "Boosts nearby towers' damage", "Overclock Pylon / Targeting Array / Suppression Pylon"],
-  ["Flak Battery", "air", "Airbursts that hit every flyer in the blast", "Sky Shredder / Proximity Burst / Dual Purpose"],
-  ["Sensor Array", "support", "Reveals cloaked enemies, marks targets", "Deep Scan / Target Painter / Disruptor"],
-  ["Graviton Projector", "ground", "Gravity pulses that move enemies along the lane", "Repulsor / Crush Field / Gravity Well"],
-  ["Nullifier", "air + ground", "Strips barriers, armour and immunities", "Purge Emitter / Dampener / Feedback Loop"],
-  ["Nova Reactor", "air + ground", "360° shockwave", "Supernova / Pulse Reactor / Solar Flare"],
-  ["Drone Bay", "air + ground", "Hunter drones that chase enemies anywhere", "Interceptor Wing / Bomber Wing / Hunter-Killer"],
-  ["Scrapyard", "none (economy)", "Credits from wreckage", "Credit Mint / Scrap Collector / Supply Depot"],
+  ["Pulse Turret", "Ballistic", "air + ground", "Rapid single-target bolts", "Gatling Pulse / Shredder / Flechette"],
+  ["Plasma Mortar", "Explosive", "ground", "Splash damage", "Siege Mortar / Plasma Burn / Bunker Buster"],
+  ["Cryo Emitter", "Field (or Energy)", "air + ground", "Area slow plus light damage", "Stasis Field / Shatter Field / Cryo Lock"],
+  ["Railgun", "Ballistic", "air + ground", "Huge range, ignores armour", "Deadeye / Piercing Rail / Null Slug"],
+  ["Arc Coil", "Energy", "air + ground", "Chain lightning, double damage to barriers", "Storm Coil / Overload / Ion Storm"],
+  ["Laser Lance", "Energy", "air + ground", "Ramping beam, ignores armour", "Prism Array / Focus Lens / Sweeper"],
+  ["Missile Battery", "Explosive", "air + ground", "Homing salvos, double damage to flyers", "Swarm Pods / Hellfire / Cluster Munitions"],
+  ["Amplifier Pylon", "Utility", "support", "Boosts nearby towers' damage", "Overclock Pylon / Targeting Array / Suppression Pylon"],
+  ["Flak Battery", "Explosive", "air", "Airbursts that hit every flyer in the blast", "Sky Shredder / Proximity Burst / Dual Purpose"],
+  ["Sensor Array", "Utility", "support", "Reveals cloaked enemies, marks targets", "Deep Scan / Target Painter / Disruptor"],
+  ["Graviton Projector", "Field (or Energy)", "ground", "Gravity pulses that move enemies along the lane", "Repulsor / Crush Field / Gravity Well"],
+  ["Nullifier", "Field (or Utility)", "air + ground", "Strips barriers, armour and immunities", "Purge Emitter / Dampener / Feedback Loop"],
+  ["Nova Reactor", "Field (or Energy)", "air + ground", "360° shockwave", "Supernova / Pulse Reactor / Solar Flare"],
+  ["Drone Bay", "Deployable (or a call)", "air + ground", "Hunter drones that chase enemies anywhere", "Interceptor Wing / Bomber Wing / Hunter-Killer"],
+  ["Scrapyard", "Economy", "none (economy)", "Credits from wreckage", "Credit Mint / Scrap Collector / Supply Depot"],
 ];
 
-const blankState = () => ({ roles: {}, added: [], towers: [{}], general: "", seq: 1 });
+const blankState = () => ({ towers: [{}], general: "" });
 let S;
 try { S = JSON.parse(localStorage.getItem(STORE) || "null"); } catch (e) { S = null; }
-if (!S || typeof S !== "object") S = blankState();
-S.roles = S.roles || {}; S.added = S.added || []; S.towers = S.towers || []; S.seq = S.seq || 1; S.general = S.general || "";
+if (!S || typeof S !== "object") {
+  // Carry over anything typed on the round 1 page (roles were scrapped, so the role is dropped).
+  let old = null;
+  try { old = JSON.parse(localStorage.getItem(OLD_STORE) || "null"); } catch (e) { old = null; }
+  S = blankState();
+  if (old && typeof old === "object") {
+    const kept = (old.towers || []).map((t) => ({ name: t.name, desc: t.desc, paths: t.paths, notes: t.notes }));
+    if (kept.length) S.towers = kept;
+    S.general = old.general || "";
+  }
+}
+S.towers = S.towers || []; S.general = S.general || "";
 function save() { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) { /* storage unavailable */ } summary(); }
 
 const $ = (id) => document.getElementById(id);
@@ -174,69 +185,35 @@ function field(label, value, onInput, opts) {
   inp.addEventListener("input", () => onInput(inp.value));
   return el("label", { cls: opts.cls || "" }, [label, inp]);
 }
+const className = (id) => { const c = CLASSES.find((x) => x.id === id); return c ? c.name : ""; };
 
-// Roles: the draft ones carry edits in S.roles[id]; added ones live in S.added.
-function roleList() {
-  const list = [];
-  for (const r of ROLES) { const e = S.roles[r.id] || {}; if (e.status !== "remove") list.push({ id: r.id, name: (e.name || "").trim() || r.name }); }
-  for (const a of S.added) list.push({ id: a.id, name: (a.name || "").trim() || "(new role)" });
-  return list;
+function renderClasses() {
+  const box = $("classes"); box.textContent = "";
+  for (const c of CLASSES) box.appendChild(el("div", { cls: "cls" + (c.proposed ? " proposed" : "") }, [
+    el("div", { cls: "row" }, [el("h3", { text: c.name }), c.proposed ? el("span", { cls: "tag", text: "proposed" }) : el("span")]),
+    el("div", { cls: "ref", text: c.line })]));
 }
-function renderRoles() {
-  const box = $("roles"); box.textContent = "";
-  for (const r of ROLES) {
-    const e = S.roles[r.id] = S.roles[r.id] || {};
-    const card = el("div", { cls: "card" + (e.status === "remove" ? " removed" : "") });
-    const keep = el("button", { text: "Keep" }), rem = el("button", { text: "Remove", cls: "danger" });
-    const sync = () => { keep.classList.toggle("on", e.status !== "remove"); rem.classList.toggle("on", e.status === "remove"); card.classList.toggle("removed", e.status === "remove"); };
-    keep.addEventListener("click", () => { e.status = "keep"; sync(); save(); renderTowers(); });
-    rem.addEventListener("click", () => { e.status = "remove"; sync(); save(); renderTowers(); });
-    sync();
-    card.appendChild(el("div", { cls: "row", style: "justify-content: space-between" }, [el("h3", { text: r.name }), el("div", { cls: "seg" }, [keep, rem])]));
-    card.appendChild(field("Name", e.name === undefined ? r.name : e.name, (v) => { e.name = v; save(); renderTowerRoleOptions(); }));
-    card.appendChild(field("Job", e.job === undefined ? r.job : e.job, (v) => { e.job = v; save(); }));
-    card.appendChild(field("Answers (enemy roles)", e.answers === undefined ? r.answers : e.answers, (v) => { e.answers = v; save(); }));
-    card.appendChild(el("div", { cls: "ref" }, [el("span", { cls: "tag", text: "Today's towers: " }), r.today]));
-    card.appendChild(field("Notes", e.notes, (v) => { e.notes = v; save(); }, { area: true }));
-    box.appendChild(card);
-  }
-  for (const a of S.added) {
-    const card = el("div", { cls: "card added" });
-    const del = el("button", { text: "Delete", cls: "danger" });
-    del.addEventListener("click", () => { S.added = S.added.filter((x) => x !== a); save(); renderRoles(); renderTowers(); });
-    card.appendChild(el("div", { cls: "row", style: "justify-content: space-between" }, [el("h3", { text: "New role" }), del]));
-    card.appendChild(field("Name", a.name, (v) => { a.name = v; save(); renderTowerRoleOptions(); }, { ph: "e.g. Siege" }));
-    card.appendChild(field("Job", a.job, (v) => { a.job = v; save(); }));
-    card.appendChild(field("Answers (enemy roles)", a.answers, (v) => { a.answers = v; save(); }));
-    card.appendChild(field("Notes", a.notes, (v) => { a.notes = v; save(); }, { area: true }));
-    box.appendChild(card);
-  }
-}
-
-const roleSelects = [];
-function fillRoleSelect(sel, t) {
-  const roles = roleList(); sel.textContent = "";
-  sel.appendChild(el("option", { value: "", text: "Pick a role" }));
-  for (const r of roles) sel.appendChild(el("option", { value: r.id, text: r.name }));
+function classSelect(t) {
+  const sel = el("select");
+  sel.appendChild(el("option", { value: "", text: "Pick a class" }));
+  for (const c of CLASSES) sel.appendChild(el("option", { value: c.id, text: c.name + (c.proposed ? " (proposed)" : "") }));
   sel.appendChild(el("option", { value: "other", text: "Other (write it in notes)" }));
-  if (t.role && t.role !== "other" && !roles.some((r) => r.id === t.role)) t.role = "";
-  sel.value = t.role || "";
+  sel.value = t.cls || "";
+  sel.addEventListener("change", () => { t.cls = sel.value; save(); });
+  return sel;
 }
-function renderTowerRoleOptions() { for (const [sel, t] of roleSelects) fillRoleSelect(sel, t); summary(); }
 function renderTowers() {
-  const box = $("towers"); box.textContent = ""; roleSelects.length = 0;
+  const box = $("towers"); box.textContent = "";
   if (!S.towers.length) box.appendChild(el("div", { cls: "empty", text: "No towers yet. Add one to start." }));
   S.towers.forEach((t, i) => {
     t.paths = t.paths || ["", "", ""];
-    const sel = el("select"); fillRoleSelect(sel, t); roleSelects.push([sel, t]);
-    sel.addEventListener("change", () => { t.role = sel.value; save(); });
     const up = el("button", { text: "▲", title: "Move up" }), dn = el("button", { text: "▼", title: "Move down" }), del = el("button", { text: "Delete", cls: "danger" });
     up.addEventListener("click", () => { if (i > 0) { [S.towers[i - 1], S.towers[i]] = [S.towers[i], S.towers[i - 1]]; save(); renderTowers(); } });
     dn.addEventListener("click", () => { if (i < S.towers.length - 1) { [S.towers[i + 1], S.towers[i]] = [S.towers[i], S.towers[i + 1]]; save(); renderTowers(); } });
     del.addEventListener("click", () => { S.towers.splice(i, 1); save(); renderTowers(); });
     const fields = el("div", { cls: "fields" }, [
       field("Name", t.name, (v) => { t.name = v; save(); }, { ph: "Tower name" }),
-      el("label", {}, ["Role", sel]),
+      el("label", {}, ["Class", classSelect(t)]),
       field("Description", t.desc, (v) => { t.desc = v; save(); }, { area: true, ph: "What it is, what it does, how it looks or feels" }),
     ]);
     const paths = el("div", { cls: "paths" }, [0, 1, 2].map((k) => field("Path " + (k + 1) + " purpose (optional)", t.paths[k], (v) => { t.paths[k] = v; save(); }, { ph: ["e.g. Power", "e.g. Range", "e.g. Effect"][k] })));
@@ -248,30 +225,13 @@ function renderTowers() {
 
 function clean(s) { return String(s || "").replace(/\s+/g, " ").trim(); }
 function summary() {
-  const out = ["Tower roster (round 1)", "Roles:"];
-  for (const r of ROLES) {
-    const e = S.roles[r.id] || {};
-    if (e.status === "remove") { out.push("- " + r.name + ": remove" + (clean(e.notes) ? "; notes: " + clean(e.notes) : "")); continue; }
-    const bits = [];
-    const nm = clean(e.name);
-    if (e.name !== undefined && nm && nm !== r.name) bits.push("renamed to " + nm);
-    if (e.job !== undefined && clean(e.job) !== r.job) bits.push("job: " + (clean(e.job) || "-"));
-    if (e.answers !== undefined && clean(e.answers) !== r.answers) bits.push("answers: " + (clean(e.answers) || "-"));
-    if (clean(e.notes)) bits.push("notes: " + clean(e.notes));
-    out.push("- " + r.name + ": keep" + (bits.length ? "; " + bits.join("; ") : ""));
-  }
-  for (const a of S.added) {
-    const bits = ["job: " + (clean(a.job) || "-"), "answers: " + (clean(a.answers) || "-")];
-    if (clean(a.notes)) bits.push("notes: " + clean(a.notes));
-    out.push("- New role " + (clean(a.name) || "(unnamed)") + ": " + bits.join("; "));
-  }
-  const names = {}; for (const r of roleList()) names[r.id] = r.name;
-  const towers = S.towers.filter((t) => clean(t.name) || clean(t.desc) || clean(t.notes) || t.role || (t.paths || []).some(clean));
+  const out = ["Tower roster (round 2)"];
+  const towers = S.towers.filter((t) => clean(t.name) || clean(t.desc) || clean(t.notes) || t.cls || (t.paths || []).some(clean));
   out.push("Towers (" + towers.length + "):");
   towers.forEach((t, i) => {
-    const role = t.role === "other" ? "other" : (names[t.role] || "-");
+    const cls = t.cls === "other" ? "other" : (className(t.cls) || "-");
     const p = (t.paths || []).map((x) => clean(x) || "-");
-    const bits = ["role " + role, "description: " + (clean(t.desc) || "-")];
+    const bits = ["class " + cls, "description: " + (clean(t.desc) || "-")];
     if (p.some((x) => x !== "-")) bits.push("paths: " + p.join(" / "));
     if (clean(t.notes)) bits.push("notes: " + clean(t.notes));
     out.push((i + 1) + ". " + (clean(t.name) || "(unnamed)") + ": " + bits.join("; "));
@@ -284,7 +244,6 @@ for (const row of TODAY) { const tr = el("tr"); for (const c of row) tr.appendCh
 const addTower = () => { S.towers.push({}); save(); renderTowers(); };
 $("add-tower").addEventListener("click", addTower);
 $("add-tower-2").addEventListener("click", addTower);
-$("add-role").addEventListener("click", () => { S.added.push({ id: "new" + (S.seq++) }); save(); renderRoles(); renderTowerRoleOptions(); });
 $("general").value = S.general;
 $("general").addEventListener("input", () => { S.general = $("general").value; save(); });
 $("copy").addEventListener("click", () => {
@@ -293,10 +252,10 @@ $("copy").addEventListener("click", () => {
   try { navigator.clipboard.writeText(ta.value).then(done, () => { ta.select(); }); } catch (e) { ta.select(); }
 });
 $("clear").addEventListener("click", () => {
-  if (!confirm("Clear the role edits, every tower and all notes?")) return;
-  S = blankState(); $("general").value = ""; save(); renderRoles(); renderTowers();
+  if (!confirm("Clear every tower and all notes?")) return;
+  S = blankState(); $("general").value = ""; save(); renderTowers();
 });
-renderRoles(); renderTowers();
+renderClasses(); renderTowers();
 </script>
 </body>
 </html>
