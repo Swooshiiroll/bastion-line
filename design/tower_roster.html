@@ -1,0 +1,261 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tower Roster</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    color-scheme: dark;
+    --ground: #06090e; --field: #0b1016; --panel: #08111a; --panel-2: #0d1a25; --rule: #1d3a4b; --wire: #2a5a70;
+    --text: #dcedf7; --dim: #86a0b1; --faint: #4f6a7b; --accent: #4de1ff; --gold: #ffc85a; --red: #ff6b6b;
+    --display: "Chakra Petch", "Bahnschrift", "Segoe UI", sans-serif;
+    --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--text); font: 14px/1.5 var(--body); padding: 28px 16px 48px; }
+  .wrap { max-width: 1340px; margin: 0 auto; display: grid; gap: 22px; }
+  .eyebrow { font: 600 12px var(--display); letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
+  h1 { font: 700 30px/1.1 var(--display); margin: 4px 0 0; }
+  h2 { font: 700 20px/1.2 var(--display); margin: 0; letter-spacing: .04em; }
+  h3 { font: 700 16px var(--display); margin: 0; letter-spacing: .03em; }
+  p.note { margin: 6px 0 0; color: var(--dim); max-width: 95ch; }
+  ul.rules { margin: 8px 0 0; padding-left: 18px; color: var(--dim); max-width: 100ch; }
+  ul.rules b, p.note b { color: var(--text); font-weight: 500; }
+  code { font: 12px var(--mono); color: var(--accent); }
+  section { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px 2px 12px 2px; padding: 12px 14px 14px; display: grid; gap: 10px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 10px; }
+  .card { border: 1px solid var(--rule); border-radius: 8px; padding: 10px; display: grid; gap: 7px; align-content: start; background: #071019; }
+  .card.removed { opacity: .45; border-style: dashed; }
+  .card.added { border-color: var(--gold); }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .key { font: 700 11px var(--display); color: #031018; background: var(--accent); border-radius: 4px; padding: 0 6px; }
+  .tag { font: 600 11px var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
+  .ref { color: var(--dim); font-size: 12.5px; }
+  label { display: grid; gap: 3px; font: 600 11px var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+  input, textarea, select { width: 100%; background: var(--field); color: var(--text); border: 1px solid var(--rule); border-radius: 6px;
+    font: 13px var(--body); padding: 6px 8px; text-transform: none; letter-spacing: 0; }
+  textarea { min-height: 44px; resize: vertical; }
+  input:focus, textarea:focus, select:focus { outline: 1px solid var(--accent); border-color: var(--accent); }
+  button { font: 600 12px var(--display); letter-spacing: .06em; color: var(--text); background: var(--panel-2); border: 1px solid var(--wire);
+    border-radius: 6px; padding: 6px 11px; cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  button.on { background: var(--accent); color: #031018; border-color: var(--accent); }
+  button.danger.on { background: var(--red); border-color: var(--red); color: #1a0505; }
+  button.big { width: 100%; padding: 9px; }
+  .seg { display: inline-flex; gap: 0; }
+  .seg button { border-radius: 0; }
+  .seg button:first-child { border-radius: 6px 0 0 6px; }
+  .seg button:last-child { border-radius: 0 6px 6px 0; }
+  .tower { border: 1px solid var(--rule); border-radius: 8px; padding: 10px; background: #071019; display: grid; gap: 8px;
+    grid-template-columns: 34px minmax(0, 1fr); }
+  .tower .num { font: 700 18px var(--display); color: var(--gold); text-align: center; padding-top: 18px; }
+  .tower .fields { display: grid; gap: 8px; grid-template-columns: minmax(150px, 1fr) minmax(150px, 1fr) minmax(0, 2.2fr); }
+  .tower .paths { display: grid; gap: 8px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .tower .tools { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+  .span2 { grid-column: span 2; }
+  .stack { display: grid; gap: 8px; }
+  details { border: 1px solid var(--rule); border-radius: 8px; padding: 8px 10px; background: #071019; }
+  summary { cursor: pointer; font: 600 13px var(--display); letter-spacing: .05em; color: var(--dim); }
+  .tablewrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 12.5px; margin-top: 8px; }
+  th, td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  th { font: 600 11px var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+  td { color: var(--dim); }
+  td:first-child { color: var(--text); white-space: nowrap; }
+  #summary { min-height: 120px; font: 12px var(--mono); }
+  .empty { color: var(--faint); font-style: italic; }
+  @media (max-width: 760px) {
+    .tower { grid-template-columns: minmax(0, 1fr); }
+    .tower .num { text-align: left; padding-top: 0; }
+    .tower .fields, .tower .paths { grid-template-columns: minmax(0, 1fr); }
+    .span2 { grid-column: auto; }
+    h1 { font-size: 24px; }
+  }
+  .classes { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; }
+  .cls { border: 1px solid var(--rule); border-left: 3px solid var(--accent); border-radius: 6px; padding: 7px 10px; background: #071019; display: grid; gap: 3px; }
+  .cls.proposed { border-left-color: var(--gold); border-style: dashed; border-left-style: solid; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Bastion Line · Tower rework · Roster · round 2</div>
+    <h1>Tower roster</h1>
+    <p class="note">Write your towers: a <b>name</b>, a <b>weapon class</b> and a <b>description</b> (the art is drawn from these later). The three path
+      purposes are optional here; we settle them in the next rounds. Everything is kept in this browser; copy it from the bottom of the page and send it back.
+      Spec: <code>design/towers.md</code> (issue #55). The classes come from the reference sheet <code>design/tower_classes.md</code>; edit the classes there.</p>
+    <ul class="rules">
+      <li><b>Weapon classes replace the roles</b> (your call, 2026-10-09): every tower has <b>exactly one</b>, and the class groups the shop. What else it does is TBD.</li>
+      <li><b>Each tower has 3 paths</b> of 4 upgrades and a mastery, each path with a purpose decided per tower (your examples: Power, Range, Speed, Effect, Buff),
+        plus an <b>optional Retrofit</b> designed for the tower.</li>
+      <li><b>Primary/secondary stays:</b> climb two paths until one gets its 3rd upgrade; that one is the primary, the other is capped.</li>
+      <li><b>Counters</b> to the reworked enemies come only through path upgrades; no tower exists just to counter.</li>
+    </ul>
+  </header>
+
+  <section>
+    <h2>Weapon classes (draft)</h2>
+    <p class="note" style="margin:0">From <code>design/tower_classes.md</code>. Field and Deployable are proposals you can accept or drop there.</p>
+    <div class="classes" id="classes"></div>
+  </section>
+
+  <section>
+    <div class="row" style="justify-content: space-between">
+      <h2>Your tower list</h2>
+      <button id="add-tower">+ Add a tower</button>
+    </div>
+    <div class="stack" id="towers"></div>
+    <button class="big" id="add-tower-2">+ Add a tower</button>
+    <details>
+      <summary>Today's 15 towers (reference only)</summary>
+      <div class="tablewrap"><table id="today"><thead><tr><th>Tower</th><th>Suggested class</th><th>Hits</th><th>Job today</th><th>Branches A / B / C</th></tr></thead><tbody></tbody></table></div>
+    </details>
+  </section>
+
+  <section class="out">
+    <h2>Roster and notes</h2>
+    <label>General notes<textarea id="general" placeholder="Anything else: how many towers you're aiming for, themes, what to keep from today's set..."></textarea></label>
+    <textarea id="summary" readonly></textarea>
+    <button class="big" id="copy">Copy roster and notes</button>
+    <button class="big" id="clear">Clear everything</button>
+  </section>
+</div>
+
+<script>
+const STORE = "bl-tower-roster-v2", OLD_STORE = "bl-tower-roster-v1";
+// Mirrors design/tower_classes.md (draft, 2026-10-09).
+const CLASSES = [
+  { id: "ballistic", name: "Ballistic", line: "Physical projectiles at a target: slugs, bolts, rounds, flechettes, rails." },
+  { id: "energy", name: "Energy", line: "Beams, lasers and lightning: no flight time; chains jump between targets." },
+  { id: "explosive", name: "Explosive", line: "Shells, missiles and bombs that burst where they land (and what the blast leaves)." },
+  { id: "utility", name: "Utility", line: "Doesn't attack: boosts towers, reveals and marks enemies, strips defences." },
+  { id: "economy", name: "Economy", line: "Doesn't fight: makes or saves credits." },
+  { id: "field", name: "Field", proposed: true, line: "Pulses, auras and shockwaves centred on the tower, covering its radius." },
+  { id: "deployable", name: "Deployable", proposed: true, line: "Launched units (drones) that act on their own away from the tower." },
+];
+const TODAY = [
+  ["Pulse Turret", "Ballistic", "air + ground", "Rapid single-target bolts", "Gatling Pulse / Shredder / Flechette"],
+  ["Plasma Mortar", "Explosive", "ground", "Splash damage", "Siege Mortar / Plasma Burn / Bunker Buster"],
+  ["Cryo Emitter", "Field (or Energy)", "air + ground", "Area slow plus light damage", "Stasis Field / Shatter Field / Cryo Lock"],
+  ["Railgun", "Ballistic", "air + ground", "Huge range, ignores armour", "Deadeye / Piercing Rail / Null Slug"],
+  ["Arc Coil", "Energy", "air + ground", "Chain lightning, double damage to barriers", "Storm Coil / Overload / Ion Storm"],
+  ["Laser Lance", "Energy", "air + ground", "Ramping beam, ignores armour", "Prism Array / Focus Lens / Sweeper"],
+  ["Missile Battery", "Explosive", "air + ground", "Homing salvos, double damage to flyers", "Swarm Pods / Hellfire / Cluster Munitions"],
+  ["Amplifier Pylon", "Utility", "support", "Boosts nearby towers' damage", "Overclock Pylon / Targeting Array / Suppression Pylon"],
+  ["Flak Battery", "Explosive", "air", "Airbursts that hit every flyer in the blast", "Sky Shredder / Proximity Burst / Dual Purpose"],
+  ["Sensor Array", "Utility", "support", "Reveals cloaked enemies, marks targets", "Deep Scan / Target Painter / Disruptor"],
+  ["Graviton Projector", "Field (or Energy)", "ground", "Gravity pulses that move enemies along the lane", "Repulsor / Crush Field / Gravity Well"],
+  ["Nullifier", "Field (or Utility)", "air + ground", "Strips barriers, armour and immunities", "Purge Emitter / Dampener / Feedback Loop"],
+  ["Nova Reactor", "Field (or Energy)", "air + ground", "360° shockwave", "Supernova / Pulse Reactor / Solar Flare"],
+  ["Drone Bay", "Deployable (or a call)", "air + ground", "Hunter drones that chase enemies anywhere", "Interceptor Wing / Bomber Wing / Hunter-Killer"],
+  ["Scrapyard", "Economy", "none (economy)", "Credits from wreckage", "Credit Mint / Scrap Collector / Supply Depot"],
+];
+
+const blankState = () => ({ towers: [{}], general: "" });
+let S;
+try { S = JSON.parse(localStorage.getItem(STORE) || "null"); } catch (e) { S = null; }
+if (!S || typeof S !== "object") {
+  // Carry over anything typed on the round 1 page (roles were scrapped, so the role is dropped).
+  let old = null;
+  try { old = JSON.parse(localStorage.getItem(OLD_STORE) || "null"); } catch (e) { old = null; }
+  S = blankState();
+  if (old && typeof old === "object") {
+    const kept = (old.towers || []).map((t) => ({ name: t.name, desc: t.desc, paths: t.paths, notes: t.notes }));
+    if (kept.length) S.towers = kept;
+    S.general = old.general || "";
+  }
+}
+S.towers = S.towers || []; S.general = S.general || "";
+function save() { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) { /* storage unavailable */ } summary(); }
+
+const $ = (id) => document.getElementById(id);
+function el(tag, attrs, kids) {
+  const n = document.createElement(tag);
+  for (const k in (attrs || {})) { if (k === "text") n.textContent = attrs[k]; else if (k === "cls") n.className = attrs[k]; else n.setAttribute(k, attrs[k]); }
+  for (const c of (kids || [])) n.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
+  return n;
+}
+function field(label, value, onInput, opts) {
+  opts = opts || {};
+  const inp = el(opts.area ? "textarea" : "input", opts.ph ? { placeholder: opts.ph } : {});
+  inp.value = value || "";
+  inp.addEventListener("input", () => onInput(inp.value));
+  return el("label", { cls: opts.cls || "" }, [label, inp]);
+}
+const className = (id) => { const c = CLASSES.find((x) => x.id === id); return c ? c.name : ""; };
+
+function renderClasses() {
+  const box = $("classes"); box.textContent = "";
+  for (const c of CLASSES) box.appendChild(el("div", { cls: "cls" + (c.proposed ? " proposed" : "") }, [
+    el("div", { cls: "row" }, [el("h3", { text: c.name }), c.proposed ? el("span", { cls: "tag", text: "proposed" }) : el("span")]),
+    el("div", { cls: "ref", text: c.line })]));
+}
+function classSelect(t) {
+  const sel = el("select");
+  sel.appendChild(el("option", { value: "", text: "Pick a class" }));
+  for (const c of CLASSES) sel.appendChild(el("option", { value: c.id, text: c.name + (c.proposed ? " (proposed)" : "") }));
+  sel.appendChild(el("option", { value: "other", text: "Other (write it in notes)" }));
+  sel.value = t.cls || "";
+  sel.addEventListener("change", () => { t.cls = sel.value; save(); });
+  return sel;
+}
+function renderTowers() {
+  const box = $("towers"); box.textContent = "";
+  if (!S.towers.length) box.appendChild(el("div", { cls: "empty", text: "No towers yet. Add one to start." }));
+  S.towers.forEach((t, i) => {
+    t.paths = t.paths || ["", "", ""];
+    const up = el("button", { text: "▲", title: "Move up" }), dn = el("button", { text: "▼", title: "Move down" }), del = el("button", { text: "Delete", cls: "danger" });
+    up.addEventListener("click", () => { if (i > 0) { [S.towers[i - 1], S.towers[i]] = [S.towers[i], S.towers[i - 1]]; save(); renderTowers(); } });
+    dn.addEventListener("click", () => { if (i < S.towers.length - 1) { [S.towers[i + 1], S.towers[i]] = [S.towers[i], S.towers[i + 1]]; save(); renderTowers(); } });
+    del.addEventListener("click", () => { S.towers.splice(i, 1); save(); renderTowers(); });
+    const fields = el("div", { cls: "fields" }, [
+      field("Name", t.name, (v) => { t.name = v; save(); }, { ph: "Tower name" }),
+      el("label", {}, ["Class", classSelect(t)]),
+      field("Description", t.desc, (v) => { t.desc = v; save(); }, { area: true, ph: "What it is, what it does, how it looks or feels" }),
+    ]);
+    const paths = el("div", { cls: "paths" }, [0, 1, 2].map((k) => field("Path " + (k + 1) + " purpose (optional)", t.paths[k], (v) => { t.paths[k] = v; save(); }, { ph: ["e.g. Power", "e.g. Range", "e.g. Effect"][k] })));
+    const body = el("div", { cls: "stack" }, [fields, paths, field("Notes", t.notes, (v) => { t.notes = v; save(); }, { area: true }), el("div", { cls: "tools" }, [up, dn, del])]);
+    box.appendChild(el("div", { cls: "tower" }, [el("div", { cls: "num", text: String(i + 1) }), body]));
+  });
+  summary();
+}
+
+function clean(s) { return String(s || "").replace(/\s+/g, " ").trim(); }
+function summary() {
+  const out = ["Tower roster (round 2)"];
+  const towers = S.towers.filter((t) => clean(t.name) || clean(t.desc) || clean(t.notes) || t.cls || (t.paths || []).some(clean));
+  out.push("Towers (" + towers.length + "):");
+  towers.forEach((t, i) => {
+    const cls = t.cls === "other" ? "other" : (className(t.cls) || "-");
+    const p = (t.paths || []).map((x) => clean(x) || "-");
+    const bits = ["class " + cls, "description: " + (clean(t.desc) || "-")];
+    if (p.some((x) => x !== "-")) bits.push("paths: " + p.join(" / "));
+    if (clean(t.notes)) bits.push("notes: " + clean(t.notes));
+    out.push((i + 1) + ". " + (clean(t.name) || "(unnamed)") + ": " + bits.join("; "));
+  });
+  if (clean(S.general)) out.push("General notes: " + clean(S.general));
+  $("summary").value = out.join("\n"); $("summary").rows = out.length + 1;
+}
+
+for (const row of TODAY) { const tr = el("tr"); for (const c of row) tr.appendChild(el("td", { text: c })); $("today").querySelector("tbody").appendChild(tr); }
+const addTower = () => { S.towers.push({}); save(); renderTowers(); };
+$("add-tower").addEventListener("click", addTower);
+$("add-tower-2").addEventListener("click", addTower);
+$("general").value = S.general;
+$("general").addEventListener("input", () => { S.general = $("general").value; save(); });
+$("copy").addEventListener("click", () => {
+  const ta = $("summary"), b = $("copy");
+  const done = () => { b.textContent = "Copied"; setTimeout(() => { b.textContent = "Copy roster and notes"; }, 1500); };
+  try { navigator.clipboard.writeText(ta.value).then(done, () => { ta.select(); }); } catch (e) { ta.select(); }
+});
+$("clear").addEventListener("click", () => {
+  if (!confirm("Clear every tower and all notes?")) return;
+  S = blankState(); $("general").value = ""; save(); renderTowers();
+});
+renderClasses(); renderTowers();
+</script>
+</body>
+</html>
