@@ -80,12 +80,12 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Tower rework · Upgrade structure · round 1</div>
+    <div class="eyebrow">Bastion Line · Tower rework · Upgrade structure · round 1 (decided)</div>
     <h1>Upgrade structure: depth and trunk</h1>
     <p class="note">Settled: <b>3 paths per tower</b>, each with its own purpose, and <b>primary/secondary stays</b>. Open: how deep a path goes, and whether
       the shared trunk (Stock → Retrofit) stays. Pick a <b>trunk</b> and a <b>depth</b> (mix freely) and add notes. <b>Your combination</b> shows the
-      mix on an example tower (today's until you pick). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
-      Spec: <code>design/towers.md</code> (issue #55).</p>
+      mix on an example tower (today's until you pick). <b>Decided:</b> your picks are preselected (trunk C Optional Retrofit, depth B 4 + mastery). The Retrofit is
+      tower-specific, has a fourth card with its own hotkey, and visibly changes the tower. Spec: <code>design/towers.md</code> (issue #55).</p>
     <ul class="rules">
       <li><b>Mixing (kept):</b> climb up to two paths, up to two upgrades each. The 3rd upgrade on either makes it the <b>primary</b>, which goes on to its mastery;
         the other is the <b>secondary</b>, capped at 2 and keeping its full effects. The third path is locked.</li>
@@ -131,7 +131,8 @@
 </div>
 
 <script>
-const STORE = "bl-tower-structure-v1";
+const STORE = "bl-tower-structure-v2";
+const DEFAULTS = { trunk: "C", depth: "B" }; // owner's pick, 2026-10-08
 const TODAY = { trunk: "A", depth: "B" };
 const TODAY_BUDGET = 1600; // Pulse Turret today: every upgrade of a full build (Retrofit, primary to mastery, secondary 2), after the 50 build
 const PURPOSES = ["Power", "Speed", "Effect"];
@@ -164,7 +165,7 @@ const DEPTHS = [
 let S;
 try { S = JSON.parse(localStorage.getItem(STORE) || "null"); } catch (e) { S = null; }
 if (!S || typeof S !== "object") S = {};
-S.picks = S.picks || { trunk: null, depth: null }; S.notes = S.notes || { trunk: "", depth: "", general: "" };
+S.picks = S.picks || { trunk: DEFAULTS.trunk, depth: DEFAULTS.depth }; S.notes = S.notes || { trunk: "", depth: "", general: "" };
 function save() { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) { /* storage unavailable */ } }
 
 const $ = (id) => document.getElementById(id);

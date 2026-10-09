@@ -26,7 +26,8 @@ confirms the spec (repo CLAUDE.md, "Designing a feature first"). Issue #55.
   - **Each path has a purpose**, determined per tower. The owner's examples: "Power, range, speed, effect, buff, etc."
   - **Primary/secondary stays:** climb two paths until one gets its 3rd upgrade; that one is the primary, and the
     other is capped where it is.
-  - **Depth and trunk:** Claude shows proposals (`design/tower_upgrade_structure.html`).
+  - **Depth and trunk (owner's pick, 2026-10-08):** trunk **C Optional Retrofit**, depth **B 4 upgrades + mastery**
+    (`design/tower_upgrade_structure.html`). See "Upgrade structure" below.
 - **Later, separately:** the Research lab, Prestige (#2, #3) and Super Structures (#4, #5) get their own passes once
   the roster is settled.
 - **Tracking:** its own issue (#55), branch (`design/tower-rework`), spec and draft PR, apart from the enemy rework.
@@ -64,12 +65,32 @@ confirms the spec (repo CLAUDE.md, "Designing a feature first"). Issue #55.
 - **Also built on today's towers:** saves (tower ids, paths), the Codex (`Lore.gd`, `data/glossary.gd`), the bot's
   build order (`BalanceProbe`), the tests, the tour, and the turret drawing cache (`Draw.dyn`, see CLAUDE.md).
 
+## Upgrade structure (decided)
+
+Picked by the owner on 2026-10-08 from `design/tower_upgrade_structure.html`: trunk **C Optional Retrofit**, depth
+**B 4 upgrades + mastery**.
+
+- **No gating trunk:** the three paths open straight from the stock tower.
+- **Each path:** four upgrades, then its mastery. Masteries still need the tower's Mastery research (the research
+  rework is a separate pass).
+- **Mixing (kept):** climb up to two paths, up to two upgrades each. The 3rd upgrade on either makes it the primary,
+  which goes on to its mastery; the other is the secondary, capped at 2 with its full effects. The third path is locked.
+- **The Optional Retrofit:** an all-round upgrade off to the side. It can be bought any time, before or after the paths,
+  and unlocks nothing.
+  - **What it gives:** a **tower-specific** boost, designed for each tower in the per-tower rounds (owner).
+  - **Buying it:** a **fourth card** in the tower panel beside the three path cards, with **its own hotkey** (owner).
+    Y is suggested (free today, next to U/I/O); the key is confirmed in the UI round.
+  - **Look:** it **visibly changes the tower** (owner), designed in the art phase with the per-path looks.
+- **Counts:** a full build is 8 upgrades with the Retrofit (Retrofit, 4 primary, the mastery, 2 secondary); the primary
+  locks in on the 3rd path upgrade; each tower has 16 upgrade nodes to design (the Retrofit and 3 paths of 4 plus a
+  mastery), as today.
+
 ## Process
 
 1. **Role set:** Claude's draft below; the owner keeps, renames, removes or adds roles (`design/tower_roster.html`).
 2. **Roster:** the owner writes the tower list on the same page: names, roles and descriptions, and optionally each
    tower's three path purposes.
-3. **Upgrade structure:** the owner picks or mixes a depth and trunk proposal (`design/tower_upgrade_structure.html`).
+3. **Upgrade structure:** decided (trunk C Optional Retrofit, depth B 4 + mastery; see above).
 4. **Per tower, in question rounds:** its three path purposes, its stats, its upgrades, and which upgrades counter
    which enemy mechanics. Then balance targets and how the bot probe checks them.
 5. **Art** (after gameplay): looks and animations from the owner's names and descriptions, then per-path looks (#6),
@@ -116,10 +137,17 @@ From the enemy rework (`design/enemies.md`, `design/enemy_roster.md` on `design/
 
 ## Open questions
 
+### Decided
+
+- **Upgrade structure** (2026-10-08): Optional Retrofit, 4 upgrades + mastery per path; the Retrofit is tower-specific,
+  bought from a fourth card with its own hotkey, and visibly changes the tower.
+
+### Still open
+
 1. **Role set:** keep, rename, remove or add roles (the roster page).
 2. **Roster:** the owner's tower list: names, roles, descriptions (the roster page).
-3. **Upgrade depth and trunk:** pick or mix a proposal (the structure page).
-4. **Per tower:** path purposes, stats, upgrades, counter upgrades (rounds after 1 to 3).
+3. **The Retrofit's hotkey:** Y suggested; confirmed in the UI round.
+4. **Per tower:** path purposes, the Retrofit's boost, stats, upgrades, counter upgrades (rounds after 1 and 2).
 5. **Old saves and ids:** what happens to towers in old saves when the roster changes (save format bump, refunds).
 6. **The bot, Codex, tests and tour:** how they follow the new roster.
 7. **Folding in #6 and #8:** per-path looks come in the art phase; the #8 playtest tree tweaks are rewritten into the
