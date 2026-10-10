@@ -1,129 +1,113 @@
-# Bastion Line Tower Weapon Classes (reference sheet)
+# Bastion Line Tower Classes (reference sheet)
 
-A reusable reference for sorting towers by **weapon class**: how a tower delivers its effect. It replaces the tower
-roles (owner, 2026-10-09). **Draft by Claude for the owner to edit**: rename, merge, split, add or delete classes,
-and rewrite any line. The tower rework spec is `design/towers.md` (issue #55).
+A reusable reference for sorting the towers. Every tower has one **class**: **Assault, Support, Defense or Utility**
+(owner, 2026-10-10). Each tower also carries a **weapon type** (Ballistic, Energy, Explosive...) as a descriptive
+sub-tag. The owner's class names and meanings are fixed; the wording, the weapon types and the edge cases are a
+**draft by Claude for the owner to edit**. The tower rework spec is `design/towers.md` (issue #55).
+
+History: roles (2026-10-08) were replaced by weapon classes (2026-10-09), which were replaced by these four classes
+(2026-10-10). The weapon classes live on below as the weapon-type sub-tag.
 
 ## Rules
 
-**Decided (owner, 2026-10-09):**
-- Every tower has **exactly one** weapon class.
+**Decided (owner, 2026-10-10):**
+- **Four classes:** Assault (damage), Support (boosts other towers), Defense (control: slow, stun, push, block),
+  Utility (tools: reveal, strip defences, economy).
+- Every tower has **exactly one** class.
 - The class **groups the shop** (and the Codex).
-- The class is a **weapon class**: it is about how the tower attacks (or, for towers that don't attack, what it does
-  instead), not its size or its technology.
+- **Economy towers are Utility.**
+- **Weapon type stays as a sub-tag:** Ballistic, Energy, Explosive and the rest describe how a tower attacks. They
+  group nothing and carry no rules for now.
 
 **To be decided (TBD):**
-- What else a class does in play. Candidates are listed under Parked at the end; none is adopted.
-- How the classes relate to the enemy spec's physical/energy damage split, which the Wraith depends on (decide later).
+- What else a class does in play. The candidates are listed under Parked; none is adopted.
+- How the weapon types relate to the enemy spec's physical/energy damage split, which the Wraith depends on (decide
+  later).
 
-**How to classify:** use the tower's **primary delivery**, meaning how its stock attack reaches the enemy. Upgrade
-paths don't change the class, because a tower has exactly one.
+**How to classify:** pick the class by the tower's **main job** with its stock setup. Upgrade paths don't change the
+class: a tower has exactly one. If a tower does two jobs, the one it's built and bought for wins (see Edge cases).
 
 **How to edit:** each class is a `## Name` section with the same bullets. "Strengths" and "Weak spots" are design
 reference only, with no rules attached. "Look cues" are a starting point for the art phase. "Today's towers" is a
 reference; the new roster comes from the owner.
 
-## Ballistic
+## Assault
 
-- **What it is:** fires physical projectiles at a target: slugs, bolts, rounds, flechettes, rails.
-- **Counts as Ballistic:** a projectile (or a burst of them) that flies to a target and hits what it strikes, with no
-  blast on impact. Piercing rounds stay Ballistic.
-- **Strengths:** precise, reliable and fast to land; easy to read; good at finishing single targets.
-- **Weak spots:** one target at a time; many small hits are where armour bites hardest.
-- **Look cues:** barrels, breeches, ammo feeds and belts, muzzle flashes, recoil; gunmetal and brass.
-- **Today's towers:** Pulse Turret (its "energy bolts" fly as projectiles), Railgun.
+- **Job:** deals the damage. The towers that kill enemies.
+- **Counts as Assault:** a tower whose main job is damage, single-target or area, ground, air or both.
+- **Strengths:** the backbone of every defence; the only class that wins on its own.
+- **Weak spots:** loses to what it can't answer (armour, flyers, cloak, crowds) without the other classes.
+- **Look cues:** weapons up front: barrels, emitters, launchers, coils; aggressive silhouettes.
+- **Today's towers:** Pulse Turret, Plasma Mortar, Railgun, Arc Coil, Laser Lance, Missile Battery, Flak Battery,
+  Nova Reactor, Drone Bay.
 
-## Energy
+## Support
 
-- **What it is:** directed energy: beams, lasers and lightning that reach the target with no flight time.
-- **Counts as Energy:** a beam or arc that connects tower and target directly, or a chain that jumps between targets.
-- **Strengths:** instant hits; often ignores armour or ramps up on a target; chains handle crowds.
-- **Weak spots:** short range or a ramp-up time; loses power over jumps or distance.
-- **Look cues:** emitters, lenses, coils and capacitors; glowing lines and a steady charge glow.
-- **Today's towers:** Laser Lance, Arc Coil. If Field (below) is dropped, the field towers come here too.
+- **Job:** boosts other towers: damage, range, fire rate and similar.
+- **Counts as Support:** a tower whose main job is making other towers better.
+- **Strengths:** multiplies a cluster of Assault towers; scales with how many towers it covers.
+- **Weak spots:** worthless alone; competes for space next to the towers it boosts.
+- **Look cues:** pylons, relay masts and amplifier rings; beams or glows linking it to nearby towers.
+- **Today's towers:** Amplifier Pylon.
 
-## Explosive
+## Defense
 
-- **What it is:** shells, missiles and bombs that burst where they land.
-- **Counts as Explosive:** anything that does area damage at an impact point, including what the blast leaves behind
-  (burning pools, shrapnel, airbursts).
-- **Strengths:** hits groups; good against swarms and packs.
-- **Weak spots:** flight time and blast spread; some can't hit flyers, others only hit flyers.
-- **Look cues:** launch tubes and mortar barrels, missile racks, warhead tips, hazard markings; smoke on firing.
-- **Today's towers:** Plasma Mortar, Missile Battery, Flak Battery.
+- **Job:** holds the line. It controls enemies: slows, stuns, pushes back and blocks.
+- **Counts as Defense:** a tower whose main job is changing how enemies move, not killing them. Light damage on the
+  side doesn't change that.
+- **Strengths:** buys time for Assault towers; answers Rushers, Evaders and bosses.
+- **Weak spots:** kills little by itself; some enemies resist control (Rampart, boss slow resist).
+- **Look cues:** heavy, planted bases; emitter plates, domes and field rings; cold, gravity or force-field glows.
+- **Today's towers:** Cryo Emitter, Graviton Projector.
 
 ## Utility
 
-- **What it is:** doesn't attack. It changes the fight: boosts towers, reveals and marks enemies, strips defences.
-- **Counts as Utility:** a tower whose main job is an effect on towers or enemies rather than damage. A little damage
-  on the side doesn't change that.
-- **Strengths:** multiplies the towers around it; answers tricks (cloak, decoys, disguise) and defences.
-- **Weak spots:** worthless alone; competes for space with damage towers.
-- **Look cues:** dishes, antennas, pylons, projectors, rotating scanners; soft ring fields.
-- **Today's towers:** Amplifier Pylon, Sensor Array.
+- **Job:** the tools: reveal hidden enemies, strip enemy defences, and the economy.
+- **Counts as Utility:** a tower whose main job is information (reveal, marks), removing enemy defences (barriers,
+  armour, immunities), or credits (income, discounts, refunds).
+- **Strengths:** answers the tricks (cloak, decoys, disguise, barriers) and pays for the rest of the defence.
+- **Weak spots:** no real damage; easy to over-build.
+- **Look cues:** dishes, antennas, scanners and projectors; for economy, cranes, hoppers and a warm credit glow.
+- **Today's towers:** Sensor Array, Nullifier, Scrapyard.
 
-## Economy
+## Weapon types (sub-tag)
 
-- **What it is:** doesn't fight. It makes or saves credits.
-- **Counts as Economy:** income, kill-credit bonuses, discounts and refunds.
-- **Strengths:** pays for the rest of the defence over a run.
-- **Weak spots:** no defence of its own; slow to pay back.
-- **Look cues:** cranes, hoppers, conveyors and scrap piles, with a warm credit glow; industrial.
-- **Today's towers:** Scrapyard.
+Descriptive only: how a tower delivers its effect. Each tower gets one. Non-attacking towers are **None**. These are the
+earlier weapon classes, kept as tags (owner, 2026-10-10).
 
-## Field (proposed: accept or drop)
+| Weapon type | What it is | Today's towers |
+|---|---|---|
+| Ballistic | Physical projectiles at a target: slugs, bolts, rounds, flechettes, rails | Pulse Turret, Railgun |
+| Energy | Beams, lasers and lightning, no flight time; chains jump between targets | Laser Lance, Arc Coil |
+| Explosive | Shells, missiles and bombs that burst where they land, and what the blast leaves behind | Plasma Mortar, Missile Battery, Flak Battery |
+| Field (proposed) | Pulses, auras and shockwaves centred on the tower, covering its radius | Cryo Emitter, Graviton Projector, Nova Reactor, Nullifier |
+| Deployable (proposed) | Launched units (drones) that act on their own away from the tower | Drone Bay |
+| None | Doesn't attack | Amplifier Pylon, Sensor Array, Scrapyard |
 
-A split out of Energy, for towers that affect **everything in an area around themselves** instead of aiming at a
-target.
-
-- **What it is:** pulses, auras and shockwaves centred on the tower: cold, gravity, dampening, plasma.
-- **Counts as Field:** the effect starts at the tower and covers its whole radius, with no projectile and no aimed
-  beam.
-- **Strengths:** never misses anything in range; hits air and ground alike; good at control (slow, shove, strip).
-- **Weak spots:** only its own radius; usually light damage per enemy.
-- **Look cues:** domes, rings and pulse plates; expanding rings on each pulse.
-- **Today's towers:** Cryo Emitter, Graviton Projector, Nova Reactor, Nullifier. **If dropped,** they go under Energy
-  (Nullifier possibly under Utility; see Edge cases).
-
-## Deployable (proposed: accept or drop)
-
-For towers whose attack is **launched units that act on their own**.
-
-- **What it is:** a bay or hangar that sends out drones (or other units) that hunt, bomb or intercept away from the
-  tower.
-- **Counts as Deployable:** the damage is dealt by units that leave the tower and move by themselves.
-- **Strengths:** reaches anywhere on the map; units can chase flyers and leakers.
-- **Weak spots:** units take time to arrive; spread thin over a big map.
-- **Look cues:** hangar bays, launch rails, docking cradles and landing lights.
-- **Today's towers:** Drone Bay. **If dropped,** it needs a call: Ballistic (its drones shoot) or Explosive (the
-  bomber path).
+Field and Deployable are proposals. If they're dropped, the field towers become Energy and the Drone Bay needs a call
+(Ballistic or Explosive).
 
 ## Edge cases (owner's calls)
 
-With exactly one class per tower, a few towers sit between classes. Claude's suggestion is first; the owner decides.
+Claude's suggestion comes first; the owner decides.
 
 | Case | Suggested class | Why | Alternative |
 |---|---|---|---|
-| Pulse Turret: "energy bolts" | Ballistic | They fly to the target as projectiles | Energy, if the name should rule |
-| Flak Battery: airburst shells | Explosive | Area burst at the impact point | Ballistic (it's a cannon) |
-| Plasma Mortar's burning pools | Explosive | Left behind by an Explosive shell | |
-| Missile Battery | Explosive | Each missile bursts on impact | |
-| Railgun's piercing line | Ballistic | Still a projectile, it just keeps going | Energy (rail as an energy weapon) |
-| Arc Coil: chain lightning | Energy | An arc, no flight time | Field, if accepted |
-| Nova Reactor: shockwave | Field (Energy if Field is dropped) | Centred on the tower, covers its radius | |
-| Nullifier: dampening pulse with light damage | Field (Utility if Field is dropped) | Its main job is stripping defences | Utility either way |
-| Drone Bay | Deployable (see above if dropped) | Units deal the damage away from the tower | Ballistic or Explosive |
-| A tower whose path changes its attack (e.g. a cone, a storm field) | Keep the stock class | Exactly one class per tower | |
+| Sensor Array: reveals cloaked enemies **and** marks enemies to take extra damage | Utility | Reveal is the job only it can do | Support (the marks raise every tower's damage) |
+| Nullifier: strips barriers, armour and immunities, with light damage | Utility | Removing defences is its job | Defense |
+| Nova Reactor: shockwave around itself | Assault | Its job is damage | |
+| Cryo Emitter: slows plus light damage (the Shatter path makes chilled enemies take more damage) | Defense | The slow is its job | |
+| Flak Battery: air-only damage | Assault | Damage, just only against flyers | |
+| Drone Bay | Assault | Its drones do damage | |
+| A path that shifts a tower's job (e.g. a damage path on a Defense tower) | Keep the stock class | Exactly one class per tower | |
 
 ## Parked (TBD): what a class could do in play
 
-Not adopted. These are listed so later rounds can pick from them (owner, 2026-10-09: "TBD").
+Not adopted. These are listed so later rounds can pick from them.
 
-- **Damage vs enemy defences:** enemies resist or are immune to some classes (the Wraith's energy-only rule; armour
-  vs Ballistic; barriers vs Energy).
-- **Class-wide boosts:** buffs, upgrades or research that target a class (e.g. a Utility tower that boosts only
-  Energy towers).
-- **Enemy counters:** enemy abilities that hit a class harder (e.g. EMP knocks out Energy towers longer).
-- **The physical/energy link** (decide later): the enemy spec calls every non-projectile tower, plus burn, damage over
-  time and Arc Coils, "energy" (`design/new_enemies.md`, Wraith, on `design/enemy-rework`). The classes could replace
-  that split, map onto it, or sit beside it.
+- **Class-wide boosts:** buffs, upgrades or research that target a class (e.g. Support towers that boost only Assault).
+- **Enemy counters by class:** enemy abilities that hit a class (e.g. EMP knocks out Assault towers longer).
+- **Build limits or costs by class.**
+- **Weapon types vs enemy defences** (the physical/energy link, decide later): the enemy spec calls every
+  non-projectile tower, plus burn, damage over time and Arc Coils, "energy" (`design/new_enemies.md`, Wraith, on
+  `design/enemy-rework`). The weapon types could replace that split, map onto it, or sit beside it.

@@ -1,6 +1,6 @@
 # Bastion Line Tower Rework (design)
 
-A general overhaul of the towers: **weapon classes**, a **new roster** the owner writes, a reworked **upgrade
+A general overhaul of the towers: **four classes**, a **new roster** the owner writes, a reworked **upgrade
 structure**, **counters** to the reworked enemies, then **new looks and animations**. This is a **draft for the owner
 to mark up**. Nothing here is confirmed beyond the owner direction below, and no game code changes until the owner
 confirms the spec (repo CLAUDE.md, "Designing a feature first"). Issue #55.
@@ -13,20 +13,22 @@ confirms the spec (repo CLAUDE.md, "Designing a feature first"). Issue #55.
 
 ## Owner direction (2026-10-08)
 
-- **Scope:** classes and stats (roles at first; replaced by weapon classes, 2026-10-09); the roster and upgrade
-  trees; per-path looks (#6); new looks and animations, **based on names and descriptions the owner writes**.
+- **Scope:** classes and stats (roles at first, then weapon classes, then four classes, 2026-10-10); the roster
+  and upgrade trees; per-path looks (#6); new looks and animations, **based on names and descriptions the owner writes**.
 - **Order:** gameplay first, then art.
 - **Roster:** the **owner writes the tower list** (names and descriptions) on an editable page. Claude proposes each
   tower's stats and tree around it, in question rounds.
-- **Roles scrapped; weapon classes instead (2026-10-09).** The owner first chose role families, then said "Lets scrap
-  the tower roles and sort them by class instead". Answers:
-  - **Class means weapon class:** how the tower attacks (for example Ballistic, Energy, Explosive), plus the
-    non-attacking Utility and Economy.
-  - **Exactly one class per tower.**
-  - **What a class does:** it groups the shop (decided); other gameplay rules are TBD.
-  - **The enemy spec's physical/energy split** (the Wraith): how it relates to the classes is decided later.
-  - **The class set** lives in a reusable markdown reference sheet, `design/tower_classes.md`: Claude drafts it, the
-    owner edits it.
+- **Classes (2026-10-10):** the towers are grouped into **four classes: Assault, Support, Defense, Utility** (owner).
+  This replaced role families (2026-10-08) and then weapon classes (2026-10-09). Answers:
+  - **Meanings:** Assault deals the damage; Support boosts other towers (damage, range, fire rate); Defense holds the
+    line by controlling enemies (slow, stun, push, block); Utility is the tools (reveal, strip enemy defences) and
+    the economy.
+  - **Economy towers are Utility.**
+  - **Exactly one class per tower**, and the class **groups the shop** (other gameplay rules TBD).
+  - **Weapon type stays as a sub-tag:** Ballistic, Energy, Explosive (plus the proposed Field and Deployable, and None)
+    describe how a tower attacks. Descriptive only for now.
+  - **The enemy spec's physical/energy split** (the Wraith): how it relates to the weapon types is decided later.
+  - **Reference sheet:** `design/tower_classes.md` (Claude drafts the wording, the owner edits).
 - **Counters** to the new enemy mechanics come **only through branch upgrades**. No tower exists just to counter.
 - **Upgrade structure:**
   - **3 paths** per tower.
@@ -95,7 +97,8 @@ Picked by the owner on 2026-10-08 from `design/tower_upgrade_structure.html`: tr
 ## Process
 
 1. **Class set:** Claude's draft in `design/tower_classes.md`; the owner edits it.
-2. **Roster:** the owner writes the tower list on `design/tower_roster.html`: names, classes and descriptions, and
+2. **Roster:** the owner writes the tower list on `design/tower_roster.html`: names, classes, weapon types and
+   descriptions, and
    optionally each tower's three path purposes.
 3. **Upgrade structure:** decided (trunk C Optional Retrofit, depth B 4 + mastery; see above).
 4. **Per tower, in question rounds:** its three path purposes, its stats, its upgrades, and which upgrades counter
@@ -104,23 +107,19 @@ Picked by the owner on 2026-10-08 from `design/tower_upgrade_structure.html`: tr
    on mockup pages like the enemy art (`design/enemy_art.md`), within the turret cache rules.
 6. **Implementation** waits on the owner's confirmation of the whole spec, and ships as its own PRs.
 
-## Weapon classes (draft)
+## Classes
 
-The full reference is `design/tower_classes.md`, for the owner to edit. Each tower has exactly one class, set by how
-its stock attack reaches the enemy; the class groups the shop.
+Decided by the owner (2026-10-10); the full reference, with edge cases, is `design/tower_classes.md`. Each tower has
+exactly one class, by its main job; the class groups the shop.
 
-| Class | What it is | Today's towers that would fit |
+| Class | Job | Today's towers that would fit |
 |---|---|---|
-| Ballistic | Physical projectiles at a target | Pulse Turret, Railgun |
-| Energy | Beams, lasers and lightning, no flight time | Laser Lance, Arc Coil |
-| Explosive | Shells, missiles and bombs that burst where they land | Plasma Mortar, Missile Battery, Flak Battery |
-| Utility | Doesn't attack: boosts, reveals, marks, strips defences | Amplifier Pylon, Sensor Array |
-| Economy | Doesn't fight: makes or saves credits | Scrapyard |
-| Field (proposed) | Pulses and shockwaves centred on the tower | Cryo Emitter, Graviton Projector, Nova Reactor, Nullifier |
-| Deployable (proposed) | Launched units acting away from the tower | Drone Bay |
+| Assault | Deals the damage | Pulse Turret, Plasma Mortar, Railgun, Arc Coil, Laser Lance, Missile Battery, Flak Battery, Nova Reactor, Drone Bay |
+| Support | Boosts other towers: damage, range, fire rate | Amplifier Pylon |
+| Defense | Holds the line: slow, stun, push, block | Cryo Emitter, Graviton Projector |
+| Utility | Tools: reveal, strip enemy defences, economy | Sensor Array, Nullifier, Scrapyard |
 
-The sheet also lists the edge cases (towers between two classes) and the parked ideas for what a class could do in play
-beyond the shop.
+**Weapon type (sub-tag, descriptive):** Ballistic, Energy, Explosive, Field (proposed), Deployable (proposed), None.
 
 ## Counters to answer (through branch upgrades)
 
@@ -149,21 +148,21 @@ From the enemy rework (`design/enemies.md`, `design/enemy_roster.md` on `design/
 
 ### Decided
 
-- **Weapon classes, not roles** (2026-10-09): exactly one per tower; groups the shop; reference sheet
-  `design/tower_classes.md`.
+- **Four classes** (2026-10-10): Assault, Support, Defense, Utility; exactly one per tower; groups the shop;
+  economy is Utility; weapon type kept as a descriptive sub-tag. Reference sheet `design/tower_classes.md`.
 - **Upgrade structure** (2026-10-08): Optional Retrofit, 4 upgrades + mastery per path; the Retrofit is tower-specific,
   bought from a fourth card with its own hotkey, and visibly changes the tower.
 
 ### Still open
 
-1. **Class set:** the owner's edits to `design/tower_classes.md`: accept or drop Field and Deployable, and decide the
-   edge cases.
-2. **Roster:** the owner's tower list: names, classes, descriptions (the roster page).
+1. **Class sheet:** the owner's edits to `design/tower_classes.md`: the edge cases (Sensor Array, Nullifier), and
+   accept or drop the Field and Deployable weapon types.
+2. **Roster:** the owner's tower list: names, classes, weapon types, descriptions (the roster page).
 3. **The Retrofit's hotkey:** Y suggested; confirmed in the UI round.
 4. **Per tower:** path purposes, the Retrofit's boost, stats, upgrades, counter upgrades (rounds after 1 and 2).
 5. **Old saves and ids:** what happens to towers in old saves when the roster changes (save format bump, refunds).
 6. **The bot, Codex, tests and tour:** how they follow the new roster.
 7. **What a class does beyond the shop** (TBD): candidates are parked in the class sheet.
-8. **Classes and the physical/energy split** the Wraith needs: decide later.
+8. **Weapon types and the physical/energy split** the Wraith needs: decide later.
 9. **Folding in #6 and #8:** per-path looks come in the art phase; the #8 playtest tree tweaks are rewritten into the
    new trees.
