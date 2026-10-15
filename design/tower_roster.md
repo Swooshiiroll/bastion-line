@@ -1,46 +1,52 @@
-# Bastion Line Tower Roster (working roster)
+# Bastion Line Tower Roster
 
-The tower rework's working roster: **20 towers** (owner, 2026-10-14; the 20th added 2026-10-15). Towers 1 to 17 are the owner's; the **Magneto
-Tower** (18) and **Tractor Tower** (19) are Claude's proposals, added at the owner's request. It supports
-`design/towers.md` (the rework spec); that spec holds the rules, this file holds the towers. Issue #55.
+The tower rework's roster: **20 towers**, all designed with the owner (2026-10-14 to 2026-10-15). Towers 1 to 17 and
+the Augmentation Tower (20) are the owner's; the **Magneto Tower** (18) and **Tractor Tower** (19) began as Claude's
+proposals, and the owner rewrote their descriptions. It supports `design/towers.md` (the rework spec): that spec holds
+the rules (classes, upgrade structure, pricing), this file holds the towers. Issue #55.
 
 ## How to read it
 
 - **Class:** Assault, Support, Defense or Utility; **weapon type** is the descriptive sub-tag
   (`design/tower_classes.md`).
-- **Paths:** the owner's three path purposes, in path order. Every tower has 3 paths of 4 upgrades and a mastery, and an
-  optional tower-specific Retrofit (`design/towers.md`, Upgrade structure).
+- **Paths:** the owner's three path purposes, in path order. Each path has 4 upgrades and a mastery; the 3rd upgrade on a
+  path makes it the primary, and the other path started is capped at 2. The **CAS Gunship** is the exception: each path
+  is one gun, and all three are uncapped.
+- **Retrofit:** an optional, tower-specific upgrade off to the side. The player **picks one of three** when buying it,
+  and the choice is locked. The **Drone Bay** keeps a single Retrofit (owner).
 - **Owner's text** (description, quote, paths, notes) is verbatim from the roster page.
-- **Design:** filled in tower by tower, in roster order, from question rounds with the owner (questions first). Until
-  then it reads "not started".
-- **Status:** roster only, in rounds, or designed (owner-confirmed).
+- **Design:** each tower's Decided list holds the owner's answers. Stock stats and upgrade effects are Claude's
+  proposals that the owner confirmed. Prices come from the value formula (`design/towers.md`, Pricing), with the
+  owner's overrides; the balance probe tunes the numbers before implementation.
 
 ## Summary
 
-| # | Tower | Class | Weapon type | Paths | Status |
-|---|---|---|---|---|---|
-| 1 | Gun Turret | Assault | Ballistic | Power / Range/Visibility / Multi-Target | Designed (2026-10-15) |
-| 2 | Mortar Tower | Assault | Explosive | Power/Penetration / Speed/Range / Blast Radius/Multi-Target | Designed (2026-10-15) |
-| 3 | Laser Tower | Assault | Energy | Power / Multi-Target / Range/Targeting | Designed (2026-10-15) |
-| 4 | Rocket Salvo | Assault | Explosive | Power / Range/Target Acquisition / Reload/Payload | Designed (2026-10-15) |
-| 5 | Anti-Aircraft Turret | Assault | Ballistic | Range / Power/Blast Radius / Speed | Designed (2026-10-15) |
-| 6 | Artillery Cannon | Assault | Explosive | Power / Speed / Special Effects | Designed (2026-10-15) |
-| 7 | Railgun | Assault | Ballistic | Power / Range/Speed / Special Effects | Designed (2026-10-15) |
-| 8 | Tesla Tower | Assault | Energy | Power (Damage) / Range/Chaining / Speed | Designed (2026-10-15) |
-| 9 | Drone Bay | Assault | Deployable | Power (overall) / Weaponry (upgrades/additions) / Speed | Designed (2026-10-15) |
-| 10 | CAS Gunship | Assault | Deployable | Light gun / Medium gun / Heavy gun (owner, replacing Speed (Attack) / Power / Weaponry Upgrades) | Designed (2026-10-15) |
-| 11 | Mine Layer | Defense | Explosive | Power/Damage / Production Speed / Range | Designed (2026-10-15) |
-| 12 | Chemical Plant | Support | Chemical | Damage/Armor stripping / Speed / Slowing | Designed (2026-10-15) |
-| 13 | Boost Tower (was Rally Beacon) | Support | None | Damage boost / Speed boost / Range Boost | Designed (2026-10-15) |
-| 14 | Radar Tower | Utility | Energy | Power/Range / Speed/Frequency / Special Targeting | Designed (2026-10-15) |
-| 15 | Cryo Tower | Support | Field | Slowing / Power/Range / Speed | Designed (2026-10-15) |
-| 16 | Shockwave Generator | Assault | Field | Power/Range / Speed / Effect | Designed (2026-10-15) |
-| 17 | Scrapyard | Utility | None | Passive Income / Kill Income / Discounts | Designed (2026-10-15) |
-| 18 | Magneto Tower (Claude's proposal) | Defense | Field | Pull Strength / Field Size / Polarity | Designed (2026-10-15) |
-| 19 | Tractor Tower (Claude's proposal) | Defense | Energy | Pull Distance / Recharge / Grip | Designed (2026-10-15) |
-| 20 | Augmentation Tower | Support | None | Energy Conversion / Critical Hits / Ricochet | Designed (2026-10-15) |
+All 20 towers are designed and confirmed by the owner (2026-10-15). Costs are build costs in credits.
 
-**By class:** Assault 11, Defense 3, Support 4, Utility 2 (20 towers).
+| # | Tower | Class | Weapon type | Cost | Paths | Retrofit options |
+|---|---|---|---|---|---|---|
+| 1 | Gun Turret | Assault | Ballistic | 75 | Power / Range/Visibility / Multi-Target | Water-Cooled Barrel / AP Belt / Tracer Feed |
+| 2 | Mortar Tower | Assault | Explosive | 150 | Power/Penetration / Speed/Range / Blast Radius/Multi-Target | Field Kit / Bunker Sight / Smoke Shells |
+| 3 | Laser Tower | Assault | Energy | 250 | Power / Multi-Target / Range/Targeting | Capacitor Bank / Heat Sinks / Focusing Lens |
+| 4 | Rocket Salvo | Assault | Explosive | 200 | Power / Range/Target Acquisition / Reload/Payload | Guidance Fins / Autoloader / Long Booster |
+| 5 | Anti-Aircraft Turret | Assault | Ballistic | 150 | Range / Power/Blast Radius / Speed | Fire-Control Radar / Ammo Drum / Armoured Mount |
+| 6 | Artillery Cannon | Assault | Explosive | 300 | Power / Speed / Special Effects | Ammo Hoist / Heavy Recoil Mount / Wide Charge |
+| 7 | Railgun | Assault | Ballistic | 500 | Power / Range/Speed / Special Effects | Capacitor Coils / Longer Rails / Penetrator Tips |
+| 8 | Tesla Tower | Assault | Energy | 250 | Power (Damage) / Range/Chaining / Speed | Bigger Disk / Grounding Rods / Insulated Coils |
+| 9 | Drone Bay | Assault | Deployable | 300 | Power (overall) / Weaponry (upgrades/additions) / Speed | Second Hangar (only) |
+| 10 | CAS Gunship | Assault | Deployable | 650 | Light gun / Medium gun / Heavy gun (its own system) | Radar / Extra Ammo / Wide Orbit |
+| 11 | Mine Layer | Defense | Explosive | 450 | Power/Damage / Production Speed / Range | Conveyor Feed / Shaped Charges / Long Arm |
+| 12 | Chemical Plant | Support | Chemical | 250 | Damage/Armor stripping / Speed / Slowing | Pressure Pump / Mist Nozzle / Bigger Tanks |
+| 13 | Boost Tower (was Rally Beacon) | Support | None | 400 | Damage boost / Speed boost / Range Boost | Signal Booster / Crit Link / Wide Mast |
+| 14 | Radar Tower | Utility | Energy | 575 | Power/Range / Speed/Frequency / Special Targeting | Bigger Dish / Signal Processor / Early Warning |
+| 15 | Cryo Tower | Support | Field | 150 | Slowing / Power/Range / Speed | Coolant Tank / Compressor / Deep Cold |
+| 16 | Shockwave Generator | Assault | Field | 450 | Power/Range / Speed / Effect | Wave Focus / Containment Coils / Reactor Venting |
+| 17 | Scrapyard | Utility | None | 875 | Passive Income / Kill Income / Discounts | Second Crusher / Bigger Yard / Salvage Crane |
+| 18 | Magneto Tower (Claude's proposal) | Defense | Field | 525 | Pull Strength / Field Size / Polarity | Superconducting Coil / Field Stabiliser / Pole Shoes |
+| 19 | Tractor Tower (Claude's proposal) | Defense | Energy | 575 | Pull Distance / Recharge / Grip | Twin Emitter / Longer Hold / Faster Recharge |
+| 20 | Augmentation Tower | Support | None | 650 | Energy Conversion / Critical Hits / Ricochet | Wide Aura / Amplified Bonus / Remote Link |
+
+**By class:** Assault 11, Defense 3, Support 4, Utility 2.
 
 ## 1. Gun Turret
 
@@ -1872,7 +1878,22 @@ the Wraith up). The build cost stays the owner's 650.
 **Look (for the art phase):** a crystal-topped emitter that projects coloured links to nearby towers: cyan for energy,
 gold for crits, green for ricochet. The Retrofit's choice shows.
 
-## Gap review (Claude, 2026-10-14, for the 17-tower list)
+## Gap review (historical: Claude, 2026-10-14, for the 17-tower list)
+
+**Since covered:**
+- **Defense:** the Magneto Tower (slow and armour), the Tractor Tower (pull back, holds, stuns) and the Mine Layer.
+- **Removing enemy defences:** barriers (Shockwave Generator's Effect path, Tractor's Grip), armour (Chemical Plant,
+  Magneto's Polarity, Laser melt, Railgun shatter), abilities (Tractor's Grip Lock).
+- **The Wraith:** area energy damage that hits cloaked enemies (Railgun ion trail, Tesla storms, Shockwave waves) and the
+  Augmentation Tower's Energy Conversion.
+- **Burrowers:** the Mine Layer, the Mortar's Bunker Buster and Bunker Sight, all inside Radar range.
+- **Air or ground:** set per tower in each design.
+
+**Still open** (in `design/towers.md`): protecting towers from EMPs (only partly: the CAS Gunship's EMP silencing is a
+known weakness); build hotkeys for 20 towers; the Wraith-counter tower idea (possibly covered by the Augmentation Tower).
+
+**The original review:**
+
 
 - **Defense was nearly empty:** only the Mine Layer. Nothing pushed or pulled, stunned or blocked. The Cryo Tower slows
   but is filed under Support; by the class definitions it reads as Defense. (The Magneto and Tractor fill push, pull
