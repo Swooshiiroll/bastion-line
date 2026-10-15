@@ -1886,7 +1886,8 @@ gold for crits, green for ricochet. The Retrofit's choice shows.
   Magneto's Polarity, Laser melt, Railgun shatter), abilities (Tractor's Grip Lock).
 - **The Wraith:** area energy damage that hits cloaked enemies (Railgun ion trail, Tesla storms, Shockwave waves) and the
   Augmentation Tower's Energy Conversion.
-- **Burrowers:** the Mine Layer, the Mortar's Bunker Buster and Bunker Sight, all inside Radar range.
+- **Burrowers:** the Mine Layer (buried mines, no Radar needed), and the Mortar's Bunker Buster and Bunker Sight (inside
+  Radar range).
 - **Air or ground:** set per tower in each design.
 
 **Still open** (in `design/towers.md`): protecting towers from EMPs (only partly: the CAS Gunship's EMP silencing is a
