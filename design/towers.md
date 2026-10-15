@@ -107,7 +107,9 @@ towers, with prices **rounded to 5s and 0s**.
     ×1.1 (Laser); homing ×1.15 to ×1.3, and guidance fins ×1.1 (Rocket Salvo); cluster bomblets as extra splash hits
     (Mortar); **hits only flyers ×0.5** (Anti-Aircraft Turret), since flyers are a minority of enemies. A player-aimed
     whole-map gun counts its reach as ×1.5; burning ground as its damage over 3 s on everything in the blast; each extra
-    selectable shell type ×0.1; a stun ×1.15 to ×1.25 (Artillery Cannon). New effects (slow, stun, burn, pull, buffs,
+    selectable shell type ×0.1; a stun ×1.15 to ×1.25 (Artillery Cannon). Boss bonus damage ×1.1 to ×1.3; armour
+    shatter +3% per armour stripped; piercing with falloff ×1.25 (40% falloff) to ×1.75 (none); an ionised trail as its
+    burn on the line (Railgun). New effects (slow, stun, burn, pull, buffs,
     income) get their multiplier or damage equivalent when their tower is designed, and are listed here.
 - **Upgrade price:** (V after − V before) × **3.9 credits per value point** × the **step multiplier**, rounded to 5.
   - **3.9** is calibrated on the Gun Turret: 75 credits for its stock value (16 damage × 1.2 shots/s).

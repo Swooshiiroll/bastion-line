@@ -25,7 +25,7 @@ Tower** (18) and **Tractor Tower** (19) are Claude's proposals, added at the own
 | 4 | Rocket Salvo | Assault | Explosive | Power / Range/Target Acquisition / Reload/Payload | Designed (2026-10-15) |
 | 5 | Anti-Aircraft Turret | Assault | Ballistic | Range / Power/Blast Radius / Speed | Designed (2026-10-15) |
 | 6 | Artillery Cannon | Assault | Explosive | Power / Speed / Special Effects | Designed (2026-10-15) |
-| 7 | Railgun | Assault | Ballistic | Power / Range/Speed / Special Effects | Roster only |
+| 7 | Railgun | Assault | Ballistic | Power / Range/Speed / Special Effects | Designed (2026-10-15) |
 | 8 | Tesla Tower | Assault | Energy | Power (Damage) / Range/Chaining / Speed | Roster only |
 | 9 | Drone Bay | Assault | Deployable | Power (overall) / Weaponry (upgrades/additions) / Speed | Roster only |
 | 10 | CAS Gunship | Assault | Deployable | Speed (Attack) / Power / Weaponry Upgrades | Roster only |
@@ -573,7 +573,86 @@ target marker shows on the aimed spot. The Retrofit adds the ammo hoist. Per pat
 
 ### Design
 
-Not started. Rounds go in roster order.
+**Status: designed, confirmed by the owner with changes (2026-10-15).** The choices under Decided are the owner's. The
+stock stats and upgrade effects are Claude's proposals, confirmed as the design; the balance probe tunes their numbers. Prices come from the pricing formula, with the
+stock tuned to the owner's 500-credit build cost.
+
+**Decided (owner, 2026-10-15):**
+- Hits **air and ground**.
+- **Armour applies:** its huge per-shot damage already shrugs most of it off.
+- **Piercing with falloff** (owner's change, replacing "piercing from a path"): every slug passes through the enemies on
+  its line, **losing damage with each enemy it passes**; upgrades reduce the falloff.
+- **500 credits**: the priciest tower so far.
+- **Path 1 (Power):** **Boss Slayer and Overcharge** combined: bigger charged shots and bonus damage against bosses.
+- **Path 2 (Range/Speed):** **mostly recharge**. It already reaches far; the steps cut the recharge.
+- **Path 3 (Special Effects):** **armour shatter, a piercing line and an ionised trail.**
+- **Retrofit:** **capacitor coils** (faster recharge).
+
+**Stock (proposed):** 500 credits; a 90-damage slug every 2.5 s, 380 range; air and ground; armour applies (a Titan's
+9 armour costs it only 10%). **Penetration:** the slug pierces every enemy on its line, losing 40% of its damage with each
+enemy it passes through (90, 54, 32...).
+
+**Pricing values:** boss bonus damage counts as ×1.1 to ×1.3; armour shatter +3% per armour stripped; piercing with falloff
+as ×1.25 (40% falloff) up to ×1.75 (no falloff); an ionised trail as its burn on the line. These join the Pricing
+effect list.
+
+**Retrofit, Capacitor Coils (proposed), 140:** recharge 2.5 to 2.2 s. Look: glowing coils along the rails that charge
+up before each shot.
+
+**Path 1, Power (boss slayer and overcharge):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Dense Slugs | 345 | +30 damage (120) |
+| 2 | Boss Rounds | 275 | ×1.5 damage to bosses |
+| 3 (primary) | Overcharge | 2,260 | It charges each shot longer: 200 damage, a 3 s recharge |
+| 4 | Kill Charge | 5,125 | 240 damage; ×2 to bosses |
+| Mastery | Kingslayer | 6,465 | 280 damage per charged shot (3.3 s); **×2.5 to bosses** |
+
+**Path 2, Range/Speed (mostly recharge):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Fast Capacitors | 140 | Recharge 2.2 s |
+| 2 | Extended Rails | 245 | +40 range (420) |
+| 3 (primary) | Rapid Capacitors | 1,930 | Recharge 1.6 s |
+| 4 | Supercapacitors | 2,610 | Recharge 1.35 s |
+| Mastery | Twin Rails | 5,000 | Two rails firing in turn: a slug every 1.2 s, twice the stock rate |
+
+**Path 3, Special Effects (shatter, penetration, ion trail):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Shatter Rounds | 60 | Each hit strips 2 armour permanently, so every tower benefits |
+| 2 | Penetrator Core | 260 | Falloff per enemy 40% to 25% |
+| 3 (primary) | Ionised Trail | 1,535 | The line burns for 2 s (30 energy damage/s to anything on it) |
+| 4 | Hot Rail | 3,685 | Shatter 4 armour; trail 45/s; falloff 15% |
+| Mastery | Ion Lance | 6,920 | Shatter 6; trail 50/s; **no falloff**: full damage to everything on the line |
+
+**Combinations (primary + secondary capped at 2):**
+- **Power + 2 Special:** a boss-killing charged shot that also shatters armour and loses less damage as it pierces.
+- **Speed + 2 Power:** fast slugs with boss rounds.
+- **Special + 2 Speed:** a burning, piercing ion line fired faster. Good against lined-up waves.
+
+**Counters:**
+- **Bosses:** the Power path (×2.5 at the mastery).
+- **Armour:** shatter strips it for everyone.
+- **Lined-up columns:** penetration at stock, full-strength at the Ion Lance.
+- **Flyers:** hits them.
+- **The Wraith:** the slug is Ballistic, but the **ionised trail is energy**, so a Special Effects Railgun with a Radar
+  reveal can burn the Wraith.
+
+**Edge cases:**
+- **Overkill:** small targets waste a 110-damage slug; it's a heavy-target tower.
+- **Decoys:** holograms in front only cost the slug some falloff; it carries on to the real target.
+- **Armour applies to the slug, not the trail** (energy damage over time follows the burn rules: it ignores armour, as
+  today's burns do).
+
+**Look (for the art phase):** two long parallel rails on a heavy turret with a capacitor bank; a blue flash and a
+straight tracer line on each shot. The Retrofit adds glowing coils. Per path:
+- **Power:** a bulked-up breech and charge glow.
+- **Speed:** twin rails.
+- **Special:** an ion-blue trail that lingers.
 
 ## 8. Tesla Tower
 
