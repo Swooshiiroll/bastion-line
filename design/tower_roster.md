@@ -573,9 +573,10 @@ target marker shows on the aimed spot. The Retrofit adds the ammo hoist. Per pat
 
 ### Design
 
-**Status: designed, confirmed by the owner with changes (2026-10-15).** The choices under Decided are the owner's. The
-stock stats and upgrade effects are Claude's proposals, confirmed as the design; the balance probe tunes their numbers. Prices come from the pricing formula, with the
-stock tuned to the owner's 500-credit build cost.
+**Status: designed, confirmed by the owner (2026-10-15), after reopening for the ion-trail change.** The choices under
+Decided are the owner's. The stock stats and upgrade effects are Claude's proposals, confirmed as the design; the
+balance probe tunes their numbers. Prices come from the pricing formula,
+with the stock tuned to the owner's 500-credit build cost.
 
 **Decided (owner, 2026-10-15):**
 - Hits **air and ground**.
@@ -585,7 +586,9 @@ stock tuned to the owner's 500-credit build cost.
 - **500 credits**: the priciest tower so far.
 - **Path 1 (Power):** **Boss Slayer and Overcharge** combined: bigger charged shots and bonus damage against bosses.
 - **Path 2 (Range/Speed):** **mostly recharge**. It already reaches far; the steps cut the recharge.
-- **Path 3 (Special Effects):** **armour shatter, a piercing line and an ionised trail.**
+- **Path 3 (Special Effects):** **armour shatter, less penetration falloff, and an ionised trail.**
+- **The ion trail is area damage** (owner, 2026-10-15): it hurts **every enemy on the line, targeted or not**, cloaked
+  enemies included.
 - **Retrofit:** **capacitor coils** (faster recharge).
 
 **Stock (proposed):** 500 credits; a 90-damage slug every 2.5 s, 380 range; air and ground; armour applies (a Titan's
@@ -625,7 +628,7 @@ up before each shot.
 |---|---|---|---|
 | 1 | Shatter Rounds | 60 | Each hit strips 2 armour permanently, so every tower benefits |
 | 2 | Penetrator Core | 260 | Falloff per enemy 40% to 25% |
-| 3 (primary) | Ionised Trail | 1,535 | The line burns for 2 s (30 energy damage/s to anything on it) |
+| 3 (primary) | Ionised Trail | 1,535 | The line burns for 2 s: 30 energy damage/s to every enemy on it, targeted or not (cloaked ones too) |
 | 4 | Hot Rail | 3,685 | Shatter 4 armour; trail 45/s; falloff 15% |
 | Mastery | Ion Lance | 6,920 | Shatter 6; trail 50/s; **no falloff**: full damage to everything on the line |
 
@@ -639,11 +642,12 @@ up before each shot.
 - **Armour:** shatter strips it for everyone.
 - **Lined-up columns:** penetration at stock, full-strength at the Ion Lance.
 - **Flyers:** hits them.
-- **The Wraith:** the slug is Ballistic, but the **ionised trail is energy**, so a Special Effects Railgun with a Radar
-  reveal can burn the Wraith.
+- **The Wraith:** the slug is Ballistic, but the **ionised trail is area energy damage**: it burns a Wraith that crosses
+  or sits on the line **even while cloaked and untargeted** (owner). Like other area damage, it also reveals it briefly
+  (the enemy spec's rule).
 
 **Edge cases:**
-- **Overkill:** small targets waste a 110-damage slug; it's a heavy-target tower.
+- **Overkill:** small targets waste a 90-damage slug; it's a heavy-target tower.
 - **Decoys:** holograms in front only cost the slug some falloff; it carries on to the real target.
 - **Armour applies to the slug, not the trail** (energy damage over time follows the burn rules: it ignores armour, as
   today's burns do).
