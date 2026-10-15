@@ -1,6 +1,6 @@
 # Bastion Line Tower Roster (working roster)
 
-The tower rework's working roster: **19 towers** (owner, 2026-10-14). Towers 1 to 17 are the owner's; the **Magneto
+The tower rework's working roster: **20 towers** (owner, 2026-10-14; the 20th added 2026-10-15). Towers 1 to 17 are the owner's; the **Magneto
 Tower** (18) and **Tractor Tower** (19) are Claude's proposals, added at the owner's request. It supports
 `design/towers.md` (the rework spec); that spec holds the rules, this file holds the towers. Issue #55.
 
@@ -38,8 +38,9 @@ Tower** (18) and **Tractor Tower** (19) are Claude's proposals, added at the own
 | 17 | Scrapyard | Utility | None | Passive Income / Kill Income / Discounts | Designed (2026-10-15) |
 | 18 | Magneto Tower (Claude's proposal) | Defense | Field | Pull Strength / Field Size / Polarity | Designed (2026-10-15) |
 | 19 | Tractor Tower (Claude's proposal) | Defense | Energy | Pull Distance / Recharge / Grip | Designed (2026-10-15) |
+| 20 | Augmentation Tower | Support | None | Energy Conversion / Critical Hits / Ricochet | Designed (2026-10-15) |
 
-**By class:** Assault 11, Defense 3, Support 3, Utility 2.
+**By class:** Assault 11, Defense 3, Support 4, Utility 2 (20 towers).
 
 ## 1. Gun Turret
 
@@ -1733,6 +1734,98 @@ and glide backwards. The Retrofit's choice shows (a second emitter, a capacitor 
 - **Pull:** a long barrel on the dish.
 - **Recharge:** capacitor drums.
 - **Grip:** clamp arms on the dish rim.
+
+
+## 20. Augmentation Tower
+
+*Added at the owner's request (2026-10-15): "one more tower that can add special effects to towers".*
+
+- **Class:** Support. **Weapon type:** None.
+- **Description (owner, 2026-10-15):** Neighboring towers are given special augmentations to their weaponry through
+  mysterious means. "So my 12-guage shotgun shoots thermonuclear explosives now apparently."
+- **Paths:** 1. Energy Conversion; 2. Critical Hits; 3. Ricochet.
+
+### Design
+
+**Status: designed, confirmed by the owner (2026-10-15).** The choices under Decided are the owner's. The upgrade effects
+are Claude's proposals, confirmed as the design; the balance probe tunes their numbers.
+
+**Decided (owner, 2026-10-15):**
+- It adds **special effects to the towers in its range**: **energy conversion** and **bonus effects** (critical hits,
+  ricochets).
+- **Each path is one effect:** Energy Conversion, Critical Hits, Ricochet. The primary/secondary rule limits a tower to
+  two.
+- **Class: Support. Weapon type: None** (it doesn't attack).
+- **It works with the Boost Tower**, but two of its own kind don't stack: each tower takes the strongest of each effect.
+- **At stock, a small bonus: a 5% crit chance** for towers in range.
+- **A 2-tile radius** (96 px).
+- **650 credits.**
+- **Retrofit: the player's choice** when buying it, from three options.
+
+**Stock (proposed):** 650 credits; towers within 96 px get a 5% chance to crit (double damage) on every hit. Doesn't
+attack.
+
+**Pricing (confirmed by the owner):** the non-damage rule doesn't work here. The stock effect is so small that every upgrade would
+cost tens of thousands. Instead its upgrades are priced on the **Boost Tower's support scale**: each +1% of
+damage-equivalent bonus over the area is worth the same as one of the Boost Tower's boost points. In damage-equivalent
+terms: crit chance × (crit multiplier − 1); ricochet chance × bounce strength; full energy conversion = +15% (it opens
+the Wraith up). The build cost stays the owner's 650.
+
+**Retrofit (pick one when buying it):**
+- **Wide Aura, 170:** a 3-tile radius (144 px).
+- **Amplified Bonus, 135:** the stock crit chance doubles to 10%.
+- **Remote Link, 75:** towers up to twice its radius away get its effects at half strength.
+
+**Path 1, Energy Conversion:**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Charged Rounds | 105 | 25% of nearby towers' damage counts as **energy** |
+| 2 | Plasma Coating | 205 | 50% |
+| 3 (primary) | Energy Weave | 410 | 75% |
+| 4 | Full Conversion | 820 | **100%**: every nearby tower's damage is energy, so even Ballistic and Explosive towers can hurt the Wraith |
+| Mastery | Overcharge | 4,375 | 100% energy, plus +10% bonus energy damage |
+
+**Path 2, Critical Hits:**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Targeting Assist | 80 | 8% crit chance |
+| 2 | Weak-Point Scan | 165 | 11% |
+| 3 (primary) | Precision Matrix | 1,260 | 15%; crits do ×2.5 |
+| 4 | Lethal Matrix | 985 | 18% |
+| Mastery | Executioner Link | 7,440 | 22%; crits do ×3 |
+
+**Path 3, Ricochet:**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Deflector Rounds | 135 | 10% of hits bounce to another enemy within 60 px at 50% damage |
+| 2 | Bounce Coating | 275 | 20% |
+| 3 (primary) | Ricochet Field | 1,205 | 30%; bounces at 70% |
+| 4 | Chain Bounce | 1,530 | 40% |
+| Mastery | Pinball | 7,660 | 50%; a bounce can bounce again |
+
+**Combinations (primary + secondary capped at 2):**
+- **Energy + 2 Crit:** a Wraith-ready cluster that crits 11%.
+- **Crit + 2 Ricochet:** big crits that sometimes bounce.
+- **Ricochet + 2 Energy:** bouncing hits, half of them energy.
+
+**Counters:**
+- **The Wraith:** Energy Conversion lets the whole cluster hurt it (owner's earlier wish for a Wraith answer; the
+  separate Wraith tower idea is still open).
+- **Swarms:** ricochets.
+- **Elites and bosses:** crits.
+
+**Edge cases:**
+- **Which towers it affects:** every attacking tower in range, not Support or Utility towers, and not itself.
+- **Crits on towers that already crit** (the Gun Turret's Range path): the chances add up.
+- **Ricochets** only come from single-target hits (not blasts or beams), proposed.
+- **Energy and armour:** converted damage follows the energy rules (whatever the physical/energy decision settles).
+- **EMPs:** an EMP knocking it offline switches its effects off.
+
+**Look (for the art phase):** a crystal-topped emitter that projects coloured links to nearby towers: cyan for energy,
+gold for crits, green for ricochet. The Retrofit's choice shows.
 
 ## Gap review (Claude, 2026-10-14, for the 17-tower list)
 

@@ -118,6 +118,9 @@ towers, with prices **rounded to 5s and 0s**.
   - **Economy** (Scrapyard, 2026-10-15): the non-damage rule with the standard multipliers, by the owner's choice, so
     its masteries are a late-game credit sink rather than something that pays back. A Retrofit chosen on purchase is
     priced per option.
+  - **Effect towers** (Augmentation Tower, 2026-10-15): when a tower's stock effect is too small for the non-damage
+    rule, its upgrades are priced on the **Boost Tower's support scale**: each +1% of damage-equivalent bonus over the
+    area costs the same as one Boost Tower point.
   - **Exception, the CAS Gunship** (owner, 2026-10-15): each path upgrades one gun (light, medium, heavy; step 1
     unlocks it, the light gun is built in), and all three paths are uncapped up to their masteries. No primary/secondary.
   - **Owner overrides:** the owner can set a price directly when the formula undervalues something. So far: the Drone
@@ -144,7 +147,7 @@ towers, with prices **rounded to 5s and 0s**.
 
 ## Roster (owner, 2026-10-14)
 
-The working roster is **19 towers**; each one's text and design live in `design/tower_roster.md`. Towers 1 to 17 are
+The working roster is **20 towers** (the Augmentation Tower added 2026-10-15); each one's text and design live in `design/tower_roster.md`. Towers 1 to 17 are
 the owner's; the Magneto Tower and Tractor Tower are Claude's proposals, added at the owner's request.
 
 | # | Tower | Class | Weapon type |
@@ -168,6 +171,7 @@ the owner's; the Magneto Tower and Tractor Tower are Claude's proposals, added a
 | 17 | Scrapyard | Utility | None |
 | 18 | Magneto Tower (Claude's proposal) | Defense | Field |
 | 19 | Tractor Tower (Claude's proposal) | Defense | Energy |
+| 20 | Augmentation Tower | Support | None |
 
 **Decided (owner, 2026-10-14):** this is the working roster; design it **tower by tower in roster order** (Gun Turret
 first), **questions first**, before any drafting. No game code until the whole spec is confirmed. The gap review and
@@ -218,7 +222,7 @@ From the enemy rework (`design/enemies.md`, `design/enemy_roster.md` on `design/
 - **Four classes** (2026-10-10): Assault, Support, Defense, Utility; exactly one per tower; groups the shop;
   economy is Utility; weapon type kept as a descriptive sub-tag. Reference sheet `design/tower_classes.md`.
 - **Pricing** (2026-10-15): value-based formula for all towers, rounded to 5s and 0s (see Pricing).
-- **All 19 towers designed** (2026-10-15): stats, three paths of 4 + mastery each (the CAS Gunship's own system), the
+- **All 20 towers designed** (2026-10-15; the Augmentation Tower added as the 20th): stats, three paths of 4 + mastery each (the CAS Gunship's own system), the
   Retrofit, counters; see `design/tower_roster.md`.
 - **Working roster** (2026-10-14): 19 towers (`design/tower_roster.md`); designed tower by tower in roster order,
   questions first.
@@ -232,13 +236,13 @@ From the enemy rework (`design/enemies.md`, `design/enemy_roster.md` on `design/
 2. **Air or ground per tower,** and whether the roster covers flyers, the Wraith (energy only) and the Burrower well
    enough (asked tower by tower, then checked across the roster).
 3. **The Retrofit's hotkey:** Y suggested; confirmed in the UI round.
-4. **Per tower:** done. All 19 towers are designed (2026-10-15) in `design/tower_roster.md`; the numbers go to the
+4. **Per tower:** done. All 20 towers are designed (2026-10-15) in `design/tower_roster.md`; the numbers go to the
    balance probe.
 5. **Old saves and ids:** what happens to towers in old saves when the roster changes (save format bump, refunds).
 6. **The bot, Codex, tests and tour:** how they follow the new roster.
 7. **What a class does beyond the shop** (TBD): candidates are parked in the class sheet.
 8. **Weapon types and the physical/energy split** the Wraith needs: decide later.
-9. **Build hotkeys:** 19 towers need more keys than today's 15.
+9. **Build hotkeys:** 20 towers need more keys than today's 15.
 10. **A Wraith counter tower** (owner, 2026-10-15): the AA gun can't hurt the Wraith (physical damage); the owner wants
     a new tower idea for it, after the 19 towers are designed.
 11. **Folding in #6 and #8:** per-path looks come in the art phase; the #8 playtest tree tweaks are rewritten into the
