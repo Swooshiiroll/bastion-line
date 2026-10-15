@@ -894,9 +894,12 @@ and upgrade effects are Claude's proposals, confirmed as the design; the balance
 inside the orbit: 12 damage, 5 rounds/s. By the formula the armed stock is worth about 350; the rest of the 650 pays for
 the airframe that carries two more guns.
 
-**Retrofit, Radar, 35:** cloaked enemies inside the gunship's orbit (Phantom, Wraith) are **revealed to every tower**,
-not just the gunship (owner). That makes it a mobile Radar Tower. The formula values it at 35, since it only counts the
-gunship's own damage; the owner may set an override. Look: a radar dome under the fuselage.
+**Retrofit (the player picks one; owner, 2026-10-15):**
+- **Radar, 35:** cloaked enemies inside the gunship's orbit (Phantom, Wraith) are **revealed to every tower** (owner),
+  making it a mobile Radar Tower. The formula values it low since it only counts the gunship's own damage. Look: a radar
+  dome under the fuselage.
+- **Extra Ammo, 70:** +10% fire rate on every gun. Look: a bigger ammo bay.
+- **Wide Orbit, 195:** +25 px orbit radius (115), covering more track. Look: longer wings.
 
 **Pricing:** a player-aimed, place-anywhere gun counts its reach as ×1.5, like the Artillery Cannon.
 
@@ -980,8 +983,10 @@ the entrance end first.
 **Pricing value:** mines count like blasts (production rate × damage × area), plus ×1.1 for hitting burrowed enemies.
 The cap isn't priced.
 
-**Retrofit, Conveyor Feed (proposed), 110:** a mine every 1.33 s, and a 25-mine cap. Look: a conveyor belt and a
-hopper of ready mines.
+**Retrofit (the player picks one; owner, 2026-10-15):**
+- **Conveyor Feed, 110:** a mine every 1.33 s, and a 25-mine cap. Look: a conveyor belt and a hopper of ready mines.
+- **Shaped Charges, 160:** +15 damage per mine (100). Look: mines with a directional charge plate.
+- **Long Arm, 150:** +20 toss range (140). Look: a longer throwing arm.
 
 **Path 1, Power/Damage:**
 
@@ -1075,8 +1080,10 @@ the enemy loses 3 armour while soaked (it comes back when the soak ends). The pl
 its stock value set to its build cost. Each upgrade is then priced by how much it raises that effect (spray rate, soak
 length, armour stripped, damage over time, slow), using the same step multipliers. This joins the Pricing section.
 
-**Retrofit, Pressure Pump (proposed), 150:** a spray every 1.33 s, and +20 range (150). Look: a pump with pressure gauges
-on the spray head.
+**Retrofit (the player picks one; owner, 2026-10-15):**
+- **Pressure Pump, 150:** a spray every 1.33 s, and +20 range (150). Look: a pump with pressure gauges on the spray head.
+- **Mist Nozzle, 300:** each spray also soaks one more unsoaked enemy next to the target. Look: a wide misting nozzle.
+- **Bigger Tanks, 60:** soaks last 5 s. Look: larger chemical tanks.
 
 **Path 1, Damage/Armor stripping (acid):**
 
@@ -1163,9 +1170,12 @@ non-damage rule: stock value = build cost).
 **Stock (proposed):** 400 credits; towers within 144 px (3 tiles) get **+5% damage, +5% fire rate and +5% range**
 (confirmed by the owner). Doesn't attack.
 
-**Retrofit, Signal Booster (proposed), 1,380:** the radius grows to 168 px, and +5% to all three boosts, stacking on top
-(+10% each). The formula prices it high because it raises three boosts over a bigger area; the owner may override.
-Look: a taller antenna mast.
+**Retrofit (the player picks one; owner, 2026-10-15):**
+- **Signal Booster, 1,380:** the radius grows to 168 px, and +5% to all three boosts, stacking on top (+10% each). Look: a
+  taller antenna mast.
+- **Crit Link, 185:** boosted towers gain a 3% crit chance (it adds to the Augmentation Tower's crits). Look: a gold
+  ring on the beacon.
+- **Wide Mast, 625:** the radius grows to 192 px (a 4-tile aura), with no boost change. Look: a tall lattice mast.
 
 **Path 1, Damage boost:**
 
@@ -1256,7 +1266,11 @@ them. Only towers within the radar's 160 px benefit. Doesn't attack.
 **Pricing value:** reveal coverage (the share of time revealed) × the area covered × the kinds of enemy it reveals; the
 radiation circle priced as damage. This joins the Pricing section under the non-damage rule.
 
-**Retrofit, Bigger Dish, 305:** +20 radius (180 px), so more area and more towers inside it. Look: a larger dish.
+**Retrofit (the player picks one; owner, 2026-10-15):**
+- **Bigger Dish, 305:** +20 radius (180 px). Look: a larger dish.
+- **Signal Processor, 575:** each reveal lasts 1.5 s. Look: an electronics cabinet.
+- **Early Warning, 230 (price set by hand, proposed; the formula can't value information):** shows the next wave's
+  hidden enemies (cloaked, burrowers, disguised) in the wave preview before it starts. Look: a tall early-warning mast.
 
 **Path 1, Power/Range (range, then radiation):**
 
@@ -1343,7 +1357,10 @@ ground, is slowed 20% for 1.5 s. The strongest slow applies (slows don't stack),
 permanent slow counts 1.5× its strength; frostbite damage is priced as damage. This joins the Pricing section under the
 non-damage rule.
 
-**Retrofit, Coolant Tank (proposed), 80:** the slow lasts 2.2 s. Look: a frosted coolant tank on the side.
+**Retrofit (the player picks one; owner, 2026-10-15):**
+- **Coolant Tank, 80:** the slow lasts 2.2 s. Look: a frosted coolant tank on the side.
+- **Compressor, 35:** a wave every 1.7 s. Look: a humming compressor unit.
+- **Deep Cold, 75:** slow 20% to 25%. Look: frost-white vents.
 
 **Path 1, Slowing (deeper, permanent, freeze):**
 
@@ -1427,7 +1444,10 @@ stock tuned to the owner's 450-credit build cost.
 **Stock (proposed):** 450 credits; a shockwave every 1.75 s hits every enemy within 100 px for 75 damage; air and
 ground; no aiming. Armour applies (proposed: it's a blast).
 
-**Retrofit, Wave Focus (proposed), 245:** +15 px radius (115). Look: a focusing ring around the core.
+**Retrofit (the player picks one; owner, 2026-10-15):**
+- **Wave Focus, 245:** +15 px radius (115). Look: a focusing ring around the core.
+- **Containment Coils, 120:** +10 damage (85). Look: glowing coils around the core.
+- **Reactor Venting, 150 (owner's option):** a wave every 1.5 s. Look: exhaust vents on the cage.
 
 **Path 1, Power/Range (bigger, stronger waves):**
 

@@ -91,8 +91,8 @@ Picked by the owner on 2026-10-08 from `design/tower_upgrade_structure.html`: tr
     Y is suggested (free today, next to U/I/O); the key is confirmed in the UI round.
   - **The player chooses it** (owner, 2026-10-15): every tower offers **three Retrofit options**, and the player
     picks one when buying it. The choice is **locked** for that tower (selling is the only reset). Each option is priced
-    on its own. How the choice shows in the game is left for the UI round. Towers designed with a single Retrofit get two
-    more options in short question rounds, tower by tower.
+    on its own. How the choice shows in the game is left for the UI round. Every tower now has three options (2026-10-15), except the **Drone Bay**,
+    which the owner kept on its single Retrofit (Second Hangar).
   - **Look:** it **visibly changes the tower** (owner), designed in the art phase with the per-path looks.
 - **Counts:** a full build is 8 upgrades with the Retrofit (Retrofit, 4 primary, the mastery, 2 secondary); the primary
   locks in on the 3rd path upgrade; each tower has 16 upgrade nodes to design (the Retrofit and 3 paths of 4 plus a
@@ -240,7 +240,8 @@ From the enemy rework (`design/enemies.md`, `design/enemy_roster.md` on `design/
 2. **Air or ground per tower,** and whether the roster covers flyers, the Wraith (energy only) and the Burrower well
    enough (asked tower by tower, then checked across the roster).
 3. **The Retrofit's hotkey:** Y suggested; confirmed in the UI round.
-4. **Per tower:** done, except two more Retrofit options for 16 towers (in progress). All 20 towers are designed (2026-10-15) in `design/tower_roster.md`; the numbers go to the
+4. **Per tower:** done, including three Retrofit options per tower (the Drone Bay keeps one, by the owner's choice). All 20
+   towers are designed (2026-10-15) in `design/tower_roster.md`; the numbers go to the
    balance probe.
 5. **Old saves and ids:** what happens to towers in old saves when the roster changes (save format bump, refunds).
 6. **The bot, Codex, tests and tour:** how they follow the new roster.
