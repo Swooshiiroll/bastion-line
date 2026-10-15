@@ -29,7 +29,7 @@ Tower** (18) and **Tractor Tower** (19) are Claude's proposals, added at the own
 | 8 | Tesla Tower | Assault | Energy | Power (Damage) / Range/Chaining / Speed | Designed (2026-10-15) |
 | 9 | Drone Bay | Assault | Deployable | Power (overall) / Weaponry (upgrades/additions) / Speed | Designed (2026-10-15) |
 | 10 | CAS Gunship | Assault | Deployable | Light gun / Medium gun / Heavy gun (owner, replacing Speed (Attack) / Power / Weaponry Upgrades) | Designed (2026-10-15) |
-| 11 | Mine Layer | Defense | Explosive | Power/Damage / Production Speed / Range | Roster only |
+| 11 | Mine Layer | Defense | Explosive | Power/Damage / Production Speed / Range | Designed (2026-10-15) |
 | 12 | Chemical Plant | Support | Chemical (in notes; not yet a listed type) | Damage/Armor stripping / Speed / Slowing | Roster only |
 | 13 | Rally Beacon | Support | None | Damage boost / Speed boost / Range Boost | Roster only |
 | 14 | Radar Tower | Utility | Energy | Power/Range / Speed/Frequency / Special Targeting | Roster only |
@@ -930,7 +930,91 @@ Each unlocked gun appears on its flank (gatling, autocannon, missile rack), and 
 
 ### Design
 
-Not started. Rounds go in roster order.
+**Status: designed, confirmed by the owner with one change (2026-10-15).** The choices under Decided are the owner's.
+The stock stats and upgrade effects are Claude's proposals, confirmed as the design; the balance probe tunes their
+numbers. Prices come from the pricing formula, with the
+stock tuned to the owner's 450-credit build cost.
+
+**Decided (owner, 2026-10-15):**
+- **Defense by area denial:** its job is holding a stretch of track; enemies pay to cross the minefield.
+- **Up to 20 mines** on the track at once. **Mines despawn when the round ends**, but **persist if you start the next
+  round early** (owner: "persistent on early start").
+- **Mines are triggered by ground and burrowed enemies:** they're buried, so Burrowers set them off too. Flyers pass
+  over. **Mirage holograms don't trigger mines:** they're projections, not physical copies (owner).
+- **450 credits.**
+- **Path 1 (Power/Damage):** **damage and larger blasts.**
+- **Path 2 (Production Speed):** **faster laying and a bigger cap.**
+- **Path 3 (Range):** **how far it tosses** mines.
+- **Retrofit:** **faster production and a higher cap.**
+
+**Stock (proposed):** 450 credits; tosses a mine onto the track within 120 px every 1.5 s, up to 20 at once. Each mine
+blasts 85 damage in 40 px when a ground or burrowed enemy passes over. Mines spread along the track in range, nearest
+the entrance end first.
+
+**Pricing value:** mines count like blasts (production rate × damage × area), plus ×1.1 for hitting burrowed enemies.
+The cap isn't priced.
+
+**Retrofit, Conveyor Feed (proposed), 110:** a mine every 1.33 s, and a 25-mine cap. Look: a conveyor belt and a
+hopper of ready mines.
+
+**Path 1, Power/Damage:**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Heavier Charge | 160 | 100 damage |
+| 2 | Wider Charge | 265 | 50 px blast |
+| 3 (primary) | HE Mines | 1,190 | 125 damage |
+| 4 | Fragmentation Casing | 1,325 | 60 px blast |
+| Mastery | Anti-Tank Mines | 6,880 | 150 damage, 65 px blast |
+
+**Path 2, Production Speed (faster laying, bigger cap):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Quick Assembly | 110 | A mine every 1.33 s; cap 24 |
+| 2 | Twin Press | 270 | Every 1.2 s; cap 28 |
+| 3 (primary) | Assembly Line | 1,080 | Every 0.95 s; cap 32 |
+| 4 | Automated Line | 1,620 | Every 0.85 s; cap 36 |
+| Mastery | Mine Factory | 5,395 | Every 0.7 s; cap 45 |
+
+**Path 3, Range (toss distance):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Longer Arm | 150 | 140 px |
+| 2 | Spring Launcher | 300 | 160 px |
+| 3 (primary) | Mine Mortar | 900 | 190 px |
+| 4 | Long Mortar | 1,800 | 220 px |
+| Mastery | Minefield Launcher | 4,795 | 260 px: covers a long stretch of track |
+
+**Combinations (primary + secondary capped at 2):**
+- **Power + 2 Production:** heavy mines, laid faster. The choke-point killer.
+- **Production + 2 Range:** a dense minefield along a long stretch.
+- **Range + 2 Power:** long-reach heavy mines.
+
+**Counters:**
+- **Burrowers:** buried mines trigger on them underground. It's a natural Burrower counter, no Radar needed (the owner's
+  call).
+- **Rushers:** they run straight over the field.
+- **Packs:** the blasts.
+- **Hydra Frame splits:** the leftover mines catch the Skitters.
+
+**Edge cases:**
+- **Flyers:** never trigger mines.
+- **Grounded flyers** (from the Magneto Tower): if grounded counts as ground, they'd set mines off (the Magneto's open
+  question).
+- **Early start:** if the next round starts before this one ends, mines on the track stay. Otherwise they despawn at the
+  round's end.
+- **Decoys:** Mirage holograms pass over mines without setting them off, since they're illusions (owner). The minefield
+  ignores them entirely.
+- **The Rampart:** immune to slows and shoves, not to mines.
+- **The Wraith:** a flyer, so it never triggers them.
+
+**Look (for the art phase):** a squat fabricator with a throwing arm, lobbing disc mines that blink on the track. The
+Retrofit adds a conveyor and hopper. Per path:
+- **Power:** chunkier anti-tank mines.
+- **Production:** twin presses, then an assembly line.
+- **Range:** a mine mortar tube.
 
 ## 12. Chemical Plant
 
