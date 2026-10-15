@@ -30,7 +30,7 @@ Tower** (18) and **Tractor Tower** (19) are Claude's proposals, added at the own
 | 9 | Drone Bay | Assault | Deployable | Power (overall) / Weaponry (upgrades/additions) / Speed | Designed (2026-10-15) |
 | 10 | CAS Gunship | Assault | Deployable | Light gun / Medium gun / Heavy gun (owner, replacing Speed (Attack) / Power / Weaponry Upgrades) | Designed (2026-10-15) |
 | 11 | Mine Layer | Defense | Explosive | Power/Damage / Production Speed / Range | Designed (2026-10-15) |
-| 12 | Chemical Plant | Support | Chemical (in notes; not yet a listed type) | Damage/Armor stripping / Speed / Slowing | Roster only |
+| 12 | Chemical Plant | Support | Chemical | Damage/Armor stripping / Speed / Slowing | Designed (2026-10-15) |
 | 13 | Rally Beacon | Support | None | Damage boost / Speed boost / Range Boost | Roster only |
 | 14 | Radar Tower | Utility | Energy | Power/Range / Speed/Frequency / Special Targeting | Roster only |
 | 15 | Cryo Tower | Support | Field | Slowing / Power/Range / Speed | Roster only |
@@ -1018,14 +1018,96 @@ Retrofit adds a conveyor and hopper. Per path:
 
 ## 12. Chemical Plant
 
-- **Class:** Support. **Weapon type:** Chemical (in notes; not yet a listed type).
+- **Class:** Support. **Weapon type:** Chemical.
 - **Description (owner):** A chemical manufacturing facility that produces and sprays chemicals on nearby enemies. "Known to cause cancer in the state of California."
 - **Paths:** 1. Damage/Armor stripping; 2. Speed; 3. Slowing.
 - **Notes (owner):** Weapon type: Chemical. Attacks one enemy at a time. Already soaked enemies are ignored by the tower until the chemical wears off.
 
 ### Design
 
-Not started. Rounds go in roster order.
+**Status: designed, confirmed by the owner (2026-10-15).** The choices under Decided are the owner's. The stock stats
+and upgrade effects are Claude's proposals, confirmed as the design; the balance probe tunes their numbers. Prices come from the pricing formula.
+
+**Decided (owner, 2026-10-15):**
+- **Class: Support** (kept): its soak sets enemies up for the other towers.
+- **Weapon type: Chemical**, now an official weapon type (added to the class sheet and the roster page).
+- Sprays **air and ground**, **one enemy at a time**; enemies already soaked are ignored until the soak wears off
+  (owner's roster note).
+- **At stock, a soak strips armour.**
+- **Path 1 (Damage/Armor stripping):** **the acid permanently removes armour**; higher tiers add damage over time and
+  strip faster.
+- **Path 2 (Speed):** **spray rate, and a longer soak.**
+- **Path 3 (Slowing):** a **gel slow** that grows each step and nearly freezes enemies at the mastery.
+- **250 credits**; **Retrofit: pressure pump** (faster spray, more range).
+- **Holograms:** the plant **can target Mirage holograms, but the spray has no effect** on them (owner). A hologram
+  wastes a spray.
+
+**Stock (proposed):** 250 credits; sprays one enemy every 1.5 s within 130 px, air and ground. The soak lasts 4 s, and
+the enemy loses 3 armour while soaked (it comes back when the soak ends). The plant always picks an unsoaked enemy.
+
+**Pricing value for support effects (accepted with the design; a new general rule):** a tower whose stock effect isn't direct damage gets
+its stock value set to its build cost. Each upgrade is then priced by how much it raises that effect (spray rate, soak
+length, armour stripped, damage over time, slow), using the same step multipliers. This joins the Pricing section.
+
+**Retrofit, Pressure Pump (proposed), 150:** a spray every 1.33 s, and +20 range (150). Look: a pump with pressure gauges
+on the spray head.
+
+**Path 1, Damage/Armor stripping (acid):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Corrosive Acid | 250 | Stripped armour stays gone **permanently**, so every tower benefits for the rest of the enemy's life |
+| 2 | Etching Acid | 665 | 4 armour per soak; acid burns 5 damage/s |
+| 3 (primary) | Fast-Acting Acid | 1,335 | 5 armour, stripped faster; 10 damage/s |
+| 4 | Concentrated Acid | 2,665 | 6 armour; 15 damage/s |
+| Mastery | Dissolver | 5,335 | 7 armour per soak; 20 damage/s |
+
+**Path 2, Speed (spray rate and soak length):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Quick Valve | 100 | A spray every 1.25 s |
+| 2 | Long-Lasting Mix | 140 | The soak lasts 5 s |
+| 3 (primary) | Twin Valves | 990 | A spray every second; the soak lasts 6 s |
+| 4 | High-Flow Pump | 1,470 | A spray every 0.83 s |
+| Mastery | Twin Nozzles | 7,760 | Sprays two enemies at once (about 1.6 a second); the soak lasts 7 s |
+
+**Path 3, Slowing (gel):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Sticky Gel | 250 | Soaked enemies are slowed 15% |
+| 2 | Thick Gel | 335 | 25% |
+| 3 (primary) | Glue | 665 | 35% |
+| 4 | Setting Glue | 1,335 | 45% |
+| Mastery | Quick-Set Foam | 2,665 | **55%**: nearly frozen |
+
+**Slows:** the strongest slow applies (they don't stack), as today, so a Cryo Tower's slow and the gel don't add up.
+
+**Combinations (primary + secondary capped at 2):**
+- **Acid + 2 Speed:** permanent armour stripping on more enemies, faster.
+- **Speed + 2 Slow:** soak-and-slow everything that passes.
+- **Slow + 2 Acid:** near-frozen enemies that lose armour for good.
+
+**Counters:**
+- **Armour** (Tanks, the Titan, armoured bosses): the acid, permanent from path 1's first step.
+- **Rushers:** the gel slow.
+- **Flyers:** it sprays them.
+- **The Wraith:** the acid's damage over time is energy-like (burn rules), so it can hurt the Wraith once it's revealed
+  (to confirm, under the parked physical/energy decision).
+
+**Edge cases:**
+- **The Rampart:** immune to the slow, but not to armour stripping.
+- **Bosses:** take the full armour strip; slows are halved, as today.
+- **One target at a time:** the plant can't keep up with big swarms; the Speed path helps.
+- **Decoys:** the plant can spray Mirage holograms, but nothing happens (owner). The spray is wasted, so the decoys still
+  soak its time.
+
+**Look (for the art phase):** a small chemical works (tanks, pipes and a spray turret) misting green acid; soaked
+enemies drip and fizz. The Retrofit adds a pump with gauges. Per path:
+- **Acid:** a hazard-yellow acid tank.
+- **Speed:** twin nozzles.
+- **Slow:** a foam-gel hopper.
 
 ## 13. Rally Beacon
 

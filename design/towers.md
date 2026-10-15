@@ -112,6 +112,9 @@ towers, with prices **rounded to 5s and 0s**.
     burn on the line (Railgun). A chain as 1 + 0.6 × the falloff-weighted jumps; a storm as its damage over 2 s in
     its radius; the EMP-enemy overload ×1.08 (Tesla Tower). Whole-map hunting drones ×1.6;
     each unlocked loadout adds flexibility (Drone Bay).
+  - **Non-damage effects** (Chemical Plant, 2026-10-15): a tower whose stock effect isn't direct damage gets its stock
+    value set to its build cost. Its upgrades are priced by how much they raise that effect, with the same step
+    multipliers.
   - **Exception, the CAS Gunship** (owner, 2026-10-15): each path upgrades one gun (light, medium, heavy; step 1
     unlocks it, the light gun is built in), and all three paths are uncapped up to their masteries. No primary/secondary.
   - **Owner overrides:** the owner can set a price directly when the formula undervalues something. So far: the Drone
@@ -155,7 +158,7 @@ the owner's; the Magneto Tower and Tractor Tower are Claude's proposals, added a
 | 9 | Drone Bay | Assault | Deployable |
 | 10 | CAS Gunship | Assault | Deployable |
 | 11 | Mine Layer | Defense | Explosive |
-| 12 | Chemical Plant | Support | Chemical (in notes) |
+| 12 | Chemical Plant | Support | Chemical |
 | 13 | Rally Beacon | Support | None |
 | 14 | Radar Tower | Utility | Energy |
 | 15 | Cryo Tower | Support | Field |
@@ -180,7 +183,8 @@ exactly one class, by its main job; the class groups the shop.
 | Defense | Holds the line: slow, stun, push, block | Cryo Emitter, Graviton Projector |
 | Utility | Tools: reveal, strip enemy defences, economy | Sensor Array, Nullifier, Scrapyard |
 
-**Weapon type (sub-tag, descriptive):** Ballistic, Energy, Explosive, Field (proposed), Deployable (proposed), None.
+**Weapon type (sub-tag, descriptive):** Ballistic, Energy, Explosive, Chemical (added 2026-10-15), Field (proposed),
+Deployable (proposed), None.
 
 ## Counters to answer (through branch upgrades)
 
@@ -232,6 +236,5 @@ From the enemy rework (`design/enemies.md`, `design/enemy_roster.md` on `design/
 9. **Build hotkeys:** 19 towers need more keys than today's 15.
 10. **A Wraith counter tower** (owner, 2026-10-15): the AA gun can't hurt the Wraith (physical damage); the owner wants
     a new tower idea for it, after the 19 towers are designed.
-11. **Weapon type "Chemical":** the Chemical Plant's notes say Chemical; add it to the list?
-12. **Folding in #6 and #8:** per-path looks come in the art phase; the #8 playtest tree tweaks are rewritten into the
+11. **Folding in #6 and #8:** per-path looks come in the art phase; the #8 playtest tree tweaks are rewritten into the
    new trees.

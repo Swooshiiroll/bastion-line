@@ -82,6 +82,7 @@ earlier weapon classes, kept as tags (owner, 2026-10-10).
 | Explosive | Shells, missiles and bombs that burst where they land, and what the blast leaves behind | Plasma Mortar, Missile Battery, Flak Battery |
 | Field (proposed) | Pulses, auras and shockwaves centred on the tower, covering its radius | Cryo Emitter, Graviton Projector, Nova Reactor, Nullifier |
 | Deployable (proposed) | Launched units (drones) that act on their own away from the tower | Drone Bay |
+| Chemical (added 2026-10-15) | Sprays and soaks: acid, gel and other agents that strip armour, slow or burn over time | (new: the Chemical Plant) |
 | None | Doesn't attack | Amplifier Pylon, Sensor Array, Scrapyard |
 
 Field and Deployable are proposals. If they're dropped, the field towers become Energy and the Drone Bay needs a call
