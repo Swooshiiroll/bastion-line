@@ -20,7 +20,7 @@ Tower** (18) and **Tractor Tower** (19) are Claude's proposals, added at the own
 | # | Tower | Class | Weapon type | Paths | Status |
 |---|---|---|---|---|---|
 | 1 | Gun Turret | Assault | Ballistic | Power / Range/Visibility / Multi-Target | Designed (2026-10-15) |
-| 2 | Mortar Tower | Assault | Explosive | Power/Penetration / Speed/Range / Blast Radius/Multi-Target | Roster only |
+| 2 | Mortar Tower | Assault | Explosive | Power/Penetration / Speed/Range / Blast Radius/Multi-Target | Draft, awaiting confirmation |
 | 3 | Laser Tower | Assault | Energy | Power / Multi-Target / Range/Targeting | Roster only |
 | 4 | Rocket Salvo | Assault | Explosive | Power / Range/Target Acquisition / Reload/Payload | Roster only |
 | 5 | Anti-Aircraft Turret | Assault | Ballistic | Range / Power/Blast Radius / Speed | Roster only |
@@ -67,8 +67,8 @@ balance probe.
 **Stock (owner, 2026-10-15):** **75 credits**; **16 damage, 130 range, 1.2 shots/s** (about 19 damage per second, close
 to the Pulse Turret's 18, in fewer, harder hits). Air and ground.
 
-**Retrofit, Water-Cooled Barrel:** **40 credits** (by the pricing formula; repriced from 150); fire rate 1.2 to 1.5/s. Look: a thick cooling
-jacket around the barrel, with a small vapour wisp when it fires.
+**Retrofit, Water-Cooled Barrel:** **40 credits** (by the pricing formula; repriced from 150); fire rate 1.2 to 1.5/s.
+Look: a thick cooling jacket around the barrel, with a small vapour wisp when it fires.
 
 **Path 1, Power (armour-piercing):**
 
@@ -142,7 +142,79 @@ base. The Retrofit adds the cooling jacket. Per path:
 
 ### Design
 
-Not started. Rounds go in roster order.
+**Status: designed, confirmed by the owner (2026-10-15).** The choices under Decided are the owner's. The stock
+stats and upgrade effects are Claude's proposals, confirmed as the design; the balance probe tunes their numbers. Prices come from the pricing formula
+(`design/towers.md`, Pricing); the stock is tuned so its value matches the owner's 150-credit build cost.
+
+**Decided (owner, 2026-10-15):**
+- **Ground only.**
+- **Short-range heavy splash:** close-in, big blasts on packed ground waves. The Rocket Salvo is the long-range
+  multi-target tower, and the Artillery Cannon the huge-range aimed one.
+- **150 credits** to build.
+- **Path 1 (Power/Penetration):** both meanings. The steps crack armour; the top **digs in and hits burrowed enemies**.
+- **Path 2 (Speed/Range):** **multiple barrels firing in succession, and further range.**
+- **Path 3 (Blast Radius/Multi-Target):** **cluster shells.**
+- **Retrofit:** all of them at once: reinforced baseplate, ranging sight and ammo rack.
+- **Prices:** by the value formula, which the owner chose to apply to all towers.
+
+**Stock (proposed):** 150 credits; 30 damage per shell, a 60 px blast, 110 range, 0.6 shells/s; ground only. Its value
+matches the Gun Turret's credits per point: the Mortar does a little less single-target damage but hits a whole pack.
+
+**Retrofit, Field Kit (proposed), 120:** a reinforced baseplate (+4 damage), a ranging sight (+10 range) and an ammo
+rack (+0.05 shells/s, +5 px blast). Look: a heavy steel baseplate with sandbags, a sight on the tube, and a rack of
+ready shells.
+
+**Path 1, Power/Penetration:**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | HE Charge | 80 | +8 damage |
+| 2 | Shaped Charge | 95 | Shells ignore 25% of armour |
+| 3 (primary) | AP Shells | 685 | Ignore 50% of armour; +10 damage |
+| 4 | Delayed Fuse | 1,350 | Ignore 75% of armour; +8 damage |
+| Mastery | Bunker Buster | 3,140 | 64 damage; ignores 75% of armour; **shells dig in and hit burrowed enemies** inside Radar Tower range |
+
+**Path 2, Speed/Range (more tubes, more reach):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Quick Reload | 50 | 0.6 to 0.7 shells/s |
+| 2 | Extended Tube | 125 | +20 range (130) |
+| 3 (primary) | Twin Tubes | 1,170 | A second tube firing in succession: 1.2 shells/s |
+| 4 | Long Tubes | 1,405 | +20 range (150); 1.3 shells/s |
+| Mastery | Barrage Battery | 6,165 | Three tubes firing in succession: 1.7 shells/s, 165 range |
+
+**Path 3, Blast Radius/Multi-Target (cluster shells):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Bigger Charge | 30 | Blast 60 to 70 px |
+| 2 | Wide Burst | 60 | Blast 80 px |
+| 3 (primary) | Cluster Shells | 1,110 | Each shell also scatters 4 bomblets around the impact (10 damage, 30 px each) |
+| 4 | Dense Cluster | 1,230 | 6 bomblets; blast 85 px |
+| Mastery | Carpet Shells | 5,000 | 8 bomblets of 12 damage, 35 px each, spread wider; blast 90 px |
+
+**Combinations (primary + secondary capped at 2):**
+- **Power + 2 Speed:** heavy armour-cracking shells, a bit faster and further.
+- **Speed + 2 Blast:** a rapid barrage of wide blasts. The anti-swarm build.
+- **Blast + 2 Power:** cluster shells with armour-cracking main charges. Good against mixed packs.
+
+**Counters:**
+- **Armour:** the Power path.
+- **Burrowers:** the Bunker Buster mastery hits them underground inside Radar Tower range (the enemy spec's rule).
+- **Swarms, packs and the Hydra Frame's split:** the Blast path's cluster shells catch the Skitters as they burst out.
+
+**Edge cases:**
+- **Flyers:** never hits them (ground only).
+- **Short range:** it has to sit close to the track; the Speed path's range helps.
+- **Bosses:** no special rule.
+- **The Wraith:** a flyer and Explosive (physical), so it can't touch it.
+
+**Look (for the art phase):** a stubby, wide mortar tube on a turntable with a blast shield. The Retrofit adds the
+baseplate, sight and shell rack. Per path:
+- **Power:** a thicker, reinforced tube.
+- **Speed:** two, then three tubes side by side.
+- **Blast:** a fat shell with cluster fins.
 
 ## 3. Laser Tower
 
