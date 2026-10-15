@@ -33,7 +33,7 @@ Tower** (18) and **Tractor Tower** (19) are Claude's proposals, added at the own
 | 12 | Chemical Plant | Support | Chemical | Damage/Armor stripping / Speed / Slowing | Designed (2026-10-15) |
 | 13 | Boost Tower (was Rally Beacon) | Support | None | Damage boost / Speed boost / Range Boost | Designed (2026-10-15) |
 | 14 | Radar Tower | Utility | Energy | Power/Range / Speed/Frequency / Special Targeting | Designed (2026-10-15) |
-| 15 | Cryo Tower | Support | Field | Slowing / Power/Range / Speed | Roster only |
+| 15 | Cryo Tower | Support | Field | Slowing / Power/Range / Speed | Designed (2026-10-15) |
 | 16 | Shockwave Generator | Assault | Field | Power/Range / Speed / Effect | Roster only |
 | 17 | Scrapyard | Utility | None | Passive Income / Kill Income / Discounts | Roster only |
 | 18 | Magneto Tower (Claude's proposal) | Defense | Field | Pull Strength / Field Size / Polarity | Roster only |
@@ -1295,7 +1295,85 @@ each pulse. The Retrofit adds a second antenna. Per path:
 
 ### Design
 
-Not started. Rounds go in roster order.
+**Status: designed, confirmed by the owner (2026-10-15).** The choices under Decided are the owner's. The stock stats
+and upgrade effects are Claude's proposals, confirmed as the design; the balance probe tunes their numbers. Prices come from the pricing formula (the
+non-damage rule: stock value = build cost).
+
+**Decided (owner, 2026-10-15):**
+- **Class: Support** (kept): it holds enemies in the damage towers' range.
+- Hits **air and ground**.
+- **No damage at stock:** it only slows.
+- **Stock slow 20%.**
+- **150 credits.**
+- **Path 1 (Slowing):** **a deeper slow, then permanent slowing; the mastery freezes.**
+- **Path 2 (Power/Range):** **frostbite damage and range.**
+- **Path 3 (Speed):** **faster waves and faster travel** (the gas spreads faster).
+- **Retrofit: a coolant tank** (a longer slow).
+
+**Stock (proposed):** 150 credits; a wave of cold gas every 2 s fills a 110 px radius. Every enemy in it, air and
+ground, is slowed 20% for 1.5 s. The strongest slow applies (slows don't stack), as today; bosses take half.
+
+**Pricing value:** a slow counts as its strength × its uptime (1 − e^(−duration ÷ interval)) × the area covered; a
+permanent slow counts 1.5× its strength; frostbite damage is priced as damage. This joins the Pricing section under the
+non-damage rule.
+
+**Retrofit, Coolant Tank (proposed), 80:** the slow lasts 2.2 s. Look: a frosted coolant tank on the side.
+
+**Path 1, Slowing (deeper, permanent, freeze):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Colder Gas | 120 | Slow 28% |
+| 2 | Sub-Zero Gas | 210 | Slow 35% |
+| 3 (primary) | Permafrost | 1,705 | Enemies chilled by it keep a **permanent 10% slow** for the rest of their life, even outside its range |
+| 4 | Deep Chill | 2,905 | Slow 45%; permanent 15% |
+| Mastery | Deep Freeze | 8,460 | Slow 50%; permanent 20%; **every 4th wave freezes** enemies solid for 1 s (bosses 0.3 s) |
+
+**Path 2, Power/Range (frostbite and range):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Frostbite | 105 | Each wave does 5 damage; 120 px radius |
+| 2 | Hard Frost | 230 | 10 damage; 130 px |
+| 3 (primary) | Ice Storm | 790 | 18 damage; 145 px |
+| 4 | Biting Cold | 695 | 26 damage |
+| Mastery | Blizzard | 4,870 | 36 damage; 165 px |
+
+**Path 3, Speed (faster waves and travel):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Faster Vents | 25 | A wave every 1.75 s; the gas spreads faster |
+| 2 | Pressurised Gas | 65 | Every 1.5 s |
+| 3 (primary) | Rapid Vents | 185 | Every 1.2 s |
+| 4 | Turbo Vents | 290 | Every second |
+| Mastery | Cold Front | 1,575 | A constant cold field: everything inside stays slowed |
+
+The Speed path is cheap by the formula because it only raises the slow's uptime; with Power/Range as the secondary it
+also raises frostbite damage per second.
+
+**Combinations (primary + secondary capped at 2):**
+- **Slowing + 2 Speed:** a deep, near-constant slow, with permanent chill.
+- **Power + 2 Slowing:** a frostbite field that slows 35%.
+- **Speed + 2 Power:** constant waves of light frostbite.
+
+**Counters:**
+- **Rushers and Fury Drones:** the slow and the permanent chill.
+- **Blink Stalkers:** a slow resets their blink charge (the enemy spec).
+- **Flyers:** it hits them.
+- **The Capacitor's charge:** the freeze (mastery) cancels it, like a stun.
+
+**Edge cases:**
+- **The Rampart:** immune to slows and freezes.
+- **Bosses:** half slow, a 0.3 s freeze.
+- **Permanent slows:** the strongest slow applies, so a permanent 20% matters only once the enemy leaves stronger slows.
+- **The Wraith:** is frostbite energy damage? It's a Field effect, so it depends on the parked physical/energy decision.
+
+**Look (for the art phase):** a squat tank with frosted vents breathing white gas in pulses; chilled enemies get a frost
+tint. The Retrofit adds a coolant tank. Per path:
+- **Slowing:** blue-white ice crystals.
+- **Power:** jagged frost spikes.
+- **Speed:** extra vents.
 
 ## 16. Shockwave Generator
 
