@@ -24,7 +24,7 @@ Tower** (18) and **Tractor Tower** (19) are Claude's proposals, added at the own
 | 3 | Laser Tower | Assault | Energy | Power / Multi-Target / Range/Targeting | Designed (2026-10-15) |
 | 4 | Rocket Salvo | Assault | Explosive | Power / Range/Target Acquisition / Reload/Payload | Designed (2026-10-15) |
 | 5 | Anti-Aircraft Turret | Assault | Ballistic | Range / Power/Blast Radius / Speed | Designed (2026-10-15) |
-| 6 | Artillery Cannon | Assault | Explosive | Power / Speed / Special Effects | Roster only |
+| 6 | Artillery Cannon | Assault | Explosive | Power / Speed / Special Effects | Designed (2026-10-15) |
 | 7 | Railgun | Assault | Ballistic | Power / Range/Speed / Special Effects | Roster only |
 | 8 | Tesla Tower | Assault | Energy | Power (Damage) / Range/Chaining / Speed | Roster only |
 | 9 | Drone Bay | Assault | Deployable | Power (overall) / Weaponry (upgrades/additions) / Speed | Roster only |
@@ -483,7 +483,87 @@ casings. The Retrofit adds a small radar dish. Per path:
 
 ### Design
 
-Not started. Rounds go in roster order.
+**Status: designed, confirmed by the owner (2026-10-15).** The choices under Decided are the owner's. The stock
+stats and upgrade effects are Claude's proposals, confirmed as the design; the balance probe tunes their numbers. Prices come from the pricing formula, with the
+stock tuned to the owner's 300-credit build cost.
+
+**Decided (owner, 2026-10-15):**
+- **Aimed by the player, not at enemies:** select the cannon, click a spot on the track, and it shells that spot on a
+  loop until you move it. Re-aiming is free, any time.
+- **Reaches the whole map.**
+- **Ground only.**
+- **300 credits.**
+- **Path 1 (Power):** **both:** damage and blast first, armour piercing at the top.
+- **Path 2 (Speed):** **faster reload**; the mastery fires a rapid barrage.
+- **Path 3 (Special Effects):** **shell types** you switch between, and the mastery combines them.
+- **Retrofit:** an **ammo hoist** (+fire rate).
+
+**Stock (proposed):** 300 credits; a heavy shell every 4 s onto the aimed spot, 75 damage, a 70 px blast, 1.5 s flight
+time; ground only. A new cannon aims at the track point nearest to itself until you set it.
+
+**Pricing value for the aimed, whole-map gun (accepted with the design):** its reach counts as ×1.5 (range ÷ 130 doesn't fit a fixed
+aim point). Burning ground counts as its damage over 3 s on everything in the blast. Each extra selectable shell type
+adds ×0.1 (flexibility), and a stun ×1.15 to ×1.25. These join the Pricing effect list.
+
+**Retrofit, Ammo Hoist (proposed), 120:** a shell every 3.3 s (0.25 to 0.3/s). Look: an ammo lift beside the gun.
+
+**Path 1, Power (damage and blast, then armour piercing):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Heavy Shells | 120 | +15 damage (90) |
+| 2 | Wide Bursting Charge | 200 | Blast 70 to 85 px |
+| 3 (primary) | HE Shells | 730 | 110 damage |
+| 4 | Penetrator Shells | 2,930 | 120 damage; ignores 50% of armour |
+| Mastery | Siege Shells | 7,355 | 140 damage, 90 px blast, ignores 75% of armour |
+
+**Path 2, Speed (faster reload):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Drilled Crew | 120 | A shell every 3.3 s |
+| 2 | Quick Breech | 240 | Every 2.9 s |
+| 3 (primary) | Autoloader | 1,450 | Every 2 s |
+| 4 | Rapid Breech | 1,935 | Every 1.7 s |
+| Mastery | Rolling Barrage | 3,865 | Fires in 3-shell barrages that walk across the aimed spot: an average of one shell every 1.4 s |
+
+**Path 3, Special Effects (shell types):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Incendiary Shells | 365 | Unlocks **incendiary**: the blast leaves burning ground (15 damage/s for 3 s) |
+| 2 | Shrapnel Shells | 195 | Unlocks **shrapnel**: a 40 px wider blast at 70% damage |
+| 3 (primary) | Concussion Shells | 1,085 | Unlocks **concussion**: everything in the blast is stunned for 0.5 s (bosses 0.15 s) |
+| 4 | Improved Payloads | 3,505 | Every shell type stronger: burn 22/s, shrapnel at 85%, stun 0.7 s |
+| Mastery | Combined Payload | 5,725 | A fourth type that does all three at once |
+
+**Switching shell types:** pick the type on the cannon's panel (a small shell selector). Proposed: it takes effect from
+the next shell. A secondary capped at 2 gets incendiary and shrapnel.
+
+**Combinations (primary + secondary capped at 2):**
+- **Power + 2 Special:** heavy, armour-piercing shells with incendiary or shrapnel.
+- **Speed + 2 Power:** fast, heavier shells. The choke-point grinder.
+- **Special + 2 Speed:** stun or combined shells, reloaded faster.
+
+**Counters:**
+- **Packs and choke points:** you pick the spot.
+- **Armour:** the Power path.
+- **Rushers and bosses at a chosen spot:** concussion stuns them; it also cancels the Capacitor's charge if it lands
+  during one.
+
+**Edge cases:**
+- **Flyers:** never hit.
+- **Wasted shells:** if the spot is empty, shells land anyway (owner: it shells the spot on a loop).
+- **The bot:** aims at the track point where enemies bunch most (the busiest choke). That needs a bot rule.
+- **Saves:** store each cannon's aim point.
+- **Map changes:** if switch gates re-route enemies away from the spot, the cannon keeps firing there until re-aimed.
+- **The Wraith:** a flyer, and Explosive, so out of reach.
+
+**Look (for the art phase):** a long-barrelled field gun on a heavy turntable with stabiliser legs. It recoils, and a
+target marker shows on the aimed spot. The Retrofit adds the ammo hoist. Per path:
+- **Power:** a bigger bore and muzzle brake.
+- **Speed:** an autoloader drum, then twin rails.
+- **Special:** colour-coded shell racks.
 
 ## 7. Railgun
 
