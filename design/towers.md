@@ -105,7 +105,7 @@ towers, with prices **rounded to 5s and 0s**.
     chance (double damage) ×(1 + chance); no-overkill targeting ×1.1; hits burrowed
     enemies ×1.1 (Mortar); a ramping beam as an average of 1 + (max − 1) × 0.5 × (3 s ÷ ramp time)^0.3, and armour melt
     ×1.1 (Laser); homing ×1.15 to ×1.3, and guidance fins ×1.1 (Rocket Salvo); cluster bomblets as extra splash hits
-    (Mortar). New effects (slow, stun, burn, pull, buffs,
+    (Mortar); **hits only flyers ×0.5** (Anti-Aircraft Turret), since flyers are a minority of enemies. New effects (slow, stun, burn, pull, buffs,
     income) get their multiplier or damage equivalent when their tower is designed, and are listed here.
 - **Upgrade price:** (V after − V before) × **3.9 credits per value point** × the **step multiplier**, rounded to 5.
   - **3.9** is calibrated on the Gun Turret: 75 credits for its stock value (16 damage × 1.2 shots/s).
@@ -220,6 +220,8 @@ From the enemy rework (`design/enemies.md`, `design/enemy_roster.md` on `design/
 7. **What a class does beyond the shop** (TBD): candidates are parked in the class sheet.
 8. **Weapon types and the physical/energy split** the Wraith needs: decide later.
 9. **Build hotkeys:** 19 towers need more keys than today's 15.
-10. **Weapon type "Chemical":** the Chemical Plant's notes say Chemical; add it to the list?
-11. **Folding in #6 and #8:** per-path looks come in the art phase; the #8 playtest tree tweaks are rewritten into the
+10. **A Wraith counter tower** (owner, 2026-10-15): the AA gun can't hurt the Wraith (physical damage); the owner wants
+    a new tower idea for it, after the 19 towers are designed.
+11. **Weapon type "Chemical":** the Chemical Plant's notes say Chemical; add it to the list?
+12. **Folding in #6 and #8:** per-path looks come in the art phase; the #8 playtest tree tweaks are rewritten into the
    new trees.

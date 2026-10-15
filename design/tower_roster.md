@@ -23,7 +23,7 @@ Tower** (18) and **Tractor Tower** (19) are Claude's proposals, added at the own
 | 2 | Mortar Tower | Assault | Explosive | Power/Penetration / Speed/Range / Blast Radius/Multi-Target | Draft, awaiting confirmation |
 | 3 | Laser Tower | Assault | Energy | Power / Multi-Target / Range/Targeting | Designed (2026-10-15) |
 | 4 | Rocket Salvo | Assault | Explosive | Power / Range/Target Acquisition / Reload/Payload | Designed (2026-10-15) |
-| 5 | Anti-Aircraft Turret | Assault | Ballistic | Range / Power/Blast Radius / Speed | Roster only |
+| 5 | Anti-Aircraft Turret | Assault | Ballistic | Range / Power/Blast Radius / Speed | Designed (2026-10-15) |
 | 6 | Artillery Cannon | Assault | Explosive | Power / Speed / Special Effects | Roster only |
 | 7 | Railgun | Assault | Ballistic | Power / Range/Speed / Special Effects | Roster only |
 | 8 | Tesla Tower | Assault | Energy | Power (Damage) / Range/Chaining / Speed | Roster only |
@@ -397,7 +397,82 @@ out to their targets. The Retrofit adds fins and a sensor dome. Per path:
 
 ### Design
 
-Not started. Rounds go in roster order.
+**Status: designed, confirmed by the owner (2026-10-15).** The choices under Decided are the owner's. The stock
+stats and upgrade effects are Claude's proposals, confirmed as the design; the balance probe tunes their numbers. Prices come from the pricing formula, with the
+stock tuned to the owner's 150-credit build cost.
+
+**Decided (owner, 2026-10-15):**
+- **Air only:** the pure air specialist.
+- A **direct-hit autocannon:** fast single-target rounds; blasts only come from a path.
+- **150 credits.**
+- **Path 1 (Range):** the mastery is **area denial**: a very long reach covering a big circle of sky.
+- **Path 2 (Power/Blast Radius):** **flak shells**: damage, then an airburst that grows, until it shreds whole flocks.
+- **Path 3 (Speed):** **more barrels and rate of fire.**
+- **Retrofit:** **fire-control radar** (more range and accuracy).
+- **The Wraith:** the AA gun doesn't counter it. The owner wants a **new tower idea** for the Wraith, **later**, after the
+  19 towers (logged in `design/towers.md`, Open questions).
+
+**Pricing value for air-only towers (accepted with the design):** a tower that can only hit flyers counts at **×0.5**, since flyers are
+a minority of enemies. That lets it hit far harder than its price suggests. This joins the Pricing effect list.
+
+**Stock (proposed):** 150 credits; 25 damage per round, 2.5 rounds/s, 160 range; flyers only. That's about 62 damage
+per second against air: it shreds Locusts and Strike Drones and wears down Gunships.
+
+**Retrofit, Fire-Control Radar (proposed), 45:** +15 range and steadier aim (×1.05). Look: a small rotating radar dish
+beside the guns.
+
+**Path 1, Range (area denial):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Long Barrel | 40 | +20 range (180) |
+| 2 | Higher Mount | 75 | +20 range (200) |
+| 3 (primary) | Sky Watch | 300 | +40 range (240) |
+| 4 | High-Velocity Rounds | 600 | +40 range (280) |
+| Mastery | Sky Wall | 1,500 | **330 range**: covers a big circle of sky |
+
+**Path 2, Power/Blast Radius (flak shells):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Heavier Rounds | 70 | +6 damage (31) |
+| 2 | Flak Rounds | 375 | Rounds burst near their target: a 20 px airburst on every flyer nearby |
+| 3 (primary) | Flak Shells | 795 | 36 damage; 30 px airburst |
+| 4 | Wide Burst | 865 | 40 px airburst |
+| Mastery | Flak Curtain | 4,325 | 42 damage; 50 px airburst: whole flocks of Locusts and Shrikes go down together |
+
+**Path 3, Speed (barrels and rate of fire):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Quick Cycle | 35 | 2.8 rounds/s |
+| 2 | Fast Traverse | 95 | 3.2 rounds/s; turns faster onto new flyers |
+| 3 (primary) | Twin Barrels | 625 | 4.5 rounds/s |
+| 4 | Belt Feed | 675 | 5.2 rounds/s |
+| Mastery | Quad Mount | 3,460 | **7 rounds/s** from four barrels: a wall of fire |
+
+**Combinations (primary + secondary capped at 2):**
+- **Power + 2 Speed:** flak bursts fired faster. The anti-flock build.
+- **Speed + 2 Range:** a quad-mount stream over a wide sky.
+- **Range + 2 Power:** long-range flak with an early airburst.
+
+**Counters:**
+- **Flyers:** its whole job. It covers the Locust and Shrike swarms (flak), Strike Drones and Fury Drones (rate of
+  fire), and Gunships and the Leviathan (sustained damage).
+- **Cloaked flyers** (the Phantom) need a Radar Tower reveal first.
+- **The Wraith** is out of reach (physical damage); it gets a separate tower later.
+
+**Edge cases:**
+- **Ground enemies:** it ignores them entirely.
+- **Flyers grounded by the Magneto Tower:** if grounded flyers count as ground, the AA gun loses them while they're down
+  (the Magneto's open question).
+- **Bosses:** the Leviathan is its boss; no special rule.
+
+**Look (for the art phase):** a twin-handled autocannon on a raised swivel with a high elevation angle and spent
+casings. The Retrofit adds a small radar dish. Per path:
+- **Range:** a long barrel on a taller mount.
+- **Power:** fat flak shells and puffs of black smoke in the sky.
+- **Speed:** twin, then quad barrels.
 
 ## 6. Artillery Cannon
 
