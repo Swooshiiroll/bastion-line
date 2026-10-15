@@ -34,7 +34,7 @@ Tower** (18) and **Tractor Tower** (19) are Claude's proposals, added at the own
 | 13 | Boost Tower (was Rally Beacon) | Support | None | Damage boost / Speed boost / Range Boost | Designed (2026-10-15) |
 | 14 | Radar Tower | Utility | Energy | Power/Range / Speed/Frequency / Special Targeting | Designed (2026-10-15) |
 | 15 | Cryo Tower | Support | Field | Slowing / Power/Range / Speed | Designed (2026-10-15) |
-| 16 | Shockwave Generator | Assault | Field | Power/Range / Speed / Effect | Roster only |
+| 16 | Shockwave Generator | Assault | Field | Power/Range / Speed / Effect | Designed (2026-10-15) |
 | 17 | Scrapyard | Utility | None | Passive Income / Kill Income / Discounts | Roster only |
 | 18 | Magneto Tower (Claude's proposal) | Defense | Field | Pull Strength / Field Size / Polarity | Roster only |
 | 19 | Tractor Tower (Claude's proposal) | Defense | Energy | Pull Distance / Recharge / Grip | Roster only |
@@ -1383,7 +1383,81 @@ tint. The Retrofit adds a coolant tank. Per path:
 
 ### Design
 
-Not started. Rounds go in roster order.
+**Status: designed, confirmed by the owner (2026-10-15).** The choices under Decided are the owner's. The stock stats
+and upgrade effects are Claude's proposals, confirmed as the design; the balance probe tunes their numbers. Prices come from the pricing formula, with the
+stock tuned to the owner's 450-credit build cost.
+
+**Decided (owner, 2026-10-15):**
+- The shockwave hits **air and ground**: everything in its radius.
+- A **steady** rhythm: a medium wave every 1.5 to 2 s.
+- **450 credits.**
+- **Path 1 (Power/Range):** **bigger, stronger waves**: damage and radius grow together.
+- **Path 2 (Speed):** **more waves.**
+- **Path 3 (Effect):** **barrier shatter**: bonus damage to barriers first, then the mastery shatters them and stops them
+  regenerating.
+- **Retrofit: wave focus** (+radius).
+- **The wave damages cloaked enemies inside it**, revealed or not (owner), like the Railgun's ion trail.
+
+**Stock (proposed):** 450 credits; a shockwave every 1.75 s hits every enemy within 100 px for 75 damage; air and
+ground; no aiming. Armour applies (proposed: it's a blast).
+
+**Retrofit, Wave Focus (proposed), 245:** +15 px radius (115). Look: a focusing ring around the core.
+
+**Path 1, Power/Range (bigger, stronger waves):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Hotter Core | 210 | 85 damage; 105 px |
+| 2 | Dense Core | 470 | 95 damage; 110 px |
+| 3 (primary) | Critical Mass | 1,870 | 110 damage; 120 px |
+| 4 | Overpressure | 3,200 | 125 damage; 125 px |
+| Mastery | Megaton Wave | 6,690 | 135 damage; 132 px |
+
+**Path 2, Speed (more waves):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Quick Cycle | 115 | A wave every 1.55 s |
+| 2 | Fast Cycle | 220 | Every 1.4 s |
+| 3 (primary) | Pulse Core | 980 | Every 1.15 s |
+| 4 | Rapid Core | 1,645 | Every second |
+| Mastery | Chain Pulse | 6,310 | Every 0.8 s |
+
+**Path 3, Effect (barrier shatter):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Disruptor Wave | 45 | ×1.5 damage to barriers |
+| 2 | Harmonic Wave | 55 | ×2 to barriers |
+| 3 (primary) | Resonance | 145 | ×2.5 to barriers |
+| 4 | Breaker Wave | 290 | ×3 to barriers |
+| Mastery | Shatterpoint | 1,300 | Each wave **shatters half of every barrier** it hits, and barriers it hits **can't regenerate for 5 s** |
+
+The Effect path is cheap by the formula because only some enemies carry barriers (the Aegis Walker, and the Bulwark's
+grants). It's the specialist answer to them.
+
+**Combinations (primary + secondary capped at 2):**
+- **Power + 2 Speed:** big, frequent waves.
+- **Speed + 2 Power:** rapid, stronger waves.
+- **Effect + 2 Power:** a barrier-breaker with stronger waves.
+
+**Counters:**
+- **Swarms and crowds around it:** every wave hits all of them.
+- **Flyers:** it hits them.
+- **Barriers** (Aegis Walker, Bulwark): the Effect path.
+- **Cloaked enemies:** the wave **damages them without a reveal** (owner), and, as area damage, reveals them briefly
+  (the enemy spec).
+
+**Edge cases:**
+- **Short reach:** it has to sit next to the track.
+- **The Wraith:** a Field shockwave from a nuclear blast. Physical or energy? Parked with the physical/energy decision.
+- **Decoys:** holograms in the wave pop (they're 1 HP), at no cost to the wave.
+
+**Look (for the art phase):** a squat reactor in a heavy containment cage, with a glowing core visible through vents and a
+bright ring expanding on each wave. The Retrofit adds a focusing ring. Per path:
+- **Power:** a denser, whiter core.
+- **Speed:** pulsing ring emitters.
+- **Effect:** a violet resonance ring.
 
 ## 17. Scrapyard
 
