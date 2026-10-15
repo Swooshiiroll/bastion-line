@@ -27,7 +27,7 @@ Tower** (18) and **Tractor Tower** (19) are Claude's proposals, added at the own
 | 6 | Artillery Cannon | Assault | Explosive | Power / Speed / Special Effects | Designed (2026-10-15) |
 | 7 | Railgun | Assault | Ballistic | Power / Range/Speed / Special Effects | Designed (2026-10-15) |
 | 8 | Tesla Tower | Assault | Energy | Power (Damage) / Range/Chaining / Speed | Designed (2026-10-15) |
-| 9 | Drone Bay | Assault | Deployable | Power (overall) / Weaponry (upgrades/additions) / Speed | Roster only |
+| 9 | Drone Bay | Assault | Deployable | Power (overall) / Weaponry (upgrades/additions) / Speed | Designed (2026-10-15) |
 | 10 | CAS Gunship | Assault | Deployable | Speed (Attack) / Power / Weaponry Upgrades | Roster only |
 | 11 | Mine Layer | Defense | Explosive | Power/Damage / Production Speed / Range | Roster only |
 | 12 | Chemical Plant | Support | Chemical (in notes; not yet a listed type) | Damage/Armor stripping / Speed / Slowing | Roster only |
@@ -754,7 +754,86 @@ enemies. The Retrofit enlarges the disk. Per path:
 
 ### Design
 
-Not started. Rounds go in roster order.
+**Status: designed, confirmed by the owner with one change (2026-10-15).** The choices under Decided are the owner's.
+The stock stats and upgrade effects are Claude's proposals, confirmed as the design; the balance probe tunes their
+numbers. Prices come from the pricing formula, with the
+stock tuned to the owner's 300-credit build cost.
+
+**Decided (owner, 2026-10-15):**
+- The drones **hunt anywhere on the map**.
+- They hit **air and ground**.
+- **1 drone at stock; the Retrofit launches the second** (the owner's "max 2 drones"). Nothing goes beyond 2.
+- **300 credits.**
+- **Path 1 (Power):** **damage.**
+- **Path 2 (Weaponry):** **choose a loadout**: each step unlocks a loadout you can switch between.
+- **Path 3 (Speed):** **rate of fire.**
+- **The Retrofit costs 3,200** (owner's override of the formula's 600): the second drone essentially doubles the bay's
+  firepower.
+- **Enemies can't hurt drones, except EMPs:** a Disruptor's EMP (Jammer, Blackout Rig, Capacitor) knocks drones out of
+  the air for its duration.
+
+**Stock (proposed):** 300 credits; 1 combat drone with a gun: 16 damage, 3 shots/s, hunting the nearest enemy to the
+core, anywhere on the map; air and ground. The drone flies to its target, so far-off enemies take a moment to reach.
+
+**Pricing value for drones (proposed):** whole-map hunting counts as ×1.5 (×1.6 less a little for flight time); each
+unlocked loadout adds flexibility, and a stronger loadout more. These join the Pricing effect list.
+
+**Retrofit, Second Hangar, 3,200 (owner):** launches the **second drone**, doubling the bay's firepower. The formula
+said 600; the owner set 3,200, since doubling the firepower is worth more than a step 1. Look: a second hangar door and landing pad.
+
+**Path 1, Power (damage):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Heavier Guns | 150 | 20 damage |
+| 2 | Hot Loads | 300 | 24 damage |
+| 3 (primary) | Combat Firmware | 900 | 30 damage |
+| 4 | Assault Frames | 1,800 | 36 damage |
+| Mastery | Elite Drones | 3,600 | 42 damage |
+
+**Path 2, Weaponry (loadouts, switchable on the bay's panel):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Micro-Missiles | 60 | Unlocks **missiles**: slower shots with a 25 px blast |
+| 2 | Bomb Racks | 120 | Unlocks **bombs**: heavy ground-only drops with a 40 px blast |
+| 3 (primary) | Drone Laser | 290 | Unlocks **laser**: energy damage that ignores armour (a Wraith counter once it's revealed) |
+| 4 | Upgraded Loadouts | 865 | Every loadout 25% stronger |
+| Mastery | Full Kit | 3,360 | A combined loadout: guns, missiles and laser together |
+
+**Path 3, Speed (rate of fire):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Fast Cycling | 100 | 3.5 shots/s |
+| 2 | Twin Feed | 200 | 4 shots/s |
+| 3 (primary) | Rotary Guns | 800 | 5 shots/s |
+| 4 | Overclocked Feed | 1,280 | 5.8 shots/s |
+| Mastery | Storm Drones | 3,840 | 7 shots/s |
+
+**Combinations (primary + secondary capped at 2):**
+- **Power + 2 Speed:** hard-hitting, faster-firing hunters.
+- **Weaponry + 2 Power:** the loadout of your choice, hitting harder.
+- **Speed + 2 Weaponry:** rapid fire with missiles or bombs.
+
+**Counters:**
+- **Leakers:** whole-map hunting catches whatever slips through.
+- **Flyers:** it hits them.
+- **Swarms:** missiles and bombs.
+- **Armour and the Wraith:** the laser loadout.
+
+**Edge cases:**
+- **EMPs:** drones caught in an EMP drop for its duration, then relaunch.
+- **Targeting:** the drones use the bay's targeting mode (First, Strongest...); with 2 drones they take different
+  targets.
+- **The loadout switch:** it takes effect on the next shot.
+- **Today's Drone Bay** (2 to 6 drones) becomes this 1-to-2 drone version (owner's cap).
+
+**Look (for the art phase):** a squat hangar with a launch pad, and small rotor or jet drones with tiny guns. The
+Retrofit adds a second hangar door. Per path:
+- **Power:** armoured drones.
+- **Weaponry:** missile pods, bomb racks or a laser pod.
+- **Speed:** rotary guns.
 
 ## 10. CAS Gunship
 
