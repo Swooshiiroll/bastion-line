@@ -102,7 +102,10 @@ towers, with prices **rounded to 5s and 0s**.
 - **Value of a tower's state:** V = damage × shots per second × targets × area × (range ÷ 130) × effect multipliers.
   - **Area:** 1 + blast radius ÷ 40 for splash attacks; 1 otherwise.
   - **Effect multipliers so far:** armour ignored ×(1 + half the % ignored); a flat armour ignore of 2 ×1.1; critical
-    chance (double damage) ×(1 + chance); no-overkill targeting ×1.1. New effects (slow, stun, burn, pull, buffs,
+    chance (double damage) ×(1 + chance); no-overkill targeting ×1.1; hits burrowed
+    enemies ×1.1 (Mortar); a ramping beam as an average of 1 + (max − 1) × 0.5 × (3 s ÷ ramp time)^0.3, and armour melt
+    ×1.1 (Laser); homing ×1.15 to ×1.3, and guidance fins ×1.1 (Rocket Salvo); cluster bomblets as extra splash hits
+    (Mortar). New effects (slow, stun, burn, pull, buffs,
     income) get their multiplier or damage equivalent when their tower is designed, and are listed here.
 - **Upgrade price:** (V after − V before) × **3.9 credits per value point** × the **step multiplier**, rounded to 5.
   - **3.9** is calibrated on the Gun Turret: 75 credits for its stock value (16 damage × 1.2 shots/s).

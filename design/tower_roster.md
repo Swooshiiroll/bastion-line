@@ -22,7 +22,7 @@ Tower** (18) and **Tractor Tower** (19) are Claude's proposals, added at the own
 | 1 | Gun Turret | Assault | Ballistic | Power / Range/Visibility / Multi-Target | Designed (2026-10-15) |
 | 2 | Mortar Tower | Assault | Explosive | Power/Penetration / Speed/Range / Blast Radius/Multi-Target | Draft, awaiting confirmation |
 | 3 | Laser Tower | Assault | Energy | Power / Multi-Target / Range/Targeting | Designed (2026-10-15) |
-| 4 | Rocket Salvo | Assault | Explosive | Power / Range/Target Acquisition / Reload/Payload | Roster only |
+| 4 | Rocket Salvo | Assault | Explosive | Power / Range/Target Acquisition / Reload/Payload | Designed (2026-10-15) |
 | 5 | Anti-Aircraft Turret | Assault | Ballistic | Range / Power/Blast Radius / Speed | Roster only |
 | 6 | Artillery Cannon | Assault | Explosive | Power / Speed / Special Effects | Roster only |
 | 7 | Railgun | Assault | Ballistic | Power / Range/Speed / Special Effects | Roster only |
@@ -310,7 +310,84 @@ ramps. The Retrofit adds capacitor drums. Per path:
 
 ### Design
 
-Not started. Rounds go in roster order.
+**Status: designed, confirmed by the owner (2026-10-15).** The choices under Decided are the owner's. The stock
+stats and upgrade effects are Claude's proposals, confirmed as the design; the balance probe tunes their numbers. Prices come from the pricing formula, with the
+stock tuned to the owner's 200-credit build cost.
+
+**Decided (owner, 2026-10-15):**
+- Hits **air and ground**.
+- **Spread salvos:** each volley fires several rockets, each at a different enemy, each with a small blast. It's the
+  long-range multi-target Explosive tower; the Mortar is the short-range heavy splash.
+- **3 rockets at stock; armour applies.**
+- **200 credits.**
+- **Path 1 (Power):** **heavier warheads**: more damage and bigger blasts.
+- **Path 2 (Range/Target Acquisition):** range, and **homing** (rockets curve onto targets and re-target if theirs
+  dies).
+- **Path 3 (Reload/Payload):** **both**: steps alternate between more rockets and faster reloads.
+- **Retrofit:** **guidance fins**: rockets fly faster and miss less.
+
+**Stock (proposed):** 200 credits; a salvo of 3 rockets every 2.5 s, each on a different enemy, 19 damage with a 25 px
+blast; 180 range; air and ground. Without homing, rockets fly at where the target was, so very fast or blinking enemies
+can dodge them.
+
+**Pricing values:** homing counts as ×1.15 to ×1.3 (fewer misses), and guidance fins as ×1.1. They join the Pricing
+effect list.
+
+**Retrofit, Guidance Fins (proposed), 40:** faster rockets that lead their target, so fewer misses. Look: tail fins and
+a small sensor dome on each pod.
+
+**Path 1, Power (heavier warheads):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | HE Warheads | 105 | +5 damage per rocket (24) |
+| 2 | Wider Burst | 155 | Blast 25 to 35 px |
+| 3 (primary) | Heavy Warheads | 985 | 32 damage, 40 px blast |
+| 4 | Dense Payload | 1,245 | 38 damage |
+| Mastery | Thermobaric Rockets | 5,710 | 46 damage, 50 px blast |
+
+**Path 2, Range/Target Acquisition (homing):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Booster Stage | 45 | +20 range (200) |
+| 2 | Seeker Heads | 135 | **Homing:** rockets curve onto their target |
+| 3 (primary) | Smart Seekers | 510 | Rockets re-target if their target dies; +30 range (230) |
+| 4 | Long Burn | 670 | +30 range (260) |
+| Mastery | Hunter Seekers | 2,315 | 300 range; seekers never miss, catching fast and blinking enemies |
+
+**Path 3, Reload/Payload (more rockets, faster reloads):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Extra Tube | 135 | 4 rockets per salvo |
+| 2 | Quick Loader | 265 | A salvo every 2 s |
+| 3 (primary) | Six-Pack | 1,335 | 6 rockets per salvo |
+| 4 | Auto-Loader | 1,605 | A salvo every 1.7 s |
+| Mastery | Ripple Salvo | 6,415 | 8 rockets per salvo, rippling out one after another |
+
+**Combinations (primary + secondary capped at 2):**
+- **Power + 2 Reload:** heavy rockets, a few more per salvo, slightly faster.
+- **Reload + 2 Range:** a big homing salvo over a long range. The anti-swarm and anti-flyer build.
+- **Range + 2 Power:** long-range homing rockets that hit harder.
+
+**Counters:**
+- **Swarms and packs:** the spread salvo puts one rocket on each of several enemies (the Reload path adds more).
+- **Flyers:** hits them.
+- **Fast and blinking enemies:** homing re-targets onto them (Range path).
+- **Decoys:** the spread wastes a single rocket per hologram, not the whole salvo.
+
+**Edge cases:**
+- **Armour:** applies to every rocket, so Tanks aren't its job.
+- **The Wraith:** Explosive (physical), so immune.
+- **Bosses:** no special rule.
+- **Fewer enemies than rockets:** the spare rockets go to the strongest target.
+
+**Look (for the art phase):** a box launcher of rocket tubes on a rotating mount. Rockets leave smoke trails and fan
+out to their targets. The Retrofit adds fins and a sensor dome. Per path:
+- **Power:** fat warheads.
+- **Range:** long seeker-nosed rockets.
+- **Reload:** bigger racks of tubes and an auto-loader.
 
 ## 5. Anti-Aircraft Turret
 
