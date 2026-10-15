@@ -21,7 +21,7 @@ Tower** (18) and **Tractor Tower** (19) are Claude's proposals, added at the own
 |---|---|---|---|---|---|
 | 1 | Gun Turret | Assault | Ballistic | Power / Range/Visibility / Multi-Target | Designed (2026-10-15) |
 | 2 | Mortar Tower | Assault | Explosive | Power/Penetration / Speed/Range / Blast Radius/Multi-Target | Draft, awaiting confirmation |
-| 3 | Laser Tower | Assault | Energy | Power / Multi-Target / Range/Targeting | Roster only |
+| 3 | Laser Tower | Assault | Energy | Power / Multi-Target / Range/Targeting | Designed (2026-10-15) |
 | 4 | Rocket Salvo | Assault | Explosive | Power / Range/Target Acquisition / Reload/Payload | Roster only |
 | 5 | Anti-Aircraft Turret | Assault | Ballistic | Range / Power/Blast Radius / Speed | Roster only |
 | 6 | Artillery Cannon | Assault | Explosive | Power / Speed / Special Effects | Roster only |
@@ -224,7 +224,83 @@ baseplate, sight and shell rack. Per path:
 
 ### Design
 
-Not started. Rounds go in roster order.
+**Status: designed, confirmed by the owner with changes (2026-10-15).** The choices under Decided are the owner's. The
+stock stats and upgrade effects are Claude's proposals, confirmed as the design; the balance probe tunes their numbers. Prices come from the pricing formula, with the
+stock tuned to the owner's 250-credit build cost.
+
+**Decided (owner, 2026-10-15):**
+- Hits **air and ground**.
+- A **continuous beam that ramps up**: it locks on, and damage builds the longer it holds a target.
+- **Melts armour:** the sustained beam strips armour over time while locked.
+- **250 credits**, a premium specialist.
+- **Path 1 (Power):** a **faster, higher ramp**; the mastery is the boss killer.
+- **Path 2 (Multi-Target):** **prism split** into more beams.
+- **Path 3 (Range/Targeting):** a **long-range lance**.
+- **Retrofit:** a **capacitor bank** (+base damage), with a **bigger boost** than first drafted (owner's change).
+- **Range path:** **shorter reach** than first drafted, keeping it a mid-range tower (owner's change).
+
+**Stock (proposed):** 250 credits; 25 damage per second, ramping up to ×3 over 3 s on the same target; 150 range; air
+and ground. **Armour melt:** the locked target loses 1 armour per second, down to 0. The armour stays gone, so other
+towers benefit. Switching targets resets the ramp but not the melted armour.
+
+**Pricing value for ramping beams:** the formula counts a ramp as an average multiplier of 1 + (max − 1) × 0.5 ×
+(3 s ÷ ramp time)^0.3, and armour melt as ×1.1. These are added to the Pricing effect list.
+
+**Retrofit, Capacitor Bank, 160:** +8 damage per second (25 to 33). Look: glowing capacitor drums on the base
+that pulse as the beam ramps.
+
+**Path 1, Power (faster, higher ramp):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Hotter Emitter | 60 | Ramp ceiling ×3.5 |
+| 2 | Quick Focus | 60 | Ramp time 3 to 2.2 s |
+| 3 (primary) | Overdrive | 815 | Ramp ceiling ×5 |
+| 4 | Thermal Lock | 1,425 | Ceiling ×6; ramp time 1.8 s |
+| Mastery | Annihilator | 5,535 | Ceiling **×8** in 1.5 s: the boss killer |
+
+**Path 2, Multi-Target (prism split):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Beam Splitter | 200 | A second beam on another target at 40% power |
+| 2 | Tuned Splitter | 200 | The second beam at 60% |
+| 3 (primary) | Prism | 1,190 | **3 beams** (extras at 60%) |
+| 4 | Clear Prism | 1,190 | Extra beams at 75% |
+| Mastery | Prism Array | 5,950 | **4 beams** (extras at 75%); each beam ramps on its own target |
+
+**Path 3, Range/Targeting (long-range lance, shortened by the owner):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Extended Optics | 50 | +15 range (165) |
+| 2 | Collimator | 100 | +15 range (180) |
+| 3 (primary) | Lance | 395 | +30 range (210) |
+| 4 | Long Lance | 795 | +30 range (240) |
+| Mastery | Deep Lance | 2,115 | **280 range**: still a mid-range tower, but with a long reach |
+
+**Combinations (primary + secondary capped at 2):**
+- **Power + 2 Range:** a faster-ramping boss killer that reaches further.
+- **Multi + 2 Power:** several beams that ramp sooner and higher. The anti-elite build.
+- **Range + 2 Multi:** a long lance with a second beam.
+
+**Counters:**
+- **Armour:** the melt at stock.
+- **Bosses and Tanks:** the Power path's ramp.
+- **Flyers:** hits them.
+- **The Wraith:** an Energy tower that hits air, so it's one of its counters (the Wraith also needs a Radar reveal).
+
+**Edge cases:**
+- **Decoys and swarms:** the ramp is wasted on small targets. The Multi path's extra beams handle that, and holograms
+  (1 HP) pop at once.
+- **The Rampart and bosses:** no immunity to the melt (to confirm).
+- **Target switching:** the ramp resets when its target dies or leaves range.
+
+**Look (for the art phase):** a sleek emitter turret with a glowing lens on a rotating mount; the beam brightens as it
+ramps. The Retrofit adds capacitor drums. Per path:
+- **Power:** a hotter, whiter beam with heat vents.
+- **Multi:** a prism crystal on the emitter, splitting the beam.
+- **Range:** a long collimator barrel.
 
 ## 4. Rocket Salvo
 
