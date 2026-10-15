@@ -19,7 +19,7 @@ Tower** (18) and **Tractor Tower** (19) are Claude's proposals, added at the own
 
 | # | Tower | Class | Weapon type | Paths | Status |
 |---|---|---|---|---|---|
-| 1 | Gun Turret | Assault | Ballistic | Power / Range/Visibility / Multi-Target | Roster only |
+| 1 | Gun Turret | Assault | Ballistic | Power / Range/Visibility / Multi-Target | Designed (2026-10-15) |
 | 2 | Mortar Tower | Assault | Explosive | Power/Penetration / Speed/Range / Blast Radius/Multi-Target | Roster only |
 | 3 | Laser Tower | Assault | Energy | Power / Multi-Target / Range/Targeting | Roster only |
 | 4 | Rocket Salvo | Assault | Explosive | Power / Range/Target Acquisition / Reload/Payload | Roster only |
@@ -49,7 +49,86 @@ Tower** (18) and **Tractor Tower** (19) are Claude's proposals, added at the own
 
 ### Design
 
-Not started. Rounds go in roster order.
+**Status: designed, confirmed by the owner (2026-10-15).** The choices under Decided, the stock stats and the costs are
+the owner's. The upgrade effects are Claude's proposals, confirmed as the design; their numbers are tuned by the
+balance probe.
+
+**Decided (owner, 2026-10-14):**
+- Hits **air and ground**; the all-rounder (the Anti-Aircraft Turret is the air specialist).
+- The **cheap starter** tower.
+- Fires **steady medium rounds:** fewer, harder hits than a classic machine gun, less hurt by armour.
+- **Path 1 (Power)** leads to **armour-piercing rounds**; the mastery **ignores armour fully**.
+- **Path 2 (Range/Visibility):** Visibility means **seeing further and tracers**, with no cloak rules; the mastery is
+  **Precision Optics** (more range and critical hits).
+- **Path 3 (Multi-Target):** more barrels on more targets, **3 targets** at the top.
+- **Retrofit:** a **water-cooled barrel** (more fire rate).
+- **Counters through its paths:** **armour (Tanks)** and **swarms and decoys**.
+
+**Stock (owner, 2026-10-15):** **75 credits**; **16 damage, 130 range, 1.2 shots/s** (about 19 damage per second, close
+to the Pulse Turret's 18, in fewer, harder hits). Air and ground.
+
+**Retrofit, Water-Cooled Barrel:** **150 credits** (owner); fire rate 1.2 to 1.5/s (proposed). Look: a thick cooling
+jacket around the barrel, with a small vapour wisp when it fires.
+
+**Path 1, Power (armour-piercing):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Heavier Rounds | 100 | +6 damage |
+| 2 | Hardened Tips | 250 | Its hits ignore 2 points of armour |
+| 3 (primary) | AP Rounds | 600 | Ignores 50% of armour; +6 damage |
+| 4 | Tungsten Core | 1,200 | Ignores 75% of armour; +8 damage |
+| Mastery | Sabot Rounds | 2,500 | **Ignores armour fully**; 44 damage per hit |
+
+**Path 2, Range/Visibility (precision):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Long Barrel | 100 | +20 range |
+| 2 | Tracer Rounds | 250 | +10 range; 10% chance of a critical hit (double damage); visible tracer lines |
+| 3 (primary) | Scope | 600 | +25 range; crit chance 15% |
+| 4 | Rangefinder | 1,200 | +20 range; crit chance 20% |
+| Mastery | Precision Optics | 2,500 | 230 range in all (+25); crit chance 30% |
+
+**Path 3, Multi-Target:**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Swivel Mount | 100 | Switches to a new target instantly after a kill, and doesn't fire at enemies already about to die (no wasted rounds on swarms and holograms) |
+| 2 | Side Gun | 250 | A small side gun fires at a second target at 50% damage |
+| 3 (primary) | Twin Mount | 600 | **2 targets** at full damage |
+| 4 | Belt Feed | 1,200 | +0.3 shots/s on every barrel |
+| Mastery | Triple Mount | 2,500 | **3 targets**; the extra barrels go for the weakest enemies in range (swarms, holograms) |
+
+**Combinations (primary + secondary capped at 2):**
+- **Power + 2 Multi:** an AP main gun with a side gun for the small stuff.
+- **Range + 2 Power:** a long-range critical-hit gun that bites through light armour.
+- **Multi + 2 Power:** three barrels of heavier rounds that partly ignore armour: a swarm clearer that doesn't stall on
+  light armour.
+
+**Upgrade costs (owner, 2026-10-15): a very steep curve.** Steps **100 / 250 / 600 / 1,200**, mastery **2,500** on every
+path. A full build (75 + Retrofit 150 + primary 4,650 + secondary 350) is about **5,225 credits**, against about 1,650
+for today's Pulse Turret: cheap to start, a long-run credit sink at the top. Effects stay proposals for the balance
+probe.
+
+**Counters:**
+- **Armour (Tanks):** the Power path; Sabot Rounds hit Siege Mechs, Titans and armoured bosses at full damage.
+- **Swarms and decoys:** the Multi-Target path. Swivel Mount stops overkill; Triple Mount's extra barrels go for the
+  weakest enemies, so swarms and Mirage holograms (1 HP) pop without pulling the main gun off the real target.
+
+**Edge cases:**
+- **Flyers:** hits them at stock.
+- **Cloaked enemies:** needs a reveal (the Radar Tower); Visibility doesn't see through cloak (owner).
+- **The Wraith:** immune, since the Gun Turret is Ballistic (physical) under the enemy spec's parked energy-only rule.
+- **Bosses:** no special rule; the Power path is its boss tool.
+- **Critical hits** are new to the game (today no tower crits); they need a Codex line and a visual (a bigger hit
+  spark).
+
+**Look (for the art phase):** a compact rotating machine-gun turret with a single barrel, an ammo feed and a riveted
+base. The Retrofit adds the cooling jacket. Per path:
+- **Power:** a thicker barrel with an AP-shell feed.
+- **Range:** a long barrel and a scope.
+- **Multi-Target:** a side gun, then twin barrels, then a triple mount.
 
 ## 2. Mortar Tower
 
