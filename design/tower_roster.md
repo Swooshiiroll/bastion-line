@@ -36,7 +36,7 @@ Tower** (18) and **Tractor Tower** (19) are Claude's proposals, added at the own
 | 15 | Cryo Tower | Support | Field | Slowing / Power/Range / Speed | Designed (2026-10-15) |
 | 16 | Shockwave Generator | Assault | Field | Power/Range / Speed / Effect | Designed (2026-10-15) |
 | 17 | Scrapyard | Utility | None | Passive Income / Kill Income / Discounts | Designed (2026-10-15) |
-| 18 | Magneto Tower (Claude's proposal) | Defense | Field | Pull Strength / Field Size / Polarity | Roster only |
+| 18 | Magneto Tower (Claude's proposal) | Defense | Field | Pull Strength / Field Size / Polarity | Designed (2026-10-15) |
 | 19 | Tractor Tower (Claude's proposal) | Defense | Energy | Pull Distance / Recharge / Grip | Roster only |
 
 **By class:** Assault 11, Defense 3, Support 3, Utility 2.
@@ -1543,78 +1543,116 @@ Retrofit choice shows (a second crusher, a wider fence, or a salvage crane). Per
 
 ## 18. Magneto Tower
 
-*Claude's proposal (2026-10-14), added to the roster at the owner's request.*
+*Claude's proposal (2026-10-14), added at the owner's request; the owner rewrote its description on 2026-10-15.*
 
 - **Class:** Defense. **Weapon type:** Field.
-- **Description:** A massive electromagnet on a rotating pylon that grabs the machine army by its own metal, dragging every enemy in range back down the track. "Opposites attract. Unfortunately for them, so does everything else."
+- **Description (owner, 2026-10-15):** A massive electromagnet that magnetically pulls against enemies in range, slowing them down and pulling off armor. "Yeah, science!"
 - **Paths:** 1. Pull Strength; 2. Field Size; 3. Polarity.
-
-### Claude's writeup (proposal, for the owner to mark up)
-
-Numbers are placeholders for the balance probe.
-
-**What it does (stock):** every 3 s it pulses a magnetic field around itself. Every enemy inside is **dragged back
-along the track** (about 25 px) and stays **slowed** for a moment after (about 20% for 1 s) as it "unsticks".
-- **Weight matters:** the pull scales down with the enemy's weight. Swarm units get yanked; Tanks barely budge. Weight
-  can come from the enemy's armour (the roster already has it), so no new stat is needed.
-- **Bosses** take a quarter of the pull, like today's Graviton Projector.
-- **The Rampart** is immune to slows, stuns and shoves, so it ignores the Magneto completely (the enemy spec's rule).
-- **Flyers:** no effect until the Field path's top upgrades (grounding, below).
-- **Damage:** none at stock. It's a Defense tower; damage only comes from the Polarity path.
-
-**Optional Retrofit, "Superconducting Coil":** pulses come about 15% faster and the slow lasts a little longer. Look:
-the coil frosts over, with a thin ring of cold vapour around it.
-
-**Paths:**
-
-| Step | Pull Strength (Power) | Field Size (Range) | Polarity (Effect) |
-|---|---|---|---|
-| 1 | Stronger Pull: longer drag | Wider Field: bigger radius | Plate Ripper: each pulse tears off 1 armour (up to a cap) |
-| 2 | Heavy Lift: heavy enemies resist less | Lingering Charge: the slow lasts longer | Scrap Shrapnel: torn plates fly off and hit nearby enemies |
-| 3 (primary) | **Lockdown:** a strong pulse every 3rd cycle **stuns** for 0.5 s (cancels the Capacitor's charge, resets the Blink Stalker's) | **Grounding Field:** flyers in the field are **pulled down to the track** for 2 s, where ground-only towers can hit them | **Reverse Polarity:** every other pulse **repels** instead, flinging enemies into each other for impact damage |
-| 4 | Faster Pulses | Field Persistence: grounded flyers stay down longer | Magnetized: enemies hit by Polarity take +10% damage from Ballistic towers (metal sticks to metal) |
-| Mastery | **Event Horizon:** pulls hard enough to **hold** enemies still for 1 s every 3rd pulse | **Magnetosphere:** a huge field; all flyers inside are grounded while they stay in it | **Scrapstorm:** destroyed enemies' scrap is flung at the next enemies, damage growing with how much is dying nearby |
-
-**Combinations (primary + secondary 2):**
-- **Pull + 2 Field:** a wide, strong undertow that slows longer. The crowd-control build.
-- **Field + 2 Polarity:** grounds flyers and strips their armour, for the ground towers to finish. The anti-air
-  support build.
-- **Polarity + 2 Pull:** a strong repel/pull rhythm that shreds armour. The anti-Tank build.
-
-**Counters it carries** (all through paths, per the rules):
-- **Flyers** (Wraith, Phantom, Locust, Shrike, Gunship, Leviathan): Grounding Field and Magnetosphere. Bosses are
-  grounded for a quarter of the time.
-- **The Capacitor's EMP charge:** Lockdown's stun cancels it.
-- **Blink Stalker and Shifter:** the stun resets their blink charge.
-- **Armour** (Siege Mech, Titan, Rampart's armour): Plate Ripper. It still strips armour on the Rampart: the Rampart is
-  immune to the pull but not to losing plates (to confirm).
-- **Burrower:** not a counter. Magnets don't reach underground (to confirm).
-
-**Look and animation:**
-- **Base:** a heavy pivot base with a horseshoe or ring electromagnet, red and grey poles, and cables.
-- **Pulse:** field lines arc outward, nearby enemies visibly tilt towards the tower, and loose bolts fly off them.
-- **Per path:**
-  - **Pull Strength:** a thicker, darker coil.
-  - **Field Size:** extra ring emitters around the base.
-  - **Polarity:** a split blue and red pole that flips on each repel.
-- **Performance:** keep the animated parts (field lines, pole glow) between `Draw.dyn(true)` and `dyn(false)`.
-
-**Open questions:**
-1. Does the pull use the enemy's armour as its weight, or should the roster get a separate weight stat?
-2. Should grounded flyers count as ground for **all** towers, including the Mine Layer's mines?
-3. Is the Magneto the replacement for today's Graviton Projector? Its shove and pull job moves here.
-4. Can a Rampart lose armour to Plate Ripper while ignoring the pull?
 
 ### Design
 
-Not started. Rounds go in roster order.
+**Status: designed, confirmed by the owner (2026-10-15).** The choices under Decided are the owner's. The stock stats
+and upgrade effects are Claude's proposals, confirmed as the design; the balance probe tunes their numbers. Prices come from the pricing formula (the
+non-damage rule: stock value = build cost). This replaces Claude's first writeup (in git history and the WIP roster
+copies), which dragged enemies backwards; the owner's description makes it a slowing, armour-pulling magnet instead.
+The Tractor Tower does the pulling back.
+
+**Decided (owner, 2026-10-15):**
+- The description is the owner's: a massive electromagnet that **pulls against enemies in range, slowing them down and
+  pulling off armour**.
+- **The field slows at stock; armour pulling comes from the Polarity path.**
+- **Pulled armour comes back when they leave the field** (Polarity makes it permanent later).
+- Affects **air and ground**.
+- **Weight from the enemy's role:** heavier roles resist the pull.
+- **525 credits.**
+- **Path 1 (Pull Strength):** a **stronger slow, and heavier roles resist less**; at the mastery, even bosses are slowed
+  fully.
+- **Path 2 (Field Size):** **a bigger field only.**
+- **Path 3 (Polarity):** **strips armour inside the field, then makes it permanent, then repels** (it flings enemies
+  into each other).
+- **Retrofit: the player's choice** when buying it, from three options.
+
+**Stock (proposed):** 525 credits; a constant magnetic field of 120 px. Every enemy inside, air and ground, is slowed
+25% while inside, scaled by weight. The strongest slow applies, as today.
+
+**Weight by role (proposed):** how much of the slow each role resists:
+
+| Role | Resists |
+|---|---|
+| Swarm | 0% |
+| Rusher | 10% |
+| Evader | 20% |
+| Support, Disruptor, Special | 30% |
+| Tank | 50% |
+| Boss | 75% |
+
+**Retrofit (pick one when buying it):**
+- **Superconducting Coil, 210:** slow 25% to 30%; the coil frosts over.
+- **Field Stabiliser, 280:** +15 px radius (135).
+- **Pole Shoes, 135:** heavy roles resist 30% less.
+
+**Path 1, Pull Strength (stronger slow, heavies too):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Stronger Coil | 295 | Slow 32% |
+| 2 | Heavy Grip | 565 | Slow 35%; heavy roles resist a quarter less |
+| 3 (primary) | Mass Lock | 2,060 | Slow 42%; heavy roles resist half as much |
+| 4 | Dense Field | 2,450 | Slow 48% |
+| Mastery | Absolute Pull | 13,630 | Slow 55%; **no role resists**: Tanks and **bosses are slowed fully** |
+
+**Path 2, Field Size:**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Wider Coil | 180 | 130 px |
+| 2 | Field Extender | 395 | 140 px |
+| 3 (primary) | Broad Field | 1,290 | 155 px |
+| 4 | Great Field | 2,845 | 170 px |
+| Mastery | Magnetosphere | 10,645 | 195 px |
+
+**Path 3, Polarity (strip, then permanent, then repel):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Plate Puller | 360 | Enemies in the field lose 2 armour while inside |
+| 2 | Plate Ripper | 720 | 4 armour |
+| 3 (primary) | Torn Plates | 1,440 | Pulled armour is **gone for good**, even after they leave |
+| 4 | Deep Pull | 2,160 | 5 armour |
+| Mastery | Reverse Polarity | 9,600 | Every 4 s the field flips to **repel**: enemies are flung into each other for impact damage and a 0.3 s stun |
+
+**Combinations (primary + secondary capped at 2):**
+- **Pull + 2 Field:** a deep slow over a wider area.
+- **Field + 2 Polarity:** a big field that strips 4 armour inside it.
+- **Polarity + 2 Pull:** permanent armour stripping, with a 35% slow.
+
+**Counters:**
+- **Armour:** the Polarity path.
+- **Rushers and swarms:** the slow (light roles feel it most).
+- **Tanks and bosses:** Pull Strength's mastery.
+- **Flyers:** it affects them.
+- **Blink Stalkers:** the slow resets their blink charge (the enemy spec).
+- **The Capacitor:** the repel's stun cancels its charge.
+
+**Edge cases:**
+- **The Rampart:** immune to the slow (and to the repel), but not to losing armour.
+- **Bosses:** the role weight (75% resistance) replaces today's flat half-slow rule for this tower. To confirm; the
+  mastery removes it.
+- **Stacking with the Cryo Tower and the Chemical Plant's gel:** the strongest slow applies.
+
+**Look (for the art phase):** a massive electromagnet on a heavy base, red and grey poles, with field lines arcing out;
+enemies inside lean towards it, and bolts fly off. The Retrofit's choice shows (a frosted coil, a stabiliser ring or
+pole shoes). Per path:
+- **Pull:** a thicker coil.
+- **Field:** ring emitters.
+- **Polarity:** a split blue/red pole that flips on each repel.
 
 ## 19. Tractor Tower
 
-*Claude's proposal (2026-10-14), added to the roster at the owner's request.*
+*Claude's proposal (2026-10-14), added at the owner's request; the owner rewrote its quote on 2026-10-15.*
 
 - **Class:** Defense. **Weapon type:** Energy.
-- **Description:** A dish-mounted emitter that locks a tractor beam onto a single enemy and hauls it back down the track before letting go. "You're going the wrong way. Let me help."
+- **Description (owner, 2026-10-15):** A dish-mounted emitter that locks a tractor beam onto a single enemy and hauls it back down the track before letting go. "You're my friend now."
 - **Paths:** 1. Pull Distance; 2. Recharge; 3. Grip.
 
 ### Claude's writeup (proposal, for the owner to mark up)
