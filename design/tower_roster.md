@@ -26,7 +26,7 @@ Tower** (18) and **Tractor Tower** (19) are Claude's proposals, added at the own
 | 5 | Anti-Aircraft Turret | Assault | Ballistic | Range / Power/Blast Radius / Speed | Designed (2026-10-15) |
 | 6 | Artillery Cannon | Assault | Explosive | Power / Speed / Special Effects | Designed (2026-10-15) |
 | 7 | Railgun | Assault | Ballistic | Power / Range/Speed / Special Effects | Designed (2026-10-15) |
-| 8 | Tesla Tower | Assault | Energy | Power (Damage) / Range/Chaining / Speed | Roster only |
+| 8 | Tesla Tower | Assault | Energy | Power (Damage) / Range/Chaining / Speed | Designed (2026-10-15) |
 | 9 | Drone Bay | Assault | Deployable | Power (overall) / Weaponry (upgrades/additions) / Speed | Roster only |
 | 10 | CAS Gunship | Assault | Deployable | Speed (Attack) / Power / Weaponry Upgrades | Roster only |
 | 11 | Mine Layer | Defense | Explosive | Power/Damage / Production Speed / Range | Roster only |
@@ -666,7 +666,84 @@ straight tracer line on each shot. The Retrofit adds glowing coils. Per path:
 
 ### Design
 
-Not started. Rounds go in roster order.
+**Status: designed, confirmed by the owner (2026-10-15).** The choices under Decided are the owner's. The stock
+stats and upgrade effects are Claude's proposals, confirmed as the design; the balance probe tunes their numbers. Prices come from the pricing formula, with the
+stock tuned to the owner's 250-credit build cost.
+
+**Decided (owner, 2026-10-15):**
+- Hits **air and ground**.
+- **Chain lightning:** it hits one enemy and jumps to a few nearby ones, losing some power per jump.
+- **250 credits.**
+- **Path 1 (Power/Damage):** **raw voltage**: pure damage, and the arcs barely weaken per jump at the top. This path
+  also carries the **stun** and the **EMP-enemy overload** (owner).
+- **Path 2 (Range/Chaining):** **storm field**: range and jumps, and arcs leave a crackling storm where they land.
+- **Path 3 (Speed):** **faster discharges**, continuous at the top.
+- **Retrofit:** a **bigger disk** (+damage, +range).
+
+**Stock (proposed):** 250 credits; an arc every 1.25 s (0.8/s), 32 damage, jumping to 3 more enemies within 70 px and
+losing 15% per jump; 140 range; air and ground. It's Energy, so it ignores armour like other energy damage
+(to confirm), and it's a Wraith counter once the Wraith is revealed.
+
+**Pricing values:** a chain counts as 1 + 0.6 × the falloff-weighted jumps (enemies aren't always in reach); the storm as
+its damage over 2 s in its radius; the overload ×1.08; stuns ×1.15 to ×1.2. These join the Pricing effect list.
+
+**Retrofit, Bigger Disk (proposed), 120:** +4 damage (36), +15 range (155). Look: a larger crowning disk with a corona
+glow.
+
+**Path 1, Power/Damage (raw voltage, stun, overload):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | High Voltage | 125 | +8 damage (40) |
+| 2 | Overload Circuits | 100 | **EMP-enemy overload:** ×2 damage to Disruptors (Jammer, Siphon, Blackout Rig, Capacitor); a hit **cancels a Capacitor's charge** |
+| 3 (primary) | Arc Stun | 1,020 | 48 damage; arcs **stun** for 0.3 s (bosses 0.1 s) |
+| 4 | Clean Conduction | 1,705 | 54 damage; only 8% lost per jump |
+| Mastery | Lightning Rod | 4,310 | 60 damage; 3% lost per jump; stun 0.5 s |
+
+**Path 2, Range/Chaining (storm field):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Taller Coil | 70 | +20 range (160) |
+| 2 | Extra Jump | 155 | 4 jumps |
+| 3 (primary) | Storm Field | 2,260 | 5 jumps; each arc leaves a 25 px storm for 2 s (10 energy damage/s to every enemy in it) |
+| 4 | Wide Storm | 2,390 | +20 range (180); 6 jumps |
+| Mastery | Tempest | 8,140 | 7 jumps; storms of 14/s, 30 px |
+
+**Path 3, Speed (faster discharges):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Quick Recharge | 60 | 0.9 arcs/s |
+| 2 | Fast Capacitor | 125 | 1.0 arcs/s |
+| 3 (primary) | Rapid Discharge | 995 | 1.4 arcs/s |
+| 4 | Overclocked Coil | 995 | 1.6 arcs/s |
+| Mastery | Continuous Discharge | 4,980 | 2.1 arcs/s: near-constant lightning |
+
+**Combinations (primary + secondary capped at 2):**
+- **Power + 2 Speed:** stunning, overloading arcs fired faster. The anti-Disruptor and crowd-control build.
+- **Chain + 2 Power:** storms through a wave, plus the overload.
+- **Speed + 2 Chain:** constant arcs with an extra jump and range.
+
+**Counters:**
+- **Crowds and swarms:** the chain.
+- **Disruptors:** the overload, which also cancels the Capacitor's charge.
+- **Rushers and Blink Stalkers:** the stun (it resets a blink charge).
+- **Flyers:** hits them.
+- **The Wraith:** Energy, and the storm is area energy damage, so a storm hurts a cloaked Wraith inside it
+  (consistent with the owner's ion-trail ruling on the Railgun). The arc itself needs a revealed target.
+
+**Edge cases:**
+- **Bosses:** stuns at a third of the duration, as today.
+- **The Rampart:** immune to the stun; it still takes damage.
+- **Isolated enemies:** no jumps, so the chain wastes value on lone targets.
+- **Barriers:** no special bonus (the owner didn't pick it).
+
+**Look (for the art phase):** a tall coil tower topped with a metal disk; arcs leap from the disk and chain between
+enemies. The Retrofit enlarges the disk. Per path:
+- **Power:** thicker, whiter arcs.
+- **Chain:** extra coil rings and a crackling storm on the ground.
+- **Speed:** a humming, flickering coil.
 
 ## 9. Drone Bay
 

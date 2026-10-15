@@ -109,7 +109,8 @@ towers, with prices **rounded to 5s and 0s**.
     whole-map gun counts its reach as ×1.5; burning ground as its damage over 3 s on everything in the blast; each extra
     selectable shell type ×0.1; a stun ×1.15 to ×1.25 (Artillery Cannon). Boss bonus damage ×1.1 to ×1.3; armour
     shatter +3% per armour stripped; piercing with falloff ×1.25 (40% falloff) to ×1.75 (none); an ionised trail as its
-    burn on the line (Railgun). New effects (slow, stun, burn, pull, buffs,
+    burn on the line (Railgun). A chain as 1 + 0.6 × the falloff-weighted jumps; a storm as its damage over 2 s in
+    its radius; the EMP-enemy overload ×1.08 (Tesla Tower). New effects (slow, stun, burn, pull, buffs,
     income) get their multiplier or damage equivalent when their tower is designed, and are listed here.
 - **Upgrade price:** (V after − V before) × **3.9 credits per value point** × the **step multiplier**, rounded to 5.
   - **3.9** is calibrated on the Gun Turret: 75 credits for its stock value (16 damage × 1.2 shots/s).
