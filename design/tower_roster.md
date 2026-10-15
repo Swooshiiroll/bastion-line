@@ -68,8 +68,12 @@ balance probe.
 **Stock (owner, 2026-10-15):** **75 credits**; **16 damage, 130 range, 1.2 shots/s** (about 19 damage per second, close
 to the Pulse Turret's 18, in fewer, harder hits). Air and ground.
 
-**Retrofit, Water-Cooled Barrel:** **40 credits** (by the pricing formula; repriced from 150); fire rate 1.2 to 1.5/s.
-Look: a thick cooling jacket around the barrel, with a small vapour wisp when it fires.
+**Retrofit (the player picks one; owner, 2026-10-15):**
+- **Water-Cooled Barrel, 40:** fire rate 1.2 to 1.5/s. Look: a thick cooling jacket around the barrel, with a small
+  vapour wisp when it fires.
+- **AP Belt, 15:** its rounds ignore 2 armour. Look: a striped ammo belt.
+- **Tracer Feed, 20:** +10 range, and every 5th round is a tracer that briefly reveals a cloaked enemy it hits. Look:
+  red-tipped rounds in the feed.
 
 **Path 1, Power (armour-piercing):**
 
@@ -161,9 +165,13 @@ stats and upgrade effects are Claude's proposals, confirmed as the design; the b
 **Stock (proposed):** 150 credits; 30 damage per shell, a 60 px blast, 110 range, 0.6 shells/s; ground only. Its value
 matches the Gun Turret's credits per point: the Mortar does a little less single-target damage but hits a whole pack.
 
-**Retrofit, Field Kit (proposed), 120:** a reinforced baseplate (+4 damage), a ranging sight (+10 range) and an ammo
-rack (+0.05 shells/s, +5 px blast). Look: a heavy steel baseplate with sandbags, a sight on the tube, and a rack of
-ready shells.
+**Retrofit (the player picks one; owner, 2026-10-15):**
+- **Field Kit, 120:** a reinforced baseplate (+4 damage), a ranging sight (+10 range) and an ammo rack (+0.05 shells/s,
+  +5 px blast). Look: a heavy steel baseplate with sandbags, a sight on the tube, and a rack of ready shells.
+- **Bunker Sight, 15:** it can target burrowed enemies inside Radar Tower range, at half damage (the Bunker Buster
+  mastery does it at full). Look: a periscope sight.
+- **Smoke Shells, 15:** every 4th shell leaves a smoke cloud for 3 s that slows enemies inside it by 15%. Look: grey-banded
+  shells in the rack.
 
 **Path 1, Power/Penetration:**
 
@@ -247,8 +255,11 @@ towers benefit. Switching targets resets the ramp but not the melted armour.
 **Pricing value for ramping beams:** the formula counts a ramp as an average multiplier of 1 + (max − 1) × 0.5 ×
 (3 s ÷ ramp time)^0.3, and armour melt as ×1.1. These are added to the Pricing effect list.
 
-**Retrofit, Capacitor Bank, 160:** +8 damage per second (25 to 33). Look: glowing capacitor drums on the base
-that pulse as the beam ramps.
+**Retrofit (the player picks one; owner, 2026-10-15):**
+- **Capacitor Bank, 160:** +8 damage per second (25 to 33). Look: glowing capacitor drums on the base that pulse as the
+  beam ramps.
+- **Heat Sinks, 60:** ramp ceiling ×3 to ×3.5. Look: cooling fins along the turret.
+- **Focusing Lens, 15:** ramp time 3 to 2.4 s. Look: a big glowing lens on the emitter.
 
 **Path 1, Power (faster, higher ramp):**
 
@@ -334,8 +345,11 @@ can dodge them.
 **Pricing values:** homing counts as ×1.15 to ×1.3 (fewer misses), and guidance fins as ×1.1. They join the Pricing
 effect list.
 
-**Retrofit, Guidance Fins (proposed), 40:** faster rockets that lead their target, so fewer misses. Look: tail fins and
-a small sensor dome on each pod.
+**Retrofit (the player picks one; owner, 2026-10-15):**
+- **Guidance Fins, 40:** faster rockets that lead their target, so fewer misses. Look: tail fins and a small sensor dome
+  on each pod.
+- **Autoloader, 55:** a salvo every 2.2 s instead of 2.5 s. Look: an ammo belt feeding the launcher.
+- **Long Booster, 65:** +30 range (210). Look: longer rockets with booster stages.
 
 **Path 1, Power (heavier warheads):**
 
@@ -419,8 +433,10 @@ a minority of enemies. That lets it hit far harder than its price suggests. This
 **Stock (proposed):** 150 credits; 25 damage per round, 2.5 rounds/s, 160 range; flyers only. That's about 62 damage
 per second against air: it shreds Locusts and Strike Drones and wears down Gunships.
 
-**Retrofit, Fire-Control Radar (proposed), 45:** +15 range and steadier aim (×1.05). Look: a small rotating radar dish
-beside the guns.
+**Retrofit (the player picks one; owner, 2026-10-15):**
+- **Fire-Control Radar, 45:** +15 range and steadier aim. Look: a small rotating radar dish beside the guns.
+- **Ammo Drum, 30:** +10% fire rate (2.75 rounds/s). Look: a big drum magazine.
+- **Armoured Mount, 50:** +4 damage (29). Look: an armoured gun shield.
 
 **Path 1, Range (area denial):**
 
@@ -506,7 +522,10 @@ time; ground only. A new cannon aims at the track point nearest to itself until 
 aim point). Burning ground counts as its damage over 3 s on everything in the blast. Each extra selectable shell type
 adds ×0.1 (flexibility), and a stun ×1.15 to ×1.25. These join the Pricing effect list.
 
-**Retrofit, Ammo Hoist (proposed), 120:** a shell every 3.3 s (0.25 to 0.3/s). Look: an ammo lift beside the gun.
+**Retrofit (the player picks one; owner, 2026-10-15):**
+- **Ammo Hoist, 120:** a shell every 3.3 s. Look: an ammo lift beside the gun.
+- **Heavy Recoil Mount, 120:** +15 damage (90). Look: a bigger recoil mechanism and stabilisers.
+- **Wide Charge, 80:** +15 px blast (85). Look: fat, wide-bodied shells.
 
 **Path 1, Power (damage and blast, then armour piercing):**
 
@@ -600,8 +619,10 @@ enemy it passes through (90, 54, 32...).
 as ×1.25 (40% falloff) up to ×1.75 (no falloff); an ionised trail as its burn on the line. These join the Pricing
 effect list.
 
-**Retrofit, Capacitor Coils (proposed), 140:** recharge 2.5 to 2.2 s. Look: glowing coils along the rails that charge
-up before each shot.
+**Retrofit (the player picks one; owner, 2026-10-15):**
+- **Capacitor Coils, 140:** recharge 2.5 to 2.2 s. Look: glowing coils along the rails that charge up before each shot.
+- **Longer Rails, 265:** +15 damage (105) and +30 range (410). Look: extended rails.
+- **Penetrator Tips, 65:** falloff per enemy 40% to 30%. Look: pointed, dark slugs.
 
 **Path 1, Power (boss slayer and overcharge):**
 
@@ -688,8 +709,10 @@ losing 15% per jump; 140 range; air and ground. It's Energy, so it ignores armou
 **Pricing values:** a chain counts as 1 + 0.6 × the falloff-weighted jumps (enemies aren't always in reach); the storm as
 its damage over 2 s in its radius; the overload ×1.08; stuns ×1.15 to ×1.2. These join the Pricing effect list.
 
-**Retrofit, Bigger Disk (proposed), 120:** +4 damage (36), +15 range (155). Look: a larger crowning disk with a corona
-glow.
+**Retrofit (the player picks one; owner, 2026-10-15):**
+- **Bigger Disk, 120:** +4 damage (36), +15 range (155). Look: a larger crowning disk with a corona glow.
+- **Grounding Rods, 65:** +1 jump (4). Look: rods around the base.
+- **Insulated Coils, 70:** an arc every 1.1 s. Look: ceramic insulators on the coil.
 
 **Path 1, Power/Damage (raw voltage, stun, overload):**
 
@@ -779,8 +802,10 @@ core, anywhere on the map; air and ground. The drone flies to its target, so far
 **Pricing value for drones (proposed):** whole-map hunting counts as ×1.5 (×1.6 less a little for flight time); each
 unlocked loadout adds flexibility, and a stronger loadout more. These join the Pricing effect list.
 
-**Retrofit, Second Hangar, 3,200 (owner):** launches the **second drone**, doubling the bay's firepower. The formula
-said 600; the owner set 3,200, since doubling the firepower is worth more than a step 1. Look: a second hangar door and landing pad.
+**Retrofit, Second Hangar, 3,200 (owner): the Drone Bay's only Retrofit.** The owner kept it single when every other
+tower got a choice of three (2026-10-15). It launches the **second drone**, doubling the bay's firepower. The formula
+said 600; the owner set 3,200, since doubling the firepower is worth more than a step 1. Look: a second hangar door and
+landing pad.
 
 **Path 1, Power (damage):**
 
