@@ -83,7 +83,7 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Tower rework · Roster · round 3</div>
+    <div class="eyebrow">Bastion Line · Tower rework · Roster · round 3 (v6: your WIP towers built in)</div>
     <h1>Tower roster</h1>
     <p class="note">Write your towers: a <b>name</b>, a <b>class</b>, a <b>weapon type</b> and a <b>description</b> (the art is drawn from these later). The three path
       purposes are optional here; we settle them in the next rounds. Everything is kept in this browser; copy it from the bottom of the page and send it back.
@@ -111,6 +111,15 @@
       <h2>Your tower list</h2>
       <button id="add-tower">+ Add a tower</button>
     </div>
+    <div class="row">
+      <button id="load-seed">Load built-in towers (your WIP list v4, 2026-10-14)</button>
+    </div>
+    <details id="import-box">
+      <summary>Import a pasted roster</summary>
+      <p class="note" style="margin:6px 0">Paste text from <b>Copy roster and notes</b> (from any browser or machine) and press Import. It replaces the list below.</p>
+      <textarea id="import-text" style="min-height:120px; font: 12px var(--mono)" placeholder="Tower roster (round 3)&#10;Towers (N):&#10;1. Name: class Assault; weapon Ballistic; description: ..."></textarea>
+      <div class="row" style="margin-top:6px"><button id="import-go">Import</button><span class="tag" id="import-msg"></span></div>
+    </details>
     <div class="stack" id="towers"></div>
     <button class="big" id="add-tower-2">+ Add a tower</button>
     <details>
@@ -164,12 +173,36 @@ const TODAY = [
 ];
 
 const blankState = () => ({ towers: [{}], general: "" });
+// The owner's WIP roster (2026-10-14), as copied from this page. Fills the page when this browser has nothing saved.
+const SEED_TEXT = "Tower roster (round 3)\nTowers (19):\n1. Gun Turret: class Assault; weapon Ballistic; description: A basic rotating machine gun turret. \"It's a machine gun, Private!\"; paths: Power / Range/Visibility / Multi-Target\n2. Mortar Tower: class Assault; weapon Explosive; description: Lobs high-explosive shells at nearby enemies. \"Toob.\"; paths: Power/Penetration / Speed/Range / Blast Radius/Multi-Target\n3. Laser Tower: class Assault; weapon Energy; description: A High-Energy Laser Emitter affixed to a rotating turret. \"It does more than just blind the enemy, that's for sure.\"; paths: Power / Multi-Target / Range/Targeting\n4. Rocket Salvo: class Assault; weapon Explosive; description: Launches a volley of rockets at oncoming enemies. \"Instead of shooting bullets, it shoots very angry telephone poles that hate absolutely everything.\"; paths: Power / Range/Target Acquisition / Reload/Payload\n5. Anti-Aircraft Turret: class Assault; weapon Ballistic; description: A fully automatic anti-aircraft gun. \"We don't need a gun, or a nug!\"; paths: Range / Power/Blast Radius / Speed\n6. Artillery Cannon: class Assault; weapon Explosive; description: A large-bore cannon that fires high-explosive shells very long distances. \"It's not DiGiorno...\"; paths: Power / Speed / Special Effects; notes: User selects where the cannon should aim along the track - Does not target enemies.\n7. Railgun: class Assault; weapon Ballistic; description: A large cannon with magnetically polarized rails that launch a large projectile extremely far, extremely fast. \"Known to cause cancer in the state of California.\"; paths: Power / Range/Speed / Special Effects\n8. Tesla Tower: class Assault; weapon Energy; description: A large metal disk mounted atop of a large tower that generates high-voltage electrical arcs that damage incoming enemies. \"It was built in a cave with a box of scraps.\"; paths: Power (Damage) / Range/Chaining / Speed\n9. Drone Bay: class Assault; weapon Deployable; description: Houses combat drones that hunt after enemies. \"The military really took the idea of same-day delivery and ran with it.\"; paths: Power (overall) / Weaponry (upgrades/additions) / Speed; notes: Max 2 drones\n10. CAS Gunship: class Assault; weapon Deployable; description: A large slow-flying cargo plane capable of being with with a wide range of weaponry. \"You know that feeling you get when its raining outside, but then the rain suddenly goes from being water to large metal bullets being shot at you from that giant plane above you? Yeah, I hate that feeling.\"; paths: Speed (Attack) / Power / Weaponry Upgrades; notes: While its tower can be placed anywhere, the gunship itself circles around a pin-point location of the user's designation.\n11. Mine Layer: class Defense; weapon Explosive; description: Manufactures and tosses explosive mines onto the track that explode when an enemy passes over them. \"You know it's a party when the high-speed confetti start flying in every direction.\"; paths: Power/Damage / Production Speed / Range\n12. Chemical Plant: class Support; weapon other; description: A chemical manufacturing facility that produces and sprays chemicals on nearby enemies. \"Known to cause cancer in the state of California.\"; paths: Damage/Armor stripping / Speed / Slowing; notes: Weapon type: Chemical. Attacks one enemy at a time. Already soaked enemies are ignored by the tower until the chemical wears off.\n13. Rally Beacon: class Support; weapon None; description: Towers in range of the Rally Beacon are amped up and given stat boosts. \"Are you feeling it now Mr. Krabs?\"; paths: Damage boost / Speed boost / Range Boost; notes: Retrofit boosts towers reach and grants mild boost for all stats for all towers in range\n14. Radar Tower: class Utility; weapon Energy; description: Radar is able to detect and alert nearby towers of stealthy or otherwise hidden enemies. \"I've lost the bleeps, I've lost the sweeps, and I've lost the creeps.\"; paths: Power/Range / Speed/Frequency / Special Targeting; notes: Enemies in range are pinged for a brief moment, allowing nearby towers to target them. ping-rate increased through upgrades Upon reaching a certain upgrade, enemies withing a small secondary circle are dealt energy damage for as long as they're in that range. (High-Energy Non-Ionizing Radiation damage)\n15. Cryo Tower: class Support; weapon Field; description: Produces a wave of sub-zero temperature gasses that stunt the mobility of enemies within range. \"The military had to put restrictions on these machines after a group of soldiers got caught having a snowball fight in the middle of a heatwave.\"; paths: Slowing / Power/Range / Speed\n16. Shockwave Generator: class Assault; weapon Field; description: Generates powerful shockwaves by creating small nuclear explosion. \"Radioactive fallout? What radioactive fallout?\"; paths: Power/Range / Speed / Effect\n17. Scrapyard: class Utility; weapon None; description: Various collections of scrap metal sold at a profit. \"One mans toxic waste is another mans potpourri\"; paths: Passive Income / Kill Income / Discounts\n18. Magneto Tower: class Defense; weapon Field; description: A massive electromagnet on a rotating pylon that grabs the machine army by its own metal, dragging every enemy in range back down the track. \"Opposites attract. Unfortunately for them, so does everything else.\"; paths: Pull Strength / Field Size / Polarity\n19. Tractor Tower: class Defense; weapon Energy; description: A dish-mounted emitter that locks a tractor beam onto a single enemy and hauls it back down the track before letting go. \"You're going the wrong way. Let me help.\"; paths: Pull Distance / Recharge / Grip";
+// Reads text from "Copy roster and notes" back into towers.
+function parseRoster(text) {
+  const byName = (list, v) => { v = String(v || "").trim(); if (!v || v === "-") return ""; if (v.toLowerCase() === "other") return "other";
+    const c = list.find((x) => x.name.toLowerCase() === v.toLowerCase()); return c ? c.id : "other"; };
+  const towers = []; let general = "";
+  for (const raw of String(text || "").split(/\r?\n/)) {
+    const line = raw.trim();
+    if (line.startsWith("General notes:")) { general = line.slice(14).trim(); continue; }
+    const m = line.match(/^\d+\.\s+(.*?):\s(.*)$/); if (!m) continue;
+    const t = { name: m[1] === "(unnamed)" ? "" : m[1], paths: ["", "", ""] };
+    for (const part of m[2].split(/;\s(?=(?:class |weapon |description: |paths: |notes: ))/)) {
+      if (part.startsWith("class ")) t.cls = byName(CLASSES, part.slice(6));
+      else if (part.startsWith("weapon ")) t.weapon = byName(WEAPONS, part.slice(7));
+      else if (part.startsWith("description: ")) { const d = part.slice(13).trim(); t.desc = d === "-" ? "" : d; }
+      else if (part.startsWith("paths: ")) t.paths = part.slice(7).split(" / ").map((x) => (x.trim() === "-" ? "" : x.trim())).concat(["", "", ""]).slice(0, 3);
+      else if (part.startsWith("notes: ")) t.notes = part.slice(7).trim();
+    }
+    towers.push(t);
+  }
+  return { towers, general };
+}
 let S;
 try { S = JSON.parse(localStorage.getItem(STORE) || "null"); } catch (e) { S = null; }
 if (!S || typeof S !== "object") {
   // Carry over anything typed on earlier rounds. Round 2's weapon class becomes the weapon type (its Economy
   // becomes class Utility); round 1's role is dropped.
-  let old = null;
+  let old = null, any = false;
+  try { any = OLD_STORES.some((k) => localStorage.getItem(k) !== null); } catch (e) { any = false; }
   for (const k of OLD_STORES) { if (old) break; try { old = JSON.parse(localStorage.getItem(k) || "null"); } catch (e) { old = null; } }
   S = blankState();
   if (old && typeof old === "object") {
@@ -183,6 +216,7 @@ if (!S || typeof S !== "object") {
     if (kept.length) S.towers = kept;
     S.general = old.general || "";
   }
+  if (!any) { const p = parseRoster(SEED_TEXT); S.towers = p.towers; S.general = p.general; }
 }
 S.towers = S.towers || []; S.general = S.general || "";
 function save() { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) { /* storage unavailable */ } summary(); }
@@ -272,6 +306,17 @@ $("copy").addEventListener("click", () => {
 $("clear").addEventListener("click", () => {
   if (!confirm("Clear every tower and all notes?")) return;
   S = blankState(); $("general").value = ""; save(); renderTowers();
+});
+$("load-seed").addEventListener("click", () => {
+  if (!confirm("Replace the list below with your built-in WIP towers (19)?")) return;
+  const p = parseRoster(SEED_TEXT); S.towers = p.towers; if (p.general) S.general = p.general; $("general").value = S.general; save(); renderTowers();
+});
+$("import-go").addEventListener("click", () => {
+  const p = parseRoster($("import-text").value), msg = $("import-msg");
+  if (!p.towers.length) { msg.textContent = "No towers found in that text"; return; }
+  if (!confirm("Replace the list below with the " + p.towers.length + " imported towers?")) return;
+  S.towers = p.towers; if (p.general) S.general = p.general; $("general").value = S.general; save(); renderTowers();
+  msg.textContent = "Imported " + p.towers.length + " towers";
 });
 renderList("classes", CLASSES); renderList("weapons", WEAPONS); renderTowers();
 </script>

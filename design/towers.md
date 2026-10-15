@@ -97,15 +97,45 @@ Picked by the owner on 2026-10-08 from `design/tower_upgrade_structure.html`: tr
 ## Process
 
 1. **Class set:** Claude's draft in `design/tower_classes.md`; the owner edits it.
-2. **Roster:** the owner writes the tower list on `design/tower_roster.html`: names, classes, weapon types and
-   descriptions, and
-   optionally each tower's three path purposes.
+2. **Roster:** done: 19 towers (see Roster below), written by the owner on `design/tower_roster.html`.
 3. **Upgrade structure:** decided (trunk C Optional Retrofit, depth B 4 + mastery; see above).
-4. **Per tower, in question rounds:** its three path purposes, its stats, its upgrades, and which upgrades counter
+4. **Per tower, in question rounds** (in progress, in roster order, questions first; answers go in
+   `design/tower_roster.md`): its three path purposes, its stats, its upgrades, and which upgrades counter
    which enemy mechanics. Then balance targets and how the bot probe checks them.
 5. **Art** (after gameplay): looks and animations from the owner's names and descriptions, then per-path looks (#6),
    on mockup pages like the enemy art (`design/enemy_art.md`), within the turret cache rules.
 6. **Implementation** waits on the owner's confirmation of the whole spec, and ships as its own PRs.
+
+## Roster (owner, 2026-10-14)
+
+The working roster is **19 towers**; each one's text and design live in `design/tower_roster.md`. Towers 1 to 17 are
+the owner's; the Magneto Tower and Tractor Tower are Claude's proposals, added at the owner's request.
+
+| # | Tower | Class | Weapon type |
+|---|---|---|---|
+| 1 | Gun Turret | Assault | Ballistic |
+| 2 | Mortar Tower | Assault | Explosive |
+| 3 | Laser Tower | Assault | Energy |
+| 4 | Rocket Salvo | Assault | Explosive |
+| 5 | Anti-Aircraft Turret | Assault | Ballistic |
+| 6 | Artillery Cannon | Assault | Explosive |
+| 7 | Railgun | Assault | Ballistic |
+| 8 | Tesla Tower | Assault | Energy |
+| 9 | Drone Bay | Assault | Deployable |
+| 10 | CAS Gunship | Assault | Deployable |
+| 11 | Mine Layer | Defense | Explosive |
+| 12 | Chemical Plant | Support | Chemical (in notes) |
+| 13 | Rally Beacon | Support | None |
+| 14 | Radar Tower | Utility | Energy |
+| 15 | Cryo Tower | Support | Field |
+| 16 | Shockwave Generator | Assault | Field |
+| 17 | Scrapyard | Utility | None |
+| 18 | Magneto Tower (Claude's proposal) | Defense | Field |
+| 19 | Tractor Tower (Claude's proposal) | Defense | Energy |
+
+**Decided (owner, 2026-10-14):** this is the working roster; design it **tower by tower in roster order** (Gun Turret
+first), **questions first**, before any drafting. No game code until the whole spec is confirmed. The gap review and
+other Defense ideas from the roster work are at the end of `design/tower_roster.md`.
 
 ## Classes
 
@@ -150,6 +180,8 @@ From the enemy rework (`design/enemies.md`, `design/enemy_roster.md` on `design/
 
 - **Four classes** (2026-10-10): Assault, Support, Defense, Utility; exactly one per tower; groups the shop;
   economy is Utility; weapon type kept as a descriptive sub-tag. Reference sheet `design/tower_classes.md`.
+- **Working roster** (2026-10-14): 19 towers (`design/tower_roster.md`); designed tower by tower in roster order,
+  questions first.
 - **Upgrade structure** (2026-10-08): Optional Retrofit, 4 upgrades + mastery per path; the Retrofit is tower-specific,
   bought from a fourth card with its own hotkey, and visibly changes the tower.
 
@@ -157,12 +189,15 @@ From the enemy rework (`design/enemies.md`, `design/enemy_roster.md` on `design/
 
 1. **Class sheet:** the owner's edits to `design/tower_classes.md`: the edge cases (Sensor Array, Nullifier), and
    accept or drop the Field and Deployable weapon types.
-2. **Roster:** the owner's tower list: names, classes, weapon types, descriptions (the roster page).
+2. **Air or ground per tower,** and whether the roster covers flyers, the Wraith (energy only) and the Burrower well
+   enough (asked tower by tower, then checked across the roster).
 3. **The Retrofit's hotkey:** Y suggested; confirmed in the UI round.
-4. **Per tower:** path purposes, the Retrofit's boost, stats, upgrades, counter upgrades (rounds after 1 and 2).
+4. **Per tower** (in progress): stats, the 4 upgrades and mastery on each path, the Retrofit, counter upgrades.
 5. **Old saves and ids:** what happens to towers in old saves when the roster changes (save format bump, refunds).
 6. **The bot, Codex, tests and tour:** how they follow the new roster.
 7. **What a class does beyond the shop** (TBD): candidates are parked in the class sheet.
 8. **Weapon types and the physical/energy split** the Wraith needs: decide later.
-9. **Folding in #6 and #8:** per-path looks come in the art phase; the #8 playtest tree tweaks are rewritten into the
+9. **Build hotkeys:** 19 towers need more keys than today's 15.
+10. **Weapon type "Chemical":** the Chemical Plant's notes say Chemical; add it to the list?
+11. **Folding in #6 and #8:** per-path looks come in the art phase; the #8 playtest tree tweaks are rewritten into the
    new trees.
