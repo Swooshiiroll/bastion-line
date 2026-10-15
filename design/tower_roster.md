@@ -49,8 +49,8 @@ Tower** (18) and **Tractor Tower** (19) are Claude's proposals, added at the own
 
 ### Design
 
-**Status: designed, confirmed by the owner (2026-10-15).** The choices under Decided, the stock stats and the costs are
-the owner's. The upgrade effects are Claude's proposals, confirmed as the design; their numbers are tuned by the
+**Status: designed, confirmed by the owner (2026-10-15).** The choices under Decided and the stock stats are the
+owner's; the costs come from the owner-accepted pricing formula. The upgrade effects are Claude's proposals, confirmed as the design; their numbers are tuned by the
 balance probe.
 
 **Decided (owner, 2026-10-14):**
@@ -67,38 +67,38 @@ balance probe.
 **Stock (owner, 2026-10-15):** **75 credits**; **16 damage, 130 range, 1.2 shots/s** (about 19 damage per second, close
 to the Pulse Turret's 18, in fewer, harder hits). Air and ground.
 
-**Retrofit, Water-Cooled Barrel:** **150 credits** (owner); fire rate 1.2 to 1.5/s (proposed). Look: a thick cooling
+**Retrofit, Water-Cooled Barrel:** **40 credits** (by the pricing formula; repriced from 150); fire rate 1.2 to 1.5/s. Look: a thick cooling
 jacket around the barrel, with a small vapour wisp when it fires.
 
 **Path 1, Power (armour-piercing):**
 
 | Step | Name | Cost | Effect (proposed) |
 |---|---|---|---|
-| 1 | Heavier Rounds | 100 | +6 damage |
-| 2 | Hardened Tips | 250 | Its hits ignore 2 points of armour |
-| 3 (primary) | AP Rounds | 600 | Ignores 50% of armour; +6 damage |
-| 4 | Tungsten Core | 1,200 | Ignores 75% of armour; +8 damage |
-| Mastery | Sabot Rounds | 2,500 | **Ignores armour fully**; 44 damage per hit |
+| 1 | Heavier Rounds | 55 | +6 damage |
+| 2 | Hardened Tips | 40 | Its hits ignore 2 points of armour |
+| 3 (primary) | AP Rounds | 405 | Ignores 50% of armour; +6 damage |
+| 4 | Tungsten Core | 1,085 | Ignores 75% of armour; +8 damage |
+| Mastery | Sabot Rounds | 2,475 | **Ignores armour fully**; 44 damage per hit |
 
 **Path 2, Range/Visibility (precision):**
 
 | Step | Name | Cost | Effect (proposed) |
 |---|---|---|---|
-| 1 | Long Barrel | 100 | +20 range |
-| 2 | Tracer Rounds | 250 | +10 range; 10% chance of a critical hit (double damage); visible tracer lines |
-| 3 (primary) | Scope | 600 | +25 range; crit chance 15% |
-| 4 | Rangefinder | 1,200 | +20 range; crit chance 20% |
-| Mastery | Precision Optics | 2,500 | 230 range in all (+25); crit chance 30% |
+| 1 | Long Barrel | 25 | +20 range |
+| 2 | Tracer Rounds | 60 | +10 range; 10% chance of a critical hit (double damage); visible tracer lines |
+| 3 (primary) | Scope | 170 | +25 range; crit chance 15% |
+| 4 | Rangefinder | 305 | +20 range; crit chance 20% |
+| Mastery | Precision Optics | 980 | 230 range in all (+25); crit chance 30% |
 
 **Path 3, Multi-Target:**
 
 | Step | Name | Cost | Effect (proposed) |
 |---|---|---|---|
-| 1 | Swivel Mount | 100 | Switches to a new target instantly after a kill, and doesn't fire at enemies already about to die (no wasted rounds on swarms and holograms) |
-| 2 | Side Gun | 250 | A small side gun fires at a second target at 50% damage |
-| 3 (primary) | Twin Mount | 600 | **2 targets** at full damage |
-| 4 | Belt Feed | 1,200 | +0.3 shots/s on every barrel |
-| Mastery | Triple Mount | 2,500 | **3 targets**; the extra barrels go for the weakest enemies in range (swarms, holograms) |
+| 1 | Swivel Mount | 15 | Switches to a new target instantly after a kill, and doesn't fire at enemies already about to die (no wasted rounds on swarms and holograms) |
+| 2 | Side Gun | 165 | A small side gun fires at a second target at 50% damage |
+| 3 (primary) | Twin Mount | 330 | **2 targets** at full damage |
+| 4 | Belt Feed | 660 | +0.3 shots/s on every barrel |
+| Mastery | Triple Mount | 3,300 | **3 targets**; the extra barrels go for the weakest enemies in range (swarms, holograms) |
 
 **Combinations (primary + secondary capped at 2):**
 - **Power + 2 Multi:** an AP main gun with a side gun for the small stuff.
@@ -106,10 +106,14 @@ jacket around the barrel, with a small vapour wisp when it fires.
 - **Multi + 2 Power:** three barrels of heavier rounds that partly ignore armour: a swarm clearer that doesn't stall on
   light armour.
 
-**Upgrade costs (owner, 2026-10-15): a very steep curve.** Steps **100 / 250 / 600 / 1,200**, mastery **2,500** on every
-path. A full build (75 + Retrofit 150 + primary 4,650 + secondary 350) is about **5,225 credits**, against about 1,650
-for today's Pulse Turret: cheap to start, a long-run credit sink at the top. Effects stay proposals for the balance
-probe.
+**Upgrade costs (owner, 2026-10-15): by the value-based pricing formula** (`design/towers.md`, Pricing), rounded to
+5s and 0s. This replaced the owner's first fixed curve (100 / 250 / 600 / 1,200, mastery 2,500), so small upgrades are
+cheap and the masteries are the big buys:
+- Power: 55 / 40 / 405 / 1,085, mastery 2,475 (total 4,060).
+- Range/Visibility: 25 / 60 / 170 / 305, mastery 980 (total 1,540).
+- Multi-Target: 15 / 165 / 330 / 660, mastery 3,300 (total 4,470).
+- A full build (75 + Retrofit 40 + a primary + 2 secondary steps) runs about 1,700 to 4,700 credits, depending on the
+  paths.
 
 **Counters:**
 - **Armour (Tanks):** the Power path; Sabot Rounds hit Siege Mechs, Titans and armoured bosses at full damage.

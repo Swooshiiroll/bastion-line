@@ -94,6 +94,24 @@ Picked by the owner on 2026-10-08 from `design/tower_upgrade_structure.html`: tr
   locks in on the 3rd path upgrade; each tower has 16 upgrade nodes to design (the Retrofit and 3 paths of 4 plus a
   mastery), as today.
 
+## Pricing (decided)
+
+Accepted by the owner on 2026-10-15: **every upgrade costs in proportion to what it adds**, by one value formula for all
+towers, with prices **rounded to 5s and 0s**.
+
+- **Value of a tower's state:** V = damage × shots per second × targets × area × (range ÷ 130) × effect multipliers.
+  - **Area:** 1 + blast radius ÷ 40 for splash attacks; 1 otherwise.
+  - **Effect multipliers so far:** armour ignored ×(1 + half the % ignored); a flat armour ignore of 2 ×1.1; critical
+    chance (double damage) ×(1 + chance); no-overkill targeting ×1.1. New effects (slow, stun, burn, pull, buffs,
+    income) get their multiplier or damage equivalent when their tower is designed, and are listed here.
+- **Upgrade price:** (V after − V before) × **3.9 credits per value point** × the **step multiplier**, rounded to 5.
+  - **3.9** is calibrated on the Gun Turret: 75 credits for its stock value (16 damage × 1.2 shots/s).
+  - **Step multiplier:** ×2, ×4, ×8, ×16 for steps 1 to 4, ×32 for the mastery (each step doubles).
+  - **The Retrofit** is priced as a step 1 (×2) from the stock tower.
+- **Stock build costs** are the owner's; the formula prices the upgrades. The balance probe tunes the effects (not the
+  rule) afterwards.
+- **Why:** small upgrades stay cheap and big ones expensive, so prices read consistently across towers.
+
 ## Process
 
 1. **Class set:** Claude's draft in `design/tower_classes.md`; the owner edits it.
@@ -180,6 +198,7 @@ From the enemy rework (`design/enemies.md`, `design/enemy_roster.md` on `design/
 
 - **Four classes** (2026-10-10): Assault, Support, Defense, Utility; exactly one per tower; groups the shop;
   economy is Utility; weapon type kept as a descriptive sub-tag. Reference sheet `design/tower_classes.md`.
+- **Pricing** (2026-10-15): value-based formula for all towers, rounded to 5s and 0s (see Pricing).
 - **Working roster** (2026-10-14): 19 towers (`design/tower_roster.md`); designed tower by tower in roster order,
   questions first.
 - **Upgrade structure** (2026-10-08): Optional Retrofit, 4 upgrades + mastery per path; the Retrofit is tower-specific,
