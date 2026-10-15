@@ -112,6 +112,8 @@ towers, with prices **rounded to 5s and 0s**.
     burn on the line (Railgun). A chain as 1 + 0.6 × the falloff-weighted jumps; a storm as its damage over 2 s in
     its radius; the EMP-enemy overload ×1.08 (Tesla Tower). Whole-map hunting drones ×1.6;
     each unlocked loadout adds flexibility (Drone Bay).
+  - **Exception, the CAS Gunship** (owner, 2026-10-15): each path upgrades one gun (light, medium, heavy; step 1
+    unlocks it, the light gun is built in), and all three paths are uncapped up to their masteries. No primary/secondary.
   - **Owner overrides:** the owner can set a price directly when the formula undervalues something. So far: the Drone
     Bay's Retrofit (the second drone) costs 3,200, not the formula's 600. New effects (slow, stun, burn, pull, buffs,
     income) get their multiplier or damage equivalent when their tower is designed, and are listed here.

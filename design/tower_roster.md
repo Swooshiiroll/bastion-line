@@ -28,7 +28,7 @@ Tower** (18) and **Tractor Tower** (19) are Claude's proposals, added at the own
 | 7 | Railgun | Assault | Ballistic | Power / Range/Speed / Special Effects | Designed (2026-10-15) |
 | 8 | Tesla Tower | Assault | Energy | Power (Damage) / Range/Chaining / Speed | Designed (2026-10-15) |
 | 9 | Drone Bay | Assault | Deployable | Power (overall) / Weaponry (upgrades/additions) / Speed | Designed (2026-10-15) |
-| 10 | CAS Gunship | Assault | Deployable | Speed (Attack) / Power / Weaponry Upgrades | Roster only |
+| 10 | CAS Gunship | Assault | Deployable | Light gun / Medium gun / Heavy gun (owner, replacing Speed (Attack) / Power / Weaponry Upgrades) | Designed (2026-10-15) |
 | 11 | Mine Layer | Defense | Explosive | Power/Damage / Production Speed / Range | Roster only |
 | 12 | Chemical Plant | Support | Chemical (in notes; not yet a listed type) | Damage/Armor stripping / Speed / Slowing | Roster only |
 | 13 | Rally Beacon | Support | None | Damage boost / Speed boost / Range Boost | Roster only |
@@ -844,7 +844,83 @@ Retrofit adds a second hangar door. Per path:
 
 ### Design
 
-Not started. Rounds go in roster order.
+**Status: designed, confirmed by the owner (2026-10-15).** The choices under Decided are the owner's. The stock stats
+and upgrade effects are Claude's proposals, confirmed as the design; the balance probe tunes their numbers. Prices come from the pricing formula.
+
+**Decided (owner, 2026-10-15):**
+- **Its own upgrade system** (an exception to the tower rules). **Each path upgrades one gun:** path 1 the **light** gun,
+  path 2 the **medium**, path 3 the **heavy**. A path's step 1 unlocks its gun (the light gun is built in).
+- **All paths uncapped:** no primary/secondary rule. Every gun can take all 4 upgrades **and its mastery**, so a fully
+  upgraded gunship has all three guns maxed.
+- **Every gun path follows the same pattern:** damage, fire rate, damage, fire rate, then the mastery.
+- **Stock weapons:** **gatling** (light, built in), **autocannon** (medium), **missiles** (heavy). Research unlocks
+  more weapons per class later (the Research Lab rework).
+- **Attack:** the tower can be placed anywhere; the gunship **orbits a point you designate and side-fires** on enemies
+  inside its orbit. **Re-designating is free, any time.**
+- **Targets:** ground and air by default, chosen by the targeting option (the Any/Air/Ground priority).
+- **EMPs** under its orbit silence its guns, like the Drone Bay's drones.
+- **Retrofit:** **Radar**: it can detect cloaked enemies.
+- **650 credits** to build.
+- **The masteries need research**, as other towers' do (owner).
+- **The Radar reveals cloaked enemies to other towers too** (owner).
+
+**Stock (proposed):** 650 credits; the gunship orbits its point at a 90 px radius. Its **gatling** fires at enemies
+inside the orbit: 12 damage, 5 rounds/s. By the formula the armed stock is worth about 350; the rest of the 650 pays for
+the airframe that carries two more guns.
+
+**Retrofit, Radar, 35:** cloaked enemies inside the gunship's orbit (Phantom, Wraith) are **revealed to every tower**,
+not just the gunship (owner). That makes it a mobile Radar Tower. The formula values it at 35, since it only counts the
+gunship's own damage; the owner may set an override. Look: a radar dome under the fuselage.
+
+**Pricing:** a player-aimed, place-anywhere gun counts its reach as ×1.5, like the Artillery Cannon.
+
+**Path 1, Light gun (gatling), built in:**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Heavier Rounds | 175 | Damage 12 to 15 |
+| 2 | Faster Spin | 350 | 6 rounds/s |
+| 3 | Hardened Rounds | 1,125 | 19 damage |
+| 4 | Overdrive Motor | 2,670 | 7.5 rounds/s |
+| Mastery | Twin Gatlings | 5,345 | 9 rounds/s |
+
+**Path 2, Medium gun (autocannon):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Autocannon | 1,145 | **Unlocks the autocannon:** 40 damage, 1.5 shots/s, 25 px blast |
+| 2 | Faster Feed | 455 | 1.8 shots/s |
+| 3 | HE Rounds | 1,645 | 52 damage |
+| 4 | Twin Feed | 3,170 | 2.2 shots/s |
+| Mastery | Autocannon Battery | 7,015 | 58 damage; 30 px blast |
+
+**Path 3, Heavy gun (missiles):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Missile Rack | 1,235 | **Unlocks guided missiles:** 150 damage, one every 3 s, 45 px blast |
+| 2 | Quick Rack | 525 | One every 2.5 s |
+| 3 | Heavy Warheads | 1,595 | 190 damage |
+| 4 | Auto-Rack | 3,785 | One every 2 s |
+| Mastery | Hellfire Volley | 13,250 | Every third volley fires two missiles |
+
+**Full build:** about 44,000 credits with every gun maxed. It's the game's biggest credit sink by design, since every
+path is uncapped.
+
+**Counters:**
+- **Packs at a point you choose:** the orbit.
+- **Flyers:** the targeting option.
+- **Cloaked enemies:** the Radar Retrofit reveals them in the orbit for every tower.
+- **Armour and Tanks:** the heavy missiles.
+
+**Edge cases:**
+- **EMP:** guns go silent while an EMP covers the orbit point.
+- **The bot:** points the orbit at the busiest choke (like the Artillery).
+- **Saves:** store the orbit point.
+- **The Wraith:** all three stock weapons are physical, so it's immune even when the radar sees it.
+
+**Look (for the art phase):** a large, slow cargo plane circling with side guns, its shadow sweeping over the track.
+Each unlocked gun appears on its flank (gatling, autocannon, missile rack), and the Retrofit adds a radar dome.
 
 ## 11. Mine Layer
 
