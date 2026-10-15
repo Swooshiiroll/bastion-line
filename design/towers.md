@@ -136,8 +136,7 @@ towers, with prices **rounded to 5s and 0s**.
 1. **Class set:** Claude's draft in `design/tower_classes.md`; the owner edits it.
 2. **Roster:** done: 19 towers (see Roster below), written by the owner on `design/tower_roster.html`.
 3. **Upgrade structure:** decided (trunk C Optional Retrofit, depth B 4 + mastery; see above).
-4. **Per tower, in question rounds** (in progress, in roster order, questions first; answers go in
-   `design/tower_roster.md`): its three path purposes, its stats, its upgrades, and which upgrades counter
+4. **Per tower, in question rounds:** done for all 19 (2026-10-15; `design/tower_roster.md`): its three path purposes, its stats, its upgrades, and which upgrades counter
    which enemy mechanics. Then balance targets and how the bot probe checks them.
 5. **Art** (after gameplay): looks and animations from the owner's names and descriptions, then per-path looks (#6),
    on mockup pages like the enemy art (`design/enemy_art.md`), within the turret cache rules.
@@ -219,6 +218,8 @@ From the enemy rework (`design/enemies.md`, `design/enemy_roster.md` on `design/
 - **Four classes** (2026-10-10): Assault, Support, Defense, Utility; exactly one per tower; groups the shop;
   economy is Utility; weapon type kept as a descriptive sub-tag. Reference sheet `design/tower_classes.md`.
 - **Pricing** (2026-10-15): value-based formula for all towers, rounded to 5s and 0s (see Pricing).
+- **All 19 towers designed** (2026-10-15): stats, three paths of 4 + mastery each (the CAS Gunship's own system), the
+  Retrofit, counters; see `design/tower_roster.md`.
 - **Working roster** (2026-10-14): 19 towers (`design/tower_roster.md`); designed tower by tower in roster order,
   questions first.
 - **Upgrade structure** (2026-10-08): Optional Retrofit, 4 upgrades + mastery per path; the Retrofit is tower-specific,
@@ -231,7 +232,8 @@ From the enemy rework (`design/enemies.md`, `design/enemy_roster.md` on `design/
 2. **Air or ground per tower,** and whether the roster covers flyers, the Wraith (energy only) and the Burrower well
    enough (asked tower by tower, then checked across the roster).
 3. **The Retrofit's hotkey:** Y suggested; confirmed in the UI round.
-4. **Per tower** (in progress): stats, the 4 upgrades and mastery on each path, the Retrofit, counter upgrades.
+4. **Per tower:** done. All 19 towers are designed (2026-10-15) in `design/tower_roster.md`; the numbers go to the
+   balance probe.
 5. **Old saves and ids:** what happens to towers in old saves when the roster changes (save format bump, refunds).
 6. **The bot, Codex, tests and tour:** how they follow the new roster.
 7. **What a class does beyond the shop** (TBD): candidates are parked in the class sheet.

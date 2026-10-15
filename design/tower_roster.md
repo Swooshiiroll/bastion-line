@@ -37,7 +37,7 @@ Tower** (18) and **Tractor Tower** (19) are Claude's proposals, added at the own
 | 16 | Shockwave Generator | Assault | Field | Power/Range / Speed / Effect | Designed (2026-10-15) |
 | 17 | Scrapyard | Utility | None | Passive Income / Kill Income / Discounts | Designed (2026-10-15) |
 | 18 | Magneto Tower (Claude's proposal) | Defense | Field | Pull Strength / Field Size / Polarity | Designed (2026-10-15) |
-| 19 | Tractor Tower (Claude's proposal) | Defense | Energy | Pull Distance / Recharge / Grip | Roster only |
+| 19 | Tractor Tower (Claude's proposal) | Defense | Energy | Pull Distance / Recharge / Grip | Designed (2026-10-15) |
 
 **By class:** Assault 11, Defense 3, Support 3, Utility 2.
 
@@ -1655,77 +1655,84 @@ pole shoes). Per path:
 - **Description (owner, 2026-10-15):** A dish-mounted emitter that locks a tractor beam onto a single enemy and hauls it back down the track before letting go. "You're my friend now."
 - **Paths:** 1. Pull Distance; 2. Recharge; 3. Grip.
 
-### Claude's writeup (proposal, for the owner to mark up)
-
-Numbers are placeholders for the balance probe.
-
-**What it does (stock):** it locks onto one enemy in range (by targeting mode: First, Strongest and so on), holds it
-in a beam for 1.5 s, and **drags it back along the track** (about 80 px) before releasing. Then it recharges (about
-6 s).
-- **Air and ground:** a tractor beam doesn't care about the ground, so it can pull flyers back along their flight
-  path. That's its signature.
-- **While held,** the enemy can't move forward, blink or use abilities; the hold works like a stun for those rules.
-- **Bosses:** a much shorter pull and a shorter hold.
-- **The Rampart** is immune (shoves).
-- **Damage:** none at stock.
-
-**Optional Retrofit, "Twin Emitter":** a second, weaker beam that pulls a second enemy half as far. Look: the dish
-grows a second, smaller emitter.
-
-**Paths:**
-
-| Step | Pull Distance (Power) | Recharge (Speed) | Grip (Effect) |
-|---|---|---|---|
-| 1 | Longer Haul: pulls further | Quick Release: shorter recharge | Firm Grip: heavier enemies (Tanks, elites) are pulled further |
-| 2 | Stronger Beam: holds longer | Capacitor Bank: stores a second charge | Crushing Grip: the held enemy takes damage over time (energy) |
-| 3 (primary) | **Rewind:** the pull sends the enemy back to where it was a few seconds ago (a big pull, track-aware) | **Rapid Lock:** short pulls in quick succession on several enemies | **Lift and Drop:** ground enemies are lifted, then **slammed** down, stunning nearby enemies |
-| 4 | Longer Rewind | Overclocked Emitter: even faster recharge | Grip Lock: the held enemy's barrier and abilities are switched off while held |
-| Mastery | **Undo:** once per round, sends one non-boss enemy **all the way back to its entrance** | **Tractor Array:** three beams at once, on three enemies | **Gravity Hammer:** the slam stuns everything in a wide area and shatters barriers |
-
-**Combinations:**
-- **Pull Distance + 2 Recharge:** fewer, very long rewinds, a little more often. The anti-leak build.
-- **Recharge + 2 Grip:** constant short holds that drain barriers and abilities. The anti-elite build.
-- **Grip + 2 Pull Distance:** big lifts and slams that also push enemies back. The crowd-stun build.
-
-**Counters it carries:**
-- **Leakers and Rushers** (Fury Drone, Needle, Strike Drone): Rewind and Undo send the fastest threats back.
-- **Flyers:** pulls them back by default. It's a strong answer to the Wraith, which is cloaked: the beam needs the
-  Radar Tower to reveal it first.
-- **Aegis Walker and Bulwark barriers:** Grip Lock and Gravity Hammer.
-- **Healers and haste auras** (Repair Bot, Mender Hulk, Rally Beacon enemy): Grip Lock switches their abilities off
-  while they're held.
-- **The Capacitor:** a hold cancels its charge, like a stun.
-- **Masquerade and Decoy Beacon:** no special effect; it pulls whatever its targeting mode picks.
-
-**Look and animation:**
-- **Base:** a dish emitter on a slim mast, with a cyan beam that shows a rippling cone towards the target.
-- **The pull:** the held enemy hovers slightly, trails afterimages and glides backwards.
-- **Per path:**
-  - **Pull Distance:** a longer barrel on the dish.
-  - **Recharge:** capacitor drums on the base that glow as they fill.
-  - **Grip:** clamp arms on the dish rim.
-- **Performance:** only the beam and the capacitor glow are animated.
-
-**Open questions:**
-1. Should **Rewind** go back in distance (pixels) or in time (where the enemy was N seconds ago)? Time feels better
-   with fast enemies; distance is simpler to balance.
-2. Is **Undo** (back to the entrance) too strong, even at once per round and non-boss only? Alternative: back to the
-   start of its current lane segment.
-3. Does a pulled enemy's progress reset for **First** targeting (it's now further back), or keep its old place?
-4. Can the beam hold a flyer that's mid-cloak, or does it drop it when the cloak returns?
-
-#### Magneto and Tractor: shared questions
-
-- **Wave pacing:** pulling enemies back makes rounds longer. The bot probe should check round length and the
-  end-of-round "stragglers" feel.
-- **Stacking:** the Magneto's pull and the Tractor's pull on the same enemy: add up, or the strongest applies? (Today
-  slows don't stack; the strongest applies.)
-- **The Graviton Projector:** both replace its job; it isn't on the WIP roster.
-- **The Defense class** would go from 1 tower (Mine Layer) to 3, or 4 with the Cryo Tower moved from Support.
-
 ### Design
 
-Not started. Rounds go in roster order.
+**Status: designed, confirmed by the owner (2026-10-15).** The choices under Decided are the owner's. The stock stats
+and upgrade effects are Claude's proposals, confirmed as the design; the balance probe tunes their numbers. Prices come from the pricing formula (the
+non-damage rule: stock value = build cost). It builds on Claude's first writeup, whose direction the owner kept.
+
+**Decided (owner, 2026-10-15):**
+- **The writeup's direction stays:** a beam grabs one enemy, holds it, and hauls it back along the track.
+- **Rewind works by time:** it sends the enemy back to where it was a few seconds ago.
+- **Undo is weaker:** it sends the enemy back to the start of its current track segment, not to its entrance.
+- **575 credits.**
+- **Pulled enemies rank by their new position** for First and Last targeting.
+- **If a held flyer re-cloaks, the beam drops it.**
+- **Retrofit: the player's choice** when buying it, from three options.
+
+**Stock (proposed):** 575 credits; 160 px range; air and ground. It locks one enemy (by its targeting mode), holds it for
+1.5 s while hauling it 80 px back along the track, releases it, then recharges for 6 s. While held, the enemy can't move
+forward, blink or use abilities (a hold counts as a stun for those rules). The pull scales by role weight, as on the
+Magneto (Swarm full, Tank half, Boss a quarter).
+
+**Retrofit (pick one when buying it):**
+- **Twin Emitter, 575:** a second, weaker beam that holds another enemy at half the pull.
+- **Longer Hold, 140:** holds for 2 s.
+- **Faster Recharge, 230:** recharges in 5 s.
+
+**Path 1, Pull Distance:**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Longer Haul | 185 | 100 px pull |
+| 2 | Stronger Beam | 535 | 120 px; holds 1.8 s |
+| 3 (primary) | Rewind | 1,840 | Sends the enemy **back to where it was 3 s ago** (by time, owner) |
+| 4 | Long Rewind | 2,945 | Back 4 s |
+| Mastery | Undo | 9,215 | Back 5 s; and once per round, sends one non-boss enemy **back to the start of its current track segment** (owner: weaker than to the entrance) |
+
+**Path 2, Recharge:**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Quick Release | 175 | Recharge 5.2 s |
+| 2 | Capacitor Bank | 345 | 4.6 s |
+| 3 (primary) | Rapid Lock | 1,265 | 3.8 s |
+| 4 | Overclocked Emitter | 2,200 | 3.3 s |
+| Mastery | Dual Beam | 10,035 | A second beam on another enemy, at a third of the pull |
+
+**Path 3, Grip:**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Firm Grip | 190 | Heavy roles resist half as much |
+| 2 | Crushing Grip | 270 | The held enemy takes 15 energy damage/s |
+| 3 (primary) | Lift and Drop | 1,075 | Ground enemies are lifted, then slammed down, stunning everything within 50 px for 0.4 s |
+| 4 | Grip Lock | 1,610 | The held enemy's barrier and abilities switch off while held |
+| Mastery | Gravity Hammer | 5,365 | The slam stuns everything within 80 px for 0.8 s and shatters barriers |
+
+**Combinations (primary + secondary capped at 2):**
+- **Pull + 2 Recharge:** long rewinds, more often. The anti-leak build.
+- **Recharge + 2 Grip:** frequent holds that crush and steady heavies.
+- **Grip + 2 Pull:** big lifts and slams that also push enemies back.
+
+**Counters:**
+- **Leakers and Rushers** (Fury Drone, Needle, Strike Drone): Rewind and Undo.
+- **Flyers:** it pulls them back by default.
+- **Barriers and abilities** (Aegis Walker, Bulwark, healers, haste auras): Grip Lock and Gravity Hammer.
+- **The Capacitor:** a hold cancels its charge.
+- **Blink Stalkers:** a hold stops the blink.
+
+**Edge cases:**
+- **Cloaked flyers:** the beam needs a revealed target, and drops it if it re-cloaks (owner).
+- **Bosses:** a quarter of the pull, and a shorter hold (half).
+- **The Rampart:** immune (shoves and holds).
+- **Wave pacing:** rewinds make rounds longer; the balance probe checks round length.
+
+**Look (for the art phase):** a dish emitter on a slim mast with a cyan beam cone; held enemies hover with afterimages
+and glide backwards. The Retrofit's choice shows (a second emitter, a capacitor ring or cooling fins). Per path:
+- **Pull:** a long barrel on the dish.
+- **Recharge:** capacitor drums.
+- **Grip:** clamp arms on the dish rim.
 
 ## Gap review (Claude, 2026-10-14, for the 17-tower list)
 
