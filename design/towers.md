@@ -159,7 +159,7 @@ the owner's; the Magneto Tower and Tractor Tower are Claude's proposals, added a
 | 10 | CAS Gunship | Assault | Deployable |
 | 11 | Mine Layer | Defense | Explosive |
 | 12 | Chemical Plant | Support | Chemical |
-| 13 | Rally Beacon | Support | None |
+| 13 | Boost Tower (was Rally Beacon) | Support | None |
 | 14 | Radar Tower | Utility | Energy |
 | 15 | Cryo Tower | Support | Field |
 | 16 | Shockwave Generator | Assault | Field |

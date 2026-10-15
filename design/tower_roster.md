@@ -31,7 +31,7 @@ Tower** (18) and **Tractor Tower** (19) are Claude's proposals, added at the own
 | 10 | CAS Gunship | Assault | Deployable | Light gun / Medium gun / Heavy gun (owner, replacing Speed (Attack) / Power / Weaponry Upgrades) | Designed (2026-10-15) |
 | 11 | Mine Layer | Defense | Explosive | Power/Damage / Production Speed / Range | Designed (2026-10-15) |
 | 12 | Chemical Plant | Support | Chemical | Damage/Armor stripping / Speed / Slowing | Designed (2026-10-15) |
-| 13 | Rally Beacon | Support | None | Damage boost / Speed boost / Range Boost | Roster only |
+| 13 | Boost Tower (was Rally Beacon) | Support | None | Damage boost / Speed boost / Range Boost | Designed (2026-10-15) |
 | 14 | Radar Tower | Utility | Energy | Power/Range / Speed/Frequency / Special Targeting | Roster only |
 | 15 | Cryo Tower | Support | Field | Slowing / Power/Range / Speed | Roster only |
 | 16 | Shockwave Generator | Assault | Field | Power/Range / Speed / Effect | Roster only |
@@ -1109,7 +1109,7 @@ enemies drip and fizz. The Retrofit adds a pump with gauges. Per path:
 - **Speed:** twin nozzles.
 - **Slow:** a foam-gel hopper.
 
-## 13. Rally Beacon
+## 13. Boost Tower (was Rally Beacon)
 
 - **Class:** Support. **Weapon type:** None.
 - **Description (owner):** Towers in range of the Rally Beacon are amped up and given stat boosts. "Are you feeling it now Mr. Krabs?"
@@ -1118,7 +1118,85 @@ enemies drip and fizz. The Retrofit adds a pump with gauges. Per path:
 
 ### Design
 
-Not started. Rounds go in roster order.
+**Status: designed, confirmed by the owner (2026-10-15).** The choices under Decided are the owner's. The stock stats
+and upgrade effects are Claude's proposals, confirmed as the design; the balance probe tunes their numbers. Prices come from the pricing formula (the
+non-damage rule: stock value = build cost).
+
+**Decided (owner, 2026-10-15):**
+- **Renamed: Boost Tower** (was Rally Beacon). The enemy roster already has a Rally Beacon (Support T2), so the tower
+  gets a new name.
+- **Overlapping Boost Towers don't stack:** the strongest boost of each kind applies, as today's Amplifier Pylon.
+- **Its paths decide what it boosts:** damage, fire rate and range, each grown by its own path (the secondary capped like
+  any tower).
+- **A mild all-round boost at stock**, and the **Retrofit's all-stats boost stacks on top** (owner: "Mid all-round.
+  Retrofit stacks").
+- **+50% at each path's mastery.**
+- **A medium boost radius** (about 3 tiles).
+- **400 credits.**
+
+**Stock (proposed):** 400 credits; towers within 144 px (3 tiles) get **+5% damage, +5% fire rate and +5% range**
+(confirmed by the owner). Doesn't attack.
+
+**Retrofit, Signal Booster (proposed), 1,380:** the radius grows to 168 px, and +5% to all three boosts, stacking on top
+(+10% each). The formula prices it high because it raises three boosts over a bigger area; the owner may override.
+Look: a taller antenna mast.
+
+**Path 1, Damage boost:**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Amplifier | 615 | Damage boost +15% |
+| 2 | Power Relay | 860 | +22% |
+| 3 (primary) | Overcharge Link | 2,460 | +32% |
+| 4 | Surge Link | 3,940 | +40% |
+| Mastery | Battle Network | 9,845 | **+50% damage** |
+
+**Path 2, Speed boost (fire rate):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Clock Sync | 615 | Fire-rate boost +15% |
+| 2 | Fast Sync | 860 | +22% |
+| 3 (primary) | Overclock Link | 2,460 | +32% |
+| 4 | Turbo Link | 3,940 | +40% |
+| Mastery | Rapid Network | 9,845 | **+50% fire rate** |
+
+**Path 3, Range boost:**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Spotting Relay | 370 | Range boost +15% |
+| 2 | Wide Relay | 515 | +22% |
+| 3 (primary) | Targeting Link | 1,475 | +32% |
+| 4 | Long Link | 2,365 | +40% |
+| Mastery | Overwatch Network | 5,910 | **+50% range** |
+
+**Pricing value:** a range boost counts at 0.6 of a damage or fire-rate boost (it helps less), and the radius counts by
+the area it covers.
+
+**Boost maths:** a path's boost replaces the stock 5% for that stat (it doesn't add to it). The Retrofit's extra +5%
+stacks on whatever the tower gives. Example: Damage path mastery + Retrofit = +55% damage, +10% fire rate, +10% range
+(+ the secondary's two steps).
+
+**Combinations (primary + secondary capped at 2):**
+- **Damage + 2 Speed:** +50% damage and +22% fire rate. The DPS amplifier.
+- **Speed + 2 Range:** +50% fire rate, +22% range.
+- **Range + 2 Damage:** +50% range, +22% damage. For long-range clusters.
+
+**Counters:** none directly; it multiplies the towers around it.
+
+**Edge cases:**
+- **Which towers it boosts:** every tower in its radius except other Boost Towers. Do Utility towers' effects count (a
+  Radar's ping radius, the Scrapyard's income)? Confirmed: only damage, fire rate and range stats, so the Radar's range
+  grows, but income doesn't.
+- **Disruptors:** an EMP that knocks the Boost Tower offline switches its boosts off.
+- **The Siphon enemy's aura:** it applies after the boost.
+
+**Look (for the art phase):** a mast with a glowing beacon ring and pulses of light to nearby towers; boosted towers
+show a small chevron. The Retrofit adds a taller antenna. Per path:
+- **Damage:** a red ring.
+- **Speed:** a yellow ring.
+- **Range:** a blue ring.
 
 ## 14. Radar Tower
 
