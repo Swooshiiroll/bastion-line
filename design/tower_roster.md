@@ -32,7 +32,7 @@ Tower** (18) and **Tractor Tower** (19) are Claude's proposals, added at the own
 | 11 | Mine Layer | Defense | Explosive | Power/Damage / Production Speed / Range | Designed (2026-10-15) |
 | 12 | Chemical Plant | Support | Chemical | Damage/Armor stripping / Speed / Slowing | Designed (2026-10-15) |
 | 13 | Boost Tower (was Rally Beacon) | Support | None | Damage boost / Speed boost / Range Boost | Designed (2026-10-15) |
-| 14 | Radar Tower | Utility | Energy | Power/Range / Speed/Frequency / Special Targeting | Roster only |
+| 14 | Radar Tower | Utility | Energy | Power/Range / Speed/Frequency / Special Targeting | Designed (2026-10-15) |
 | 15 | Cryo Tower | Support | Field | Slowing / Power/Range / Speed | Roster only |
 | 16 | Shockwave Generator | Assault | Field | Power/Range / Speed / Effect | Roster only |
 | 17 | Scrapyard | Utility | None | Passive Income / Kill Income / Discounts | Roster only |
@@ -1207,7 +1207,85 @@ show a small chevron. The Retrofit adds a taller antenna. Per path:
 
 ### Design
 
-Not started. Rounds go in roster order.
+**Status: designed, confirmed by the owner with changes (2026-10-15).** The choices under Decided are the owner's. The
+stock stats and upgrade effects are Claude's proposals, confirmed as the design; the balance probe tunes their numbers. Prices come from the pricing formula (the
+non-damage rule: stock value = build cost).
+
+**Decided (owner, 2026-10-15):**
+- **The ping reveals cloaked enemies (Phantom, Wraith) and burrowed ones (Burrower; the enemy spec's doppler ping).**
+- **Only towers within the radar's range** can use a ping (the owner's "nearby towers").
+- **Stock ping: every 3 s, revealing for 1 s.**
+- **Path 1 (Power/Range):** range, and **the radiation circle turns on at step 3**: enemies inside a small inner circle
+  take energy damage for as long as they're in it (owner's note: "high-energy non-ionizing radiation").
+- **Path 2 (Speed/Frequency):** **pings more often, and each lasts longer; the mastery is constant.**
+- **Path 3 (Special Targeting):** **unmasking**: the advanced reveals.
+- **575 credits**; **Retrofit: a bigger dish** (+range). The owner changed it from a second antenna.
+- **The radiation circle needs a ping:** it only hurts enemies that are revealed (owner). Cloaked enemies inside take
+  nothing until a ping lands.
+
+**Stock (proposed):** 575 credits; a 160 px radius. Every 3 s it pings: for 1 s, cloaked enemies inside are targetable,
+and burrowed enemies show, so towers that can hit underground (the Mortar's Bunker Buster, the Mine Layer) can target
+them. Only towers within the radar's 160 px benefit. Doesn't attack.
+
+**Pricing value:** reveal coverage (the share of time revealed) × the area covered × the kinds of enemy it reveals; the
+radiation circle priced as damage. This joins the Pricing section under the non-damage rule.
+
+**Retrofit, Bigger Dish, 305:** +20 radius (180 px), so more area and more towers inside it. Look: a larger dish.
+
+**Path 1, Power/Range (range, then radiation):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Bigger Array | 305 | 180 px radius |
+| 2 | Tall Mast | 685 | 200 px |
+| 3 (primary) | Radiation Emitter | 585 | **Radiation circle:** enemies within 60 px take 15 energy damage/s while inside |
+| 4 | High-Power Emitter | 3,995 | 220 px radius; radiation 25/s within 70 px |
+| Mastery | Microwave Array | 6,440 | 230 px radius; radiation 40/s within 80 px |
+
+**Path 2, Speed/Frequency:**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Faster Sweep | 255 | A ping every 2.7 s, revealing for 1.1 s |
+| 2 | Pulse Compression | 640 | Every 2.4 s, for 1.2 s |
+| 3 (primary) | Rapid Sweep | 2,070 | Every 2 s, for 1.3 s |
+| 4 | Phased Array | 4,485 | Every 1.6 s, for 1.3 s |
+| Mastery | Constant Track | 10,350 | **Constant:** everything hidden in range stays revealed |
+
+**Path 3, Special Targeting (unmasking):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Signal Analysis | 230 | Pings expose the **Decoy Beacon's** fake rank: towers in range rank it correctly |
+| 2 | Disguise Breaker | 460 | Pings **unmask the Masquerade** early |
+| 3 (primary) | Track Lock | 1,930 | Reveals last 1.3 s |
+| 4 | Illusion Filter | 2,390 | Pings mark **Mirage holograms** as fakes: towers in range stop shooting them |
+| Mastery | Total Exposure | 3,590 | Revealed enemies can't re-cloak, re-disguise or re-burrow for 5 s after leaving the radar's range |
+
+**Combinations (primary + secondary capped at 2):**
+- **Frequency + 2 Power:** near-constant reveals over a bigger area.
+- **Power + 2 Frequency:** a radiation field with faster pings.
+- **Unmasking + 2 Frequency:** every trick exposed, more often.
+
+**Counters:**
+- **Cloak** (Phantom, Wraith) and **burrowing**: at stock.
+- **Disguise** (Masquerade), **decoys** (Decoy Beacon, Mirage): the unmasking path.
+- **The Wraith:** the radiation is energy damage, but it **needs a ping** (owner): a cloaked Wraith only takes it while
+  revealed. Unlike the Railgun's ion trail, which hits cloaked enemies.
+
+**Edge cases:**
+- **Several radars:** overlapping pings don't stack; each tower uses any radar it's inside.
+- **The CAS Gunship's Radar Retrofit:** a mobile reveal, the same rules within its orbit.
+- **EMPs:** an EMP that knocks the radar offline stops its pings.
+- **Bosses:** no special rule.
+- **The Enemy spec:** "a Sensor Array upgrade reveals it" (Decoy Beacon, Masquerade) now points to this tower's
+  unmasking path.
+
+**Look (for the art phase):** a mast with a rotating radar dish and a green sweep line, and a ping ring that expands on
+each pulse. The Retrofit adds a second antenna. Per path:
+- **Power:** a microwave emitter horn and a faint red inner circle.
+- **Frequency:** a phased-array panel.
+- **Unmasking:** an analysis cabinet with blinking lights.
 
 ## 15. Cryo Tower
 
