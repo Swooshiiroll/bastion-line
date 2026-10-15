@@ -115,6 +115,9 @@ towers, with prices **rounded to 5s and 0s**.
   - **Non-damage effects** (Chemical Plant, 2026-10-15): a tower whose stock effect isn't direct damage gets its stock
     value set to its build cost. Its upgrades are priced by how much they raise that effect, with the same step
     multipliers.
+  - **Economy** (Scrapyard, 2026-10-15): the non-damage rule with the standard multipliers, by the owner's choice, so
+    its masteries are a late-game credit sink rather than something that pays back. A Retrofit chosen on purchase is
+    priced per option.
   - **Exception, the CAS Gunship** (owner, 2026-10-15): each path upgrades one gun (light, medium, heavy; step 1
     unlocks it, the light gun is built in), and all three paths are uncapped up to their masteries. No primary/secondary.
   - **Owner overrides:** the owner can set a price directly when the formula undervalues something. So far: the Drone

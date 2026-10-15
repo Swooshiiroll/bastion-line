@@ -35,7 +35,7 @@ Tower** (18) and **Tractor Tower** (19) are Claude's proposals, added at the own
 | 14 | Radar Tower | Utility | Energy | Power/Range / Speed/Frequency / Special Targeting | Designed (2026-10-15) |
 | 15 | Cryo Tower | Support | Field | Slowing / Power/Range / Speed | Designed (2026-10-15) |
 | 16 | Shockwave Generator | Assault | Field | Power/Range / Speed / Effect | Designed (2026-10-15) |
-| 17 | Scrapyard | Utility | None | Passive Income / Kill Income / Discounts | Roster only |
+| 17 | Scrapyard | Utility | None | Passive Income / Kill Income / Discounts | Designed (2026-10-15) |
 | 18 | Magneto Tower (Claude's proposal) | Defense | Field | Pull Strength / Field Size / Polarity | Roster only |
 | 19 | Tractor Tower (Claude's proposal) | Defense | Energy | Pull Distance / Recharge / Grip | Roster only |
 
@@ -1467,7 +1467,79 @@ bright ring expanding on each wave. The Retrofit adds a focusing ring. Per path:
 
 ### Design
 
-Not started. Rounds go in roster order.
+**Status: designed, confirmed by the owner (2026-10-15).** The choices under Decided are the owner's. The upgrade
+effects are Claude's proposals, confirmed as the design; the balance probe tunes their numbers. Prices come from the pricing formula's non-damage rule with the
+**standard** step multipliers (owner's choice).
+
+**Decided (owner, 2026-10-15):**
+- **875 credits**; **2×2** on the map, as today.
+- **Passive income** is paid **at each round's clear**: **100 per round** at stock (scaled with the round, like today's
+  income).
+- **Kill income** is a **bonus field**: enemies destroyed inside it pay extra credits.
+- **Discounts** apply to **towers near it** (building and upgrading inside its field).
+- **Several Scrapyards:** **income stacks; fields don't** (overlapping kill fields and discounts use the strongest).
+- **Pricing:** the **non-damage rule** (stock value = build cost) with the **standard multipliers** (×2 to ×32), so
+  the masteries are a pure late-game credit sink. The owner chose this over gentler economy multipliers that would let
+  upgrades pay back.
+- **The Retrofit is chosen when you buy it**, from three: **Second Crusher**, **Bigger Yard** and **Salvage Crane**.
+
+**Stock (proposed):** 875 credits; pays 100 credits at each round's clear (× the round's income scale). A 150 px field
+(used by the Kill and Discount paths). Doesn't attack.
+
+**Retrofit (pick one when buying it):**
+- **Second Crusher, 525:** +30 income per round.
+- **Bigger Yard, 260:** +30 px to its fields. Its value depends on the paths, so the formula can't price
+  it at stock; proposed at the Salvage Crane's price.
+- **Salvage Crane, 260:** towers sold within its field refund 15% more.
+
+**Path 1, Passive Income:**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Stamping Press | 525 | 130 per round |
+| 2 | Vault Doors | 1,225 | 165 per round |
+| 3 (primary) | Credit Mint | 3,850 | 220 per round |
+| 4 | Treasury Link | 7,000 | 270 per round |
+| Mastery | Reserve Bank | 27,440 | 320 per round, plus 3% interest on banked credits at each clear (up to 400) |
+
+**Path 2, Kill Income (bonus field):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Scrap Collector | 345 | Enemies destroyed within 140 px pay 15% more |
+| 2 | Magnet Cranes | 625 | +25%; 150 px |
+| 3 (primary) | Sorting Line | 2,095 | +35%; 170 px |
+| 4 | Smelter | 5,720 | +45%; 190 px |
+| Mastery | Reclamation Plant | 28,945 | +60%; 210 px; bosses pay double |
+
+**Path 3, Discounts (towers near it):**
+
+| Step | Name | Cost | Effect (proposed) |
+|---|---|---|---|
+| 1 | Supply Depot | 190 | Towers within 140 px upgrade for 5% less |
+| 2 | Bulk Orders | 495 | 10% off upgrades; 150 px |
+| 3 (primary) | Procurement Office | 2,035 | 15% off upgrades, 5% off builds; 160 px |
+| 4 | Freight Rail | 3,865 | 20% off upgrades; 175 px |
+| Mastery | Forward Command | 20,935 | 25% off upgrades, 10% off builds; 190 px; towers in the field sell back for everything spent on them |
+
+**Combinations (primary + secondary capped at 2):**
+- **Passive + 2 Kill:** steady income plus a 25% kill bonus.
+- **Kill + 2 Discount:** a kill-bonus field that also discounts nearby upgrades.
+- **Discount + 2 Passive:** a forward base: cheaper upgrades nearby and more income.
+
+**Counters:** none; it pays for everything else.
+
+**Edge cases:**
+- **Discounts and other price rules:** they multiply with the difficulty price and research discounts, as today.
+- **Its own upgrades** aren't discounted by itself (proposed).
+- **Leaked enemies** pay nothing.
+- **The bot:** keeps today's economy rules for when to buy Scrapyards.
+
+**Look (for the art phase):** a 2×2 yard with a crusher, a crane and scrap piles; credit sparks at round clear. The
+Retrofit choice shows (a second crusher, a wider fence, or a salvage crane). Per path:
+- **Passive:** a mint press.
+- **Kill:** magnet cranes reaching over the lane.
+- **Discount:** a depot with crates.
 
 ## 18. Magneto Tower
 
