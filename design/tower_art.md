@@ -40,7 +40,7 @@ enemies on the lane and flyers overhead (air-only towers ignore the ground, and 
 
 | Page | Towers | File | Status |
 |---|---|---|---|
-| 1 | Gun Turret, Mortar Tower, Laser Tower, Rocket Salvo, Anti-Aircraft Turret | `design/tower_art_1.html` | In-game style round 1: picks open |
+| 1 | Gun Turret, Mortar Tower, Laser Tower, Rocket Salvo, Anti-Aircraft Turret | `design/tower_art_1.html` | Round 2: four towers picked; Rocket Salvo's three-pod change to confirm |
 | 2 | Artillery Cannon, Railgun, Tesla Tower, Drone Bay, CAS Gunship | `design/tower_art_2.html` | Not started |
 | 3 | Mine Layer, Chemical Plant, Boost Tower, Radar Tower, Cryo Tower | `design/tower_art_3.html` | Not started |
 | 4 | Shockwave Generator, Scrapyard, Magneto Tower, Tractor Tower, Augmentation Tower | `design/tower_art_4.html` | Not started |
@@ -66,9 +66,24 @@ enemies on the lane and flyers overhead (air-only towers ignore the ground, and 
 Rockets are drawn like the game's loaded missiles (pale body, red nose) with smoke trails, and the loaded noses show in
 the tube mouths until a salvo leaves.
 
-**Picks:** to come.
+**Picks (owner, round 1):**
+
+| Tower | Look | Animation | Status |
+|---|---|---|---|
+| Gun Turret | C Rotary Gun | C Rapid Stream | Picked |
+| Mortar Tower | C Braced Siege Mortar | A High Lob | Picked |
+| Laser Tower | A Lance Emitter | A Steady Beam | Picked |
+| Rocket Salvo | C Quad Rail Pods | A Ripple Salvo | Owner note: "Change this to 3 barrels" |
+| Anti-Aircraft Turret | C Heavy Flak Cannon | A Alternating Barrels | Picked |
+
+## Page 1, round 2
+
+- **Rocket Salvo look C** is now **Triple Rail Pods**: three round launch pods (was four), each a little wider.
+- **Ripple Salvo** now fires **three** rockets per salvo, one per pod, so no pod fires twice. Claude made this change to
+  fit the three pods; it's for the owner to confirm.
+- Everything else is preselected as picked.
 
 ## Open questions
 
-1. **Page 1 picks** (in-game style round 1): every tower's look and animation.
+1. **Page 1, round 2:** confirm the Rocket Salvo's Triple Rail Pods and the three-rocket Ripple Salvo.
 2. Pages 2 to 4, then the second pass (per-path looks and Retrofit looks).

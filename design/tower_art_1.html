@@ -51,7 +51,7 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Tower rework · Tower art · page 1 of 4: towers 1-5 (in-game style, round 1)</div>
+    <div class="eyebrow">Bastion Line · Tower rework · Tower art · page 1 of 4: towers 1-5 (in-game style, round 2)</div>
     <h1>Tower art: towers 1-5</h1>
     <p class="note">The reworked towers' <b>models</b>, first pass: for each tower pick its <b>look</b> and its <b>firing animation</b> from three proposals each (A to C), and add notes. Mix freely. <b>Your combination</b> shows your mix (option A until you pick). Every preview runs live: the turret tracks and fires at enemies on the lane (flyers for air towers). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back. Spec: <code>design/tower_art.md</code>.</p>
     <ul class="rules">
@@ -327,7 +327,7 @@ DRAW.hydra = (c, f, n, ang, rr, t, b, g) => {
 // Dark gunmetal armour lit from the upper left (bevelled plates, rivets, shaded barrels and domes), the hex deck
 // every tower stands on, and one glowing accent colour per tower, as in scripts/view/Draw.gd. Earlier rounds
 // (modern military, then sleek sci-fi) were scrapped by the owner; they're in git history.
-const PAGE = { title: "Tower art page 1 (towers 1-5)", store: "bl-tower-art-1-game-v1" };
+const PAGE = { title: "Tower art page 1 (towers 1-5)", store: "bl-tower-art-1-game-v2" };
 
 // ---- Game units: drawings use Draw.gd's pixel sizes (a tile is 48 px), scaled to the preview ----------------
 const G = (s) => s / 48;
@@ -521,16 +521,16 @@ const TOWERS = [
           [[-12, 0], [12, 1], [-8, 2], [8, 3]].forEach(([y, i]) => { const p = P(c, aim, k, 8.5, y); disc(p, 1.9 * k, OUTLINE); disc(p, 1.5 * k, BORE); const f = firedBarrel(fx, i, 0.25); if (f > 0) glowDot(p, 2 * k * f, col); });
           noses(c, aim, k, [[9, -12], [9, 12], [9, -8], [9, 8]], fx, 1.3);
           plate(c, ngon(8, 1, Math.PI / 8), METAL_L, aim, 6.5 * k, 1.2); orb(c, 4.4 * k, METAL); plate(P(c, aim, k, 3.5, 0), rectPts(1, 2.4), [0.25, 0.4, 0.45, 1], aim, k, 0.6); } },
-      { key: "C", name: "Quad Rail Pods", muzzle: 12 / 48, muzzles: [[12 / 48, -7.5 / 48], [12 / 48, 7.5 / 48], [12 / 48, -2.5 / 48], [12 / 48, 2.5 / 48]], theme: "Four slim round launch pods side by side on a cross frame, each holding one big rocket; a hazard-striped blast deflector behind.",
+      { key: "C", name: "Triple Rail Pods", muzzle: 12 / 48, muzzles: [[12 / 48, -6.5 / 48], [12 / 48, 0], [12 / 48, 6.5 / 48]], theme: "Three round launch pods side by side on a cross frame, each holding one big rocket; a hazard-striped blast deflector behind. (Round 2: was four pods.)",
         draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t);
           plate(P(c, aim, k, -11, 0), rectPts(1.6, 11), METAL_L, aim, k, 1); hazard(c, aim, k, -12, -10, 0, col, 1.2);
           for (const x of [-4, 6]) bar(P(c, aim, k, x, -11), P(c, aim, k, x, 11), 2.4 * k, lt(METAL_D, 0.15));
-          [[-7.5, 0], [7.5, 1], [-2.5, 2], [2.5, 3]].forEach(([y, i]) => { bar(P(c, aim, k, -8, y), P(c, aim, k, 11, y), 4.4 * k, METAL_L); const p = P(c, aim, k, 11.5, y);
-            disc(p, 2.2 * k, OUTLINE); disc(p, 1.8 * k, BORE); const f = firedBarrel(fx, i, 0.25); if (f > 0) glowDot(p, 2.2 * k * f, col); });
-          noses(c, aim, k, [[12, -7.5], [12, 7.5], [12, -2.5], [12, 2.5]], fx, 1.5); orb(c, 2.6 * k, METAL); glowDot(c, 1 * k, col); } },
+          [[-6.5, 0], [0, 1], [6.5, 2]].forEach(([y, i]) => { bar(P(c, aim, k, -8, y), P(c, aim, k, 11, y), 5.2 * k, METAL_L); const p = P(c, aim, k, 11.5, y);
+            disc(p, 2.5 * k, OUTLINE); disc(p, 2.1 * k, BORE); const f = firedBarrel(fx, i, 0.25); if (f > 0) glowDot(p, 2.2 * k * f, col); });
+          noses(c, aim, k, [[12, -6.5], [12, 0], [12, 6.5]], fx, 1.75); orb(P(c, aim, k, -4, 0), 2.4 * k, METAL); glowDot(P(c, aim, k, -4, 0), 1 * k, col); } },
     ],
     anims: [
-      { key: "A", name: "Ripple Salvo", desc: "Four rockets leave one after another, each from its own tube, curving onto separate enemies on smoke trails; the tubes reload.", period: 2.6, burst: 4, gap: 0.16, multi: true, flight: 0.85,
+      { key: "A", name: "Ripple Salvo", desc: "Three rockets leave one after another, one per pod, curving onto separate enemies on smoke trails; the pods reload.", period: 2.6, burst: 3, gap: 0.16, multi: true, flight: 0.85,
         fx: (since) => ({ ready: since < 0.6 ? 0 : Math.min(1, (since - 0.6) / 1.2) }), shot: (f, to, u, s, col, k) => rocketPath(f, to, u, s, col, k), impact: (to, v, s, col) => blast(to, v, s, col, 0.35) },
       { key: "B", name: "Full Volley", desc: "Every tube fires at once in a burst of smoke behind the launcher; the rockets fan out together.", period: 2.6, burst: 4, gap: 0.02, multi: true, flight: 0.85,
         fx: (since) => ({ ready: since < 0.5 ? 0 : Math.min(1, (since - 0.5) / 1.4) }),
@@ -578,7 +578,7 @@ const TOWERS = [
         fx: (since) => ({ recoil: decay(since, 0.08) * 0.6, flash: decay(since, 0.06) }), shot: (f, to, u, s, col) => tracer(f, to, u, col, 1.3, 0.3), impact: (to, v, s, col) => spark(to, v, s * 0.7, col) },
     ] },
 ];
-const DEFAULTS = {};
+const DEFAULTS = { gun: { look: "C", anim: "C" }, mortar: { look: "C", anim: "A" }, laser: { look: "A", anim: "A" }, rocket: { look: "C", anim: "A" }, aa: { look: "C", anim: "A" } };
 
 // ---- Tower art engine: previews towers aiming and firing at enemies on a lane --------------------------
 // Data (defined before this): PAGE {title, key, store}, TOWERS [...], DEFAULTS {id: {look, anim}}.
