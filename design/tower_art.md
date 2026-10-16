@@ -41,7 +41,7 @@ enemies on the lane and flyers overhead (air-only towers ignore the ground, and 
 | Page | Towers | File | Status |
 |---|---|---|---|
 | 1 | Gun Turret, Mortar Tower, Laser Tower, Rocket Salvo, Anti-Aircraft Turret | `design/tower_art_1.html` | **Confirmed** (round 2) |
-| 2 | Artillery Cannon, Railgun, Tesla Tower, Drone Bay, CAS Gunship | `design/tower_art_2.html` | Round 1: picks open |
+| 2 | Artillery Cannon, Railgun, Tesla Tower, Drone Bay, CAS Gunship | `design/tower_art_2.html` | Round 2: picks open |
 | 3 | Mine Layer, Chemical Plant, Boost Tower, Radar Tower, Cryo Tower | `design/tower_art_3.html` | Not started |
 | 4 | Shockwave Generator, Scrapyard, Magneto Tower, Tractor Tower, Augmentation Tower | `design/tower_art_4.html` | Not started |
 
@@ -118,9 +118,48 @@ The previews show each tower's own mechanic:
 | Drone Bay | Hunt and Circle | Strafing Dives | Stand-off Hover |
 | CAS Gunship | Gatling Stream | Burst Sweeps | Brass Rain |
 
+**Picks and notes (owner, round 1):**
+
+| Tower | Look | Animation | Notes |
+|---|---|---|---|
+| Artillery Cannon | - | - | Look: "More ideas". Animation: "More ideas" |
+| Railgun | B Sealed Accelerator | A Snap Shot | Animation: "Make sure the trail doesn't turn with the gun" |
+| Tesla Tower | - | C Corona Burst | Look: "More designs" |
+| Drone Bay | A Rotor Pad Hangar | - | Animation: "More ideas. Also, the drone should Idle if no enemies are around instead of heading back to the drone bay" |
+| CAS Gunship | - | A Gatling Stream | Look: "The ship should be way larger, as if it were at high altitude. More ideas" |
+
+**Decided (owner):** once launched, the **drone stays out**. It idles when no enemies are around and doesn't return to
+the bay.
+
+## Page 2, round 2
+
+- **Railgun:** the line now stays where the shot went instead of turning with the gun. Picks preselected (B / A).
+- **Artillery Cannon:**
+  - New looks: **D Self-Propelled Gun**, **E Twin-Barrel Battery** and **F Rammer Howitzer**.
+  - New animations: **D Walking Barrage**, **E Air Burst** and **F Spotter and Strike**.
+- **Tesla Tower:** new looks **D Mushroom Cap**, **E Triple Spire** and **F Spark Gap**. Corona Burst is preselected.
+- **Drone Bay:**
+  - Every animation now keeps the drone out, with its own idle:
+
+    | Animation | Fight | Idle |
+    |---|---|---|
+    | A Hunt and Circle | circles its prey, firing short bursts | hovers |
+    | B Strafing Dives | fast passes over its prey | flies a figure-eight |
+    | C Stand-off Hover | fires single shots from a distance | drifts in a slow circle |
+    | D Weave Run (new) | weaves in, firing a stream | patrols along the track |
+    | E Pounce (new) | waits high, then swoops in | climbs and circles high |
+    | F Overwatch Orbit (new) | circles at long range | scans with a searchlight |
+
+  - The preview clears the lane every few seconds to show the idle.
+- **CAS Gunship:**
+  - Every plane is now drawn **twice as large**, with a faint shadow far below, as if at high altitude.
+  - New designs: **D Hardened Bunker + Flying Wing**, **E Radar Mast + Six-Engine Heavy** and **F Command Post + Jet
+    Gunship**.
+  - Gatling Stream is preselected.
+
 **Picks:** to come.
 
 ## Open questions
 
-1. **Page 2 picks** (round 1), including whether the proposed Artillery blue and CAS pink stand.
+1. **Page 2 picks** (round 2), including whether the proposed Artillery blue and CAS pink stand.
 2. Pages 3 and 4, then the second pass (per-path looks and Retrofit looks).
