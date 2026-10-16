@@ -41,7 +41,7 @@ enemies on the lane and flyers overhead (air-only towers ignore the ground, and 
 | Page | Towers | File | Status |
 |---|---|---|---|
 | 1 | Gun Turret, Mortar Tower, Laser Tower, Rocket Salvo, Anti-Aircraft Turret | `design/tower_art_1.html` | **Confirmed** (round 2) |
-| 2 | Artillery Cannon, Railgun, Tesla Tower, Drone Bay, CAS Gunship | `design/tower_art_2.html` | Round 2: picks open |
+| 2 | Artillery Cannon, Railgun, Tesla Tower, Drone Bay, CAS Gunship | `design/tower_art_2.html` | Round 3: Artillery animation open; CAS gun change to confirm |
 | 3 | Mine Layer, Chemical Plant, Boost Tower, Radar Tower, Cryo Tower | `design/tower_art_3.html` | Not started |
 | 4 | Shockwave Generator, Scrapyard, Magneto Tower, Tractor Tower, Augmentation Tower | `design/tower_art_4.html` | Not started |
 
@@ -157,9 +157,25 @@ the bay.
     Gunship**.
   - Gatling Stream is preselected.
 
-**Picks:** to come.
+**Picks (owner, round 2):**
+
+| Tower | Look | Animation | Notes |
+|---|---|---|---|
+| Artillery Cannon | F Rammer Howitzer | (none picked) | |
+| Railgun | B Sealed Accelerator | A Snap Shot | |
+| Tesla Tower | B Twin Toroid | C Corona Burst | |
+| Drone Bay | A Rotor Pad Hangar | A Hunt and Circle | |
+| CAS Gunship | A Airfield Beacon + Four-Engine Gunship | A Gatling Stream | Look: "The guns shouldn't be visible on the top" |
+
+## Page 2, round 3
+
+- **CAS Gunship:** the gatling sits inside the fuselage. From above, only its muzzle flash shows at the side door; no
+  gun is drawn on top. This applies to every CAS look.
+- **Artillery Cannon:** no animation picked yet, and none of its six (A-F) carries a note.
+- Everything else is preselected as picked.
 
 ## Open questions
 
-1. **Page 2 picks** (round 2), including whether the proposed Artillery blue and CAS pink stand.
+1. **Page 2, round 3:** the Artillery Cannon's animation, the hidden CAS guns, and whether the proposed Artillery blue and
+   CAS pink stand.
 2. Pages 3 and 4, then the second pass (per-path looks and Retrofit looks).

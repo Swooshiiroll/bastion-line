@@ -51,7 +51,7 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Tower rework · Tower art · page 2 of 4: towers 6-10 (in-game style, round 2)</div>
+    <div class="eyebrow">Bastion Line · Tower rework · Tower art · page 2 of 4: towers 6-10 (in-game style, round 3)</div>
     <h1>Tower art: towers 6-10</h1>
     <p class="note">The reworked towers' <b>models</b>, first pass: for each tower pick its <b>look</b> and its <b>firing animation</b> from three proposals each (A to C), and add notes. Mix freely. <b>Your combination</b> shows your mix (option A until you pick). Every preview runs live: the turret tracks and fires at enemies on the lane (flyers for air towers). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back. Spec: <code>design/tower_art.md</code>.</p>
     <ul class="rules">
@@ -378,7 +378,7 @@ function noses(c, aim, k, tubes, fx, r) { const ready = fx.ready ?? 1; if (ready
 
 // ---- Tower art page 2: towers 6-10, in the style of today's in-game towers (owner, 2026-10-16) -----------
 // Shared style helpers (deck, hazard, muzzleEnd, shell, missile...) come from game_style.js.
-const PAGE = { title: "Tower art page 2 (towers 6-10)", store: "bl-tower-art-2-game-v2" };
+const PAGE = { title: "Tower art page 2 (towers 6-10)", store: "bl-tower-art-2-game-v3" };
 
 // ---- Page 2 effects ---------------------------------------------------------------------------------------
 const rnd = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
@@ -403,7 +403,7 @@ const COPPER = [0.78, 0.5, 0.28, 1], CERAMIC = [0.86, 0.85, 0.8, 1];
 // ---- Drones and aircraft (drawn by the looks, flown by the animations) ------------------------------------
 function rotor(p, r, t, k) { disc(p, r, [0.8, 0.85, 0.95, 0.12]); ring(p, r, [0.8, 0.86, 0.95, 0.35], 0.8); for (let q = 0; q < 2; q++) line(p, add(p, mul(fa(t * 40 + q * Math.PI), r * 0.95)), [0.85, 0.9, 1, 0.55], 1.1 * k); }
 function planeShadow(p, heading, k, span, len) { const q = add(p, [k * 10, k * 16]); fill(q, rectPts(len * 0.5, 2.6), [0, 0, 0, 0.14], heading, k); fill(q, rectPts(2.4, span * 0.5), [0, 0, 0, 0.14], heading, k); }
-function gunDoor(p, heading, k, fx, col, x) { const g = P(p, heading, k, x || 1, 3.4); bar(g, P(p, heading, k, x || 1, 6.4), 1.5 * k, METAL_D); if (fx.flash > 0) glowDot(P(p, heading, k, x || 1, 6.8), (1 + 3 * fx.flash) * k, col); }
+function gunDoor(p, heading, k, fx, col, x) { if (fx.flash > 0) glowDot(P(p, heading, k, x || 1, 3.2), (0.8 + 2.4 * fx.flash) * k, col); } // the guns are inside: only the muzzle flash shows at the side door
 
 // ---- Drones that stay out: once launched the drone never goes home; it hunts, and idles when the lane is clear ----
 const turnTo = (a, b, m) => { const d = fmod(b - a + Math.PI, TAU) - Math.PI; return a + Math.max(-m, Math.min(m, d)); };
@@ -663,10 +663,10 @@ const TOWERS = [
   { id: "cas", num: 10, name: "CAS Gunship", cls: "Assault", weapon: "Deployable", hits: "both", color: [1.00, 0.45, 0.70, 1], orbit: { x: 0.66, y: 0.58, r: 0.75, w: 0.35 },
     desc: "A large slow-flying cargo plane carrying a wide range of weaponry. \"Yeah, I hate that feeling.\" The tower stands anywhere; the gunship circles the point you designate and side-fires its built-in gatling at enemies under its orbit (shown smaller than the real 90 px orbit to fit). It flies high, so it's drawn much bigger than the ground, its shadow far below (owner). The look sets the ground station and the plane. (Colour: a new pink; no in-game counterpart.)",
     looks: [
-      { key: "A", name: "Airfield Beacon + Four-Engine Gunship", muzzle: 0, fixed: true, theme: "Station: a hardstand with runway markings and a pulsing guidance beacon. Plane: a big high-wing cargo gunship with four engines and the gatling in its side door.",
+      { key: "A", name: "Airfield Beacon + Four-Engine Gunship", muzzle: 0, fixed: true, theme: "Station: a hardstand with runway markings and a pulsing guidance beacon. Plane: a big high-wing cargo gunship with four engines; the gatling fires from inside its side door (round 3: no gun showing on top).",
         draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t); plate(c, rectPts(12, 12), METAL_D, 0, k, 1.2); for (let i = 0; i < 4; i++) rect(c[0] - 1 * k, c[1] + (-10 + i * 5) * k, 2 * k, 2.6 * k, [0.85, 0.85, 0.8, 0.8]);
           bar(add(c, [7 * k, 7 * k]), add(c, [7 * k, -2 * k]), 1.2 * k, METAL_L); const pu = fmod(t * 1.2, 1); glowDot(add(c, [7 * k, -2.8 * k]), (0.9 + 0.6 * (1 - pu)) * k, col); ring(add(c, [7 * k, -2.8 * k]), (1.5 + 5 * pu) * k, A(col, 0.6 * (1 - pu)), 1); },
-        door(p, h, s) { return P(p, h, G(s) * CAS_Z, 1, 6.6); },
+        door(p, h, s) { return P(p, h, G(s) * CAS_Z, 1, 3.2); },
         plane(p, h, s, fx, t, col) { const k = G(s) * CAS_Z; planeShadow(p, h, k, 36, 26);
           bar(P(p, h, k, -12, 0), P(p, h, k, 13, 0), 5 * k, METAL_L); plate(P(p, h, k, -11, 0), rectPts(1.6, 6.5), METAL, h, k, 0.9);
           plate(P(p, h, k, 2, 0), rectPts(2.4, 18), METAL_L, h, k, 1); for (const y of [-12, -6, 6, 12]) { orb(P(p, h, k, 4, y), 1.6 * k, METAL); rotor(P(p, h, k, 6, y), 2.6 * k, t, k); }
@@ -674,7 +674,7 @@ const TOWERS = [
       { key: "B", name: "Control Tower + Twin-Boom Gunship", muzzle: 0, fixed: true, theme: "Station: a small round control tower with a turning radar arm. Plane: a twin-boom gunship, short podded fuselage, two engines and a tail joining the booms.",
         draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t); orb(c, 9 * k, METAL_L); ring(c, 6.5 * k, METAL, 1.2 * k); fill(c, rectPts(5, 5), [0.25, 0.4, 0.45, 0.9], t * 0.3, k);
           const d = fa(t * 2); line(c, add(c, mul(d, 8 * k)), METAL_D, 2 * k); glowDot(add(c, mul(d, 8 * k)), 0.9 * k, col); glowDot(c, 1.1 * k, col); },
-        door(p, h, s) { return P(p, h, G(s) * CAS_Z, 2, 6.6); },
+        door(p, h, s) { return P(p, h, G(s) * CAS_Z, 2, 3.2); },
         plane(p, h, s, fx, t, col) { const k = G(s) * CAS_Z; planeShadow(p, h, k, 30, 24);
           for (const y of [-5, 5]) bar(P(p, h, k, 3, y), P(p, h, k, -12, y), 1.8 * k, METAL); plate(P(p, h, k, -12, 0), rectPts(1.4, 6.5), METAL_L, h, k, 0.9);
           plate(P(p, h, k, 2, 0), rectPts(2.6, 15), METAL_L, h, k, 1); for (const y of [-5, 5]) { orb(P(p, h, k, 4, y), 1.9 * k, METAL); rotor(P(p, h, k, 6.4, y), 3 * k, t, k); }
@@ -683,7 +683,7 @@ const TOWERS = [
         draw(c, aim, s, fx, t, col, info) { const k = G(s); deck(c, k, col, t); plate(c, rectPts(8, 8), METAL, 0, k, 1.1);
           const a = info && info.orbit ? Math.atan2(info.orbit[1] - c[1], info.orbit[0] - c[0]) : 0; arc(c, 8 * k, a - 1.1, a + 1.1, OUTLINE, 3.6 * k); arc(c, 8 * k, a - 1.1, a + 1.1, METAL_L, 2.2 * k);
           line(c, add(c, mul(fa(a), 6 * k)), METAL_L, 1 * k); glowDot(add(c, mul(fa(a), 6 * k)), 1 * k, col); },
-        door(p, h, s) { return P(p, h, G(s) * CAS_Z, 0, 6.6); },
+        door(p, h, s) { return P(p, h, G(s) * CAS_Z, 0, 3.2); },
         plane(p, h, s, fx, t, col) { const k = G(s) * CAS_Z; planeShadow(p, h, k, 32, 22);
           plate(P(p, h, k, 1, 0), rectPts(10, 3.6), METAL_L, h, k, 1); plate(P(p, h, k, -10, 0), rectPts(1.4, 5.5), METAL, h, k, 0.9);
           plate(P(p, h, k, 3, 0), rectPts(2, 16), METAL, h, k, 0.9); for (const y of [-14, -7, 7, 14]) rotor(P(p, h, k, 3.5, y), 3.4 * k, t, k);
@@ -691,7 +691,7 @@ const TOWERS = [
       { key: "D", name: "Hardened Bunker + Flying Wing", muzzle: 0, fixed: true, theme: "Station: a low hardened bunker with a hazard-striped blast door. Plane: a broad flying wing with engines buried in its trailing edge and a gun pod under the inner wing.",
         draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t); plate(c, rectPts(12, 8), METAL_L, 0, k, 1.3); fill(c, rectPts(9.5, 5.6), METAL, 0, k); rivets(c, rectPts(12, 8), 0, k, 0.86, 0.8 * k);
           plate(add(c, [0, 8.5 * k]), rectPts(6, 1.4), METAL_D, 0, k, 1); hazard(c, 0, k, -5.5, 5.5, 10.6, col, 1.2); glowDot(add(c, [8 * k, -4 * k]), 1 * k, col); },
-        door(p, h, s) { return P(p, h, G(s) * CAS_Z, -1, 6.6); },
+        door(p, h, s) { return P(p, h, G(s) * CAS_Z, -1, 3.2); },
         plane(p, h, s, fx, t, col) { const k = G(s) * CAS_Z; planeShadow(p, h, k, 40, 16);
           const wing = [[8, 0], [-5, 20], [-9, 18], [-4, 0], [-9, -18], [-5, -20]]; plate(p, wing, METAL_L, h, k, 1.1); line(P(p, h, k, 6, 0), P(p, h, k, -4, 0), [0, 0, 0, 0.3], 1);
           for (const y of [-9, -4, 4, 9]) glowDot(P(p, h, k, -6.5, y), 0.9 * k, col); gunDoor(p, h, k, fx, col, -1); glowDot(P(p, h, k, -6, -19), 0.7 * k, [1, 0.25, 0.25, 1]); glowDot(P(p, h, k, -6, 19), 0.7 * k, [0.3, 1, 0.45, 1]); } },
@@ -699,7 +699,7 @@ const TOWERS = [
         draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t); const sq = [[-6, -6], [6, -6], [6, 6], [-6, 6]].map((q) => add(c, mul(q, k)));
           for (let i = 0; i < 4; i++) bar(sq[i], sq[(i + 1) % 4], 1.4 * k, METAL_L); bar(sq[0], sq[2], 1 * k, METAL); bar(sq[1], sq[3], 1 * k, METAL);
           const d = fa(t * 1.6); bar(sub(c, mul(d, 9 * k)), add(c, mul(d, 9 * k)), 2 * k, METAL_L); glowDot(add(c, mul(d, 9 * k)), 0.9 * k, col); orb(c, 2.2 * k, METAL); },
-        door(p, h, s) { return P(p, h, G(s) * CAS_Z, 3, 6.6); },
+        door(p, h, s) { return P(p, h, G(s) * CAS_Z, 3, 3.2); },
         plane(p, h, s, fx, t, col) { const k = G(s) * CAS_Z; planeShadow(p, h, k, 44, 32);
           bar(P(p, h, k, -16, 0), P(p, h, k, 16, 0), 5.6 * k, METAL_L); plate(P(p, h, k, -15, 0), rectPts(1.8, 8), METAL, h, k, 0.9);
           plate(P(p, h, k, 3, 0), rectPts(2.8, 22), METAL_L, h, k, 1); for (const y of [-18, -12, -6, 6, 12, 18]) { orb(P(p, h, k, 5, y), 1.5 * k, METAL); rotor(P(p, h, k, 7, y), 2.4 * k, t, k); }
@@ -708,7 +708,7 @@ const TOWERS = [
         draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t); plate(c, ngon(8, 1, Math.PI / 8), METAL_L, 0, 10 * k, 1.3); fill(c, ngon(8, 1, Math.PI / 8), METAL, 0, 7.4 * k);
           for (const x of [-5, 5]) { line(add(c, [x * k, 0]), add(c, [(x + 2) * k, -12 * k]), METAL_L, 0.9 * k); if (fmod(t + x * 0.1, 1.2) < 0.3) glowDot(add(c, [(x + 2) * k, -12 * k]), 0.9 * k, col); }
           glowDot(c, 1.2 * k, col); },
-        door(p, h, s) { return P(p, h, G(s) * CAS_Z, 4, 6.6); },
+        door(p, h, s) { return P(p, h, G(s) * CAS_Z, 4, 3.2); },
         plane(p, h, s, fx, t, col) { const k = G(s) * CAS_Z; planeShadow(p, h, k, 34, 30);
           for (const sg of [-1, 1]) plate(p, [[5, sg * 2], [-5, sg * 17], [-8, sg * 17], [-2, sg * 2]], METAL_L, h, k, 1);
           bar(P(p, h, k, -14, 0), P(p, h, k, 15, 0), 4.6 * k, METAL_L); plate(P(p, h, k, -13, 0), rectPts(1.4, 6), METAL, h, k, 0.9);
@@ -726,7 +726,7 @@ const TOWERS = [
         impact: (to, v, s, col) => spark(to, v, s * 0.7, col) },
     ] },
 ];
-const DEFAULTS = { railgun: { look: "B", anim: "A" }, tesla: { anim: "C" }, drones: { look: "A" }, cas: { anim: "A" } };
+const DEFAULTS = { artillery: { look: "F" }, railgun: { look: "B", anim: "A" }, tesla: { look: "B", anim: "C" }, drones: { look: "A", anim: "A" }, cas: { look: "A", anim: "A" } };
 
 // ---- Tower art engine: previews towers aiming and firing at enemies on a lane --------------------------
 // Data (defined before this): PAGE {title, key, store}, TOWERS [...], DEFAULTS {id: {look, anim}}.
