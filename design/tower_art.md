@@ -27,7 +27,7 @@ enemies on the lane and flyers overhead (air-only towers ignore the ground, and 
 
 | Page | Towers | File | Status |
 |---|---|---|---|
-| 1 | Gun Turret, Mortar Tower, Laser Tower, Rocket Salvo, Anti-Aircraft Turret | `design/tower_art_1.html` | Round 2 |
+| 1 | Gun Turret, Mortar Tower, Laser Tower, Rocket Salvo, Anti-Aircraft Turret | `design/tower_art_1.html` | Round 3: only the Rocket Salvo open |
 | 2 | Artillery Cannon, Railgun, Tesla Tower, Drone Bay, CAS Gunship | `design/tower_art_2.html` | Not started |
 | 3 | Mine Layer, Chemical Plant, Boost Tower, Radar Tower, Cryo Tower | `design/tower_art_3.html` | Not started |
 | 4 | Shockwave Generator, Scrapyard, Magneto Tower, Tractor Tower, Augmentation Tower | `design/tower_art_4.html` | Not started |
@@ -71,8 +71,17 @@ enemies on the lane and flyers overhead (air-only towers ignore the ground, and 
   Ripple, E Twin Volley, F Pop-up Launch.
 - **AA animations:** D Alternating Barrels, E Flak Barrage, F Lead the Target.
 
+**Picks, round 2 (owner, 2026-10-16):**
+- **Mortar Tower:** look **F Heavy Siege Mortar**, animation **C Flash and Smoke**. **Confirmed.**
+- **Laser Tower:** look **E Crystal Core**, animation **A Ramp Glow** (locks on first). **Confirmed.**
+- **Anti-Aircraft Turret:** look **A Twin Autocannon**, animation **D Alternating Barrels**. **Confirmed.**
+- **Rocket Salvo:** open. Owner: "Make some vertical rocket pod ideas".
+
+**Round 3:** Rocket Salvo looks G Raised Pod Turret (a turret that raises a square four-tube pod upright), H Twin Vertical
+Pods (two upright cylindrical pods of three tubes, firing alternately), I Ring Silo (eight vertical cells in a ring
+around a sensor mast; doesn't rotate). They pair naturally with animation F Pop-up Launch.
+
 ## Open questions
 
-1. **Page 1 picks:** Mortar look (A to F), Laser look (A to F), Rocket Salvo look and animation (A to F), AA animation
-   (A to F).
+1. **Page 1 picks:** the Rocket Salvo's look (A to I) and animation (A to F).
 2. Pages 2 to 4, then the second pass (per-path looks and Retrofit looks).
