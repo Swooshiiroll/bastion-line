@@ -58,29 +58,46 @@ function makeView(canvas, tw, getLook, getAnim, scale) {
     for (const e of inView) { const d = Math.hypot(e.p[0] - c[0], e.p[1] - c[1]); if (d < best) { best = d; tgt = e; } }
     if (tgt) {
       const want = Math.atan2(tgt.p[1] - c[1], tgt.p[0] - c[0]);
-      let d = fmod(want - v.aim + Math.PI, TAU) - Math.PI; v.aim += Math.max(-0.12, Math.min(0.12, d));
+      let d = fmod(want - v.aim + Math.PI, TAU) - Math.PI; const dt = Math.min(0.25, Math.max(0, t - (v.prevT || t))); const turn = 7 * dt; v.aim += Math.max(-turn, Math.min(turn, d));
       if (tgt.i !== v.lockId) { v.lockId = tgt.i; v.lockT = t; }
     }
+    v.prevT = t;
     const since = t - v.last;
-    if (tgt && !an.beam && since >= an.period && Math.abs(fmod(Math.atan2(tgt.p[1] - c[1], tgt.p[0] - c[0]) - v.aim + Math.PI, TAU) - Math.PI) < 0.35) {
+    const muzzles = look.muzzles || [[look.muzzle || 0.45, 0]];
+    const muzzleAt = (m, ang) => add(c, rot([muzzles[m % muzzles.length][0] * s, muzzles[m % muzzles.length][1] * s], look.fixed ? 0 : ang));
+    const aligned = tgt && Math.abs(fmod(Math.atan2(tgt.p[1] - c[1], tgt.p[0] - c[0]) - v.aim + Math.PI, TAU) - Math.PI) < (an.beam ? 0.15 : 0.35);
+    if (tgt && !an.beam && since >= an.period && aligned) {
       v.last = t; const n = an.burst || 1;
       for (let k = 0; k < n; k++) {
         const target = an.multi ? (inView[k % inView.length] || tgt) : tgt;
-        v.shots.push({ t0: t + k * (an.gap || 0), tid: target.i, to0: target.p.slice(), k });
+        v.shots.push({ t0: t + k * (an.gap || 0), tid: target.i, to0: target.p.slice(), k, m: (v.n = (v.n || 0) + 1) - 1 });
       }
     }
     pad(c, s);
     for (const e of others) drawEnemy(e, s);
     for (const e of ens) drawEnemy(e, s);
-    const fx = an.beam ? an.fx(tgt ? t - v.lockT : 0, an.period, !!tgt) : an.fx(t - v.last, an.period, !!tgt);
+    // Beams lock on first: a short acquisition (reticle on the target), then the beam fires.
+    const lockDelay = an.lock || 0, held = tgt ? t - v.lockT : 0, beamOn = an.beam && tgt && aligned && held >= lockDelay;
+    let fx;
+    if (an.beam) fx = an.fx(beamOn ? held - lockDelay : 0, an.period, !!beamOn);
+    else {
+      fx = an.fx(t - v.last, an.period, !!tgt);
+      const fired = v.shots.filter((sh) => t >= sh.t0); const lastShot = fired[fired.length - 1];
+      fx.barrel = lastShot ? lastShot.m % muzzles.length : -1; fx.barrelSince = lastShot ? t - lastShot.t0 : 9; fx.shots = lastShot ? lastShot.m + 1 : 0;
+    }
     look.draw(c, v.aim, s, fx, t, tw.color);
-    const muzzle = add(c, mul(fa(v.aim), (look.muzzle || 0.45) * s));
-    if (an.beam && tgt) an.shot(muzzle, tgt.p, t - v.lockT, s, tw.color, 0, t);
+    if (an.beam && tgt) {
+      if (beamOn) an.shot(muzzleAt(0, v.aim), tgt.p, held - lockDelay, s, tw.color, 0, t);
+      else { const q = Math.min(1, held / Math.max(0.01, lockDelay)), r0 = s * (0.35 - 0.18 * q), sp = t * 4;
+        line(muzzleAt(0, v.aim), tgt.p, A(tw.color, 0.25), 1);
+        for (let i = 0; i < 4; i++) { const a0 = sp + i * Math.PI / 2; arc(tgt.p, r0, a0, a0 + 0.7, A(tw.color, 0.5 + 0.5 * q), 2); } }
+    }
     v.shots = v.shots.filter((sh) => t - sh.t0 < an.flight + 0.6);
     for (const sh of v.shots) {
       const age = t - sh.t0; if (age < 0) continue;
+      if (!sh.from) sh.from = muzzleAt(sh.m, v.aim);
       const live = ens.find((e) => e.i === sh.tid); const to = live ? live.p : sh.to0;
-      if (age < an.flight) an.shot(add(c, mul(fa(v.aim), (look.muzzle || 0.45) * s)), to, age / an.flight, s, tw.color, sh.k, t);
+      if (age < an.flight) an.shot(sh.from, to, age / an.flight, s, tw.color, sh.k, t);
       else if (an.impact) an.impact(to, (age - an.flight) / 0.6, s, tw.color);
     }
     X.restore();

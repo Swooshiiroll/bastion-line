@@ -51,7 +51,7 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Tower rework · Tower art · page 1 of 4: towers 1-5</div>
+    <div class="eyebrow">Bastion Line · Tower rework · Tower art · page 1 of 4: towers 1-5 (round 2)</div>
     <h1>Tower art: towers 1-5</h1>
     <p class="note">The reworked towers' <b>models</b>, first pass: for each tower pick its <b>look</b> and its <b>firing animation</b> from three proposals each (A to C), and add notes. Mix freely. <b>Your combination</b> shows your mix (option A until you pick). Every preview runs live: the turret tracks and fires at enemies on the lane (flyers for air towers). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back. Spec: <code>design/tower_art.md</code>.</p>
     <ul class="rules">
@@ -324,7 +324,7 @@ DRAW.hydra = (c, f, n, ang, rr, t, b, g) => {
 // ---- New enemies (draft designs) ---------------------------------------------------------------
 
 // ---- Tower art page 1: towers 1-5 ------------------------------------------------------------------------
-const PAGE = { title: "Tower art page 1 (towers 1-5)", store: "bl-tower-art-1-v1" };
+const PAGE = { title: "Tower art page 1 (towers 1-5)", store: "bl-tower-art-1-v2" };
 
 // Shared effects (tile units scaled by s).
 const lerp = (a, b, u) => [a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u];
@@ -345,6 +345,7 @@ function beam(from, to, w, col, k) { line(from, to, A(col, 0.35 * k), w * 2.6); 
 function barrel(c, aim, s, x0, x1, w, col, off) { const o = mul(orth(fa(aim)), (off || 0) * s); bar(add(add(c, o), mul(fa(aim), x0 * s)), add(add(c, o), mul(fa(aim), x1 * s)), w * s, col); }
 function sandbags(c, s, r, n) { for (let i = 0; i < n; i++) { const a = i * TAU / n; plate(add(c, mul(fa(a), r * s)), [[0.16, 0], [0.12, 0.09], [-0.12, 0.09], [-0.16, 0], [-0.12, -0.09], [0.12, -0.09]], [0.55, 0.5, 0.38, 1], a + Math.PI / 2, s, 0.8); } }
 
+function firedBarrel(fx, i, len) { return fx.barrel === i && fx.barrelSince < (len || 0.12) ? 1 - fx.barrelSince / (len || 0.12) : 0; }
 const OLIVE = [0.33, 0.37, 0.24, 1], GUNMETAL = [0.26, 0.28, 0.3, 1], STEEL = [0.42, 0.45, 0.48, 1], DARK = [0.13, 0.14, 0.15, 1];
 
 const TOWERS = [
@@ -397,6 +398,17 @@ const TOWERS = [
         draw(c, aim, s, fx, t, col) { plate(c, ngon(8, 0.44), DARK, Math.PI / 8, s, 1); const r = fx.recoil * 0.08;
           plate(c, rectPts(0.3, 0.26), [0.4, 0.36, 0.28, 1], aim, s, 1.2); barrel(c, aim, s, 0.15, 0.5 - r, 0.14, GUNMETAL); disc(add(c, mul(fa(aim), (0.5 - r) * s)), s * 0.08, DARK);
           plate(add(c, mul(fa(aim), -s * 0.12)), rectPts(0.08, 0.2), dk(OLIVE, 0.1), aim, s, 0.8); glowDot(add(c, mul(fa(aim), -s * 0.2)), s * 0.03, A(col, 0.9)); flashAt(add(c, mul(fa(aim), (0.5 - r) * s)), aim, s, fx.flash); } },
+      { key: "D", name: "Twin-Tube Mortar", muzzle: 0.22, muzzles: [[0.12, -0.13], [0.12, 0.13]], theme: "Two stubby mortar tubes side by side on a turntable with a loader's platform; they fire in turn.",
+        draw(c, aim, s, fx, t, col) { plate(c, ngon(8, 0.42), DARK, Math.PI / 8, s, 1); disc(c, s * 0.3, GUNMETAL); plate(c, rectPts(0.18, 0.32), [0.36, 0.33, 0.26, 1], aim, s, 1);
+          [-0.13, 0.13].forEach((y, i) => { const q = add(c, rot([0.12 * s, y * s], aim)), k = firedBarrel(fx, i, 0.25) * 0.03; disc(q, s * (0.1 - k), OUTLINE); disc(q, s * (0.08 - k), OLIVE); disc(q, s * 0.045, DARK); smokePuff(q, 1 - firedBarrel(fx, i, 0.6), s, 0.5); }); } },
+      { key: "E", name: "Bunker Mortar", muzzle: 0.1, theme: "A squat concrete bunker under a camouflage net; the mortar fires up through a hole in the roof.",
+        draw(c, aim, s, fx, t, col) { plate(c, rectPts(0.44, 0.44), [0.42, 0.42, 0.4, 1], 0, s, 1.2); plate(c, rectPts(0.34, 0.34), [0.5, 0.5, 0.47, 1], 0, s, 0.8);
+          for (let i = 0; i < 7; i++) { const a = i * 0.9; fill(add(c, mul(fa(a), s * 0.25)), ngon(5, 0.09, a), A([0.3, 0.36, 0.2, 1], 0.85), 0, s); }
+          disc(c, s * 0.11, OUTLINE); disc(c, s * 0.08, DARK); const k = fx.recoil * 0.02; disc(c, s * (0.06 - k), GUNMETAL); smokePuff(c, 1 - fx.flash, s, 0.55); } },
+      { key: "F", name: "Heavy Siege Mortar", muzzle: 0.34, theme: "One big fat-bored mortar behind a curved armour shield on a heavy rotating mount; slow, huge shells.",
+        draw(c, aim, s, fx, t, col) { plate(c, ngon(10, 0.44), DARK, 0, s, 1); const r = fx.recoil * 0.06; arc(add(c, mul(fa(aim), s * 0.05)), s * 0.34, aim - 1, aim + 1, [0.4, 0.38, 0.3, 1], s * 0.08);
+          const m = add(c, mul(fa(aim), (0.16 - r) * s)); disc(m, s * 0.2, OUTLINE); disc(m, s * 0.17, GUNMETAL); disc(m, s * 0.11, DARK); ring(m, s * 0.17, STEEL, 1.5);
+          plate(add(c, mul(fa(aim), -s * 0.2)), rectPts(0.07, 0.16), OLIVE, aim, s, 0.8); flashAt(m, aim, s, fx.flash * 0.6); smokePuff(m, 1 - fx.flash, s, 0.5); } },
     ],
     anims: [
       { key: "A", name: "Tube Drop", desc: "A thunk, a puff of smoke from the tube, and the shell arcs high before bursting on the pack.", period: 1.67, flight: 0.9,
@@ -425,14 +437,26 @@ const TOWERS = [
         draw(c, aim, s, fx, t, col) { plate(c, rectPts(0.38, 0.38), DARK, 0, s, 1); disc(c, s * 0.12, GUNMETAL);
           const d = add(c, mul(fa(aim), s * 0.04)); arc(d, s * 0.34, aim - 1.2, aim + 1.2, STEEL, s * 0.12); arc(d, s * 0.34, aim - 1.2, aim + 1.2, lt(STEEL, 0.4), s * 0.04);
           bar(add(c, mul(fa(aim), -s * 0.2)), add(c, mul(fa(aim), s * 0.22)), s * 0.05, GUNMETAL); fill(add(c, mul(fa(aim), s * 0.24)), ngon(4, 0.07), A(mix(STEEL, col, fx.glow), 1), aim, s); glowDot(add(c, mul(fa(aim), s * 0.26)), s * 0.06 * (0.5 + fx.glow), A(col, 0.8)); } },
+      { key: "D", name: "Twin Emitters", muzzle: 0.5, theme: "Two parallel emitter barrels whose beams converge on the target; a heat-sink block between them.",
+        draw(c, aim, s, fx, t, col) { plate(c, ngon(8, 0.42), DARK, Math.PI / 8, s, 1); plate(c, rectPts(0.24, 0.24), STEEL, aim, s, 1.1);
+          for (const off of [-0.13, 0.13]) { barrel(c, aim, s, 0.05, 0.5, 0.07, GUNMETAL, off); glowDot(add(add(c, mul(orth(fa(aim)), off * s)), mul(fa(aim), 0.5 * s)), s * (0.03 + 0.05 * fx.glow), A(col, 0.5 + 0.5 * fx.glow)); }
+          for (let i = 0; i < 3; i++) line(add(c, rot([(-0.12 + i * 0.1) * s, -0.2 * s], aim)), add(c, rot([(-0.12 + i * 0.1) * s, 0.2 * s], aim)), DARK, 1.5); } },
+      { key: "E", name: "Crystal Core", muzzle: 0.36, theme: "An exposed glowing crystal held in a caged gimbal; the beam pours out of the crystal itself.",
+        draw(c, aim, s, fx, t, col) { plate(c, ngon(6, 0.42), DARK, 0, s, 1); for (let i = 0; i < 6; i++) bar(add(c, mul(fa(i * TAU / 6 + 0.5), s * 0.34)), add(c, mul(fa(i * TAU / 6 + 0.5), s * 0.18)), s * 0.04, STEEL);
+          ring(c, s * 0.24, STEEL, s * 0.04); fill(c, [[0.32, 0], [0, 0.14], [-0.2, 0], [0, -0.14]], A(mix([0.5, 0.15, 0.2, 1], col, 0.4 + 0.6 * fx.glow), 1), aim, s);
+          outline(c, [[0.32, 0], [0, 0.14], [-0.2, 0], [0, -0.14]], A([1, 1, 1, 1], 0.6), 1, aim, s); glowDot(c, s * (0.08 + 0.1 * fx.glow), A(col, 0.4 + 0.5 * fx.glow)); } },
+      { key: "F", name: "Military Laser Pod", muzzle: 0.42, theme: "A boxy naval-style laser weapon system: a square armoured housing, a big square aperture and a sensor dome on top.",
+        draw(c, aim, s, fx, t, col) { plate(c, rectPts(0.42, 0.42), DARK, 0, s, 1); disc(c, s * 0.22, GUNMETAL); plate(c, rectPts(0.3, 0.24), [0.55, 0.57, 0.6, 1], aim, s, 1.2);
+          const ap = add(c, mul(fa(aim), s * 0.26)); plate(ap, rectPts(0.07, 0.17), DARK, aim, s, 0.9); fill(ap, rectPts(0.04, 0.13), A(mix(DARK, col, fx.glow), 1), aim, s);
+          disc(add(c, mul(fa(aim), -s * 0.1)), s * 0.09, OUTLINE); disc(add(c, mul(fa(aim), -s * 0.1)), s * 0.075, [0.75, 0.78, 0.82, 1]); glowDot(ap, s * 0.06 * (0.3 + fx.glow), A(col, 0.8)); } },
     ],
     anims: [
-      { key: "A", name: "Ramp Glow", desc: "The beam starts thin and thickens and whitens the longer it holds a target; the lens brightens with it.", beam: true, period: 1,
+      { key: "A", name: "Ramp Glow", lock: 0.6, desc: "Locks on first (a reticle closes on the target), then: The beam starts thin and thickens and whitens the longer it holds a target; the lens brightens with it.", beam: true, period: 1,
         fx: (lock, p, on) => ({ glow: on ? Math.min(1, 0.2 + lock / 3) : 0 }), shot: (f, to, lock, s, col) => beam(f, to, 1.5 + Math.min(1, lock / 3) * 3, col, 0.6 + Math.min(1, lock / 3) * 0.4) },
-      { key: "B", name: "Pulse Hum", desc: "A steady beam with energy pulses travelling down it and expanding rings at the emitter.", beam: true, period: 1,
+      { key: "B", name: "Pulse Hum", lock: 0.6, desc: "Locks on first (a reticle closes on the target), then: A steady beam with energy pulses travelling down it and expanding rings at the emitter.", beam: true, period: 1,
         fx: (lock, p, on) => ({ glow: on ? 0.6 + 0.4 * Math.sin(lock * 10) : 0 }),
         shot: (f, to, lock, s, col) => { beam(f, to, 2.4, col, 0.85); for (let i = 0; i < 3; i++) glowDot(lerp(f, to, fmod(lock * 1.6 + i / 3, 1)), s * 0.05, A([1, 1, 1, 1], 0.9)); ring(f, s * 0.1 * (1 + fmod(lock * 3, 1)), A(col, 1 - fmod(lock * 3, 1)), 1.5); } },
-      { key: "C", name: "Heat Shimmer", desc: "The beam burns with sparks and armour flakes spraying off the target; heat vents glow on the tower.", beam: true, period: 1,
+      { key: "C", name: "Heat Shimmer", lock: 0.6, desc: "Locks on first (a reticle closes on the target), then: The beam burns with sparks and armour flakes spraying off the target; heat vents glow on the tower.", beam: true, period: 1,
         fx: (lock, p, on) => ({ glow: on ? Math.min(1, 0.3 + lock / 2) : 0 }),
         shot: (f, to, lock, s, col, k, t) => { beam(f, to, 2.2 + Math.min(1, lock / 3) * 2, col, 0.9); for (let i = 0; i < 5; i++) { const a = t * 9 + i * 1.3, q = fmod(t * 3 + i * 0.2, 1); disc(add(to, mul(fa(a), s * 0.3 * q)), 1.4, A([1, 0.8, 0.4, 1], 1 - q)); } } },
     ] },
@@ -441,19 +465,32 @@ const TOWERS = [
   { id: "rocket", num: 4, name: "Rocket Salvo", cls: "Assault", weapon: "Explosive", hits: "both", color: [1, 0.85, 0.3, 1],
     desc: "Launches a volley of rockets at oncoming enemies. \"Instead of shooting bullets, it shoots very angry telephone poles that hate absolutely everything.\" Spread salvos, one rocket per enemy.",
     looks: [
-      { key: "A", name: "Box Launcher", muzzle: 0.42, theme: "A boxy launcher pod with a 3x2 grid of tube mouths on a rotating base, like a truck-mounted rocket system.",
+      { key: "A", name: "Box Launcher", muzzle: 0.42, muzzles: [[0.3, -0.15], [0.3, 0], [0.3, 0.15]], theme: "A boxy launcher pod with a 3x2 grid of tube mouths on a rotating base, like a truck-mounted rocket system.",
         draw(c, aim, s, fx, t, col) { disc(c, s * 0.4, DARK); disc(c, s * 0.32, GUNMETAL); const r = fx.recoil * 0.04;
           plate(add(c, mul(fa(aim), -r * s)), rectPts(0.36, 0.26), OLIVE, aim, s, 1.2);
           for (let i = 0; i < 3; i++) for (let j = 0; j < 2; j++) { const p = add(c, rot([(0.2 - r) * s, (-0.15 + i * 0.15) * s], aim)); disc(add(p, mul(orth(fa(aim)), (j - 0.5) * 0 * s)), s * 0.05, (i + j + Math.floor(t)) % 7 === 0 ? DARK : DARK); }
           for (let i = 0; i < 3; i++) { const p = add(c, rot([(0.28 - r) * s, (-0.15 + i * 0.15) * s], aim)); disc(p, s * 0.055, OUTLINE); disc(p, s * 0.04, mix(DARK, col, fx.flash * 0.6)); } } },
-      { key: "B", name: "Rail Launcher", muzzle: 0.45, theme: "Open launch rails on a swivel mount with the rockets visible on them; a blast shield behind.",
+      { key: "B", name: "Rail Launcher", muzzle: 0.45, muzzles: [[0.42, -0.16], [0.42, 0], [0.42, 0.16]], theme: "Open launch rails on a swivel mount with the rockets visible on them; a blast shield behind.",
         draw(c, aim, s, fx, t, col) { plate(c, ngon(8, 0.4), DARK, 0, s, 1); plate(add(c, mul(fa(aim), -s * 0.26)), rectPts(0.05, 0.3), STEEL, aim, s, 0.9);
           for (const y of [-0.16, 0, 0.16]) { bar(add(c, rot([-0.2 * s, y * s], aim)), add(c, rot([0.42 * s, y * s], aim)), s * 0.04, GUNMETAL);
             if (fx.flash < 0.5) fill(add(c, rot([0.12 * s, y * s], aim)), [[0.3, 0], [-0.25, 0.06], [-0.25, -0.06]], col, aim, s); } } },
-      { key: "C", name: "Pod Turret", muzzle: 0.4, theme: "A round turret carrying two cylindrical rocket pods on its flanks, with a sensor head in the middle.",
+      { key: "C", name: "Pod Turret", muzzle: 0.4, muzzles: [[0.26, -0.27], [0.26, 0.27], [0.26, -0.27]], theme: "A round turret carrying two cylindrical rocket pods on its flanks, with a sensor head in the middle.",
         draw(c, aim, s, fx, t, col) { plate(c, ngon(10, 0.4), DARK, 0, s, 1); plate(c, ngon(10, 0.2, aim), GUNMETAL, 0, s, 1); glowDot(add(c, mul(fa(aim), s * 0.12)), s * 0.035, A(col, 0.9));
           for (const sg of [-1, 1]) { const pc = add(c, mul(orth(fa(aim)), sg * s * 0.27)); plate(pc, rectPts(0.24, 0.1), OLIVE, aim, s, 1);
             for (const y of [-0.04, 0.04]) { const p = add(pc, rot([0.2 * s, y * s], aim)); disc(p, s * 0.035, mix(DARK, col, fx.flash * 0.6)); } } } },
+      { key: "D", name: "Truck Rack", muzzle: 0.4, muzzles: [[0.36, -0.18], [0.36, -0.06], [0.36, 0.06], [0.36, 0.18]], theme: "The back of a launcher truck: a cab, and a tilting rack of eight tubes on the bed that swings to aim.",
+        draw(c, aim, s, fx, t, col) { plate(add(c, [-0.32 * s, 0]), rectPts(0.12, 0.24), OLIVE, 0, s, 1); disc(add(c, [-0.4 * s, -0.24 * s]), 2, DARK); disc(add(c, [-0.4 * s, 0.24 * s]), 2, DARK);
+          plate(c, rectPts(0.4, 0.3), DARK, 0, s, 1); plate(c, rectPts(0.28, 0.24), OLIVE, aim, s, 1.1);
+          for (let i = 0; i < 4; i++) for (let j = 0; j < 2; j++) { const q = add(c, rot([(0.24 - j * 0.12) * s, (-0.18 + i * 0.12) * s], aim)); disc(q, s * 0.045, OUTLINE); disc(q, s * 0.032, j ? DARK : mix(DARK, col, firedBarrel(fx, i, 0.3))); } } },
+      { key: "E", name: "Drum Launcher", muzzle: 0.4, theme: "A revolving drum magazine of rockets behind one launch barrel; the drum turns a notch for each shot.",
+        draw(c, aim, s, fx, t, col) { plate(c, ngon(8, 0.42), DARK, Math.PI / 8, s, 1); const dc = add(c, mul(fa(aim), -s * 0.08)); disc(dc, s * 0.25, OUTLINE); disc(dc, s * 0.22, OLIVE);
+          const spin = ((fx.shots || 0) - 1 + (fx.barrelSince < 0.2 ? fx.barrelSince / 0.2 : 1)) * (TAU / 6);
+          for (let i = 0; i < 6; i++) { const q = add(dc, mul(fa(spin + i * TAU / 6), s * 0.14)); disc(q, s * 0.045, DARK); disc(q, s * 0.025, col); }
+          barrel(c, aim, s, 0.05, 0.42, 0.1, GUNMETAL); flashAt(add(c, mul(fa(aim), 0.42 * s)), aim, s, fx.flash * 0.5); } },
+      { key: "F", name: "Vertical Launch Block", muzzle: 0, fixed: true, muzzles: [[0.15, -0.15], [0.15, 0.15], [-0.15, -0.15], [-0.15, 0.15]], theme: "A low armoured block of four vertical launch cells; hatches flip open and rockets pop straight up, then turn onto targets. It doesn't rotate.",
+        draw(c, aim, s, fx, t, col) { plate(c, rectPts(0.42, 0.42), DARK, 0, s, 1.1); plate(c, rectPts(0.36, 0.36), [0.36, 0.38, 0.32, 1], 0, s, 0.9);
+          [[0.15, -0.15], [0.15, 0.15], [-0.15, -0.15], [-0.15, 0.15]].forEach((q, i) => { const p = add(c, [q[0] * s, q[1] * s]); const open = firedBarrel(fx, i, 0.5);
+            plate(p, rectPts(0.11, 0.11), DARK, 0, s, 0.8); if (open > 0) { fill(p, rectPts(0.08, 0.08), [0.05, 0.05, 0.05, 1], 0, s); smokePuff(p, 1 - open, s, 0.6); } else fill(p, rectPts(0.08, 0.08), mix([0.3, 0.32, 0.28, 1], col, 0.15), 0, s); }); } },
     ],
     anims: [
       { key: "A", name: "Ripple Fire", desc: "Rockets leave the tubes one after another, each with its own puff of smoke, curving onto separate enemies.", period: 2.5, burst: 3, gap: 0.14, multi: true, flight: 0.8,
@@ -465,26 +502,35 @@ const TOWERS = [
       { key: "C", name: "Elevate and Fire", desc: "The launcher rocks up to elevate before each salvo, fires, then settles back down.", period: 2.5, burst: 3, gap: 0.1, multi: true, flight: 0.8,
         fx: (since, p) => ({ recoil: since < 0.6 ? Math.sin(since / 0.6 * Math.PI) : 0, flash: since < 0.3 ? 1 : 0 }),
         shot: (f, to, u, s, col, k) => rocketAt(f, to, u, s, col, k), impact: (to, v, s, col) => blast(to, v, s, col, 0.35) },
+      { key: "D", name: "Rapid Ripple", desc: "A long ripple of small, fast rockets, one tube after another, filling the air with smoke trails.", period: 2.5, burst: 6, gap: 0.08, multi: true, flight: 0.65,
+        fx: (since) => ({ recoil: since < 0.5 ? 0.3 : 0, flash: since < 0.5 ? 1 : 0 }), shot: (f, to, u, s, col, k) => rocketAt(f, to, u, s * 0.8, col, k), impact: (to, v, s, col) => blast(to, v, s, col, 0.25) },
+      { key: "E", name: "Twin Volley", desc: "Two quick pairs: two rockets, a beat, two more, each pair from opposite sides of the launcher.", period: 2.5, burst: 4, gap: 0.22, multi: true, flight: 0.8,
+        fx: (since) => ({ recoil: since < 0.7 ? 0.4 : 0, flash: since < 0.7 ? (fmod(since, 0.22) < 0.08 ? 1 : 0) : 0 }), shot: (f, to, u, s, col, k) => rocketAt(f, to, u, s, col, k), impact: (to, v, s, col) => blast(to, v, s, col, 0.35) },
+      { key: "F", name: "Pop-up Launch", desc: "Rockets pop straight up out of the launcher (their shadows shrink), then arc over and dive onto their targets.", period: 2.5, burst: 3, gap: 0.15, multi: true, flight: 1.0,
+        fx: (since) => ({ recoil: 0, flash: since < 0.5 ? 1 : 0 }),
+        shot: (f, to, u, s, col, k) => { const p = lerp(f, to, Math.max(0, (u - 0.25) / 0.75)), h = s * 1.4 * (u < 0.25 ? u / 0.25 : 1 - (u - 0.25) / 0.75);
+          ellipse(p, s * 0.06, s * 0.03, [0, 0, 0, 0.3]); const q = add(p, [0, -h]); disc(add(q, [0, s * 0.12]), s * 0.05, [0.7, 0.7, 0.7, 0.35]); fill(q, [[0.5, 0], [-0.5, 0.18], [-0.5, -0.18]], col, u < 0.25 ? -Math.PI / 2 : Math.atan2(to[1] - q[1], to[0] - q[0]), s * 0.18); },
+        impact: (to, v, s, col) => blast(to, v, s, col, 0.4) },
     ] },
 
   // 5. Anti-Aircraft Turret -----------------------------------------------------------------------------
   { id: "aa", num: 5, name: "Anti-Aircraft Turret", cls: "Assault", weapon: "Ballistic", hits: "air", color: [0.85, 1, 0.45, 1],
     desc: "A fully automatic anti-aircraft gun. \"We don't need a gun, or a nug!\" A direct-hit autocannon, air only.",
     looks: [
-      { key: "A", name: "Twin Autocannon", muzzle: 0.68, theme: "Twin long barrels on an open mount with a gunner's seat and ammo clips stacked on top.",
+      { key: "A", name: "Twin Autocannon", muzzle: 0.68, muzzles: [[0.68, 0.09], [0.68, -0.09]], theme: "Twin long barrels on an open mount with a gunner's seat and ammo clips stacked on top.",
         draw(c, aim, s, fx, t, col) { plate(c, ngon(8, 0.42), DARK, 0, s, 1); disc(c, s * 0.26, GUNMETAL); const r = fx.recoil * 0.06;
-          for (const off of [-0.09, 0.09]) barrel(c, aim, s, 0, 0.68 - (off > 0 ? r : 0), 0.055, STEEL, off);
+          [-0.09, 0.09].forEach((off, i) => barrel(c, aim, s, 0, 0.68 - firedBarrel(fx, i) * 0.06, 0.055, STEEL, off));
           plate(c, rectPts(0.18, 0.2), OLIVE, aim, s, 1); plate(add(c, mul(fa(aim), -s * 0.18)), rectPts(0.06, 0.08), [0.45, 0.4, 0.3, 1], aim, s, 0.7);
-          flashAt(add(add(c, mul(orth(fa(aim)), 0.09 * s)), mul(fa(aim), (0.68 - r) * s)), aim, s, fx.flash); } },
-      { key: "B", name: "Quad Mount", muzzle: 0.58, theme: "Four heavy machine guns on one swivel mount with a central sight; a wall of tracers.",
+          [-0.09, 0.09].forEach((off, i) => flashAt(add(add(c, mul(orth(fa(aim)), off * s)), mul(fa(aim), 0.68 * s)), aim, s, firedBarrel(fx, i, 0.08))); } },
+      { key: "B", name: "Quad Mount", muzzle: 0.58, muzzles: [[0.58, 0.22], [0.58, -0.1], [0.58, 0.1], [0.58, -0.22]], theme: "Four heavy machine guns on one swivel mount with a central sight; a wall of tracers.",
         draw(c, aim, s, fx, t, col) { plate(c, ngon(8, 0.4), DARK, Math.PI / 8, s, 1); plate(c, rectPts(0.18, 0.3), OLIVE, aim, s, 1.1);
-          for (const off of [-0.22, -0.1, 0.1, 0.22]) barrel(c, aim, s, -0.05, 0.58 - fx.recoil * 0.04, 0.045, GUNMETAL, off);
-          glowDot(add(c, mul(fa(aim), s * 0.1)), s * 0.035, A(col, 0.9)); flashAt(add(c, mul(fa(aim), 0.6 * s)), aim, s, fx.flash); } },
-      { key: "C", name: "Radar Gun", muzzle: 0.62, theme: "A boxy self-contained turret with two side-mounted autocannons and a spinning search radar on the back.",
+          [-0.22, 0.1, -0.1, 0.22].forEach((off, i) => barrel(c, aim, s, -0.05, 0.58 - firedBarrel(fx, i) * 0.05, 0.045, GUNMETAL, off));
+          glowDot(add(c, mul(fa(aim), s * 0.1)), s * 0.035, A(col, 0.9)); [-0.22, 0.1, -0.1, 0.22].forEach((off, i) => flashAt(add(add(c, mul(orth(fa(aim)), off * s)), mul(fa(aim), 0.6 * s)), aim, s, firedBarrel(fx, i, 0.08))); } },
+      { key: "C", name: "Radar Gun", muzzle: 0.62, muzzles: [[0.62, 0.27], [0.62, -0.27]], theme: "A boxy self-contained turret with two side-mounted autocannons and a spinning search radar on the back.",
         draw(c, aim, s, fx, t, col) { plate(c, rectPts(0.4, 0.4), DARK, 0, s, 1); plate(c, rectPts(0.26, 0.22), OLIVE, aim, s, 1.2);
-          for (const sg of [-1, 1]) barrel(c, aim, s, 0.1, 0.62 - fx.recoil * 0.05, 0.05, STEEL, sg * 0.27);
+          [-1, 1].forEach((sg, i) => barrel(c, aim, s, 0.1, 0.62 - firedBarrel(fx, i) * 0.05, 0.05, STEEL, sg * 0.27));
           const rp = add(c, mul(fa(aim), -s * 0.18)); line(add(rp, mul(fa(t * 4), s * 0.16)), add(rp, mul(fa(t * 4), -s * 0.16)), STEEL, s * 0.06); disc(rp, s * 0.04, col);
-          flashAt(add(add(c, mul(orth(fa(aim)), 0.27 * s)), mul(fa(aim), 0.62 * s)), aim, s, fx.flash); } },
+          [-1, 1].forEach((sg, i) => flashAt(add(add(c, mul(orth(fa(aim)), sg * 0.27 * s)), mul(fa(aim), 0.62 * s)), aim, s, firedBarrel(fx, i, 0.08))); } },
     ],
     anims: [
       { key: "A", name: "Skyward Bursts", desc: "Paired shots with flashes; each round bursts in a small black puff near the flyer.", period: 0.8, burst: 2, gap: 0.08, flight: 0.28,
@@ -497,10 +543,20 @@ const TOWERS = [
         fx: (since) => ({ recoil: decay(since, 0.15), flash: decay(since, 0.06) }),
         shot: (f, to, u, s, col, k) => { tracer(f, to, u, col, 2, 0.18); if (u < 0.3) disc(add(f, mul(orth(norm(sub(to, f))), s * (0.2 + u))), 1.5, [0.9, 0.75, 0.3, 1 - u * 3]); },
         impact: (to, v, s) => { if (v < 0.5) ring(to, s * (0.05 + v * 0.3), [1, 0.9, 0.6, 1 - v * 2], 1.5); } },
+      { key: "D", name: "Alternating Barrels", desc: "The two barrels fire in turn, left, right, left; each kicks back on its own shot.", period: 0.4, burst: 1, flight: 0.26,
+        fx: (since) => ({ recoil: decay(since, 0.1), flash: decay(since, 0.06) }), shot: (f, to, u, s, col) => tracer(f, to, u, col, 1.8, 0.22),
+        impact: (to, v, s) => { if (v < 0.6) disc(add(to, [0, -v * 3]), s * (0.06 + v * 0.14), [0.12, 0.12, 0.12, 0.6 * (1 - v)]); } },
+      { key: "E", name: "Flak Barrage", desc: "Bursts of four rounds that blossom into a cluster of black flak puffs around the flyer.", period: 1.2, burst: 4, gap: 0.07, flight: 0.3,
+        fx: (since) => ({ recoil: since < 0.3 ? 0.5 : 0, flash: since < 0.3 ? 1 : 0 }), shot: (f, to, u, s, col) => tracer(f, to, u, col, 1.6, 0.2),
+        impact: (to, v, s, col, k) => { for (let i = 0; i < 3; i++) { const q = add(to, mul(fa(i * 2.1 + 0.4), s * 0.22)); disc(add(q, [0, -v * 4]), s * (0.07 + v * 0.16), [0.1, 0.1, 0.1, 0.55 * (1 - v)]); } } },
+      { key: "F", name: "Lead the Target", desc: "A steady stream of tracers aimed ahead of the flyer that sweeps onto it, like real anti-aircraft fire.", period: 0.25, burst: 1, flight: 0.3,
+        fx: (since) => ({ recoil: decay(since, 0.08), flash: decay(since, 0.05) }),
+        shot: (f, to, u, s, col) => { const lead = add(to, [s * 0.6 * (1 - u), 0]); tracer(f, lead, u, col, 1.6, 0.25); },
+        impact: (to, v, s, col) => { if (v < 0.3) glowDot(to, s * 0.05, col); } },
     ] },
 ];
 
-const DEFAULTS = {};
+const DEFAULTS = { gun: { look: "A", anim: "A" }, mortar: { anim: "C" }, laser: { anim: "A" }, aa: { look: "A" } };
 
 // ---- Tower art engine: previews towers aiming and firing at enemies on a lane --------------------------
 // Data (defined before this): PAGE {title, key, store}, TOWERS [...], DEFAULTS {id: {look, anim}}.
@@ -562,29 +618,46 @@ function makeView(canvas, tw, getLook, getAnim, scale) {
     for (const e of inView) { const d = Math.hypot(e.p[0] - c[0], e.p[1] - c[1]); if (d < best) { best = d; tgt = e; } }
     if (tgt) {
       const want = Math.atan2(tgt.p[1] - c[1], tgt.p[0] - c[0]);
-      let d = fmod(want - v.aim + Math.PI, TAU) - Math.PI; v.aim += Math.max(-0.12, Math.min(0.12, d));
+      let d = fmod(want - v.aim + Math.PI, TAU) - Math.PI; const dt = Math.min(0.25, Math.max(0, t - (v.prevT || t))); const turn = 7 * dt; v.aim += Math.max(-turn, Math.min(turn, d));
       if (tgt.i !== v.lockId) { v.lockId = tgt.i; v.lockT = t; }
     }
+    v.prevT = t;
     const since = t - v.last;
-    if (tgt && !an.beam && since >= an.period && Math.abs(fmod(Math.atan2(tgt.p[1] - c[1], tgt.p[0] - c[0]) - v.aim + Math.PI, TAU) - Math.PI) < 0.35) {
+    const muzzles = look.muzzles || [[look.muzzle || 0.45, 0]];
+    const muzzleAt = (m, ang) => add(c, rot([muzzles[m % muzzles.length][0] * s, muzzles[m % muzzles.length][1] * s], look.fixed ? 0 : ang));
+    const aligned = tgt && Math.abs(fmod(Math.atan2(tgt.p[1] - c[1], tgt.p[0] - c[0]) - v.aim + Math.PI, TAU) - Math.PI) < (an.beam ? 0.15 : 0.35);
+    if (tgt && !an.beam && since >= an.period && aligned) {
       v.last = t; const n = an.burst || 1;
       for (let k = 0; k < n; k++) {
         const target = an.multi ? (inView[k % inView.length] || tgt) : tgt;
-        v.shots.push({ t0: t + k * (an.gap || 0), tid: target.i, to0: target.p.slice(), k });
+        v.shots.push({ t0: t + k * (an.gap || 0), tid: target.i, to0: target.p.slice(), k, m: (v.n = (v.n || 0) + 1) - 1 });
       }
     }
     pad(c, s);
     for (const e of others) drawEnemy(e, s);
     for (const e of ens) drawEnemy(e, s);
-    const fx = an.beam ? an.fx(tgt ? t - v.lockT : 0, an.period, !!tgt) : an.fx(t - v.last, an.period, !!tgt);
+    // Beams lock on first: a short acquisition (reticle on the target), then the beam fires.
+    const lockDelay = an.lock || 0, held = tgt ? t - v.lockT : 0, beamOn = an.beam && tgt && aligned && held >= lockDelay;
+    let fx;
+    if (an.beam) fx = an.fx(beamOn ? held - lockDelay : 0, an.period, !!beamOn);
+    else {
+      fx = an.fx(t - v.last, an.period, !!tgt);
+      const fired = v.shots.filter((sh) => t >= sh.t0); const lastShot = fired[fired.length - 1];
+      fx.barrel = lastShot ? lastShot.m % muzzles.length : -1; fx.barrelSince = lastShot ? t - lastShot.t0 : 9; fx.shots = lastShot ? lastShot.m + 1 : 0;
+    }
     look.draw(c, v.aim, s, fx, t, tw.color);
-    const muzzle = add(c, mul(fa(v.aim), (look.muzzle || 0.45) * s));
-    if (an.beam && tgt) an.shot(muzzle, tgt.p, t - v.lockT, s, tw.color, 0, t);
+    if (an.beam && tgt) {
+      if (beamOn) an.shot(muzzleAt(0, v.aim), tgt.p, held - lockDelay, s, tw.color, 0, t);
+      else { const q = Math.min(1, held / Math.max(0.01, lockDelay)), r0 = s * (0.35 - 0.18 * q), sp = t * 4;
+        line(muzzleAt(0, v.aim), tgt.p, A(tw.color, 0.25), 1);
+        for (let i = 0; i < 4; i++) { const a0 = sp + i * Math.PI / 2; arc(tgt.p, r0, a0, a0 + 0.7, A(tw.color, 0.5 + 0.5 * q), 2); } }
+    }
     v.shots = v.shots.filter((sh) => t - sh.t0 < an.flight + 0.6);
     for (const sh of v.shots) {
       const age = t - sh.t0; if (age < 0) continue;
+      if (!sh.from) sh.from = muzzleAt(sh.m, v.aim);
       const live = ens.find((e) => e.i === sh.tid); const to = live ? live.p : sh.to0;
-      if (age < an.flight) an.shot(add(c, mul(fa(v.aim), (look.muzzle || 0.45) * s)), to, age / an.flight, s, tw.color, sh.k, t);
+      if (age < an.flight) an.shot(sh.from, to, age / an.flight, s, tw.color, sh.k, t);
       else if (an.impact) an.impact(to, (age - an.flight) / 0.6, s, tw.color);
     }
     X.restore();

@@ -27,7 +27,7 @@ enemies on the lane and flyers overhead (air-only towers ignore the ground, and 
 
 | Page | Towers | File | Status |
 |---|---|---|---|
-| 1 | Gun Turret, Mortar Tower, Laser Tower, Rocket Salvo, Anti-Aircraft Turret | `design/tower_art_1.html` | Round 1: picks open |
+| 1 | Gun Turret, Mortar Tower, Laser Tower, Rocket Salvo, Anti-Aircraft Turret | `design/tower_art_1.html` | Round 2 |
 | 2 | Artillery Cannon, Railgun, Tesla Tower, Drone Bay, CAS Gunship | `design/tower_art_2.html` | Not started |
 | 3 | Mine Layer, Chemical Plant, Boost Tower, Radar Tower, Cryo Tower | `design/tower_art_3.html` | Not started |
 | 4 | Shockwave Generator, Scrapyard, Magneto Tower, Tractor Tower, Augmentation Tower | `design/tower_art_4.html` | Not started |
@@ -50,9 +50,29 @@ enemies on the lane and flyers overhead (air-only towers ignore the ground, and 
 | Rocket Salvo | Ripple Fire | Salvo Blast | Elevate and Fire |
 | Anti-Aircraft Turret | Skyward Bursts | Hosepipe | Track and Fire |
 
-**Picks:** to come (look, animation; notes).
+**Picks, round 1 (owner, 2026-10-16):**
+- **Gun Turret:** look **A Sandbag MG Nest**, animation **A Recoil Kick**. **Confirmed.**
+- **Mortar Tower:** animation **C Flash and Smoke**; look open, the owner asked for more designs.
+- **Laser Tower:** animation **A Ramp Glow**; look open, more designs. Owner: **the laser doesn't fire until the target
+  is locked on.** Every laser animation now locks on first: a reticle closes on the target over 0.6 s, then the beam
+  fires.
+- **Rocket Salvo:** look and animation open, more designs for both.
+- **Anti-Aircraft Turret:** look **A Twin Autocannon**; animation open, more designs. Owner: **bullets should come from
+  the barrel that fired them.** On every multi-barrel tower, each round now leaves its own barrel, and that barrel
+  flashes and kicks back.
+
+**Round 2** (on the same page, with the picks above preselected):
+- **Mortar looks:** D Twin-Tube Mortar (two tubes on a turntable, firing in turn), E Bunker Mortar (a concrete bunker
+  under a camouflage net, firing through the roof), F Heavy Siege Mortar (one fat-bored mortar behind a curved shield).
+- **Laser looks:** D Twin Emitters (two converging beams), E Crystal Core (a caged glowing crystal), F Military Laser Pod
+  (a boxy naval-style laser system with a sensor dome).
+- **Rocket looks:** D Truck Rack (a launcher truck's eight-tube rack), E Drum Launcher (a revolving drum behind one
+  barrel), F Vertical Launch Block (four cells that pop rockets straight up; doesn't rotate). **Animations:** D Rapid
+  Ripple, E Twin Volley, F Pop-up Launch.
+- **AA animations:** D Alternating Barrels, E Flak Barrage, F Lead the Target.
 
 ## Open questions
 
-1. **Page 1 picks.**
+1. **Page 1 picks:** Mortar look (A to F), Laser look (A to F), Rocket Salvo look and animation (A to F), AA animation
+   (A to F).
 2. Pages 2 to 4, then the second pass (per-path looks and Retrofit looks).
