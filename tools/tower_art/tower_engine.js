@@ -2,7 +2,9 @@
 // Data (defined before this): PAGE {title, key, store}, TOWERS [...], DEFAULTS {id: {look, anim}}.
 // A look: {key, name, theme, muzzle (tile units along the aim), draw(c, aim, s, fx, t, col)} where s = px per tile.
 // An animation: {key, name, desc, period, burst?, gap?, multi?, flight, beam?, fx(since, period) -> {recoil, flash, glow, spin},
-//   shot(from, to, u, s, col, k), impact(to, v, s, col)}.
+//   shot(from, to, u, s, col, k, t, info), impact(to, v, s, col, info)}. info = {ens (hittable enemies in reach), c, W, H, s, t, look, spot, orbit}.
+// A tower can set spot {x, y} (player-aimed at a fixed point, fractions of the view) or orbit {x, y, r (tiles), w (rad/s)}
+//   (an aircraft circling a point; the look draws it with plane(p, heading, s, fx, t, col, centre) and fires from its door).
 
 const STORE = PAGE.store;
 let state = {};
@@ -54,8 +56,15 @@ function makeView(canvas, tw, getLook, getAnim, scale) {
     const ens = enemiesAt(t, W, H, s).filter((e) => (tw.hits === "air" ? e.air : tw.hits === "ground" ? !e.air : true));
     const others = enemiesAt(t, W, H, s).filter((e) => !ens.includes(e));
     const inView = ens.filter((e) => e.p[0] > 10 && e.p[0] < W - 10);
+    // tw.spot: the player aims it at a fixed point (it ignores enemies). tw.orbit: an aircraft circles a designated
+    // point and fires at enemies near it.
+    const O = tw.orbit ? [W * tw.orbit.x, H * tw.orbit.y] : null;
+    const cands = O ? inView.filter((e) => Math.hypot(e.p[0] - O[0], e.p[1] - O[1]) < tw.orbit.r * s * 1.6) : inView;
     let tgt = null, best = 1e9;
-    for (const e of inView) { const d = Math.hypot(e.p[0] - c[0], e.p[1] - c[1]); if (d < best) { best = d; tgt = e; } }
+    if (tw.spot) tgt = { p: [W * tw.spot.x, H * tw.spot.y], i: -5 };
+    else for (const e of cands) { const ref = O || c, d = Math.hypot(e.p[0] - ref[0], e.p[1] - ref[1]); if (d < best) { best = d; tgt = e; } }
+    let pl = null;
+    if (O) { const a = t * (tw.orbit.w || 0.5), p = add(O, mul(fa(a), tw.orbit.r * s)); pl = { p, heading: a + Math.PI / 2, door: add(p, mul(norm(sub(O, p)), s * 0.14)) }; }
     if (tgt) {
       const want = Math.atan2(tgt.p[1] - c[1], tgt.p[0] - c[0]);
       let d = fmod(want - v.aim + Math.PI, TAU) - Math.PI; const dt = Math.min(0.25, Math.max(0, t - (v.prevT || t))); const turn = 7 * dt; v.aim += Math.max(-turn, Math.min(turn, d));
@@ -64,18 +73,21 @@ function makeView(canvas, tw, getLook, getAnim, scale) {
     v.prevT = t;
     const since = t - v.last;
     const muzzles = look.muzzles || [[look.muzzle || 0.45, 0]];
-    const muzzleAt = (m, ang) => add(c, rot([muzzles[m % muzzles.length][0] * s, muzzles[m % muzzles.length][1] * s], look.fixed ? 0 : ang));
-    const aligned = tgt && Math.abs(fmod(Math.atan2(tgt.p[1] - c[1], tgt.p[0] - c[0]) - v.aim + Math.PI, TAU) - Math.PI) < (an.beam ? 0.15 : 0.35);
+    const muzzleAt = (m, ang) => pl ? pl.door : add(c, rot([muzzles[m % muzzles.length][0] * s, muzzles[m % muzzles.length][1] * s], look.fixed ? 0 : ang));
+    const info = { ens: cands, c, W, H, s, t, look, spot: tgt && tgt.i === -5 ? tgt.p : null, orbit: O };
+    const aligned = tgt && (pl || Math.abs(fmod(Math.atan2(tgt.p[1] - c[1], tgt.p[0] - c[0]) - v.aim + Math.PI, TAU) - Math.PI) < (an.beam ? 0.15 : 0.35));
     if (tgt && !an.beam && since >= an.period && aligned) {
       v.last = t; const n = an.burst || 1;
       for (let k = 0; k < n; k++) {
-        const target = an.multi ? (inView[k % inView.length] || tgt) : tgt;
+        const target = an.multi ? (cands[k % cands.length] || tgt) : tgt;
         v.shots.push({ t0: t + k * (an.gap || 0), tid: target.i, to0: target.p.slice(), k, m: (v.n = (v.n || 0) + 1) - 1 });
       }
     }
     pad(c, s);
     for (const e of others) drawEnemy(e, s);
     for (const e of ens) drawEnemy(e, s);
+    if (info.spot) { const q = info.spot, pu = 0.5 + 0.5 * Math.sin(t * 4); ring(q, s * (0.28 + 0.04 * pu), A(tw.color, 0.55 + 0.3 * pu), 1.5);
+      for (let i = 0; i < 4; i++) { const d = fa(i * Math.PI / 2); line(add(q, mul(d, s * 0.16)), add(q, mul(d, s * 0.36)), A(tw.color, 0.8), 1.2); } }
     // Beams lock on first: a short acquisition (reticle on the target), then the beam fires.
     const lockDelay = an.lock || 0, held = tgt ? t - v.lockT : 0, beamOn = an.beam && tgt && aligned && held >= lockDelay;
     let fx;
@@ -85,7 +97,7 @@ function makeView(canvas, tw, getLook, getAnim, scale) {
       const fired = v.shots.filter((sh) => t >= sh.t0); const lastShot = fired[fired.length - 1];
       fx.barrel = lastShot ? lastShot.m % muzzles.length : -1; fx.barrelSince = lastShot ? t - lastShot.t0 : 9; fx.shots = lastShot ? lastShot.m + 1 : 0;
     }
-    look.draw(c, v.aim, s, fx, t, tw.color);
+    look.draw(c, v.aim, s, fx, t, tw.color, info);
     if (an.beam && tgt) {
       if (beamOn) an.shot(muzzleAt(0, v.aim), tgt.p, held - lockDelay, s, tw.color, 0, t);
       else { const q = Math.min(1, held / Math.max(0.01, lockDelay)), r0 = s * (0.35 - 0.18 * q), sp = t * 4;
@@ -97,9 +109,10 @@ function makeView(canvas, tw, getLook, getAnim, scale) {
       const age = t - sh.t0; if (age < 0) continue;
       if (!sh.from) sh.from = muzzleAt(sh.m, v.aim);
       const live = ens.find((e) => e.i === sh.tid); const to = live ? live.p : sh.to0;
-      if (age < an.flight) an.shot(sh.from, to, age / an.flight, s, tw.color, sh.k, t);
-      else if (an.impact) an.impact(to, (age - an.flight) / 0.6, s, tw.color);
+      if (age < an.flight) an.shot(sh.from, to, age / an.flight, s, tw.color, sh.k, t, info);
+      else if (an.impact) an.impact(to, (age - an.flight) / 0.6, s, tw.color, info);
     }
+    if (pl && look.plane) look.plane(pl.p, pl.heading, s, fx, t, tw.color, O);
     X.restore();
   };
   return v;

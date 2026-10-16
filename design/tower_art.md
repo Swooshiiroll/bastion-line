@@ -40,8 +40,8 @@ enemies on the lane and flyers overhead (air-only towers ignore the ground, and 
 
 | Page | Towers | File | Status |
 |---|---|---|---|
-| 1 | Gun Turret, Mortar Tower, Laser Tower, Rocket Salvo, Anti-Aircraft Turret | `design/tower_art_1.html` | Round 2: four towers picked; Rocket Salvo's three-pod change to confirm |
-| 2 | Artillery Cannon, Railgun, Tesla Tower, Drone Bay, CAS Gunship | `design/tower_art_2.html` | Not started |
+| 1 | Gun Turret, Mortar Tower, Laser Tower, Rocket Salvo, Anti-Aircraft Turret | `design/tower_art_1.html` | **Confirmed** (round 2) |
+| 2 | Artillery Cannon, Railgun, Tesla Tower, Drone Bay, CAS Gunship | `design/tower_art_2.html` | Round 1: picks open |
 | 3 | Mine Layer, Chemical Plant, Boost Tower, Radar Tower, Cryo Tower | `design/tower_art_3.html` | Not started |
 | 4 | Shockwave Generator, Scrapyard, Magneto Tower, Tractor Tower, Augmentation Tower | `design/tower_art_4.html` | Not started |
 
@@ -83,7 +83,44 @@ the tube mouths until a salvo leaves.
   fit the three pods; it's for the owner to confirm.
 - Everything else is preselected as picked.
 
+**Page 1 confirmed (owner, round 2):** Gun Turret C Rotary Gun / C Rapid Stream; Mortar Tower C Braced Siege Mortar /
+A High Lob; Laser Tower A Lance Emitter / A Steady Beam; Rocket Salvo C Triple Rail Pods / A Ripple Salvo (three
+rockets); Anti-Aircraft Turret C Heavy Flak Cannon / A Alternating Barrels.
+
+## Page 2, round 1 (towers 6-10)
+
+Colours: Railgun green, Tesla purple and Drone Bay green are today's colours for those towers; the **Artillery Cannon
+(blue)** and **CAS Gunship (pink)** have no in-game counterpart, so their colours are Claude's proposals. The Drone Bay's
+green sits close to the AA Turret's lime.
+
+The previews show each tower's own mechanic:
+- **Artillery Cannon:** it shells a marked spot and never tracks enemies.
+- **Railgun:** the slug pierces the line, and the hit flashes shrink with the damage falloff.
+- **Tesla Tower:** arcs jump from the target to 3 nearby enemies; the tower doesn't turn.
+- **Drone Bay:** one drone flies out, fights and comes home. The look sets the bay and the drone; the animation sets
+  how it fights.
+- **CAS Gunship:** the plane circles a designated point, drawn smaller than the real 90 px orbit, and side-fires its
+  gatling. The look sets the ground station and the plane.
+
+| Tower | Look A | Look B | Look C |
+|---|---|---|---|
+| Artillery Cannon | Field Gun | Casemate Howitzer | Long Tom |
+| Railgun | Twin-Rail Turret | Sealed Accelerator | Split Rails |
+| Tesla Tower | Disk Coil | Twin Toroid | Lattice Mast |
+| Drone Bay | Rotor Pad Hangar (quadcopter) | Jet Silo (delta jet) | Tilt-Rotor Hangar (tilt-rotor) |
+| CAS Gunship | Airfield Beacon + Four-Engine Gunship | Control Tower + Twin-Boom Gunship | Uplink Dish + Tilt-Wing Lifter |
+
+| Tower | Animation A | Animation B | Animation C |
+|---|---|---|---|
+| Artillery Cannon | Shell on the Mark | Muzzle Blast | Plunging Shell |
+| Railgun | Snap Shot | Hypersonic Slug | Ion Trail |
+| Tesla Tower | Chain Arc | Jumping Arc | Corona Burst |
+| Drone Bay | Hunt and Circle | Strafing Dives | Stand-off Hover |
+| CAS Gunship | Gatling Stream | Burst Sweeps | Brass Rain |
+
+**Picks:** to come.
+
 ## Open questions
 
-1. **Page 1, round 2:** confirm the Rocket Salvo's Triple Rail Pods and the three-rocket Ripple Salvo.
-2. Pages 2 to 4, then the second pass (per-path looks and Retrofit looks).
+1. **Page 2 picks** (round 1), including whether the proposed Artillery blue and CAS pink stand.
+2. Pages 3 and 4, then the second pass (per-path looks and Retrofit looks).
