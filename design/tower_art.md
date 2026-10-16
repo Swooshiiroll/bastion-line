@@ -13,14 +13,23 @@ the enemy art was (`design/enemy_art.md`). **Draft: no game code changes until t
 - **Scope:** the **base look**, the **firing animation**, the **per-path looks** (#6) and the **Retrofit looks**.
 - **Order:** **base look and firing animation first**; once those are picked, a second pass adds the per-path looks and
   the Retrofit looks on top of the chosen design.
-- **Style (changed 2026-10-16):** **sleek high-tech sci-fi**: smooth light armour shells, dark inset panels, glowing seams
-  and energy cores, hover bases. The **weapons stay as named** (bullets, shells, rockets, beams); only the hardware is
-  futuristic. The owner first chose "modern military with sci-fi touches", ran four rounds on page 1, then said "Scratch
-  everything and switch to more sci-fi designs": every page 1 pick and design was dropped (in git history).
-- **Kept from the military rounds (owner):** the **laser locks on before firing**, and **shots leave the barrel that fired
-  them**.
-- **Colour:** **per tower**: each tower has its own accent colour.
-- **No shared family look:** each tower is designed on its own (unlike the enemies' role families).
+- **Style (changed again 2026-10-16): like today's in-game towers.** The owner said "Make the coloring and underlying
+  design philosophy similar to what has already been made and start from scratch again", and chose **today's in-game
+  towers** (`scripts/view/Draw.gd`) as the reference: dark gunmetal armour lit from the upper left (bevelled plates,
+  rivets, shaded barrels and domes), the hex deck every tower stands on, and glowing accents in the tower's colour.
+  **Weapons stay as named** (bullets, shells, rockets, beams).
+- **History:** the owner first chose "modern military with sci-fi touches" (four rounds on page 1), then "sleek
+  high-tech sci-fi" (one round, picks made, round 2 never shipped); both were scrapped along with **every pick** (owner:
+  "Drop everything"). They're in git history.
+- **Kept rules (owner):** the **laser locks on before firing**, and **shots leave the barrel that fired them**. The
+  Rocket Salvo's launchers stay **horizontal** (the owner's last Rocket Salvo direction).
+- **No tier styling:** upgrade steps don't shift the style balance (owner: "No"; the enemy art's gritty-to-sleek tiers
+  don't carry over).
+- **Colour:** **per tower**: each tower has its own accent colour. Round 1 uses today's colour of its nearest in-game
+  tower: Gun Turret cyan (Pulse Turret), Mortar orange (Plasma Mortar), Laser red (Laser Lance), Rocket Salvo yellow
+  (Missile Battery), Anti-Aircraft lime (Flak Battery).
+- **No shared family look:** each tower is designed on its own (unlike the enemies' role families); the hex deck is
+  the game's common tower base, not a family look.
 - **Top-down**, like the game: a static base, and a turret that rotates to aim. (In the game, the animated parts go
   between `Draw.dyn(true)` and `dyn(false)`, and the rest is cached; see CLAUDE.md.)
 
@@ -31,32 +40,35 @@ enemies on the lane and flyers overhead (air-only towers ignore the ground, and 
 
 | Page | Towers | File | Status |
 |---|---|---|---|
-| 1 | Gun Turret, Mortar Tower, Laser Tower, Rocket Salvo, Anti-Aircraft Turret | `design/tower_art_1.html` | Sci-fi round 1: picks open |
+| 1 | Gun Turret, Mortar Tower, Laser Tower, Rocket Salvo, Anti-Aircraft Turret | `design/tower_art_1.html` | In-game style round 1: picks open |
 | 2 | Artillery Cannon, Railgun, Tesla Tower, Drone Bay, CAS Gunship | `design/tower_art_2.html` | Not started |
 | 3 | Mine Layer, Chemical Plant, Boost Tower, Radar Tower, Cryo Tower | `design/tower_art_3.html` | Not started |
 | 4 | Shockwave Generator, Scrapyard, Magneto Tower, Tractor Tower, Augmentation Tower | `design/tower_art_4.html` | Not started |
 
-## Page 1, sci-fi round 1 (towers 1-5)
+## Page 1, in-game style round 1 (towers 1-5)
 
 | Tower | Look A | Look B | Look C |
 |---|---|---|---|
-| Gun Turret | Capsule Sentry | Wedge Sentinel | Orb Gunner |
-| Mortar Tower | Iris Dome | Hover Mortar | Accelerator Cradle |
-| Laser Tower | Prism Head | Floating Focus Rings | Crystal Spire |
-| Rocket Salvo | Flush-Cell Wing | Floating Cell Array | Twin Nacelles |
-| Anti-Aircraft Turret | Twin-Barrel Pod | Quad Spinner | Tracker Dome |
+| Gun Turret | Shielded Gun Mount | Twin Gun Nest | Rotary Gun |
+| Mortar Tower | Turntable Mortar | Twin-Tube Mortar | Braced Siege Mortar |
+| Laser Tower | Lance Emitter | Twin-Prong Emitter | Focus Lens |
+| Rocket Salvo | Box Pod Launcher | Twin Side Pods | Quad Rail Pods |
+| Anti-Aircraft Turret | Twin Autocannon | Quad Flak Mount | Heavy Flak Cannon |
 
 | Tower | Animation A | Animation B | Animation C |
 |---|---|---|---|
-| Gun Turret | Slide Recoil | Heat Build | Burst Cycle |
-| Mortar Tower | Lob and Glow | Charge Sequence | Vent Plume |
-| Laser Tower | Ramp Glow | Pulse Train | Melt Sparks (all lock on first) |
-| Rocket Salvo | Ripple Launch | Full Salvo | Cover Slide |
-| Anti-Aircraft Turret | Alternating Barrels | Paired Bursts | Lead Stream |
+| Gun Turret | Single Shots | Three-Round Burst | Rapid Stream |
+| Mortar Tower | High Lob | Double Tap | Heavy Shell |
+| Laser Tower | Steady Beam | Pulse Beam | Ramp Burn (all lock on first) |
+| Rocket Salvo | Ripple Salvo | Full Volley | Heavy Rockets |
+| Anti-Aircraft Turret | Alternating Barrels | Flak Bursts | Lead Stream |
+
+Rockets are drawn like the game's loaded missiles (pale body, red nose) with smoke trails, and the loaded noses show in
+the tube mouths until a salvo leaves.
 
 **Picks:** to come.
 
 ## Open questions
 
-1. **Page 1 picks** (sci-fi round 1): every tower's look and animation.
+1. **Page 1 picks** (in-game style round 1): every tower's look and animation.
 2. Pages 2 to 4, then the second pass (per-path looks and Retrofit looks).
