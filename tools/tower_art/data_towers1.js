@@ -1,5 +1,5 @@
 // ---- Tower art page 1: towers 1-5 ------------------------------------------------------------------------
-const PAGE = { title: "Tower art page 1 (towers 1-5)", store: "bl-tower-art-1-v3" };
+const PAGE = { title: "Tower art page 1 (towers 1-5)", store: "bl-tower-art-1-v4" };
 
 // Shared effects (tile units scaled by s).
 const lerp = (a, b, u) => [a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u];
@@ -23,6 +23,13 @@ function sandbags(c, s, r, n) { for (let i = 0; i < n; i++) { const a = i * TAU 
 function firedBarrel(fx, i, len) { return fx.barrel === i && fx.barrelSince < (len || 0.12) ? 1 - fx.barrelSince / (len || 0.12) : 0; }
 function vcell(p, size, open, col, a) { plate(p, rectPts(size, size), DARK, a || 0, 1, 0.8); if (open > 0) { fill(p, rectPts(size * 0.75, size * 0.75), [0.04, 0.04, 0.05, 1], a || 0, 1); smokePuff(p, 1 - open, size * 6, 0.6); }
   else { fill(p, rectPts(size * 0.75, size * 0.75), [0.32, 0.34, 0.3, 1], a || 0, 1); disc(p, size * 0.35, mix([0.3, 0.32, 0.28, 1], col, 0.25)); } }
+function hpod(c, aim, s, x0, x1, half, lat, col, tubes, firedIdx, body) {
+  const o = mul(orth(fa(aim)), -lat * s), p0 = add(add(c, o), mul(fa(aim), x0 * s)), p1 = add(add(c, o), mul(fa(aim), x1 * s));
+  bar(p0, p1, half * 2 * s + 2, OUTLINE); bar(p0, p1, half * 2 * s, body || OLIVE);
+  for (let i = 1; i < 4; i++) { const q = lerp(p0, p1, i / 4); line(add(q, mul(orth(fa(aim)), half * s)), add(q, mul(orth(fa(aim)), -half * s)), dk(body || OLIVE, 0.35), 1.2); }
+  for (let j = 0; j < tubes; j++) { const y = tubes === 1 ? 0 : -half * 0.7 + (half * 1.4) * j / (tubes - 1); const q = add(p1, mul(orth(fa(aim)), -y * s));
+    disc(q, s * Math.min(0.04, half * 0.35), j === firedIdx ? mix(DARK, col, 0.8) : DARK); }
+}
 const OLIVE = [0.33, 0.37, 0.24, 1], GUNMETAL = [0.26, 0.28, 0.3, 1], STEEL = [0.42, 0.45, 0.48, 1], DARK = [0.13, 0.14, 0.15, 1];
 
 const TOWERS = [
@@ -181,6 +188,18 @@ const TOWERS = [
         draw(c, aim, s, fx, t, col) { disc(c, s * 0.44, OUTLINE); disc(c, s * 0.42, [0.38, 0.4, 0.36, 1]); ring(c, s * 0.42, DARK, 2);
           for (let i = 0; i < 8; i++) { const p = add(c, mul(fa(i * TAU / 8), s * 0.27)); vcell(p, s * 0.075, firedBarrel(fx, i, 0.5), col, i * TAU / 8); }
           disc(c, s * 0.1, DARK); line(c, add(c, mul(fa(t * 2), s * 0.09)), STEEL, 2); glowDot(c, s * 0.03, A(col, 0.9)); } },
+      { key: "J", name: "Quad Pod Cluster", muzzle: 0.42, muzzles: [[0.42, -0.13], [0.42, 0.13], [0.42, -0.13], [0.42, 0.13]], theme: "Four stubby honeycomb rocket pods clustered 2x2 on a compact turret, like helicopter rocket pods; they fire in a fast left-right ripple.",
+        draw(c, aim, s, fx, t, col) { plate(c, ngon(8, 0.42), DARK, Math.PI / 8, s, 1); disc(c, s * 0.2, GUNMETAL);
+          [-0.13, 0.13].forEach((lat, i) => { hpod(c, aim, s, -0.1, 0.42, 0.09, lat, col, 3, firedBarrel(fx, i, 0.15) > 0 ? 1 : -1); });
+          [-0.13, 0.13].forEach((lat) => { const q = add(add(c, mul(orth(fa(aim)), -lat * s)), mul(fa(aim), 0.1 * s)); ring(q, s * 0.09, dk(OLIVE, 0.4), 1); }); glowDot(add(c, mul(fa(aim), -s * 0.14)), s * 0.03, A(col, 0.9)); } },
+      { key: "K", name: "Side-Pod Turret", muzzle: 0.45, muzzles: [[0.45, -0.3], [0.45, 0.3]], theme: "A central gunner turret with a long horizontal launcher pod on each side arm, like an air-defence vehicle's turret; rockets leave the pods alternately.",
+        draw(c, aim, s, fx, t, col) { plate(c, ngon(10, 0.4), DARK, 0, s, 1); for (const lat of [-0.3, 0.3]) bar(c, add(c, mul(orth(fa(aim)), -lat * s)), s * 0.05, STEEL);
+          [-0.3, 0.3].forEach((lat, i) => hpod(c, aim, s, -0.25, 0.45, 0.08, lat, col, 4, firedBarrel(fx, i, 0.15) > 0 ? 1 : -1));
+          plate(c, ngon(8, 0.17, aim), OLIVE, 0, s, 1); plate(add(c, mul(fa(aim), s * 0.1)), rectPts(0.04, 0.08), [0.25, 0.4, 0.45, 1], aim, s, 0.6); } },
+      { key: "L", name: "Triple Stack Rack", muzzle: 0.48, muzzles: [[0.48, -0.17], [0.48, 0], [0.48, 0.17]], theme: "Three long horizontal pods stacked side by side on a heavy tilting cradle, with a blast deflector behind; the biggest horizontal launcher.",
+        draw(c, aim, s, fx, t, col) { plate(c, rectPts(0.44, 0.44), DARK, 0, s, 1); disc(c, s * 0.28, GUNMETAL);
+          plate(add(c, mul(fa(aim), -s * 0.32)), rectPts(0.05, 0.28), STEEL, aim, s, 0.9);
+          [-0.17, 0, 0.17].forEach((lat, i) => hpod(c, aim, s, -0.26, 0.48, 0.075, lat, col, 3, firedBarrel(fx, i, 0.15) > 0 ? 1 : -1, i === 1 ? lt(OLIVE, 0.08) : OLIVE)); } },
     ],
     anims: [
       { key: "A", name: "Ripple Fire", desc: "Rockets leave the tubes one after another, each with its own puff of smoke, curving onto separate enemies.", period: 2.5, burst: 3, gap: 0.14, multi: true, flight: 0.8,

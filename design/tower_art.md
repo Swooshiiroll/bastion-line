@@ -27,7 +27,7 @@ enemies on the lane and flyers overhead (air-only towers ignore the ground, and 
 
 | Page | Towers | File | Status |
 |---|---|---|---|
-| 1 | Gun Turret, Mortar Tower, Laser Tower, Rocket Salvo, Anti-Aircraft Turret | `design/tower_art_1.html` | Round 3: only the Rocket Salvo open |
+| 1 | Gun Turret, Mortar Tower, Laser Tower, Rocket Salvo, Anti-Aircraft Turret | `design/tower_art_1.html` | Round 4: only the Rocket Salvo open |
 | 2 | Artillery Cannon, Railgun, Tesla Tower, Drone Bay, CAS Gunship | `design/tower_art_2.html` | Not started |
 | 3 | Mine Layer, Chemical Plant, Boost Tower, Radar Tower, Cryo Tower | `design/tower_art_3.html` | Not started |
 | 4 | Shockwave Generator, Scrapyard, Magneto Tower, Tractor Tower, Augmentation Tower | `design/tower_art_4.html` | Not started |
@@ -81,7 +81,11 @@ enemies on the lane and flyers overhead (air-only towers ignore the ground, and 
 Pods (two upright cylindrical pods of three tubes, firing alternately), I Ring Silo (eight vertical cells in a ring
 around a sensor mast; doesn't rotate). They pair naturally with animation F Pop-up Launch.
 
+**Round 4** (owner: "Make more horizontal rocket pod designs"): Rocket Salvo looks J Quad Pod Cluster (four stubby
+honeycomb pods 2x2, like helicopter rocket pods), K Side-Pod Turret (a central turret with a long pod on each side arm,
+firing alternately), L Triple Stack Rack (three long pods side by side on a heavy tilting cradle).
+
 ## Open questions
 
-1. **Page 1 picks:** the Rocket Salvo's look (A to I) and animation (A to F).
+1. **Page 1 picks:** the Rocket Salvo's look (A to L) and animation (A to F).
 2. Pages 2 to 4, then the second pass (per-path looks and Retrofit looks).
