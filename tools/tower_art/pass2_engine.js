@@ -17,9 +17,9 @@ const optOf = (list, id) => list.find((o) => o.key === S2.picks[id]) || list[0];
 
 // The layers for path levels lv[] and Retrofit r (-1 none); `over` swaps one stage for a candidate option.
 function layersFor(lv, r, swap) {
-  const out = []; out.build = { lv: lv.slice(), r };
-  P2.paths.forEach((pa, pi) => { for (let k = 0; k < lv[pi]; k++) { const id = "p" + pi + "s" + k; out.push(swap && swap.id === id ? swap.opt : optOf(pa.steps[k].options, id)); } });
-  if (r >= 0) { const id = "r" + r; out.push(swap && swap.id === id ? swap.opt : optOf(P2.retrofits[r].options, id)); }
+  const out = [], keys = {}; out.build = { lv: lv.slice(), r, keys, key: (id) => keys[id] || "A" };
+  P2.paths.forEach((pa, pi) => { for (let k = 0; k < lv[pi]; k++) { const id = "p" + pi + "s" + k, o = swap && swap.id === id ? swap.opt : optOf(pa.steps[k].options, id); keys[id] = o.key; out.push(o); } });
+  if (r >= 0) { const id = "r" + r, o = swap && swap.id === id ? swap.opt : optOf(P2.retrofits[r].options, id); keys[id] = o.key; out.push(o); }
   return out;
 }
 const GOLD_C = [1, 0.78, 0.3, 1];
@@ -37,8 +37,9 @@ function compose(layers) {
   if (P2.muzzleAt) look.muzzleAt = (m, k, c, aim, s, info) => P2.muzzleAt(B, m, k, c, aim, s, info);
   const b = BASE_ANIM, every = crit > 0 ? Math.max(2, Math.round(1 / crit)) : 0;
   const anim = { ...b, key: b.key + targets, burst: (b.burst || 1) * targets, multi: targets > 1 || b.multi, gap: targets > 1 ? 0.02 : b.gap,
+    ...(md && md.period ? { period: md.period } : {}), ...(md && md.burst ? { burst: md.burst, gap: md.gap ?? b.gap, multi: md.multi ?? false } : {}),
     shot: (f, to, u, s, col, k, t, info) => { (shot || b.shot)(f, to, u, s, col, k, t, info); for (const L of layers) if (L.shotFx) L.shotFx(f, to, u, s, col, k, t, info); if (md && md.shotFx) md.shotFx(f, to, u, s, col, k, t, info); },
-    impact: (to, v, s, col, info) => { if (b.impact) b.impact(to, v, s, col, info); for (const L of layers) if (L.impactFx) L.impactFx(to, v, s, col, info);
+    impact: (to, v, s, col, info) => { if (md && md.impact) md.impact(to, v, s, col, info); else if (b.impact) b.impact(to, v, s, col, info); for (const L of layers) if (L.impactFx) L.impactFx(to, v, s, col, info);
       if (md && md.impactFx) md.impactFx(to, v, s, col, info);
       if (every && info && info.sh && info.sh.m % every === 0) critMark(to, v, s); } };
   return { look, anim };

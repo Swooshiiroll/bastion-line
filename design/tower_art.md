@@ -372,7 +372,8 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 
 | # | Tower | File | Status |
 |---|---|---|---|
-| 1 | Gun Turret | `design/tower_art_p2_01_gun.html` | Round 3: owner's changes applied; to confirm |
+| 1 | Gun Turret | `design/tower_art_p2_01_gun.html` | **Confirmed** (owner, 2026-10-17: "Gun turret finished") |
+| 2 | Mortar Tower | `design/tower_art_p2_02_mortar.html` | Round 1: picks open |
 
 ### Gun Turret (second pass)
 
@@ -420,6 +421,24 @@ paths work together.
   Every gun on the mount fires them. The Range path's long tracer lines and Incendiary's orange still apply to the
   trail.
 
+### Mortar Tower (second pass)
+
+**Round 1 (Claude):** drawn as one parametric model from the start, applying the Gun Turret's lessons:
+- **Options swap parts** instead of laying overlays over them. Longer tubes move the bores forward; Twin Tubes and the
+  Barrage Battery re-lay the mount with two or three narrower tubes.
+- **Every tube carries every detail:** Power's bands, breech and fuses, the Blast path's sleeves, bands and vanes,
+  Speed's sleeves and rings, and the Retrofit's sight.
+- **Each Power step changes the shells:**
+  - 1: a red band, a bigger shell or a hotter glow.
+  - 2: a steel nose, a copper rim or a red trail.
+  - 3: a dark AP shell with a yellow band.
+  - 4: fins, or a blinking delayed fuse.
+  - Mastery: gold drill tips, seismic rings or ground cracks.
+- **The Blast path grows the blast** (60 to 90 px). Cluster Shells add 4, 6, then 8 bomblets, or a mid-air dispenser.
+- **Smoke Shells:** every 4th shell flies grey and leaves smoke.
+- **Kit placement:** Power kit by the mount's left side, Blast kit on the right, Speed and Retrofit kit at the back.
+- **Muzzles:** the base Mortar's bore glow is kept, since only the Gun Turret's was removed. To confirm for the Mortar.
+
 ## Open questions
 
-1. **Second pass, Gun Turret** (round 3): confirm; then towers 2-20, one page each.
+1. **Second pass, Mortar Tower** (round 1): picks for 15 steps and 3 Retrofits, and whether its bore glow stays; then towers 3-20.
