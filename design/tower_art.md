@@ -376,7 +376,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 2 | Mortar Tower | `design/tower_art_p2_02_mortar.html` | **Confirmed** (owner, 2026-10-17: "Mortar finished"; its bore glow stays) |
 | 3 | Laser Tower | `design/tower_art_p2_03_laser.html` | **Confirmed** (owner, 2026-10-17: "Laser finished") |
 | 4 | Rocket Salvo | `design/tower_art_p2_04_rocket.html` | **Confirmed** (owner, 2026-10-17: "Rocket Salvo is done") |
-| 5 | Anti-Aircraft Turret | `design/tower_art_p2_05_aa.html` | Round 3: drum replaces the crate; Range step 3 open |
+| 5 | Anti-Aircraft Turret | `design/tower_art_p2_05_aa.html` | Round 4: Range step 3 Optical Director; awaiting confirm |
 
 ### Gun Turret (second pass)
 
@@ -584,6 +584,9 @@ options until it's picked.
 
 **Round 3:** the Ammo Drum replaces the ammo crate (owner: "Drum mag should replace the existing magazine").
 
+**Round 4:** Range step 3 (Sky Watch) is B, the Optical Director (owner: "I meant optical director"). With the
+director fitted, the mastery's gold radar moves to the other side of the deck so the two don't overlap.
+
 ## Open questions
 
-1. **Second pass, Anti-Aircraft Turret** (round 2): pick Range step 3 (Sky Watch); confirm. Then towers 6-20.
+1. **Second pass, Anti-Aircraft Turret** (round 4): confirm. Then towers 6-20 (next: Artillery Cannon).
