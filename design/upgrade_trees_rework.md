@@ -19,8 +19,8 @@ A basic rotating machine gun turret. "It's a machine gun, Private!"
 |---|---|---|---|---|---|---|
 | 1 | base | Gun Turret | 75 |  | 75 credits; 16 damage, 130 range, 1.2 shots/s (about 19 damage per second, close to the Pulse Turret's 18, in fewer, harder hits). Air and ground. | new |
 | 2 | r1 | Water-Cooled Barrel | 40 |  | Fire rate 1.2 to 1.5/s. | new |
-| 2 | r2 | AP Belt | 15 |  | Its rounds ignore 2 armour. | new |
-| 2 | r3 | Tracer Feed | 20 |  | +10 range, and every 5th round is a tracer that briefly reveals a cloaked enemy it hits. | new |
+| 2 | r2 | Shock Rounds | 5 |  | Every hit has a 5% chance to stun its target for 0.3 s. | new |
+| 2 | r3 | Incendiary Rounds | 25 |  | Hits set the target burning for 3 damage per second for 2 s. Proposed: a new hit refreshes the burn rather than stacking it, so it adds 3 damage per second to the current target. | new |
 | 3 | a | Heavier Rounds | 55 |  | +6 damage | new |
 | 4 | a | Hardened Tips | 40 |  | Its hits ignore 2 points of armour | new |
 | 5 | a | AP Rounds | 405 |  | Ignores 50% of armour; +6 damage | new |

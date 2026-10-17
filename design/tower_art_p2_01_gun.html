@@ -611,8 +611,13 @@ const NO_BOOT = true;
 // ---- Tower art second pass: Gun Turret (tower 1), on the confirmed base: look C Rotary Gun, animation C Rapid Stream --
 // Rotary Gun geometry (game px, x along the aim, y to the side): four barrels x 5..19 spinning at y ±3.4, shroud rings at
 // x 8 and 18, muzzle at x 20, drum magazine at (-1, 8.5) r 4.2, vent block at (-8, 0), hexagonal body r 6.8.
-const PAGE = { title: "Gun Turret: paths and Retrofits (second pass)", store: "bl-tower-art-p2-gun-v2" };
+const PAGE = { title: "Gun Turret: paths and Retrofits (second pass)", store: "bl-tower-art-p2-gun-v3" };
 const GOLD = [1, 0.78, 0.3, 1], RED_TIP = [1, 0.3, 0.25, 1], STEEL = [0.42, 0.45, 0.5, 1], COPPER = [0.78, 0.5, 0.28, 1];
+const SHOCK = [0.6, 0.85, 1, 1], FIRE = [1, 0.55, 0.2, 1];
+const rnd2 = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
+// A stunning hit (every 20th: 5%) crackles with small arcs on the target.
+function stunArcs(to, v, s, info) { if (!info || !info.sh || info.sh.m % 20 !== 0 || v >= 1) return; for (let i = 0; i < 4; i++) { const a = rnd2(i + Math.floor(v * 12)) * TAU, p = add(to, mul(fa(a), s * 0.16)); line(to, p, A(SHOCK, 1 - v), 1.4); } glowDot(to, s * 0.06 * (1 - v), SHOCK); }
+function flames(to, v, s) { if (v >= 1) return; for (let i = 0; i < 3; i++) { const q = fmod(v * 2 + i / 3, 1); disc(add(to, [(i - 1) * s * 0.05, -q * s * 0.18]), s * 0.035 * (1 - q), A(i % 2 ? FIRE : [1, 0.85, 0.3, 1], 1 - q)); } }
 const RC = (fx) => fx.recoil * 1.5; // the cluster's recoil, as the base draws it
 const spinOf = (fx, t) => t * (fx.recoil > 0 || fx.flash > 0 ? 30 : 3);
 // A small rotary cluster (n barrels) at lateral y0, from x0 to x1.
@@ -777,24 +782,28 @@ const P2 = {
       { key: "C", name: "Radiator Shroud", desc: "A finned radiator plate over the cluster with blue coolant lines glowing through it.",
         over: (c, aim, s, fx) => { const k = G(s), r = RC(fx); plate(P(c, aim, k, 12 - r, 0), rectPts(4, 4.4), METAL_L, aim, k, 1); for (let x = 9; x <= 15; x += 1.5) line(P(c, aim, k, x - r, -3.6), P(c, aim, k, x - r, 3.6), [0.4, 0.75, 1, 0.8], 0.8 * k); vapour(P(c, aim, k, 20, 0), fx, s); } },
     ] },
-    { name: "AP Belt", cost: 15, effect: "Rounds ignore 2 armour", options: [
-      { key: "A", name: "Striped Belt", desc: "A belt of yellow-and-black striped AP rounds runs from the drum into the breech.",
-        over: (c, aim, s, fx, t) => { const k = G(s); beltLine(P(c, aim, k, -1, 5), P(c, aim, k, 4, 2), k, 4, [1, 0.85, 0.2, 1], t); } },
-      { key: "B", name: "Striped Drum", desc: "The drum is repainted with yellow-and-black AP hazard stripes.",
-        over: (c, aim, s) => { const k = G(s), d = P(c, aim, k, -1, 8.5); for (let i = 0; i < 8; i++) arc(d, 3.4 * k, i * TAU / 8, i * TAU / 8 + TAU / 16, i % 2 ? [0.08, 0.08, 0.08, 1] : [1, 0.85, 0.2, 1], 1.6 * k); } },
-      { key: "C", name: "AP Box", desc: "A second, striped AP ammo box clipped to the back of the drum.",
-        over: (c, aim, s) => { const k = G(s); plate(P(c, aim, k, -6, 8.5), rectPts(2.4, 2.6), AMMO, aim, k, 1); hazard(c, aim, k, -8, -4, 11.4, [1, 0.85, 0.2, 1], 1); } },
+    { name: "Shock Rounds", cost: 5, effect: "Every hit has a 5% chance to stun for 0.3 s", options: [
+      { key: "A", name: "Coil Wraps", desc: "Blue-white shock coils wrap the barrel cluster; a stunning hit crackles with arcs on the target.",
+        over: (c, aim, s, fx, t) => { const k = G(s), r = RC(fx); for (let x = 10; x <= 16; x += 1.5) { line(P(c, aim, k, x - r, -4.8), P(c, aim, k, x + 0.7 - r, 4.8), [0.35, 0.45, 0.6, 1], 1 * k); } glowDot(P(c, aim, k, 13 - r, 0), 0.8 * k, A(SHOCK, 0.5 + 0.5 * Math.sin(t * 9))); },
+        impactFx: (to, v, s, col, info) => stunArcs(to, v, s, info) },
+      { key: "B", name: "Capacitor Pack", desc: "A capacitor pack on the back of the turret with charge lights; a stunning hit throws a blue ring round the target.",
+        over: (c, aim, s, fx, t) => { const k = G(s), p = P(c, aim, k, -11, 0); plate(p, rectPts(2.4, 5), METAL, aim, k, 1); for (let i = 0; i < 3; i++) disc(P(c, aim, k, -11, -3 + i * 3), 0.7 * k, A(SHOCK, fmod(t * 2 - i * 0.3, 1) < 0.5 ? 0.95 : 0.3)); },
+        impactFx: (to, v, s, col, info) => { stunArcs(to, v, s, info); if (info && info.sh && info.sh.m % 20 === 0 && v < 1) ring(to, s * (0.15 + 0.3 * v), A(SHOCK, 1 - v), 1.6); } },
+      { key: "C", name: "Arc Prongs", desc: "Two prongs at the muzzle with a spark jumping between them; stunning hits crackle.",
+        over: (c, aim, s, fx, t) => { const k = G(s), r = RC(fx); for (const y of [-4.2, 4.2]) bar(P(c, aim, k, 17 - r, y), P(c, aim, k, 22 - r, y * 0.75), 1 * k, METAL_L);
+          const pts = [P(c, aim, k, 22 - r, -3.1)]; for (let i = 1; i < 4; i++) pts.push(P(c, aim, k, 22 + (rnd2(Math.floor(t * 20) + i) - 0.5) * 1.6 - r, -3.1 + i * 1.55)); pts.push(P(c, aim, k, 22 - r, 3.1)); polyline(pts, A(SHOCK, 0.9), 0.8 * k); },
+        impactFx: (to, v, s, col, info) => stunArcs(to, v, s, info) },
     ] },
-    { name: "Tracer Feed", cost: 20, effect: "+10 range; every 5th round is a tracer that briefly reveals a cloaked enemy it hits", options: [
-      { key: "A", name: "Red-Tip Belt", desc: "Red-tipped rounds in the feed; every 5th shot is a long red tracer.",
-        over: (c, aim, s, fx, t) => { const k = G(s); beltLine(P(c, aim, k, -1, 5), P(c, aim, k, 4, 2), k, 4, RED_TIP, t); },
-        shotFx: (f, to, u, s, col, k, t, info) => { if (info && info.sh && info.sh.m % 5 === 0) longTracer(f, to, u, RED_TIP, 1.6); } },
-      { key: "B", name: "Tracer Canister", desc: "A small red tracer canister clipped to the body; every 5th shot is a long red tracer.",
-        over: (c, aim, s) => { const k = G(s); bar(P(c, aim, k, -6, -5), P(c, aim, k, -2, -5), 2.6 * k, [0.7, 0.2, 0.18, 1]); },
-        shotFx: (f, to, u, s, col, k, t, info) => { if (info && info.sh && info.sh.m % 5 === 0) longTracer(f, to, u, RED_TIP, 1.6); } },
-      { key: "C", name: "Glowing Feed", desc: "The feed chute glows red as tracers pass; every 5th shot is a long red tracer.",
-        over: (c, aim, s, fx, t) => { const k = G(s); line(P(c, aim, k, -1, 5), P(c, aim, k, 4, 2), [1, 0.3, 0.25, 0.5 + 0.5 * Math.sin(t * 10)], 1.6 * k); },
-        shotFx: (f, to, u, s, col, k, t, info) => { if (info && info.sh && info.sh.m % 5 === 0) longTracer(f, to, u, RED_TIP, 1.6); } },
+    { name: "Incendiary Rounds", cost: 25, effect: "Hits burn the target for 3 damage/s for 2 s (refreshes, proposed)", options: [
+      { key: "A", name: "Fuel Canister", desc: "A red fuel canister feeds the breech; rounds fly as orange tracers and the target flickers with flame.",
+        over: (c, aim, s) => { const k = G(s); bar(P(c, aim, k, -7, -6), P(c, aim, k, -2, -6), 3 * k, [0.7, 0.18, 0.12, 1]); line(P(c, aim, k, -2, -6), P(c, aim, k, 4, -2), [0.5, 0.2, 0.12, 1], 1.2 * k); },
+        shot: (f, to, u, s) => tracer(f, to, u, FIRE, 1.6, 0.3), impactFx: (to, v, s) => flames(to, v, s) },
+      { key: "B", name: "Igniter Muzzle", desc: "An igniter ring round the muzzle with a small pilot flame; orange tracers, burning targets.",
+        over: (c, aim, s, fx, t) => { const k = G(s), r = RC(fx), p = P(c, aim, k, 19.5 - r, 0); ring(p, 4.2 * k, OUTLINE, 2.4 * k); ring(p, 4.2 * k, [0.45, 0.3, 0.22, 1], 1.4 * k); glowDot(P(c, aim, k, 19.5 - r, -4.4), (0.7 + 0.3 * Math.sin(t * 13)) * k, FIRE); },
+        shot: (f, to, u, s) => tracer(f, to, u, FIRE, 1.6, 0.3), impactFx: (to, v, s) => flames(to, v, s) },
+      { key: "C", name: "Napalm Drum", desc: "The drum is swapped for an orange hazard-striped incendiary drum; rounds glow orange and targets burn.",
+        over: (c, aim, s) => { const k = G(s), dr = P(c, aim, k, -1, 8.5); orb(dr, 4.4 * k, [0.75, 0.38, 0.12, 1]); for (let i = 0; i < 8; i++) arc(dr, 3 * k, i * TAU / 8, i * TAU / 8 + TAU / 16, i % 2 ? [0.08, 0.08, 0.08, 1] : [1, 0.75, 0.2, 1], 1.2 * k); },
+        shot: (f, to, u, s) => tracer(f, to, u, FIRE, 1.6, 0.3), impactFx: (to, v, s) => flames(to, v, s) },
     ] },
   ],
 };

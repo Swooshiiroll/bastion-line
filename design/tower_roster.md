@@ -25,7 +25,7 @@ All 20 towers are designed and confirmed by the owner (2026-10-15). Costs are bu
 
 | # | Tower | Class | Weapon type | Cost | Paths | Retrofit options |
 |---|---|---|---|---|---|---|
-| 1 | Gun Turret | Assault | Ballistic | 75 | Power / Range/Visibility / Multi-Target | Water-Cooled Barrel / AP Belt / Tracer Feed |
+| 1 | Gun Turret | Assault | Ballistic | 75 | Power / Range/Visibility / Multi-Target | Water-Cooled Barrel / Shock Rounds / Incendiary Rounds |
 | 2 | Mortar Tower | Assault | Explosive | 150 | Power/Penetration / Speed/Range / Blast Radius/Multi-Target | Field Kit / Bunker Sight / Smoke Shells |
 | 3 | Laser Tower | Assault | Energy | 250 | Power / Multi-Target / Range/Targeting | Capacitor Bank / Heat Sinks / Focusing Lens |
 | 4 | Rocket Salvo | Assault | Explosive | 200 | Power / Range/Target Acquisition / Reload/Payload | Guidance Fins / Autoloader / Long Booster |
@@ -74,12 +74,16 @@ balance probe.
 **Stock (owner, 2026-10-15):** **75 credits**; **16 damage, 130 range, 1.2 shots/s** (about 19 damage per second, close
 to the Pulse Turret's 18, in fewer, harder hits). Air and ground.
 
-**Retrofit (the player picks one; owner, 2026-10-15):**
+**Retrofit (the player picks one; owner, 2026-10-15; options 2 and 3 replaced 2026-10-16):**
 - **Water-Cooled Barrel, 40:** fire rate 1.2 to 1.5/s. Look: a thick cooling jacket around the barrel, with a small
   vapour wisp when it fires.
-- **AP Belt, 15:** its rounds ignore 2 armour. Look: a striped ammo belt.
-- **Tracer Feed, 20:** +10 range, and every 5th round is a tracer that briefly reveals a cloaked enemy it hits. Look:
-  red-tipped rounds in the feed.
+- **Shock Rounds, 5 (formula; owner, 2026-10-16):** every hit has a 5% chance to stun its target for 0.3 s. Look: coils
+  round the barrels; a stunning hit crackles. Replaces the **AP Belt**, which duplicated Power step 2 (Hardened Tips).
+  The formula prices it very low: the stun is up about 2% of the time on a target.
+- **Incendiary Rounds, 25 (formula; owner, 2026-10-16):** hits set the target burning for 3 damage per second for 2 s.
+  Proposed: a new hit refreshes the burn rather than stacking it, so it adds 3 damage per second to the current
+  target. Look: rounds glow orange from a fuel feed; burning enemies flicker with flame. Replaces the **Tracer Feed**,
+  which overlapped Range/Visibility step 2 (Tracer Rounds).
 
 **Path 1, Power (armour-piercing):**
 
