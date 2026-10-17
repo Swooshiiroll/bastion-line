@@ -373,7 +373,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | # | Tower | File | Status |
 |---|---|---|---|
 | 1 | Gun Turret | `design/tower_art_p2_01_gun.html` | **Confirmed** (owner, 2026-10-17: "Gun turret finished") |
-| 2 | Mortar Tower | `design/tower_art_p2_02_mortar.html` | Round 1: picks open |
+| 2 | Mortar Tower | `design/tower_art_p2_02_mortar.html` | Round 2: picks and notes applied; to confirm |
 
 ### Gun Turret (second pass)
 
@@ -458,6 +458,24 @@ paths work together.
   - the mouth shrinks again so its rim lines up with the tube's sides (owner: "the muzzle is still slightly oversized").
   - the owner briefly reverted to the original tube, then undid that ("nevermind"): this angled version stands.
 
+**Picks (owner, round 1):**
+- **Power:** 1 B Reinforced Collar, 2 A Pointed Shells, 3 C AP Rack, 4 A Fuse Timer, M B Gold Bore Rings.
+- **Speed/Range:** 1 C Ready Rack, 2 A Longer Tubes, 3 C Twin Cradle, 4 A Even Longer, M B Triangle Cluster.
+- **Blast:** 1 B Fat Shells, 2 B Fragmentation Sleeves, 3 B Bomblet Rack, 4 B Second Rack, M A Gold Canisters.
+- **Retrofits:** Field Kit C Field Crate, Bunker Sight B Seismic Probe, Smoke Shells (none picked; see the note).
+
+**Round 2 (Claude, from the owner's notes):**
+- **Only the barrel turns.** The legs, the mount plate and the recoil spade are gone. Every rack, the crate and the probe
+  sit in fixed spots on the deck. The twin cradle and the tube kit turn with the tubes. The spade's removal is Claude's
+  reading of "the only thing that should move is the mortar barrel".
+- **Racks show the current shells.** Power restyles the shells in any rack on the tower (the Ready Rack, the Field Kit's
+  crate) instead of adding racks (x/1/0). Power's own rack appears only when there's no other.
+- **Speed's mastery gets gold muzzle rims**, as Power's mastery does.
+- **Blast's mastery turns the shells gold**, in flight and in the racks.
+- **Smoke Shells:** from the note, every shell (in flight and in the racks) carries the grey smoke band; every 4th
+  leaves a cloud.
+- **To confirm:** with the mount gone the barrel stands bare on the deck. Should there be a fixed pivot hub under it?
+
 ## Open questions
 
-1. **Second pass, Mortar Tower** (round 1): picks for 15 steps and 3 Retrofits, and whether its bore glow stays; then towers 3-20.
+1. **Second pass, Mortar Tower** (round 2): confirm; whether a fixed pivot hub goes under the barrel; whether its bore glow stays. Then towers 3-20.

@@ -65,7 +65,7 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Tower rework · Tower art · second pass · tower 2 of 20 · round 1</div>
+    <div class="eyebrow">Bastion Line · Tower rework · Tower art · second pass · tower 2 of 20 · round 2</div>
     <h1>Tower art: Mortar Tower paths and Retrofits</h1>
     <p class="note">Second pass for one tower: <b>every upgrade step and mastery</b> on each path, and each <b>Retrofit</b>, adds or changes a detail on the confirmed model. Each card shows the model with that path's earlier steps (your picks, or option A until you pick) plus the candidate. Pick one of three per step, add notes per path, then <b>Copy picks and notes</b>.</p>
     <ul class="rules">
@@ -614,7 +614,7 @@ const NO_BOOT = true;
 // carries the other paths' details and the Retrofit's; each Power step changes the shells.
 // Geometry (game px, x along the aim, y to the side): tube from x -1 to its bore at x 9, 11 wide; bore r 6.8; four
 // braced legs on the diagonals (r 15); recoil spade at x -10; octagonal mount r 8.5.
-const PAGE = { title: "Mortar Tower: paths and Retrofits (second pass)", store: "bl-tower-art-p2-mortar-r1h" };
+const PAGE = { title: "Mortar Tower: paths and Retrofits (second pass)", store: "bl-tower-art-p2-mortar-r2" };
 const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], COPPER = [0.78, 0.5, 0.28, 1], RED = [0.85, 0.2, 0.18, 1];
 const DARKSHELL = [0.2, 0.2, 0.22, 1], YEL = [1, 0.85, 0.2, 1], SMOKE = [0.6, 0.62, 0.64, 1], SAND = [0.62, 0.55, 0.4, 1];
 const rnd2 = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
@@ -639,7 +639,7 @@ function mortarShell(f, to, u, s, col, B, info) { const k = G(s), arcH = (h) => 
   const z = (P1 === "B" ? 1.2 : 1) * (X1 === "B" ? 1.2 : 1), r = 2.6 * k * z;
   ellipse(p0, 3 * k * z, 1.5 * k * z, [0, 0, 0, 0.3]);
   if (P2s === "C") for (let i = 4; i >= 1; i--) { const v = Math.max(0, u - i * 0.03); disc(add(lerp(f, to, v), [0, -arcH(v)]), (0.8 + i * 0.3) * k, A(RED, 0.4 - 0.08 * i)); }
-  const body = smoky ? SMOKE : P3 ? DARKSHELL : METAL_L;
+  const body = B.lv[2] >= 5 ? GOLD : smoky ? SMOKE : P3 ? DARKSHELL : METAL_L;
   if (P4 === "B" || PM) for (const sg of [-1, 1]) fill(p, [[-0.6, sg * 0.8], [-1.8, sg * 1.8], [-1.8, sg * 0.8]].map((q) => mul(q, z)), STEEL, dir, k);
   if (P2s === "A" || PM === "A") fill(add(p, mul(d, r * 0.7)), [[1.6, 0], [0, 1], [0, -1]].map((q) => mul(q, z)), PM === "A" ? GOLD : STEEL, dir, k);
   orb(p, r, body);
@@ -647,6 +647,7 @@ function mortarShell(f, to, u, s, col, B, info) { const k = G(s), arcH = (h) => 
   if (P2s === "B") ring(p, r * 0.95, COPPER, 0.8 * k);
   if (P3) line(add(p, mul(orth(d), r * 0.9)), add(p, mul(orth(d), -r * 0.9)), smoky ? [0.4, 0.4, 0.4, 1] : YEL, 0.9 * k);
   if (PM) ring(p, r * 0.55, GOLD, 0.8 * k);
+  if (B.r === 2) ring(p, r * 0.85, [0.42, 0.42, 0.44, 1], 0.9 * k); // the smoke-shell band on every shell
   if (X2 === "B") for (let i = 0; i < 3; i++) line(add(p, mul(fa(i * 1.05 + 0.5), r * 0.3)), add(p, mul(fa(i * 1.05 + 0.5), r * 0.95)), [0, 0, 0, 0.45], 0.6 * k);
   if (X3 === "A") line(add(p, mul(d, -r)), add(p, mul(d, r)), [0, 0, 0, 0.5], 0.7 * k);
   const blink = P4 === "A" || P4 === "C" ? fmod(u * 8, 1) < 0.5 : true;
@@ -669,8 +670,8 @@ function mortarImpact(to, v, s, col, info, B) { const k = G(s), size = 0.45 * BL
   if (B.r === 2 && info && info.sh && info.sh.m % 4 === 0) for (let i = 0; i < 5; i++) disc(add(to, mul(fa(i * 1.3), s * 0.18 * Math.min(1, v * 3))), s * (0.14 + 0.06 * Math.sin(i)), A(SMOKE, 0.45 * (1 - v * 0.6))); }
 
 // ---- The model ---------------------------------------------------------------------------------------------------
-function rack(c, aim, k, x, y, n, shellCol, band, vertical) { plate(P(c, aim, k, x, y), rectPts(vertical ? 1.8 : n * 1.6 + 0.6, vertical ? n * 1.6 + 0.6 : 1.8), METAL_D, aim, k, 0.9);
-  for (let i = 0; i < n; i++) { const q = vertical ? P(c, aim, k, x, y + (i - (n - 1) / 2) * 3) : P(c, aim, k, x + (i - (n - 1) / 2) * 3, y); orb(q, 1.3 * k, shellCol); if (band) disc(q, 0.5 * k, band); } }
+function rack(c, aim, k, x, y, n, shellCol, band, vertical, nose) { plate(P(c, aim, k, x, y), rectPts(vertical ? 1.8 : n * 1.6 + 0.6, vertical ? n * 1.6 + 0.6 : 1.8), METAL_D, aim, k, 0.9);
+  for (let i = 0; i < n; i++) { const q = vertical ? P(c, aim, k, x, y + (i - (n - 1) / 2) * 3) : P(c, aim, k, x + (i - (n - 1) / 2) * 3, y); orb(q, 1.3 * k, shellCol); if (band) ring(q, 0.8 * k, band, 0.7 * k); if (nose) disc(add(q, [0.5 * k, -0.5 * k]), 0.55 * k, [0.66, 0.69, 0.74, 1]); } }
 // The mouth of an angled tube seen from above: an ellipse squashed along the aim (the opening faces up and forward).
 function ell(p, rx, ry, a, col, w) { X.strokeStyle = css(col); X.lineWidth = w; X.beginPath(); X.ellipse(p[0], p[1], Math.max(0.1, rx), Math.max(0.1, ry), a, 0, TAU); X.stroke(); }
 const MOUTH = 0.85, RX = 1.4; // RX widens the mouth along the aim, near round like the original // mouth size relative to the old round bore, so the rim sits just outside the tube's sides
@@ -678,7 +679,7 @@ function bore(p, k, f0, col, fx, B, flash, aim) { const f = f0 * MOUTH; const PM
   oval(p, 3.9 * RX * k * f, 6.9 * k * f, aim, METAL_L, 1.2); oval(add(p, mul(LIGHT, 0.4 * k)), 3.5 * k * f, 6.2 * k * f, aim, lt(METAL_L, 0.12));
   if (X1 === "A") ell(p, 3.6 * RX * k * f, 6.4 * k * f, aim, STEEL, 1.6 * k);
   if (S2 === "C") for (let i = 0; i < 8; i++) { const an = i * TAU / 8, q0 = add(p, rot([Math.cos(an) * 2.7 * RX * k * f, Math.sin(an) * 4.6 * k * f], aim)), q1 = add(p, rot([Math.cos(an) * 3.6 * RX * k * f, Math.sin(an) * 6.3 * k * f], aim)); line(q0, q1, [0, 0, 0, 0.5], 1 * k); }
-  if (PM === "B") ell(p, 3.5 * RX * k * f, 6.1 * k * f, aim, GOLD, 1.2 * k);
+  if (PM === "B" || B.lv[1] >= 5) ell(p, 3.5 * RX * k * f, 6.1 * k * f, aim, GOLD, 1.2 * k);
   oval(p, 2.6 * RX * k * f, 4.5 * k * f, aim, BORE); if (P2s === "B") ell(p, 2.3 * RX * k * f, 3.9 * k * f, aim, COPPER, 0.9 * k);
   oval(p, 1.9 * RX * k * f, 3.3 * k * f, aim, A(col, 0.25 + 0.75 * flash)); if (flash > 0) glowDot(p, 3.2 * k * f * flash, col); }
 // The tube, as the original draws it: one shaded barrel with a rounded back end (bar), plus trunnion pins and a slight
@@ -701,42 +702,19 @@ const P2 = {
   model(c, aim, s, fx, t, col, info, B) {
     const k = G(s), T = tubesOf(B), n = T.pos.length, L = tubeLen(B), f = T.w / 11, last = ((fx.shots || 1) - 1) % n;
     deck(c, k, col, t);
-    // Field Kit: a sandbag ring or a steel baseplate under the mount.
-    if (B.r === 0 && B.key("r0") === "A") for (let i = 0; i < 14; i++) { const q = add(c, mul(fa(i * TAU / 14), 17 * k)); shadedOval(q, 2.8 * k, 1.7 * k, i * TAU / 14 + Math.PI / 2, SAND); }
-    if (B.r === 0 && B.key("r0") === "B") plate(c, rectPts(15, 15), STEEL, aim, k, 1.2);
+    // Only the barrel turns (owner, round 2): no legs, mount plate or recoil spade; the kit sits in fixed spots.
     for (let i = 0; i < n; i++) { const [x, y] = tubeAt(T, i, fx.shots); tubeShadow(c, aim, k, x, y, L, 11 * f); }
-    // Legs, foot pads and the recoil spade (with the Ready Rack on it).
-    for (let i = 0; i < 4; i++) { const a = Math.PI / 4 + i * Math.PI / 2, ft = P(c, aim, k, Math.cos(a) * 15, Math.sin(a) * 15);
-      bar(P(c, aim, k, Math.cos(a) * 6, Math.sin(a) * 6), ft, 3 * k, lt(METAL_D, 0.12)); bar(P(c, aim, k, Math.cos(a) * 7, Math.sin(a) * 7), P(c, aim, k, Math.cos(a) * 11, Math.sin(a) * 11), 1.3 * k, METAL_L);
-      plate(ft, rectPts(2, 2), METAL_L, aim, k, 0.9);
-      if (Kp(B, 1, 3) === "C") for (const tp of T.pos) bar(P(c, aim, k, tp[0] + 4, tp[1]), P(c, aim, k, Math.cos(a) * 9, Math.sin(a) * 9), 0.9 * k, STEEL); }
-    plate(P(c, aim, k, -10, 0), [[1.5, -5], [1.5, 5], [-1.5, 4], [-1.5, -4]], METAL_L, aim, k, 1); hazard(c, aim, k, -11, -9, 0, col, 1);
-    if (Kp(B, 1, 0) === "C") rack(c, aim, k, -10, 0, 3, METAL_L, null, true);
-    // Power at the back: the Armoured Breech and the Bunker Ram.
-    if (Kp(B, 0, 4) === "C") { plate(P(c, aim, k, -13.5, 0), rectPts(1.6, 6.5), STEEL, aim, k, 1.1); outline(P(c, aim, k, -13.5, 0), rectPts(1.3, 5.6), GOLD, 1 * k, aim, k); }
-    plate(c, ngon(8, 1, Math.PI / 8), METAL, aim, 8.5 * k, 1.2);
-    if (T.cradle) plate(c, rectPts(4, 9.5), METAL_L, aim, k, 1);
-    if (T.revolver) { disc(c, 10.5 * k, OUTLINE); disc(c, 9.8 * k, METAL); ring(c, 9.8 * k, GOLD, 1.2 * k); }
-    // Mount-side kit: racks, boxes, plates (Power on the left, Blast on the right, Speed and Retrofits at the back).
-    if (Kp(B, 0, 0) === "C") for (const x of [4, 8]) { const q = P(c, aim, k, x, -12.5); shadedOval(q, 1.8 * k, 1.4 * k, aim, [0.55, 0.5, 0.36, 1]); }
-    if (Kp(B, 0, 1) === "A") rack(c, aim, k, -1, -12.5, 2, STEEL);
-    if (Kp(B, 0, 2) === "C") rack(c, aim, k, -1, -12.5, 3, DARKSHELL, YEL);
-    if (Kp(B, 0, 3) === "C") { plate(P(c, aim, k, -6, -9), rectPts(1.8, 1.8), METAL_D, aim, k, 0.9); glowDot(P(c, aim, k, -6, -9), 0.6 * k, RED); }
-    if (Kp(B, 2, 0) === "C") for (const sg of [-1, 1]) plate(P(c, aim, k, 2, sg * 12.5), [[3, -0.8], [3, 0.8], [-3, 1.2], [-3, -1.2]], STEEL, aim, k, 1);
-    if (Kp(B, 2, 1) === "A") { plate(P(c, aim, k, -4, 12), rectPts(2.4, 2), AMMO, aim, k, 1); hazard(c, aim, k, -6, -2, 14.2, [1, 0.55, 0.2, 1], 0.9); }
-    if (B.lv[2] >= 3) { const st = Kp(B, 2, 2), gold = B.lv[2] >= 5 && Kp(B, 2, 4) === "A";
-      if (st === "A") rack(c, aim, k, 4, 12, B.lv[2] >= 4 && Kp(B, 2, 3) === "A" ? 3 : 2, gold ? GOLD : METAL_L, [0, 0, 0, 0.6]);
-      if (st === "B") { rack(c, aim, k, 4, 12, 3, [0.5, 0.52, 0.48, 1]); if (Kp(B, 2, 3) === "B") rack(c, aim, k, 4, 15.4, 3, [0.5, 0.52, 0.48, 1]); } }
-    if (Kp(B, 1, 0) === "A") { plate(P(c, aim, k, -6, -10), rectPts(2.6, 2.6), AMMO, aim, k, 1); for (const q of [[-7, -10], [-5, -10]]) orb(P(c, aim, k, ...q), 0.9 * k, METAL_L); }
-    if (B.r === 0) { if (B.key("r0") === "C") { plate(P(c, aim, k, -6, 10), rectPts(3, 2.4), [0.5, 0.42, 0.28, 1], aim, k, 1); } rack(c, aim, k, -6, B.key("r0") === "C" ? 13.2 : 10, 3, METAL_L); }
-    if (B.r === 1) { const q = P(c, aim, k, -5, 9); const st = B.key("r1");
-      if (st === "A") { orb(q, 1.8 * k, METAL); bar(q, P(c, aim, k, -2, 9), 1.2 * k, METAL); glowDot(P(c, aim, k, -1.6, 9), 0.6 * k, col); }
-      if (st === "B") { bar(q, P(c, aim, k, -5, 13), 1 * k, METAL_L); glowDot(P(c, aim, k, -5, 13), (fmod(t * 1.2, 1) < 0.3 ? 1 : 0.5) * k, [0.4, 1, 0.5, 1]); for (let i = 1; i <= 2; i++) ring(P(c, aim, k, -5, 13), fmod(t, 1) * 5 * k, A([0.4, 1, 0.5, 1], 0.5 * (1 - fmod(t, 1))), 1); }
-      if (st === "C") { const a = t * 2; arc(q, 2.6 * k, a - 1, a + 1, OUTLINE, 2.2 * k); arc(q, 2.6 * k, a - 1, a + 1, METAL_L, 1.3 * k); glowDot(q, 0.6 * k, col); } }
-    if (B.r === 2) { const st = B.key("r2");
-      if (st === "A") rack(c, aim, k, -6, 10, 3, SMOKE, [0.4, 0.4, 0.4, 1]);
-      if (st === "B") for (const y of [8.5, 11.5]) { bar(P(c, aim, k, -8, y), P(c, aim, k, -4, y), 2.4 * k, SMOKE); }
-      if (st === "C") for (const y of [8.5, 11.5]) { disc(P(c, aim, k, -6, y), 1.6 * k, OUTLINE); disc(P(c, aim, k, -6, y), 1.2 * k, BORE); } }
+    const S = (x, y) => P(c, 0, k, x, y); // a fixed deck position
+    // Racks show the current shells: Power restyles the shells in any rack on the tower instead of adding its own
+    // racks (owner: x/1/0); Power's own rack appears only when there's no other rack.
+    const shellRack = B.lv[2] >= 5 ? GOLD : B.lv[0] >= 3 ? DARKSHELL : METAL_L, band = B.r === 2 ? [0.42, 0.42, 0.44, 1] : B.lv[0] >= 3 ? YEL : null, nose = B.lv[0] >= 2;
+    const ready = B.lv[1] >= 1, field = B.r === 0;
+    if (ready) rack(c, 0, k, -12.5, 4.5, 3, shellRack, band, true, nose);
+    if (field) { plate(S(0, -12.5), rectPts(5.4, 2.4), [0.5, 0.42, 0.28, 1], 0, k, 1); rack(c, 0, k, 0, -12.5, 3, shellRack, band, false, nose); }
+    if (!ready && !field && B.lv[0] >= 2) rack(c, 0, k, -12.5, -4.5, B.lv[0] >= 3 ? 3 : 2, shellRack, band, true, nose);
+    if (B.lv[2] >= 3) { const bc = B.lv[2] >= 5 ? GOLD : [0.5, 0.52, 0.48, 1]; rack(c, 0, k, 12.5, -4.5, 3, bc, null, true); if (B.lv[2] >= 4) rack(c, 0, k, 12.5, 4.5, 3, bc, null, true); }
+    if (B.r === 1) { const q = S(10, -11); bar(q, S(10, -7.5), 1 * k, METAL_L); glowDot(q, (fmod(t * 1.2, 1) < 0.3 ? 1 : 0.5) * k, [0.4, 1, 0.5, 1]); ring(q, fmod(t, 1) * 5 * k, A([0.4, 1, 0.5, 1], 0.5 * (1 - fmod(t, 1))), 1); }
+    if (T.cradle) plate(c, rectPts(4, 9.5), METAL_L, aim, k, 1); // the twin cradle turns with the tubes
     // The tubes, each with the same kit; the one that fired last recoils.
     for (let i = 0; i < n; i++) { const [x, y] = tubeAt(T, i, fx.shots), r = (i === last ? decay(fx.barrelSince ?? 9, 0.3) : 0) * 2.5, w = 11 * f;
       angledTube(c, aim, k, x, y, L, w, r);
@@ -848,6 +826,23 @@ const P2 = {
       { key: "C", name: "Launcher Cups", desc: "Two smoke launcher cups on the mount; every 4th shell leaves a smoke cloud." } ] },
   ],
 };
+
+// ---- Round 2 (owner's picks and notes, 2026-10-17): each stage shows only the pick, re-described where a note changed it.
+P2.intro = "Round 2: your picks drawn as one model with your notes applied. Only the barrel turns now (no legs, mount plate or spade); racks show the current shells; Speed's mastery gets gold muzzles; Blast's mastery gold shells; Smoke Shells band every shell. Use the build preview to check combinations.";
+P2.picks = { p0s0: "B", p0s1: "A", p0s2: "C", p0s3: "A", p0s4: "B", p1s0: "C", p1s1: "A", p1s2: "C", p1s3: "A", p1s4: "B", p2s0: "B", p2s1: "B", p2s2: "B", p2s3: "B", p2s4: "A", r0: "C", r1: "B" };
+P2.paths.forEach((pa, pi) => pa.steps.forEach((st, k) => { st.options = st.options.filter((o) => o.key === P2.picks["p" + pi + "s" + k]); }));
+P2.retrofits.forEach((rf, ri) => { if (P2.picks["r" + ri]) rf.options = rf.options.filter((o) => o.key === P2.picks["r" + ri]); });
+const RE = (pi, k, desc) => { P2.paths[pi].steps[k].options[0].desc = desc; };
+RE(0, 1, "Pointed steel-nosed shells. They restyle the shells in any rack on the tower (the Ready Rack, the Field Kit's) instead of adding a rack (your note); a rack of their own only when there's none.");
+RE(0, 2, "Dark yellow-banded AP shells, in flight and in every rack (no extra rack when one is fitted).");
+RE(1, 0, "A rack of three ready shells in a fixed spot on the deck (the spade is gone); it shows the current shells.");
+RE(1, 4, "Three tubes in a triangle, with gold muzzle rims as at Power's mastery (your note).");
+RE(2, 2, "A rack of bomblets in a fixed spot on the deck; 4 bomblets scatter and burst.");
+RE(2, 3, "A second bomblet rack beside the first; 6 bomblets.");
+RE(2, 4, "Gold shells in flight (your note) and gold canisters in the racks; 8 bomblets carpet a wider ring.");
+P2.retrofits[0].options[0].desc = "A field crate with a shell rack in a fixed spot on the deck, and a sight on the tube.";
+P2.retrofits[1].options[0].desc = "A probe spike in a fixed spot on the deck, pulsing green rings into the ground.";
+P2.retrofits[2].options = [{ key: "A", name: "Smoke-Banded Shells", desc: "From your note: every shell, in flight and in the racks, carries the grey smoke band; every 4th leaves a smoke cloud." }];
 
 // ---- Tower art engine: previews towers aiming and firing at enemies on a lane --------------------------
 // Data (defined before this): PAGE {title, key, store}, TOWERS [...], DEFAULTS {id: {look, anim}}.
