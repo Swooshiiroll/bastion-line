@@ -376,6 +376,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 2 | Mortar Tower | `design/tower_art_p2_02_mortar.html` | **Confirmed** (owner, 2026-10-17: "Mortar finished"; its bore glow stays) |
 | 3 | Laser Tower | `design/tower_art_p2_03_laser.html` | **Confirmed** (owner, 2026-10-17: "Laser finished") |
 | 4 | Rocket Salvo | `design/tower_art_p2_04_rocket.html` | **Confirmed** (owner, 2026-10-17: "Rocket Salvo is done") |
+| 5 | Anti-Aircraft Turret | `design/tower_art_p2_05_aa.html` | Round 1: picks open |
 
 ### Gun Turret (second pass)
 
@@ -556,6 +557,22 @@ Their prices are formula estimates (proposed), in `design/tower_roster.md`.
   - the central hub sits down between the banks, drawn under them (owner: "That central ball is also visible through
     the silos").
 
+### Anti-Aircraft Turret (second pass)
+
+**Retrofits kept** (owner, 2026-10-17). Claude flagged that all three overlap a path:
+- Fire-Control Radar (+15 range) overlaps Range.
+- Ammo Drum (+10% fire rate) overlaps Speed.
+- Armoured Mount (+4 damage) overlaps Power step 1.
+
+The owner kept all three as they are.
+
+**Round 1 (Claude):** one parametric model.
+- **Range** swaps in longer barrels and raises the mount (a pedestal, rams or a mast).
+- **Power/Blast changes the rounds each step:** brass bullets, then dark flak shells that burst beside the flyer. The
+  bursts grow (20 to 50 px) and are shown as a flak puff with a faint ring for their reach; flyers caught in one flash.
+- **Speed adds barrels:** 2, then 4, each firing in turn from its own muzzle.
+- **Deck kit stays put.**
+
 ## Open questions
 
-1. **Second pass:** towers 5-20, one page each (the Anti-Aircraft Turret next).
+1. **Second pass, Anti-Aircraft Turret** (round 1): picks for 15 steps and 3 Retrofits; then towers 6-20.
