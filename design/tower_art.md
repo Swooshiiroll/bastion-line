@@ -376,7 +376,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 2 | Mortar Tower | `design/tower_art_p2_02_mortar.html` | **Confirmed** (owner, 2026-10-17: "Mortar finished"; its bore glow stays) |
 | 3 | Laser Tower | `design/tower_art_p2_03_laser.html` | **Confirmed** (owner, 2026-10-17: "Laser finished") |
 | 4 | Rocket Salvo | `design/tower_art_p2_04_rocket.html` | **Confirmed** (owner, 2026-10-17: "Rocket Salvo is done") |
-| 5 | Anti-Aircraft Turret | `design/tower_art_p2_05_aa.html` | Round 2: picks applied; Range step 3 open |
+| 5 | Anti-Aircraft Turret | `design/tower_art_p2_05_aa.html` | Round 3: drum replaces the crate; Range step 3 open |
 
 ### Gun Turret (second pass)
 
@@ -581,6 +581,8 @@ The owner kept all three as they are.
 
 **Round 2:** the traverse ring sits on the baseplate under the turret (owner). Range step 3 (Sky Watch) keeps its three
 options until it's picked.
+
+**Round 3:** the Ammo Drum replaces the ammo crate (owner: "Drum mag should replace the existing magazine").
 
 ## Open questions
 
