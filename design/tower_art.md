@@ -375,7 +375,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 1 | Gun Turret | `design/tower_art_p2_01_gun.html` | **Confirmed** (owner, 2026-10-17: "Gun turret finished") |
 | 2 | Mortar Tower | `design/tower_art_p2_02_mortar.html` | **Confirmed** (owner, 2026-10-17: "Mortar finished"; its bore glow stays) |
 | 3 | Laser Tower | `design/tower_art_p2_03_laser.html` | **Confirmed** (owner, 2026-10-17: "Laser finished") |
-| 4 | Rocket Salvo | `design/tower_art_p2_04_rocket.html` | Round 3: taller 8-tube banks; to confirm |
+| 4 | Rocket Salvo | `design/tower_art_p2_04_rocket.html` | **Confirmed** (owner, 2026-10-17: "Rocket Salvo is done") |
 
 ### Gun Turret (second pass)
 
@@ -558,4 +558,4 @@ Their prices are formula estimates (proposed), in `design/tower_roster.md`.
 
 ## Open questions
 
-1. **Second pass, Rocket Salvo** (round 3): confirm; then towers 5-20.
+1. **Second pass:** towers 5-20, one page each (the Anti-Aircraft Turret next).
