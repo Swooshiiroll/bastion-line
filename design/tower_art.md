@@ -352,6 +352,28 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 19 | Tractor Tower | cyan | C Claw Emitter | C Spiral Lock |
 | 20 | Augmentation Tower | lavender | F Nanite Hive | D Nanite Swarm |
 
+## Second pass: per-path and Retrofit looks (owner, 2026-10-16)
+
+**Decided:**
+- **Every step and the mastery** of every path changes the look. Each upgrade **adds or changes a detail**.
+- **Both the primary and the secondary show**, and their details overlap (owner: "Each upgrades adds or changes a
+  detail to the tower, so they overlap").
+- **Three options per stage:** every step and mastery is picked separately (A/B/C) and can be mixed freely. Each
+  Retrofit also gets three options.
+- **One tower per page:** `design/tower_art_p2_NN_<tower>.html`, in roster order.
+- **A build preview with level sliders:** set each path's level (M is the mastery) and a Retrofit, and watch the
+  combined model fire. It enforces the primary/secondary rule: two paths at most, and once one reaches 3 the other stops
+  at 2. Unpicked steps show option A.
+
+**Conventions (Claude):**
+- Masteries get gold trim, as today's tier-4 towers do.
+- Paths that add guns move the firing points, so shots still leave their own barrel.
+- Paths that add crits show a gold burst at the crit rate.
+
+| # | Tower | File | Status |
+|---|---|---|---|
+| 1 | Gun Turret | `design/tower_art_p2_01_gun.html` | Round 1: picks open |
+
 ## Open questions
 
-1. The second pass (per-path looks and Retrofit looks).
+1. **Second pass, Gun Turret** (round 1): picks for 15 steps and 3 Retrofits; then towers 2-20, one page each.

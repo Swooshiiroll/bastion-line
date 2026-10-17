@@ -200,4 +200,4 @@ function boot() {
   const tick = () => { const t = (performance.now() - t0) / 1000; for (const v of views) if (v.visible) v.frame(t); requestAnimationFrame(tick); };
   requestAnimationFrame(tick);
 }
-if (typeof document !== "undefined") boot();
+if (typeof document !== "undefined" && typeof NO_BOOT === "undefined") boot(); // the second-pass pages reuse makeView without this page
