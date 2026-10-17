@@ -438,11 +438,25 @@ paths work together.
 - **Smoke Shells:** every 4th shell flies grey and leaves smoke.
 - **Kit placement:** Power kit by the mount's left side, Blast kit on the right, Speed and Retrofit kit at the back.
 - **Muzzles:** the base Mortar's bore glow is kept, since only the Gun Turret's was removed. To confirm for the Mortar.
-- **The tube shape stays the original's** (owner, 2026-10-17: "revert back to the original"). The owner first asked for
-  an angled tube ("The mortar looks more like a flat body with a circle, can you make it look more like an angled
-  tube?"), and Claude drew several versions: a flared cylinder with an elliptical mouth, then the mouth sized to the
-  tube, then closer to the original, then layering fixes. The owner then reverted to the original Braced Siege Mortar:
-  a thick tube with a round bore. Those versions are in git history.
+- **An angled tube** (owner: "The mortar looks more like a flat body with a circle, can you make it look more like an
+  angled tube?"). Every tube is now drawn as a cylinder rising from a rounded breech low at the back to a raised mouth
+  at the front:
+  - it widens toward the mouth, with a lit side and a shaded side.
+  - trunnion pins hold it on its yoke.
+  - its shadow lengthens toward the mouth.
+  - the mouth is an ellipse squashed along the aim, since the opening faces up and forward. The collar, fin slots,
+    vanes and clamps follow that ellipse.
+  - the mouth is sized to the tube, its rim just outside the tube's sides (owner: "The barrel end is too thick for the
+    barrel").
+  - then pulled back toward the confirmed original (owner: "Make it look closer to the original"). It keeps the
+    original's short, thick tube and near-round bore, with only a hint of the angle: a slight flare to the mouth, the
+    breech cap, trunnion pins and a soft shadow.
+  - Layering fixed (owner: "The layering is incorrect and still looks rather odd"):
+    - each tube's shadow sits on the deck, under the legs and mount.
+    - the tube is one shaded barrel with a rounded back end, as the original draws it, instead of a ball on top.
+    - trunnion pins and a slight flare band near the mouth.
+  - the mouth shrinks again so its rim lines up with the tube's sides (owner: "the muzzle is still slightly oversized").
+  - the owner briefly reverted to the original tube, then undid that ("nevermind"): this angled version stands.
 
 ## Open questions
 
