@@ -4,7 +4,7 @@
 // put while the turret turns; shots leave their own barrel. The Retrofits are kept as they are (owner, 2026-10-17).
 // Geometry (game px, x along the aim): cannon from x 2 to its muzzle brake at 21.5 and muzzle at 23; recoil-spring rings
 // at x 6 and 8; octagonal body r 7.5; rangefinder bar across the back at x -7 (y +-12); ammo crate at (-1, 9.5).
-const PAGE = { title: "Anti-Aircraft Turret: paths and Retrofits (second pass)", store: "bl-tower-art-p2-aa-r1" };
+const PAGE = { title: "Anti-Aircraft Turret: paths and Retrofits (second pass)", store: "bl-tower-art-p2-aa-r2" };
 const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], BRASS = [0.86, 0.68, 0.32, 1], DARKR = [0.2, 0.2, 0.22, 1], SAND = [0.62, 0.55, 0.4, 1];
 const Kp = (B, pi, k) => (B.lv[pi] > k ? B.key("p" + pi + "s" + k) : null);
 const rnd2 = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
@@ -75,6 +75,8 @@ const P2 = {
     if (kp(0, 1) === "A") { ellipse(add(c, [3 * k, 5 * k]), 12 * k, 6 * k, [0, 0, 0, 0.25]); disc(c, 10 * k, OUTLINE); disc(c, 9.3 * k, METAL_D); ring(c, 8 * k, METAL, 1.2 * k); }
     if (kp(0, 1) === "C") for (let i = 0; i < 3; i++) { const a = -Math.PI / 2 + i * TAU / 3; bar(add(c, mul(fa(a), 4 * k)), add(c, mul(fa(a), 13 * k)), 2 * k, lt(METAL_D, 0.12)); }
     if (B.r === 1 && B.key("r1") === "C") { const q = P(c, aim, k, -2, -10); bar(q, P(c, aim, k, -2, -6), 1.2 * k, [0.5, 0.42, 0.28, 1]); disc(q, 3 * k, OUTLINE); disc(q, 2.6 * k, METAL); }
+    // The traverse ring sits on the baseplate under the turret (owner, round 2).
+    if (kp(2, 1) === "A") { ring(c, 9 * k, OUTLINE, 2.4 * k); for (let i = 0; i < 16; i++) { const d2 = fa(i * TAU / 16 + aim); line(add(c, mul(d2, 8.4 * k)), add(c, mul(d2, 10 * k)), METAL_L, 1 * k); } }
     // The turret: rangefinder bar, (twin-arm frame), barrels, body, crate.
     bar(P(c, aim, k, -7, -12), P(c, aim, k, -7, 12), 2.2 * k, METAL); for (const y of [-12, 12]) { orb(P(c, aim, k, -7, y), 1.9 * k, goldR && kp(0, 4) === "B" ? GOLD : METAL_L); glowDot(P(c, aim, k, -6.2, y), 0.8 * k, col); }
     if (kp(0, 1) === "B") for (const sg of [-1, 1]) bar(P(c, aim, k, -4, sg * 5), P(c, aim, k, 4, sg * 4), 1.6 * k, STEEL);
@@ -86,7 +88,6 @@ const P2 = {
     if (kp(0, 3) === "B") ring(P(c, aim, k, L + 3, 0), 3 * k, A(col, 0.7), 1 * k);
     if (kp(2, 3) === "A") for (const [b] of Bl.list.map((b, i) => [b, i])) line(P(c, aim, k, -1, 8), P(c, aim, k, b[0] + 3, b[1]), [0.55, 0.45, 0.25, 1], 1.4 * k);
     plate(c, ngon(8, 1, Math.PI / 8), METAL_L, aim, 7.5 * k, 1.2); rivets(c, ngon(8, 1, Math.PI / 8), aim, 7.5 * k, 0.82, 0.6 * k);
-    if (kp(2, 1) === "A") { ring(c, 9 * k, OUTLINE, 2.4 * k); for (let i = 0; i < 16; i++) { const d2 = fa(i * TAU / 16 + aim); line(add(c, mul(d2, 8.4 * k)), add(c, mul(d2, 10 * k)), METAL_L, 1 * k); } }
     plate(P(c, aim, k, -1, 9.5), rectPts(4, 2.6), AMMO, aim, k, 1);
     // Turret-top kit: radars, directors, fuse box, gears, motors, belts, drums, shields.
     if (kp(0, 2) === "A" || goldR && kp(0, 4) === "A") { const q = P(c, aim, k, -3, -5), a = t * 2, R0 = goldR && kp(0, 4) === "A" ? 4.4 : 3.2; arc(q, R0 * k, a - 1, a + 1, OUTLINE, 2.4 * k); arc(q, R0 * k, a - 1, a + 1, goldR && kp(0, 4) === "A" ? GOLD : METAL_L, 1.4 * k); glowDot(q, 0.6 * k, col); }
@@ -190,3 +191,10 @@ const P2 = {
       { key: "C", name: "Sandbag Ring", desc: "A ring of sandbags round the deck." } ] },
   ],
 };
+
+// ---- Round 2 (owner's picks and notes, 2026-10-17) ----------------------------------------------------------------
+P2.intro = "Round 2: your picks as one model. The traverse ring now sits on the baseplate under the turret (your note). Range step 3 (Sky Watch) had no pick: its three options are still open below.";
+P2.picks = { p0s0: "A", p0s1: "A", p0s3: "A", p0s4: "A", p1s0: "B", p1s1: "A", p1s2: "A", p1s3: "B", p1s4: "B", p2s0: "A", p2s1: "A", p2s2: "A", p2s3: "B", p2s4: "A", r0: "A", r1: "A", r2: "B" };
+P2.paths.forEach((pa, pi) => pa.steps.forEach((st, k) => { const pk = P2.picks["p" + pi + "s" + k]; if (pk) st.options = st.options.filter((o) => o.key === pk); }));
+P2.retrofits.forEach((rf, ri) => { rf.options = rf.options.filter((o) => o.key === P2.picks["r" + ri]); });
+P2.paths[2].steps[1].options[0].desc = "A toothed traverse ring on the baseplate, under the turret (your note).";

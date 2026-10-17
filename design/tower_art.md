@@ -376,7 +376,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 2 | Mortar Tower | `design/tower_art_p2_02_mortar.html` | **Confirmed** (owner, 2026-10-17: "Mortar finished"; its bore glow stays) |
 | 3 | Laser Tower | `design/tower_art_p2_03_laser.html` | **Confirmed** (owner, 2026-10-17: "Laser finished") |
 | 4 | Rocket Salvo | `design/tower_art_p2_04_rocket.html` | **Confirmed** (owner, 2026-10-17: "Rocket Salvo is done") |
-| 5 | Anti-Aircraft Turret | `design/tower_art_p2_05_aa.html` | Round 1: picks open |
+| 5 | Anti-Aircraft Turret | `design/tower_art_p2_05_aa.html` | Round 2: picks applied; Range step 3 open |
 
 ### Gun Turret (second pass)
 
@@ -573,6 +573,15 @@ The owner kept all three as they are.
 - **Speed adds barrels:** 2, then 4, each firing in turn from its own muzzle.
 - **Deck kit stays put.**
 
+**Picks (owner, round 1):**
+- **Range:** 1 A Longer Barrel, 2 A Raised Pedestal, 3 (none picked), 4 A HV Barrel, M A Gold Sky Radar.
+- **Power/Blast:** 1 B Heavy Breech, 2 A Flak Fuzes, 3 A Heavy Flak, 4 B Frag Sleeves, M B Curtain Battery.
+- **Speed:** 1 A Extra Springs, 2 A Traverse Ring, 3 A Twin Cannons, 4 B Feed Gears, M A Quad Cannons.
+- **Retrofits:** Fire-Control Radar A, Ammo Drum A, Armoured Mount B.
+
+**Round 2:** the traverse ring sits on the baseplate under the turret (owner). Range step 3 (Sky Watch) keeps its three
+options until it's picked.
+
 ## Open questions
 
-1. **Second pass, Anti-Aircraft Turret** (round 1): picks for 15 steps and 3 Retrofits; then towers 6-20.
+1. **Second pass, Anti-Aircraft Turret** (round 2): pick Range step 3 (Sky Watch); confirm. Then towers 6-20.
