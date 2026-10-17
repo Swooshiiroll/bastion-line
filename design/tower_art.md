@@ -376,7 +376,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 2 | Mortar Tower | `design/tower_art_p2_02_mortar.html` | **Confirmed** (owner, 2026-10-17: "Mortar finished"; its bore glow stays) |
 | 3 | Laser Tower | `design/tower_art_p2_03_laser.html` | **Confirmed** (owner, 2026-10-17: "Laser finished") |
 | 4 | Rocket Salvo | `design/tower_art_p2_04_rocket.html` | **Confirmed** (owner, 2026-10-17: "Rocket Salvo is done") |
-| 5 | Anti-Aircraft Turret | `design/tower_art_p2_05_aa.html` | Round 4: Range step 3 Optical Director; awaiting confirm |
+| 5 | Anti-Aircraft Turret | `design/tower_art_p2_05_aa.html` | **Confirmed** (owner, 2026-10-17: "AA Finished"; Range 3 is the Optical Director) |
 
 ### Gun Turret (second pass)
 
@@ -589,4 +589,4 @@ director fitted, the mastery's gold radar moves to the other side of the deck so
 
 ## Open questions
 
-1. **Second pass, Anti-Aircraft Turret** (round 4): confirm. Then towers 6-20 (next: Artillery Cannon).
+1. **Second pass, Artillery Cannon** (tower 6): its three Retrofits each duplicate a path step; waiting on the owner's replacements before drawing. Then towers 7-20.
