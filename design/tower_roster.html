@@ -1,0 +1,325 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tower Roster</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    color-scheme: dark;
+    --ground: #06090e; --field: #0b1016; --panel: #08111a; --panel-2: #0d1a25; --rule: #1d3a4b; --wire: #2a5a70;
+    --text: #dcedf7; --dim: #86a0b1; --faint: #4f6a7b; --accent: #4de1ff; --gold: #ffc85a; --red: #ff6b6b;
+    --display: "Chakra Petch", "Bahnschrift", "Segoe UI", sans-serif;
+    --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--text); font: 14px/1.5 var(--body); padding: 28px 16px 48px; }
+  .wrap { max-width: 1340px; margin: 0 auto; display: grid; gap: 22px; }
+  .eyebrow { font: 600 12px var(--display); letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
+  h1 { font: 700 30px/1.1 var(--display); margin: 4px 0 0; }
+  h2 { font: 700 20px/1.2 var(--display); margin: 0; letter-spacing: .04em; }
+  h3 { font: 700 16px var(--display); margin: 0; letter-spacing: .03em; }
+  p.note { margin: 6px 0 0; color: var(--dim); max-width: 95ch; }
+  ul.rules { margin: 8px 0 0; padding-left: 18px; color: var(--dim); max-width: 100ch; }
+  ul.rules b, p.note b { color: var(--text); font-weight: 500; }
+  code { font: 12px var(--mono); color: var(--accent); }
+  section { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px 2px 12px 2px; padding: 12px 14px 14px; display: grid; gap: 10px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 10px; }
+  .card { border: 1px solid var(--rule); border-radius: 8px; padding: 10px; display: grid; gap: 7px; align-content: start; background: #071019; }
+  .card.removed { opacity: .45; border-style: dashed; }
+  .card.added { border-color: var(--gold); }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .key { font: 700 11px var(--display); color: #031018; background: var(--accent); border-radius: 4px; padding: 0 6px; }
+  .tag { font: 600 11px var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
+  .ref { color: var(--dim); font-size: 12.5px; }
+  label { display: grid; gap: 3px; font: 600 11px var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+  input, textarea, select { width: 100%; background: var(--field); color: var(--text); border: 1px solid var(--rule); border-radius: 6px;
+    font: 13px var(--body); padding: 6px 8px; text-transform: none; letter-spacing: 0; }
+  textarea { min-height: 44px; resize: vertical; }
+  input:focus, textarea:focus, select:focus { outline: 1px solid var(--accent); border-color: var(--accent); }
+  button { font: 600 12px var(--display); letter-spacing: .06em; color: var(--text); background: var(--panel-2); border: 1px solid var(--wire);
+    border-radius: 6px; padding: 6px 11px; cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  button.on { background: var(--accent); color: #031018; border-color: var(--accent); }
+  button.danger.on { background: var(--red); border-color: var(--red); color: #1a0505; }
+  button.big { width: 100%; padding: 9px; }
+  .seg { display: inline-flex; gap: 0; }
+  .seg button { border-radius: 0; }
+  .seg button:first-child { border-radius: 6px 0 0 6px; }
+  .seg button:last-child { border-radius: 0 6px 6px 0; }
+  .tower { border: 1px solid var(--rule); border-radius: 8px; padding: 10px; background: #071019; display: grid; gap: 8px;
+    grid-template-columns: 34px minmax(0, 1fr); }
+  .tower .num { font: 700 18px var(--display); color: var(--gold); text-align: center; padding-top: 18px; }
+  .tower .fields { display: grid; gap: 8px; grid-template-columns: minmax(140px, 1fr) minmax(120px, .8fr) minmax(120px, .8fr) minmax(0, 2fr); }
+  .classes.weapons .cls { border-left-color: var(--faint); }
+  .tower .paths { display: grid; gap: 8px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .tower .tools { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+  .span2 { grid-column: span 2; }
+  .stack { display: grid; gap: 8px; }
+  details { border: 1px solid var(--rule); border-radius: 8px; padding: 8px 10px; background: #071019; }
+  summary { cursor: pointer; font: 600 13px var(--display); letter-spacing: .05em; color: var(--dim); }
+  .tablewrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 12.5px; margin-top: 8px; }
+  th, td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  th { font: 600 11px var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+  td { color: var(--dim); }
+  td:first-child { color: var(--text); white-space: nowrap; }
+  #summary { min-height: 120px; font: 12px var(--mono); }
+  .empty { color: var(--faint); font-style: italic; }
+  @media (max-width: 760px) {
+    .tower { grid-template-columns: minmax(0, 1fr); }
+    .tower .num { text-align: left; padding-top: 0; }
+    .tower .fields, .tower .paths { grid-template-columns: minmax(0, 1fr); }
+    .span2 { grid-column: auto; }
+    h1 { font-size: 24px; }
+  }
+  .classes { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 8px; }
+  .cls { border: 1px solid var(--rule); border-left: 3px solid var(--accent); border-radius: 6px; padding: 7px 10px; background: #071019; display: grid; gap: 3px; }
+  .cls.proposed { border-left-color: var(--gold); border-style: dashed; border-left-style: solid; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Bastion Line · Tower rework · Roster · round 3 (v6: your WIP towers built in)</div>
+    <h1>Tower roster</h1>
+    <p class="note">Write your towers: a <b>name</b>, a <b>class</b>, a <b>weapon type</b> and a <b>description</b> (the art is drawn from these later). The three path
+      purposes are optional here; we settle them in the next rounds. Everything is kept in this browser; copy it from the bottom of the page and send it back.
+      Spec: <code>design/towers.md</code> (issue #55). Classes and weapon types come from the reference sheet <code>design/tower_classes.md</code>.</p>
+    <ul class="rules">
+      <li><b>Four classes</b> (your call, 2026-10-10): <b>Assault</b>, <b>Support</b>, <b>Defense</b>, <b>Utility</b>. Every tower has <b>exactly one</b>, and the class groups the shop; what else it does is TBD.
+        The <b>weapon type</b> (Ballistic, Energy, Explosive...) is a descriptive sub-tag.</li>
+      <li><b>Each tower has 3 paths</b> of 4 upgrades and a mastery, each path with a purpose decided per tower (your examples: Power, Range, Speed, Effect, Buff),
+        plus an <b>optional Retrofit</b> designed for the tower.</li>
+      <li><b>Primary/secondary stays:</b> climb two paths until one gets its 3rd upgrade; that one is the primary, the other is capped.</li>
+      <li><b>Counters</b> to the reworked enemies come only through path upgrades; no tower exists just to counter.</li>
+    </ul>
+  </header>
+
+  <section>
+    <h2>Classes</h2>
+    <div class="classes" id="classes"></div>
+    <h3 style="margin-top:4px">Weapon types (sub-tag)</h3>
+    <p class="note" style="margin:0">Descriptive only. Field and Deployable are proposals you can accept or drop in the sheet.</p>
+    <div class="classes weapons" id="weapons"></div>
+  </section>
+
+  <section>
+    <div class="row" style="justify-content: space-between">
+      <h2>Your tower list</h2>
+      <button id="add-tower">+ Add a tower</button>
+    </div>
+    <div class="row">
+      <button id="load-seed">Load built-in towers (your WIP list v4, 2026-10-14)</button>
+    </div>
+    <details id="import-box">
+      <summary>Import a pasted roster</summary>
+      <p class="note" style="margin:6px 0">Paste text from <b>Copy roster and notes</b> (from any browser or machine) and press Import. It replaces the list below.</p>
+      <textarea id="import-text" style="min-height:120px; font: 12px var(--mono)" placeholder="Tower roster (round 3)&#10;Towers (N):&#10;1. Name: class Assault; weapon Ballistic; description: ..."></textarea>
+      <div class="row" style="margin-top:6px"><button id="import-go">Import</button><span class="tag" id="import-msg"></span></div>
+    </details>
+    <div class="stack" id="towers"></div>
+    <button class="big" id="add-tower-2">+ Add a tower</button>
+    <details>
+      <summary>Today's 15 towers (reference only)</summary>
+      <div class="tablewrap"><table id="today"><thead><tr><th>Tower</th><th>Suggested class</th><th>Weapon type</th><th>Hits</th><th>Job today</th><th>Branches A / B / C</th></tr></thead><tbody></tbody></table></div>
+    </details>
+  </section>
+
+  <section class="out">
+    <h2>Roster and notes</h2>
+    <label>General notes<textarea id="general" placeholder="Anything else: how many towers you're aiming for, themes, what to keep from today's set..."></textarea></label>
+    <textarea id="summary" readonly></textarea>
+    <button class="big" id="copy">Copy roster and notes</button>
+    <button class="big" id="clear">Clear everything</button>
+  </section>
+</div>
+
+<script>
+const STORE = "bl-tower-roster-v3", OLD_STORES = ["bl-tower-roster-v2", "bl-tower-roster-v1"];
+// Mirrors design/tower_classes.md (2026-10-10).
+const CLASSES = [
+  { id: "assault", name: "Assault", line: "Deals the damage: the towers that kill enemies." },
+  { id: "support", name: "Support", line: "Boosts other towers: damage, range, fire rate." },
+  { id: "defense", name: "Defense", line: "Holds the line: slows, stuns, pushes back and blocks enemies." },
+  { id: "utility", name: "Utility", line: "The tools: reveal, strip enemy defences, and the economy." },
+];
+const WEAPONS = [
+  { id: "ballistic", name: "Ballistic", line: "Physical projectiles: slugs, bolts, rounds, flechettes, rails." },
+  { id: "energy", name: "Energy", line: "Beams, lasers and lightning, no flight time." },
+  { id: "explosive", name: "Explosive", line: "Shells, missiles and bombs that burst where they land." },
+  { id: "chemical", name: "Chemical", line: "Sprays and soaks: acid, gel and other agents." },
+  { id: "field", name: "Field", proposed: true, line: "Pulses and shockwaves centred on the tower." },
+  { id: "deployable", name: "Deployable", proposed: true, line: "Launched units (drones) acting away from the tower." },
+  { id: "none", name: "None", line: "Doesn't attack." },
+];
+const TODAY = [
+  ["Pulse Turret", "Assault", "Ballistic", "air + ground", "Rapid single-target bolts", "Gatling Pulse / Shredder / Flechette"],
+  ["Plasma Mortar", "Assault", "Explosive", "ground", "Splash damage", "Siege Mortar / Plasma Burn / Bunker Buster"],
+  ["Cryo Emitter", "Defense", "Field", "air + ground", "Area slow plus light damage", "Stasis Field / Shatter Field / Cryo Lock"],
+  ["Railgun", "Assault", "Ballistic", "air + ground", "Huge range, ignores armour", "Deadeye / Piercing Rail / Null Slug"],
+  ["Arc Coil", "Assault", "Energy", "air + ground", "Chain lightning, double damage to barriers", "Storm Coil / Overload / Ion Storm"],
+  ["Laser Lance", "Assault", "Energy", "air + ground", "Ramping beam, ignores armour", "Prism Array / Focus Lens / Sweeper"],
+  ["Missile Battery", "Assault", "Explosive", "air + ground", "Homing salvos, double damage to flyers", "Swarm Pods / Hellfire / Cluster Munitions"],
+  ["Amplifier Pylon", "Support", "None", "support", "Boosts nearby towers' damage", "Overclock Pylon / Targeting Array / Suppression Pylon"],
+  ["Flak Battery", "Assault", "Explosive", "air", "Airbursts that hit every flyer in the blast", "Sky Shredder / Proximity Burst / Dual Purpose"],
+  ["Sensor Array", "Utility (or Support)", "None", "support", "Reveals cloaked enemies, marks targets", "Deep Scan / Target Painter / Disruptor"],
+  ["Graviton Projector", "Defense", "Field", "ground", "Gravity pulses that move enemies along the lane", "Repulsor / Crush Field / Gravity Well"],
+  ["Nullifier", "Utility (or Defense)", "Field", "air + ground", "Strips barriers, armour and immunities", "Purge Emitter / Dampener / Feedback Loop"],
+  ["Nova Reactor", "Assault", "Field", "air + ground", "360° shockwave", "Supernova / Pulse Reactor / Solar Flare"],
+  ["Drone Bay", "Assault", "Deployable", "air + ground", "Hunter drones that chase enemies anywhere", "Interceptor Wing / Bomber Wing / Hunter-Killer"],
+  ["Scrapyard", "Utility", "None", "none (economy)", "Credits from wreckage", "Credit Mint / Scrap Collector / Supply Depot"],
+];
+
+const blankState = () => ({ towers: [{}], general: "" });
+// The owner's WIP roster (2026-10-14), as copied from this page. Fills the page when this browser has nothing saved.
+const SEED_TEXT = "Tower roster (round 3)\nTowers (20):\n1. Gun Turret: class Assault; weapon Ballistic; description: A basic rotating machine gun turret. \"It's a machine gun, Private!\"; paths: Power / Range/Visibility / Multi-Target\n2. Mortar Tower: class Assault; weapon Explosive; description: Lobs high-explosive shells at nearby enemies. \"Toob.\"; paths: Power/Penetration / Speed/Range / Blast Radius/Multi-Target\n3. Laser Tower: class Assault; weapon Energy; description: A High-Energy Laser Emitter affixed to a rotating turret. \"It does more than just blind the enemy, that's for sure.\"; paths: Power / Multi-Target / Range/Targeting\n4. Rocket Salvo: class Assault; weapon Explosive; description: Launches a volley of rockets at oncoming enemies. \"Instead of shooting bullets, it shoots very angry telephone poles that hate absolutely everything.\"; paths: Power / Range/Target Acquisition / Reload/Payload\n5. Anti-Aircraft Turret: class Assault; weapon Ballistic; description: A fully automatic anti-aircraft gun. \"We don't need a gun, or a nug!\"; paths: Range / Power/Blast Radius / Speed\n6. Artillery Cannon: class Assault; weapon Explosive; description: A large-bore cannon that fires high-explosive shells very long distances. \"It's not DiGiorno...\"; paths: Power / Speed / Special Effects; notes: User selects where the cannon should aim along the track - Does not target enemies.\n7. Railgun: class Assault; weapon Ballistic; description: A large cannon with magnetically polarized rails that launch a large projectile extremely far, extremely fast. \"Known to cause cancer in the state of California.\"; paths: Power / Range/Speed / Special Effects\n8. Tesla Tower: class Assault; weapon Energy; description: A large metal disk mounted atop of a large tower that generates high-voltage electrical arcs that damage incoming enemies. \"It was built in a cave with a box of scraps.\"; paths: Power (Damage) / Range/Chaining / Speed\n9. Drone Bay: class Assault; weapon Deployable; description: Houses combat drones that hunt after enemies. \"The military really took the idea of same-day delivery and ran with it.\"; paths: Power (overall) / Weaponry (upgrades/additions) / Speed; notes: Max 2 drones\n10. CAS Gunship: class Assault; weapon Deployable; description: A large slow-flying cargo plane capable of being with with a wide range of weaponry. \"You know that feeling you get when its raining outside, but then the rain suddenly goes from being water to large metal bullets being shot at you from that giant plane above you? Yeah, I hate that feeling.\"; paths: Speed (Attack) / Power / Weaponry Upgrades; notes: While its tower can be placed anywhere, the gunship itself circles around a pin-point location of the user's designation.\n11. Mine Layer: class Defense; weapon Explosive; description: Manufactures and tosses explosive mines onto the track that explode when an enemy passes over them. \"You know it's a party when the high-speed confetti start flying in every direction.\"; paths: Power/Damage / Production Speed / Range\n12. Chemical Plant: class Support; weapon Chemical; description: A chemical manufacturing facility that produces and sprays chemicals on nearby enemies. \"Known to cause cancer in the state of California.\"; paths: Damage/Armor stripping / Speed / Slowing; notes: Weapon type: Chemical. Attacks one enemy at a time. Already soaked enemies are ignored by the tower until the chemical wears off.\n13. Boost Tower: class Support; weapon None; description: Towers in range of the Rally Beacon are amped up and given stat boosts. \"Are you feeling it now Mr. Krabs?\"; paths: Damage boost / Speed boost / Range Boost; notes: Retrofit boosts towers reach and grants mild boost for all stats for all towers in range\n14. Radar Tower: class Utility; weapon Energy; description: Radar is able to detect and alert nearby towers of stealthy or otherwise hidden enemies. \"I've lost the bleeps, I've lost the sweeps, and I've lost the creeps.\"; paths: Power/Range / Speed/Frequency / Special Targeting; notes: Enemies in range are pinged for a brief moment, allowing nearby towers to target them. ping-rate increased through upgrades Upon reaching a certain upgrade, enemies withing a small secondary circle are dealt energy damage for as long as they're in that range. (High-Energy Non-Ionizing Radiation damage)\n15. Cryo Tower: class Support; weapon Field; description: Produces a wave of sub-zero temperature gasses that stunt the mobility of enemies within range. \"The military had to put restrictions on these machines after a group of soldiers got caught having a snowball fight in the middle of a heatwave.\"; paths: Slowing / Power/Range / Speed\n16. Shockwave Generator: class Assault; weapon Field; description: Generates powerful shockwaves by creating small nuclear explosion. \"Radioactive fallout? What radioactive fallout?\"; paths: Power/Range / Speed / Effect\n17. Scrapyard: class Utility; weapon None; description: Various collections of scrap metal sold at a profit. \"One mans toxic waste is another mans potpourri\"; paths: Passive Income / Kill Income / Discounts\n18. Magneto Tower: class Defense; weapon Field; description: A massive electromagnet that magnetically pulls against enemies in range, slowing them down and pulling off armor. \"Yeah, science!\"; paths: Pull Strength / Field Size / Polarity\n19. Tractor Tower: class Defense; weapon Energy; description: A dish-mounted emitter that locks a tractor beam onto a single enemy and hauls it back down the track before letting go. \"You're my friend now.\"; paths: Pull Distance / Recharge / Grip\n20. Augmentation Tower: class Support; weapon None; description: Neighboring towers are given special augmentations to their weaponry through mysterious means. \"So my 12-guage shotgun shoots thermonuclear explosives now apparently.\"; paths: Energy Conversion / Critical Hits / Ricochet";
+// Reads text from "Copy roster and notes" back into towers.
+function parseRoster(text) {
+  const byName = (list, v) => { v = String(v || "").trim(); if (!v || v === "-") return ""; if (v.toLowerCase() === "other") return "other";
+    const c = list.find((x) => x.name.toLowerCase() === v.toLowerCase()); return c ? c.id : "other"; };
+  const towers = []; let general = "";
+  for (const raw of String(text || "").split(/\r?\n/)) {
+    const line = raw.trim();
+    if (line.startsWith("General notes:")) { general = line.slice(14).trim(); continue; }
+    const m = line.match(/^\d+\.\s+(.*?):\s(.*)$/); if (!m) continue;
+    const t = { name: m[1] === "(unnamed)" ? "" : m[1], paths: ["", "", ""] };
+    for (const part of m[2].split(/;\s(?=(?:class |weapon |description: |paths: |notes: ))/)) {
+      if (part.startsWith("class ")) t.cls = byName(CLASSES, part.slice(6));
+      else if (part.startsWith("weapon ")) t.weapon = byName(WEAPONS, part.slice(7));
+      else if (part.startsWith("description: ")) { const d = part.slice(13).trim(); t.desc = d === "-" ? "" : d; }
+      else if (part.startsWith("paths: ")) t.paths = part.slice(7).split(" / ").map((x) => (x.trim() === "-" ? "" : x.trim())).concat(["", "", ""]).slice(0, 3);
+      else if (part.startsWith("notes: ")) t.notes = part.slice(7).trim();
+    }
+    towers.push(t);
+  }
+  return { towers, general };
+}
+let S;
+try { S = JSON.parse(localStorage.getItem(STORE) || "null"); } catch (e) { S = null; }
+if (!S || typeof S !== "object") {
+  // Carry over anything typed on earlier rounds. Round 2's weapon class becomes the weapon type (its Economy
+  // becomes class Utility); round 1's role is dropped.
+  let old = null, any = false;
+  try { any = OLD_STORES.some((k) => localStorage.getItem(k) !== null); } catch (e) { any = false; }
+  for (const k of OLD_STORES) { if (old) break; try { old = JSON.parse(localStorage.getItem(k) || "null"); } catch (e) { old = null; } }
+  S = blankState();
+  if (old && typeof old === "object") {
+    const kept = (old.towers || []).map((t) => {
+      const n = { name: t.name, desc: t.desc, paths: t.paths, notes: t.notes };
+      if (["ballistic", "energy", "explosive", "field", "deployable"].includes(t.cls)) n.weapon = t.cls;
+      if (t.cls === "economy") { n.cls = "utility"; n.weapon = "none"; }
+      if (t.cls === "utility") n.weapon = "none";
+      return n;
+    });
+    if (kept.length) S.towers = kept;
+    S.general = old.general || "";
+  }
+  if (!any) { const p = parseRoster(SEED_TEXT); S.towers = p.towers; S.general = p.general; }
+}
+S.towers = S.towers || []; S.general = S.general || "";
+function save() { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) { /* storage unavailable */ } summary(); }
+
+const $ = (id) => document.getElementById(id);
+function el(tag, attrs, kids) {
+  const n = document.createElement(tag);
+  for (const k in (attrs || {})) { if (k === "text") n.textContent = attrs[k]; else if (k === "cls") n.className = attrs[k]; else n.setAttribute(k, attrs[k]); }
+  for (const c of (kids || [])) n.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
+  return n;
+}
+function field(label, value, onInput, opts) {
+  opts = opts || {};
+  const inp = el(opts.area ? "textarea" : "input", opts.ph ? { placeholder: opts.ph } : {});
+  inp.value = value || "";
+  inp.addEventListener("input", () => onInput(inp.value));
+  return el("label", { cls: opts.cls || "" }, [label, inp]);
+}
+const nameIn = (list, id) => { const c = list.find((x) => x.id === id); return c ? c.name : ""; };
+
+function renderList(boxId, list) {
+  const box = $(boxId); box.textContent = "";
+  for (const c of list) box.appendChild(el("div", { cls: "cls" + (c.proposed ? " proposed" : "") }, [
+    el("div", { cls: "row" }, [el("h3", { text: c.name }), c.proposed ? el("span", { cls: "tag", text: "proposed" }) : el("span")]),
+    el("div", { cls: "ref", text: c.line })]));
+}
+function pickSelect(t, key, list, placeholder) {
+  const sel = el("select");
+  sel.appendChild(el("option", { value: "", text: placeholder }));
+  for (const c of list) sel.appendChild(el("option", { value: c.id, text: c.name + (c.proposed ? " (proposed)" : "") }));
+  sel.appendChild(el("option", { value: "other", text: "Other (write it in notes)" }));
+  sel.value = t[key] || "";
+  sel.addEventListener("change", () => { t[key] = sel.value; save(); });
+  return sel;
+}
+function renderTowers() {
+  const box = $("towers"); box.textContent = "";
+  if (!S.towers.length) box.appendChild(el("div", { cls: "empty", text: "No towers yet. Add one to start." }));
+  S.towers.forEach((t, i) => {
+    t.paths = t.paths || ["", "", ""];
+    const up = el("button", { text: "▲", title: "Move up" }), dn = el("button", { text: "▼", title: "Move down" }), del = el("button", { text: "Delete", cls: "danger" });
+    up.addEventListener("click", () => { if (i > 0) { [S.towers[i - 1], S.towers[i]] = [S.towers[i], S.towers[i - 1]]; save(); renderTowers(); } });
+    dn.addEventListener("click", () => { if (i < S.towers.length - 1) { [S.towers[i + 1], S.towers[i]] = [S.towers[i], S.towers[i + 1]]; save(); renderTowers(); } });
+    del.addEventListener("click", () => { S.towers.splice(i, 1); save(); renderTowers(); });
+    const fields = el("div", { cls: "fields" }, [
+      field("Name", t.name, (v) => { t.name = v; save(); }, { ph: "Tower name" }),
+      el("label", {}, ["Class", pickSelect(t, "cls", CLASSES, "Pick a class")]),
+      el("label", {}, ["Weapon type", pickSelect(t, "weapon", WEAPONS, "Pick a type")]),
+      field("Description", t.desc, (v) => { t.desc = v; save(); }, { area: true, ph: "What it is, what it does, how it looks or feels" }),
+    ]);
+    const paths = el("div", { cls: "paths" }, [0, 1, 2].map((k) => field("Path " + (k + 1) + " purpose (optional)", t.paths[k], (v) => { t.paths[k] = v; save(); }, { ph: ["e.g. Power", "e.g. Range", "e.g. Effect"][k] })));
+    const body = el("div", { cls: "stack" }, [fields, paths, field("Notes", t.notes, (v) => { t.notes = v; save(); }, { area: true }), el("div", { cls: "tools" }, [up, dn, del])]);
+    box.appendChild(el("div", { cls: "tower" }, [el("div", { cls: "num", text: String(i + 1) }), body]));
+  });
+  summary();
+}
+
+function clean(s) { return String(s || "").replace(/\s+/g, " ").trim(); }
+function summary() {
+  const out = ["Tower roster (round 3)"];
+  const towers = S.towers.filter((t) => clean(t.name) || clean(t.desc) || clean(t.notes) || t.cls || t.weapon || (t.paths || []).some(clean));
+  out.push("Towers (" + towers.length + "):");
+  towers.forEach((t, i) => {
+    const cls = t.cls === "other" ? "other" : (nameIn(CLASSES, t.cls) || "-");
+    const wpn = t.weapon === "other" ? "other" : (nameIn(WEAPONS, t.weapon) || "-");
+    const p = (t.paths || []).map((x) => clean(x) || "-");
+    const bits = ["class " + cls, "weapon " + wpn, "description: " + (clean(t.desc) || "-")];
+    if (p.some((x) => x !== "-")) bits.push("paths: " + p.join(" / "));
+    if (clean(t.notes)) bits.push("notes: " + clean(t.notes));
+    out.push((i + 1) + ". " + (clean(t.name) || "(unnamed)") + ": " + bits.join("; "));
+  });
+  if (clean(S.general)) out.push("General notes: " + clean(S.general));
+  $("summary").value = out.join("\n"); $("summary").rows = out.length + 1;
+}
+
+for (const row of TODAY) { const tr = el("tr"); for (const c of row) tr.appendChild(el("td", { text: c })); $("today").querySelector("tbody").appendChild(tr); }
+const addTower = () => { S.towers.push({}); save(); renderTowers(); };
+$("add-tower").addEventListener("click", addTower);
+$("add-tower-2").addEventListener("click", addTower);
+$("general").value = S.general;
+$("general").addEventListener("input", () => { S.general = $("general").value; save(); });
+$("copy").addEventListener("click", () => {
+  const ta = $("summary"), b = $("copy");
+  const done = () => { b.textContent = "Copied"; setTimeout(() => { b.textContent = "Copy roster and notes"; }, 1500); };
+  try { navigator.clipboard.writeText(ta.value).then(done, () => { ta.select(); }); } catch (e) { ta.select(); }
+});
+$("clear").addEventListener("click", () => {
+  if (!confirm("Clear every tower and all notes?")) return;
+  S = blankState(); $("general").value = ""; save(); renderTowers();
+});
+$("load-seed").addEventListener("click", () => {
+  if (!confirm("Replace the list below with your built-in WIP towers (20)?")) return;
+  const p = parseRoster(SEED_TEXT); S.towers = p.towers; if (p.general) S.general = p.general; $("general").value = S.general; save(); renderTowers();
+});
+$("import-go").addEventListener("click", () => {
+  const p = parseRoster($("import-text").value), msg = $("import-msg");
+  if (!p.towers.length) { msg.textContent = "No towers found in that text"; return; }
+  if (!confirm("Replace the list below with the " + p.towers.length + " imported towers?")) return;
+  S.towers = p.towers; if (p.general) S.general = p.general; $("general").value = S.general; save(); renderTowers();
+  msg.textContent = "Imported " + p.towers.length + " towers";
+});
+renderList("classes", CLASSES); renderList("weapons", WEAPONS); renderTowers();
+</script>
+</body>
+</html>
