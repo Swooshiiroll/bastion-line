@@ -455,6 +455,7 @@ paths work together.
     - each tube's shadow sits on the deck, under the legs and mount.
     - the tube is one shaded barrel with a rounded back end, as the original draws it, instead of a ball on top.
     - trunnion pins and a slight flare band near the mouth.
+  - the mouth shrinks again so its rim lines up with the tube's sides (owner: "the muzzle is still slightly oversized").
 
 ## Open questions
 
