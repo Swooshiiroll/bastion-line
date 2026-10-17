@@ -148,8 +148,8 @@ A large-bore cannon that fires high-explosive shells very long distances. "It's 
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
 | 1 | base | Artillery Cannon | 300 |  | 300 credits; a heavy shell every 4 s onto the aimed spot, 75 damage, a 70 px blast, 1.5 s flight time; ground only. A new cannon aims at the track point nearest to itself until you set it. | new |
-| 2 | r1 | Ammo Hoist | 120 |  | A shell every 3.3 s. | new |
-| 2 | r2 | Heavy Recoil Mount | 120 |  | +15 damage (90). | new |
+| 2 | r1 | Shell Magazine | 120 |  | Every third shell is a heavy round for +50% damage (about +17% on average), with no change to reload time. | new |
+| 2 | r2 | Stabilised Mount | 120 |  | Shells land within 15 px of the aimed spot instead of scattering up to 30 px, so the blast hits what you aimed at. | new |
 | 2 | r3 | Wide Charge | 80 |  | +15 px blast (85). | new |
 | 3 | a | Heavy Shells | 120 |  | +15 damage (90) | new |
 | 4 | a | Wide Bursting Charge | 200 |  | Blast 70 to 85 px | new |

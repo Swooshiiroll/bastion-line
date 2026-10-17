@@ -30,7 +30,7 @@ All 20 towers are designed and confirmed by the owner (2026-10-15). Costs are bu
 | 3 | Laser Tower | Assault | Energy | 250 | Power / Multi-Target / Range/Targeting | Capacitor Bank / Heat Sinks / Ramp Memory |
 | 4 | Rocket Salvo | Assault | Explosive | 200 | Power / Range/Target Acquisition / Reload/Payload | Proximity Fuses / Smoke Trails / Incendiary Warheads |
 | 5 | Anti-Aircraft Turret | Assault | Ballistic | 150 | Range / Power/Blast Radius / Speed | Fire-Control Radar / Ammo Drum / Armoured Mount |
-| 6 | Artillery Cannon | Assault | Explosive | 300 | Power / Speed / Special Effects | Ammo Hoist / Heavy Recoil Mount / Wide Charge |
+| 6 | Artillery Cannon | Assault | Explosive | 300 | Power / Speed / Special Effects | Shell Magazine / Stabilised Mount / Wide Charge |
 | 7 | Railgun | Assault | Ballistic | 500 | Power / Range/Speed / Special Effects | Capacitor Coils / Longer Rails / Penetrator Tips |
 | 8 | Tesla Tower | Assault | Energy | 250 | Power (Damage) / Range/Chaining / Speed | Bigger Disk / Grounding Rods / Insulated Coils |
 | 9 | Drone Bay | Assault | Deployable | 300 | Power (overall) / Weaponry (upgrades/additions) / Speed | Second Hangar (only) |
@@ -537,10 +537,15 @@ time; ground only. A new cannon aims at the track point nearest to itself until 
 aim point). Burning ground counts as its damage over 3 s on everything in the blast. Each extra selectable shell type
 adds ×0.1 (flexibility), and a stun ×1.15 to ×1.25. These join the Pricing effect list.
 
-**Retrofit (the player picks one; owner, 2026-10-15):**
-- **Ammo Hoist, 120:** a shell every 3.3 s. Look: an ammo lift beside the gun.
-- **Heavy Recoil Mount, 120:** +15 damage (90). Look: a bigger recoil mechanism and stabilisers.
-- **Wide Charge, 80:** +15 px blast (85). Look: fat, wide-bodied shells.
+**Retrofit (the player picks one; owner, 2026-10-15; two replaced 2026-10-17):**
+- **Shell Magazine, 120 (price to be set by the formula, proposed):** every third shell is a heavy round for +50% damage
+  (about +17% on average), with no change to reload time. Look: a drum magazine beside the breech. Replaces the **Ammo
+  Hoist**, which duplicated Speed step 1 (a shell every 3.3 s).
+- **Stabilised Mount, 120 (price to be set by the formula, proposed):** shells land within 15 px of the aimed spot
+  instead of scattering up to 30 px, so the blast hits what you aimed at. Look: a bigger recoil mechanism and
+  stabilisers. Replaces the **Heavy Recoil Mount**, which duplicated Power step 1 (+15 damage, 90).
+- **Wide Charge, 80:** +15 px blast (85). Look: fat, wide-bodied shells. The owner kept it although it matches Power
+  step 2 (70 to 85 px).
 
 **Path 1, Power (damage and blast, then armour piercing):**
 
