@@ -51,7 +51,7 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Tower rework · Tower art · page 4 of 4: towers 16-20 (in-game style, round 2)</div>
+    <div class="eyebrow">Bastion Line · Tower rework · Tower art · page 4 of 4: towers 16-20 (in-game style, confirmed)</div>
     <h1>Tower art: towers 16-20</h1>
     <p class="note">The reworked towers' <b>models</b>, first pass: for each tower pick its <b>look</b> and its <b>firing animation</b> from three proposals each (A to C), and add notes. Mix freely. <b>Your combination</b> shows your mix (option A until you pick). Every preview runs live: the turret tracks and fires at enemies on the lane (flyers for air towers). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back. Spec: <code>design/tower_art.md</code>.</p>
     <ul class="rules">
@@ -645,7 +645,7 @@ const TOWERS = [
           crit: (p, v, s) => { critBurst(p, v, s); for (let i = 0; i < 8; i++) { const d = fa(i * TAU / 8); line(add(p, mul(d, s * 0.05)), add(p, mul(d, s * (0.15 + 0.3 * v))), A(GOLDC, 1 - v), 1.2); } } }) },
     ] },
 ];
-const DEFAULTS = { shock: { look: "B", anim: "B" }, scrap: { look: "C", anim: "B" }, tractor: { look: "C" } };
+const DEFAULTS = { shock: { look: "B", anim: "B" }, scrap: { look: "C", anim: "B" }, magneto: { look: "F", anim: "F" }, tractor: { look: "C", anim: "C" }, augment: { look: "F", anim: "D" } };
 
 // ---- Tower art engine: previews towers aiming and firing at enemies on a lane --------------------------
 // Data (defined before this): PAGE {title, key, store}, TOWERS [...], DEFAULTS {id: {look, anim}}.

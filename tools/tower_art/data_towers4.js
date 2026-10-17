@@ -259,4 +259,4 @@ const TOWERS = [
           crit: (p, v, s) => { critBurst(p, v, s); for (let i = 0; i < 8; i++) { const d = fa(i * TAU / 8); line(add(p, mul(d, s * 0.05)), add(p, mul(d, s * (0.15 + 0.3 * v))), A(GOLDC, 1 - v), 1.2); } } }) },
     ] },
 ];
-const DEFAULTS = { shock: { look: "B", anim: "B" }, scrap: { look: "C", anim: "B" }, tractor: { look: "C" } };
+const DEFAULTS = { shock: { look: "B", anim: "B" }, scrap: { look: "C", anim: "B" }, magneto: { look: "F", anim: "F" }, tractor: { look: "C", anim: "C" }, augment: { look: "F", anim: "D" } };

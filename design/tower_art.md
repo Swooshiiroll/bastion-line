@@ -43,7 +43,7 @@ enemies on the lane and flyers overhead (air-only towers ignore the ground, and 
 | 1 | Gun Turret, Mortar Tower, Laser Tower, Rocket Salvo, Anti-Aircraft Turret | `design/tower_art_1.html` | **Confirmed** (round 2) |
 | 2 | Artillery Cannon, Railgun, Tesla Tower, Drone Bay, CAS Gunship | `design/tower_art_2.html` | **Confirmed** (round 3) |
 | 3 | Mine Layer, Chemical Plant, Boost Tower, Radar Tower, Cryo Tower | `design/tower_art_3.html` | **Confirmed** (round 3) |
-| 4 | Shockwave Generator, Scrapyard, Magneto Tower, Tractor Tower, Augmentation Tower | `design/tower_art_4.html` | Round 2: picks open |
+| 4 | Shockwave Generator, Scrapyard, Magneto Tower, Tractor Tower, Augmentation Tower | `design/tower_art_4.html` | **Confirmed** (round 2) |
 
 ## Page 1, in-game style round 1 (towers 1-5)
 
@@ -318,9 +318,40 @@ Each preview runs the tower's own mechanic:
 - **Tractor Tower:** its animation is still open. A-C are unchanged, since there was no note.
 - The Shockwave, Scrapyard and Tractor look picks are preselected.
 
-**Picks:** to come.
+**Page 4 confirmed (owner, round 2):**
+- Shockwave Generator: B Ring Reactor / B Mushroom Pulse.
+- Scrapyard: C Magnet Yard / B Sparks and Sale.
+- Magneto Tower: F Stacked Coil Tower / F Drag Trails.
+- Tractor Tower: C Claw Emitter / C Spiral Lock.
+- Augmentation Tower: F Nanite Hive / D Nanite Swarm.
+
+The Tractor cyan and Augmentation lavender weren't changed, so they stand.
+
+## All base looks and firing animations (confirmed 2026-10-16)
+
+| # | Tower | Colour | Look | Animation |
+|---|---|---|---|---|
+| 1 | Gun Turret | cyan | C Rotary Gun | C Rapid Stream |
+| 2 | Mortar Tower | orange | C Braced Siege Mortar | A High Lob |
+| 3 | Laser Tower | red | A Lance Emitter | A Steady Beam (locks on first) |
+| 4 | Rocket Salvo | yellow | C Triple Rail Pods | A Ripple Salvo (three rockets) |
+| 5 | Anti-Aircraft Turret | lime | C Heavy Flak Cannon | A Alternating Barrels |
+| 6 | Artillery Cannon | blue | F Rammer Howitzer | A Shell on the Mark |
+| 7 | Railgun | green | B Sealed Accelerator | A Snap Shot (the line stays where it fired) |
+| 8 | Tesla Tower | purple | B Twin Toroid | C Corona Burst |
+| 9 | Drone Bay | green | A Rotor Pad Hangar | A Hunt and Circle (stays out and idles) |
+| 10 | CAS Gunship | pink | A Airfield Beacon + Four-Engine Gunship (guns hidden, high altitude) | A Gatling Stream |
+| 11 | Mine Layer | red-orange | F Rail Launcher | C Confetti Charge (random spots) |
+| 12 | Chemical Plant | acid green | F Distillery Columns | A Acid Stream |
+| 13 | Boost Tower | magenta | F Signal Drum | F Overcharge Sparks |
+| 14 | Radar Tower | teal | A Dish Mast | B Sweep Beam (follows the dish) |
+| 15 | Cryo Tower | ice blue | B Compressor Block | C Creeping Mist |
+| 16 | Shockwave Generator | amber | B Ring Reactor | B Mushroom Pulse |
+| 17 | Scrapyard | copper | C Magnet Yard | B Sparks and Sale |
+| 18 | Magneto Tower | violet | F Stacked Coil Tower | F Drag Trails |
+| 19 | Tractor Tower | cyan | C Claw Emitter | C Spiral Lock |
+| 20 | Augmentation Tower | lavender | F Nanite Hive | D Nanite Swarm |
 
 ## Open questions
 
-1. **Page 4 picks** (round 2), and whether the proposed Tractor cyan and Augmentation lavender stand.
-2. Then the second pass (per-path looks and Retrofit looks).
+1. The second pass (per-path looks and Retrofit looks).
