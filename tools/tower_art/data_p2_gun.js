@@ -9,7 +9,7 @@
 //   targets, and get Power's shielding (from Power 1) and marked shroud, Range's barrels, and the Retrofit's jacket,
 //   coils or fuel line.
 // - The Water Jacket and Coil Wraps grow with the longer Range barrels.
-const PAGE = { title: "Gun Turret: paths and Retrofits (second pass)", store: "bl-tower-art-p2-gun-r4" };
+const PAGE = { title: "Gun Turret: paths and Retrofits (second pass)", store: "bl-tower-art-p2-gun-r5" };
 const GOLD = [1, 0.78, 0.3, 1], RED_TIP = [1, 0.3, 0.25, 1], STEEL = [0.42, 0.45, 0.5, 1];
 const SHOCK = [0.6, 0.85, 1, 1], FIRE = [1, 0.55, 0.2, 1], WATER = [0.3, 0.42, 0.5, 1];
 const rnd2 = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
@@ -89,7 +89,6 @@ const P2 = {
     if (L.R >= 4) { const e = P(c, aim, k, 5, n > 1 ? 5.5 : -5.5); plate(e, rectPts(1.6, 1.2), METAL, aim, k, 0.8); line(e, add(e, mul(fa(aim), s * 1.4)), [1, 0.25, 0.25, 0.25], 0.8); glowDot(e, 0.6 * k, [1, 0.3, 0.3, 1]); }
     // Extra guns on swivel mounts (bodies bigger than their barrels), each with the same kit as the main gun.
     for (let i = 1; i < n; i++) { const mp = P(c, aim, k, ...mountOf(i)), a = ex[i], el = extraLen(L.R);
-      bar(c, mp, 2.4 * k, METAL);
       if (L.M >= 3) cluster(mp, a, k, fx, t, 1, el, 2.4, 1.4, 4, L.M >= 5 ? GOLD : METAL_L, L.R);
       else { bar(P(mp, a, k, 1 - rc, 0), P(mp, a, k, el - rc, 0), 1.8 * k, METAL_L); if (L.R >= 3) for (let x = 4; x <= el - 2; x += 1.8) line(P(mp, a, k, x - rc, -0.6), P(mp, a, k, x + 0.9 - rc, 0.6), lt(METAL_L, 0.35), 0.5 * k); }
       barrelKit(mp, a, k, fx, t, 4, el - 2, L.M >= 3 ? 2.4 : 1, L, gold, col);

@@ -408,6 +408,7 @@ paths work together.
 - The Water Jacket loses its tank and hose.
 - No blue muzzle glow. The single bore floating in front of the cluster is gone (owner): each barrel has its own bore
   at its tip, and a short pale flash shows at the firing barrel. Shots leave that barrel.
+- The dark arm connecting each extra gun to the turret centre is removed (owner); the mounts stand on their own.
 
 ## Open questions
 
