@@ -377,7 +377,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 3 | Laser Tower | `design/tower_art_p2_03_laser.html` | **Confirmed** (owner, 2026-10-17: "Laser finished") |
 | 4 | Rocket Salvo | `design/tower_art_p2_04_rocket.html` | **Confirmed** (owner, 2026-10-17: "Rocket Salvo is done") |
 | 5 | Anti-Aircraft Turret | `design/tower_art_p2_05_aa.html` | **Confirmed** (owner, 2026-10-17: "AA Finished"; Range 3 is the Optical Director) |
-| 6 | Artillery Cannon | `design/tower_art_p2_06_artillery.html` | Round 1: three options per stage; awaiting picks |
+| 6 | Artillery Cannon | `design/tower_art_p2_06_artillery.html` | Round 2: picks drawn, note applied; awaiting confirm |
 
 ### Gun Turret (second pass)
 
@@ -608,6 +608,16 @@ director fitted, the mastery's gold radar moves to the other side of the deck so
 - **Assumption to confirm:** the stock cannon scatters its shells up to 30 px around the aimed spot (it isn't in the
   confirmed stock stats), so the Stabilised Mount's 15 px shows. Say if the stock should be exact instead.
 
+**Picks (owner, round 1):**
+- **Power:** 1 A Heavy Breech Block, 2 B Fragmentation Sleeve, 3 A Dark HE Shells, 4 C Long Penetrators, M B Gold Muzzle Brake.
+- **Speed:** 1 A Loader Arm, 2 A Hydraulic Breech, 3 A Autoloader Drum, 4 C Recoil Springs, M A Triple Rammer.
+- **Special Effects:** 1 B Igniter Coil, 2 B Fan Vanes, 3 C Damper Pads, 4 C Fuse Computer, M A Gold Selector.
+- **Retrofits:** Shell Magazine A, Stabilised Mount A, Wide Charge A.
+- **Note:** Long Penetrators should change the shape of the round.
+
+**Round 2:** the Long Penetrators now change the round itself: a long slim shell with a steel tip, in flight and in the
+tray (it was a round shell with a tail). The page shows only the picks.
+
 ## Open questions
 
-1. **Second pass, Artillery Cannon** (tower 6, round 1): pick one option per stage and Retrofit, and say whether stock shells should scatter. Then towers 7-20.
+1. **Second pass, Artillery Cannon** (tower 6, round 2): confirm, and say whether stock shells should scatter (the Stabilised Mount assumes 30 px). Then towers 7-20.

@@ -65,7 +65,7 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Tower rework · Tower art · second pass · tower 6 of 20 · round 1</div>
+    <div class="eyebrow">Bastion Line · Tower rework · Tower art · second pass · tower 6 of 20 · round 2</div>
     <h1>Tower art: Artillery Cannon paths and Retrofits</h1>
     <p class="note">Second pass for one tower: <b>every upgrade step and mastery</b> on each path, and each <b>Retrofit</b>, adds or changes a detail on the confirmed model. Each card shows the model with that path's earlier steps (your picks, or option A until you pick) plus the candidate. Pick one of three per step, add notes per path, then <b>Copy picks and notes</b>.</p>
     <ul class="rules">
@@ -763,7 +763,7 @@ const NO_BOOT = true;
 // The Retrofits replaced on 2026-10-17: Shell Magazine (for the Ammo Hoist) and Stabilised Mount (for the Heavy Recoil
 // Mount). Stock scatter is drawn as 30 px, so the Stabilised Mount's 15 px is visible; that stock scatter is Claude's
 // assumption, flagged to the owner.
-const PAGE = { title: "Artillery Cannon: paths and Retrofits (second pass)", store: "bl-tower-art-p2-artillery-r1" };
+const PAGE = { title: "Artillery Cannon: paths and Retrofits (second pass)", store: "bl-tower-art-p2-artillery-r2" };
 const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], RED = [0.85, 0.2, 0.18, 1], ORANGE = [1, 0.55, 0.2, 1];
 const YEL = [1, 0.85, 0.2, 1], DARKSHELL = [0.2, 0.2, 0.22, 1], FIRE = [1, 0.45, 0.12, 1], CONC = [0.55, 0.85, 1, 1];
 const SHRAP = [0.82, 0.8, 0.72, 1], BAG = [0.55, 0.47, 0.3, 1], TANK = [0.6, 0.18, 0.15, 1];
@@ -787,8 +787,10 @@ function shellMarks(p, r, k, B, ty, dir, big) {
   const d = fa(dir), body = bodyCol(B), P4 = Kp(B, 0, 3), band = bandCol(B);
   if (P4 === "B") for (const sg of [-1, 1]) fill(p, [[-0.6, sg * 0.8], [-1.9, sg * 1.9], [-1.9, sg * 0.8]].map((q) => mul(q, r / (2.6 * k))), STEEL, dir, k);
   if (P4 === "A") fill(add(p, mul(d, r * 0.8)), [[1.7, 0], [0, 1], [0, -1]].map((q) => mul(q, r / (2.6 * k))), STEEL, dir, k);
-  if (P4 === "C") { bar(add(p, mul(d, -r * 1.7)), add(p, mul(d, r * 1.1)), r * 1.15, body); }
-  orb(p, r, body);
+  if (P4 === "C") { // Long Penetrators change the round's shape (owner's note): a long slim body with a steel tip
+    bar(add(p, mul(d, -r * 1.9)), add(p, mul(d, r * 0.9)), r * 1.05, body);
+    fill(add(p, mul(d, r * 0.9)), [[1.5, 0], [0, 0.55], [0, -0.55]].map((q) => mul(q, r / (2.6 * k))), STEEL, dir, k);
+  } else orb(p, r, body);
   if (Kp(B, 0, 4)) ring(p, r * 0.55, GOLD, 0.8 * k);
   if (band) line(add(p, mul(orth(d), r * 0.9)), add(p, mul(orth(d), -r * 0.9)), band, 1 * k);
   if (Kp(B, 0, 1) === "A") for (const sg of [-1, 1]) line(add(p, mul(orth(d), sg * r * 0.55 - d[0] * 0)), add(p, add(mul(orth(d), sg * r * 0.55), mul(d, r * 0.6))), ORANGE, 0.8 * k);
@@ -824,7 +826,8 @@ function artImpact(to0, v, s, col, info, B) { const k = G(s), to = add(to0, offO
 const lenFor = () => 25;
 function shellRow(S, k, x, y, n, B, vertical, ty) { const body = bodyCol(B), band = bandCol(B);
   for (let i = 0; i < n; i++) { const q = vertical ? S(x, y + (i - (n - 1) / 2) * 3) : S(x + (i - (n - 1) / 2) * 3, y), r = 1.4 * k * (Kp(B, 0, 0) === "A" ? 1.15 : 1) * (B.r === 2 ? 1.2 : 1);
-    orb(q, r, body); if (band) ring(q, r * 0.7, band, 0.6 * k); if (Kp(B, 0, 3) === "A" || Kp(B, 0, 3) === "C") disc(add(q, [r * 0.55, -r * 0.4]), 0.5 * k, [0.66, 0.69, 0.74, 1]);
+    if (Kp(B, 0, 3) === "C") { bar(add(q, [0, 1.6 * k]), add(q, [0, -1 * k]), r * 0.95, body); fill(add(q, [0, -1 * k]), [[0, -1.5], [0.55, 0], [-0.55, 0]].map((v) => mul(v, r / (2.6 * k))), STEEL, 0, k); if (band) line(add(q, [-r * 0.5, 0.3 * k]), add(q, [r * 0.5, 0.3 * k]), band, 0.6 * k); }
+    else { orb(q, r, body); if (band) ring(q, r * 0.7, band, 0.6 * k); if (Kp(B, 0, 3) === "A") disc(add(q, [r * 0.55, -r * 0.4]), 0.5 * k, [0.66, 0.69, 0.74, 1]); }
     if (B.lv[0] >= 5) ring(q, r * 0.5, GOLD, 0.6 * k); if (ty) ring(q, r * 1.2, A(ty, 0.8), 0.6 * k); } }
 const P2 = {
   tower: "artillery", look: "F", anim: "A",
@@ -1012,6 +1015,13 @@ const P2 = {
 };
 // Round 1 shows all three options per stage, unpicked.
 P2.picks = {};
+
+// ---- Round 2 (owner's picks and notes, 2026-10-17): each stage shows only the pick, re-described where a note changed it.
+P2.intro = "Round 2: your picks drawn as one model, with your note applied: the Long Penetrators now change the shape of the round itself, a long slim shell with a steel tip, in flight and in the tray. Use the build preview to check combinations.";
+P2.picks = { p0s0: "A", p0s1: "B", p0s2: "A", p0s3: "C", p0s4: "B", p1s0: "A", p1s1: "A", p1s2: "A", p1s3: "C", p1s4: "A", p2s0: "B", p2s1: "B", p2s2: "C", p2s3: "C", p2s4: "A", r0: "A", r1: "A", r2: "A" };
+P2.paths.forEach((pa, pi) => pa.steps.forEach((st, k) => { st.options = st.options.filter((o) => o.key === P2.picks["p" + pi + "s" + k]); }));
+P2.retrofits.forEach((rf, ri) => { rf.options = rf.options.filter((o) => o.key === P2.picks["r" + ri]); });
+P2.paths[0].steps[3].options[0].desc = "From your note: the round itself changes shape. Shells are long and slim with a steel tip, in flight and in the tray; a heavy collar at the breech.";
 
 // ---- Tower art engine: previews towers aiming and firing at enemies on a lane --------------------------
 // Data (defined before this): PAGE {title, key, store}, TOWERS [...], DEFAULTS {id: {look, anim}}.
