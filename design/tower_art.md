@@ -43,7 +43,7 @@ enemies on the lane and flyers overhead (air-only towers ignore the ground, and 
 | 1 | Gun Turret, Mortar Tower, Laser Tower, Rocket Salvo, Anti-Aircraft Turret | `design/tower_art_1.html` | **Confirmed** (round 2) |
 | 2 | Artillery Cannon, Railgun, Tesla Tower, Drone Bay, CAS Gunship | `design/tower_art_2.html` | **Confirmed** (round 3) |
 | 3 | Mine Layer, Chemical Plant, Boost Tower, Radar Tower, Cryo Tower | `design/tower_art_3.html` | **Confirmed** (round 3) |
-| 4 | Shockwave Generator, Scrapyard, Magneto Tower, Tractor Tower, Augmentation Tower | `design/tower_art_4.html` | Round 1: picks open |
+| 4 | Shockwave Generator, Scrapyard, Magneto Tower, Tractor Tower, Augmentation Tower | `design/tower_art_4.html` | Round 2: picks open |
 
 ## Page 1, in-game style round 1 (towers 1-5)
 
@@ -297,9 +297,30 @@ Each preview runs the tower's own mechanic:
 | Tractor Tower | Beam Cone | Grapple Beam | Spiral Lock |
 | Augmentation Tower | Crit Links | Augment Glow | Shard Stream |
 
+**Picks and notes (owner, round 1):**
+
+| Tower | Look | Animation | Notes |
+|---|---|---|---|
+| Shockwave Generator | B Ring Reactor | B Mushroom Pulse | |
+| Scrapyard | C Magnet Yard | B Sparks and Sale | |
+| Magneto Tower | - | - | Look: "More ideas". Animation: "More ideas" |
+| Tractor Tower | C Claw Emitter | (none picked) | |
+| Augmentation Tower | - | - | Look: "More ideas". Animation: "More ideas" |
+
+## Page 4, round 2
+
+- **Magneto Tower:**
+  - New looks: **D Ring Electromagnet**, **E Lifting Magnet Crane** and **F Stacked Coil Tower**.
+  - New animations: **D Spark Arcs**, **E Gravity Ripple** and **F Drag Trails**.
+- **Augmentation Tower:**
+  - New looks: **D Tuning Fork Spire**, **E Glyph Ring** and **F Nanite Hive**.
+  - New animations: **D Nanite Swarm**, **E Heartbeat Tethers** and **F Overdrive Halo**.
+- **Tractor Tower:** its animation is still open. A-C are unchanged, since there was no note.
+- The Shockwave, Scrapyard and Tractor look picks are preselected.
+
 **Picks:** to come.
 
 ## Open questions
 
-1. **Page 4 picks** (round 1), and whether the proposed Tractor cyan and Augmentation lavender stand.
+1. **Page 4 picks** (round 2), and whether the proposed Tractor cyan and Augmentation lavender stand.
 2. Then the second pass (per-path looks and Retrofit looks).
