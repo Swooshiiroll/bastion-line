@@ -5,7 +5,7 @@
 // Fuses, Smoke Trails, Incendiary Warheads.
 // Geometry (game px, x along the aim): pods from x -8 to their mouths at x 11.5; cross-frame bars at x -4 and 6;
 // a hazard-striped blast deflector at x -11.
-const PAGE = { title: "Rocket Salvo: paths and Retrofits (second pass)", store: "bl-tower-art-p2-rocket-r2" };
+const PAGE = { title: "Rocket Salvo: paths and Retrofits (second pass)", store: "bl-tower-art-p2-rocket-r3" };
 const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], RED = [0.9, 0.22, 0.2, 1], YEL = [1, 0.85, 0.2, 1], ORANGE = [1, 0.55, 0.2, 1];
 const SEEK = [0.35, 0.75, 1, 1], DARKR = [0.22, 0.22, 0.24, 1], PALE = [0.86, 0.88, 0.92, 1], SMOKEC = [0.55, 0.57, 0.6, 1];
 const Kp = (B, pi, k) => (B.lv[pi] > k ? B.key("p" + pi + "s" + k) : null);
@@ -20,7 +20,7 @@ const homing = (B) => B.lv[1] >= 2;
 // ---- Launch tubes: layout from the Payload path; each entry is a mouth [x, y, r] plus the pod bodies -----------------
 function layoutOf(B, t) { const P3 = B.lv[2];
   if (P3 >= 5) { const st = Kp(B, 2, 4);
-    if (st === "B") return { pods: [[-7.4, 11], [7.4, 11]], mouths: [-1, 1].flatMap((sg) => [[11, sg * 5, 1.4], [11, sg * 9.8, 1.4], [8.2, sg * 5, 1.4], [8.2, sg * 9.8, 1.4]]), gold: true }; // 2 x 2 per side
+    if (st === "B") return { pods: [[-7.4, 11], [7.4, 11]], tall: true, mouths: [-1, 1].flatMap((sg) => [[11.5, sg * 5, 1.4, 1], [11.5, sg * 9.8, 1.4, 1], [11.5, sg * 5, 1.4, 0], [11.5, sg * 9.8, 1.4, 0]]), gold: true }; // 2 x 2 per side: [x, y, r, upper?]
     if (st === "C") { const sp = t * 2; return { drum: true, pods: [[0, 12]], mouths: [0, 1, 2, 3, 4, 5, 6, 7].map((i) => [11.5, Math.sin(sp + i * TAU / 8) * 4.8, 1.2]), gold: true }; }
     return { pods: [[0, 23]], mouths: [-10.5, -7.5, -4.5, -1.5, 1.5, 4.5, 7.5, 10.5].map((y, i) => [i % 2 ? 9 : 11, y, 1.3]), gold: true }; }
   if (P3 >= 3) { const st = Kp(B, 2, 2);
@@ -60,6 +60,13 @@ function rocketImpact(to, v, s, col, info, B) { const size = 0.014 * blastPx(B),
   if (B.r === 2 && !air) for (let i = 0; i < 4; i++) { const q = add(to, [(rnd2(i + 3) - 0.5) * s * size * 2, (rnd2(i + 7) - 0.5) * s * size]), w = fmod(v * 2 + i / 4, 1); disc(add(q, [0, -w * s * 0.12]), s * 0.03 * (1 - w), A(i % 2 ? ORANGE : YEL, 1 - w)); } }
 
 // ---- The model ---------------------------------------------------------------------------------------------------------
+const TALL_H = 7; // how high the mastery's banks stand (game px, drawn as a screen-down offset)
+function tallBox(c, aim, k, x0, x1, y, w, col, gold) { const up = [0, -TALL_H * k], q = [[x0, y - w / 2], [x1, y - w / 2], [x1, y + w / 2], [x0, y + w / 2]].map(([x, yy]) => P(c, aim, k, x, yy));
+  poly(q.map((p) => add(p, [4 * k, 6 * k])), [0, 0, 0, 0.25]); // long shadow
+  for (let i = 0; i < 4; i++) { const a = q[i], b = q[(i + 1) % 4], m = mul(add(a, b), 0.5), ctr = mul(q.reduce((s2, p) => add(s2, p), [0, 0]), 0.25);
+    if (m[1] - ctr[1] > 0.01) { const face = [a, b, add(b, up), add(a, up)]; poly(face, OUTLINE); poly(face.map((p) => add(mul(sub(p, mul(add(face[0], face[2]), 0.5)), 0.9), mul(add(face[0], face[2]), 0.5))), dk(col, i === 1 ? 0.25 : 0.4)); } }
+  const top = q.map((p) => add(p, up)); poly(top, OUTLINE); const ctr = mul(top.reduce((s2, p) => add(s2, p), [0, 0]), 0.25); poly(top.map((p) => add(ctr, mul(sub(p, ctr), 0.92))), col);
+  for (const fr of [0.2, 0.85]) line(add(lerp(top[0], top[1], fr), [0, 0]), add(lerp(top[3], top[2], fr), [0, 0]), gold ? GOLD : [0, 0, 0, 0.3], 1.1 * k); return up; }
 function deckRack(c, k, x, y, n, col2, band) { const S = (dx, dy) => P(c, 0, k, x + dx, y + dy); plate(S(0, 0), rectPts(1.8, n * 1.6 + 0.6), METAL_D, 0, k, 0.9);
   for (let i = 0; i < n; i++) { const q = S(0, (i - (n - 1) / 2) * 3); orb(q, 1.2 * k, col2); if (band) ring(q, 0.7 * k, band, 0.6 * k); } }
 
@@ -70,7 +77,7 @@ const P2 = {
     return { period, burst: n, gap: B.lv[2] >= 5 ? 0.09 : 0.14, multi: true,
       shot: (f, to, u, s, col, kk, t, info) => { const dest = homing(B) || !info || !info.sh ? to : info.sh.to0; rocketFlight(f, dest, u, s, col, kk, B); },
       impact: (to, v, s, col, info) => rocketImpact(homing(B) || !info || !info.sh ? to : info.sh.to0, v, s, col, info, B) }; },
-  muzzleAt(B, m, kk, c, aim, s, info) { const L = layoutOf(B, info.t), mo = L.mouths[kk % L.mouths.length]; return P(c, aim, G(s), mo[0] + 0.5, mo[1]); },
+  muzzleAt(B, m, kk, c, aim, s, info) { const L = layoutOf(B, info.t), mo = L.mouths[kk % L.mouths.length], k = G(s); return add(P(c, aim, k, mo[0] + 0.5, mo[1]), L.tall ? [0, (mo[3] ? -TALL_H * 0.78 : -TALL_H * 0.28) * k] : [0, 0]); },
   model(c, aim, s, fx, t, col, info, B) {
     const k = G(s), L = layoutOf(B, t), S = (x, y) => P(c, 0, k, x, y), kp = (pi, kk) => Kp(B, pi, kk), gold = B.lv[0] >= 5, ready = fx.ready ?? 1;
     deck(c, k, col, t);
@@ -87,15 +94,17 @@ const P2 = {
     if (kp(2, 3) === "B") { const dr = P(c, aim, k, -6.5, 0); disc(dr, 4 * k, OUTLINE); disc(dr, 3.4 * k, METAL); ring(dr, 2.2 * k, A(col, 0.7), 0.9 * k); }
     if (kp(2, 1) === "B") line(P(c, aim, k, -9, 9), P(c, aim, k, -6, 5), [0.55, 0.45, 0.25, 1], 2 * k);
     if (kp(2, 1) === "A") { const a = aim + Math.PI * 0.8 - decay(fx.barrelSince ?? 9, 0.5) * 0.8, b0 = P(c, aim, k, -7, 9); orb(b0, 1.5 * k, METAL); bar(b0, add(b0, mul(fa(a), 7 * k)), 1.2 * k, METAL_L); }
+    if (kp(2, 3) === "C") bar(P(c, aim, k, -9, 12), P(c, aim, k, -9, -12), 1.6 * k, [0.3, 0.3, 0.32, 1]);
     const podLen = 11.5 + (kp(1, 0) === "B" ? 2 : 0), podCol = kp(0, 2) === "B" ? STEEL : METAL_L;
     if (L.drum) { bar(P(c, aim, k, -8, 0), P(c, aim, k, podLen, 0), 12 * k, METAL); for (const m of L.mouths) line(P(c, aim, k, -6, m[1]), P(c, aim, k, podLen - 0.5, m[1]), [0, 0, 0, 0.35], 1.2 * k); for (const x of [-6, podLen - 1]) line(P(c, aim, k, x, -6), P(c, aim, k, x, 6), GOLD, 1.2 * k); }
+    else if (L.tall) for (const [y, w] of L.pods) tallBox(c, aim, k, -8, podLen, y, w, podCol, true);
     else for (const [y, w] of L.pods) { if (w > 8) { const cx = (podLen - 8) / 2; plate(P(c, aim, k, cx, y), rectPts((podLen + 8) / 2, w / 2), podCol, aim, k, 1.2); rivets(P(c, aim, k, cx, y), rectPts((podLen + 8) / 2, w / 2), aim, k, 0.9, 0.7 * k); }
       else bar(P(c, aim, k, -8, y), P(c, aim, k, podLen, y), w * k, podCol); } // wide blocks are flat plates, pods are round
     if (L.top) bar(P(c, aim, k, -4, 0), P(c, aim, k, 9, 0), 3 * k, lt(METAL_L, 0.1));
     if (L.side) bar(P(c, aim, k, -2, 11.5), P(c, aim, k, 8, 11.5), 2.6 * k, METAL_L);
     // Pod bands and kit (on every pod): Power, Range, gold at the masteries, the Retrofit.
     const half = (w) => w * 0.5;
-    for (const [y, w] of L.drum ? [[0, 12]] : L.pods) { const band = (x, c2, lw) => line(P(c, aim, k, x, y - half(w)), P(c, aim, k, x, y + half(w)), c2, lw * k);
+    for (const [y, w] of L.drum ? [[0, 12]] : L.tall ? [] : L.pods) { const band = (x, c2, lw) => line(P(c, aim, k, x, y - half(w)), P(c, aim, k, x, y + half(w)), c2, lw * k);
       if (kp(0, 0) === "A") band(4, RED, 1.1);
       if (kp(0, 1) === "C") for (const x of [0, 2]) band(x, [0, 0, 0, 0.45], 0.8);
       if (kp(0, 2) === "B") for (const x of [-6, 9]) band(x, STEEL, 1.6);
@@ -107,7 +116,7 @@ const P2 = {
       if (B.r === 1 && B.key("r1") === "A") bar(P(c, aim, k, -6, y + half(w) * 0.7), P(c, aim, k, -1, y + half(w) * 0.7), 1.2 * k, SMOKEC); }
     if (kp(1, 0) === "C") bar(P(c, aim, k, -8, -half(L.pods[0][1]) + L.pods[0][0] - 1.4), P(c, aim, k, podLen - 1, -half(L.pods[0][1]) + L.pods[0][0] - 1.4), 1 * k, STEEL);
     if (gold && kp(0, 4) === "C") for (const y of [-12.5, 12.5]) { bar(P(c, aim, k, -6, y), P(c, aim, k, 4, y), 2.6 * k, [0.75, 0.38, 0.12, 1]); ring(P(c, aim, k, -1, y), 1.4 * k, GOLD, 0.9 * k); }
-    for (const [i, m] of L.mouths.entries()) { const q = P(c, aim, k, m[0] + (L.drum ? 0 : podLen - 11.5), m[1]); disc(q, (m[2] + 0.4) * k, OUTLINE); disc(q, m[2] * k, BORE);
+    for (const [i, m] of L.mouths.entries()) { const q = add(P(c, aim, k, m[0] + (L.drum ? 0 : podLen - 11.5), m[1]), L.tall ? [0, (m[3] ? -TALL_H * 0.78 : -TALL_H * 0.28) * k] : [0, 0]); disc(q, (m[2] + 0.4) * k, OUTLINE); disc(q, m[2] * k, BORE);
       const f2 = fx.barrel === i && (fx.barrelSince ?? 9) < 0.25 ? 1 - fx.barrelSince / 0.25 : 0; if (f2 > 0) glowDot(q, m[2] * k * f2, col);
       if (B.r === 2 && B.key("r2") === "C") ring(q, (m[2] + 0.2) * k, A(ORANGE, 0.8), 0.7 * k);
       if (B.r === 0 && B.key("r0") === "A") line(q, add(q, mul(fa(aim), 1.8 * k)), STEEL, 0.5 * k);
@@ -120,7 +129,6 @@ const P2 = {
     if (B.r === 0 && B.key("r0") === "B") { plate(P(c, aim, k, -8, -9.5), rectPts(1.8, 1.4), METAL_D, aim, k, 0.9); glowDot(P(c, aim, k, -8, -9.5), 0.6 * k, ORANGE); }
     if (kp(2, 3) === "A") for (const y of [-12.5, 12.5]) { const q = P(c, aim, k, -6.5, y); disc(q, 1.8 * k, OUTLINE); for (let i = 0; i < 6; i++) line(q, add(q, mul(fa(t * 6 * Math.sign(y) + i * Math.PI / 3), 1.6 * k)), METAL_L, 0.8 * k); }
     if (kp(1, 3) === "C") for (const y of [-12.5, 12.5]) { bar(P(c, aim, k, -9, y), P(c, aim, k, -3, y), 2.4 * k, [0.5, 0.55, 0.45, 1]); line(P(c, aim, k, -6, y - 1), P(c, aim, k, -6, y + 1), [0, 0, 0, 0.4], 0.8 * k); }
-    if (kp(2, 3) === "C") bar(P(c, aim, k, -9, 12), P(c, aim, k, -9, -12), 1.6 * k, [0.3, 0.3, 0.32, 1]);
     orb(P(c, aim, k, -4, 0), 2.4 * k, METAL); glowDot(P(c, aim, k, -4, 0), 1 * k, col);
   },
   paths: [

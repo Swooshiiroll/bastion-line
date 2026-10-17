@@ -375,7 +375,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 1 | Gun Turret | `design/tower_art_p2_01_gun.html` | **Confirmed** (owner, 2026-10-17: "Gun turret finished") |
 | 2 | Mortar Tower | `design/tower_art_p2_02_mortar.html` | **Confirmed** (owner, 2026-10-17: "Mortar finished"; its bore glow stays) |
 | 3 | Laser Tower | `design/tower_art_p2_03_laser.html` | **Confirmed** (owner, 2026-10-17: "Laser finished") |
-| 4 | Rocket Salvo | `design/tower_art_p2_04_rocket.html` | Round 2: picks and notes applied; to confirm |
+| 4 | Rocket Salvo | `design/tower_art_p2_04_rocket.html` | Round 3: taller 8-tube banks; to confirm |
 
 ### Gun Turret (second pass)
 
@@ -547,7 +547,11 @@ Their prices are formula estimates (proposed), in `design/tower_roster.md`.
 - **5/2/0:** the Seeker Heads' blue nose wins over the Power mastery's gold, in flight and in the tubes.
 - **The pods and banks are bigger than their mouths.**
 - **The Ripple Salvo stacks its tubes 2 x 2** in each side bank.
+- **The 8-tube banks stand tall** (owner, round 3: "It still looks flat"):
+  - each bank is a raised box: its top face lifted, the side and front faces facing the viewer shaded, a long shadow.
+  - the 2 x 2 tubes really stack: the upper pair on the top's front edge, the lower pair on the front face.
+  - rockets leave their own row.
 
 ## Open questions
 
-1. **Second pass, Rocket Salvo** (round 2): confirm; then towers 5-20.
+1. **Second pass, Rocket Salvo** (round 3): confirm; then towers 5-20.
