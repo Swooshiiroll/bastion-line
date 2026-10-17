@@ -374,7 +374,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 |---|---|---|---|
 | 1 | Gun Turret | `design/tower_art_p2_01_gun.html` | **Confirmed** (owner, 2026-10-17: "Gun turret finished") |
 | 2 | Mortar Tower | `design/tower_art_p2_02_mortar.html` | **Confirmed** (owner, 2026-10-17: "Mortar finished"; its bore glow stays) |
-| 3 | Laser Tower | `design/tower_art_p2_03_laser.html` | Round 1: picks open |
+| 3 | Laser Tower | `design/tower_art_p2_03_laser.html` | Round 2: picks and notes applied; Ramp Memory's look to pick |
 
 ### Gun Turret (second pass)
 
@@ -495,6 +495,20 @@ paths work together.
   - each extra beam locks on its own target with its own reticle.
   - at the mastery each beam ramps on its own.
 
+**Picks (owner, round 1):**
+- **Power:** 1 C Heat Vents, 2 C Fast Focus, 3 A Overdrive Core, 4 B Big Heat Sinks, M C Gold Heat Sinks.
+- **Multi-Target:** 1 A Splitter Prism, 2 B Thicker Beam, 3 C Prism Cluster, 4 B Brighter Beams, M C Prism Halo.
+- **Range/Targeting:** 1 A Longer Lance, 2 A Collimator Rings, 3 C Rail Lance, 4 A Even Longer, M A Gold Rings.
+- **Retrofits:** Capacitor Bank C Capacitor Ring, Heat Sinks B Radiator Blocks.
+
+**Round 2 (owner's notes and answers):**
+- **The Focusing Lens Retrofit was redundant** with Power step 2, so it's replaced by **Ramp Memory**: switching targets
+  keeps half the ramp. Its price is 55 (a formula estimate, proposed).
+- **The Heat Sinks' overlap** with Power step 1 (both ramp ceiling ×3.5) stays (owner: "Keep it as is").
+- **The Radiator Blocks replace all the heat-sink fins.** Power's Big Heat Sinks and Gold Heat Sinks then grow and gild
+  the blocks instead.
+- **Ramp Memory's look** has three options: Charge Reservoir, Memory Coil, Afterglow Crystal.
+
 ## Open questions
 
-1. **Second pass, Laser Tower** (round 1): picks for 15 steps and 3 Retrofits; then towers 4-20.
+1. **Second pass, Laser Tower** (round 2): Ramp Memory's look and confirmation; then towers 4-20.

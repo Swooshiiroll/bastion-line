@@ -27,7 +27,7 @@ All 20 towers are designed and confirmed by the owner (2026-10-15). Costs are bu
 |---|---|---|---|---|---|---|
 | 1 | Gun Turret | Assault | Ballistic | 75 | Power / Range/Visibility / Multi-Target | Water-Cooled Barrel / Shock Rounds / Incendiary Rounds |
 | 2 | Mortar Tower | Assault | Explosive | 150 | Power/Penetration / Speed/Range / Blast Radius/Multi-Target | Field Kit / Bunker Sight / Smoke Shells |
-| 3 | Laser Tower | Assault | Energy | 250 | Power / Multi-Target / Range/Targeting | Capacitor Bank / Heat Sinks / Focusing Lens |
+| 3 | Laser Tower | Assault | Energy | 250 | Power / Multi-Target / Range/Targeting | Capacitor Bank / Heat Sinks / Ramp Memory |
 | 4 | Rocket Salvo | Assault | Explosive | 200 | Power / Range/Target Acquisition / Reload/Payload | Guidance Fins / Autoloader / Long Booster |
 | 5 | Anti-Aircraft Turret | Assault | Ballistic | 150 | Range / Power/Blast Radius / Speed | Fire-Control Radar / Ammo Drum / Armoured Mount |
 | 6 | Artillery Cannon | Assault | Explosive | 300 | Power / Speed / Special Effects | Ammo Hoist / Heavy Recoil Mount / Wide Charge |
@@ -269,7 +269,9 @@ towers benefit. Switching targets resets the ramp but not the melted armour.
 - **Capacitor Bank, 160:** +8 damage per second (25 to 33). Look: glowing capacitor drums on the base that pulse as the
   beam ramps.
 - **Heat Sinks, 60:** ramp ceiling ×3 to ×3.5. Look: cooling fins along the turret.
-- **Focusing Lens, 15:** ramp time 3 to 2.4 s. Look: a big glowing lens on the emitter.
+- **Ramp Memory, 55 (formula estimate, proposed; owner, 2026-10-17):** switching targets keeps half the ramp instead of
+  resetting it. Look: a charge reservoir that stays lit between targets. Replaces the **Focusing Lens**, which duplicated
+  Power step 2 (Quick Focus). The Heat Sinks Retrofit's overlap with Power step 1 (Hotter Emitter) stays (owner).
 
 **Path 1, Power (faster, higher ramp):**
 

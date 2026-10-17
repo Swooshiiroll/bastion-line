@@ -4,13 +4,13 @@
 // changes with the Power path (ramp, width, heat); only the turret turns (the deck kit stays put).
 // Geometry (game px, x along the aim): hex hull r ~10, heat-sink fins on both flanks (x -3..-8, y 5..9), lance barrel
 // from x 4 to its tip at x 21 with focusing rings at 8 / 12 / 16, a crystal at the tip, a capacitor orb at x -4.
-const PAGE = { title: "Laser Tower: paths and Retrofits (second pass)", store: "bl-tower-art-p2-laser-r1" };
+const PAGE = { title: "Laser Tower: paths and Retrofits (second pass)", store: "bl-tower-art-p2-laser-r2" };
 const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], COPPER = [0.78, 0.5, 0.28, 1], COOL = [0.35, 0.6, 0.9, 1];
 const Kp = (B, pi, k) => (B.lv[pi] > k ? B.key("p" + pi + "s" + k) : null);
 const rnd2 = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
 
 // ---- Numbers that drive the look -------------------------------------------------------------------------------
-const rampTime = (B) => Math.min([3, 3, 2.2, 2.2, 1.8, 1.5][B.lv[0]], B.r === 2 ? 2.4 : 9);
+const rampTime = (B) => [3, 3, 2.2, 2.2, 1.8, 1.5][B.lv[0]];
 const ceilingOf = (B) => [3, 3.5, 3.5, 5, 6, 8][B.lv[0]] + (B.r === 1 ? 0.5 : 0);
 const beamsOf = (B) => [1, 2, 2, 3, 3, 4][B.lv[1]];
 const extraPower = (B) => [1, 0.4, 0.6, 0.6, 0.75, 0.75][B.lv[1]];
@@ -40,7 +40,7 @@ const P2 = {
   tower: "laser", look: "A", anim: "A",
   intro: "Round 1: three options for every step and Retrofit, as one model. The beam itself changes with the Power path (it ramps wider and hotter, whitening at Overdrive, wrapped in gold at the mastery); Multi-Target adds beams that lock and ramp on their own targets; Range swaps in a longer lance. Only the turret turns. Unpicked steps show option A.",
   mods(B) { return { shot: (f, to, lock, s, col, kk, t, info) => {
-      const g = Math.min(1, lock / rampTime(B)); if (info) info.view.ramp = g; rampBeam(f, to, g, B, col, 1, s);
+      const g = Math.min(1, lock / rampTime(B) + (B.r === 2 ? 0.5 : 0)); if (info) info.view.ramp = g; rampBeam(f, to, g, B, col, 1, s);
       const nb = beamsOf(B); if (nb < 2 || !info) return; const v = info.view; v.locks ||= {}; const k = G(s), aim = info.aim, c = info.c;
       for (let i = 1; i < nb; i++) { const e = info.order && info.order[i]; if (!e) continue; v.locks[e.i] ??= t; for (const id in v.locks) if (!info.order.some((x) => x.i == id)) delete v.locks[id];
         const held = t - v.locks[e.i], on = held >= 0.6, origin = sideEmitters(B) ? add(P(c, aim, k, ...sideAt(i)), mul(fa(aim), 6.4 * k)) : add(P(c, aim, k, tipX(B), 0), mul(orth(fa(aim)), (i % 2 ? 1 : -1) * 1.2 * k));
@@ -58,8 +58,11 @@ const P2 = {
       if (st === "C") { ring(c, 13.5 * k, OUTLINE, 3 * k); ring(c, 13.5 * k, METAL, 2 * k); ring(c, 13.5 * k, A(col, 0.2 + 0.6 * g), 0.8 * k); } }
     // Heat-sink fins on the flanks (the Heat Sinks Retrofit and Thermal Lock B make them bigger).
     const finL = B.r === 1 && B.key("r1") === "A" ? 12 : kp(0, 3) === "B" ? 11 : 9, finN = B.r === 1 ? 4 : 3;
-    for (const y of [-1, 1]) for (let i = 0; i < finN; i++) bar(P(c, aim, k, -3 - 2.3 * i, y * 5), P(c, aim, k, -3 - 2.3 * i, y * finL), 1.3 * k, gold && kp(0, 4) === "C" ? GOLD : METAL_L);
-    if (B.r === 1 && B.key("r1") === "B") for (const y of [-7.5, 7.5]) { plate(P(c, aim, k, -6, y), rectPts(3.4, 1.6), METAL, aim, k, 1); for (let i = 0; i < 4; i++) line(P(c, aim, k, -8.5 + i * 1.6, y - 1.2), P(c, aim, k, -8.5 + i * 1.6, y + 1.2), [0, 0, 0, 0.4], 0.7 * k); }
+    const radiators = B.r === 1 && B.key("r1") === "B";
+    if (!radiators) for (const y of [-1, 1]) for (let i = 0; i < finN; i++) bar(P(c, aim, k, -3 - 2.3 * i, y * 5), P(c, aim, k, -3 - 2.3 * i, y * finL), 1.3 * k, gold && kp(0, 4) === "C" ? GOLD : METAL_L);
+    if (radiators) { const big = kp(0, 3) === "B", gild = gold && kp(0, 4) === "C", hw = big ? 2.4 : 1.6;
+      for (const y of [-1, 1]) { const q = P(c, aim, k, -6, y * (big ? 8 : 7.5)); plate(q, rectPts(big ? 4.4 : 3.4, hw), gild ? GOLD : METAL, aim, k, 1);
+        for (let i = 0; i < (big ? 5 : 4); i++) line(P(c, aim, k, -9 + i * 1.6, y * (big ? 8 : 7.5) - hw * 0.75), P(c, aim, k, -9 + i * 1.6, y * (big ? 8 : 7.5) + hw * 0.75), [0, 0, 0, 0.4], 0.7 * k); } }
     if (B.r === 1 && B.key("r1") === "C") { const fp = P(c, aim, k, -7, 0); disc(fp, 3.4 * k, OUTLINE); disc(fp, 3 * k, METAL); for (let i = 0; i < 4; i++) line(fp, add(fp, mul(fa(t * 10 + i * Math.PI / 2), 2.7 * k)), METAL_L, 1 * k); }
     // The hull.
     plate(c, [[7, 0], [1, 6], [-9, 5], [-11, 0], [-9, -5], [1, -6]], METAL_L, aim, k, 1.2);
@@ -94,7 +97,10 @@ const P2 = {
       if (M >= 5 && kp(1, 4) === "C") for (let i = 0; i < 4; i++) solid(add(tp, mul(fa(aim + i * Math.PI / 2 + t), 6 * k)), ngon(3, 1.2, t), A(GOLD, 0.9), 0, k, 0.6); }
     else crystal(tp, aim, k, col, g, kp(0, 0) === "A" ? 1.3 : 1, gold && kp(0, 4) === "A");
     if (B.lv[2] >= 5 && kp(2, 4) === "C") { orb(tp, 4.2 * k, mix(col, WHITE, 0.3)); ring(tp, 4.4 * k, GOLD, 1.2 * k); glowDot(tp, (1 + 1.6 * g) * k, WHITE); }
-    if (B.r === 2) { const st = B.key("r2"); ell2(tp, aim, k, st === "A" ? 5 : 4, col, g); if (st === "B") ell2(P(c, aim, k, tip - 3, 0), aim, k, 3.4, col, g); if (st === "C") ring(tp, 6 * k, A(col, 0.5 + 0.4 * Math.sin(t * 6)), 1.2 * k); }
+    if (B.r === 2) { const st = B.key("r2"), held = Math.max(0.5, g); // Ramp Memory: it never drops below half
+      if (st === "A") { const q = P(c, aim, k, -7, 4.5); plate(q, rectPts(2.6, 1.8), METAL, aim, k, 1); line(P(c, aim, k, -9, 4.5), P(c, aim, k, -9 + 4 * held, 4.5), A(col, 0.95), 1.6 * k); }
+      if (st === "B") { const q = P(c, aim, k, 5, 0); ring(q, 3.4 * k, OUTLINE, 2.4 * k); ring(q, 3.4 * k, COPPER, 1.4 * k); ring(q, 3.4 * k, A(col, 0.3 + 0.6 * held), 0.6 * k); }
+      if (st === "C") glowDot(tp, (1.2 + 0.8 * held) * k, A(col, 0.6)); }
     if (M >= 1 && sideEmitters(B)) for (let i = 1; i < beamsOf(B); i++) emitterKit(P(c, aim, k, ...sideAt(i)), aim, k, col, g, B, t);
     // The capacitor orb; Overdrive A's core and the Annihilator B core glow with the ramp.
     orb(P(c, aim, k, -4, 0), (kp(0, 2) === "A" ? 3 : 2.2) * k, dk(col, 0.3)); if (kp(0, 2) === "A") glowDot(P(c, aim, k, -4, 0), (0.8 + 1.4 * g) * k, mix(col, WHITE, 0.4));
@@ -184,3 +190,16 @@ const P2 = {
   ],
 };
 function ell2(p, aim, k, r, col, g) { oval(p, r * 0.6 * k, r * k, aim, A(mix(col, WHITE, 0.4), 0.55 + 0.3 * g)); ring(p, r * k, OUTLINE, 1); glowDot(p, (0.8 + g) * k, WHITE); }
+
+// ---- Round 2 (owner's picks and notes, 2026-10-17) ----------------------------------------------------------------
+P2.intro = "Round 2: your picks drawn as one model. The Radiator Blocks replace the heat-sink fins (your note), and Power's fin steps grow and gild the blocks instead. The Focusing Lens is replaced by Ramp Memory (switching targets keeps half the ramp): pick its look below.";
+P2.picks = { p0s0: "C", p0s1: "C", p0s2: "A", p0s3: "B", p0s4: "C", p1s0: "A", p1s1: "B", p1s2: "C", p1s3: "B", p1s4: "C", p2s0: "A", p2s1: "A", p2s2: "C", p2s3: "A", p2s4: "A", r0: "C", r1: "B" };
+P2.paths.forEach((pa, pi) => pa.steps.forEach((st, k) => { st.options = st.options.filter((o) => o.key === P2.picks["p" + pi + "s" + k]); }));
+[0, 1].forEach((ri) => { P2.retrofits[ri].options = P2.retrofits[ri].options.filter((o) => o.key === P2.picks["r" + ri]); });
+P2.paths[0].steps[3].options[0].desc = "Longer heat-sink fins; with the Radiator Blocks fitted, the blocks grow instead.";
+P2.paths[0].steps[4].options[0].desc = "Gold heat-sink fins (or gold radiator blocks); at full ramp the beam is wrapped in gold.";
+P2.retrofits[1].options[0].desc = "Finned radiator blocks on both flanks replace all the heat-sink fins (your note).";
+P2.retrofits[2] = { name: "Ramp Memory", cost: 55, effect: "Switching targets keeps half the ramp (replaces the Focusing Lens; 55 is a formula estimate)", options: [
+  { key: "A", name: "Charge Reservoir", desc: "A reservoir on the hull whose gauge never drops below half; the beam starts each new target half-ramped." },
+  { key: "B", name: "Memory Coil", desc: "A copper coil round the lance base that stays lit between targets." },
+  { key: "C", name: "Afterglow Crystal", desc: "The tip crystal keeps a steady afterglow between targets." } ] };

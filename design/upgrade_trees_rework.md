@@ -72,7 +72,7 @@ A High-Energy Laser Emitter affixed to a rotating turret. "It does more than jus
 | 1 | base | Laser Tower | 250 |  | 250 credits; 25 damage per second, ramping up to ×3 over 3 s on the same target; 150 range; air and ground. Armour melt: the locked target loses 1 armour per second, down to 0. The armour stays gone, so other towers benefit. Switching targets resets the ramp but not the melted armour. | new |
 | 2 | r1 | Capacitor Bank | 160 |  | +8 damage per second (25 to 33). | new |
 | 2 | r2 | Heat Sinks | 60 |  | Ramp ceiling ×3 to ×3.5. | new |
-| 2 | r3 | Focusing Lens | 15 |  | Ramp time 3 to 2.4 s. | new |
+| 2 | r3 | Ramp Memory | 55 |  | Switching targets keeps half the ramp instead of resetting it. | new |
 | 3 | a | Hotter Emitter | 60 |  | Ramp ceiling ×3.5 | new |
 | 4 | a | Quick Focus | 60 |  | Ramp time 3 to 2.2 s | new |
 | 5 | a | Overdrive | 815 |  | Ramp ceiling ×5 | new |
