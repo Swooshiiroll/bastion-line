@@ -446,6 +446,8 @@ paths work together.
   - its shadow lengthens toward the mouth.
   - the mouth is an ellipse squashed along the aim, since the opening faces up and forward. The collar, fin slots,
     vanes and clamps follow that ellipse.
+  - the mouth is sized to the tube, its rim just outside the tube's sides (owner: "The barrel end is too thick for the
+    barrel").
 
 ## Open questions
 
