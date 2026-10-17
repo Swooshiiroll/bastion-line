@@ -372,7 +372,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 
 | # | Tower | File | Status |
 |---|---|---|---|
-| 1 | Gun Turret | `design/tower_art_p2_01_gun.html` | Round 2: picks drawn as one model; to confirm |
+| 1 | Gun Turret | `design/tower_art_p2_01_gun.html` | Round 3: owner's changes applied; to confirm |
 
 ### Gun Turret (second pass)
 
@@ -402,6 +402,12 @@ paths work together.
   - the Laser Rangefinder moves to the right side when a flank gun is fitted.
   - the drum moves back at Multi-Target's mastery to make room for the third gun.
 
+**Round 3 (owner, 2026-10-17):**
+- Multi-Target 1 is now **A Geared Swivel Ring** (was Bearing Rollers).
+- Multi-Target 4 is now **C Feed Gears** (was Ammo Hopper): spinning gears on the body and on every extra gun's mount.
+- The Water Jacket loses its tank and hose.
+- No blue muzzle glow: each muzzle is a dark bore with a short pale flash per shot.
+
 ## Open questions
 
-1. **Second pass, Gun Turret** (round 2): confirm the combined model; then towers 2-20, one page each.
+1. **Second pass, Gun Turret** (round 3): confirm; then towers 2-20, one page each.

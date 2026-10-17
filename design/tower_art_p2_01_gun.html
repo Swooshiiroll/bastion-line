@@ -65,7 +65,7 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Tower rework · Tower art · second pass · tower 1 of 20 · round 2</div>
+    <div class="eyebrow">Bastion Line · Tower rework · Tower art · second pass · tower 1 of 20 · round 3</div>
     <h1>Tower art: Gun Turret paths and Retrofits</h1>
     <p class="note">Second pass for one tower: <b>every upgrade step and mastery</b> on each path, and each <b>Retrofit</b>, adds or changes a detail on the confirmed model. Each card shows the model with that path's earlier steps (your picks, or option A until you pick) plus the candidate. Pick one of three per step, add notes per path, then <b>Copy picks and notes</b>.</p>
     <ul class="rules">
@@ -619,7 +619,7 @@ const NO_BOOT = true;
 //   targets, and get Power's shielding (from Power 1) and marked shroud, Range's barrels, and the Retrofit's jacket,
 //   coils or fuel line.
 // - The Water Jacket and Coil Wraps grow with the longer Range barrels.
-const PAGE = { title: "Gun Turret: paths and Retrofits (second pass)", store: "bl-tower-art-p2-gun-r2" };
+const PAGE = { title: "Gun Turret: paths and Retrofits (second pass)", store: "bl-tower-art-p2-gun-r3" };
 const GOLD = [1, 0.78, 0.3, 1], RED_TIP = [1, 0.3, 0.25, 1], STEEL = [0.42, 0.45, 0.5, 1];
 const SHOCK = [0.6, 0.85, 1, 1], FIRE = [1, 0.55, 0.2, 1], WATER = [0.3, 0.42, 0.5, 1];
 const rnd2 = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
@@ -627,6 +627,8 @@ const spinOf = (fx, t) => t * (fx.recoil > 0 || fx.flash > 0 ? 30 : 3);
 function longTracer(f, to, u, col, w) { const a = lerp(f, to, Math.max(0, u - 0.6)), b = lerp(f, to, u); line(a, b, A(col, 0.35), w * 2.4); line(a, b, A(col, 0.95), w); line(a, b, [1, 1, 1, 0.8], w * 0.35); }
 function stunArcs(to, v, s, info) { if (!info || !info.sh || info.sh.m % 20 !== 0 || v >= 1) return; for (let i = 0; i < 4; i++) { const a = rnd2(i + Math.floor(v * 12)) * TAU; line(to, add(to, mul(fa(a), s * 0.16)), A(SHOCK, 1 - v), 1.4); } glowDot(to, s * 0.06 * (1 - v), SHOCK); }
 function flames(to, v, s) { if (v >= 1) return; for (let i = 0; i < 3; i++) { const q = fmod(v * 2 + i / 3, 1); disc(add(to, [(i - 1) * s * 0.05, -q * s * 0.18]), s * 0.035 * (1 - q), A(i % 2 ? FIRE : [1, 0.85, 0.3, 1], 1 - q)); } }
+function bore(p, k, w, fx) { disc(p, w * 0.6 * k, BORE); const f = Math.max(0, (fx.flash - 0.35) / 0.65); if (f > 0) { disc(p, w * 0.5 * k, [1, 0.92, 0.7, f]); disc(p, w * 0.9 * k * f, [1, 0.95, 0.8, 0.35 * f]); } }
+function gear(p, r, k, t, n, col) { const pts = []; for (let i = 0; i < n * 2; i++) pts.push(mul(fa(t + i * Math.PI / n), i % 2 ? r * 0.78 : r)); solid(p, pts, col || METAL_L, 0, k, 0.8); disc(p, r * 0.35 * k, METAL_D); }
 function vapourAt(p, fx, s) { if (fx.flash > 0.6) smokePuff(add(p, [0, -s * 0.05]), 1 - fx.flash, s * 0.5, 0.35); }
 
 // The build: levels P (Power), R (Range/Visibility), M (Multi-Target), and the Retrofit r (0 water, 1 shock, 2 incendiary).
@@ -659,7 +661,7 @@ function barrelKit(c0, a, k, fx, t, x0, x1, half, Lv, gold, col) { const rc = fx
 
 const P2 = {
   tower: "gun", look: "C", anim: "C",
-  picks: { p0s0: "C", p0s1: "C", p0s2: "C", p0s3: "B", p0s4: "B", p1s0: "A", p1s1: "B", p1s2: "A", p1s3: "B", p1s4: "C", p2s0: "B", p2s1: "A", p2s2: "A", p2s3: "B", p2s4: "A", r0: "A", r1: "A", r2: "A" },
+  picks: { p0s0: "C", p0s1: "C", p0s2: "C", p0s3: "B", p0s4: "B", p1s0: "A", p1s1: "B", p1s2: "A", p1s3: "B", p1s4: "C", p2s0: "A", p2s1: "A", p2s2: "A", p2s3: "C", p2s4: "A", r0: "A", r1: "A", r2: "A" },
   intro: "Round 2: your round-1 picks drawn as one model, so the paths work together (your notes). Each stage shows only your pick; use the build preview to check combinations, and note anything to change.",
   mods(B) { const L = lvOf(B), n = gunsOf(L.M);
     return { targets: n, crit: [0, 0, 0.1, 0.15, 0.2, 0.3][L.R],
@@ -673,15 +675,15 @@ const P2 = {
     const ex = extraAims(info, c, aim, k, n), drum = L.M >= 5 ? P(c, aim, k, -7, 6) : P(c, aim, k, -1, 8.5);
     deck(c, k, col, t);
     // Under the turret: Multi 1's bearing rollers.
-    if (L.M >= 1) for (let i = 0; i < 6; i++) { const p = add(c, mul(fa(i * TAU / 6), 9.6 * k)); orb(p, 1.6 * k, METAL_L); line(p, add(p, mul(fa(aim * 3 + i), 1.4 * k)), METAL_D, 0.8 * k); }
+    if (L.M >= 1) { ring(c, 9.5 * k, OUTLINE, 2.6 * k); ring(c, 9.5 * k, METAL_L, 1.6 * k); for (let i = 0; i < 16; i++) { const d2 = fa(i * TAU / 16 + aim); line(add(c, mul(d2, 9.5 * k)), add(c, mul(d2, 11 * k)), METAL_L, 1 * k); } }
     // The back: vent block, Power 4's counterweight or Multi 4's hopper.
     plate(P(c, aim, k, -8, 0), rectPts(3, 5.5), lt(METAL_D, 0.1), aim, k, 1); for (let i = 0; i < 3; i++) line(P(c, aim, k, -9.5 + i * 1.5, -4), P(c, aim, k, -9.5 + i * 1.5, 4), A(col, 0.5 + 0.4 * (i === 2)), 0.9 * k);
     if (L.P >= 4) { plate(P(c, aim, k, -11.5, 0), rectPts(2.4, 6.4), STEEL, aim, k, 1.1); hazard(c, aim, k, -13, -10, 6.8, col, 1.2); hazard(c, aim, k, -13, -10, -6.8, col, 1.2); }
-    if (L.M >= 4) { plate(P(c, aim, k, -11, 0), rectPts(3, 7), AMMO, aim, k, 1.1); hazard(c, aim, k, -13.5, -8.5, -7.6, col, 1.1); }
+
     // The main gun: barrels swapped longer at Range 1, fluted at Range 3; the Retrofit sleeve; the marked shroud.
     cluster(c, aim, k, fx, t, 5, len, 3.4, 1.8, 4, L.M >= 5 ? GOLD : METAL_L, L.R);
     barrelKit(c, aim, k, fx, t, 9, len - 3, 3.4, L, gold, col);
-    muzzleEnd(P(c, aim, k, len + 1 - rc, 0), k, 3, col, fx.flash);
+    bore(P(c, aim, k, len + 1 - rc, 0), k, 3, fx);
     if (L.r === 0) vapourAt(P(c, aim, k, len + 1, 0), fx, s);
     if (L.P >= 1) { plate(P(c, aim, k, 4.5 - rc, 0), rectPts(2.2, 5.4), STEEL, aim, k, 1); rivets(P(c, aim, k, 4.5 - rc, 0), rectPts(2.2, 5.4), aim, k, 0.7, 0.6 * k); }
     // The drum (red ring from Range 2's tracers), the body, its cheeks, the lens crown and the gold mastery ring.
@@ -697,13 +699,13 @@ const P2 = {
       if (L.M >= 3) cluster(mp, a, k, fx, t, 1, el, 2.4, 1.4, 4, L.M >= 5 ? GOLD : METAL_L, L.R);
       else { bar(P(mp, a, k, 1 - rc, 0), P(mp, a, k, el - rc, 0), 1.8 * k, METAL_L); if (L.R >= 3) for (let x = 4; x <= el - 2; x += 1.8) line(P(mp, a, k, x - rc, -0.6), P(mp, a, k, x + 0.9 - rc, 0.6), lt(METAL_L, 0.35), 0.5 * k); }
       barrelKit(mp, a, k, fx, t, 4, el - 2, L.M >= 3 ? 2.4 : 1, L, gold, col);
-      muzzleEnd(P(mp, a, k, el + 1 - rc, 0), k, L.M >= 3 ? 2.2 : 1.6, col, fx.flash);
+      bore(P(mp, a, k, el + 1 - rc, 0), k, L.M >= 3 ? 2.2 : 1.6, fx);
       plate(mp, ngon(6, 1, 0), METAL_L, a, 5 * k, 1.1); orb(mp, 2.6 * k, METAL); glowDot(P(mp, a, k, 1, 0), 0.8 * k, col);
       if (L.P >= 1) plate(P(mp, a, k, 3, 0), [[0.8, -3.6], [0.8, 3.6], [-0.8, 3], [-0.8, -3]], STEEL, a, k, 0.9);
       if (L.r === 0) vapourAt(P(mp, a, k, el + 1, 0), fx, s);
       if (L.r === 2) line(P(c, aim, k, -4.5, -6), mp, [0.5, 0.2, 0.12, 1], 1.1 * k); }
-    // Retrofits on the body: the water tank and hose, the fuel canister and line.
-    if (L.r === 0) { orb(P(c, aim, k, -6, -6), 2.2 * k, WATER); line(P(c, aim, k, -6, -6), P(c, aim, k, 8, -4), [0.2, 0.3, 0.36, 1], 1.2 * k); }
+    if (L.M >= 4) { for (const y of [-5, 5]) gear(P(c, aim, k, -5, y), 2.2, k, t * 6 * (y > 0 ? 1 : -1), 8); for (let i = 1; i < n; i++) gear(P(P(c, aim, k, ...mountOf(i)), ex[i], k, -3.4, 0), 1.6, k, t * 7, 6); }
+    // Retrofits on the body: the fuel canister and line (the water tank is gone; owner, 2026-10-17).
     if (L.r === 2) { bar(P(c, aim, k, -7, -6), P(c, aim, k, -2, -6), 3 * k, [0.7, 0.18, 0.12, 1]); line(P(c, aim, k, -2, -6), P(c, aim, k, 4, -2), [0.5, 0.2, 0.12, 1], 1.2 * k); }
   },
   paths: [
@@ -722,15 +724,15 @@ const P2 = {
       { name: "Targeting Computer", cost: 980, effect: "230 range in all; 30% crits (mastery)", options: [{ key: "C", name: "Hex Lens Crown", desc: "A big faceted lens crowns the body in a gold hex frame." }] },
     ] },
     { name: "Multi-Target", theme: "more guns on more targets", steps: [
-      { name: "Swivel Mount", cost: 15, effect: "Switches target instantly; no wasted rounds", options: [{ key: "B", name: "Bearing Rollers", desc: "Roller bearings round the turret base." }] },
+      { name: "Swivel Mount", cost: 15, effect: "Switches target instantly; no wasted rounds", options: [{ key: "A", name: "Geared Swivel Ring", desc: "A toothed swivel ring round the base of the turret (owner's change from the Bearing Rollers)." }] },
       { name: "Side Gun", cost: 165, effect: "A side gun fires at a second target at 50% damage", options: [{ key: "A", name: "Flank Gun", desc: "A single-barrel gun on its own swivel mount on the left flank, aiming at its own target; its body is bigger than its barrel (your notes)." }] },
       { name: "Twin Mount", cost: 330, effect: "2 targets at full damage (primary)", options: [{ key: "A", name: "Twin Rotary", desc: "The flank gun becomes a rotary cluster on its larger swivel mount (your notes)." }] },
-      { name: "Belt Feed", cost: 660, effect: "+0.3 shots/s on every barrel", options: [{ key: "B", name: "Ammo Hopper", desc: "A big hazard-striped ammo hopper on the back." }] },
+      { name: "Belt Feed", cost: 660, effect: "+0.3 shots/s on every barrel", options: [{ key: "C", name: "Feed Gears", desc: "Spinning feed gears drive the belts, on the body and on every extra gun's mount (owner's change from the Ammo Hopper)." }] },
       { name: "Triple Mount", cost: 3300, effect: "3 targets; the extra barrels go for the weakest (mastery)", options: [{ key: "A", name: "Triple Rotary", desc: "A third swivelling rotary on the right flank (the drum moves back); gold rings on every gun, and a marked shroud turns gold (your note)." }] },
     ] },
   ],
   retrofits: [
-    { name: "Water-Cooled Barrel", cost: 40, effect: "Fire rate 1.2 to 1.5/s", options: [{ key: "A", name: "Water Jacket", desc: "A water jacket on every gun (your note), longer with the Range barrels; a tank and hose; vapour at each muzzle." }] },
+    { name: "Water-Cooled Barrel", cost: 40, effect: "Fire rate 1.2 to 1.5/s", options: [{ key: "A", name: "Water Jacket", desc: "A water jacket on every gun, longer with the Range barrels; vapour at each muzzle. No tank (owner, 2026-10-17)." }] },
     { name: "Shock Rounds", cost: 5, effect: "Every hit has a 5% chance to stun for 0.3 s", options: [{ key: "A", name: "Coil Wraps", desc: "Shock coils on every gun (your note), longer with the Range barrels; stunning hits crackle." }] },
     { name: "Incendiary Rounds", cost: 25, effect: "Hits burn the target for 3 damage/s for 2 s (refreshes, proposed)", options: [{ key: "A", name: "Fuel Canister", desc: "A fuel canister with fuel lines to every gun (your note); orange tracers; burning targets." }] },
   ],
