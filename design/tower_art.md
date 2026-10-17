@@ -438,6 +438,14 @@ paths work together.
 - **Smoke Shells:** every 4th shell flies grey and leaves smoke.
 - **Kit placement:** Power kit by the mount's left side, Blast kit on the right, Speed and Retrofit kit at the back.
 - **Muzzles:** the base Mortar's bore glow is kept, since only the Gun Turret's was removed. To confirm for the Mortar.
+- **An angled tube** (owner: "The mortar looks more like a flat body with a circle, can you make it look more like an
+  angled tube?"). Every tube is now drawn as a cylinder rising from a rounded breech low at the back to a raised mouth
+  at the front:
+  - it widens toward the mouth, with a lit side and a shaded side.
+  - trunnion pins hold it on its yoke.
+  - its shadow lengthens toward the mouth.
+  - the mouth is an ellipse squashed along the aim, since the opening faces up and forward. The collar, fin slots,
+    vanes and clamps follow that ellipse.
 
 ## Open questions
 
