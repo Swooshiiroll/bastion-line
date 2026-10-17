@@ -348,4 +348,4 @@ const TOWERS = [
         impact: (to, v, s, col) => spark(to, v, s * 0.7, col) },
     ] },
 ];
-const DEFAULTS = { artillery: { look: "F" }, railgun: { look: "B", anim: "A" }, tesla: { look: "B", anim: "C" }, drones: { look: "A", anim: "A" }, cas: { look: "A", anim: "A" } };
+const DEFAULTS = { artillery: { look: "F", anim: "A" }, railgun: { look: "B", anim: "A" }, tesla: { look: "B", anim: "C" }, drones: { look: "A", anim: "A" }, cas: { look: "A", anim: "A" } };

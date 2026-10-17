@@ -4,7 +4,8 @@
 // An animation: {key, name, desc, period, burst?, gap?, multi?, flight, beam?, fx(since, period) -> {recoil, flash, glow, spin},
 //   shot(from, to, u, s, col, k, t, info), impact(to, v, s, col, info)}. info = {ens (hittable enemies in reach), c, W, H, s, t, look, spot, orbit}.
 // info.sh is the shot being drawn ({t0, k, to0: where its target was when it fired}). An animation with persist(mem, t,
-//   info, s, col) is a free agent instead (drones that stay out); tw.waves {on, off} empties the lane between waves.
+//   info, s, col) is a free agent instead (drones, mines, sprays, pulses); it can steer the turret with mem.aimAt, and the
+//   look sees its state as fx.mem. tw.waves {on, off} empties the lane between waves; tw.hits "none" attacks nothing.
 // A tower can set spot {x, y} (player-aimed at a fixed point, fractions of the view) or orbit {x, y, r (tiles), w (rad/s)}
 //   (an aircraft circling a point; the look draws it with plane(p, heading, s, fx, t, col, centre) and fires from its door).
 
@@ -56,7 +57,7 @@ function makeView(canvas, tw, getLook, getAnim, scale) {
     const look = getLook(), an = getAnim();
     drawGround(W, H);
     const live = !tw.waves || fmod(t, tw.waves.on + tw.waves.off) < tw.waves.on, all = live ? enemiesAt(t, W, H, s) : [];
-    const ens = all.filter((e) => (tw.hits === "air" ? e.air : tw.hits === "ground" ? !e.air : true));
+    const ens = all.filter((e) => (tw.hits === "none" ? false : tw.hits === "air" ? e.air : tw.hits === "ground" ? !e.air : true));
     const others = all.filter((e) => !ens.includes(e));
     const inView = ens.filter((e) => e.p[0] > 10 && e.p[0] < W - 10);
     // tw.spot: the player aims it at a fixed point (it ignores enemies). tw.orbit: an aircraft circles a designated
@@ -68,16 +69,18 @@ function makeView(canvas, tw, getLook, getAnim, scale) {
     else for (const e of cands) { const ref = O || c, d = Math.hypot(e.p[0] - ref[0], e.p[1] - ref[1]); if (d < best) { best = d; tgt = e; } }
     let pl = null;
     if (O) { const a = t * (tw.orbit.w || 0.5), p = add(O, mul(fa(a), tw.orbit.r * s)); pl = { p, heading: a + Math.PI / 2, door: add(p, mul(norm(sub(O, p)), s * 0.14)) }; if (look.door) pl.door = look.door(p, pl.heading, s, O); }
-    if (tgt) {
-      const want = Math.atan2(tgt.p[1] - c[1], tgt.p[0] - c[0]);
+    if (an.persist && (!v.mem || v.mem.key !== an.key + look.key)) v.mem = { key: an.key + look.key };
+    const aimP = an.persist && v.mem.aimAt ? v.mem.aimAt : tgt && tgt.p;
+    if (aimP) {
+      const want = Math.atan2(aimP[1] - c[1], aimP[0] - c[0]);
       let d = fmod(want - v.aim + Math.PI, TAU) - Math.PI; const dt = Math.min(0.25, Math.max(0, t - (v.prevT || t))); const turn = 7 * dt; v.aim += Math.max(-turn, Math.min(turn, d));
-      if (tgt.i !== v.lockId) { v.lockId = tgt.i; v.lockT = t; }
+      if (tgt && tgt.i !== v.lockId) { v.lockId = tgt.i; v.lockT = t; }
     }
     v.prevT = t;
     const since = t - v.last;
     const muzzles = look.muzzles || [[look.muzzle || 0.45, 0]];
     const muzzleAt = (m, ang) => pl ? pl.door : add(c, rot([muzzles[m % muzzles.length][0] * s, muzzles[m % muzzles.length][1] * s], look.fixed ? 0 : ang));
-    const info = { ens: cands, c, W, H, s, t, look, spot: tgt && tgt.i === -5 ? tgt.p : null, orbit: O };
+    const info = { ens: cands, all, c, W, H, s, t, look, aim: v.aim, muzzleAt, spot: tgt && tgt.i === -5 ? tgt.p : null, orbit: O };
     const aligned = tgt && (pl || Math.abs(fmod(Math.atan2(tgt.p[1] - c[1], tgt.p[0] - c[0]) - v.aim + Math.PI, TAU) - Math.PI) < (an.beam ? 0.15 : 0.35));
     if (tgt && !an.beam && !an.persist && since >= an.period && aligned) {
       v.last = t; const n = an.burst || 1;
@@ -100,7 +103,7 @@ function makeView(canvas, tw, getLook, getAnim, scale) {
       const fired = v.shots.filter((sh) => t >= sh.t0); const lastShot = fired[fired.length - 1];
       fx.barrel = lastShot ? lastShot.m % muzzles.length : -1; fx.barrelSince = lastShot ? t - lastShot.t0 : 9; fx.shots = lastShot ? lastShot.m + 1 : 0;
     }
-    if (an.persist) { if (!v.mem || v.mem.key !== an.key + look.key) v.mem = { key: an.key + look.key }; fx.docked = !v.mem.out; }
+    if (an.persist) { fx.docked = !v.mem.out; fx.mem = v.mem; }
     look.draw(c, v.aim, s, fx, t, tw.color, info);
     if (an.beam && tgt) {
       if (beamOn) an.shot(muzzleAt(0, v.aim), tgt.p, held - lockDelay, s, tw.color, 0, t);
@@ -134,7 +137,7 @@ const io = typeof IntersectionObserver !== "undefined" ? new IntersectionObserve
 
 function buildTower(tw, root) {
   const sec = el("section", "enemy");
-  sec.appendChild(el("div", "enemy-head", `<span class="num">${tw.num}</span><h2>${tw.name}</h2><span class="tags">${tw.cls} · ${tw.weapon} · hits ${tw.hits === "both" ? "air and ground" : tw.hits}</span>`));
+  sec.appendChild(el("div", "enemy-head", `<span class="num">${tw.num}</span><h2>${tw.name}</h2><span class="tags">${tw.cls} · ${tw.weapon} · ${tw.hits === "none" ? "no attack" : "hits " + (tw.hits === "both" ? "air and ground" : tw.hits)}</span>`));
   sec.appendChild(el("p", "desc", tw.desc));
   for (const kind of ["look", "anim"]) {
     const list = kind === "look" ? tw.looks : tw.anims;

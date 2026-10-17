@@ -41,8 +41,8 @@ enemies on the lane and flyers overhead (air-only towers ignore the ground, and 
 | Page | Towers | File | Status |
 |---|---|---|---|
 | 1 | Gun Turret, Mortar Tower, Laser Tower, Rocket Salvo, Anti-Aircraft Turret | `design/tower_art_1.html` | **Confirmed** (round 2) |
-| 2 | Artillery Cannon, Railgun, Tesla Tower, Drone Bay, CAS Gunship | `design/tower_art_2.html` | Round 3: Artillery animation open; CAS gun change to confirm |
-| 3 | Mine Layer, Chemical Plant, Boost Tower, Radar Tower, Cryo Tower | `design/tower_art_3.html` | Not started |
+| 2 | Artillery Cannon, Railgun, Tesla Tower, Drone Bay, CAS Gunship | `design/tower_art_2.html` | **Confirmed** (round 3) |
+| 3 | Mine Layer, Chemical Plant, Boost Tower, Radar Tower, Cryo Tower | `design/tower_art_3.html` | Round 1: picks open |
 | 4 | Shockwave Generator, Scrapyard, Magneto Tower, Tractor Tower, Augmentation Tower | `design/tower_art_4.html` | Not started |
 
 ## Page 1, in-game style round 1 (towers 1-5)
@@ -174,8 +174,51 @@ the bay.
 - **Artillery Cannon:** no animation picked yet, and none of its six (A-F) carries a note.
 - Everything else is preselected as picked.
 
+**Page 2 confirmed (owner, round 3):**
+- Artillery Cannon: F Rammer Howitzer / A Shell on the Mark.
+- Railgun: B Sealed Accelerator / A Snap Shot (the line stays where the shot went).
+- Tesla Tower: B Twin Toroid / C Corona Burst.
+- Drone Bay: A Rotor Pad Hangar / A Hunt and Circle (the drone stays out and idles).
+- CAS Gunship: A Airfield Beacon + Four-Engine Gunship, guns hidden, / A Gatling Stream.
+
+The Artillery blue and CAS pink weren't changed, so they stand.
+
+## Page 3, round 1 (towers 11-15)
+
+None of these five fires ordinary shots, so each preview runs the tower's own mechanic:
+- **Mine Layer:** mines are tossed onto the track and wait there until a ground enemy rolls over them; the preview caps
+  at 6 mines (the real cap is 20). The look sets the fabricator and its mine; the animation sets the toss and the blast.
+- **Chemical Plant:** it sprays one enemy at a time. Soaked enemies drip and fizz for 4 s and are skipped until they dry.
+- **Boost Tower:** it attacks nothing. The preview puts three stand-in towers around it and shows them boosted with
+  chevrons; its real reach is 3 tiles.
+- **Radar Tower:** every other enemy is cloaked (a faint shimmer) until a ping reveals it for 1 s, marked with brackets.
+- **Cryo Tower:** a cold wave every 2 s frosts every enemy it reaches. The preview doesn't actually slow them.
+
+**Colours:**
+- Today's colours: Chemical Plant acid green (Plasma Burn), Boost Tower magenta (Amplifier Pylon), Radar teal (Sensor
+  Array) and Cryo ice blue (Cryo Emitter).
+- The **Mine Layer's red-orange** is Claude's proposal (no in-game counterpart).
+- Close pairs: the Boost magenta sits near the CAS pink, and the Chemical green near the Railgun's.
+
+| Tower | Look A | Look B | Look C |
+|---|---|---|---|
+| Mine Layer | Arm Fabricator (disc mine) | Mine Mortar (pancake mine) | Conveyor Catapult (hex prong mine) |
+| Chemical Plant | Tank Farm Sprayer | Vat Works | Pressure Sphere |
+| Boost Tower | Beacon Mast | Emitter Array | Broadcast Antenna |
+| Radar Tower | Dish Mast | Phased Array Block | Twin Dish Rotor |
+| Cryo Tower | Vent Tank | Compressor Block | Cryo Spire |
+
+| Tower | Animation A | Animation B | Animation C |
+|---|---|---|---|
+| Mine Layer | Lob and Blink | Skip Toss | Confetti Charge |
+| Chemical Plant | Acid Stream | Mist Puff | Gel Glob |
+| Boost Tower | Pulse Rings | Link Beams | Aura Field |
+| Radar Tower | Ping Ring | Sweep Beam | Pulse Burst |
+| Cryo Tower | Gas Wave | Frost Burst | Creeping Mist |
+
+**Picks:** to come.
+
 ## Open questions
 
-1. **Page 2, round 3:** the Artillery Cannon's animation, the hidden CAS guns, and whether the proposed Artillery blue and
-   CAS pink stand.
-2. Pages 3 and 4, then the second pass (per-path looks and Retrofit looks).
+1. **Page 3 picks** (round 1), and whether the Mine Layer red-orange stands.
+2. Page 4, then the second pass (per-path looks and Retrofit looks).
