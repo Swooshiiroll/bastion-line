@@ -1,7 +1,7 @@
 // ---- Tower art page 3: towers 11-15, in the style of today's in-game towers (owner, 2026-10-16) ----------
 // Shared style helpers come from game_style.js. Every tower here is a persistent agent (mines on the track, soaks,
 // boosts, pings, cold waves) rather than a turret firing shots.
-const PAGE = { title: "Tower art page 3 (towers 11-15)", store: "bl-tower-art-3-game-v1" };
+const PAGE = { title: "Tower art page 3 (towers 11-15)", store: "bl-tower-art-3-game-v2" };
 
 const rnd = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
 const distTo = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
@@ -45,6 +45,7 @@ function hideCloaked(e, s, t) { const r = Math.max(4, Math.min(11, s * 0.12)) + 
   ring(e.p, r - 1, [0.7, 0.9, 1, 0.18 + 0.1 * Math.sin(t * 9 + e.i)], 1); }
 function revealMark(p, s, col, a) { const r = Math.max(4, Math.min(11, s * 0.12)) + 4;
   for (let i = 0; i < 4; i++) { const d = fa(Math.PI / 4 + i * Math.PI / 2), c0 = add(p, mul(d, r)); line(c0, add(c0, mul(rot(d, Math.PI * 0.75), r * 0.6)), A(col, a), 1.5); line(c0, add(c0, mul(rot(d, -Math.PI * 0.75), r * 0.6)), A(col, a), 1.5); } }
+const sweepAngle = (info, t) => (info.look.dishAngle ? info.look.dishAngle(t) : t * TAU / 3); // the sweep follows the dish (owner)
 function radarAgent(cfg) { return (m, t, info, s, col) => { if (!m.seen) m.seen = {};
   cfg.draw(m, t, info, s, col);
   for (const e of info.all) { if (!cloaked(e)) continue; const until = m.seen[e.i] || 0;
@@ -84,6 +85,24 @@ const TOWERS = [
           plate(P(c, aim - sw * 2.2, k, -6, 0), rectPts(2, 3), METAL_D, aim - sw * 2.2, k, 0.9); orb(c, 2.6 * k, METAL); glowDot(c, 1 * k, col); if (t - (mm.lastToss ?? -9) > 0.5) this.mine(tip, k * 0.8, t, col, false); },
         mine(p, k, t, col, blink) { ellipse(add(p, [k * 0.8, k * 1.6]), 4 * k, 1.8 * k, [0, 0, 0, 0.3]); for (let i = 0; i < 3; i++) line(p, add(p, mul(fa(-Math.PI / 2 + i * TAU / 3), 5.2 * k)), METAL_L, 0.8 * k);
           plate(p, ngon(6, 1, 0), METAL, 0, 3.6 * k, 0.9); glowDot(p, (blink ? 1.4 : 0.7) * k, A(col, blink ? 1 : 0.55)); } },
+      { key: "D", name: "Drum Dispenser", muzzle: 0.3, theme: "A big rotating drum magazine that clicks round one slot per mine, feeding a short chute arm that flicks it out. Mine: a small sphere with six contact prongs.",
+        draw(c, aim, s, fx, t, col) { const k = G(s), mm = fx.mem || {}, since = t - (mm.lastToss ?? -9), sw = decay(since, 0.3), step = Math.floor((mm.n || 0)) + Math.min(1, since / 0.4); deck(c, k, col, t);
+          disc(c, 12 * k, OUTLINE); disc(c, 11.2 * k, METAL_L); for (let i = 0; i < 6; i++) { const q = add(c, mul(fa(step * TAU / 6 + i * TAU / 6), 7.5 * k)); disc(q, 2.6 * k, BORE); if (i) this.mine(q, k * 0.55, t, col, false); }
+          orb(c, 3.4 * k, METAL); const tip = P(c, aim - sw * 1.4, k, 15, 0); bar(c, tip, 2.6 * k, METAL); glowDot(c, 1.1 * k, col); if (since > 0.5) this.mine(tip, k * 0.8, t, col, false); },
+        mine(p, k, t, col, blink) { ellipse(add(p, [k * 0.8, k * 1.6]), 3.6 * k, 1.6 * k, [0, 0, 0, 0.3]); for (let i = 0; i < 6; i++) { const d = fa(i * TAU / 6); line(add(p, mul(d, 2.6 * k)), add(p, mul(d, 4.4 * k)), METAL_L, 0.9 * k); disc(add(p, mul(d, 4.4 * k)), 0.6 * k, METAL_L); }
+          orb(p, 3 * k, METAL); glowDot(p, (blink ? 1.3 : 0.6) * k, A(col, blink ? 1 : 0.55)); } },
+      { key: "E", name: "Twin Press Factory", muzzle: 0.3, theme: "Two stamping presses that thump down in turn on a riveted factory block, and a gantry arm that picks up each fresh mine and flicks it out. Mine: a square box mine with a pressure plate on top.",
+        draw(c, aim, s, fx, t, col) { const k = G(s), mm = fx.mem || {}, since = t - (mm.lastToss ?? -9), sw = decay(since, 0.3); deck(c, k, col, t);
+          plate(c, rectPts(12, 9), METAL_L, 0, k, 1.3); rivets(c, rectPts(12, 9), 0, k, 0.86, 0.8 * k); hazard(c, 0, k, -10, 10, 9.6, col, 1.2);
+          for (const [x, ph] of [[-6, 0], [6, 0.75]]) { const down = fmod(t * 0.67 + ph, 1.5) < 0.2; plate(add(c, [x * k, -2 * k]), rectPts(3.4, 3.4), down ? METAL : lt(METAL_L, 0.1), 0, k, 1); if (down) glowDot(add(c, [x * k, -2 * k]), 1 * k, col); }
+          const tip = P(c, aim - sw * 1.8, k, 14, 0); bar(c, tip, 1.8 * k, METAL); plate(c, rectPts(2, 2), METAL_D, aim, k, 0.9); if (since > 0.5) this.mine(tip, k * 0.8, t, col, false); },
+        mine(p, k, t, col, blink) { ellipse(add(p, [k * 0.8, k * 1.6]), 4 * k, 1.8 * k, [0, 0, 0, 0.3]); plate(p, rectPts(3.6, 3.6), AMMO, 0, k, 0.9); fill(p, rectPts(2, 2), dk(AMMO, 0.3), 0, k); glowDot(add(p, [2.4 * k, -2.4 * k]), (blink ? 1.2 : 0.6) * k, A(col, blink ? 1 : 0.55)); } },
+      { key: "F", name: "Rail Launcher", muzzle: 0.3, theme: "A short magnetic rail launcher on a round mount that snaps each mine out along its rails, a stack of canisters loaded behind. Mine: a squat canister with a glowing band.",
+        draw(c, aim, s, fx, t, col) { const k = G(s), mm = fx.mem || {}, since = t - (mm.lastToss ?? -9), fl = decay(since, 0.2); deck(c, k, col, t);
+          disc(c, 10 * k, OUTLINE); disc(c, 9.2 * k, METAL); for (let i = 0; i < 3; i++) this.mine(P(c, aim, k, -6, (i - 1) * 4.2), k * 0.55, t, col, false);
+          for (const y of [-2.6, 2.6]) bar(P(c, aim, k, -2, y), P(c, aim, k, 15, y), 1.8 * k, METAL_L); for (const x of [3, 9]) bar(P(c, aim, k, x, -4), P(c, aim, k, x, 4), 1.4 * k, dk(col, 0.2));
+          strip(P(c, aim, k, 0, 0), P(c, aim, k, 15, 0), 0.6 * k, A(col, 0.3 + 0.7 * fl)); if (since > 0.5) this.mine(P(c, aim, k, 6, 0), k * 0.7, t, col, false); glowDot(c, 1 * k, col); },
+        mine(p, k, t, col, blink) { ellipse(add(p, [k * 0.8, k * 1.6]), 4 * k, 1.8 * k, [0, 0, 0, 0.3]); disc(p, 3.6 * k, OUTLINE); disc(p, 3.1 * k, METAL_L); ring(p, 2.2 * k, A(col, blink ? 1 : 0.5), 0.9 * k); disc(p, 1.2 * k, METAL); } },
     ],
     anims: [
       { key: "A", name: "Lob and Blink", desc: "Each mine arcs onto the track, lands with a puff of dust and blinks slowly until an enemy rolls over it: an orange blast.", period: 1, flight: 1, fx: () => ({}),
@@ -118,6 +137,18 @@ const TOWERS = [
         draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t); orb(c, 11 * k, METAL_L); ring(c, 8 * k, METAL, 1.2 * k); for (let i = 0; i < 8; i++) { const q = add(c, mul(fa(i * TAU / 8), 9.6 * k)); disc(q, 0.8 * k, OUTLINE); disc(q, 0.5 * k, METAL_L); }
           for (const [x, y] of [[-6, -5], [6, -5]]) { const g = add(c, [x * k, y * k]); disc(g, 2 * k, OUTLINE); disc(g, 1.6 * k, [0.9, 0.9, 0.85, 1]); line(g, add(g, mul(fa(-2 + Math.sin(t * 2 + x) * 0.4), 1.4 * k)), [0.8, 0.1, 0.1, 1], 0.6 * k); }
           for (const y of [-1.6, 1.6]) bar(P(c, aim, k, 0, y), P(c, aim, k, 13, y), 1.4 * k, METAL); orb(c, 3.4 * k, METAL); glowDot(c, 1.1 * k, col); } },
+      { key: "D", name: "Cooling Tower Works", muzzle: 15 / 48, theme: "A squat hyperbolic cooling tower steaming green vapour beside a pump house, with a spray turret on the pump house roof.",
+        draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t); const ct = add(c, [-5 * k, -4 * k]); disc(ct, 8 * k, OUTLINE); disc(ct, 7.3 * k, lt(METAL_L, 0.1)); disc(ct, 5.2 * k, dk(col, 0.6)); ring(ct, 6.3 * k, METAL, 0.9 * k);
+          for (let i = 0; i < 3; i++) { const v = fmod(t * 0.5 + i / 3, 1); disc(add(ct, [v * 3 * k, -v * 9 * k]), (2 + v * 3) * k, A(lt(col, 0.5), 0.25 * (1 - v))); }
+          const ph = add(c, [6 * k, 5 * k]); plate(ph, rectPts(5, 5), METAL_L, 0, k, 1.1); bar(ph, add(ph, mul(fa(aim), 10 * k)), 2.2 * k, METAL); orb(ph, 2.6 * k, METAL); glowDot(ph, 0.9 * k, col); bar(ct, ph, 1.2 * k, METAL); } },
+      { key: "E", name: "Barrel Yard Sprayer", muzzle: 15 / 48, theme: "A ring of hazard-striped chemical drums round a hose-reel turret; a hose runs from the drums to a long lance nozzle.",
+        draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t);
+          for (let i = 0; i < 6; i++) { const q = add(c, mul(fa(i * TAU / 6 + Math.PI / 6), 11 * k)); disc(q, 3.4 * k, OUTLINE); disc(q, 2.9 * k, i % 2 ? [0.9, 0.75, 0.15, 1] : METAL_L); arc(q, 2.2 * k, 0, Math.PI, DARK_STRIPE, 0.9 * k); disc(q, 0.9 * k, dk(col, 0.3)); }
+          disc(c, 6 * k, OUTLINE); disc(c, 5.3 * k, METAL); ring(c, 3.6 * k, A(col, 0.6), 1.2 * k); bar(c, P(c, aim, k, 15, 0), 1.6 * k, METAL_L); glowDot(c, 1 * k, col); } },
+      { key: "F", name: "Distillery Columns", muzzle: 14 / 48, theme: "Three tall distillation columns with ladder rings, joined by pipes to a central still with a gooseneck spray nozzle.",
+        draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t);
+          for (let i = 0; i < 3; i++) { const q = add(c, mul(fa(-Math.PI / 2 + i * TAU / 3), 10 * k)); bar(c, q, 1.4 * k, METAL); orb(q, 4 * k, METAL_L); ring(q, 2.8 * k, METAL, 0.8 * k); glowDot(q, 0.9 * k, A(col, 0.5 + 0.5 * Math.sin(t * 2 + i))); }
+          orb(c, 5 * k, mix(METAL_L, col, 0.15)); bar(c, P(c, aim, k, 6, 0), 2.4 * k, METAL); bar(P(c, aim, k, 6, 0), P(c, aim, k, 13, 0), 1.6 * k, METAL); glowDot(c, 1.1 * k, col); } },
     ],
     anims: [
       { key: "A", name: "Acid Stream", desc: "A green arc of acid droplets streams onto the target; it drips and fizzes while soaked, and the turret moves on to the next dry enemy.", period: 1, flight: 1, fx: () => ({}),
@@ -152,6 +183,17 @@ const TOWERS = [
           for (let i = 0; i < 4; i++) bar(sq[i], sq[(i + 1) % 4], 1.6 * k, METAL_L); bar(sq[0], sq[2], 1 * k, METAL); bar(sq[1], sq[3], 1 * k, METAL);
           for (let i = 0; i < 3; i++) ring(c, (7.5 - i * 2.2) * k, A(col, fmod(t * 2, 3) >= i ? 0.95 : 0.25), 1.1 * k);
           const d = fa(t * 4); bar(sub(c, mul(d, 6 * k)), add(c, mul(d, 6 * k)), 1.4 * k, METAL_L); glowDot(c, 1.3 * k, col); } },
+      { key: "D", name: "Holo Projector", muzzle: 0, fixed: true, theme: "A flat projector disc throwing a slowly spinning holographic triangle and ring above it, flickering in magenta.",
+        draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t); disc(c, 10 * k, OUTLINE); disc(c, 9.3 * k, METAL); ring(c, 7 * k, METAL_L, 1.2 * k);
+          const fl = 0.75 + 0.25 * Math.sin(t * 23) * Math.sin(t * 7); outline(c, ngon(3, 1, t * 0.8), A(col, 0.75 * fl), 1.4 * k, 0, 9 * k); ring(c, (5 + Math.sin(t * 2)) * k, A(col, 0.5 * fl), 1 * k); glowDot(c, 1.6 * k, col); } },
+      { key: "E", name: "Capacitor Obelisk", muzzle: 0, fixed: true, theme: "A square obelisk banded with stacked capacitor rings that charge up one by one, crackling at the tip when full.",
+        draw(c, aim, s, fx, t, col) { const k = G(s), lvl = fmod(t * 1.5, 5); deck(c, k, col, t); plate(c, rectPts(8, 8), METAL_L, Math.PI / 4, k, 1.3);
+          for (let i = 0; i < 4; i++) outline(c, rectPts(7 - i * 1.6, 7 - i * 1.6), A(col, lvl > i ? 0.95 : 0.2), 1.2 * k, Math.PI / 4, k);
+          if (lvl > 4) for (let i = 0; i < 3; i++) { const a = rnd(Math.floor(t * 20) + i) * TAU; line(c, add(c, mul(fa(a), 4 * k)), A(lt(col, 0.4), 0.9), 0.8 * k); } glowDot(c, (1 + 0.4 * lvl) * k, col); } },
+      { key: "F", name: "Signal Drum", muzzle: 0, fixed: true, theme: "A big round drum emitter, its membrane rings rippling outward on each beat, braced by three struts.",
+        draw(c, aim, s, fx, t, col) { const k = G(s), beat = fmod(t * 1.2, 1); deck(c, k, col, t); for (let i = 0; i < 3; i++) { const d = fa(Math.PI / 2 + i * TAU / 3); bar(add(c, mul(d, 9 * k)), add(c, mul(d, 14 * k)), 2 * k, METAL); }
+          disc(c, 11 * k, OUTLINE); disc(c, 10.3 * k, METAL_L); disc(c, 8.6 * k, METAL_D); for (let i = 0; i < 3; i++) { const r = fmod(beat + i / 3, 1); ring(c, (2 + 6.4 * r) * k, A(col, 0.8 * (1 - r)), 1.1 * k); }
+          glowDot(c, (1.2 + 0.8 * (1 - beat)) * k, col); } },
     ],
     anims: [
       { key: "A", name: "Pulse Rings", desc: "Magenta rings ripple out from the tower; as each ring reaches a tower, its chevrons flash and it glows for a moment.", period: 1, flight: 1, fx: () => ({}),
@@ -165,6 +207,18 @@ const TOWERS = [
         persist: (m, t, info, s, col) => { const R = s * 1.6; disc(info.c, R, A(col, 0.07)); arcSegments(info.c, R, 12, 0.18, t * 0.3, A(col, 0.55), 1.6);
           for (const mt of matesOf(info)) { ring(mt.p, s * 0.32, A(col, 0.5 + 0.2 * Math.sin(t * 3)), 1.5); mateTower(mt.p, G(s), mt.col, t, 0.9, col);
             for (let i = 0; i < 3; i++) { const q = fmod(t * 0.7 + i / 3 + mt.p[0], 1); glowDot(add(mt.p, [(rnd(i + mt.p[1]) - 0.5) * s * 0.4, -q * s * 0.4]), s * 0.015, A(col, 1 - q)); } } } },
+      { key: "D", name: "Chevron Rain", desc: "Every couple of seconds a glowing chevron drops onto each boosted tower from above and lands with a flash, stacking with the others.", period: 1, flight: 1, fx: () => ({}),
+        persist: (m, t, info, s, col) => { matesOf(info).forEach((mt, i) => { const u = fmod(t * 0.5 + i * 0.25, 1); mateTower(mt.p, G(s), mt.col, t, u > 0.4 ? 1 : 0.5, col);
+          if (u < 0.4) { const q = add(mt.p, [0, -(16 * G(s) * 0.75) - (1 - u / 0.4) * s * 0.6]); polyline([add(q, [-3 * G(s), 2 * G(s)]), q, add(q, [3 * G(s), 2 * G(s)])], A(col, 0.9), 2); } else if (u < 0.5) glowDot(mt.p, s * 0.12 * (1 - (u - 0.4) * 10), col); }); } },
+      { key: "E", name: "Power Cables", desc: "Glowing cables run along the ground from the tower to each boosted tower, with pulses of power travelling down them; the decks light up as each pulse arrives.", period: 1, flight: 1, fx: () => ({}),
+        persist: (m, t, info, s, col) => { matesOf(info).forEach((mt, i) => { const mid = add(lerp(info.c, mt.p, 0.5), [0, s * 0.15]), pts = []; for (let j = 0; j <= 10; j++) { const u = j / 10; pts.push(lerp(lerp(info.c, mid, u), lerp(mid, mt.p, u), u)); }
+          polyline(pts, OUTLINE, 3.2); polyline(pts, METAL, 2); const q = fmod(t * 0.9 + i * 0.3, 1); glowDot(pts[Math.floor(q * 10)], s * 0.035, col); mateTower(mt.p, G(s), mt.col, t, q > 0.85 ? 1 : 0.55, col); if (q > 0.85) ring(mt.p, s * 0.3, A(col, (q - 0.85) * 6), 1.5); }); } },
+      { key: "F", name: "Overcharge Sparks", desc: "Magenta arcs jump from the tower to each boosted tower in turn; the struck tower crackles and its barrel glows hot for a moment.", period: 1, flight: 1, fx: () => ({}),
+        persist: (m, t, info, s, col) => { const mates = matesOf(info), cur = Math.floor(t * 1.5) % mates.length, u = fmod(t * 1.5, 1);
+          mates.forEach((mt, i) => { const on = i === cur; mateTower(mt.p, G(s), mt.col, t, on ? 1 : 0.5, col);
+            if (on && u < 0.35) { const pts = [info.c]; for (let j = 1; j < 6; j++) pts.push(add(lerp(info.c, mt.p, j / 6), mul(orth(norm(sub(mt.p, info.c))), (rnd(Math.floor(t * 30) + j) - 0.5) * s * 0.25))); pts.push(mt.p);
+              polyline(pts, A(col, 0.3), 4); polyline(pts, col, 1.6); polyline(pts, [1, 1, 1, 0.8], 0.6); }
+            if (on) glowDot(add(mt.p, [s * 0.15, -s * 0.08]), s * 0.05 * (1 - u), [1, 0.6, 0.3, 1]); }); } },
     ] },
 
   // 14. Radar Tower -------------------------------------------------------------------------------------
@@ -172,7 +226,8 @@ const TOWERS = [
     desc: "Detects and alerts nearby towers of stealthy or otherwise hidden enemies. \"I've lost the bleeps, I've lost the sweeps, and I've lost the creeps.\" In the preview every other enemy is cloaked (a faint shimmer) until a ping reveals it for 1 s, marked with brackets. (Colour: today's Sensor Array teal.)",
     looks: [
       { key: "A", name: "Dish Mast", muzzle: 0, fixed: true, theme: "A braced mast carrying a big parabolic dish that turns steadily, a feed horn at its focus.",
-        draw(c, aim, s, fx, t, col) { const k = G(s), a = t * 1.2; deck(c, k, col, t); for (let i = 0; i < 4; i++) { const d = fa(Math.PI / 4 + i * Math.PI / 2); bar(add(c, mul(d, 3 * k)), add(c, mul(d, 12 * k)), 2 * k, lt(METAL_D, 0.12)); }
+        dishAngle: (t) => t * TAU / 3,
+        draw(c, aim, s, fx, t, col) { const k = G(s), a = this.dishAngle(t); deck(c, k, col, t); for (let i = 0; i < 4; i++) { const d = fa(Math.PI / 4 + i * Math.PI / 2); bar(add(c, mul(d, 3 * k)), add(c, mul(d, 12 * k)), 2 * k, lt(METAL_D, 0.12)); }
           orb(c, 4 * k, METAL); arc(c, 10 * k, a - 1.1, a + 1.1, OUTLINE, 4.6 * k); arc(c, 10 * k, a - 1.1, a + 1.1, METAL_L, 3 * k); arc(c, 9.6 * k, a - 0.9, a - 0.1, lt(METAL_L, 0.4), 0.9 * k);
           line(c, add(c, mul(fa(a), 6 * k)), METAL_L, 1 * k); glowDot(add(c, mul(fa(a), 6 * k)), 1 * k, col); } },
       { key: "B", name: "Phased Array Block", muzzle: 0, fixed: true, theme: "A square block faced with flat phased-array panels whose tiles light up in sweeping sequence, a small whip antenna on top.",
@@ -180,7 +235,8 @@ const TOWERS = [
           for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) { const on = fmod(t * 3 - (i + j) * 0.25, 2) < 0.4; rect(c[0] + (-8 + i * 4.2) * k, c[1] + (-8 + j * 4.2) * k, 3.4 * k, 3.4 * k, on ? A(col, 0.85) : [0.12, 0.16, 0.16, 1]); }
           bar(c, add(c, [3 * k, -13 * k]), 0.9 * k, METAL_L); glowDot(add(c, [3 * k, -13 * k]), 0.9 * k, col); } },
       { key: "C", name: "Twin Dish Rotor", muzzle: 0, fixed: true, theme: "A rotor arm turning on a hub with a small dish at each end facing outward, sweeping twice per turn.",
-        draw(c, aim, s, fx, t, col) { const k = G(s), a = t * 1.4; deck(c, k, col, t); plate(c, ngon(8, 1, Math.PI / 8), METAL, 0, 7 * k, 1.2);
+        dishAngle: (t) => t * TAU / 3,
+        draw(c, aim, s, fx, t, col) { const k = G(s), a = this.dishAngle(t); deck(c, k, col, t); plate(c, ngon(8, 1, Math.PI / 8), METAL, 0, 7 * k, 1.2);
           for (const sg of [-1, 1]) { const d = fa(a + (sg > 0 ? 0 : Math.PI)), p = add(c, mul(d, 10 * k)); bar(c, p, 2 * k, METAL_L); const pa = Math.atan2(d[1], d[0]);
             arc(p, 3.6 * k, pa - 1.2, pa + 1.2, OUTLINE, 3 * k); arc(p, 3.6 * k, pa - 1.2, pa + 1.2, METAL_L, 1.8 * k); glowDot(p, 0.8 * k, col); }
           orb(c, 3 * k, METAL_L); glowDot(c, 1 * k, col); } },
@@ -189,9 +245,9 @@ const TOWERS = [
       { key: "A", name: "Ping Ring", desc: "Every 3 s a teal ring expands across the radar's range; each cloaked enemy it passes is revealed with brackets for a second.", period: 1, flight: 1, fx: () => ({}),
         persist: radarAgent({ draw: (m, t, info, s, col) => { const u = fmod(t, 3) / 1.2; if (u < 1) { ring(info.c, s * 3.3 * u, A(col, 0.7 * (1 - u)), 2); ring(info.c, s * 3.3 * u - 4, A(col, 0.25 * (1 - u)), 4); } },
           hits: (m, t, info, s, e) => { const u = fmod(t, 3) / 1.2; return u < 1 && Math.abs(distTo(e.p, info.c) - s * 3.3 * u) < s * 0.15; } }) },
-      { key: "B", name: "Sweep Beam", desc: "A sweep wedge turns round the tower once every 3 s, like a radar screen; cloaked enemies light up with brackets as it passes over them.", period: 1, flight: 1, fx: () => ({}),
-        persist: radarAgent({ draw: (m, t, info, s, col) => { const a = t * TAU / 3, R = s * 3.3; for (let i = 0; i < 6; i++) { const a0 = a - i * 0.08; poly([info.c, add(info.c, mul(fa(a0 - 0.08), R)), add(info.c, mul(fa(a0), R))], A(col, 0.16 * (1 - i / 6))); } line(info.c, add(info.c, mul(fa(a), R)), A(col, 0.7), 1.3); },
-          hits: (m, t, info, s, e) => { const a = fmod(t * TAU / 3, TAU), b = fmod(Math.atan2(e.p[1] - info.c[1], e.p[0] - info.c[0]), TAU), d = fmod(a - b, TAU); return d < 0.15; } }) },
+      { key: "B", name: "Sweep Beam", desc: "A sweep wedge turns round the tower once every 3 s, following the dish (round 2), like a radar screen; cloaked enemies light up with brackets as it passes over them.", period: 1, flight: 1, fx: () => ({}),
+        persist: radarAgent({ draw: (m, t, info, s, col) => { const a = sweepAngle(info, t), R = s * 3.3; for (let i = 0; i < 6; i++) { const a0 = a - i * 0.08; poly([info.c, add(info.c, mul(fa(a0 - 0.08), R)), add(info.c, mul(fa(a0), R))], A(col, 0.16 * (1 - i / 6))); } line(info.c, add(info.c, mul(fa(a), R)), A(col, 0.7), 1.3); },
+          hits: (m, t, info, s, e) => { const a = fmod(sweepAngle(info, t), TAU), b = fmod(Math.atan2(e.p[1] - info.c[1], e.p[0] - info.c[0]), TAU), d = fmod(a - b, TAU); return d < 0.15; } }) },
       { key: "C", name: "Pulse Burst", desc: "Every 3 s the whole range flashes in a grid pattern at once; revealed enemies get brackets and a link line back to the radar, alerting the towers.", period: 1, flight: 1, fx: () => ({}),
         persist: radarAgent({ draw: (m, t, info, s, col) => { const u = fmod(t, 3); if (u < 0.35) { const a = 1 - u / 0.35, R = s * 3.3; disc(info.c, R, A(col, 0.08 * a)); for (let i = -3; i <= 3; i++) { line(add(info.c, [i * s * 0.5, -R]), add(info.c, [i * s * 0.5, R]), A(col, 0.18 * a), 1); line(add(info.c, [-R, i * s * 0.5]), add(info.c, [R, i * s * 0.5]), A(col, 0.18 * a), 1); } }
             for (const e of info.all) if (cloaked(e) && (m.seen[e.i] || 0) > t) line(info.c, e.p, A(col, 0.35 * Math.min(1, (m.seen[e.i] - t) * 2)), 1); },
@@ -230,6 +286,17 @@ const TOWERS = [
         persist: coldAgent({ travel: 1.8, draw: (c, u, R, s, col, t, raw) => { const a = 0.55 + 0.45 * (1 - Math.min(1, raw / 2));
           for (let i = 0; i < 22; i++) { const ang = rnd(i) * TAU + t * 0.1 * (i % 2 ? 1 : -1), rr = R * Math.min(u, rnd(i + 9)), p = add(c, mul(fa(ang), rr));
             disc(p, s * (0.12 + 0.04 * Math.sin(t * 1.5 + i)), A(FROST, 0.16 * a)); } } }) },
+      { key: "D", name: "Snow Squall", desc: "Snowflakes spiral out from the tower in a swirling squall that fills the range; enemies caught in it are dusted white.", period: 1, flight: 1, fx: () => ({}),
+        persist: coldAgent({ travel: 1.3, draw: (c, u, R, s, col, t, raw) => { const a = raw > 1.5 ? 0.3 : 1 - 0.7 * Math.min(1, raw / 1.5);
+          for (let i = 0; i < 26; i++) { const rr = R * fmod(rnd(i) + t * 0.35, 1), ang = rnd(i + 5) * TAU + rr / R * 4 + t * 0.6, p = add(c, mul(fa(ang), rr));
+            const f = 1.2 + rnd(i + 2) * 1.6; for (let j = 0; j < 3; j++) { const d = fa(j * Math.PI / 3 + t); line(sub(p, mul(d, f)), add(p, mul(d, f)), A([1, 1, 1, 1], 0.7 * a), 0.8); } } } }) },
+      { key: "E", name: "Ice Spike Ring", desc: "A ring of ice spikes bursts up out of the ground and races outward, then melts away behind the front.", period: 1, flight: 1, fx: () => ({}),
+        persist: coldAgent({ travel: 0.9, draw: (c, u, R, s, col, t, raw) => { if (raw > 1.6) return;
+          for (let j = 0; j < 3; j++) { const back = u - j * 0.12; if (back <= 0) continue; const r = R * back, a = Math.max(0, 1 - (raw - back) * 1.4) * (1 - j * 0.3);
+            for (let i = 0; i < 18; i++) { const d = fa(i * TAU / 18 + j * 0.17), p = add(c, mul(d, r)); fill(p, [[0, -s * 0.12], [s * 0.035, 0], [-s * 0.035, 0]], A(mix(FROST, [1, 1, 1, 1], 0.4), a), 0, 1); } } } }) },
+      { key: "F", name: "Fog Jets", desc: "Four jets of dense freezing fog blast out of the vents in a cross and spread sideways until they fill the range.", period: 1, flight: 1, fx: () => ({}),
+        persist: coldAgent({ travel: 1.2, draw: (c, u, R, s, col, t, raw) => { if (raw > 1.8) return; const a = 1 - Math.min(1, raw / 1.8);
+          for (let j = 0; j < 4; j++) { const d = fa(Math.PI / 4 + j * Math.PI / 2); for (let i = 0; i < 7; i++) { const q = (i + 1) / 7; if (q > u) break; const spread = q * q * R * 0.5; for (const sg of [-1, 0, 1]) disc(add(add(c, mul(d, R * q)), mul(orth(d), sg * spread)), s * (0.08 + q * 0.12), A(FROST, 0.18 * a)); } } } }) },
     ] },
 ];
-const DEFAULTS = {};
+const DEFAULTS = { mines: { anim: "C" }, chem: { anim: "A" }, radar: { look: "A", anim: "B" }, cryo: { look: "B" } };

@@ -42,7 +42,7 @@ enemies on the lane and flyers overhead (air-only towers ignore the ground, and 
 |---|---|---|---|
 | 1 | Gun Turret, Mortar Tower, Laser Tower, Rocket Salvo, Anti-Aircraft Turret | `design/tower_art_1.html` | **Confirmed** (round 2) |
 | 2 | Artillery Cannon, Railgun, Tesla Tower, Drone Bay, CAS Gunship | `design/tower_art_2.html` | **Confirmed** (round 3) |
-| 3 | Mine Layer, Chemical Plant, Boost Tower, Radar Tower, Cryo Tower | `design/tower_art_3.html` | Round 1: picks open |
+| 3 | Mine Layer, Chemical Plant, Boost Tower, Radar Tower, Cryo Tower | `design/tower_art_3.html` | Round 2: picks open |
 | 4 | Shockwave Generator, Scrapyard, Magneto Tower, Tractor Tower, Augmentation Tower | `design/tower_art_4.html` | Not started |
 
 ## Page 1, in-game style round 1 (towers 1-5)
@@ -216,9 +216,33 @@ None of these five fires ordinary shots, so each preview runs the tower's own me
 | Radar Tower | Ping Ring | Sweep Beam | Pulse Burst |
 | Cryo Tower | Gas Wave | Frost Burst | Creeping Mist |
 
+**Picks and notes (owner, round 1):**
+
+| Tower | Look | Animation | Notes |
+|---|---|---|---|
+| Mine Layer | - | C Confetti Charge | Look: "More ideas" |
+| Chemical Plant | - | A Acid Stream | Look: "more designs" |
+| Boost Tower | - | - | Look: "more ideas". Animation: "more ideas" |
+| Radar Tower | A Dish Mast | B Sweep Beam | Animation: "The beam should follow the radar dish" |
+| Cryo Tower | B Compressor Block | - | Animation: "more ideas" |
+
+## Page 3, round 2
+
+- **Radar Tower:** the sweep now follows the dish, turning with it once every 3 s. The Twin Dish Rotor's sweep follows its
+  dish too. Picks preselected (A / B).
+- **Mine Layer:** new looks **D Drum Dispenser** (prong-sphere mine), **E Twin Press Factory** (box mine) and **F Rail
+  Launcher** (canister mine). Confetti Charge is preselected.
+- **Chemical Plant:** new looks **D Cooling Tower Works**, **E Barrel Yard Sprayer** and **F Distillery Columns**. Acid
+  Stream is preselected.
+- **Boost Tower:**
+  - New looks: **D Holo Projector**, **E Capacitor Obelisk** and **F Signal Drum**.
+  - New animations: **D Chevron Rain**, **E Power Cables** and **F Overcharge Sparks**.
+- **Cryo Tower:** new animations **D Snow Squall**, **E Ice Spike Ring** and **F Fog Jets**. Compressor Block is
+  preselected.
+
 **Picks:** to come.
 
 ## Open questions
 
-1. **Page 3 picks** (round 1), and whether the Mine Layer red-orange stands.
+1. **Page 3 picks** (round 2), and whether the Mine Layer red-orange stands.
 2. Page 4, then the second pass (per-path looks and Retrofit looks).
