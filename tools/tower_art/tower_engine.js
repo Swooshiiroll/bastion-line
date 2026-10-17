@@ -50,7 +50,7 @@ function pad(c, s) {
 // ---- One animated preview -------------------------------------------------------------------------------
 function makeView(canvas, tw, getLook, getAnim, scale) {
   const ctx = canvas.getContext("2d"), W = canvas.width, H = canvas.height, s = scale;
-  const c = [W * 0.34, H * 0.44];
+  const c = tw.center ? [W * tw.center[0], H * tw.center[1]] : [W * 0.34, H * 0.44]; // tw.size 2: a 2x2 tower
   const v = { aim: -0.6, last: -9, shots: [], lockT: 0, lockId: -1, visible: true };
   v.frame = (t) => {
     X = ctx; X.save(); X.globalAlpha = 1; X.lineCap = "round"; X.lineJoin = "round";
@@ -89,7 +89,7 @@ function makeView(canvas, tw, getLook, getAnim, scale) {
         v.shots.push({ t0: t + k * (an.gap || 0), tid: target.i, to0: target.p.slice(), k, m: (v.n = (v.n || 0) + 1) - 1 });
       }
     }
-    pad(c, s);
+    pad(c, s * (tw.size || 1));
     for (const e of others) drawEnemy(e, s);
     for (const e of ens) drawEnemy(e, s);
     if (info.spot) { const q = info.spot, pu = 0.5 + 0.5 * Math.sin(t * 4); ring(q, s * (0.28 + 0.04 * pu), A(tw.color, 0.55 + 0.3 * pu), 1.5);

@@ -33,12 +33,6 @@ function soakAgent(cfg) { return (m, t, info, s, col) => {
   for (const e of info.ens) if (m.soak[e.i] > t) cfg.soaked(e.p, (m.soak[e.i] - t) / 4, s, col, t, e.i); }; }
 
 // ---- Boost Tower: no attack; it boosts the towers around it ---------------------------------------------------
-const MATES = [[[1.15, -0.25], [0.30, 0.90, 1.00, 1]], [[1.0, 0.72], [1.00, 0.55, 0.20, 1]], [[-0.85, 0.78], [1.00, 0.30, 0.35, 1]]];
-const matesOf = (info) => MATES.map(([o, col]) => ({ p: add(info.c, mul(o, info.s)), col }));
-function mateTower(p, k, col, t, boosted, bcol) { deck(p, k * 0.75, col, t); const aim = -0.5 + Math.sin(t * 0.7 + p[0]) * 0.4;
-  bar(p, P(p, aim, k * 0.75, 15, 0), 3 * k * 0.75, METAL_L); plate(p, ngon(8, 1, Math.PI / 8), METAL_L, aim, 6.5 * k * 0.75, 1); orb(p, 3.4 * k * 0.75, METAL); glowDot(p, 1 * k, col);
-  if (boosted > 0) for (let i = 0; i < 2; i++) { const q = add(p, [0, -(16 + i * 3.4) * k * 0.75]); polyline([add(q, [-2.6 * k, 1.6 * k]), q, add(q, [2.6 * k, 1.6 * k])], A(bcol, boosted), 1.6 * k); } }
-
 // ---- Radar Tower: cloaked enemies (every other one) stay hidden until a ping reveals them for a moment ------------
 const cloaked = (e) => e.i % 2 === 0;
 function hideCloaked(e, s, t) { const r = Math.max(4, Math.min(11, s * 0.12)) + 2; disc(e.p, r, e.air ? [0.07, 0.09, 0.08, 0.82] : [0.16, 0.15, 0.13, 0.82]);

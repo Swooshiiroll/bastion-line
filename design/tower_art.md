@@ -42,8 +42,8 @@ enemies on the lane and flyers overhead (air-only towers ignore the ground, and 
 |---|---|---|---|
 | 1 | Gun Turret, Mortar Tower, Laser Tower, Rocket Salvo, Anti-Aircraft Turret | `design/tower_art_1.html` | **Confirmed** (round 2) |
 | 2 | Artillery Cannon, Railgun, Tesla Tower, Drone Bay, CAS Gunship | `design/tower_art_2.html` | **Confirmed** (round 3) |
-| 3 | Mine Layer, Chemical Plant, Boost Tower, Radar Tower, Cryo Tower | `design/tower_art_3.html` | Round 3: mine placement change to confirm |
-| 4 | Shockwave Generator, Scrapyard, Magneto Tower, Tractor Tower, Augmentation Tower | `design/tower_art_4.html` | Not started |
+| 3 | Mine Layer, Chemical Plant, Boost Tower, Radar Tower, Cryo Tower | `design/tower_art_3.html` | **Confirmed** (round 3) |
+| 4 | Shockwave Generator, Scrapyard, Magneto Tower, Tractor Tower, Augmentation Tower | `design/tower_art_4.html` | Round 1: picks open |
 
 ## Page 1, in-game style round 1 (towers 1-5)
 
@@ -256,7 +256,50 @@ None of these five fires ordinary shots, so each preview runs the tower's own me
   the tower.
 - Everything else is preselected as picked.
 
+**Page 3 confirmed (owner, "NEXT"):**
+- Mine Layer: F Rail Launcher / C Confetti Charge (random mine spots).
+- Chemical Plant: F Distillery Columns / A Acid Stream.
+- Boost Tower: F Signal Drum / F Overcharge Sparks.
+- Radar Tower: A Dish Mast / B Sweep Beam (the sweep follows the dish).
+- Cryo Tower: B Compressor Block / C Creeping Mist.
+
+The Mine Layer red-orange wasn't changed, so it stands.
+
+## Page 4, round 1 (towers 16-20)
+
+Each preview runs the tower's own mechanic:
+- **Shockwave Generator:** a wave every 1.75 s; enemies flash as it passes them.
+- **Scrapyard:** a 2×2 yard drawn at its real size. It attacks nothing and pays +100 at each round's clear (the preview
+  pays every 4 s).
+- **Magneto Tower:** a constant field; enemies inside show a pull arrow toward the magnet.
+- **Tractor Tower:** grabs one enemy, drags it back for 1.5 s and lets go. The real recharge is 6 s; the preview
+  shortens it. The preview redraws the held enemy where the beam drags it, since it can't move the real one.
+- **Augmentation Tower:** links to three stand-in towers. Every third stand-in shot crits, so the 5% crit shows.
+
+**Colours:**
+- Today's colours: Shockwave amber (Nova Reactor), Scrapyard copper (Scrapyard) and Magneto violet (Gravity Well).
+- **Proposals** (no in-game counterpart): the **Tractor's cyan** (the roster's look) and the **Augmentation lavender**.
+- Close pairs: the Magneto violet sits near the Tesla's purple, and the Tractor cyan near the Gun Turret's.
+
+| Tower | Look A | Look B | Look C |
+|---|---|---|---|
+| Shockwave Generator | Caged Reactor | Ring Reactor | Piston Thumper |
+| Scrapyard | Crusher Yard | Compactor Plant | Magnet Yard |
+| Magneto Tower | Horseshoe Magnet | Coil Drum | Twin Pole Pylons |
+| Tractor Tower | Dish Emitter | Gimbal Projector | Claw Emitter |
+| Augmentation Tower | Crystal Emitter | Orbiting Shards | Caged Prism |
+
+| Tower | Animation A | Animation B | Animation C |
+|---|---|---|---|
+| Shockwave Generator | Blast Ring | Mushroom Pulse | Double Shock |
+| Scrapyard | Round Payout | Sparks and Sale | Wreck Collector (shows the kill bonus too) |
+| Magneto Tower | Field Lines | Pulse Pull | Iron Filings |
+| Tractor Tower | Beam Cone | Grapple Beam | Spiral Lock |
+| Augmentation Tower | Crit Links | Augment Glow | Shard Stream |
+
+**Picks:** to come.
+
 ## Open questions
 
-1. **Page 3, round 3:** the random mine placement, and whether the Mine Layer red-orange stands.
-2. Page 4, then the second pass (per-path looks and Retrofit looks).
+1. **Page 4 picks** (round 1), and whether the proposed Tractor cyan and Augmentation lavender stand.
+2. Then the second pass (per-path looks and Retrofit looks).

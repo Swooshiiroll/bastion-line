@@ -51,7 +51,7 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Tower rework · Tower art · page 3 of 4: towers 11-15 (in-game style, round 3)</div>
+    <div class="eyebrow">Bastion Line · Tower rework · Tower art · page 3 of 4: towers 11-15 (in-game style, confirmed)</div>
     <h1>Tower art: towers 11-15</h1>
     <p class="note">The reworked towers' <b>models</b>, first pass: for each tower pick its <b>look</b> and its <b>firing animation</b> from three proposals each (A to C), and add notes. Mix freely. <b>Your combination</b> shows your mix (option A until you pick). Every preview runs live: the turret tracks and fires at enemies on the lane (flyers for air towers). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back. Spec: <code>design/tower_art.md</code>.</p>
     <ul class="rules">
@@ -376,6 +376,14 @@ function noses(c, aim, k, tubes, fx, r) { const ready = fx.ready ?? 1; if (ready
   for (const [x, y] of tubes) { const p = P(c, aim, k, x, y); orb(p, (r || 1.7) * k * ready, [0.86, 0.88, 0.92, 1]); disc(add(p, mul(fa(aim), 0.5 * k)), (r || 1.7) * 0.45 * k * ready, [1, 0.32, 0.25, 1]); } }
 
 
+// ---- Stand-in neighbour towers for support towers' previews (Boost Tower, Augmentation Tower) ---------------------
+const MATES = [[[1.15, -0.25], [0.30, 0.90, 1.00, 1]], [[1.0, 0.72], [1.00, 0.55, 0.20, 1]], [[-0.85, 0.78], [1.00, 0.30, 0.35, 1]]];
+const matesOf = (info) => MATES.map(([o, col]) => ({ p: add(info.c, mul(o, info.s)), col }));
+function mateTower(p, k, col, t, boosted, bcol, aimAt) { deck(p, k * 0.75, col, t); const aim = aimAt ?? (-0.5 + Math.sin(t * 0.7 + p[0]) * 0.4);
+  bar(p, P(p, aim, k * 0.75, 15, 0), 3 * k * 0.75, METAL_L); plate(p, ngon(8, 1, Math.PI / 8), METAL_L, aim, 6.5 * k * 0.75, 1); orb(p, 3.4 * k * 0.75, METAL); glowDot(p, 1 * k, col);
+  if (boosted > 0) for (let i = 0; i < 2; i++) { const q = add(p, [0, -(16 + i * 3.4) * k * 0.75]); polyline([add(q, [-2.6 * k, 1.6 * k]), q, add(q, [2.6 * k, 1.6 * k])], A(bcol, boosted), 1.6 * k); } }
+
+
 // ---- Tower art page 3: towers 11-15, in the style of today's in-game towers (owner, 2026-10-16) ----------
 // Shared style helpers come from game_style.js. Every tower here is a persistent agent (mines on the track, soaks,
 // boosts, pings, cold waves) rather than a turret firing shots.
@@ -411,12 +419,6 @@ function soakAgent(cfg) { return (m, t, info, s, col) => {
   for (const e of info.ens) if (m.soak[e.i] > t) cfg.soaked(e.p, (m.soak[e.i] - t) / 4, s, col, t, e.i); }; }
 
 // ---- Boost Tower: no attack; it boosts the towers around it ---------------------------------------------------
-const MATES = [[[1.15, -0.25], [0.30, 0.90, 1.00, 1]], [[1.0, 0.72], [1.00, 0.55, 0.20, 1]], [[-0.85, 0.78], [1.00, 0.30, 0.35, 1]]];
-const matesOf = (info) => MATES.map(([o, col]) => ({ p: add(info.c, mul(o, info.s)), col }));
-function mateTower(p, k, col, t, boosted, bcol) { deck(p, k * 0.75, col, t); const aim = -0.5 + Math.sin(t * 0.7 + p[0]) * 0.4;
-  bar(p, P(p, aim, k * 0.75, 15, 0), 3 * k * 0.75, METAL_L); plate(p, ngon(8, 1, Math.PI / 8), METAL_L, aim, 6.5 * k * 0.75, 1); orb(p, 3.4 * k * 0.75, METAL); glowDot(p, 1 * k, col);
-  if (boosted > 0) for (let i = 0; i < 2; i++) { const q = add(p, [0, -(16 + i * 3.4) * k * 0.75]); polyline([add(q, [-2.6 * k, 1.6 * k]), q, add(q, [2.6 * k, 1.6 * k])], A(bcol, boosted), 1.6 * k); } }
-
 // ---- Radar Tower: cloaked enemies (every other one) stay hidden until a ping reveals them for a moment ------------
 const cloaked = (e) => e.i % 2 === 0;
 function hideCloaked(e, s, t) { const r = Math.max(4, Math.min(11, s * 0.12)) + 2; disc(e.p, r, e.air ? [0.07, 0.09, 0.08, 0.82] : [0.16, 0.15, 0.13, 0.82]);
@@ -731,7 +733,7 @@ function pad(c, s) {
 // ---- One animated preview -------------------------------------------------------------------------------
 function makeView(canvas, tw, getLook, getAnim, scale) {
   const ctx = canvas.getContext("2d"), W = canvas.width, H = canvas.height, s = scale;
-  const c = [W * 0.34, H * 0.44];
+  const c = tw.center ? [W * tw.center[0], H * tw.center[1]] : [W * 0.34, H * 0.44]; // tw.size 2: a 2x2 tower
   const v = { aim: -0.6, last: -9, shots: [], lockT: 0, lockId: -1, visible: true };
   v.frame = (t) => {
     X = ctx; X.save(); X.globalAlpha = 1; X.lineCap = "round"; X.lineJoin = "round";
@@ -770,7 +772,7 @@ function makeView(canvas, tw, getLook, getAnim, scale) {
         v.shots.push({ t0: t + k * (an.gap || 0), tid: target.i, to0: target.p.slice(), k, m: (v.n = (v.n || 0) + 1) - 1 });
       }
     }
-    pad(c, s);
+    pad(c, s * (tw.size || 1));
     for (const e of others) drawEnemy(e, s);
     for (const e of ens) drawEnemy(e, s);
     if (info.spot) { const q = info.spot, pu = 0.5 + 0.5 * Math.sin(t * 4); ring(q, s * (0.28 + 0.04 * pu), A(tw.color, 0.55 + 0.3 * pu), 1.5);
