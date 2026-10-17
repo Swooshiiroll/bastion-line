@@ -409,12 +409,13 @@ paths work together.
 - No blue muzzle glow. The single bore floating in front of the cluster is gone (owner): each barrel has its own bore
   at its tip, and a short pale flash shows at the firing barrel. Shots leave that barrel.
 - The dark arm connecting each extra gun to the turret centre is removed (owner); the mounts stand on their own.
-- **The rounds change at every Power step** (owner: "Heavier and harder"). The stock round is a thin tracer. Then:
-  1. a thicker tracer with a heavier head.
+- **The rounds change at every Power step** (owner: "Heavier and harder"; then "They should still look like bullets,
+  they're too thick"). Each step is a slim pointed bullet on the same thin tracer:
+  1. a brass bullet.
   2. a steel tip.
-  3. a dark core with a yellow AP band.
-  4. a white-hot tungsten core.
-  5. Mastery: a slim sabot dart that sheds its petals at the muzzle, with a gold streak.
+  3. a dark AP bullet with a yellow band.
+  4. a white-hot tungsten core glowing at its base.
+  5. Mastery: a slim finned sabot dart that sheds its petals at the muzzle, with a gold streak.
 
   Every gun on the mount fires them. The Range path's long tracer lines and Incendiary's orange still apply to the
   trail.
