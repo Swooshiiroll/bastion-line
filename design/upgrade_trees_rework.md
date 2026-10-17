@@ -28,9 +28,9 @@ A basic rotating machine gun turret. "It's a machine gun, Private!"
 | M | a | Sabot Rounds | 2475 |  | Ignores armour fully; 44 damage per hit | new |
 | 3 | b | Long Barrel | 25 |  | +20 range | new |
 | 4 | b | Tracer Rounds | 60 |  | +10 range; 10% chance of a critical hit (double damage); visible tracer lines | new |
-| 5 | b | Scope | 170 |  | +25 range; crit chance 15% | new |
+| 5 | b | Rifled Barrels | 170 |  | +25 range; crit chance 15% | new |
 | 6 | b | Rangefinder | 305 |  | +20 range; crit chance 20% | new |
-| M | b | Precision Optics | 980 |  | 230 range in all (+25); crit chance 30% | new |
+| M | b | Targeting Computer | 980 |  | 230 range in all (+25); crit chance 30% | new |
 | 3 | c | Swivel Mount | 15 |  | Switches to a new target instantly after a kill, and doesn't fire at enemies already about to die (no wasted rounds on swarms and holograms) | new |
 | 4 | c | Side Gun | 165 |  | A small side gun fires at a second target at 50% damage | new |
 | 5 | c | Twin Mount | 330 |  | 2 targets at full damage | new |
@@ -191,7 +191,7 @@ A large cannon with magnetically polarized rails that launch a large projectile 
 | 4 | c | Penetrator Core | 260 |  | Falloff per enemy 40% to 25% | new |
 | 5 | c | Ionised Trail | 1535 |  | The line burns for 2 s: 30 energy damage/s to every enemy on it, targeted or not (cloaked ones too) | new |
 | 6 | c | Hot Rail | 3685 |  | Shatter 4 armour; trail 45/s; falloff 15% | new |
-| M | c | Ion Lance | 6920 |  | Shatter 6; trail 50/s; no falloff: full damage to everything on the line | new |
+| M | c | Ion Cannon | 6920 |  | Shatter 6; trail 50/s; no falloff: full damage to everything on the line | new |
 
 ## Tesla Tower
 id: tesla_tower · class: Assault · weapon: Energy · build: 250 cr · status: new · branches: Power/Damage (raw voltage, stun, overload), Range/Chaining (storm field), Speed (faster discharges)
@@ -287,7 +287,7 @@ Manufactures and tosses explosive mines onto the track that explode when an enem
 | 3 | b | Quick Assembly | 110 |  | A mine every 1.33 s; cap 24 | new |
 | 4 | b | Twin Press | 270 |  | Every 1.2 s; cap 28 | new |
 | 5 | b | Assembly Line | 1080 |  | Every 0.95 s; cap 32 | new |
-| 6 | b | Automated Line | 1620 |  | Every 0.85 s; cap 36 | new |
+| 6 | b | Rapid Line | 1620 |  | Every 0.85 s; cap 36 | new |
 | M | b | Mine Factory | 5395 |  | Every 0.7 s; cap 45 | new |
 | 3 | c | Longer Arm | 150 |  | 140 px | new |
 | 4 | c | Spring Launcher | 300 |  | 160 px | new |
@@ -423,7 +423,7 @@ Generates powerful shockwaves by creating small nuclear explosion. "Radioactive 
 | 4 | c | Harmonic Wave | 55 |  | ×2 to barriers | new |
 | 5 | c | Resonance | 145 |  | ×2.5 to barriers | new |
 | 6 | c | Breaker Wave | 290 |  | ×3 to barriers | new |
-| M | c | Shatterpoint | 1300 |  | Each wave shatters half of every barrier it hits, and barriers it hits can't regenerate for 5 s | new |
+| M | c | Shatter Shock | 1300 |  | Each wave shatters half of every barrier it hits, and barriers it hits can't regenerate for 5 s | new |
 
 ## Scrapyard
 id: scrapyard · class: Utility · weapon: None · build: 875 cr · status: new · branches: Passive Income, Kill Income (bonus field), Discounts (towers near it)

@@ -1,7 +1,7 @@
 // ---- Tower art second pass: Gun Turret (tower 1), on the confirmed base: look C Rotary Gun, animation C Rapid Stream --
 // Rotary Gun geometry (game px, x along the aim, y to the side): four barrels x 5..19 spinning at y ±3.4, shroud rings at
 // x 8 and 18, muzzle at x 20, drum magazine at (-1, 8.5) r 4.2, vent block at (-8, 0), hexagonal body r 6.8.
-const PAGE = { title: "Gun Turret: paths and Retrofits (second pass)", store: "bl-tower-art-p2-gun-v1" };
+const PAGE = { title: "Gun Turret: paths and Retrofits (second pass)", store: "bl-tower-art-p2-gun-v2" };
 const GOLD = [1, 0.78, 0.3, 1], RED_TIP = [1, 0.3, 0.25, 1], STEEL = [0.42, 0.45, 0.5, 1], COPPER = [0.78, 0.5, 0.28, 1];
 const RC = (fx) => fx.recoil * 1.5; // the cluster's recoil, as the base draws it
 const spinOf = (fx, t) => t * (fx.recoil > 0 || fx.flash > 0 ? 30 : 3);
@@ -86,13 +86,14 @@ const P2 = {
           { key: "C", name: "Feed Lamp", desc: "A small lamp on the breech glows with each round; long white-hot tracer lines; crits flash gold.", crit: 0.1,
             over: (c, aim, s, fx) => { const k = G(s); glowDot(P(c, aim, k, 3, -4.5), (0.8 + fx.flash) * k, [1, 0.9, 0.6, 1]); }, shot: (f, to, u) => longTracer(f, to, u, [1, 0.92, 0.7, 1], 1.4) },
         ] },
-        { name: "Scope", cost: 170, effect: "+25 range; 15% crits (primary)", options: [
-          { key: "A", name: "Side Scope", desc: "A long telescopic scope along the left of the body, its lens glinting red.", crit: 0.15,
-            over: (c, aim, s) => { const k = G(s), a = P(c, aim, k, -4, -7.5), b = P(c, aim, k, 8, -7.5); bar(a, b, 2.6 * k, METAL); ring(b, 1.6 * k, METAL_L, 0.8 * k); glowDot(b, 0.9 * k, [1, 0.3, 0.3, 1]); } },
-          { key: "B", name: "Twin-Lens Sight", desc: "A boxed sight with two lenses perched on the body.", crit: 0.15,
-            over: (c, aim, s, fx, t, col) => { const k = G(s), p = P(c, aim, k, 1, -6.5); plate(p, rectPts(3.4, 2.4), METAL, aim, k, 1); for (const y of [-1.2, 1.2]) glowDot(P(p, aim, k, 3.2, y), 0.7 * k, col); } },
-          { key: "C", name: "Periscope Dome", desc: "A small armoured dome on the body with a lens slit facing forward.", crit: 0.15,
-            over: (c, aim, s, fx, t, col) => { const k = G(s), p = P(c, aim, k, -3, -4); orb(p, 2.8 * k, METAL); line(P(p, aim, k, 1.2, -1.2), P(p, aim, k, 1.2, 1.2), A(col, 0.95), 0.9 * k); } },
+        { name: "Rifled Barrels", cost: 170, effect: "+25 range; 15% crits (primary)", options: [
+          { key: "A", name: "Fluted Barrels", desc: "The four barrels are swapped for longer fluted barrels, their grooves catching the light as they spin.", crit: 0.15,
+            over: (c, aim, s, fx, t) => { const k = G(s), r = RC(fx), sp = spinOf(fx, t); for (let i = 0; i < 4; i++) { const y = Math.sin(sp + i * TAU / 4) * 3.4; if (Math.cos(sp + i * TAU / 4) < 0) continue; for (let x = 9; x <= 16; x += 1.8) line(P(c, aim, k, x - r, y - 0.5), P(c, aim, k, x + 0.9 - r, y + 0.5), lt(METAL_L, 0.35), 0.6 * k); } } },
+          { key: "B", name: "Rifling Glow", desc: "A spiral of accent light runs down the cluster as the rifled barrels spin, brightest while firing.", crit: 0.15,
+            over: (c, aim, s, fx, t, col) => { const k = G(s), r = RC(fx), sp = spinOf(fx, t); for (let x = 9; x <= 17; x += 1) { const y = Math.sin(sp * 0.5 + x * 0.9) * 3.6; disc(P(c, aim, k, x - r, y), 0.5 * k, A(col, 0.4 + 0.5 * fx.flash)); } } },
+          { key: "C", name: "Rifled Bore Caps", desc: "Each barrel ends in a ribbed rifled cap, and a gauge on the body reads the spin.", crit: 0.15,
+            over: (c, aim, s, fx, t, col) => { const k = G(s), r = RC(fx); bar(P(c, aim, k, 18.5 - r, -4.6), P(c, aim, k, 18.5 - r, 4.6), 2.4 * k, STEEL); for (let y = -3.6; y <= 3.6; y += 1.2) line(P(c, aim, k, 17.4 - r, y), P(c, aim, k, 19.6 - r, y), [0, 0, 0, 0.45], 0.6 * k);
+              const g = P(c, aim, k, -4, -4.5); disc(g, 1.8 * k, OUTLINE); disc(g, 1.4 * k, [0.9, 0.9, 0.85, 1]); line(g, add(g, mul(fa(t * 4), 1.1 * k)), A(col, 1), 0.6 * k); } },
         ] },
         { name: "Rangefinder", cost: 305, effect: "+20 range; 20% crits", options: [
           { key: "A", name: "Stereo Rangefinder", desc: "A long rangefinder bar across the back with a lens at each end.", crit: 0.2,
@@ -102,7 +103,7 @@ const P2 = {
           { key: "C", name: "Sensor Mast", desc: "A thin mast on the back with a small sensor head turning on top.", crit: 0.2,
             over: (c, aim, s, fx, t, col) => { const k = G(s), m = P(c, aim, k, -6, -5); orb(m, 1.6 * k, METAL); line(m, add(m, mul(fa(t * 3), 3.4 * k)), METAL_L, 1.2 * k); glowDot(add(m, mul(fa(t * 3), 3.4 * k)), 0.7 * k, col); } },
         ] },
-        { name: "Precision Optics", cost: 980, effect: "230 range in all; 30% crits (mastery)", options: [
+        { name: "Targeting Computer", cost: 980, effect: "230 range in all; 30% crits (mastery)", options: [
           { key: "A", name: "Sniper Optic", desc: "A long gold-ringed sniper optic runs the length of the gun; crits burst gold.", crit: 0.3,
             over: (c, aim, s) => { const k = G(s), a = P(c, aim, k, -8, -7.5), b = P(c, aim, k, 12, -7.5); bar(a, b, 3.2 * k, METAL); for (const x of [-4, 6]) ring(P(c, aim, k, x, -7.5), 2 * k, GOLD, 1 * k); disc(b, 1.8 * k, OUTLINE); glowDot(b, 1.1 * k, [1, 0.3, 0.3, 1]); } },
           { key: "B", name: "Targeting Array", desc: "Three gold-framed lenses in a row on the body; a gold reticle closes on each target as it fires.", crit: 0.3,

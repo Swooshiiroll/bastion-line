@@ -66,7 +66,7 @@ balance probe.
 - Fires **steady medium rounds:** fewer, harder hits than a classic machine gun, less hurt by armour.
 - **Path 1 (Power)** leads to **armour-piercing rounds**; the mastery **ignores armour fully**.
 - **Path 2 (Range/Visibility):** Visibility means **seeing further and tracers**, with no cloak rules; the mastery is
-  **Precision Optics** (more range and critical hits).
+  **Targeting Computer** (more range and critical hits; renamed by the owner from Precision Optics, 2026-10-16).
 - **Path 3 (Multi-Target):** more barrels on more targets, **3 targets** at the top.
 - **Retrofit:** a **water-cooled barrel** (more fire rate).
 - **Counters through its paths:** **armour (Tanks)** and **swarms and decoys**.
@@ -97,9 +97,9 @@ to the Pulse Turret's 18, in fewer, harder hits). Air and ground.
 |---|---|---|---|
 | 1 | Long Barrel | 25 | +20 range |
 | 2 | Tracer Rounds | 60 | +10 range; 10% chance of a critical hit (double damage); visible tracer lines |
-| 3 (primary) | Scope | 170 | +25 range; crit chance 15% |
+| 3 (primary) | Rifled Barrels | 170 | +25 range; crit chance 15% |
 | 4 | Rangefinder | 305 | +20 range; crit chance 20% |
-| Mastery | Precision Optics | 980 | 230 range in all (+25); crit chance 30% |
+| Mastery | Targeting Computer | 980 | 230 range in all (+25); crit chance 30% |
 
 **Path 3, Multi-Target:**
 
@@ -658,7 +658,7 @@ effect list.
 | 2 | Penetrator Core | 260 | Falloff per enemy 40% to 25% |
 | 3 (primary) | Ionised Trail | 1,535 | The line burns for 2 s: 30 energy damage/s to every enemy on it, targeted or not (cloaked ones too) |
 | 4 | Hot Rail | 3,685 | Shatter 4 armour; trail 45/s; falloff 15% |
-| Mastery | Ion Lance | 6,920 | Shatter 6; trail 50/s; **no falloff**: full damage to everything on the line |
+| Mastery | Ion Cannon | 6,920 | Shatter 6; trail 50/s; **no falloff**: full damage to everything on the line |
 
 **Combinations (primary + secondary capped at 2):**
 - **Power + 2 Special:** a boss-killing charged shot that also shatters armour and loses less damage as it pierces.
@@ -668,7 +668,7 @@ effect list.
 **Counters:**
 - **Bosses:** the Power path (×2.5 at the mastery).
 - **Armour:** shatter strips it for everyone.
-- **Lined-up columns:** penetration at stock, full-strength at the Ion Lance.
+- **Lined-up columns:** penetration at stock, full-strength at the Ion Cannon.
 - **Flyers:** hits them.
 - **The Wraith:** the slug is Ballistic, but the **ionised trail is area energy damage**: it burns a Wraith that crosses
   or sits on the line **even while cloaked and untargeted** (owner). Like other area damage, it also reveals it briefly
@@ -1011,7 +1011,7 @@ The cap isn't priced.
 | 1 | Quick Assembly | 110 | A mine every 1.33 s; cap 24 |
 | 2 | Twin Press | 270 | Every 1.2 s; cap 28 |
 | 3 (primary) | Assembly Line | 1,080 | Every 0.95 s; cap 32 |
-| 4 | Automated Line | 1,620 | Every 0.85 s; cap 36 |
+| 4 | Rapid Line | 1,620 | Every 0.85 s; cap 36 |
 | Mastery | Mine Factory | 5,395 | Every 0.7 s; cap 45 |
 
 **Path 3, Range (toss distance):**
@@ -1483,7 +1483,7 @@ ground; no aiming. Armour applies (proposed: it's a blast).
 | 2 | Harmonic Wave | 55 | ×2 to barriers |
 | 3 (primary) | Resonance | 145 | ×2.5 to barriers |
 | 4 | Breaker Wave | 290 | ×3 to barriers |
-| Mastery | Shatterpoint | 1,300 | Each wave **shatters half of every barrier** it hits, and barriers it hits **can't regenerate for 5 s** |
+| Mastery | Shatter Shock | 1,300 | Each wave **shatters half of every barrier** it hits, and barriers it hits **can't regenerate for 5 s** |
 
 The Effect path is cheap by the formula because only some enemies carry barriers (the Aegis Walker, and the Bulwark's
 grants). It's the specialist answer to them.
