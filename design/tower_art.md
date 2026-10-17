@@ -372,8 +372,36 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 
 | # | Tower | File | Status |
 |---|---|---|---|
-| 1 | Gun Turret | `design/tower_art_p2_01_gun.html` | Round 1: picks open |
+| 1 | Gun Turret | `design/tower_art_p2_01_gun.html` | Round 2: picks drawn as one model; to confirm |
+
+### Gun Turret (second pass)
+
+**Picks (owner, round 1):**
+- **Power:** 1 C Reinforced Breech, 2 C Marked Shroud, 3 C Armour Cheeks, 4 B Counterweight, M B Gold-Banded Gun.
+- **Range/Visibility:** 1 A Barrel Extensions, 2 B Tracer Drum, 3 A Fluted Barrels, 4 B Laser Rangefinder, M C Hex
+  Lens Crown.
+- **Multi-Target:** 1 B Bearing Rollers, 2 A Flank Gun, 3 A Twin Rotary, 4 B Ammo Hopper, M A Triple Rotary.
+- **Retrofits:** Water-Cooled Barrel A Water Jacket, Shock Rounds A Coil Wraps, Incendiary Rounds A Fuel Canister.
+
+**Round 2 (Claude, from the owner's notes):** the picks are drawn as one parametric model, so details from different
+paths work together.
+- **Range 1** swaps the barrels for longer ones instead of laying an extension over them. Every gun on the mount gets
+  the longer barrels, and Range 3's fluting.
+- **Power 2's marked shroud** sits on the front ring, over the barrels, wherever the muzzle is. Power's mastery and
+  Multi-Target's mastery turn it gold instead of adding a new shroud.
+- **Range 2** turns the drum's ring red instead of adding a circle.
+- **Extra guns** sit on their own swivel mounts, with bodies bigger than their barrels, and aim at their own targets. The
+  engine now sends the main gun's shots to the enemy it's aimed at.
+- **Extra guns get the same kit:**
+  - a gun shield from Power 1. The owner's "shielding" at pathing 1/0/x is read as a gun shield; to confirm.
+  - the marked shroud.
+  - the longer and fluted barrels.
+  - the Retrofit's jacket, coils or fuel line.
+- **The water jacket and coils** grow with the longer barrels.
+- **Small placement calls (Claude):**
+  - the Laser Rangefinder moves to the right side when a flank gun is fitted.
+  - the drum moves back at Multi-Target's mastery to make room for the third gun.
 
 ## Open questions
 
-1. **Second pass, Gun Turret** (round 1): picks for 15 steps and 3 Retrofits; then towers 2-20, one page each.
+1. **Second pass, Gun Turret** (round 2): confirm the combined model; then towers 2-20, one page each.

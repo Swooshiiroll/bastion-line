@@ -79,13 +79,15 @@ function makeView(canvas, tw, getLook, getAnim, scale) {
     v.prevT = t;
     const since = t - v.last;
     const muzzles = look.muzzles || [[look.muzzle || 0.45, 0]];
-    const muzzleAt = (m, ang) => pl ? pl.door : add(c, rot([muzzles[m % muzzles.length][0] * s, muzzles[m % muzzles.length][1] * s], look.fixed ? 0 : ang));
-    const info = { ens: cands, all, c, W, H, s, t, look, aim: v.aim, muzzleAt, spot: tgt && tgt.i === -5 ? tgt.p : null, orbit: O };
+    const muzzleAt = (m, ang, k) => pl ? pl.door : look.muzzleAt ? look.muzzleAt(m, k ?? 0, c, ang, s, info) : add(c, rot([muzzles[m % muzzles.length][0] * s, muzzles[m % muzzles.length][1] * s], look.fixed ? 0 : ang));
+    // Multi-target order: the aimed-at target first, then the rest nearest first.
+    const order = tgt && tgt.i !== -5 ? [tgt, ...cands.filter((e) => e !== tgt).sort((a, b) => Math.hypot(a.p[0] - c[0], a.p[1] - c[1]) - Math.hypot(b.p[0] - c[0], b.p[1] - c[1]))] : cands;
+    const info = { ens: cands, all, order, view: v, c, W, H, s, t, look, aim: v.aim, muzzleAt, spot: tgt && tgt.i === -5 ? tgt.p : null, orbit: O };
     const aligned = tgt && (pl || Math.abs(fmod(Math.atan2(tgt.p[1] - c[1], tgt.p[0] - c[0]) - v.aim + Math.PI, TAU) - Math.PI) < (an.beam ? 0.15 : 0.35));
     if (tgt && !an.beam && !an.persist && since >= an.period && aligned) {
       v.last = t; const n = an.burst || 1;
       for (let k = 0; k < n; k++) {
-        const target = an.multi ? (cands[k % cands.length] || tgt) : tgt;
+        const target = an.multi ? (order[k % order.length] || tgt) : tgt;
         v.shots.push({ t0: t + k * (an.gap || 0), tid: target.i, to0: target.p.slice(), k, m: (v.n = (v.n || 0) + 1) - 1 });
       }
     }
@@ -114,7 +116,7 @@ function makeView(canvas, tw, getLook, getAnim, scale) {
     v.shots = v.shots.filter((sh) => t - sh.t0 < an.flight + 0.6);
     for (const sh of v.shots) {
       const age = t - sh.t0; if (age < 0) continue;
-      if (!sh.from) sh.from = muzzleAt(sh.m, v.aim);
+      if (!sh.from) sh.from = muzzleAt(sh.m, v.aim, sh.k);
       const live = ens.find((e) => e.i === sh.tid); const to = live ? live.p : sh.to0;
       info.sh = sh;
       if (age < an.flight) an.shot(sh.from, to, age / an.flight, s, tw.color, sh.k, t, info);

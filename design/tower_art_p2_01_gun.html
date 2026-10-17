@@ -65,7 +65,7 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Tower rework · Tower art · second pass · tower 1 of 20</div>
+    <div class="eyebrow">Bastion Line · Tower rework · Tower art · second pass · tower 1 of 20 · round 2</div>
     <h1>Tower art: Gun Turret paths and Retrofits</h1>
     <p class="note">Second pass for one tower: <b>every upgrade step and mastery</b> on each path, and each <b>Retrofit</b>, adds or changes a detail on the confirmed model. Each card shows the model with that path's earlier steps (your picks, or option A until you pick) plus the candidate. Pick one of three per step, add notes per path, then <b>Copy picks and notes</b>.</p>
     <ul class="rules">
@@ -608,206 +608,133 @@ const DEFAULTS = { gun: { look: "C", anim: "C" }, mortar: { look: "C", anim: "A"
 return { TOWERS };
 })();
 const NO_BOOT = true;
-// ---- Tower art second pass: Gun Turret (tower 1), on the confirmed base: look C Rotary Gun, animation C Rapid Stream --
-// Rotary Gun geometry (game px, x along the aim, y to the side): four barrels x 5..19 spinning at y ±3.4, shroud rings at
-// x 8 and 18, muzzle at x 20, drum magazine at (-1, 8.5) r 4.2, vent block at (-8, 0), hexagonal body r 6.8.
-const PAGE = { title: "Gun Turret: paths and Retrofits (second pass)", store: "bl-tower-art-p2-gun-v3" };
-const GOLD = [1, 0.78, 0.3, 1], RED_TIP = [1, 0.3, 0.25, 1], STEEL = [0.42, 0.45, 0.5, 1], COPPER = [0.78, 0.5, 0.28, 1];
-const SHOCK = [0.6, 0.85, 1, 1], FIRE = [1, 0.55, 0.2, 1];
+// ---- Tower art second pass: Gun Turret (tower 1), round 2 -------------------------------------------------------
+// Base: look C Rotary Gun, animation C Rapid Stream. The owner picked every step in round 1; round 2 draws those picks
+// as one parametric model so details from different paths work together (owner's notes, 2026-10-17):
+// - Range 1 swaps the barrels for longer ones (not an overlay); every gun on the mount gets them, and Range 3's fluting.
+// - Power 2's marked shroud sits on the front shroud ring, over the barrels, wherever the muzzle is; Power's mastery
+//   and Multi-Target's mastery turn it gold instead of adding a new shroud.
+// - Range 2 turns the drum's ring red instead of adding a red circle.
+// - Extra guns (Multi-Target) sit on their own swivel mounts with bodies bigger than their barrels, aim at their own
+//   targets, and get Power's shielding (from Power 1) and marked shroud, Range's barrels, and the Retrofit's jacket,
+//   coils or fuel line.
+// - The Water Jacket and Coil Wraps grow with the longer Range barrels.
+const PAGE = { title: "Gun Turret: paths and Retrofits (second pass)", store: "bl-tower-art-p2-gun-r2" };
+const GOLD = [1, 0.78, 0.3, 1], RED_TIP = [1, 0.3, 0.25, 1], STEEL = [0.42, 0.45, 0.5, 1];
+const SHOCK = [0.6, 0.85, 1, 1], FIRE = [1, 0.55, 0.2, 1], WATER = [0.3, 0.42, 0.5, 1];
 const rnd2 = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
-// A stunning hit (every 20th: 5%) crackles with small arcs on the target.
-function stunArcs(to, v, s, info) { if (!info || !info.sh || info.sh.m % 20 !== 0 || v >= 1) return; for (let i = 0; i < 4; i++) { const a = rnd2(i + Math.floor(v * 12)) * TAU, p = add(to, mul(fa(a), s * 0.16)); line(to, p, A(SHOCK, 1 - v), 1.4); } glowDot(to, s * 0.06 * (1 - v), SHOCK); }
-function flames(to, v, s) { if (v >= 1) return; for (let i = 0; i < 3; i++) { const q = fmod(v * 2 + i / 3, 1); disc(add(to, [(i - 1) * s * 0.05, -q * s * 0.18]), s * 0.035 * (1 - q), A(i % 2 ? FIRE : [1, 0.85, 0.3, 1], 1 - q)); } }
-const RC = (fx) => fx.recoil * 1.5; // the cluster's recoil, as the base draws it
 const spinOf = (fx, t) => t * (fx.recoil > 0 || fx.flash > 0 ? 30 : 3);
-// A small rotary cluster (n barrels) at lateral y0, from x0 to x1.
-function cluster(c, aim, k, fx, t, y0, x0, x1, rad, w, n, col, goldRing) { const sp = spinOf(fx, t), r = RC(fx);
-  const bs = []; for (let i = 0; i < n; i++) bs.push({ y: y0 + Math.sin(sp + i * TAU / n) * rad, z: Math.cos(sp + i * TAU / n) }); bs.sort((a, b) => a.z - b.z);
-  for (const b of bs) bar(P(c, aim, k, x0 - r, b.y), P(c, aim, k, x1 - r, b.y), w * k, mix(METAL_D, METAL_L, 0.5 + 0.5 * b.z));
-  for (const x of [x0 + 2, x1 - 1]) bar(P(c, aim, k, x - r, y0 - rad - 1.2), P(c, aim, k, x - r, y0 + rad + 1.2), 1.3 * k, goldRing ? GOLD : METAL_L);
-  muzzleEnd(P(c, aim, k, x1 + 1 - r, y0), k, rad * 0.9, col, fx.flash); }
-function beltLine(a, b, k, n, tipCol, t) { line(a, b, OUTLINE, 3.2 * k); line(a, b, [0.55, 0.45, 0.25, 1], 2.2 * k);
-  for (let i = 0; i < n; i++) { const q = lerp(a, b, fmod(i / n + t * 0.8, 1)); disc(q, 1 * k, [0.85, 0.7, 0.35, 1]); if (tipCol) disc(q, 0.55 * k, tipCol); } }
 function longTracer(f, to, u, col, w) { const a = lerp(f, to, Math.max(0, u - 0.6)), b = lerp(f, to, u); line(a, b, A(col, 0.35), w * 2.4); line(a, b, A(col, 0.95), w); line(a, b, [1, 1, 1, 0.8], w * 0.35); }
-function vapour(p, fx, s) { if (fx.flash > 0.6) smokePuff(add(p, [0, -s * 0.05]), 1 - fx.flash, s * 0.5, 0.35); }
+function stunArcs(to, v, s, info) { if (!info || !info.sh || info.sh.m % 20 !== 0 || v >= 1) return; for (let i = 0; i < 4; i++) { const a = rnd2(i + Math.floor(v * 12)) * TAU; line(to, add(to, mul(fa(a), s * 0.16)), A(SHOCK, 1 - v), 1.4); } glowDot(to, s * 0.06 * (1 - v), SHOCK); }
+function flames(to, v, s) { if (v >= 1) return; for (let i = 0; i < 3; i++) { const q = fmod(v * 2 + i / 3, 1); disc(add(to, [(i - 1) * s * 0.05, -q * s * 0.18]), s * 0.035 * (1 - q), A(i % 2 ? FIRE : [1, 0.85, 0.3, 1], 1 - q)); } }
+function vapourAt(p, fx, s) { if (fx.flash > 0.6) smokePuff(add(p, [0, -s * 0.05]), 1 - fx.flash, s * 0.5, 0.35); }
+
+// The build: levels P (Power), R (Range/Visibility), M (Multi-Target), and the Retrofit r (0 water, 1 shock, 2 incendiary).
+const lvOf = (B) => ({ P: B.lv[0], R: B.lv[1], M: B.lv[2], r: B.r });
+const mainLen = (R) => (R >= 1 ? 24 : 19); // barrel end (game px along the aim); the muzzle is 1 further
+const extraLen = (R) => (R >= 1 ? 15 : 11);
+const gunsOf = (M) => (M >= 5 ? 3 : M >= 2 ? 2 : 1);
+const mountOf = (i) => [1, i === 1 ? -10.5 : 10.5]; // extra gun mounts, on the main turret's flanks
+
+// Extra guns swivel on their own: each aims at the target its shots go to (info.order[i]), turning at 7 rad/s.
+function extraAims(info, c, aim, k, n) {
+  const v = info.view; v.ex ||= {}; const dt = Math.min(0.25, Math.max(0, info.t - (v.ex.t ?? info.t))); v.ex.t = info.t; const out = [];
+  for (let i = 1; i < n; i++) { const mp = P(c, aim, k, ...mountOf(i)), o = info.order || [], tg = (o[i] || o[0] || {}).p;
+    const want = tg ? Math.atan2(tg[1] - mp[1], tg[0] - mp[0]) : aim; let a = v.ex[i] ?? aim; const d = fmod(want - a + Math.PI, TAU) - Math.PI;
+    a += Math.max(-7 * dt, Math.min(7 * dt, d)); v.ex[i] = a; out[i] = a; }
+  return out; }
+
+// A rotary cluster at c0 aimed along a: n barrels from x0 to x1 at radius rad; fluted at Range 3.
+function cluster(c0, a, k, fx, t, x0, x1, rad, w, n, ringCol, R) { const sp = spinOf(fx, t), rc = fx.recoil * 1.5;
+  const bs = []; for (let i = 0; i < n; i++) bs.push({ y: Math.sin(sp + i * TAU / n) * rad, z: Math.cos(sp + i * TAU / n) }); bs.sort((p, q) => p.z - q.z);
+  for (const b of bs) { bar(P(c0, a, k, x0 - rc, b.y), P(c0, a, k, x1 - rc, b.y), w * k, mix(METAL_D, METAL_L, 0.5 + 0.5 * b.z));
+    if (R >= 3 && b.z > 0) for (let x = x0 + 4; x <= x1 - 2; x += 1.8) line(P(c0, a, k, x - rc, b.y - w * 0.3), P(c0, a, k, x + 0.9 - rc, b.y + w * 0.3), lt(METAL_L, 0.35), 0.6 * k); }
+  for (const x of [x0 + 3, x1 - 1]) bar(P(c0, a, k, x - rc, -rad - 1.4), P(c0, a, k, x - rc, rad + 1.4), 1.5 * k, ringCol || METAL_L); }
+
+// What's on every gun's barrels: the Retrofit sleeve, then Power's marked shroud on the front ring.
+function barrelKit(c0, a, k, fx, t, x0, x1, half, Lv, gold, col) { const rc = fx.recoil * 1.5;
+  if (Lv.r === 0) plate(P(c0, a, k, (x0 + x1) / 2 - rc, 0), rectPts((x1 - x0) / 2, half + 0.8), WATER, a, k, 1);
+  if (Lv.r === 1) { for (let x = x0; x <= x1; x += 1.5) line(P(c0, a, k, x - rc, -half - 1), P(c0, a, k, x + 0.7 - rc, half + 1), [0.35, 0.45, 0.6, 1], 1 * k); glowDot(P(c0, a, k, (x0 + x1) / 2 - rc, 0), 0.7 * k, A(SHOCK, 0.5 + 0.5 * Math.sin(t * 9))); }
+  if (Lv.P >= 2) { const mc = gold ? GOLD : col; for (const dx of [0, 1.4]) line(P(c0, a, k, x1 + 2 - dx - rc, -half - 1.4), P(c0, a, k, x1 + 2 - dx - rc, half + 1.4), A(mc, 0.95), 1 * k); } }
 
 const P2 = {
   tower: "gun", look: "C", anim: "C",
-  intro: "The cheap all-rounder: 16 damage, 130 range, 1.2 shots/s, air and ground. Power leads to armour-piercing rounds, Range/Visibility to long-range crits, Multi-Target to a triple mount. Every step adds or changes a detail on the Rotary Gun.",
+  picks: { p0s0: "C", p0s1: "C", p0s2: "C", p0s3: "B", p0s4: "B", p1s0: "A", p1s1: "B", p1s2: "A", p1s3: "B", p1s4: "C", p2s0: "B", p2s1: "A", p2s2: "A", p2s3: "B", p2s4: "A", r0: "A", r1: "A", r2: "A" },
+  intro: "Round 2: your round-1 picks drawn as one model, so the paths work together (your notes). Each stage shows only your pick; use the build preview to check combinations, and note anything to change.",
+  mods(B) { const L = lvOf(B), n = gunsOf(L.M);
+    return { targets: n, crit: [0, 0, 0.1, 0.15, 0.2, 0.3][L.R],
+      shot: (f, to, u, s, col) => { const c2 = L.r === 2 ? FIRE : col; if (L.R >= 2) longTracer(f, to, u, c2, 1.5); else tracer(f, to, u, c2, 1.4, 0.2); if (L.P >= 3) disc(lerp(f, to, u), 1.6, [0.15, 0.12, 0.1, 1]); },
+      impactFx: (to, v, s, col, info) => { if (L.r === 1) stunArcs(to, v, s, info); if (L.r === 2) flames(to, v, s); } }; },
+  muzzleAt(B, m, kk, c, aim, s, info) { const L = lvOf(B), k = G(s), n = gunsOf(L.M), i = kk % n;
+    if (i === 0) return P(c, aim, k, mainLen(L.R) + 1, 0);
+    const a = (info.view.ex && info.view.ex[i]) ?? aim; return P(P(c, aim, k, ...mountOf(i)), a, k, extraLen(L.R) + 1, 0); },
+  model(c, aim, s, fx, t, col, info, B) {
+    const L = lvOf(B), k = G(s), rc = fx.recoil * 1.5, len = mainLen(L.R), n = gunsOf(L.M), gold = L.P >= 5 || L.M >= 5;
+    const ex = extraAims(info, c, aim, k, n), drum = L.M >= 5 ? P(c, aim, k, -7, 6) : P(c, aim, k, -1, 8.5);
+    deck(c, k, col, t);
+    // Under the turret: Multi 1's bearing rollers.
+    if (L.M >= 1) for (let i = 0; i < 6; i++) { const p = add(c, mul(fa(i * TAU / 6), 9.6 * k)); orb(p, 1.6 * k, METAL_L); line(p, add(p, mul(fa(aim * 3 + i), 1.4 * k)), METAL_D, 0.8 * k); }
+    // The back: vent block, Power 4's counterweight or Multi 4's hopper.
+    plate(P(c, aim, k, -8, 0), rectPts(3, 5.5), lt(METAL_D, 0.1), aim, k, 1); for (let i = 0; i < 3; i++) line(P(c, aim, k, -9.5 + i * 1.5, -4), P(c, aim, k, -9.5 + i * 1.5, 4), A(col, 0.5 + 0.4 * (i === 2)), 0.9 * k);
+    if (L.P >= 4) { plate(P(c, aim, k, -11.5, 0), rectPts(2.4, 6.4), STEEL, aim, k, 1.1); hazard(c, aim, k, -13, -10, 6.8, col, 1.2); hazard(c, aim, k, -13, -10, -6.8, col, 1.2); }
+    if (L.M >= 4) { plate(P(c, aim, k, -11, 0), rectPts(3, 7), AMMO, aim, k, 1.1); hazard(c, aim, k, -13.5, -8.5, -7.6, col, 1.1); }
+    // The main gun: barrels swapped longer at Range 1, fluted at Range 3; the Retrofit sleeve; the marked shroud.
+    cluster(c, aim, k, fx, t, 5, len, 3.4, 1.8, 4, L.M >= 5 ? GOLD : METAL_L, L.R);
+    barrelKit(c, aim, k, fx, t, 9, len - 3, 3.4, L, gold, col);
+    muzzleEnd(P(c, aim, k, len + 1 - rc, 0), k, 3, col, fx.flash);
+    if (L.r === 0) vapourAt(P(c, aim, k, len + 1, 0), fx, s);
+    if (L.P >= 1) { plate(P(c, aim, k, 4.5 - rc, 0), rectPts(2.2, 5.4), STEEL, aim, k, 1); rivets(P(c, aim, k, 4.5 - rc, 0), rectPts(2.2, 5.4), aim, k, 0.7, 0.6 * k); }
+    // The drum (red ring from Range 2's tracers), the body, its cheeks, the lens crown and the gold mastery ring.
+    orb(drum, 4.2 * k, METAL); ring(drum, 2.8 * k, L.R >= 2 ? RED_TIP : A(col, 0.7), 1.2 * k);
+    plate(c, ngon(6, 1, 0), METAL_L, aim, 6.8 * k, 1.2); orb(c, 3.6 * k, METAL); glowDot(P(c, aim, k, 1.2, 0), 1.2 * k, col);
+    if (L.P >= 3) for (const sg of [-1, 1]) plate(P(c, aim, k, 0, sg * 6.4), [[5, -sg * 1.2], [5, sg * 1.6], [-5, sg * 2.2], [-6, -sg * 1]], STEEL, aim, k, 1);
+    if (L.R >= 5) { plate(c, ngon(6, 1, 0), METAL_L, aim, 5.6 * k, 1); outline(c, ngon(6, 1, 0), GOLD, 1.2 * k, aim, 5.6 * k); disc(c, 3.4 * k, A(col, 0.55)); disc(add(c, mul(LIGHT, 1.2 * k)), 1.2 * k, [1, 1, 1, 0.6]); }
+    if (L.P >= 5) { ring(c, 7.6 * k, GOLD, 1.2 * k); glowDot(c, 1.8 * k, [1, 0.6, 0.3, 1]); }
+    if (L.R >= 4) { const e = P(c, aim, k, 5, n > 1 ? 5.5 : -5.5); plate(e, rectPts(1.6, 1.2), METAL, aim, k, 0.8); line(e, add(e, mul(fa(aim), s * 1.4)), [1, 0.25, 0.25, 0.25], 0.8); glowDot(e, 0.6 * k, [1, 0.3, 0.3, 1]); }
+    // Extra guns on swivel mounts (bodies bigger than their barrels), each with the same kit as the main gun.
+    for (let i = 1; i < n; i++) { const mp = P(c, aim, k, ...mountOf(i)), a = ex[i], el = extraLen(L.R);
+      bar(c, mp, 2.4 * k, METAL);
+      if (L.M >= 3) cluster(mp, a, k, fx, t, 1, el, 2.4, 1.4, 4, L.M >= 5 ? GOLD : METAL_L, L.R);
+      else { bar(P(mp, a, k, 1 - rc, 0), P(mp, a, k, el - rc, 0), 1.8 * k, METAL_L); if (L.R >= 3) for (let x = 4; x <= el - 2; x += 1.8) line(P(mp, a, k, x - rc, -0.6), P(mp, a, k, x + 0.9 - rc, 0.6), lt(METAL_L, 0.35), 0.5 * k); }
+      barrelKit(mp, a, k, fx, t, 4, el - 2, L.M >= 3 ? 2.4 : 1, L, gold, col);
+      muzzleEnd(P(mp, a, k, el + 1 - rc, 0), k, L.M >= 3 ? 2.2 : 1.6, col, fx.flash);
+      plate(mp, ngon(6, 1, 0), METAL_L, a, 5 * k, 1.1); orb(mp, 2.6 * k, METAL); glowDot(P(mp, a, k, 1, 0), 0.8 * k, col);
+      if (L.P >= 1) plate(P(mp, a, k, 3, 0), [[0.8, -3.6], [0.8, 3.6], [-0.8, 3], [-0.8, -3]], STEEL, a, k, 0.9);
+      if (L.r === 0) vapourAt(P(mp, a, k, el + 1, 0), fx, s);
+      if (L.r === 2) line(P(c, aim, k, -4.5, -6), mp, [0.5, 0.2, 0.12, 1], 1.1 * k); }
+    // Retrofits on the body: the water tank and hose, the fuel canister and line.
+    if (L.r === 0) { orb(P(c, aim, k, -6, -6), 2.2 * k, WATER); line(P(c, aim, k, -6, -6), P(c, aim, k, 8, -4), [0.2, 0.3, 0.36, 1], 1.2 * k); }
+    if (L.r === 2) { bar(P(c, aim, k, -7, -6), P(c, aim, k, -2, -6), 3 * k, [0.7, 0.18, 0.12, 1]); line(P(c, aim, k, -2, -6), P(c, aim, k, 4, -2), [0.5, 0.2, 0.12, 1], 1.2 * k); }
+  },
   paths: [
-    { name: "Power", theme: "armour-piercing: a heavier gun with an AP-shell feed",
-      steps: [
-        { name: "Heavier Rounds", cost: 55, effect: "+6 damage", options: [
-          { key: "A", name: "Heavy Shroud Rings", desc: "The two shroud rings round the barrels become thick armoured collars.",
-            over: (c, aim, s, fx) => { const k = G(s), r = RC(fx); for (const x of [8, 18]) bar(P(c, aim, k, x - r, -5.6), P(c, aim, k, x - r, 5.6), 2.6 * k, STEEL); } },
-          { key: "B", name: "Bigger Drum", desc: "A larger drum magazine with reinforcing bands replaces the stock drum.",
-            over: (c, aim, s) => { const k = G(s), d = P(c, aim, k, -1, 9); orb(d, 5.4 * k, METAL); ring(d, 4 * k, METAL_L, 1.2 * k); ring(d, 2.4 * k, METAL_D, 1 * k); } },
-          { key: "C", name: "Reinforced Breech", desc: "A heavy breech block behind the barrels, bolted to the body.",
-            over: (c, aim, s, fx) => { const k = G(s); plate(P(c, aim, k, 4.5 - RC(fx), 0), rectPts(2.2, 5.4), STEEL, aim, k, 1); rivets(P(c, aim, k, 4.5 - RC(fx), 0), rectPts(2.2, 5.4), aim, k, 0.7, 0.6 * k); } },
-        ] },
-        { name: "Hardened Tips", cost: 40, effect: "Ignores 2 armour", options: [
-          { key: "A", name: "Black-Tip Belt", desc: "A belt of dark hardened-tip rounds runs from the drum into the breech.",
-            over: (c, aim, s, fx, t) => { const k = G(s); beltLine(P(c, aim, k, -1, 5), P(c, aim, k, 4, 2), k, 4, [0.1, 0.1, 0.12, 1], t); } },
-          { key: "B", name: "Steel Muzzle Collar", desc: "A hardened steel collar round the muzzle, edged in the accent colour.",
-            over: (c, aim, s, fx, t, col) => { const k = G(s), p = P(c, aim, k, 19.5 - RC(fx), 0); ring(p, 4.4 * k, OUTLINE, 2.6 * k); ring(p, 4.4 * k, STEEL, 1.6 * k); ring(p, 5.2 * k, A(col, 0.7), 0.8 * k); } },
-          { key: "C", name: "Marked Shroud", desc: "A painted warning band in the accent colour round the front shroud ring.",
-            over: (c, aim, s, fx, t, col) => { const k = G(s), r = RC(fx); line(P(c, aim, k, 18 - r, -5), P(c, aim, k, 18 - r, 5), A(col, 0.9), 1 * k); line(P(c, aim, k, 16.6 - r, -5), P(c, aim, k, 16.6 - r, 5), A(col, 0.9), 1 * k); } },
-        ] },
-        { name: "AP Rounds", cost: 405, effect: "Ignores 50% of armour; +6 damage (primary)", options: [
-          { key: "A", name: "AP Shell Feed", desc: "A second ammo box of yellow-banded AP shells on the left flank, chuted into the breech. Rounds fly as heavier dark-cored tracers.",
-            over: (c, aim, s, fx, t) => { const k = G(s), bx = P(c, aim, k, -2, -9); plate(bx, rectPts(3.6, 2.8), AMMO, aim, k, 1); hazard(c, aim, k, -5, 1, -11.6, [1, 0.85, 0.2, 1], 1); beltLine(P(c, aim, k, 0, -7), P(c, aim, k, 4, -2), k, 3, [1, 0.85, 0.2, 1], t); },
-            shotFx: (f, to, u, s) => { const p = lerp(f, to, u); disc(p, 1.6, [0.15, 0.12, 0.1, 1]); } },
-          { key: "B", name: "Heavy Barrel Sleeve", desc: "A solid armoured sleeve encloses the barrel cluster, so the gun reads as one thick cannon. Dark-cored tracers.",
-            over: (c, aim, s, fx) => { const k = G(s), r = RC(fx); plate(P(c, aim, k, 11.5 - r, 0), rectPts(6, 5), STEEL, aim, k, 1.1); for (const x of [8, 11.5, 15]) line(P(c, aim, k, x - r, -4), P(c, aim, k, x - r, 4), [0, 0, 0, 0.4], 1); },
-            shotFx: (f, to, u, s) => disc(lerp(f, to, u), 1.6, [0.15, 0.12, 0.1, 1]) },
-          { key: "C", name: "Armour Cheeks", desc: "Angled armour plates bolted to both cheeks of the turret body. Dark-cored tracers.",
-            over: (c, aim, s) => { const k = G(s); for (const sg of [-1, 1]) plate(P(c, aim, k, 0, sg * 6.4), [[5, -sg * 1.2], [5, sg * 1.6], [-5, sg * 2.2], [-6, -sg * 1]], STEEL, aim, k, 1); },
-            shotFx: (f, to, u, s) => disc(lerp(f, to, u), 1.6, [0.15, 0.12, 0.1, 1]) },
-        ] },
-        { name: "Tungsten Core", cost: 1085, effect: "Ignores 75% of armour; +8 damage", options: [
-          { key: "A", name: "Cooling Fins", desc: "Rows of radiator fins stand off the shroud between the rings.",
-            over: (c, aim, s, fx) => { const k = G(s), r = RC(fx); for (let x = 10; x <= 16; x += 2) for (const sg of [-1, 1]) line(P(c, aim, k, x - r, sg * 4.6), P(c, aim, k, x - r, sg * 6.6), METAL_L, 1.1 * k); } },
-          { key: "B", name: "Counterweight", desc: "A heavy hazard-striped counterweight block on the back of the turret.",
-            over: (c, aim, s, fx, t, col) => { const k = G(s); plate(P(c, aim, k, -11.5, 0), rectPts(2.4, 6.4), STEEL, aim, k, 1.1); hazard(c, aim, k, -13, -10, 6.8, col, 1.2); hazard(c, aim, k, -13, -10, -6.8, col, 1.2); } },
-          { key: "C", name: "Twin Feed Chutes", desc: "Two armoured feed chutes curve from the magazines into the breech.",
-            over: (c, aim, s) => { const k = G(s); for (const [a, b] of [[[-1, 5], [4, 2]], [[-1, -5], [4, -2]]]) { bar(P(c, aim, k, a[0], a[1]), P(c, aim, k, b[0], b[1]), 2.4 * k, STEEL); } } },
-        ] },
-        { name: "Sabot Rounds", cost: 2475, effect: "Ignores armour fully; 44 damage per hit (mastery)", options: [
-          { key: "A", name: "Sabot Muzzle Brake", desc: "A big gold-ringed muzzle brake; on each shot the sabot petals peel off in front of it.",
-            muzzles: [[24 / 48, 0]],
-            over: (c, aim, s, fx, t, col) => { const k = G(s), r = RC(fx); bar(P(c, aim, k, 18 - r, 0), P(c, aim, k, 23 - r, 0), 6 * k, STEEL); for (const x of [19.5, 22]) line(P(c, aim, k, x - r, -3), P(c, aim, k, x - r, 3), [0, 0, 0, 0.5], 1); ring(P(c, aim, k, 23.5 - r, 0), 3.4 * k, GOLD, 1.2 * k); muzzleEnd(P(c, aim, k, 24 - r, 0), k, 3, col, fx.flash); },
-            shotFx: (f, to, u, s) => { if (u < 0.3) { const d = norm(sub(to, f)); for (const sg of [-1, 1]) disc(add(add(f, mul(d, u * s * 0.8)), mul(orth(d), sg * u * s * 0.4)), 1.5, [0.6, 0.6, 0.62, 1 - u * 3]); } } },
-          { key: "B", name: "Gold-Banded Gun", desc: "Gold bands on the shroud rings, a gold ring round the body (as today's tier-4 towers) and a hot core glow.",
-            over: (c, aim, s, fx, t, col) => { const k = G(s), r = RC(fx); for (const x of [8, 18]) bar(P(c, aim, k, x - r, -5.2), P(c, aim, k, x - r, 5.2), 1.8 * k, GOLD); ring(c, 7.6 * k, GOLD, 1.2 * k); glowDot(c, 1.8 * k, [1, 0.6, 0.3, 1]); } },
-          { key: "C", name: "Armoured Gun House", desc: "A full armoured house over the body and breech, gold-trimmed, with only the barrels showing.",
-            over: (c, aim, s) => { const k = G(s), hs = [[7, -6.5], [7, 6.5], [-6, 8], [-10, 4], [-10, -4], [-6, -8]]; plate(c, hs, STEEL, aim, k, 1.3); outline(c, hs.map((q) => mul(q, 0.86)), GOLD, 1 * k, aim, k); rivets(c, hs, aim, k, 0.72, 0.7 * k); } },
-        ] },
-      ] },
-    { name: "Range/Visibility", theme: "precision: a long barrel, tracers, a scope and critical hits",
-      steps: [
-        { name: "Long Barrel", cost: 25, effect: "+20 range", options: [
-          { key: "A", name: "Barrel Extensions", desc: "The four barrels run on past the front ring to a new muzzle further out.", muzzles: [[25 / 48, 0]],
-            over: (c, aim, s, fx, t, col) => cluster(c, aim, k0(s), fx, t, 0, 17, 24, 3.4, 1.6, 4, col) },
-          { key: "B", name: "Long Shroud Tube", desc: "One long ventilated shroud tube carries the muzzle well forward.", muzzles: [[25 / 48, 0]],
-            over: (c, aim, s, fx, t, col) => { const k = G(s), r = RC(fx); bar(P(c, aim, k, 17 - r, 0), P(c, aim, k, 24 - r, 0), 5.4 * k, METAL_L); for (let x = 19; x <= 23; x += 2) disc(P(c, aim, k, x - r, 0), 0.8 * k, OUTLINE); muzzleEnd(P(c, aim, k, 25 - r, 0), k, 3, col, fx.flash); } },
-          { key: "C", name: "Guide Rails", desc: "Two slim rails run forward from the shroud to a ringed muzzle guide.", muzzles: [[25 / 48, 0]],
-            over: (c, aim, s, fx, t, col) => { const k = G(s), r = RC(fx); for (const y of [-4, 4]) bar(P(c, aim, k, 16 - r, y), P(c, aim, k, 24 - r, y * 0.6), 1.3 * k, METAL_L); ring(P(c, aim, k, 24 - r, 0), 2.8 * k, METAL_L, 1.2 * k); muzzleEnd(P(c, aim, k, 25 - r, 0), k, 2.6, col, fx.flash); } },
-        ] },
-        { name: "Tracer Rounds", cost: 60, effect: "+10 range; 10% crits; visible tracer lines", options: [
-          { key: "A", name: "Red Tracer Belt", desc: "A belt of red-tipped tracers feeds the gun; every shot draws a long red tracer line; crits flash gold.", crit: 0.1,
-            over: (c, aim, s, fx, t) => { const k = G(s); beltLine(P(c, aim, k, -1, 5), P(c, aim, k, 4, 2), k, 4, RED_TIP, t); }, shot: (f, to, u, s, col) => longTracer(f, to, u, RED_TIP, 1.6) },
-          { key: "B", name: "Tracer Drum", desc: "The drum gets a red tracer band; shots draw long tracer lines in the tower's cyan; crits flash gold.", crit: 0.1,
-            over: (c, aim, s) => { const k = G(s); ring(P(c, aim, k, -1, 8.5), 3.4 * k, RED_TIP, 1.4 * k); }, shot: (f, to, u, s, col) => longTracer(f, to, u, col, 1.5) },
-          { key: "C", name: "Feed Lamp", desc: "A small lamp on the breech glows with each round; long white-hot tracer lines; crits flash gold.", crit: 0.1,
-            over: (c, aim, s, fx) => { const k = G(s); glowDot(P(c, aim, k, 3, -4.5), (0.8 + fx.flash) * k, [1, 0.9, 0.6, 1]); }, shot: (f, to, u) => longTracer(f, to, u, [1, 0.92, 0.7, 1], 1.4) },
-        ] },
-        { name: "Rifled Barrels", cost: 170, effect: "+25 range; 15% crits (primary)", options: [
-          { key: "A", name: "Fluted Barrels", desc: "The four barrels are swapped for longer fluted barrels, their grooves catching the light as they spin.", crit: 0.15,
-            over: (c, aim, s, fx, t) => { const k = G(s), r = RC(fx), sp = spinOf(fx, t); for (let i = 0; i < 4; i++) { const y = Math.sin(sp + i * TAU / 4) * 3.4; if (Math.cos(sp + i * TAU / 4) < 0) continue; for (let x = 9; x <= 16; x += 1.8) line(P(c, aim, k, x - r, y - 0.5), P(c, aim, k, x + 0.9 - r, y + 0.5), lt(METAL_L, 0.35), 0.6 * k); } } },
-          { key: "B", name: "Rifling Glow", desc: "A spiral of accent light runs down the cluster as the rifled barrels spin, brightest while firing.", crit: 0.15,
-            over: (c, aim, s, fx, t, col) => { const k = G(s), r = RC(fx), sp = spinOf(fx, t); for (let x = 9; x <= 17; x += 1) { const y = Math.sin(sp * 0.5 + x * 0.9) * 3.6; disc(P(c, aim, k, x - r, y), 0.5 * k, A(col, 0.4 + 0.5 * fx.flash)); } } },
-          { key: "C", name: "Rifled Bore Caps", desc: "Each barrel ends in a ribbed rifled cap, and a gauge on the body reads the spin.", crit: 0.15,
-            over: (c, aim, s, fx, t, col) => { const k = G(s), r = RC(fx); bar(P(c, aim, k, 18.5 - r, -4.6), P(c, aim, k, 18.5 - r, 4.6), 2.4 * k, STEEL); for (let y = -3.6; y <= 3.6; y += 1.2) line(P(c, aim, k, 17.4 - r, y), P(c, aim, k, 19.6 - r, y), [0, 0, 0, 0.45], 0.6 * k);
-              const g = P(c, aim, k, -4, -4.5); disc(g, 1.8 * k, OUTLINE); disc(g, 1.4 * k, [0.9, 0.9, 0.85, 1]); line(g, add(g, mul(fa(t * 4), 1.1 * k)), A(col, 1), 0.6 * k); } },
-        ] },
-        { name: "Rangefinder", cost: 305, effect: "+20 range; 20% crits", options: [
-          { key: "A", name: "Stereo Rangefinder", desc: "A long rangefinder bar across the back with a lens at each end.", crit: 0.2,
-            over: (c, aim, s, fx, t, col) => { const k = G(s); bar(P(c, aim, k, -10, -10), P(c, aim, k, -10, 10), 2 * k, METAL); for (const y of [-10, 10]) { orb(P(c, aim, k, -10, y), 1.6 * k, METAL_L); glowDot(P(c, aim, k, -9.2, y), 0.6 * k, col); } } },
-          { key: "B", name: "Laser Rangefinder", desc: "A small emitter beside the gun paints a faint red ranging line ahead of it.", crit: 0.2,
-            over: (c, aim, s) => { const k = G(s), e = P(c, aim, k, 5, -5.5); plate(e, rectPts(1.6, 1.2), METAL, aim, k, 0.8); line(e, P(c, aim, k, 60, -5.5), [1, 0.25, 0.25, 0.25], 0.8); glowDot(e, 0.6 * k, [1, 0.3, 0.3, 1]); } },
-          { key: "C", name: "Sensor Mast", desc: "A thin mast on the back with a small sensor head turning on top.", crit: 0.2,
-            over: (c, aim, s, fx, t, col) => { const k = G(s), m = P(c, aim, k, -6, -5); orb(m, 1.6 * k, METAL); line(m, add(m, mul(fa(t * 3), 3.4 * k)), METAL_L, 1.2 * k); glowDot(add(m, mul(fa(t * 3), 3.4 * k)), 0.7 * k, col); } },
-        ] },
-        { name: "Targeting Computer", cost: 980, effect: "230 range in all; 30% crits (mastery)", options: [
-          { key: "A", name: "Sniper Optic", desc: "A long gold-ringed sniper optic runs the length of the gun; crits burst gold.", crit: 0.3,
-            over: (c, aim, s) => { const k = G(s), a = P(c, aim, k, -8, -7.5), b = P(c, aim, k, 12, -7.5); bar(a, b, 3.2 * k, METAL); for (const x of [-4, 6]) ring(P(c, aim, k, x, -7.5), 2 * k, GOLD, 1 * k); disc(b, 1.8 * k, OUTLINE); glowDot(b, 1.1 * k, [1, 0.3, 0.3, 1]); } },
-          { key: "B", name: "Targeting Array", desc: "Three gold-framed lenses in a row on the body; a gold reticle closes on each target as it fires.", crit: 0.3,
-            over: (c, aim, s, fx, t, col) => { const k = G(s); for (const y of [-3, 0, 3]) { const p = P(c, aim, k, -3, y - 6.5); disc(p, 1.6 * k, GOLD); glowDot(p, 0.8 * k, col); } },
-            shotFx: (f, to, u, s) => { if (u > 0.7) { const r = s * 0.25 * (1.6 - u); for (let i = 0; i < 4; i++) arc(to, r, i * Math.PI / 2 + 0.3, i * Math.PI / 2 + 1.1, GOLD, 1.4); } } },
-          { key: "C", name: "Hex Lens Crown", desc: "A big faceted lens crowns the turret body in a gold hex frame.", crit: 0.3,
-            over: (c, aim, s, fx, t, col) => { const k = G(s); plate(c, ngon(6, 1, 0), METAL_L, aim, 5.6 * k, 1); outline(c, ngon(6, 1, 0), GOLD, 1.2 * k, aim, 5.6 * k); disc(c, 3.4 * k, A(col, 0.55)); disc(add(c, mul(LIGHT, 1.2 * k)), 1.2 * k, [1, 1, 1, 0.6]); } },
-        ] },
-      ] },
-    { name: "Multi-Target", theme: "more barrels on more targets: a side gun, then a twin and a triple mount",
-      steps: [
-        { name: "Swivel Mount", cost: 15, effect: "Switches target instantly; no wasted rounds", options: [
-          { key: "A", name: "Geared Swivel Ring", desc: "A toothed swivel ring shows round the base of the turret.",
-            under: (c, aim, s) => { const k = G(s); ring(c, 9.5 * k, OUTLINE, 2.6 * k); ring(c, 9.5 * k, METAL_L, 1.6 * k); for (let i = 0; i < 16; i++) { const d = fa(i * TAU / 16 + aim); line(add(c, mul(d, 9.5 * k)), add(c, mul(d, 11 * k)), METAL_L, 1 * k); } } },
-          { key: "B", name: "Bearing Rollers", desc: "Six roller bearings round the turret base that spin as it turns.",
-            under: (c, aim, s) => { const k = G(s); for (let i = 0; i < 6; i++) { const p = add(c, mul(fa(i * TAU / 6), 9.6 * k)); orb(p, 1.6 * k, METAL_L); line(p, add(p, mul(fa(aim * 3 + i), 1.4 * k)), METAL_D, 0.8 * k); } } },
-          { key: "C", name: "Target Lamp", desc: "A lamp on the body blinks each time the gun snaps to a new target.",
-            over: (c, aim, s, fx, t, col) => { const k = G(s); glowDot(P(c, aim, k, -4, 4.5), (fmod(t * 2, 1) < 0.2 ? 1.4 : 0.6) * k, col); } },
-        ] },
-        { name: "Side Gun", cost: 165, effect: "A side gun fires at a second target at 50% damage", options: [
-          { key: "A", name: "Flank Gun", desc: "A small single-barrel gun on the left flank fires at a second target.", targets: 2, muzzles: [[20 / 48, 0], [15 / 48, -8 / 48]],
-            over: (c, aim, s, fx, t, col) => { const k = G(s); plate(P(c, aim, k, 2, -8), rectPts(2.6, 2), METAL_L, aim, k, 1); bar(P(c, aim, k, 2, -8), P(c, aim, k, 14, -8), 1.6 * k, METAL_L); muzzleEnd(P(c, aim, k, 15, -8), k, 1.6, col, fx.barrel === 1 ? 1 - fx.barrelSince * 8 : 0); } },
-          { key: "B", name: "Pintle Gun", desc: "A pintle-mounted light gun on top of the body fires at a second target.", targets: 2, muzzles: [[20 / 48, 0], [13 / 48, -3.5 / 48]],
-            over: (c, aim, s, fx, t, col) => { const k = G(s); orb(P(c, aim, k, -3, -3.5), 1.6 * k, METAL); bar(P(c, aim, k, -3, -3.5), P(c, aim, k, 12, -3.5), 1.3 * k, METAL_L); muzzleEnd(P(c, aim, k, 13, -3.5), k, 1.3, col, fx.barrel === 1 ? 1 - fx.barrelSince * 8 : 0); } },
-          { key: "C", name: "Coax Gun", desc: "A coaxial gun tucked under the left side of the cluster fires at a second target.", targets: 2, muzzles: [[20 / 48, 0], [17 / 48, -5.5 / 48]],
-            under: (c, aim, s, fx, t, col) => { const k = G(s); bar(P(c, aim, k, 2, -5.5), P(c, aim, k, 16, -5.5), 1.5 * k, METAL); muzzleEnd(P(c, aim, k, 17, -5.5), k, 1.5, col, fx.barrel === 1 ? 1 - fx.barrelSince * 8 : 0); } },
-        ] },
-        { name: "Twin Mount", cost: 330, effect: "2 targets at full damage (primary)", options: [
-          { key: "A", name: "Twin Rotary", desc: "A second, smaller rotary cluster on the left flank, both firing at full rate.", targets: 2, muzzles: [[20 / 48, 0], [18 / 48, -9 / 48]],
-            over: (c, aim, s, fx, t, col) => { const k = G(s); plate(P(c, aim, k, 1, -9), rectPts(3, 2.6), METAL_L, aim, k, 1); cluster(c, aim, k, fx, t, -9, 4, 17, 2.6, 1.5, 4, col); } },
-          { key: "B", name: "Gun Pods", desc: "Two rotary gun pods on short arms either side; the main gun and the left pod share targets.", targets: 2, muzzles: [[20 / 48, 0], [17 / 48, -10 / 48]],
-            over: (c, aim, s, fx, t, col) => { const k = G(s); for (const y of [-10, 10]) { bar(c, P(c, aim, k, 0, y), 2 * k, METAL_L); plate(P(c, aim, k, 2, y), rectPts(4, 2.6), METAL, aim, k, 1); cluster(c, aim, k, fx, t, y, 5, 16, 2.2, 1.3, 3, col); } } },
-          { key: "C", name: "Stacked Gun", desc: "A second gun mounted high on the body over the first, offset left.", targets: 2, muzzles: [[20 / 48, 0], [17 / 48, -4.5 / 48]],
-            over: (c, aim, s, fx, t, col) => { const k = G(s); plate(P(c, aim, k, -1, -4.5), rectPts(4, 3), METAL_L, aim, k, 1.1); cluster(c, aim, k, fx, t, -4.5, 3, 16, 2.4, 1.4, 4, col); } },
-        ] },
-        { name: "Belt Feed", cost: 660, effect: "+0.3 shots/s on every barrel", options: [
-          { key: "A", name: "Belt Feeds", desc: "Ammo belts run from the drum to every gun on the mount.",
-            over: (c, aim, s, fx, t) => { const k = G(s); beltLine(P(c, aim, k, -1, 5), P(c, aim, k, 4, 2), k, 4, null, t); beltLine(P(c, aim, k, -1, 5), P(c, aim, k, 2, -6), k, 5, null, t); } },
-          { key: "B", name: "Ammo Hopper", desc: "A big ammo hopper on the back of the turret, hazard-striped.",
-            over: (c, aim, s, fx, t, col) => { const k = G(s); plate(P(c, aim, k, -11, 0), rectPts(3, 7), AMMO, aim, k, 1.1); hazard(c, aim, k, -13.5, -8.5, -7.6, col, 1.1); } },
-          { key: "C", name: "Feed Motors", desc: "Small feed motors with spinning gears drive the belts.",
-            over: (c, aim, s, fx, t) => { const k = G(s); for (const y of [-5, 5]) { const p = P(c, aim, k, -5, y); disc(p, 2 * k, OUTLINE); disc(p, 1.6 * k, METAL); for (let i = 0; i < 4; i++) line(p, add(p, mul(fa(t * 8 + i * Math.PI / 2), 1.6 * k)), METAL_L, 0.7 * k); } } },
-        ] },
-        { name: "Triple Mount", cost: 3300, effect: "3 targets; the extra barrels go for the weakest (mastery)", options: [
-          { key: "A", name: "Triple Rotary", desc: "A third rotary cluster on the right flank, over the drum; all three gold-ringed.", targets: 3, muzzles: [[20 / 48, 0], [18 / 48, -9 / 48], [18 / 48, 9 / 48]],
-            over: (c, aim, s, fx, t, col) => { const k = G(s); for (const y of [-9, 9]) { plate(P(c, aim, k, 1, y), rectPts(3, 2.6), METAL_L, aim, k, 1); cluster(c, aim, k, fx, t, y, 4, 17, 2.6, 1.5, 4, col, true); } ring(c, 7.4 * k, GOLD, 1 * k); } },
-          { key: "B", name: "Gun Crown", desc: "A gold crown ring carries three guns fanned out round the body.", targets: 3, muzzles: [[20 / 48, 0], [15 / 48, -9 / 48], [15 / 48, 9 / 48]],
-            over: (c, aim, s, fx, t, col) => { const k = G(s); ring(c, 8.6 * k, OUTLINE, 3 * k); ring(c, 8.6 * k, GOLD, 1.8 * k); for (const y of [-9, 9]) { orb(P(c, aim, k, 2, y), 1.8 * k, METAL); bar(P(c, aim, k, 2, y), P(c, aim, k, 14, y), 1.5 * k, METAL_L); muzzleEnd(P(c, aim, k, 15, y), k, 1.5, col, fx.flash * 0.6); } } },
-          { key: "C", name: "Weapon Wing", desc: "A wide armoured wing across the turret, gold-edged, carrying a gun at each tip.", targets: 3, muzzles: [[20 / 48, 0], [16 / 48, -13 / 48], [16 / 48, 13 / 48]],
-            under: (c, aim, s) => { const k = G(s), w = [[3, -15], [3, 15], [-4, 15], [-6, 0], [-4, -15]]; plate(c, w, METAL_L, aim, k, 1.2); outline(c, w.map((q) => mul(q, 0.9)), GOLD, 1 * k, aim, k); },
-            over: (c, aim, s, fx, t, col) => { const k = G(s); for (const y of [-13, 13]) { bar(P(c, aim, k, 0, y), P(c, aim, k, 15, y), 1.6 * k, METAL_L); muzzleEnd(P(c, aim, k, 16, y), k, 1.6, col, fx.flash * 0.6); } } },
-        ] },
-      ] },
+    { name: "Power", theme: "armour-piercing", steps: [
+      { name: "Heavier Rounds", cost: 55, effect: "+6 damage", options: [{ key: "C", name: "Reinforced Breech", desc: "A heavy breech block behind the barrels. Extra guns get a gun shield (your note)." }] },
+      { name: "Hardened Tips", cost: 40, effect: "Ignores 2 armour", options: [{ key: "C", name: "Marked Shroud", desc: "Two accent bands on the front shroud ring, over the barrels and at the muzzle wherever it is (your note); on extra guns too." }] },
+      { name: "AP Rounds", cost: 405, effect: "Ignores 50% of armour; +6 damage (primary)", options: [{ key: "C", name: "Armour Cheeks", desc: "Angled armour plates on both cheeks of the body; dark-cored rounds." }] },
+      { name: "Tungsten Core", cost: 1085, effect: "Ignores 75% of armour; +8 damage", options: [{ key: "B", name: "Counterweight", desc: "A heavy hazard-striped counterweight on the back." }] },
+      { name: "Sabot Rounds", cost: 2475, effect: "Ignores armour fully; 44 damage per hit (mastery)", options: [{ key: "B", name: "Gold-Banded Gun", desc: "The marked shroud bands turn gold instead of a new shroud being drawn (your note), with a gold ring round the body and a hot core." }] },
+    ] },
+    { name: "Range/Visibility", theme: "precision", steps: [
+      { name: "Long Barrel", cost: 25, effect: "+20 range", options: [{ key: "A", name: "Longer Barrels", desc: "The barrels are swapped for longer ones instead of an extension laid over them (your note), on extra guns too." }] },
+      { name: "Tracer Rounds", cost: 60, effect: "+10 range; 10% crits; visible tracer lines", options: [{ key: "B", name: "Tracer Drum", desc: "The drum's ring turns red instead of a new red circle (your note); long tracer lines; gold crit bursts." }] },
+      { name: "Rifled Barrels", cost: 170, effect: "+25 range; 15% crits (primary)", options: [{ key: "A", name: "Fluted Barrels", desc: "Fluted barrels, on the extra gun too (your note)." }] },
+      { name: "Rangefinder", cost: 305, effect: "+20 range; 20% crits", options: [{ key: "B", name: "Laser Rangefinder", desc: "An emitter beside the gun paints a faint red ranging line (it moves to the right side when a flank gun is fitted)." }] },
+      { name: "Targeting Computer", cost: 980, effect: "230 range in all; 30% crits (mastery)", options: [{ key: "C", name: "Hex Lens Crown", desc: "A big faceted lens crowns the body in a gold hex frame." }] },
+    ] },
+    { name: "Multi-Target", theme: "more guns on more targets", steps: [
+      { name: "Swivel Mount", cost: 15, effect: "Switches target instantly; no wasted rounds", options: [{ key: "B", name: "Bearing Rollers", desc: "Roller bearings round the turret base." }] },
+      { name: "Side Gun", cost: 165, effect: "A side gun fires at a second target at 50% damage", options: [{ key: "A", name: "Flank Gun", desc: "A single-barrel gun on its own swivel mount on the left flank, aiming at its own target; its body is bigger than its barrel (your notes)." }] },
+      { name: "Twin Mount", cost: 330, effect: "2 targets at full damage (primary)", options: [{ key: "A", name: "Twin Rotary", desc: "The flank gun becomes a rotary cluster on its larger swivel mount (your notes)." }] },
+      { name: "Belt Feed", cost: 660, effect: "+0.3 shots/s on every barrel", options: [{ key: "B", name: "Ammo Hopper", desc: "A big hazard-striped ammo hopper on the back." }] },
+      { name: "Triple Mount", cost: 3300, effect: "3 targets; the extra barrels go for the weakest (mastery)", options: [{ key: "A", name: "Triple Rotary", desc: "A third swivelling rotary on the right flank (the drum moves back); gold rings on every gun, and a marked shroud turns gold (your note)." }] },
+    ] },
   ],
   retrofits: [
-    { name: "Water-Cooled Barrel", cost: 40, effect: "Fire rate 1.2 to 1.5/s", options: [
-      { key: "A", name: "Water Jacket", desc: "A thick water jacket sleeves the barrels, piped to a small tank; a vapour wisp at the muzzle when it fires.",
-        over: (c, aim, s, fx) => { const k = G(s), r = RC(fx); plate(P(c, aim, k, 12.5 - r, 0), rectPts(4.5, 5.2), [0.3, 0.42, 0.5, 1], aim, k, 1); orb(P(c, aim, k, -6, -6), 2.2 * k, [0.3, 0.42, 0.5, 1]); line(P(c, aim, k, -6, -6), P(c, aim, k, 8, -4), [0.2, 0.3, 0.36, 1], 1.2 * k); vapour(P(c, aim, k, 20, 0), fx, s); } },
-      { key: "B", name: "Coolant Coils", desc: "Copper coolant coils wrap the barrel cluster; steam wisps from the vent block.",
-        over: (c, aim, s, fx) => { const k = G(s), r = RC(fx); for (let x = 9; x <= 16; x += 1.4) line(P(c, aim, k, x - r, -4.6), P(c, aim, k, x + 0.7 - r, 4.6), COPPER, 0.9 * k); vapour(P(c, aim, k, -8, 0), fx, s); } },
-      { key: "C", name: "Radiator Shroud", desc: "A finned radiator plate over the cluster with blue coolant lines glowing through it.",
-        over: (c, aim, s, fx) => { const k = G(s), r = RC(fx); plate(P(c, aim, k, 12 - r, 0), rectPts(4, 4.4), METAL_L, aim, k, 1); for (let x = 9; x <= 15; x += 1.5) line(P(c, aim, k, x - r, -3.6), P(c, aim, k, x - r, 3.6), [0.4, 0.75, 1, 0.8], 0.8 * k); vapour(P(c, aim, k, 20, 0), fx, s); } },
-    ] },
-    { name: "Shock Rounds", cost: 5, effect: "Every hit has a 5% chance to stun for 0.3 s", options: [
-      { key: "A", name: "Coil Wraps", desc: "Blue-white shock coils wrap the barrel cluster; a stunning hit crackles with arcs on the target.",
-        over: (c, aim, s, fx, t) => { const k = G(s), r = RC(fx); for (let x = 10; x <= 16; x += 1.5) { line(P(c, aim, k, x - r, -4.8), P(c, aim, k, x + 0.7 - r, 4.8), [0.35, 0.45, 0.6, 1], 1 * k); } glowDot(P(c, aim, k, 13 - r, 0), 0.8 * k, A(SHOCK, 0.5 + 0.5 * Math.sin(t * 9))); },
-        impactFx: (to, v, s, col, info) => stunArcs(to, v, s, info) },
-      { key: "B", name: "Capacitor Pack", desc: "A capacitor pack on the back of the turret with charge lights; a stunning hit throws a blue ring round the target.",
-        over: (c, aim, s, fx, t) => { const k = G(s), p = P(c, aim, k, -11, 0); plate(p, rectPts(2.4, 5), METAL, aim, k, 1); for (let i = 0; i < 3; i++) disc(P(c, aim, k, -11, -3 + i * 3), 0.7 * k, A(SHOCK, fmod(t * 2 - i * 0.3, 1) < 0.5 ? 0.95 : 0.3)); },
-        impactFx: (to, v, s, col, info) => { stunArcs(to, v, s, info); if (info && info.sh && info.sh.m % 20 === 0 && v < 1) ring(to, s * (0.15 + 0.3 * v), A(SHOCK, 1 - v), 1.6); } },
-      { key: "C", name: "Arc Prongs", desc: "Two prongs at the muzzle with a spark jumping between them; stunning hits crackle.",
-        over: (c, aim, s, fx, t) => { const k = G(s), r = RC(fx); for (const y of [-4.2, 4.2]) bar(P(c, aim, k, 17 - r, y), P(c, aim, k, 22 - r, y * 0.75), 1 * k, METAL_L);
-          const pts = [P(c, aim, k, 22 - r, -3.1)]; for (let i = 1; i < 4; i++) pts.push(P(c, aim, k, 22 + (rnd2(Math.floor(t * 20) + i) - 0.5) * 1.6 - r, -3.1 + i * 1.55)); pts.push(P(c, aim, k, 22 - r, 3.1)); polyline(pts, A(SHOCK, 0.9), 0.8 * k); },
-        impactFx: (to, v, s, col, info) => stunArcs(to, v, s, info) },
-    ] },
-    { name: "Incendiary Rounds", cost: 25, effect: "Hits burn the target for 3 damage/s for 2 s (refreshes, proposed)", options: [
-      { key: "A", name: "Fuel Canister", desc: "A red fuel canister feeds the breech; rounds fly as orange tracers and the target flickers with flame.",
-        over: (c, aim, s) => { const k = G(s); bar(P(c, aim, k, -7, -6), P(c, aim, k, -2, -6), 3 * k, [0.7, 0.18, 0.12, 1]); line(P(c, aim, k, -2, -6), P(c, aim, k, 4, -2), [0.5, 0.2, 0.12, 1], 1.2 * k); },
-        shot: (f, to, u, s) => tracer(f, to, u, FIRE, 1.6, 0.3), impactFx: (to, v, s) => flames(to, v, s) },
-      { key: "B", name: "Igniter Muzzle", desc: "An igniter ring round the muzzle with a small pilot flame; orange tracers, burning targets.",
-        over: (c, aim, s, fx, t) => { const k = G(s), r = RC(fx), p = P(c, aim, k, 19.5 - r, 0); ring(p, 4.2 * k, OUTLINE, 2.4 * k); ring(p, 4.2 * k, [0.45, 0.3, 0.22, 1], 1.4 * k); glowDot(P(c, aim, k, 19.5 - r, -4.4), (0.7 + 0.3 * Math.sin(t * 13)) * k, FIRE); },
-        shot: (f, to, u, s) => tracer(f, to, u, FIRE, 1.6, 0.3), impactFx: (to, v, s) => flames(to, v, s) },
-      { key: "C", name: "Napalm Drum", desc: "The drum is swapped for an orange hazard-striped incendiary drum; rounds glow orange and targets burn.",
-        over: (c, aim, s) => { const k = G(s), dr = P(c, aim, k, -1, 8.5); orb(dr, 4.4 * k, [0.75, 0.38, 0.12, 1]); for (let i = 0; i < 8; i++) arc(dr, 3 * k, i * TAU / 8, i * TAU / 8 + TAU / 16, i % 2 ? [0.08, 0.08, 0.08, 1] : [1, 0.75, 0.2, 1], 1.2 * k); },
-        shot: (f, to, u, s) => tracer(f, to, u, FIRE, 1.6, 0.3), impactFx: (to, v, s) => flames(to, v, s) },
-    ] },
+    { name: "Water-Cooled Barrel", cost: 40, effect: "Fire rate 1.2 to 1.5/s", options: [{ key: "A", name: "Water Jacket", desc: "A water jacket on every gun (your note), longer with the Range barrels; a tank and hose; vapour at each muzzle." }] },
+    { name: "Shock Rounds", cost: 5, effect: "Every hit has a 5% chance to stun for 0.3 s", options: [{ key: "A", name: "Coil Wraps", desc: "Shock coils on every gun (your note), longer with the Range barrels; stunning hits crackle." }] },
+    { name: "Incendiary Rounds", cost: 25, effect: "Hits burn the target for 3 damage/s for 2 s (refreshes, proposed)", options: [{ key: "A", name: "Fuel Canister", desc: "A fuel canister with fuel lines to every gun (your note); orange tracers; burning targets." }] },
   ],
 };
-function k0(s) { return G(s); }
 
 // ---- Tower art engine: previews towers aiming and firing at enemies on a lane --------------------------
 // Data (defined before this): PAGE {title, key, store}, TOWERS [...], DEFAULTS {id: {look, anim}}.
@@ -890,13 +817,15 @@ function makeView(canvas, tw, getLook, getAnim, scale) {
     v.prevT = t;
     const since = t - v.last;
     const muzzles = look.muzzles || [[look.muzzle || 0.45, 0]];
-    const muzzleAt = (m, ang) => pl ? pl.door : add(c, rot([muzzles[m % muzzles.length][0] * s, muzzles[m % muzzles.length][1] * s], look.fixed ? 0 : ang));
-    const info = { ens: cands, all, c, W, H, s, t, look, aim: v.aim, muzzleAt, spot: tgt && tgt.i === -5 ? tgt.p : null, orbit: O };
+    const muzzleAt = (m, ang, k) => pl ? pl.door : look.muzzleAt ? look.muzzleAt(m, k ?? 0, c, ang, s, info) : add(c, rot([muzzles[m % muzzles.length][0] * s, muzzles[m % muzzles.length][1] * s], look.fixed ? 0 : ang));
+    // Multi-target order: the aimed-at target first, then the rest nearest first.
+    const order = tgt && tgt.i !== -5 ? [tgt, ...cands.filter((e) => e !== tgt).sort((a, b) => Math.hypot(a.p[0] - c[0], a.p[1] - c[1]) - Math.hypot(b.p[0] - c[0], b.p[1] - c[1]))] : cands;
+    const info = { ens: cands, all, order, view: v, c, W, H, s, t, look, aim: v.aim, muzzleAt, spot: tgt && tgt.i === -5 ? tgt.p : null, orbit: O };
     const aligned = tgt && (pl || Math.abs(fmod(Math.atan2(tgt.p[1] - c[1], tgt.p[0] - c[0]) - v.aim + Math.PI, TAU) - Math.PI) < (an.beam ? 0.15 : 0.35));
     if (tgt && !an.beam && !an.persist && since >= an.period && aligned) {
       v.last = t; const n = an.burst || 1;
       for (let k = 0; k < n; k++) {
-        const target = an.multi ? (cands[k % cands.length] || tgt) : tgt;
+        const target = an.multi ? (order[k % order.length] || tgt) : tgt;
         v.shots.push({ t0: t + k * (an.gap || 0), tid: target.i, to0: target.p.slice(), k, m: (v.n = (v.n || 0) + 1) - 1 });
       }
     }
@@ -925,7 +854,7 @@ function makeView(canvas, tw, getLook, getAnim, scale) {
     v.shots = v.shots.filter((sh) => t - sh.t0 < an.flight + 0.6);
     for (const sh of v.shots) {
       const age = t - sh.t0; if (age < 0) continue;
-      if (!sh.from) sh.from = muzzleAt(sh.m, v.aim);
+      if (!sh.from) sh.from = muzzleAt(sh.m, v.aim, sh.k);
       const live = ens.find((e) => e.i === sh.tid); const to = live ? live.p : sh.to0;
       info.sh = sh;
       if (age < an.flight) an.shot(sh.from, to, age / an.flight, s, tw.color, sh.k, t, info);
@@ -1025,14 +954,14 @@ const TW = BASE.TOWERS.find((x) => x.id === P2.tower);
 const BASE_LOOK = TW.looks.find((l) => l.key === P2.look), BASE_ANIM = TW.anims.find((a) => a.key === P2.anim);
 let S2 = {};
 try { S2 = JSON.parse(localStorage.getItem(PAGE.store) || "{}") || {}; } catch (e) { S2 = {}; }
-S2.picks ||= {}; S2.notes ||= {}; S2.build ||= { lv: [0, 0, 0], r: -1 };
+S2.picks ||= { ...(P2.picks || {}) }; S2.notes ||= {}; S2.build ||= { lv: [0, 0, 0], r: -1 };
 function save2() { try { localStorage.setItem(PAGE.store, JSON.stringify(S2)); } catch (e) { /* storage unavailable */ } }
 const STAGE = ["1", "2", "3", "4", "M"];
 const optOf = (list, id) => list.find((o) => o.key === S2.picks[id]) || list[0];
 
 // The layers for path levels lv[] and Retrofit r (-1 none); `over` swaps one stage for a candidate option.
 function layersFor(lv, r, swap) {
-  const out = [];
+  const out = []; out.build = { lv: lv.slice(), r };
   P2.paths.forEach((pa, pi) => { for (let k = 0; k < lv[pi]; k++) { const id = "p" + pi + "s" + k; out.push(swap && swap.id === id ? swap.opt : optOf(pa.steps[k].options, id)); } });
   if (r >= 0) { const id = "r" + r; out.push(swap && swap.id === id ? swap.opt : optOf(P2.retrofits[r].options, id)); }
   return out;
@@ -1042,13 +971,19 @@ function critMark(p, v, s) { if (v >= 1) return; glowDot(p, s * 0.1 * (1 - v), G
 function compose(layers) {
   let muzzles = BASE_LOOK.muzzles, targets = 1, crit = 0, shot = null;
   for (const L of layers) { if (L.muzzles) muzzles = L.muzzles; if (L.targets) targets = Math.max(targets, L.targets); if (L.crit) crit = Math.max(crit, L.crit); if (L.shot) shot = L.shot; }
+  const B = layers.build || { lv: [0, 0, 0], r: -1 };
+  const md = P2.mods ? P2.mods(B) : null;
+  if (md) { if (md.targets) targets = md.targets; if (md.crit != null) crit = md.crit; if (md.shot) shot = md.shot; }
   const look = { ...BASE_LOOK, muzzles, key: BASE_LOOK.key + layers.map((L) => L.key).join(""),
-    draw(c, aim, s, fx, t, col, info) { for (const L of layers) if (L.under) L.under(c, aim, s, fx, t, col, info);
+    draw(c, aim, s, fx, t, col, info) { if (P2.model) return P2.model(c, aim, s, fx, t, col, info, B);
+      for (const L of layers) if (L.under) L.under(c, aim, s, fx, t, col, info);
       BASE_LOOK.draw.call(this, c, aim, s, fx, t, col, info); for (const L of layers) if (L.over) L.over(c, aim, s, fx, t, col, info); } };
+  if (P2.muzzleAt) look.muzzleAt = (m, k, c, aim, s, info) => P2.muzzleAt(B, m, k, c, aim, s, info);
   const b = BASE_ANIM, every = crit > 0 ? Math.max(2, Math.round(1 / crit)) : 0;
   const anim = { ...b, key: b.key + targets, burst: (b.burst || 1) * targets, multi: targets > 1 || b.multi, gap: targets > 1 ? 0.02 : b.gap,
-    shot: (f, to, u, s, col, k, t, info) => { (shot || b.shot)(f, to, u, s, col, k, t, info); for (const L of layers) if (L.shotFx) L.shotFx(f, to, u, s, col, k, t, info); },
+    shot: (f, to, u, s, col, k, t, info) => { (shot || b.shot)(f, to, u, s, col, k, t, info); for (const L of layers) if (L.shotFx) L.shotFx(f, to, u, s, col, k, t, info); if (md && md.shotFx) md.shotFx(f, to, u, s, col, k, t, info); },
     impact: (to, v, s, col, info) => { if (b.impact) b.impact(to, v, s, col, info); for (const L of layers) if (L.impactFx) L.impactFx(to, v, s, col, info);
+      if (md && md.impactFx) md.impactFx(to, v, s, col, info);
       if (every && info && info.sh && info.sh.m % every === 0) critMark(to, v, s); } };
   return { look, anim };
 }

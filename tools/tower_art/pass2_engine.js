@@ -10,14 +10,14 @@ const TW = BASE.TOWERS.find((x) => x.id === P2.tower);
 const BASE_LOOK = TW.looks.find((l) => l.key === P2.look), BASE_ANIM = TW.anims.find((a) => a.key === P2.anim);
 let S2 = {};
 try { S2 = JSON.parse(localStorage.getItem(PAGE.store) || "{}") || {}; } catch (e) { S2 = {}; }
-S2.picks ||= {}; S2.notes ||= {}; S2.build ||= { lv: [0, 0, 0], r: -1 };
+S2.picks ||= { ...(P2.picks || {}) }; S2.notes ||= {}; S2.build ||= { lv: [0, 0, 0], r: -1 };
 function save2() { try { localStorage.setItem(PAGE.store, JSON.stringify(S2)); } catch (e) { /* storage unavailable */ } }
 const STAGE = ["1", "2", "3", "4", "M"];
 const optOf = (list, id) => list.find((o) => o.key === S2.picks[id]) || list[0];
 
 // The layers for path levels lv[] and Retrofit r (-1 none); `over` swaps one stage for a candidate option.
 function layersFor(lv, r, swap) {
-  const out = [];
+  const out = []; out.build = { lv: lv.slice(), r };
   P2.paths.forEach((pa, pi) => { for (let k = 0; k < lv[pi]; k++) { const id = "p" + pi + "s" + k; out.push(swap && swap.id === id ? swap.opt : optOf(pa.steps[k].options, id)); } });
   if (r >= 0) { const id = "r" + r; out.push(swap && swap.id === id ? swap.opt : optOf(P2.retrofits[r].options, id)); }
   return out;
@@ -27,13 +27,19 @@ function critMark(p, v, s) { if (v >= 1) return; glowDot(p, s * 0.1 * (1 - v), G
 function compose(layers) {
   let muzzles = BASE_LOOK.muzzles, targets = 1, crit = 0, shot = null;
   for (const L of layers) { if (L.muzzles) muzzles = L.muzzles; if (L.targets) targets = Math.max(targets, L.targets); if (L.crit) crit = Math.max(crit, L.crit); if (L.shot) shot = L.shot; }
+  const B = layers.build || { lv: [0, 0, 0], r: -1 };
+  const md = P2.mods ? P2.mods(B) : null;
+  if (md) { if (md.targets) targets = md.targets; if (md.crit != null) crit = md.crit; if (md.shot) shot = md.shot; }
   const look = { ...BASE_LOOK, muzzles, key: BASE_LOOK.key + layers.map((L) => L.key).join(""),
-    draw(c, aim, s, fx, t, col, info) { for (const L of layers) if (L.under) L.under(c, aim, s, fx, t, col, info);
+    draw(c, aim, s, fx, t, col, info) { if (P2.model) return P2.model(c, aim, s, fx, t, col, info, B);
+      for (const L of layers) if (L.under) L.under(c, aim, s, fx, t, col, info);
       BASE_LOOK.draw.call(this, c, aim, s, fx, t, col, info); for (const L of layers) if (L.over) L.over(c, aim, s, fx, t, col, info); } };
+  if (P2.muzzleAt) look.muzzleAt = (m, k, c, aim, s, info) => P2.muzzleAt(B, m, k, c, aim, s, info);
   const b = BASE_ANIM, every = crit > 0 ? Math.max(2, Math.round(1 / crit)) : 0;
   const anim = { ...b, key: b.key + targets, burst: (b.burst || 1) * targets, multi: targets > 1 || b.multi, gap: targets > 1 ? 0.02 : b.gap,
-    shot: (f, to, u, s, col, k, t, info) => { (shot || b.shot)(f, to, u, s, col, k, t, info); for (const L of layers) if (L.shotFx) L.shotFx(f, to, u, s, col, k, t, info); },
+    shot: (f, to, u, s, col, k, t, info) => { (shot || b.shot)(f, to, u, s, col, k, t, info); for (const L of layers) if (L.shotFx) L.shotFx(f, to, u, s, col, k, t, info); if (md && md.shotFx) md.shotFx(f, to, u, s, col, k, t, info); },
     impact: (to, v, s, col, info) => { if (b.impact) b.impact(to, v, s, col, info); for (const L of layers) if (L.impactFx) L.impactFx(to, v, s, col, info);
+      if (md && md.impactFx) md.impactFx(to, v, s, col, info);
       if (every && info && info.sh && info.sh.m % every === 0) critMark(to, v, s); } };
   return { look, anim };
 }
