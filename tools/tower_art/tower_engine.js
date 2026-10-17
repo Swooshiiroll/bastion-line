@@ -108,7 +108,7 @@ function makeView(canvas, tw, getLook, getAnim, scale) {
     if (an.persist) { fx.docked = !v.mem.out; fx.mem = v.mem; }
     look.draw(c, v.aim, s, fx, t, tw.color, info);
     if (an.beam && tgt) {
-      if (beamOn) an.shot(muzzleAt(0, v.aim), tgt.p, held - lockDelay, s, tw.color, 0, t);
+      if (beamOn) an.shot(muzzleAt(0, v.aim), tgt.p, held - lockDelay, s, tw.color, 0, t, info);
       else { const q = Math.min(1, held / Math.max(0.01, lockDelay)), r0 = s * (0.35 - 0.18 * q), sp = t * 4;
         line(muzzleAt(0, v.aim), tgt.p, A(tw.color, 0.25), 1);
         for (let i = 0; i < 4; i++) { const a0 = sp + i * Math.PI / 2; arc(tgt.p, r0, a0, a0 + 0.7, A(tw.color, 0.5 + 0.5 * q), 2); } }

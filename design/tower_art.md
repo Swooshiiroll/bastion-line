@@ -373,7 +373,8 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | # | Tower | File | Status |
 |---|---|---|---|
 | 1 | Gun Turret | `design/tower_art_p2_01_gun.html` | **Confirmed** (owner, 2026-10-17: "Gun turret finished") |
-| 2 | Mortar Tower | `design/tower_art_p2_02_mortar.html` | Round 3: owner's changes applied; to confirm |
+| 2 | Mortar Tower | `design/tower_art_p2_02_mortar.html` | **Confirmed** (owner, 2026-10-17: "Mortar finished"; its bore glow stays) |
+| 3 | Laser Tower | `design/tower_art_p2_03_laser.html` | Round 1: picks open |
 
 ### Gun Turret (second pass)
 
@@ -479,6 +480,21 @@ paths work together.
   - **Smoke Shells A** (the smoke band on every shell) picked.
   - **the bomblet rack stacks** 1 x 3 at step 3, 2 x 3 at step 4 and 2 x 4 at the mastery (gold).
 
+### Laser Tower (second pass)
+
+**Round 1 (Claude):** one parametric model, with the lessons so far:
+- **Options swap parts:** the Range path swaps in longer lances, with the focusing rings spread along them.
+- **Side emitters carry the main lance's details.**
+- **Deck kit stays put;** only the turret turns.
+- **The beam changes along the Power path:**
+  - it ramps wider and hotter over the ramp time.
+  - it whitens from Overdrive on.
+  - it's wrapped in gold at full ramp at the mastery.
+- **Multi-Target adds beams:**
+  - 2, then 3, then 4 beams, from a tip prism or from flank emitters.
+  - each extra beam locks on its own target with its own reticle.
+  - at the mastery each beam ramps on its own.
+
 ## Open questions
 
-1. **Second pass, Mortar Tower** (round 3): confirm, and whether its bore glow stays. Then towers 3-20.
+1. **Second pass, Laser Tower** (round 1): picks for 15 steps and 3 Retrofits; then towers 4-20.
