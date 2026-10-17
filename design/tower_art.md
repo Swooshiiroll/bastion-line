@@ -551,6 +551,8 @@ Their prices are formula estimates (proposed), in `design/tower_roster.md`.
   - each bank is a raised box: its top face lifted, the side and front faces facing the viewer shaded, a long shadow.
   - the 2 x 2 tubes really stack: the upper pair on the top's front edge, the lower pair on the front face.
   - rockets leave their own row.
+  - the mouths show only when the bank's front faces the viewer (owner: "The holes are visible from the opposite end").
+  - the gold bands wrap all the way round: across the top and down every visible side (owner).
 
 ## Open questions
 

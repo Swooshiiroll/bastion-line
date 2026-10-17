@@ -5,7 +5,7 @@
 // Fuses, Smoke Trails, Incendiary Warheads.
 // Geometry (game px, x along the aim): pods from x -8 to their mouths at x 11.5; cross-frame bars at x -4 and 6;
 // a hazard-striped blast deflector at x -11.
-const PAGE = { title: "Rocket Salvo: paths and Retrofits (second pass)", store: "bl-tower-art-p2-rocket-r3" };
+const PAGE = { title: "Rocket Salvo: paths and Retrofits (second pass)", store: "bl-tower-art-p2-rocket-r3c" };
 const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], RED = [0.9, 0.22, 0.2, 1], YEL = [1, 0.85, 0.2, 1], ORANGE = [1, 0.55, 0.2, 1];
 const SEEK = [0.35, 0.75, 1, 1], DARKR = [0.22, 0.22, 0.24, 1], PALE = [0.86, 0.88, 0.92, 1], SMOKEC = [0.55, 0.57, 0.6, 1];
 const Kp = (B, pi, k) => (B.lv[pi] > k ? B.key("p" + pi + "s" + k) : null);
@@ -66,7 +66,11 @@ function tallBox(c, aim, k, x0, x1, y, w, col, gold) { const up = [0, -TALL_H * 
   for (let i = 0; i < 4; i++) { const a = q[i], b = q[(i + 1) % 4], m = mul(add(a, b), 0.5), ctr = mul(q.reduce((s2, p) => add(s2, p), [0, 0]), 0.25);
     if (m[1] - ctr[1] > 0.01) { const face = [a, b, add(b, up), add(a, up)]; poly(face, OUTLINE); poly(face.map((p) => add(mul(sub(p, mul(add(face[0], face[2]), 0.5)), 0.9), mul(add(face[0], face[2]), 0.5))), dk(col, i === 1 ? 0.25 : 0.4)); } }
   const top = q.map((p) => add(p, up)); poly(top, OUTLINE); const ctr = mul(top.reduce((s2, p) => add(s2, p), [0, 0]), 0.25); poly(top.map((p) => add(ctr, mul(sub(p, ctr), 0.92))), col);
-  for (const fr of [0.2, 0.85]) line(add(lerp(top[0], top[1], fr), [0, 0]), add(lerp(top[3], top[2], fr), [0, 0]), gold ? GOLD : [0, 0, 0, 0.3], 1.1 * k); return up; }
+  // Gold bands wrap all the way round (owner): across the top, and down every side face that faces the viewer.
+  const ctr0 = mul(q.reduce((s2, p) => add(s2, p), [0, 0]), 0.25);
+  for (const fr of [0.2, 0.85]) { const bc = gold ? GOLD : [0, 0, 0, 0.3]; line(lerp(top[0], top[1], fr), lerp(top[3], top[2], fr), bc, 1.1 * k);
+    for (const [ea, eb] of [[0, 1], [3, 2]]) { const m = mul(add(q[ea], q[eb]), 0.5); if (m[1] - ctr0[1] > 0.01) { const p = lerp(q[ea], q[eb], fr); line(p, add(p, up), bc, 1.1 * k); } } }
+  return up; }
 function deckRack(c, k, x, y, n, col2, band) { const S = (dx, dy) => P(c, 0, k, x + dx, y + dy); plate(S(0, 0), rectPts(1.8, n * 1.6 + 0.6), METAL_D, 0, k, 0.9);
   for (let i = 0; i < n; i++) { const q = S(0, (i - (n - 1) / 2) * 3); orb(q, 1.2 * k, col2); if (band) ring(q, 0.7 * k, band, 0.6 * k); } }
 
@@ -116,7 +120,8 @@ const P2 = {
       if (B.r === 1 && B.key("r1") === "A") bar(P(c, aim, k, -6, y + half(w) * 0.7), P(c, aim, k, -1, y + half(w) * 0.7), 1.2 * k, SMOKEC); }
     if (kp(1, 0) === "C") bar(P(c, aim, k, -8, -half(L.pods[0][1]) + L.pods[0][0] - 1.4), P(c, aim, k, podLen - 1, -half(L.pods[0][1]) + L.pods[0][0] - 1.4), 1 * k, STEEL);
     if (gold && kp(0, 4) === "C") for (const y of [-12.5, 12.5]) { bar(P(c, aim, k, -6, y), P(c, aim, k, 4, y), 2.6 * k, [0.75, 0.38, 0.12, 1]); ring(P(c, aim, k, -1, y), 1.4 * k, GOLD, 0.9 * k); }
-    for (const [i, m] of L.mouths.entries()) { const q = add(P(c, aim, k, m[0] + (L.drum ? 0 : podLen - 11.5), m[1]), L.tall ? [0, (m[3] ? -TALL_H * 0.78 : -TALL_H * 0.28) * k] : [0, 0]); disc(q, (m[2] + 0.4) * k, OUTLINE); disc(q, m[2] * k, BORE);
+    const frontShows = !L.tall || Math.sin(aim) > 0.08; // a tall bank's mouths are on its front face: hidden when it faces away
+    for (const [i, m] of L.mouths.entries()) { if (!frontShows) break; const q = add(P(c, aim, k, m[0] + (L.drum ? 0 : podLen - 11.5), m[1]), L.tall ? [0, (m[3] ? -TALL_H * 0.78 : -TALL_H * 0.28) * k] : [0, 0]); disc(q, (m[2] + 0.4) * k, OUTLINE); disc(q, m[2] * k, BORE);
       const f2 = fx.barrel === i && (fx.barrelSince ?? 9) < 0.25 ? 1 - fx.barrelSince / 0.25 : 0; if (f2 > 0) glowDot(q, m[2] * k * f2, col);
       if (B.r === 2 && B.key("r2") === "C") ring(q, (m[2] + 0.2) * k, A(ORANGE, 0.8), 0.7 * k);
       if (B.r === 0 && B.key("r0") === "A") line(q, add(q, mul(fa(aim), 1.8 * k)), STEEL, 0.5 * k);
