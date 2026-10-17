@@ -1,0 +1,1147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tower Art: Rocket Salvo paths and Retrofits</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    color-scheme: dark;
+    --ground: #06090e; --field: #0b1016; --panel: #08111a; --panel-2: #0d1a25; --rule: #1d3a4b; --wire: #2a5a70;
+    --text: #dcedf7; --dim: #86a0b1; --faint: #4f6a7b; --accent: #4de1ff; --gold: #ffc85a;
+    --display: "Chakra Petch", "Bahnschrift", "Segoe UI", sans-serif;
+    --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--text); font: 14px/1.5 var(--body); padding: 28px 16px 48px; }
+  .wrap { max-width: 1340px; margin: 0 auto; display: grid; gap: 22px; }
+  .eyebrow { font: 600 12px var(--display); letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
+  h1 { font: 700 30px/1.1 var(--display); margin: 4px 0 0; }
+  h2 { font: 700 22px/1.2 var(--display); margin: 0; letter-spacing: .03em; }
+  h3 { font: 600 13px var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--dim); margin: 6px 0 0; }
+  p.note, .desc { color: var(--dim); }
+  p.note { margin: 6px 0 0; max-width: 95ch; }
+  ul.rules { margin: 8px 0 0; padding-left: 18px; color: var(--dim); max-width: 100ch; }
+  ul.rules b, p.note b { color: var(--text); font-weight: 500; }
+  code { font: 12px var(--mono); color: var(--accent); }
+  .enemy { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px 2px 12px 2px; padding: 12px 14px 14px; display: grid; gap: 8px; }
+  .enemy-head { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+  .num { font: 700 22px var(--display); color: var(--gold); }
+  .tags { font: 600 11px var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; }
+  .panel { border: 1px solid var(--rule); border-radius: 8px; padding: 8px; display: grid; gap: 6px; align-content: start; background: #071019; }
+  .meta { display: flex; gap: 8px; align-items: center; }
+  .key { font: 700 11px var(--display); color: #031018; background: var(--accent); border-radius: 4px; padding: 0 6px; }
+  .panel .desc { font-size: 12.5px; margin: 0; }
+  canvas { display: block; background: var(--field); border: 1px solid var(--rule); border-radius: 4px; max-width: 100%; height: auto; }
+  button { font: 600 12px var(--display); letter-spacing: .06em; color: var(--text); background: var(--panel-2); border: 1px solid var(--wire); border-radius: 6px; padding: 6px 11px; cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  button.pick.on { background: var(--gold); color: #1a1000; border-color: var(--gold); }
+  label.notes { display: grid; gap: 3px; font: 600 11px var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+  label.notes textarea { width: 100%; min-height: 40px; background: #071019; color: var(--text); border: 1px solid var(--rule); border-radius: 6px; font: 13px var(--body); padding: 6px 8px; resize: vertical; text-transform: none; letter-spacing: 0; }
+  .combo { display: grid; gap: 6px; border: 1px solid var(--gold); border-radius: 8px; padding: 8px; background: rgba(255,200,90,.04); justify-items: start; }
+  .combo-head { font: 600 12px var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
+  .out { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px 2px 12px 2px; padding: 12px 14px; display: grid; gap: 8px; }
+  #summary { width: 100%; min-height: 100px; background: #071019; color: var(--text); border: 1px solid var(--rule); border-radius: 6px; font: 12px var(--mono); padding: 8px; }
+  .stage { display: grid; gap: 6px; border-top: 1px solid var(--rule); padding-top: 8px; }
+  .stage-head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+  .lvl { font: 700 13px var(--display); color: #031018; background: var(--gold); border-radius: 4px; padding: 0 7px; }
+  .cost { font: 500 12px var(--mono); color: var(--gold); }
+  .eff { color: var(--dim); font-size: 13px; }
+  .grid3 { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; }
+  .build { display: grid; gap: 10px; grid-template-columns: minmax(0, 560px) minmax(220px, 1fr); align-items: start; border: 1px solid var(--gold); border-radius: 8px; padding: 10px; background: rgba(255,200,90,.04); }
+  .ctrls { display: grid; gap: 10px; }
+  .ctrl { display: grid; gap: 3px; }
+  .ctrl label { font: 600 12px var(--display); letter-spacing: .08em; color: var(--text); }
+  .ctrl input[type=range] { width: 100%; accent-color: var(--gold); }
+  .ctrl select { background: #071019; color: var(--text); border: 1px solid var(--rule); border-radius: 6px; padding: 4px 6px; font: 13px var(--body); }
+  .role { font: 600 11px var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+  @media (max-width: 860px) { .build { grid-template-columns: 1fr; } }
+  @media (max-width: 760px) { h1 { font-size: 24px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Bastion Line · Tower rework · Tower art · second pass · tower 4 of 20 · round 1</div>
+    <h1>Tower art: Rocket Salvo paths and Retrofits</h1>
+    <p class="note">Second pass for one tower: <b>every upgrade step and mastery</b> on each path, and each <b>Retrofit</b>, adds or changes a detail on the confirmed model. Each card shows the model with that path's earlier steps (your picks, or option A until you pick) plus the candidate. Pick one of three per step, add notes per path, then <b>Copy picks and notes</b>.</p>
+    <ul class="rules">
+      <li><b>Details stack:</b> the primary path's steps and the secondary's (capped at 2) both show and overlap, as in the build preview.</li>
+      <li><b>Build preview:</b> set each path's level (M is the mastery) and a Retrofit; it enforces the primary/secondary rule (two paths at most; once one reaches 3, the other stops at 2).</li>
+      <li><b>Masteries</b> get gold trim, as today's tier-4 towers do.</li>
+      <li>Same style as the base pass: dark gunmetal lit from the upper left, the tower's accent colour, top-down.</li>
+    </ul>
+  </header>
+  <div id="towers" class="wrap"></div>
+  <section class="out">
+    <h2>Picks and notes</h2>
+    <textarea id="summary" readonly></textarea>
+    <button id="copy">Copy picks and notes</button>
+    <button id="clear">Clear this page</button>
+  </section>
+</div>
+<script>
+// ---- Colours and vectors (mirrors Draw.gd) -------------------------------------------------
+const OUTLINE = [0.03, 0.04, 0.06, 0.95], METAL_D = [0.10, 0.115, 0.14, 1], METAL = [0.18, 0.20, 0.24, 1], METAL_L = [0.30, 0.33, 0.38, 1];
+const LIGHT = [-0.6, -0.8];
+const WHITE = [1, 1, 1, 1];
+const A = (c, a) => [c[0], c[1], c[2], a];
+const dk = (c, k) => [c[0] * (1 - k), c[1] * (1 - k), c[2] * (1 - k), c[3] ?? 1];
+const lt = (c, k) => [c[0] + (1 - c[0]) * k, c[1] + (1 - c[1]) * k, c[2] + (1 - c[2]) * k, c[3] ?? 1];
+const mix = (a, b, k) => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k, (a[3] ?? 1) + ((b[3] ?? 1) - (a[3] ?? 1)) * k];
+const css = c => `rgba(${Math.round(c[0] * 255)},${Math.round(c[1] * 255)},${Math.round(c[2] * 255)},${c[3] ?? 1})`;
+const add = (a, b) => [a[0] + b[0], a[1] + b[1]];
+const sub = (a, b) => [a[0] - b[0], a[1] - b[1]];
+const mul = (a, k) => [a[0] * k, a[1] * k];
+const fa = a => [Math.cos(a), Math.sin(a)];
+const orth = v => [v[1], -v[0]];
+const dot = (a, b) => a[0] * b[0] + a[1] * b[1];
+const norm = v => { const l = Math.hypot(v[0], v[1]) || 1; return [v[0] / l, v[1] / l]; };
+const rot = (p, r) => [p[0] * Math.cos(r) - p[1] * Math.sin(r), p[0] * Math.sin(r) + p[1] * Math.cos(r)];
+const TAU = Math.PI * 2;
+const clamp01 = x => Math.max(0, Math.min(1, x));
+const ease = x => { x = clamp01(x); return x * x * (3 - 2 * x); };
+const fmod = (a, b) => ((a % b) + b) % b;
+
+// ---- Drawing primitives (one-to-one with Draw.gd) ------------------------------------------
+let X = null; // current 2D context
+function disc(c, r, col) { if (r <= 0) return; X.fillStyle = css(col); X.beginPath(); X.arc(c[0], c[1], r, 0, TAU); X.fill(); }
+function arc(c, r, a0, a1, col, w) { X.strokeStyle = css(col); X.lineWidth = w > 0 ? w : 1; X.beginPath(); X.arc(c[0], c[1], Math.max(0.01, r), a0, a1); X.stroke(); }
+function ring(c, r, col, w = 1.5) { arc(c, r, 0, TAU, col, w); }
+function line(a, b, col, w = 1) { X.strokeStyle = css(col); X.lineWidth = w > 0 ? w : 1; X.beginPath(); X.moveTo(a[0], a[1]); X.lineTo(b[0], b[1]); X.stroke(); }
+function polyline(pts, col, w = 1) { if (pts.length < 2) return; X.strokeStyle = css(col); X.lineWidth = w > 0 ? w : 1; X.beginPath(); X.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) X.lineTo(pts[i][0], pts[i][1]); X.stroke(); }
+function poly(pts, col) { X.fillStyle = css(col); X.beginPath(); X.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) X.lineTo(pts[i][0], pts[i][1]); X.closePath(); X.fill(); }
+function xform(c, pts, r, s) { return pts.map(p => add(c, rot(mul(p, s), r))); }
+function fill(c, pts, col, r = 0, s = 1) { poly(xform(c, pts, r, s), col); }
+function outline(c, pts, col, w, r = 0, s = 1) { const p = xform(c, pts, r, s); p.push(p[0]); polyline(p, col, w); }
+function solid(c, pts, col, r = 0, s = 1, lw = 1.2) { fill(c, pts, col, r, s); outline(c, pts, OUTLINE, lw, r, s); }
+function ellipse(c, rx, ry, col) { X.fillStyle = css(col); X.beginPath(); X.ellipse(c[0], c[1], Math.max(0.01, rx), Math.max(0.01, ry), 0, 0, TAU); X.fill(); }
+function rect(x, y, w, h, col) { X.fillStyle = css(col); X.fillRect(x, y, w, h); }
+function ngon(n, r, ph = 0) { const o = []; for (let i = 0; i < n; i++) { const a = ph + TAU * i / n; o.push([Math.cos(a) * r, Math.sin(a) * r]); } return o; }
+function rectPts(hw, hh) { return [[-hw, -hh], [hw, -hh], [hw, hh], [-hw, hh]]; }
+function glowDot(c, r, col) { disc(c, r * 2.2, A(col, 0.18 * (col[3] ?? 1))); disc(c, r * 1.4, A(col, 0.35 * (col[3] ?? 1))); disc(c, r, col); disc(c, r * 0.45, [1, 1, 1, 0.9 * (col[3] ?? 1)]); }
+function arcSegments(c, r, count, gap, rt, col, w) { const span = TAU / count; for (let i = 0; i < count; i++) { const a0 = rt + span * i + gap * 0.5; arc(c, r, a0, a0 + span - gap, col, w); } }
+function orb(p, r, col) {
+  disc(p, r + 1.1, OUTLINE); disc(p, r, dk(col, 0.3)); disc(add(p, mul(LIGHT, r * 0.12)), r * 0.8, col);
+  arc(p, r * 0.72, Math.PI * 1.05, Math.PI * 1.6, lt(col, 0.35), Math.max(0.8, r * 0.16));
+  disc(add(p, mul(LIGHT, r * 0.45)), Math.max(0.6, r * 0.13), [1, 1, 1, 0.55]);
+}
+function plate(c, pts, col, r = 0, s = 1, lw = 1.2) {
+  const p = xform(c, pts, r, s);
+  poly(p, dk(col, 0.22));
+  let ce = [0, 0]; for (const q of p) ce = add(ce, q); ce = mul(ce, 1 / p.length);
+  poly(p.map(q => add(ce, mul(sub(q, ce), 0.8))), col);
+  for (let i = 0; i < p.length; i++) {
+    const a = p[i], b = p[(i + 1) % p.length];
+    const m = norm(sub(mul(add(a, b), 0.5), ce));
+    const d = dot(m, LIGHT);
+    const a1 = add(a, mul(sub(ce, a), 0.1)), b1 = add(b, mul(sub(ce, b), 0.1));
+    if (d > 0.15) line(a1, b1, lt(col, 0.45), Math.max(0.8, lw * 0.8));
+    else if (d < -0.15) line(a1, b1, dk(col, 0.5), Math.max(0.8, lw * 0.8));
+  }
+  const cl = p.slice(); cl.push(p[0]); polyline(cl, OUTLINE, lw);
+}
+function rivets(c, pts, r, s, inset = 0.72, rr = 0.9) { for (const q of xform(c, pts, r, s)) { const p = add(c, mul(sub(q, c), inset)); disc(p, rr + 0.3, OUTLINE); disc(p, rr, lt(METAL_L, 0.15)); } }
+function bar(a, b, w, col) {
+  const d = norm(sub(b, a)); let n = orth(d); if (dot(n, LIGHT) < 0) n = mul(n, -1);
+  line(a, b, OUTLINE, w + 1.6); line(a, b, dk(col, 0.25), w);
+  line(add(a, mul(n, w * 0.18)), add(b, mul(n, w * 0.18)), col, w * 0.55);
+  line(add(a, mul(n, w * 0.3)), add(b, mul(n, w * 0.3)), lt(col, 0.4), Math.max(0.6, w * 0.16));
+}
+function strip(a, b, w, col) { line(a, b, A(col, 0.25 * (col[3] ?? 1)), w * 2.6); line(a, b, col, w); line(a, b, [1, 1, 1, 0.6 * (col[3] ?? 1)], Math.max(0.5, w * 0.35)); }
+function oval(c, rx, ry, r, col, ow = 0) {
+  const pts = []; for (let i = 0; i < 20; i++) { const a = TAU * i / 20; pts.push(add(c, rot([Math.cos(a) * rx, Math.sin(a) * ry], r))); }
+  if (ow > 0) poly(pts.map(p => add(c, mul(sub(p, c), 1 + ow / Math.max(rx, ry)))), OUTLINE);
+  poly(pts, col);
+}
+function shadedOval(c, rx, ry, r, col) {
+  const m = Math.min(rx, ry);
+  oval(c, rx, ry, r, dk(col, 0.3), 1.3); oval(add(c, mul(LIGHT, m * 0.12)), rx * 0.8, ry * 0.78, r, col);
+  disc(add(c, mul(LIGHT, m * 0.5)), Math.max(0.6, m * 0.14), [1, 1, 1, 0.45]);
+}
+function limb(pts, w, col) { polyline(pts, OUTLINE, w + 1.4); polyline(pts, col, w); for (let i = 1; i < pts.length - 1; i++) { disc(pts[i], w * 0.75 + 0.4, OUTLINE); disc(pts[i], w * 0.75, lt(col, 0.25)); } }
+
+// ---- Palettes (existing from Draw.gd ENEMY_BODY / ENEMY_COLOR; new ones are drafts) ----------
+const PAL = {
+  grunt: [[0.40, 0.42, 0.48, 1], [1.00, 0.28, 0.22, 1]], runner: [[0.30, 0.30, 0.32, 1], [1.00, 0.80, 0.20, 1]],
+  brute: [[0.40, 0.37, 0.33, 1], [1.00, 0.55, 0.15, 1]], swarmling: [[0.12, 0.30, 0.16, 1], [0.40, 1.00, 0.50, 1]],
+  bat: [[0.30, 0.32, 0.38, 1], [1.00, 0.35, 0.25, 1]], phantom: [[0.16, 0.20, 0.26, 1], [0.55, 0.95, 1.00, 1]],
+  aegis: [[0.30, 0.36, 0.46, 1], [0.40, 0.70, 1.00, 1]], hydra: [[0.36, 0.30, 0.22, 1], [1.00, 0.65, 0.25, 1]],
+  jammer: [[0.26, 0.28, 0.24, 1], [0.90, 1.00, 0.30, 1]], locust: [[0.30, 0.36, 0.22, 1], [0.75, 1.00, 0.35, 1]],
+  gunship: [[0.30, 0.33, 0.30, 1], [1.00, 0.45, 0.30, 1]], burrower: [[0.40, 0.33, 0.24, 1], [1.00, 0.70, 0.35, 1]],
+  stalker: [[0.22, 0.20, 0.30, 1], [0.75, 0.55, 1.00, 1]], rampart: [[0.36, 0.34, 0.30, 1], [1.00, 0.45, 0.35, 1]],
+  // new (draft)
+  needle: [[0.22, 0.24, 0.28, 1], [0.94, 0.95, 0.97, 1]], fury: [[0.25, 0.17, 0.24, 1], [1.00, 0.25, 0.75, 1]],
+  shrike: [[0.34, 0.36, 0.40, 1], [0.20, 0.90, 0.80, 1]], titan: [[0.28, 0.29, 0.32, 1], [1.00, 0.45, 0.10, 1]],
+  siphon: [[0.26, 0.28, 0.24, 1], [0.90, 1.00, 0.30, 1]], blackout: [[0.24, 0.26, 0.22, 1], [0.95, 1.00, 0.45, 1]],
+  capacitor: [[0.22, 0.24, 0.22, 1], [0.85, 1.00, 0.35, 1]], shifter: [[0.27, 0.25, 0.20, 1], [1.00, 0.88, 0.55, 1]],
+  wraith: [[0.12, 0.11, 0.24, 1], [0.86, 0.88, 1.00, 1]], masq: [[0.30, 0.20, 0.32, 1], [1.00, 0.40, 0.55, 1]],
+  decoy: [[0.30, 0.31, 0.33, 1], [1.00, 0.75, 0.30, 1]], mirage: [[0.20, 0.24, 0.30, 1], [0.80, 0.70, 1.00, 1]],
+};
+const FLYERS = new Set(["bat", "locust", "gunship", "shrike"]);
+const SELF_SHADOW = new Set(["siphon"]); // hovers: draws its own offset shadow
+let TELL = "dots";
+
+// ---- Existing enemies, ported from Draw.enemy ------------------------------------------------
+const DRAW = {};
+DRAW.grunt = (c, f, n, ang, rr, t, b, g) => {
+  disc(c, rr * 1.2, A(g, 0.07));
+  for (const side of [-1, 1]) { const pod = add(c, mul(n, side * rr * 0.95)); plate(pod, rectPts(0.5, 0.24), lt(METAL_D, 0.1), ang, rr, 1.0); strip(sub(sub(pod, mul(f, rr * 0.55)), mul(n, rr * 0.12)), add(sub(pod, mul(f, rr * 0.55)), mul(n, rr * 0.12)), 0.8, [0.4, 0.8, 1.0, 1]); }
+  bar(add(c, mul(f, rr * 0.3)), add(c, mul(f, rr * 1.3)), 2.0, METAL_L); disc(add(c, mul(f, rr * 1.3)), 1.1, [0.05, 0.05, 0.05, 1]);
+  orb(c, rr * 0.86, b); arcSegments(c, rr * 0.64, 6, 0.35, ang, dk(b, 0.35), 1.4);
+  const e = add(c, mul(f, rr * 0.12)); disc(e, rr * 0.4, OUTLINE); disc(e, rr * 0.33, [0.15, 0.03, 0.03, 1]); glowDot(e, rr * 0.2, g); disc(add(e, mul(LIGHT, rr * 0.15)), rr * 0.07, [1, 1, 1, 0.8]);
+};
+DRAW.runner = (c, f, n, ang, rr, t, b, g) => {
+  for (let i = 0; i < 3; i++) for (const side of [-1, 1]) {
+    const ph = t * 20 + i * 2.1 + (side > 0 ? Math.PI : 0);
+    const root = add(add(c, mul(f, (1 - i) * rr * 0.35)), mul(n, side * rr * 0.28));
+    const knee = add(add(root, mul(n, side * rr * 0.7)), mul(f, ((1 - i) * 0.35 + 0.22 * Math.sin(ph)) * rr));
+    const foot = add(add(knee, mul(n, side * rr * 0.3)), mul(f, (1 - i) * 0.45 * rr));
+    limb([root, knee, foot], 1.0, METAL_L);
+  }
+  shadedOval(sub(c, mul(f, rr * 0.35)), rr * 0.56, rr * 0.43, ang, b);
+  for (let k = 0; k < 2; k++) { const sp = sub(c, mul(f, rr * (0.2 + 0.25 * k))); line(sub(sp, mul(n, rr * 0.35)), add(sp, mul(n, rr * 0.35)), [0, 0, 0, 0.45], 1.0); }
+  strip(sub(c, mul(f, rr * 0.65)), sub(c, mul(f, rr * 0.1)), 0.8, g);
+  orb(add(c, mul(f, rr * 0.35)), rr * 0.35, lt(b, 0.15));
+  for (const side of [-1, 1]) { line(add(add(c, mul(f, rr * 0.6)), mul(n, side * rr * 0.12)), add(add(c, mul(f, rr * 0.85)), mul(n, side * rr * 0.04)), METAL_L, 1.0); glowDot(add(add(c, mul(f, rr * 0.5)), mul(n, side * rr * 0.14)), rr * 0.08, g); }
+};
+DRAW.brute = (c, f, n, ang, rr, t, b, g) => {
+  for (const side of [-1, 1]) {
+    const step = Math.sin(t * 5 + (side > 0 ? Math.PI : 0)) * rr * 0.35;
+    const hip = add(c, mul(n, side * rr * 0.45)), knee = add(add(hip, mul(n, side * rr * 0.2)), mul(f, step * 0.5)), foot = add(add(hip, mul(n, side * rr * 0.15)), mul(f, step));
+    limb([hip, knee, foot], 3.0, lt(METAL_D, 0.1)); plate(foot, rectPts(0.32, 0.2), METAL_L, ang, rr, 1.0);
+  }
+  const hull = ngon(6, 1.0); plate(c, hull, b, ang, rr * 0.84, 1.6); rivets(c, hull, ang, rr * 0.84, 0.78, 0.6);
+  fill(c, rectPts(0.3, 0.42), dk(b, 0.15), ang, rr);
+  for (const side of [-1, 1]) { const sh = add(c, mul(n, side * rr * 0.78)); plate(sh, rectPts(0.34, 0.3), METAL_L, ang, rr, 1.2); bar(add(sh, mul(f, rr * 0.2)), add(sh, mul(f, rr * 1.15)), 2.4, METAL_L); disc(add(sh, mul(f, rr * 1.15)), 1.4, [0.05, 0.05, 0.05, 1]); disc(add(sh, mul(f, rr * 1.15)), 0.8, A(g, 0.9)); }
+  const v = add(c, mul(f, rr * 0.42)); strip(sub(v, mul(n, rr * 0.28)), add(v, mul(n, rr * 0.28)), 1.6, g);
+};
+DRAW.swarmling = (c, f, n, ang, rr, t, b, g) => {
+  disc(c, rr * 1.7, A(g, 0.13));
+  for (let k = 0; k < 4; k++) { const p = add(c, mul(fa(t * 7 + TAU * k / 4), rr * 0.78)); solid(p, [[0.5, 0], [0, 0.35], [-0.5, 0], [0, -0.35]], lt(b, 0.35), t * 7, rr, 0.8); disc(p, rr * 0.11, g); }
+  orb(c, rr * 0.34, lt(b, 0.2)); glowDot(c, rr * 0.18, g);
+};
+DRAW.bat = (c, f, n, ang, rr, t, b, g) => {
+  ellipse(add(c, [0, rr * 2.4]), rr * 1.3, rr * 0.4, [0, 0, 0, 0.2]);
+  for (let k = 0; k < 4; k++) {
+    const a = ang + Math.PI / 4 + TAU * k / 4, tip = add(c, mul(fa(a), rr * 1.2));
+    bar(c, tip, 1.8, lt(METAL_D, 0.15)); disc(tip, rr * 0.62, [0.8, 0.86, 0.95, 0.12]); ring(tip, rr * 0.62, [0.8, 0.86, 0.95, 0.35], 0.8);
+    const spin = t * 38 * (k % 2 === 0 ? 1 : -1);
+    for (let q = 0; q < 2; q++) line(tip, add(tip, mul(fa(spin + q * Math.PI), rr * 0.58)), [0.85, 0.9, 1.0, 0.55], 1.2);
+    orb(tip, rr * 0.17, METAL_L);
+    const nav = k < 2 ? [1, 0.25, 0.25, 1] : [0.3, 1, 0.45, 1];
+    if (fmod(t * 1.5 + k * 0.25, 1) < 0.35) glowDot(add(c, mul(fa(a), rr * 0.72)), rr * 0.08, nav);
+  }
+  plate(c, [[0.62, 0], [0.35, 0.36], [-0.5, 0.3], [-0.62, 0], [-0.5, -0.3], [0.35, -0.36]], b, ang, rr, 1.2);
+  for (const side of [-1, 1]) { const pod = add(add(c, mul(n, side * rr * 0.34)), mul(f, rr * 0.1)); bar(pod, add(pod, mul(f, rr * 0.45)), 1.6, METAL_L); }
+  const cam = add(c, mul(f, rr * 0.42)); orb(cam, rr * 0.2, METAL); glowDot(add(cam, mul(f, rr * 0.06)), rr * 0.09, g);
+  strip(sub(sub(c, mul(f, rr * 0.35)), mul(n, rr * 0.12)), add(sub(c, mul(f, rr * 0.35)), mul(n, rr * 0.12)), 0.7, g);
+};
+DRAW.locust = (c, f, n, ang, rr, t, b, g) => {
+  ellipse(add(c, [0, rr * 2.6]), rr * 0.9, rr * 0.3, [0, 0, 0, 0.18]);
+  const flap = 0.55 + 0.45 * Math.sin(t * 60);
+  for (const side of [-1, 1]) for (let k = 0; k < 2; k++) { const root = add(c, mul(f, rr * (0.25 - 0.45 * k))); const tip = sub(add(root, mul(n, side * rr * (1.5 * flap + 0.3))), mul(f, rr * 0.35)); line(root, tip, [0.85, 0.95, 0.8, 0.45], 1.6); }
+  shadedOval(sub(c, mul(f, rr * 0.1)), rr * 0.9, rr * 0.42, ang, b); glowDot(add(c, mul(f, rr * 0.6)), rr * 0.3, g);
+};
+DRAW.gunship = (c, f, n, ang, rr, t, b, g) => {
+  ellipse(add(c, [0, rr * 2.0]), rr * 1.4, rr * 0.4, [0, 0, 0, 0.22]);
+  bar(sub(c, mul(f, rr * 0.4)), sub(c, mul(f, rr * 1.35)), 2.4, lt(METAL_D, 0.12)); plate(sub(c, mul(f, rr * 1.35)), rectPts(0.1, 0.42), METAL, ang, rr, 1.0);
+  for (const side of [-1, 1]) {
+    const fan = sub(add(c, mul(n, side * rr * 0.95)), mul(f, rr * 0.1));
+    disc(fan, rr * 0.5, OUTLINE); disc(fan, rr * 0.44, METAL_D);
+    for (let q = 0; q < 3; q++) line(fan, add(fan, mul(fa(t * 30 * side + TAU * q / 3), rr * 0.4)), [0.8, 0.85, 0.95, 0.5], 1.4);
+    ring(fan, rr * 0.47, METAL_L, 1.6); glowDot(sub(fan, mul(f, rr * 0.5)), rr * 0.08, side < 0 ? [1, 0.25, 0.25, 1] : [0.3, 1, 0.45, 1]);
+  }
+  const hull = [[0.95, 0], [0.55, 0.5], [-0.6, 0.55], [-0.85, 0.2], [-0.85, -0.2], [-0.6, -0.55], [0.55, -0.5]];
+  plate(c, hull, b, ang, rr * 0.8, 1.6); rivets(c, hull, ang, rr * 0.8, 0.72, 0.6);
+  line(sub(c, mul(f, rr * 0.4)), add(c, mul(f, rr * 0.45)), [0, 0, 0, 0.35], 1.0);
+  const tur = add(c, mul(f, rr * 0.55));
+  for (const side of [-1, 1]) bar(add(tur, mul(n, side * rr * 0.1)), add(add(tur, mul(n, side * rr * 0.1)), mul(f, rr * 0.6)), 1.8, METAL_L);
+  orb(tur, rr * 0.22, METAL); glowDot(add(c, mul(f, rr * 0.2)), rr * 0.1, g);
+};
+DRAW.rampart = (c, f, n, ang, rr, t, b, g) => {
+  const roll = fmod(t * 14, 5);
+  for (const side of [-1, 1]) { const tread = add(c, mul(n, side * rr * 0.82)); plate(tread, rectPts(1.05, 0.26), lt(METAL_D, 0.05), ang, rr, 1.3); for (let k = 0; k < 5; k++) { const lp = add(tread, mul(f, -rr * 0.95 + fmod(k * rr * 0.42 + roll, rr * 2.0))); line(sub(lp, mul(n, rr * 0.22)), add(lp, mul(n, rr * 0.22)), METAL_L, 1.0); } }
+  const hull = rectPts(0.78, 0.66); plate(c, hull, b, ang, rr, 1.8);
+  for (const cx of [-1, 1]) for (const cy of [-1, 1]) plate(add(add(c, mul(f, cx * rr * 0.62)), mul(n, cy * rr * 0.5)), rectPts(0.16, 0.16), lt(b, 0.12), ang, rr, 1.1);
+  rivets(c, hull, ang, rr, 0.7, 0.7);
+  bar(add(c, mul(f, rr * 0.7)), add(c, mul(f, rr * 1.25)), 4.0, METAL_L); plate(add(c, mul(f, rr * 1.2)), [[0.2, 0], [-0.05, 0.3], [-0.05, -0.3]], lt(METAL_L, 0.1), ang, rr, 1.0);
+  orb(c, rr * 0.28, dk(b, 0.2)); glowDot(c, rr * 0.13, g);
+};
+DRAW.jammer = (c, f, n, ang, rr, t, b, g) => {
+  const ping = fmod(t * 0.9, 1); arc(c, rr * (1.2 + 1.4 * ping), 0, TAU, A(g, 0.35 * (1 - ping)), 1.5);
+  for (const side of [-1, 1]) { const tr = add(c, mul(n, side * rr * 0.72)); plate(tr, rectPts(0.8, 0.22), lt(METAL_D, 0.08), ang, rr, 1.0); for (let k = 0; k < 3; k++) { const lp = add(tr, mul(f, (fmod(t * 6 + k * 0.5, 1.5) - 0.75) * rr)); line(sub(lp, mul(n, rr * 0.16)), add(lp, mul(n, rr * 0.16)), [0, 0, 0, 0.45], 0.9); } }
+  orb(c, rr * 0.72, b); const dir = fa(t * 2.5);
+  arc(c, rr * 0.55, t * 2.5 - 0.9, t * 2.5 + 0.9, OUTLINE, 3.6); arc(c, rr * 0.55, t * 2.5 - 0.9, t * 2.5 + 0.9, METAL_L, 2.2);
+  bar(c, add(c, mul(dir, rr * 0.9)), 1.2, METAL_L); glowDot(add(c, mul(dir, rr * 0.9)), rr * 0.14, g); glowDot(c, rr * 0.18, g);
+};
+DRAW.stalker = (c, f, n, ang, rr, t, b, g) => {
+  const echo = fmod(t * 1.1, 1);
+  const ghost = [[1.1, 0], [0.2, 0.45], [-0.7, 0.3], [-0.7, -0.3], [0.2, -0.45]];
+  outline(sub(c, mul(f, rr * (0.6 + 1.2 * echo))), ghost, A(g, 0.45 * (1 - echo)), 1.0, ang, rr);
+  for (const side of [-1, 1]) {
+    const ph = t * 12 + (side > 0 ? Math.PI : 0);
+    const hip = add(c, mul(n, side * rr * 0.3)), knee = add(add(hip, mul(n, side * rr * 0.45)), mul(f, rr * (0.45 + 0.25 * Math.sin(ph)))), foot = sub(add(knee, mul(n, side * rr * 0.1)), mul(f, rr * (0.55 - 0.3 * Math.sin(ph))));
+    limb([hip, knee, foot], 1.3, METAL_L);
+  }
+  plate(c, ghost, b, ang, rr * 0.8, 1.1); strip(sub(c, mul(f, rr * 0.45)), add(c, mul(f, rr * 0.55)), 0.8, g); glowDot(add(c, mul(f, rr * 0.6)), rr * 0.16, g);
+};
+DRAW.burrower = (c, f, n, ang, rr, t, b, g, o) => {
+  if (o.hidden) {
+    const dirt = [0.42, 0.33, 0.24, 1]; shadedOval(c, rr * 1.15, rr * 0.8, ang, dirt);
+    for (let k = 0; k < 5; k++) { const a = ang + TAU * k / 5 + t * 0.5; disc(add(c, mul(fa(a), rr * (0.85 + 0.15 * Math.sin(t * 9 + k)))), 1.4, lt(dirt, 0.2)); }
+    line(add(c, mul(f, rr * 0.6)), add(c, mul(f, rr * 1.05)), METAL_L, 2.0); glowDot(add(c, mul(f, rr * 0.2)), rr * 0.12, A(g, 0.6)); return;
+  }
+  for (const side of [-1, 1]) { const tr = add(c, mul(n, side * rr * 0.72)); plate(tr, rectPts(0.7, 0.2), lt(METAL_D, 0.08), ang, rr, 1.0); for (let k = 0; k < 3; k++) { const lp = add(tr, mul(f, (fmod(t * 7 + k * 0.45, 1.35) - 0.68) * rr)); line(sub(lp, mul(n, rr * 0.15)), add(lp, mul(n, rr * 0.15)), [0, 0, 0, 0.45], 0.9); } }
+  shadedOval(sub(c, mul(f, rr * 0.15)), rr * 0.7, rr * 0.58, ang, b);
+  for (let k = 0; k < 2; k++) { const sp = sub(c, mul(f, rr * (0.05 + 0.3 * k))); line(sub(sp, mul(n, rr * 0.5)), add(sp, mul(n, rr * 0.5)), [0, 0, 0, 0.35], 1.0); }
+  plate(c, [[1.45, 0], [0.5, 0.42], [0.5, -0.42]], METAL_L, ang, rr, 1.2);
+  for (let k = 0; k < 3; k++) { const fr = fmod(t * 5 + k / 3, 1), x = 0.55 + 0.8 * fr, hw = 0.42 * (1.45 - x) / 0.95; line(sub(add(c, mul(f, rr * x)), mul(n, rr * hw)), add(add(c, mul(f, rr * (x + 0.12))), mul(n, rr * hw)), [0, 0, 0, 0.45], 1.0); }
+  glowDot(sub(c, mul(f, rr * 0.2)), rr * 0.14, g);
+};
+DRAW.phantom = (c, f, n, ang, rr, t, b, g, o) => {
+  const blade = [[1.4, 0], [0.1, 0.55], [-0.9, 1.0], [-0.5, 0], [-0.9, -1.0], [0.1, -0.55]];
+  if (o.hidden) {
+    const a = 0.2 + 0.08 * Math.sin(t * 7), rp = fmod(t * 1.3, 1);
+    arc(c, rr * (1 + 0.8 * rp), 0, TAU, [0.8, 0.95, 1.0, 0.22 * (1 - rp)], 1.0);
+    outline(c, blade, A(g, a), 1.2, ang, rr); outline(add(c, mul(n, Math.sin(t * 11) * 1.5)), blade, A(g, a * 0.5), 1.0, ang, rr * 1.08); return;
+  }
+  plate(c, blade, b, ang, rr, 1.2); line(sub(c, mul(f, rr * 0.4)), add(c, mul(f, rr * 1.1)), A(g, 0.5), 1.0);
+  for (const side of [-1, 1]) { glowDot(add(add(c, mul(f, rr * 0.35)), mul(n, side * rr * 0.28)), rr * 0.13, g); strip(add(sub(c, mul(f, rr * 0.75)), mul(n, side * rr * 0.55)), add(sub(c, mul(f, rr * 0.55)), mul(n, side * rr * 0.4)), 0.8, g); }
+  ring(c, rr * 1.3, A(g, 0.35 + 0.2 * Math.sin(t * 5)), 1.0);
+};
+DRAW.aegis = (c, f, n, ang, rr, t, b, g) => {
+  for (let k = 0; k < 4; k++) { const ld = fa(ang + Math.PI / 4 + k * Math.PI / 2), step = Math.sin(t * 6 + k * Math.PI / 2) * rr * 0.18; const knee = add(add(c, mul(ld, rr * 0.75)), mul(f, step)); limb([add(c, mul(ld, rr * 0.3)), knee, add(knee, mul(ld, rr * 0.35))], 2.0, METAL_L); }
+  const hull = ngon(6, 1.0, Math.PI / 6); plate(c, hull, b, ang, rr * 0.74, 1.4); rivets(c, hull, ang, rr * 0.74, 0.75, 0.55);
+  orb(sub(c, mul(f, rr * 0.25)), rr * 0.2, dk(g, 0.3)); glowDot(sub(c, mul(f, rr * 0.25)), rr * 0.12, g);
+  const sc = add(c, mul(f, rr * 0.2));
+  arc(sc, rr * 0.95, ang - 0.95, ang + 0.95, OUTLINE, 5.6); arc(sc, rr * 0.95, ang - 0.95, ang + 0.95, METAL_L, 3.8); arc(sc, rr * 0.88, ang - 0.8, ang + 0.1, lt(METAL_L, 0.35), 1.0);
+  for (let k = 0; k < 3; k++) disc(add(sc, mul(fa(ang + (k - 1) * 0.55), rr * 0.95)), 0.9, A(g, 0.9));
+  arc(sc, rr * 1.04, ang - 0.9, ang + 0.9, A(g, 0.8), 1.2);
+  const hex = ngon(6, 1.0, t * 0.6); fill(c, hex, [0.4, 0.7, 1.0, 0.15], 0, rr + 6); outline(c, hex, [0.55, 0.8, 1.0, 0.75], 1.4, 0, rr + 6); // barrier (enemy_status)
+};
+DRAW.hydra = (c, f, n, ang, rr, t, b, g) => {
+  shadedOval(sub(c, mul(f, rr * 0.3)), rr * 0.52, rr * 0.48, ang, b); ring(sub(c, mul(f, rr * 0.3)), rr * 0.3, dk(b, 0.35), 1.3); glowDot(sub(c, mul(f, rr * 0.3)), rr * 0.1, g);
+  for (let k = 0; k < 3; k++) {
+    const ba = ang + (k - 1) * 0.7, pts = [];
+    for (let i = 0; i < 5; i++) { const q = i / 4, sway = Math.sin(t * 4 + k * 1.7 - q * 2) * rr * 0.22 * q; pts.push(add(add(c, mul(fa(ba), rr * (0.05 + 1.05 * q))), mul(fa(ba + Math.PI / 2), sway))); }
+    polyline(pts, OUTLINE, 5.0); polyline(pts, lt(b, 0.15), 3.2); for (let i = 1; i < 4; i++) disc(pts[i], 1.0, dk(b, 0.25));
+    const hd = norm(sub(pts[4], pts[3])), hp = add(pts[4], mul(hd, rr * 0.12));
+    plate(hp, [[0.6, 0], [0.05, 0.38], [-0.4, 0.3], [-0.4, -0.3], [0.05, -0.38]], lt(b, 0.1), Math.atan2(hd[1], hd[0]), rr * 0.5, 1.0);
+    const jaw = mul(orth(hd), rr * 0.1 * (1 + Math.sin(t * 8 + k))); line(add(add(hp, mul(hd, rr * 0.28)), jaw), add(hp, mul(hd, rr * 0.1)), METAL_L, 1.0); glowDot(add(hp, mul(hd, rr * 0.06)), rr * 0.1, g);
+  }
+};
+
+// ---- New enemies (draft designs) ---------------------------------------------------------------
+
+// ---- Shared in-game tower style for the tower art pages (mirrors scripts/view/Draw.gd) ----------------------------
+// ---- Game units: drawings use Draw.gd's pixel sizes (a tile is 48 px), scaled to the preview ----------------
+const G = (s) => s / 48;
+const P = (c, aim, k, x, y) => add(c, rot([x * k, y * k], aim)); // x along the aim, y to the side, in game px
+const AMMO = [0.4, 0.42, 0.25, 1], BORE = [0.04, 0.04, 0.05, 1], DARK_STRIPE = [0.06, 0.06, 0.06, 1];
+
+// The hex deck every tower stands on (Draw._pad): bevelled armour, corner bolts, vents, status LEDs, the accent
+// trim that breathes, and one tier pip.
+function deck(c, k, col, t) {
+  const hex = ngon(6, 1);
+  ellipse(add(c, [0, 6 * k]), 21 * k, 9 * k, [0, 0, 0, 0.35]);
+  fill(c, hex, OUTLINE, 0, 20.5 * k); plate(c, hex, lt(METAL_D, 0.05), 0, 19.2 * k, 1); fill(c, hex, METAL, 0, 15.6 * k);
+  outline(c, hex, [0, 0, 0, 0.45], 1, 0, 15.6 * k); outline(c, hex, A(col, 0.5 + 0.2 * Math.sin(t * 2.2)), 1.35 * k, 0, 17.6 * k);
+  for (const q of xform(c, hex, 0, 17.6 * k)) { disc(q, 1.5 * k, OUTLINE); disc(q, 1.0 * k, METAL_L); }
+  for (let i = 0; i < 3; i++) { const y = c[1] - 13 * k + i * 2.2 * k; line([c[0] - 13.5 * k, y], [c[0] - 10 * k, y], [0, 0, 0, 0.5], 1); line([c[0] + 10 * k, y], [c[0] + 13.5 * k, y], [0, 0, 0, 0.5], 1); }
+  disc(add(c, [-9 * k, 11 * k]), k, [0.4, 1, 0.5, fmod(t * 0.9, 2) < 0.12 ? 0.95 : 0.45]); disc(add(c, [9 * k, 11 * k]), k, A(col, 0.8));
+  rect(c[0] - 3 * k, c[1] + 14.4 * k, 6 * k, 3.2 * k, OUTLINE); rect(c[0] - 2.4 * k, c[1] + 15 * k, 4.8 * k, 2 * k, col);
+}
+// Hazard striping along one side of a part, alternating accent and black (Draw._missile).
+function hazard(c, aim, k, x0, x1, y, col, w) { const n = Math.max(2, Math.round((x1 - x0) / 2));
+  for (let i = 0; i < n; i++) { const x = x0 + (x1 - x0) * (i + 0.5) / n; line(P(c, aim, k, x - 0.8, y), P(c, aim, k, x + 0.8, y), i % 2 ? DARK_STRIPE : A(col, 0.95), (w || 1.8) * k); } }
+// A barrel's open end: dark bore that glows in the accent colour as it fires (Draw._flak).
+function muzzleEnd(p, k, w, col, f) { disc(p, w * 0.6 * k, BORE); disc(p, w * 0.45 * k, A(col, Math.min(1, 0.3 + 3 * f))); if (f > 0) glowDot(p, (1.2 + 6 * f) * k, A(col, f)); }
+
+// ---- Shared effects (s = preview px per tile) -------------------------------------------------------------
+const lerp = (a, b, u) => [a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u];
+const decay = (since, len) => (since >= 0 && since < len ? 1 - since / len : 0);
+function firedBarrel(fx, i, len) { return fx.barrel === i && fx.barrelSince < (len || 0.12) ? 1 - fx.barrelSince / (len || 0.12) : 0; }
+function smokePuff(p, v, s, a) { if (v <= 0 || v >= 1) return; disc(add(p, [0, -v * s * 0.25]), s * (0.1 + v * 0.22), [0.55, 0.57, 0.6, (a || 0.4) * (1 - v)]); }
+function blast(p, v, s, col, size) { if (v < 0 || v >= 1) return; const r = s * (size || 0.4);
+  disc(p, r * (0.35 + v * 0.7), A([1, 0.85, 0.5, 1], 0.75 * (1 - v))); ring(p, r * (0.5 + v * 1.1), A(col, 0.85 * (1 - v)), 2); smokePuff(p, v, s, 0.35); }
+function spark(p, v, s, col) { if (v < 0.35) glowDot(p, s * 0.07 * (1 - v / 0.35), col); }
+function tracer(from, to, u, col, w, len) { const a = lerp(from, to, Math.max(0, u - (len || 0.15))), b = lerp(from, to, u); line(a, b, A(col, 0.9), w || 2); line(a, b, [1, 1, 1, 0.8], (w || 2) * 0.4); }
+function beam(from, to, w, col, k) { line(from, to, A(col, 0.3 * k), w * 2.6); line(from, to, A(col, 0.9 * k), w); line(from, to, [1, 1, 1, 0.8 * k], Math.max(1, w * 0.35)); glowDot(to, w * 1.3, A(col, k)); }
+// A mortar shell: a dark round with a glowing fuse, arcing high; optional glowing trail.
+function shell(from, to, u, s, col, z, trail) { const k = G(s) * (z || 1), arcH = (h) => Math.sin(Math.PI * h) * s * 0.85, p = lerp(from, to, u);
+  ellipse(p, 3 * k, 1.5 * k, [0, 0, 0, 0.3]);
+  if (trail) for (let i = 4; i >= 1; i--) { const v = Math.max(0, u - i * 0.035); disc(add(lerp(from, to, v), [0, -arcH(v)]), (1 + i * 0.45) * k, A(col, 0.32 - 0.06 * i)); }
+  const a = add(p, [0, -arcH(u)]); orb(a, 2.6 * k, METAL_L); glowDot(a, 1.1 * k, col); }
+// A rocket as the in-game loaded missiles look: pale body, red nose, grey fins, a hot exhaust and a smoke trail.
+function missile(p, dir, k, col) {
+  for (const sg of [-1, 1]) fill(p, [[-1.5, sg * 1.1], [-4.2, sg * 2.8], [-4.6, sg * 2.8], [-4.2, sg * 1.1]], METAL_L, dir, k);
+  solid(p, [[4.6, 0], [2.7, 1.35], [-4.2, 1.35], [-4.2, -1.35], [2.7, -1.35]], [0.86, 0.88, 0.92, 1], dir, k, 0.8);
+  fill(p, [[4.6, 0], [2.9, 1.35], [2.9, -1.35]], [1, 0.32, 0.25, 1], dir, k); glowDot(add(p, mul(fa(dir), -5 * k)), 1.2 * k, col); }
+function rocketPath(from, to, u, s, col, idx, z, bendK) { const k = G(s) * (z || 1), bend = (bendK ?? 1) * (idx % 2 ? 1 : -1) * (0.28 + 0.1 * (idx % 3)) * s;
+  const mid = add(lerp(from, to, 0.5), mul(orth(norm(sub(to, from))), bend)), q = (x) => lerp(lerp(from, mid, x), lerp(mid, to, x), x);
+  for (let i = 6; i >= 1; i--) disc(q(Math.max(0, u - i * 0.035)), (1.2 + i * 0.55) * k, [0.62, 0.64, 0.66, 0.34 - i * 0.045]);
+  const p = q(u), pb = q(Math.max(0, u - 0.04)); missile(p, Math.atan2(p[1] - pb[1], p[0] - pb[0]), k, col); }
+// Loaded rocket noses showing in the tube mouths; they're gone after a salvo and slide back in as it reloads.
+function noses(c, aim, k, tubes, fx, r) { const ready = fx.ready ?? 1; if (ready <= 0.05) return;
+  for (const [x, y] of tubes) { const p = P(c, aim, k, x, y); orb(p, (r || 1.7) * k * ready, [0.86, 0.88, 0.92, 1]); disc(add(p, mul(fa(aim), 0.5 * k)), (r || 1.7) * 0.45 * k * ready, [1, 0.32, 0.25, 1]); } }
+
+
+// ---- Stand-in neighbour towers for support towers' previews (Boost Tower, Augmentation Tower) ---------------------
+const MATES = [[[1.15, -0.25], [0.30, 0.90, 1.00, 1]], [[1.0, 0.72], [1.00, 0.55, 0.20, 1]], [[-0.85, 0.78], [1.00, 0.30, 0.35, 1]]];
+const matesOf = (info) => MATES.map(([o, col]) => ({ p: add(info.c, mul(o, info.s)), col }));
+function mateTower(p, k, col, t, boosted, bcol, aimAt) { deck(p, k * 0.75, col, t); const aim = aimAt ?? (-0.5 + Math.sin(t * 0.7 + p[0]) * 0.4);
+  bar(p, P(p, aim, k * 0.75, 15, 0), 3 * k * 0.75, METAL_L); plate(p, ngon(8, 1, Math.PI / 8), METAL_L, aim, 6.5 * k * 0.75, 1); orb(p, 3.4 * k * 0.75, METAL); glowDot(p, 1 * k, col);
+  if (boosted > 0) for (let i = 0; i < 2; i++) { const q = add(p, [0, -(16 + i * 3.4) * k * 0.75]); polyline([add(q, [-2.6 * k, 1.6 * k]), q, add(q, [2.6 * k, 1.6 * k])], A(bcol, boosted), 1.6 * k); } }
+
+
+const BASE = (() => {
+// ---- Tower art page 1: towers 1-5, in the style of today's in-game towers (owner, 2026-10-16) -----------
+// Dark gunmetal armour lit from the upper left (bevelled plates, rivets, shaded barrels and domes), the hex deck
+// every tower stands on, and one glowing accent colour per tower, as in scripts/view/Draw.gd. Earlier rounds
+// (modern military, then sleek sci-fi) were scrapped by the owner; they're in git history.
+const PAGE = { title: "Tower art page 1 (towers 1-5)", store: "bl-tower-art-1-game-v2" };
+
+const TOWERS = [
+  // 1. Gun Turret ---------------------------------------------------------------------------------------
+  { id: "gun", num: 1, name: "Gun Turret", cls: "Assault", weapon: "Ballistic", hits: "both", color: [0.30, 0.90, 1.00, 1],
+    desc: "A basic rotating machine gun turret. \"It's a machine gun, Private!\" Steady medium rounds; the cheap starter. (Colour: today's Pulse Turret cyan.)",
+    looks: [
+      { key: "A", name: "Shielded Gun Mount", muzzle: 20 / 48, theme: "A square armoured gun body behind an angled gun shield; one heavy barrel with cooling-jacket rings pokes through, fed by a belt from a side ammo box.",
+        draw(c, aim, s, fx, t, col) { const k = G(s), r = fx.recoil * 2.5; deck(c, k, col, t);
+          plate(P(c, aim, k, -4, -9.5), rectPts(3.4, 2.4), AMMO, aim, k, 1); line(P(c, aim, k, -2, -7.5), P(c, aim, k, 2, -3), A([1, 0.78, 0.3, 1], 0.75), 1.3 * k);
+          bar(P(c, aim, k, 4 - r, 0), P(c, aim, k, 20 - r, 0), 3.4 * k, METAL_L);
+          for (const x of [12, 15.5]) { bar(P(c, aim, k, x - r, -2.6), P(c, aim, k, x - r, 2.6), 1.5 * k, lt(METAL_D, 0.15)); line(P(c, aim, k, x - r, -2), P(c, aim, k, x - r, 2), A(col, 0.95), 0.8 * k); }
+          muzzleEnd(P(c, aim, k, 20 - r, 0), k, 3.4, col, fx.flash);
+          plate(c, rectPts(6.5, 6.5), METAL_L, aim, k, 1.2); rivets(c, rectPts(6.5, 6.5), aim, k, 0.75, 0.8 * k);
+          plate(P(c, aim, k, 8, 0), [[1.6, -7.5], [1.6, 7.5], [-1.4, 6], [-1.4, -6]], lt(METAL_L, 0.05), aim, k, 1.1);
+          orb(P(c, aim, k, -2, 2.5), 2.4 * k, METAL); glowDot(P(c, aim, k, -1.2, 2.5), 1.1 * k, col); } },
+      { key: "B", name: "Twin Gun Nest", muzzle: 18 / 48, muzzles: [[18 / 48, -4 / 48], [18 / 48, 4 / 48]], theme: "An armoured dome turret with a gun on each flank, firing alternately; two belt feeds run back to ammo boxes behind the dome.",
+        draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t);
+          for (const y of [-6.5, 6.5]) plate(P(c, aim, k, -8.5, y), rectPts(2.6, 3), AMMO, aim, k, 1);
+          [-4, 4].forEach((y, i) => { const r = firedBarrel(fx, i, 0.14) * 2.5; bar(P(c, aim, k, 2 - r, y), P(c, aim, k, 18 - r, y), 2.6 * k, METAL_L);
+            bar(P(c, aim, k, 11 - r, y - 2), P(c, aim, k, 11 - r, y + 2), 1.3 * k, lt(METAL_D, 0.15)); muzzleEnd(P(c, aim, k, 18 - r, y), k, 2.6, col, firedBarrel(fx, i, 0.08)); });
+          for (const y of [-4.5, 4.5]) line(P(c, aim, k, -6.5, y * 1.4), P(c, aim, k, -1, y), A([1, 0.78, 0.3, 1], 0.7), 1.1 * k);
+          plate(c, ngon(8, 1, Math.PI / 8), METAL_L, aim, 7.4 * k, 1.2); orb(c, 5 * k, METAL); rivets(c, ngon(4, 1, Math.PI / 4), aim, 7.4 * k, 0.82, 0.75 * k);
+          strip(P(c, aim, k, 2.5, -2), P(c, aim, k, 2.5, 2), 0.8 * k, col); } },
+      { key: "C", name: "Rotary Gun", muzzle: 20 / 48, theme: "A four-barrel rotary gun in a shrouded cluster that spins up while firing, a drum magazine on its flank and a cooling vent block behind.",
+        draw(c, aim, s, fx, t, col) { const k = G(s), r = fx.recoil * 1.5; deck(c, k, col, t); const spin = t * (fx.recoil > 0 || fx.flash > 0 ? 30 : 3);
+          plate(P(c, aim, k, -8, 0), rectPts(3, 5.5), lt(METAL_D, 0.1), aim, k, 1); for (let i = 0; i < 3; i++) line(P(c, aim, k, -9.5 + i * 1.5, -4), P(c, aim, k, -9.5 + i * 1.5, 4), A(col, 0.5 + 0.4 * (i === 2)), 0.9 * k);
+          const bs = [0, 1, 2, 3].map((i) => ({ y: Math.sin(spin + i * TAU / 4) * 3.4, z: Math.cos(spin + i * TAU / 4) })).sort((a, b) => a.z - b.z);
+          for (const b of bs) bar(P(c, aim, k, 5 - r, b.y), P(c, aim, k, 19 - r, b.y), 1.8 * k, mix(METAL_D, METAL_L, 0.5 + 0.5 * b.z));
+          for (const x of [8, 18]) bar(P(c, aim, k, x - r, -4.8), P(c, aim, k, x - r, 4.8), 1.6 * k, METAL_L);
+          muzzleEnd(P(c, aim, k, 20 - r, 0), k, 3, col, fx.flash);
+          orb(P(c, aim, k, -1, 8.5), 4.2 * k, METAL); ring(P(c, aim, k, -1, 8.5), 2.8 * k, A(col, 0.7), 1 * k);
+          plate(c, ngon(6, 1, 0), METAL_L, aim, 6.8 * k, 1.2); orb(c, 3.6 * k, METAL); glowDot(P(c, aim, k, 1.2, 0), 1.2 * k, col); } },
+    ],
+    anims: [
+      { key: "A", name: "Single Shots", desc: "Steady single rounds: the barrel kicks back, the bore flashes cyan and a tracer streaks to the target.", period: 0.8, flight: 0.18,
+        fx: (since) => ({ recoil: decay(since, 0.15), flash: decay(since, 0.08) }), shot: (f, to, u, s, col) => tracer(f, to, u, col, 2.2, 0.25), impact: (to, v, s, col) => spark(to, v, s, col) },
+      { key: "B", name: "Three-Round Burst", desc: "Quick three-round bursts with a pause between; each round kicks the barrel.", period: 1.4, burst: 3, gap: 0.09, flight: 0.16,
+        fx: (since) => { const on = since < 0.3 && fmod(since, 0.09) < 0.05 ? 1 : 0; return { recoil: on * 0.7, flash: on }; },
+        shot: (f, to, u, s, col) => tracer(f, to, u, col, 1.8, 0.22), impact: (to, v, s, col) => spark(to, v, s, col) },
+      { key: "C", name: "Rapid Stream", desc: "A fast, steady stream of rounds; light recoil, the bore glowing constantly and sparks dancing on the target.", period: 0.2, flight: 0.15,
+        fx: (since) => ({ recoil: decay(since, 0.1) * 0.5, flash: 0.35 + 0.65 * decay(since, 0.06) }), shot: (f, to, u, s, col) => tracer(f, to, u, col, 1.4, 0.2),
+        impact: (to, v, s, col) => { if (v < 0.25) disc(add(to, mul(fa(v * 40), s * 0.1 * v * 4)), 1.3, A([1, 0.9, 0.6, 1], 1 - v * 4)); } },
+    ] },
+
+  // 2. Mortar Tower -------------------------------------------------------------------------------------
+  { id: "mortar", num: 2, name: "Mortar Tower", cls: "Assault", weapon: "Explosive", hits: "ground", color: [1.00, 0.55, 0.20, 1],
+    desc: "Lobs high-explosive shells at nearby enemies. \"Tools.\" Short range, heavy splash, ground only. (Colour: today's Plasma Mortar orange.)",
+    looks: [
+      { key: "A", name: "Turntable Mortar", muzzle: 8 / 48, theme: "A stout armoured tube angled at the sky (from above: its wide bore) on a bolted turntable, two shell canisters racked behind it.",
+        draw(c, aim, s, fx, t, col) { const k = G(s), r = fx.recoil * 2; deck(c, k, col, t);
+          disc(c, 12.5 * k, OUTLINE); disc(c, 11.5 * k, lt(METAL_D, 0.08)); ring(c, 9.5 * k, [0, 0, 0, 0.4], 1);
+          for (let i = 0; i < 8; i++) { const q = add(c, mul(fa(i * TAU / 8), 10.6 * k)); disc(q, 1.1 * k, OUTLINE); disc(q, 0.7 * k, METAL_L); }
+          for (const y of [-5, 5]) { orb(P(c, aim, k, -7, y), 2.6 * k, mix(METAL_L, col, 0.3)); disc(P(c, aim, k, -7, y), 0.9 * k, A(col, 0.8)); }
+          bar(P(c, aim, k, -2 - r, 0), P(c, aim, k, 8 - r, 0), 9 * k, METAL_L); const b = P(c, aim, k, 8 - r, 0);
+          disc(b, 5.6 * k, OUTLINE); disc(b, 5 * k, METAL_L); ring(b, 4.3 * k, lt(METAL_L, 0.3), 0.8 * k); disc(b, 3.5 * k, BORE); disc(b, 2.6 * k, A(col, 0.25 + 0.75 * fx.flash)); if (fx.flash > 0) glowDot(b, 3 * k * fx.flash, col); } },
+      { key: "B", name: "Twin-Tube Mortar", muzzle: 7 / 48, muzzles: [[7 / 48, -5 / 48], [7 / 48, 5 / 48]], theme: "Two mortar tubes side by side on an armoured sled with hydraulic elevation rams; they fire one after the other.",
+        draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t);
+          plate(c, rectPts(9, 11), METAL_L, aim, k, 1.2); rivets(c, rectPts(9, 11), aim, k, 0.85, 0.75 * k); hazard(c, aim, k, -8, 8, -11.6, col, 1.4);
+          for (const y of [-5, 5]) bar(P(c, aim, k, -8, y), P(c, aim, k, -1, y), 2 * k, lt(METAL_D, 0.2));
+          [-5, 5].forEach((y, i) => { const f = firedBarrel(fx, i, 0.2), b = P(c, aim, k, 7 - f * 1.5, y);
+            disc(b, 4.6 * k, OUTLINE); disc(b, 4.1 * k, METAL); ring(b, 3.5 * k, lt(METAL_L, 0.2), 0.8 * k); disc(b, 2.8 * k, BORE); disc(b, 2 * k, A(col, 0.25 + 0.75 * f)); if (f > 0) glowDot(b, 2.6 * k * f, col); });
+          glowDot(P(c, aim, k, -4, 0), 1.2 * k, col); } },
+      { key: "C", name: "Braced Siege Mortar", muzzle: 9 / 48, theme: "A heavy mortar braced on four hydraulic legs with foot pads, a recoil spade behind and a big bore; the whole mount dips when it fires.",
+        draw(c, aim, s, fx, t, col) { const k = G(s), r = fx.recoil * 2.5; deck(c, k, col, t);
+          for (let i = 0; i < 4; i++) { const a = Math.PI / 4 + i * Math.PI / 2, f = P(c, aim, k, Math.cos(a) * 15, Math.sin(a) * 15);
+            bar(P(c, aim, k, Math.cos(a) * 6, Math.sin(a) * 6), f, 3 * k, lt(METAL_D, 0.12)); bar(P(c, aim, k, Math.cos(a) * 7, Math.sin(a) * 7), P(c, aim, k, Math.cos(a) * 11, Math.sin(a) * 11), 1.3 * k, METAL_L);
+            plate(f, rectPts(2, 2), METAL_L, aim, k, 0.9); }
+          plate(P(c, aim, k, -10, 0), [[1.5, -5], [1.5, 5], [-1.5, 4], [-1.5, -4]], METAL_L, aim, k, 1); hazard(c, aim, k, -11, -9, 0, col, 1);
+          plate(c, ngon(8, 1, Math.PI / 8), METAL, aim, 8.5 * k, 1.2);
+          bar(P(c, aim, k, -1 - r, 0), P(c, aim, k, 9 - r, 0), 11 * k, METAL_L); const b = P(c, aim, k, 9 - r, 0);
+          disc(b, 6.8 * k, OUTLINE); disc(b, 6.2 * k, METAL_L); ring(b, 5.4 * k, lt(METAL_L, 0.3), 1 * k); disc(b, 4.4 * k, BORE); disc(b, 3.3 * k, A(col, 0.25 + 0.75 * fx.flash)); if (fx.flash > 0) glowDot(b, 3.6 * k * fx.flash, col); } },
+    ],
+    anims: [
+      { key: "A", name: "High Lob", desc: "One shell arcs high with a smoke puff at the bore and lands in an orange blast.", period: 2.2, flight: 1.0,
+        fx: (since) => ({ recoil: decay(since, 0.3), flash: decay(since, 0.18) }),
+        shot: (f, to, u, s, col) => { if (u < 0.35) smokePuff(f, u / 0.35, s, 0.5); shell(f, to, u, s, col); }, impact: (to, v, s, col) => blast(to, v, s, col, 0.45) },
+      { key: "B", name: "Double Tap", desc: "Two shells in quick succession, each bore kicking in turn; two smaller blasts.", period: 2.4, burst: 2, gap: 0.35, flight: 0.95,
+        fx: (since) => ({ recoil: decay(since, 0.25) + decay(since - 0.35, 0.25), flash: decay(since, 0.15) + decay(since - 0.35, 0.15) }),
+        shot: (f, to, u, s, col) => { if (u < 0.3) smokePuff(f, u / 0.3, s, 0.4); shell(f, to, u, s, col, 0.85); }, impact: (to, v, s, col) => blast(to, v, s, col, 0.35) },
+      { key: "C", name: "Heavy Shell", desc: "A slow, heavy shell with a glowing trail, a big kick and a long smoke plume; a wide blast with a shock ring.", period: 3.0, flight: 1.3,
+        fx: (since) => ({ recoil: decay(since, 0.5), flash: decay(since, 0.3) }),
+        shot: (f, to, u, s, col) => { if (u < 0.5) smokePuff(f, u / 0.5, s * 1.3, 0.55); shell(f, to, u, s, col, 1.35, true); },
+        impact: (to, v, s, col) => { blast(to, v, s, col, 0.6); if (v < 0.6) ring(to, s * (0.3 + v * 1.4), A([1, 0.9, 0.7, 1], 0.6 * (1 - v / 0.6)), 1.4); } },
+    ] },
+
+  // 3. Laser Tower --------------------------------------------------------------------------------------
+  { id: "laser", num: 3, name: "Laser Tower", cls: "Assault", weapon: "Energy", hits: "both", color: [1.00, 0.30, 0.35, 1],
+    desc: "A high-energy laser emitter on a rotating turret. \"It does more than just blind the enemy, that's for sure.\" A ramping beam that melts armour; it fires only once locked on. (Colour: today's Laser Lance red.)",
+    looks: [
+      { key: "A", name: "Lance Emitter", muzzle: 21 / 48, theme: "A hexagonal armoured hull with heat-sink fins on both flanks, a long lance barrel with focusing rings and a red light strip, and an emitter crystal at the tip.",
+        draw(c, aim, s, fx, t, col) { const k = G(s), g = fx.glow || 0; deck(c, k, col, t);
+          for (const y of [-1, 1]) for (let i = 0; i < 3; i++) bar(P(c, aim, k, -3 - 2.5 * i, y * 5), P(c, aim, k, -3 - 2.5 * i, y * 9), 1.3 * k, METAL_L);
+          plate(c, [[7, 0], [1, 6], [-9, 5], [-11, 0], [-9, -5], [1, -6]], METAL_L, aim, k, 1.2);
+          bar(P(c, aim, k, 4, 0), P(c, aim, k, 21, 0), 3 * k, METAL); strip(P(c, aim, k, 5, 0), P(c, aim, k, 21, 0), 0.6 * k, A(col, 0.35 + 0.6 * g));
+          for (const x of [8, 12, 16]) bar(P(c, aim, k, x, -3.2), P(c, aim, k, x, 3.2), 1.5 * k, dk(col, 0.2));
+          const tip = P(c, aim, k, 21, 0); solid(tip, [[3.8, 0], [0, 2.8], [-3.8, 0], [0, -2.8]], A(col, 0.85), aim, k, 1); glowDot(tip, (0.8 + 1.8 * g) * k, [1, 1, 1, 1]);
+          orb(P(c, aim, k, -4, 0), 2.2 * k, dk(col, 0.3)); } },
+      { key: "B", name: "Twin-Prong Emitter", muzzle: 16 / 48, theme: "Two conductor prongs reach forward from a capacitor block with charge bars; a red crystal floats between the prong tips and the beam leaves from it.",
+        draw(c, aim, s, fx, t, col) { const k = G(s), g = fx.glow || 0; deck(c, k, col, t);
+          plate(P(c, aim, k, -5, 0), rectPts(5, 7), METAL_L, aim, k, 1.2); rivets(P(c, aim, k, -5, 0), rectPts(5, 7), aim, k, 0.8, 0.7 * k);
+          for (let i = 0; i < 3; i++) line(P(c, aim, k, -8 + i * 2, -4.5), P(c, aim, k, -8 + i * 2, 4.5), A(col, 0.4 + 0.2 * i + 0.4 * g), 1 * k);
+          for (const y of [-4, 4]) { bar(P(c, aim, k, 0, y), P(c, aim, k, 18, y * 0.8), 2.4 * k, METAL); bar(P(c, aim, k, 3, y), P(c, aim, k, 6, y), 3 * k, dk(col, 0.25)); glowDot(P(c, aim, k, 18, y * 0.8), 0.8 * k, A(col, 0.5 + 0.5 * g)); }
+          const cr = P(c, aim, k, 15 + Math.sin(t * 3) * 0.5, 0); arc(cr, 3.2 * k, aim - 1.5 + t * 2, aim + 1.5 + t * 2, A(col, 0.3 + 0.6 * g), 0.9 * k);
+          solid(cr, [[2.6, 0], [0, 2], [-2.6, 0], [0, -2]], A(lt(col, 0.2), 0.9), aim, k, 0.9); glowDot(cr, (0.8 + 1.6 * g) * k, [1, 1, 1, 1]);
+          orb(P(c, aim, k, -5, 0), 2.6 * k, METAL); glowDot(P(c, aim, k, -5, 0), 1 * k, col); } },
+      { key: "C", name: "Focus Lens", muzzle: 17 / 48, theme: "A round armoured housing on a short, wide barrel ending in one big red focusing lens inside a pulsing ring; cooling ribs wrap the housing.",
+        draw(c, aim, s, fx, t, col) { const k = G(s), g = fx.glow || 0; deck(c, k, col, t);
+          for (let i = 0; i < 6; i++) { const a = aim + Math.PI * 0.55 + i * Math.PI * 0.18; bar(add(c, mul(fa(a), 7.5 * k)), add(c, mul(fa(a), 10.5 * k)), 1.6 * k, METAL_L); }
+          bar(P(c, aim, k, 2, 0), P(c, aim, k, 13, 0), 6 * k, METAL); for (const x of [7, 10.5]) bar(P(c, aim, k, x, -3.8), P(c, aim, k, x, 3.8), 1.4 * k, dk(col, 0.2));
+          orb(c, 8 * k, METAL_L); ring(c, 5.4 * k, METAL, 1.4 * k); ring(c, 4 * k, [0, 0, 0, 0.4], 0.8 * k); glowDot(c, 1.3 * k, col);
+          const lens = P(c, aim, k, 15, 0); orb(lens, 4.6 * k, dk(col, 0.2)); glowDot(lens, (1.6 + 1.6 * g) * k, col); ring(lens, 6.2 * k, A(col, 0.45 + 0.35 * Math.sin(t * 8) * (0.4 + 0.6 * g)), 1.1 * k); } },
+    ],
+    anims: [
+      { key: "A", name: "Steady Beam", lock: 0.6, desc: "Locks on first (a reticle closes on the target), then a steady red beam holds on it while the barrel's light strip glows full.", beam: true, period: 1,
+        fx: (lock, p, on) => ({ glow: on ? 0.9 : 0 }), shot: (f, to, lock, s, col) => beam(f, to, 2.4 + 0.3 * Math.sin(lock * 30), col, 0.9) },
+      { key: "B", name: "Pulse Beam", lock: 0.6, desc: "Locks on first, then fires in rapid pulses: the beam flares and dims four times a second, the emitter flashing with each pulse.", beam: true, period: 1,
+        fx: (lock, p, on) => ({ glow: on ? 0.4 + 0.6 * (fmod(lock * 4, 1) < 0.5 ? 1 : 0) : 0 }),
+        shot: (f, to, lock, s, col) => { const pl = fmod(lock * 4, 1) < 0.5; beam(f, to, pl ? 3 : 1.2, col, pl ? 1 : 0.45); if (pl) glowDot(f, s * 0.06, [1, 1, 1, 0.9]); } },
+      { key: "C", name: "Ramp Burn", lock: 0.6, desc: "Locks on first, then the beam starts thin and thickens the longer it holds, with molten sparks spraying off the target.", beam: true, period: 1,
+        fx: (lock, p, on) => ({ glow: on ? Math.min(1, 0.25 + lock / 2.5) : 0 }),
+        shot: (f, to, lock, s, col, k, t) => { const g = Math.min(1, lock / 2.5); beam(f, to, 1.2 + g * 3.4, col, 0.6 + 0.4 * g);
+          for (let i = 0; i < 2 + Math.round(g * 5); i++) { const a = t * 9 + i * 1.3, q = fmod(t * 3 + i * 0.2, 1); disc(add(to, mul(fa(a), s * 0.3 * q)), 1.4, A([1, 0.8, 0.5, 1], 1 - q)); } } },
+    ] },
+
+  // 4. Rocket Salvo -------------------------------------------------------------------------------------
+  { id: "rocket", num: 4, name: "Rocket Salvo", cls: "Assault", weapon: "Explosive", hits: "both", color: [1.00, 0.85, 0.30, 1],
+    desc: "Launches a volley of rockets at oncoming enemies. \"Instead of shooting bullets, it shoots very angry telephone poles that hate absolutely everything.\" Spread salvos, one rocket per enemy. (Colour: today's Missile Battery yellow.) All three launchers lie horizontal, rockets leaving from the front.",
+    looks: [
+      { key: "A", name: "Box Pod Launcher", muzzle: 11 / 48, muzzles: [[11 / 48, -5 / 48], [11 / 48, 0], [11 / 48, 5 / 48], [11 / 48, 0]], theme: "One armoured box pod lying along the aim, hazard-striped flanks and panel lines, three tube mouths across its front with the loaded rocket noses showing.",
+        draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t); disc(c, 8 * k, OUTLINE); disc(c, 7.2 * k, METAL_D);
+          plate(c, rectPts(11, 8.5), METAL_L, aim, k, 1.3); fill(c, rectPts(8.6, 6.4), METAL, aim, k); rivets(c, rectPts(11, 8.5), aim, k, 0.88, 0.8 * k);
+          hazard(c, aim, k, -8, 8, -8.2, col); hazard(c, aim, k, -8, 8, 8.2, col);
+          for (const x of [-3, 3]) line(P(c, aim, k, x, -6), P(c, aim, k, x, 6), [0, 0, 0, 0.35], 1);
+          [-5, 0, 5].forEach((y, i) => { const p = P(c, aim, k, 10.5, y); disc(p, 2.4 * k, OUTLINE); disc(p, 2 * k, BORE); const f = firedBarrel(fx, i, 0.25) + (i === 1 ? firedBarrel(fx, 3, 0.25) : 0); if (f > 0) glowDot(p, 2.4 * k * f, col); });
+          noses(c, aim, k, [[11, -5], [11, 0], [11, 5]], fx, 1.6); const h = P(c, aim, k, -8.5, 0); rect(h[0] - 1.6 * k, h[1] - 1.6 * k, 3.2 * k, 3.2 * k, OUTLINE); glowDot(h, 1.1 * k, col); } },
+      { key: "B", name: "Twin Side Pods", muzzle: 9 / 48, muzzles: [[9 / 48, -12 / 48], [9 / 48, 12 / 48], [9 / 48, -8 / 48], [9 / 48, 8 / 48]], theme: "A domed gunner turret with a horizontal two-tube pod on each side arm, like an air-defence vehicle; the pods fire left, right, left, right.",
+        draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t);
+          for (const y of [-1, 1]) { bar(c, P(c, aim, k, 0, y * 10), 2.6 * k, METAL_L); plate(P(c, aim, k, 0, y * 10), rectPts(9, 3.8), METAL_L, aim, k, 1.1); hazard(c, aim, k, -7, 3, y * 13.4, col, 1.2);
+            for (const x of [-4, 0, 4]) line(P(c, aim, k, x, y * 7), P(c, aim, k, x, y * 13), [0, 0, 0, 0.35], 1); }
+          [[-12, 0], [12, 1], [-8, 2], [8, 3]].forEach(([y, i]) => { const p = P(c, aim, k, 8.5, y); disc(p, 1.9 * k, OUTLINE); disc(p, 1.5 * k, BORE); const f = firedBarrel(fx, i, 0.25); if (f > 0) glowDot(p, 2 * k * f, col); });
+          noses(c, aim, k, [[9, -12], [9, 12], [9, -8], [9, 8]], fx, 1.3);
+          plate(c, ngon(8, 1, Math.PI / 8), METAL_L, aim, 6.5 * k, 1.2); orb(c, 4.4 * k, METAL); plate(P(c, aim, k, 3.5, 0), rectPts(1, 2.4), [0.25, 0.4, 0.45, 1], aim, k, 0.6); } },
+      { key: "C", name: "Triple Rail Pods", muzzle: 12 / 48, muzzles: [[12 / 48, -6.5 / 48], [12 / 48, 0], [12 / 48, 6.5 / 48]], theme: "Three round launch pods side by side on a cross frame, each holding one big rocket; a hazard-striped blast deflector behind. (Round 2: was four pods.)",
+        draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t);
+          plate(P(c, aim, k, -11, 0), rectPts(1.6, 11), METAL_L, aim, k, 1); hazard(c, aim, k, -12, -10, 0, col, 1.2);
+          for (const x of [-4, 6]) bar(P(c, aim, k, x, -11), P(c, aim, k, x, 11), 2.4 * k, lt(METAL_D, 0.15));
+          [[-6.5, 0], [0, 1], [6.5, 2]].forEach(([y, i]) => { bar(P(c, aim, k, -8, y), P(c, aim, k, 11, y), 5.2 * k, METAL_L); const p = P(c, aim, k, 11.5, y);
+            disc(p, 2.5 * k, OUTLINE); disc(p, 2.1 * k, BORE); const f = firedBarrel(fx, i, 0.25); if (f > 0) glowDot(p, 2.2 * k * f, col); });
+          noses(c, aim, k, [[12, -6.5], [12, 0], [12, 6.5]], fx, 1.75); orb(P(c, aim, k, -4, 0), 2.4 * k, METAL); glowDot(P(c, aim, k, -4, 0), 1 * k, col); } },
+    ],
+    anims: [
+      { key: "A", name: "Ripple Salvo", desc: "Three rockets leave one after another, one per pod, curving onto separate enemies on smoke trails; the pods reload.", period: 2.6, burst: 3, gap: 0.16, multi: true, flight: 0.85,
+        fx: (since) => ({ ready: since < 0.6 ? 0 : Math.min(1, (since - 0.6) / 1.2) }), shot: (f, to, u, s, col, k) => rocketPath(f, to, u, s, col, k), impact: (to, v, s, col) => blast(to, v, s, col, 0.35) },
+      { key: "B", name: "Full Volley", desc: "Every tube fires at once in a burst of smoke behind the launcher; the rockets fan out together.", period: 2.6, burst: 4, gap: 0.02, multi: true, flight: 0.85,
+        fx: (since) => ({ ready: since < 0.5 ? 0 : Math.min(1, (since - 0.5) / 1.4) }),
+        shot: (f, to, u, s, col, k) => { if (u < 0.45) smokePuff(f, u / 0.45, s * 1.2, 0.45); rocketPath(f, to, u, s, col, k); }, impact: (to, v, s, col) => blast(to, v, s, col, 0.35) },
+      { key: "C", name: "Heavy Rockets", desc: "Two big rockets, one per pair of tubes, flying nearly straight and hitting harder; heavy blasts.", period: 2.6, burst: 2, gap: 0.3, multi: true, flight: 0.7,
+        fx: (since) => ({ ready: since < 0.7 ? 0 : Math.min(1, (since - 0.7) / 1.2) }),
+        shot: (f, to, u, s, col, k) => rocketPath(f, to, u, s, col, k, 1.4, 0.3), impact: (to, v, s, col) => blast(to, v, s, col, 0.55) },
+    ] },
+
+  // 5. Anti-Aircraft Turret -----------------------------------------------------------------------------
+  { id: "aa", num: 5, name: "Anti-Aircraft Turret", cls: "Assault", weapon: "Ballistic", hits: "air", color: [0.85, 1.00, 0.45, 1],
+    desc: "A fully automatic anti-aircraft gun. \"We don't need a gun, or a nug!\" A direct-hit autocannon, air only. (Colour: today's Flak Battery lime.)",
+    looks: [
+      { key: "A", name: "Twin Autocannon", muzzle: 20 / 48, muzzles: [[20 / 48, -2.8 / 48], [20 / 48, 2.8 / 48]], theme: "Two long autocannon barrels in shrouds on an armoured mount, an ammo box feeding them and a tracking radar sweeping behind.",
+        draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t);
+          [-2.8, 2.8].forEach((y, i) => { const f = firedBarrel(fx, i, 0.12), r = f * 2.5; bar(P(c, aim, k, 2 - r, y), P(c, aim, k, 20 - r, y), 1.9 * k, METAL_L); muzzleEnd(P(c, aim, k, 20 - r, y), k, 1.9, col, f); });
+          bar(P(c, aim, k, 6, -5), P(c, aim, k, 6, 5), 1.6 * k, lt(METAL_D, 0.15));
+          const body = [[8, -6], [8, 6], [-7, 8], [-9, 0], [-7, -8]]; plate(c, body, METAL_L, aim, k, 1.2); rivets(c, body, aim, k, 0.7, 0.7 * k);
+          plate(P(c, aim, k, -3, -9), rectPts(2.5, 2), AMMO, aim, k, 1);
+          const d = P(c, aim, k, -6, 5); arc(d, 3.2 * k, t * 3, t * 3 + Math.PI, OUTLINE, 2.6 * k); arc(d, 3.2 * k, t * 3, t * 3 + Math.PI, A(col, 0.9), 1.4 * k); glowDot(P(c, aim, k, 2, 0), 1.5 * k, col); } },
+      { key: "B", name: "Quad Flak Mount", muzzle: 18 / 48, muzzles: [[18 / 48, -6.5 / 48], [18 / 48, 6.5 / 48], [18 / 48, -3.5 / 48], [18 / 48, 3.5 / 48]], theme: "A wide mount with four barrels in two pairs, a gunner's dome in the middle and a radar dish turning at the back.",
+        draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t);
+          [[-6.5, 0], [6.5, 1], [-3.5, 2], [3.5, 3]].forEach(([y, i]) => { const f = firedBarrel(fx, i, 0.12), r = f * 2.2; bar(P(c, aim, k, 4 - r, y), P(c, aim, k, 18 - r, y), 1.5 * k, METAL_L); muzzleEnd(P(c, aim, k, 18 - r, y), k, 1.5, col, f); });
+          for (const x of [7, 12]) bar(P(c, aim, k, x, -8), P(c, aim, k, x, 8), 1.3 * k, lt(METAL_D, 0.15));
+          plate(c, rectPts(7, 10), METAL_L, aim, k, 1.2); rivets(c, rectPts(7, 10), aim, k, 0.8, 0.7 * k); for (const y of [-8.5, 8.5]) plate(P(c, aim, k, -2, y), rectPts(3, 1.6), AMMO, aim, k, 0.9);
+          orb(c, 3.8 * k, METAL); glowDot(P(c, aim, k, 1.4, 0), 1.1 * k, col);
+          const d = P(c, aim, k, -9.5, 0); disc(d, 2.6 * k, OUTLINE); disc(d, 2 * k, METAL); line(d, add(d, mul(fa(t * 2.5), 4 * k)), METAL_L, 1.8 * k); glowDot(add(d, mul(fa(t * 2.5), 4 * k)), 0.9 * k, col); } },
+      { key: "C", name: "Heavy Flak Cannon", muzzle: 23 / 48, theme: "One long heavy cannon with a slotted muzzle brake and recoil springs, a big ammo crate, and a stereo rangefinder bar across the back.",
+        draw(c, aim, s, fx, t, col) { const k = G(s), r = fx.recoil * 3; deck(c, k, col, t);
+          bar(P(c, aim, k, -7, -12), P(c, aim, k, -7, 12), 2.2 * k, METAL); for (const y of [-12, 12]) { orb(P(c, aim, k, -7, y), 1.9 * k, METAL_L); glowDot(P(c, aim, k, -6.2, y), 0.8 * k, col); }
+          bar(P(c, aim, k, 2 - r, 0), P(c, aim, k, 21 - r, 0), 3.6 * k, METAL_L); for (const x of [6, 8]) ring(P(c, aim, k, x - r * 0.5, 0), 2.6 * k, METAL_L, 1 * k);
+          plate(P(c, aim, k, 21.5 - r, 0), rectPts(1.6, 2.8), METAL, aim, k, 1); line(P(c, aim, k, 21.5 - r, -2.8), P(c, aim, k, 21.5 - r, 2.8), [0, 0, 0, 0.5], 0.8 * k);
+          muzzleEnd(P(c, aim, k, 23 - r, 0), k, 2.6, col, fx.flash);
+          plate(c, ngon(8, 1, Math.PI / 8), METAL_L, aim, 7.5 * k, 1.2); rivets(c, ngon(8, 1, Math.PI / 8), aim, 7.5 * k, 0.82, 0.6 * k); plate(P(c, aim, k, -1, 9.5), rectPts(4, 2.6), AMMO, aim, k, 1);
+          orb(c, 3.6 * k, METAL); glowDot(P(c, aim, k, 1.2, 0), 1.2 * k, col); } },
+    ],
+    anims: [
+      { key: "A", name: "Alternating Barrels", desc: "The barrels fire in turn, each kicking back as its tracer leaves it; small flashes on the flyer.", period: 0.38, flight: 0.22,
+        fx: (since) => ({ recoil: decay(since, 0.12), flash: decay(since, 0.07) }), shot: (f, to, u, s, col) => tracer(f, to, u, col, 1.8, 0.22), impact: (to, v, s, col) => spark(to, v, s, col) },
+      { key: "B", name: "Flak Bursts", desc: "Shells fly up in pairs and burst beside the flyer in dark smoke puffs with an orange flash, as proximity flak does.", period: 0.9, burst: 2, gap: 0.12, flight: 0.3,
+        fx: (since) => ({ recoil: decay(since, 0.12) + decay(since - 0.12, 0.12), flash: decay(since, 0.07) + decay(since - 0.12, 0.07) }),
+        shot: (f, to, u, s, col) => { const p = lerp(f, to, u); disc(p, 2, OUTLINE); disc(p, 1.4, col); },
+        impact: (to, v, s, col) => { const p = add(to, [s * 0.12, -s * 0.08]); if (v < 0.2) glowDot(p, s * 0.1 * (1 - v * 5), [1, 0.7, 0.3, 1]); disc(add(p, [0, -v * s * 0.15]), s * (0.1 + v * 0.18), [0.22, 0.22, 0.24, 0.65 * (1 - v)]); } },
+      { key: "C", name: "Lead Stream", desc: "A long, fast stream of tracers walked onto the flyer, the barrels hammering in turn.", period: 0.12, flight: 0.25,
+        fx: (since) => ({ recoil: decay(since, 0.08) * 0.6, flash: decay(since, 0.06) }), shot: (f, to, u, s, col) => tracer(f, to, u, col, 1.3, 0.3), impact: (to, v, s, col) => spark(to, v, s * 0.7, col) },
+    ] },
+];
+const DEFAULTS = { gun: { look: "C", anim: "C" }, mortar: { look: "C", anim: "A" }, laser: { look: "A", anim: "A" }, rocket: { look: "C", anim: "A" }, aa: { look: "C", anim: "A" } };
+
+return { TOWERS };
+})();
+const NO_BOOT = true;
+// ---- Tower art second pass: Rocket Salvo (tower 4), round 1 ------------------------------------------------------
+// Base: look C Triple Rail Pods, animation A Ripple Salvo. One parametric model with the lessons so far: options swap
+// parts; every pod carries the other paths' details; each Power step changes the rockets; deck kit stays put while the
+// launcher turns; rockets leave their own tube. The Retrofits are the owner's replacements (2026-10-17): Proximity
+// Fuses, Smoke Trails, Incendiary Warheads.
+// Geometry (game px, x along the aim): pods from x -8 to their mouths at x 11.5; cross-frame bars at x -4 and 6;
+// a hazard-striped blast deflector at x -11.
+const PAGE = { title: "Rocket Salvo: paths and Retrofits (second pass)", store: "bl-tower-art-p2-rocket-r1" };
+const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], RED = [0.9, 0.22, 0.2, 1], YEL = [1, 0.85, 0.2, 1], ORANGE = [1, 0.55, 0.2, 1];
+const SEEK = [0.35, 0.75, 1, 1], DARKR = [0.22, 0.22, 0.24, 1], PALE = [0.86, 0.88, 0.92, 1], SMOKEC = [0.55, 0.57, 0.6, 1];
+const Kp = (B, pi, k) => (B.lv[pi] > k ? B.key("p" + pi + "s" + k) : null);
+const rnd2 = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
+
+// ---- Numbers --------------------------------------------------------------------------------------------------------
+const rocketsOf = (B) => [3, 4, 4, 6, 6, 8][B.lv[2]];
+const reloadOf = (B) => [2.5, 2.5, 2, 2, 1.7, 1.7][B.lv[2]];
+const blastPx = (B) => [25, 25, 35, 40, 40, 50][B.lv[0]];
+const homing = (B) => B.lv[1] >= 2;
+
+// ---- Launch tubes: layout from the Payload path; each entry is a mouth [x, y, r] plus the pod bodies -----------------
+function layoutOf(B, t) { const P3 = B.lv[2];
+  if (P3 >= 5) { const st = Kp(B, 2, 4);
+    if (st === "B") return { pods: [[-7.6, 9.6], [7.6, 9.6]], mouths: [-12, -9, -6, -3, 3, 6, 9, 12].map((y) => [11, y * 0.95, 1.25]), gold: true };
+    if (st === "C") { const sp = t * 2; return { drum: true, pods: [[0, 12]], mouths: [0, 1, 2, 3, 4, 5, 6, 7].map((i) => [11.5, Math.sin(sp + i * TAU / 8) * 4.8, 1.2]), gold: true }; }
+    return { pods: [[0, 23]], mouths: [-10.5, -7.5, -4.5, -1.5, 1.5, 4.5, 7.5, 10.5].map((y, i) => [i % 2 ? 9 : 11, y, 1.3]), gold: true }; }
+  if (P3 >= 3) { const st = Kp(B, 2, 2);
+    if (st === "B") return { pods: [[-7, 9], [7, 9]], mouths: [-10, -7, -4, 4, 7, 10].map((y) => [11, y, 1.4]) };
+    if (st === "C") return { pods: [[0, 12]], mouths: [[11, -6, 1.5], [11, 0, 1.5], [11, 6, 1.5], [8.4, -3, 1.5], [8.4, 3, 1.5], [5.8, 0, 1.5]] };
+    return { pods: [[0, 23]], mouths: [-10, -6, -2, 2, 6, 10].map((y) => [11, y, 1.5]) }; }
+  if (P3 >= 1) { const st = Kp(B, 2, 0);
+    if (st === "B") return { pods: [[-6.5, 5.2], [0, 5.2], [6.5, 5.2]], top: true, mouths: [[11.5, -6.5, 2.1], [11.5, 0, 2.1], [11.5, 6.5, 2.1], [9, 0, 1.3]] };
+    if (st === "C") return { pods: [[-6.5, 5.2], [0, 5.2], [6.5, 5.2]], side: true, mouths: [[11.5, -6.5, 2.1], [11.5, 0, 2.1], [11.5, 6.5, 2.1], [8, 11.5, 1.3]] };
+    return { pods: [[-7.5, 4.4], [-2.5, 4.4], [2.5, 4.4], [7.5, 4.4]], mouths: [-7.5, -2.5, 2.5, 7.5].map((y) => [11.5, y, 1.8]) }; }
+  return { pods: [[-6.5, 5.2], [0, 5.2], [6.5, 5.2]], mouths: [[11.5, -6.5, 2.1], [11.5, 0, 2.1], [11.5, 6.5, 2.1]] }; }
+
+// ---- The rocket: Power changes the warhead each step; Range adds boosters and seekers; the Retrofit marks it --------
+function rocketBody(p, dir, k, col, B, u) { const P1 = Kp(B, 0, 0), P2s = Kp(B, 0, 1), P3 = Kp(B, 0, 2), P4 = Kp(B, 0, 3), PM = Kp(B, 0, 4), R1 = Kp(B, 1, 0), R2 = Kp(B, 1, 1), RM = Kp(B, 1, 4);
+  const z = P3 === "A" ? 1.2 : 1, d = fa(dir), o = orth(d), K = k * z;
+  const body = P4 === "A" ? DARKR : PALE;
+  if (R1 === "A" && u < 0.45) solid(add(p, mul(d, -6 * K)), [[1.6, 1.1], [-2.4, 1.1], [-2.4, -1.1], [1.6, -1.1]], STEEL, dir, K, 0.6); // the booster stage, shed mid-flight
+  for (const sg of [-1, 1]) fill(p, [[-1.5, sg * 1.1], [-4.2, sg * 2.8], [-4.6, sg * 2.8], [-4.2, sg * 1.1]], P2s === "B" ? STEEL : METAL_L, dir, K);
+  solid(p, [[4.6, 0], [2.7, 1.35], [-4.2, 1.35], [-4.2, -1.35], [2.7, -1.35]], body, dir, K, 0.8);
+  const nose = PM === "A" || RM === "A" ? GOLD : B.lv[1] >= 2 && R2 === "A" ? SEEK : P2s === "A" ? ORANGE : RED;
+  fill(p, [[P1 === "B" ? 5.6 : 4.6, 0], [2.9, 1.35], [2.9, -1.35]], nose, dir, K);
+  if (P1 === "A") line(add(p, mul(o, 1.35 * K)), add(p, mul(o, -1.35 * K)), RED, 0.8 * K);
+  if (P4 === "A") line(add(add(p, mul(d, -1.2 * K)), mul(o, 1.35 * K)), add(add(p, mul(d, -1.2 * K)), mul(o, -1.35 * K)), YEL, 0.7 * K);
+  if (P2s === "B") for (let i = 0; i < 3; i++) line(add(add(p, mul(d, (-2.6 + i * 1.6) * K)), mul(o, 1.35 * K)), add(add(p, mul(d, (-2.6 + i * 1.6) * K)), mul(o, -1.35 * K)), [0, 0, 0, 0.4], 0.5 * K);
+  if (B.r === 2) line(add(add(p, mul(d, 0.6 * K)), mul(o, 1.35 * K)), add(add(p, mul(d, 0.6 * K)), mul(o, -1.35 * K)), ORANGE, 0.8 * K);
+  if (B.r === 0) line(add(p, mul(d, 4.6 * K)), add(p, mul(d, 6.4 * K)), STEEL, 0.5 * K);
+  glowDot(add(p, mul(d, -5 * K)), (P1 === "C" ? 1.7 : 1.2) * K, P1 === "C" ? [1, 0.6, 0.3, 1] : col); }
+function rocketFlight(f, to, u, s, col, idx, B) { const k = G(s), bend = (homing(B) ? 0.45 : 0.28 + 0.1 * (idx % 3)) * (idx % 2 ? 1 : -1) * s;
+  const mid = add(lerp(f, to, 0.5), mul(orth(norm(sub(to, f))), bend)), q = (x) => lerp(lerp(f, mid, x), lerp(mid, to, x), x);
+  const trail = B.lv[1] >= 4 && Kp(B, 1, 3) === "A" ? 10 : 6, smoky = B.r === 1;
+  for (let i = trail; i >= 1; i--) disc(q(Math.max(0, u - i * 0.035)), (1.2 + i * 0.55) * k * (smoky ? 1.4 : 1), smoky ? [0.42, 0.43, 0.45, 0.5 - i * 0.04] : [0.62, 0.64, 0.66, 0.34 - i * 0.045]);
+  const p = q(u), pb = q(Math.max(0, u - 0.04)); rocketBody(p, Math.atan2(p[1] - pb[1], p[0] - pb[0]), k, col, B, u); }
+function rocketImpact(to, v, s, col, info, B) { const size = 0.014 * blastPx(B), air = info && info.sh && info.ens && (info.ens.find((e) => e.i === info.sh.tid) || {}).air;
+  let p = to; if (B.r === 0 && air) { p = add(to, [s * 0.12, -s * 0.06]); if (v < 0.3) for (let i = 0; i < 6; i++) disc(add(p, mul(fa(i + 0.4), s * 0.18 * v * 3)), 1.2, [0.3, 0.3, 0.32, 1 - v * 3]); }
+  if (B.lv[0] >= 5) { if (v < 0.25) disc(p, s * size * (0.6 + v * 1.6), [1, 0.85, 0.6, 0.3]); blast(p, Math.max(0, v - 0.1) / 0.9, s, col, size); if (v < 0.7) ring(p, s * size * (0.6 + v * 2), A([1, 0.95, 0.8, 1], 0.6 * (1 - v / 0.7)), 1.6); }
+  else blast(p, v, s, col, size);
+  if (B.r === 2 && !air) for (let i = 0; i < 4; i++) { const q = add(to, [(rnd2(i + 3) - 0.5) * s * size * 2, (rnd2(i + 7) - 0.5) * s * size]), w = fmod(v * 2 + i / 4, 1); disc(add(q, [0, -w * s * 0.12]), s * 0.03 * (1 - w), A(i % 2 ? ORANGE : YEL, 1 - w)); } }
+
+// ---- The model ---------------------------------------------------------------------------------------------------------
+function deckRack(c, k, x, y, n, col2, band) { const S = (dx, dy) => P(c, 0, k, x + dx, y + dy); plate(S(0, 0), rectPts(1.8, n * 1.6 + 0.6), METAL_D, 0, k, 0.9);
+  for (let i = 0; i < n; i++) { const q = S(0, (i - (n - 1) / 2) * 3); orb(q, 1.2 * k, col2); if (band) ring(q, 0.7 * k, band, 0.6 * k); } }
+
+const P2 = {
+  tower: "rocket", look: "C", anim: "A",
+  intro: "Round 1: three options for every step and for the three new Retrofits (your replacements: Proximity Fuses, Smoke Trails, Incendiary Warheads), drawn as one model. Each Power step changes the rockets; Range adds boosters and homing (rockets curve onto their target); Payload re-lays the launcher with 4, 6, then 8 tubes, each rocket leaving its own tube. Deck kit stays put. Unpicked steps show option A.",
+  mods(B) { const n = rocketsOf(B), period = reloadOf(B);
+    return { period, burst: n, gap: B.lv[2] >= 5 ? 0.09 : 0.14, multi: true,
+      shot: (f, to, u, s, col, kk, t, info) => { const dest = homing(B) || !info || !info.sh ? to : info.sh.to0; rocketFlight(f, dest, u, s, col, kk, B); },
+      impact: (to, v, s, col, info) => rocketImpact(homing(B) || !info || !info.sh ? to : info.sh.to0, v, s, col, info, B) }; },
+  muzzleAt(B, m, kk, c, aim, s, info) { const L = layoutOf(B, info.t), mo = L.mouths[kk % L.mouths.length]; return P(c, aim, G(s), mo[0] + 0.5, mo[1]); },
+  model(c, aim, s, fx, t, col, info, B) {
+    const k = G(s), L = layoutOf(B, t), S = (x, y) => P(c, 0, k, x, y), kp = (pi, kk) => Kp(B, pi, kk), gold = B.lv[0] >= 5, ready = fx.ready ?? 1;
+    deck(c, k, col, t);
+    // Deck kit (fixed): warhead crates and racks, reload crate, smoke generator, napalm tanks.
+    if (kp(0, 0) === "C") { plate(S(-12.5, -5), rectPts(2.4, 2), AMMO, 0, k, 1); hazard(c, 0, k, -14.5, -10.5, -2.6, [1, 0.32, 0.25, 1], 0.9); }
+    if (kp(0, 2) === "C") deckRack(c, k, 12.5, -4.5, 3, B.lv[0] >= 4 && kp(0, 3) === "A" ? DARKR : PALE, gold ? GOLD : RED);
+    if (kp(2, 1) === "C") { plate(S(-12.5, 5), rectPts(2.4, 2.4), [0.5, 0.42, 0.28, 1], 0, k, 1); for (const y of [4, 6]) orb(S(-12.5, y), 0.9 * k, PALE); }
+    if (B.r === 1 && B.key("r1") === "B") { plate(S(12.5, 5), rectPts(2.4, 2.6), SMOKEC, 0, k, 1); for (let i = 0; i < 2; i++) { const w = fmod(t * 0.6 + i / 2, 1); disc(add(S(12.5, 3), [0, -w * 8 * k]), (1 + w * 2.5) * k, [0.6, 0.62, 0.64, 0.35 * (1 - w)]); } }
+    if (B.r === 2 && B.key("r2") === "B") for (const y of [-3, 3]) { orb(S(12.5, y + 5), 1.8 * k, [0.75, 0.38, 0.12, 1]); }
+    // The launcher (it all turns): deflector, cross frame, pods (or the rotary drum), mouths, loaded noses.
+    if (kp(1, 2) === "C") { bar(P(c, aim, k, -9, -9), P(c, aim, k, -9, -13), 1 * k, METAL_L); glowDot(P(c, aim, k, -9, -13), (fmod(t, 1) < 0.3 ? 1 : 0.4) * k, SEEK); }
+    plate(P(c, aim, k, -11, 0), rectPts(1.6, 11), METAL_L, aim, k, 1); hazard(c, aim, k, -12, -10, 0, col, 1.2);
+    for (const x of [-4, 6]) bar(P(c, aim, k, x, -11.5), P(c, aim, k, x, 11.5), 2.4 * k, kp(0, 3) === "C" ? STEEL : lt(METAL_D, 0.15));
+    if (kp(2, 3) === "B") { const dr = P(c, aim, k, -6.5, 0); disc(dr, 4 * k, OUTLINE); disc(dr, 3.4 * k, METAL); ring(dr, 2.2 * k, A(col, 0.7), 0.9 * k); }
+    if (kp(2, 1) === "B") line(P(c, aim, k, -9, 9), P(c, aim, k, -6, 5), [0.55, 0.45, 0.25, 1], 2 * k);
+    if (kp(2, 1) === "A") { const a = aim + Math.PI * 0.8 - decay(fx.barrelSince ?? 9, 0.5) * 0.8, b0 = P(c, aim, k, -7, 9); orb(b0, 1.5 * k, METAL); bar(b0, add(b0, mul(fa(a), 7 * k)), 1.2 * k, METAL_L); }
+    const podLen = 11.5 + (kp(1, 0) === "B" ? 2 : 0), podCol = kp(0, 2) === "B" ? STEEL : METAL_L;
+    if (L.drum) { bar(P(c, aim, k, -8, 0), P(c, aim, k, podLen, 0), 12 * k, METAL); for (const m of L.mouths) line(P(c, aim, k, -6, m[1]), P(c, aim, k, podLen - 0.5, m[1]), [0, 0, 0, 0.35], 1.2 * k); for (const x of [-6, podLen - 1]) line(P(c, aim, k, x, -6), P(c, aim, k, x, 6), GOLD, 1.2 * k); }
+    else for (const [y, w] of L.pods) { if (w > 8) { const cx = (podLen - 8) / 2; plate(P(c, aim, k, cx, y), rectPts((podLen + 8) / 2, w / 2), podCol, aim, k, 1.2); rivets(P(c, aim, k, cx, y), rectPts((podLen + 8) / 2, w / 2), aim, k, 0.9, 0.7 * k); }
+      else bar(P(c, aim, k, -8, y), P(c, aim, k, podLen, y), w * k, podCol); } // wide blocks are flat plates, pods are round
+    if (L.top) bar(P(c, aim, k, -4, 0), P(c, aim, k, 9, 0), 3 * k, lt(METAL_L, 0.1));
+    if (L.side) bar(P(c, aim, k, -2, 11.5), P(c, aim, k, 8, 11.5), 2.6 * k, METAL_L);
+    // Pod bands and kit (on every pod): Power, Range, gold at the masteries, the Retrofit.
+    const half = (w) => w * 0.5;
+    for (const [y, w] of L.drum ? [[0, 12]] : L.pods) { const band = (x, c2, lw) => line(P(c, aim, k, x, y - half(w)), P(c, aim, k, x, y + half(w)), c2, lw * k);
+      if (kp(0, 0) === "A") band(4, RED, 1.1);
+      if (kp(0, 1) === "C") for (const x of [0, 2]) band(x, [0, 0, 0, 0.45], 0.8);
+      if (kp(0, 2) === "B") for (const x of [-6, 9]) band(x, STEEL, 1.6);
+      if (gold && kp(0, 4) === "B" || L.gold && kp(2, 4) !== "C") for (const x of [-2, 9.5]) band(x, GOLD, 1.1);
+      if (kp(1, 2) === "A") glowDot(P(c, aim, k, -6, y), 0.6 * k, fmod(t * 2 + y, 1) < 0.5 ? SEEK : A(SEEK, 0.3));
+      if (kp(1, 3) === "B") for (const sg of [-1, 1]) fill(P(c, aim, k, -7, y + sg * half(w)), [[2, 0], [-1, sg * 1.6], [-1, 0]], STEEL, aim, k);
+      if (B.r === 0 && B.key("r0") === "C") band(10.5, A(col, 0.85), 0.8);
+      if (B.r === 1 && B.key("r1") === "C") for (const sg of [-1, 1]) disc(P(c, aim, k, -8.5, y + sg * half(w) * 0.5), 0.8 * k, BORE);
+      if (B.r === 1 && B.key("r1") === "A") bar(P(c, aim, k, -6, y + half(w) * 0.7), P(c, aim, k, -1, y + half(w) * 0.7), 1.2 * k, SMOKEC); }
+    if (kp(1, 0) === "C") bar(P(c, aim, k, -8, -half(L.pods[0][1]) + L.pods[0][0] - 1.4), P(c, aim, k, podLen - 1, -half(L.pods[0][1]) + L.pods[0][0] - 1.4), 1 * k, STEEL);
+    if (gold && kp(0, 4) === "C") for (const y of [-12.5, 12.5]) { bar(P(c, aim, k, -6, y), P(c, aim, k, 4, y), 2.6 * k, [0.75, 0.38, 0.12, 1]); ring(P(c, aim, k, -1, y), 1.4 * k, GOLD, 0.9 * k); }
+    for (const [i, m] of L.mouths.entries()) { const q = P(c, aim, k, m[0] + (L.drum ? 0 : podLen - 11.5), m[1]); disc(q, (m[2] + 0.4) * k, OUTLINE); disc(q, m[2] * k, BORE);
+      const f2 = fx.barrel === i && (fx.barrelSince ?? 9) < 0.25 ? 1 - fx.barrelSince / 0.25 : 0; if (f2 > 0) glowDot(q, m[2] * k * f2, col);
+      if (B.r === 2 && B.key("r2") === "C") ring(q, (m[2] + 0.2) * k, A(ORANGE, 0.8), 0.7 * k);
+      if (B.r === 0 && B.key("r0") === "A") line(q, add(q, mul(fa(aim), 1.8 * k)), STEEL, 0.5 * k);
+      if (ready > 0.05) { orb(q, m[2] * 0.8 * k * ready, B.lv[0] >= 4 && kp(0, 3) === "A" ? DARKR : PALE); disc(add(q, mul(fa(aim), 0.4 * k)), m[2] * 0.36 * k * ready, gold && kp(0, 4) === "A" ? GOLD : B.lv[1] >= 2 && kp(1, 1) === "A" ? SEEK : RED); } }
+    // Launcher top kit: seeker radar, tracking dish, hunter array / eye, fuse setter.
+    if (kp(1, 1) === "B") { const q = P(c, aim, k, -1, 0); disc(q, 2 * k, OUTLINE); disc(q, 1.6 * k, METAL); line(q, add(q, mul(fa(t * 3), 2.6 * k)), METAL_L, 1 * k); }
+    if (kp(1, 1) === "C") { bar(P(c, aim, k, -2, -3), P(c, aim, k, -2, -9), 0.7 * k, METAL_L); glowDot(P(c, aim, k, -2, -9), 0.6 * k, SEEK); }
+    if (kp(1, 2) === "B") { const q = P(c, aim, k, -1, 0), a = t * 1.5; arc(q, 3 * k, a - 1, a + 1, OUTLINE, 2.4 * k); arc(q, 3 * k, a - 1, a + 1, METAL_L, 1.4 * k); }
+    if (B.lv[1] >= 5) { const st = kp(1, 4), q = P(c, aim, k, -1, 0); if (st === "B") for (let i = 0; i < 3; i++) { const a = t * 1.2 + i * TAU / 3; arc(q, 3.6 * k, a - 0.5, a + 0.5, GOLD, 1.4 * k); } if (st === "C") { orb(q, 2.4 * k, METAL); ring(q, 2.6 * k, GOLD, 1 * k); glowDot(q, 1 * k, SEEK); } if (st === "A") ring(q, 2.2 * k, GOLD, 1 * k); }
+    if (B.r === 0 && B.key("r0") === "B") { plate(P(c, aim, k, -8, -9.5), rectPts(1.8, 1.4), METAL_D, aim, k, 0.9); glowDot(P(c, aim, k, -8, -9.5), 0.6 * k, ORANGE); }
+    if (kp(2, 3) === "A") for (const y of [-12.5, 12.5]) { const q = P(c, aim, k, -6.5, y); disc(q, 1.8 * k, OUTLINE); for (let i = 0; i < 6; i++) line(q, add(q, mul(fa(t * 6 * Math.sign(y) + i * Math.PI / 3), 1.6 * k)), METAL_L, 0.8 * k); }
+    if (kp(1, 3) === "C") for (const y of [-12.5, 12.5]) { bar(P(c, aim, k, -9, y), P(c, aim, k, -3, y), 2.4 * k, [0.5, 0.55, 0.45, 1]); line(P(c, aim, k, -6, y - 1), P(c, aim, k, -6, y + 1), [0, 0, 0, 0.4], 0.8 * k); }
+    if (kp(2, 3) === "C") bar(P(c, aim, k, -9, 12), P(c, aim, k, -9, -12), 1.6 * k, [0.3, 0.3, 0.32, 1]);
+    orb(P(c, aim, k, -4, 0), 2.4 * k, METAL); glowDot(P(c, aim, k, -4, 0), 1 * k, col);
+  },
+  paths: [
+    { name: "Power", theme: "heavier warheads; each step changes the rockets", steps: [
+      { name: "HE Warheads", cost: 105, effect: "+5 damage per rocket (24)", options: [
+        { key: "A", name: "Red Warhead Bands", desc: "Red bands on every pod; rockets carry a red HE band." },
+        { key: "B", name: "Long Noses", desc: "Rockets with longer red noses." },
+        { key: "C", name: "Warhead Crate", desc: "A warhead crate on the deck; rockets burn with a hotter orange exhaust." } ] },
+      { name: "Wider Burst", cost: 155, effect: "Blast 25 to 35 px", options: [
+        { key: "A", name: "Burst Charges", desc: "Orange burst-charge noses; bigger blasts." },
+        { key: "B", name: "Frag Sleeves", desc: "Rockets with fragmentation rings and steel fins; bigger blasts." },
+        { key: "C", name: "Blast Vents", desc: "Vent slots on every pod; bigger blasts." } ] },
+      { name: "Heavy Warheads", cost: 985, effect: "32 damage, 40 px blast (primary)", options: [
+        { key: "A", name: "Heavy Rockets", desc: "Fatter, heavier rockets." },
+        { key: "B", name: "Armoured Pods", desc: "Steel armour bands on the pods." },
+        { key: "C", name: "Warhead Rack", desc: "A rack of heavy warheads on the deck." } ] },
+      { name: "Dense Payload", cost: 1245, effect: "38 damage", options: [
+        { key: "A", name: "Dense Cores", desc: "Dark rockets with a yellow band (in the tubes too)." },
+        { key: "B", name: "Payload Drum", desc: "A payload drum at the back of the launcher." },
+        { key: "C", name: "Steel Frame", desc: "The cross frame is rebuilt in heavy steel." } ] },
+      { name: "Thermobaric Rockets", cost: 5710, effect: "46 damage, 50 px blast (mastery)", options: [
+        { key: "A", name: "Gold Warheads", desc: "Gold-nosed rockets; fuel-air blasts flash, then burst." },
+        { key: "B", name: "Gold Pods", desc: "Gold bands on every pod; fuel-air blasts." },
+        { key: "C", name: "Fuel-Air Tanks", desc: "Gold-ringed fuel tanks on the launcher's flanks; fuel-air blasts." } ] },
+    ] },
+    { name: "Range/Target Acquisition", theme: "range, then homing rockets", steps: [
+      { name: "Booster Stage", cost: 45, effect: "+20 range (200)", options: [
+        { key: "A", name: "Booster Stages", desc: "Rockets fly with a booster stage that falls away mid-flight." },
+        { key: "B", name: "Longer Pods", desc: "The pods are swapped for longer ones." },
+        { key: "C", name: "Booster Rail", desc: "A booster rail along the launcher." } ] },
+      { name: "Seeker Heads", cost: 135, effect: "Homing: rockets curve onto their target", options: [
+        { key: "A", name: "Seeker Domes", desc: "Blue seeker noses (in the tubes too); rockets home onto their targets." },
+        { key: "B", name: "Seeker Radar", desc: "A small turning radar on the launcher; rockets home." },
+        { key: "C", name: "Guidance Antenna", desc: "A guidance antenna on the launcher; rockets home." } ] },
+      { name: "Smart Seekers", cost: 510, effect: "Re-target if their target dies; +30 range (230) (primary)", options: [
+        { key: "A", name: "Seeker Lights", desc: "Blinking seeker lights on every pod." },
+        { key: "B", name: "Tracking Dish", desc: "A turning tracking dish on the launcher." },
+        { key: "C", name: "Datalink Mast", desc: "A blinking datalink mast on the launcher." } ] },
+      { name: "Long Burn", cost: 670, effect: "+30 range (260)", options: [
+        { key: "A", name: "Long-Burn Motors", desc: "Rockets trail longer exhaust." },
+        { key: "B", name: "Sustainer Fins", desc: "Fins at the back of every pod." },
+        { key: "C", name: "Fuel Pods", desc: "Fuel pods on both flanks of the launcher." } ] },
+      { name: "Hunter Seekers", cost: 2315, effect: "300 range; seekers never miss (mastery)", options: [
+        { key: "A", name: "Gold Seekers", desc: "Gold seeker noses and a gold sensor ring on the launcher." },
+        { key: "B", name: "Hunter Array", desc: "A turning gold sensor array on the launcher." },
+        { key: "C", name: "Hunter Eye", desc: "A big gold-ringed hunter eye on the launcher." } ] },
+    ] },
+    { name: "Reload/Payload", theme: "more rockets and faster reloads; each rocket leaves its own tube", steps: [
+      { name: "Extra Tube", cost: 135, effect: "4 rockets per salvo", options: [
+        { key: "A", name: "Fourth Pod", desc: "The launcher is re-laid with four narrower pods." },
+        { key: "B", name: "Top Pod", desc: "A small fourth pod on top of the middle one." },
+        { key: "C", name: "Side Tube", desc: "A single extra tube on the flank." } ] },
+      { name: "Quick Loader", cost: 265, effect: "A salvo every 2 s", options: [
+        { key: "A", name: "Loader Arm", desc: "A loader arm that swings in after each salvo." },
+        { key: "B", name: "Ammo Belt", desc: "An ammo belt feeding the launcher." },
+        { key: "C", name: "Reload Crate", desc: "A crate of ready rockets on the deck." } ] },
+      { name: "Six-Pack", cost: 1335, effect: "6 rockets per salvo (primary)", options: [
+        { key: "A", name: "Six-Tube Block", desc: "One wide block with six tubes in a row." },
+        { key: "B", name: "Twin Banks", desc: "Two banks of three tubes." },
+        { key: "C", name: "Honeycomb", desc: "Six tubes in a staggered honeycomb." } ] },
+      { name: "Auto-Loader", cost: 1605, effect: "A salvo every 1.7 s", options: [
+        { key: "A", name: "Feed Gears", desc: "Spinning feed gears on both flanks." },
+        { key: "B", name: "Magazine Drum", desc: "A magazine drum behind the tubes." },
+        { key: "C", name: "Conveyor", desc: "A conveyor across the back of the launcher." } ] },
+      { name: "Ripple Salvo", cost: 6415, effect: "8 rockets per salvo, rippling out one after another (mastery)", options: [
+        { key: "A", name: "Eight-Tube Grid", desc: "A gold-banded block with eight staggered tubes." },
+        { key: "B", name: "Twin Four-Banks", desc: "Two gold-banded banks of four." },
+        { key: "C", name: "Rotary Launcher", desc: "Eight tubes on a turning drum." } ] },
+    ] },
+  ],
+  retrofits: [
+    { name: "Proximity Fuses", cost: 40, effect: "Rockets burst beside flyers: +40% damage against air (replaces Guidance Fins; formula estimate)", options: [
+      { key: "A", name: "Proximity Noses", desc: "A fuse antenna on every rocket; they burst beside flyers with a flak puff." },
+      { key: "B", name: "Fuse Setter", desc: "A fuse-setting box on the launcher; rockets burst beside flyers." },
+      { key: "C", name: "Sensor Bands", desc: "Sensor bands round the pod mouths; rockets burst beside flyers." } ] },
+    { name: "Smoke Trails", cost: 20, effect: "Rockets leave smoke that slows enemies 10% for 2 s (replaces the Autoloader; formula estimate)", options: [
+      { key: "A", name: "Smoke Canisters", desc: "Smoke canisters on every pod; rockets leave thick grey trails." },
+      { key: "B", name: "Smoke Generator", desc: "A smoking generator on the deck; thick grey trails." },
+      { key: "C", name: "Trail Nozzles", desc: "Smoke nozzles at the back of every pod; thick grey trails." } ] },
+    { name: "Incendiary Warheads", cost: 125, effect: "Blasts leave burning ground, 3 damage/s for 2 s (replaces the Long Booster; formula estimate)", options: [
+      { key: "A", name: "Fuel Warheads", desc: "Orange-banded rockets; their blasts leave flames." },
+      { key: "B", name: "Napalm Tanks", desc: "Napalm tanks on the deck; blasts leave flames." },
+      { key: "C", name: "Igniter Mouths", desc: "Glowing igniter rings round the tube mouths; blasts leave flames." } ] },
+  ],
+};
+
+// ---- Tower art engine: previews towers aiming and firing at enemies on a lane --------------------------
+// Data (defined before this): PAGE {title, key, store}, TOWERS [...], DEFAULTS {id: {look, anim}}.
+// A look: {key, name, theme, muzzle (tile units along the aim), draw(c, aim, s, fx, t, col)} where s = px per tile.
+// An animation: {key, name, desc, period, burst?, gap?, multi?, flight, beam?, fx(since, period) -> {recoil, flash, glow, spin},
+//   shot(from, to, u, s, col, k, t, info), impact(to, v, s, col, info)}. info = {ens (hittable enemies in reach), c, W, H, s, t, look, spot, orbit}.
+// info.sh is the shot being drawn ({t0, k, to0: where its target was when it fired}). An animation with persist(mem, t,
+//   info, s, col) is a free agent instead (drones, mines, sprays, pulses); it can steer the turret with mem.aimAt, and the
+//   look sees its state as fx.mem. tw.waves {on, off} empties the lane between waves; tw.hits "none" attacks nothing.
+// A tower can set spot {x, y} (player-aimed at a fixed point, fractions of the view) or orbit {x, y, r (tiles), w (rad/s)}
+//   (an aircraft circling a point; the look draws it with plane(p, heading, s, fx, t, col, centre) and fires from its door).
+
+const STORE = PAGE.store;
+let state = {};
+try { state = JSON.parse(localStorage.getItem(STORE) || "{}") || {}; } catch (e) { state = {}; }
+function save() { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) { /* storage unavailable */ } }
+const DEF = typeof DEFAULTS === "undefined" ? {} : DEFAULTS;
+function st(id) { if (!state[id]) { const d = DEF[id] || {}; state[id] = { look: d.look || null, anim: d.anim || null, notes: { look: "", anim: "" } }; } return state[id]; }
+const lookOf = (tw) => tw.looks.find((l) => l.key === st(tw.id).look) || tw.looks[0];
+const animOf = (tw) => tw.anims.find((a) => a.key === st(tw.id).anim) || tw.anims[0];
+
+// ---- Scene: a lane of ground enemies and a few flyers -------------------------------------------------
+const ENEMY_RED = [0.86, 0.24, 0.22, 1];
+function enemiesAt(t, W, H, sc) {
+  const out = [], laneY = H * 0.8, span = W + 80;
+  for (let i = 0; i < 4; i++) out.push({ air: false, p: [fmod(t * 34 + i * span / 4, span) - 40, laneY + Math.sin(t * 2 + i) * 2], i });
+  for (let i = 0; i < 2; i++) { const u = fmod(t * 26 + i * span / 2, span) - 40; out.push({ air: true, p: [u, H * 0.1 + Math.sin(t * 1.5 + i * 2) * 5], i: 10 + i }); }
+  return out;
+}
+function drawEnemy(e, sc) {
+  const r = Math.max(4, Math.min(11, sc * 0.12));
+  if (e.air) {
+    ellipse(add(e.p, [r * 0.6, r * 1.4]), r * 0.9, r * 0.4, [0, 0, 0, 0.25]);
+    fill(e.p, [[1.1, 0], [-0.7, 0.8], [-0.35, 0], [-0.7, -0.8]], ENEMY_RED, 0, r); outline(e.p, [[1.1, 0], [-0.7, 0.8], [-0.35, 0], [-0.7, -0.8]], OUTLINE, 1, 0, r);
+  } else {
+    ellipse(add(e.p, [0, r * 0.7]), r * 1.1, r * 0.45, [0, 0, 0, 0.25]);
+    disc(e.p, r + 1, OUTLINE); disc(e.p, r, ENEMY_RED); disc(add(e.p, [r * 0.35, -r * 0.2]), r * 0.35, [1, 0.85, 0.6, 1]);
+  }
+}
+function drawGround(W, H) {
+  rect(0, 0, W, H, [0.07, 0.09, 0.08, 1]);
+  for (let x = 0; x < W; x += 24) for (let y = 0; y < H; y += 24) if (((x + y) / 24) % 2 === 0) rect(x, y, 24, 24, [0.075, 0.098, 0.085, 1]);
+  rect(0, H * 0.8 - 14, W, 28, [0.16, 0.15, 0.13, 1]); line([0, H * 0.8 - 14], [W, H * 0.8 - 14], [0.24, 0.22, 0.18, 1], 1); line([0, H * 0.8 + 14], [W, H * 0.8 + 14], [0.24, 0.22, 0.18, 1], 1);
+}
+function pad(c, s) {
+  const h = s * 0.5;
+  rect(c[0] - h, c[1] - h, s, s, [0.2, 0.21, 0.22, 1]); rect(c[0] - h + 2, c[1] - h + 2, s - 4, s - 4, [0.25, 0.26, 0.27, 1]);
+  for (const q of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) disc(add(c, [q[0] * (h - 5), q[1] * (h - 5)]), 1.6, [0.15, 0.16, 0.17, 1]);
+}
+
+// ---- One animated preview -------------------------------------------------------------------------------
+function makeView(canvas, tw, getLook, getAnim, scale) {
+  const ctx = canvas.getContext("2d"), W = canvas.width, H = canvas.height, s = scale;
+  const c = tw.center ? [W * tw.center[0], H * tw.center[1]] : [W * 0.34, H * 0.44]; // tw.size 2: a 2x2 tower
+  const v = { aim: -0.6, last: -9, shots: [], lockT: 0, lockId: -1, visible: true };
+  v.frame = (t) => {
+    X = ctx; X.save(); X.globalAlpha = 1; X.lineCap = "round"; X.lineJoin = "round";
+    const look = getLook(), an = getAnim();
+    drawGround(W, H);
+    const live = !tw.waves || fmod(t, tw.waves.on + tw.waves.off) < tw.waves.on, all = live ? enemiesAt(t, W, H, s) : [];
+    const ens = all.filter((e) => (tw.hits === "none" ? false : tw.hits === "air" ? e.air : tw.hits === "ground" ? !e.air : true));
+    const others = all.filter((e) => !ens.includes(e));
+    const inView = ens.filter((e) => e.p[0] > 10 && e.p[0] < W - 10);
+    // tw.spot: the player aims it at a fixed point (it ignores enemies). tw.orbit: an aircraft circles a designated
+    // point and fires at enemies near it.
+    const O = tw.orbit ? [W * tw.orbit.x, H * tw.orbit.y] : null;
+    const cands = O ? inView.filter((e) => Math.hypot(e.p[0] - O[0], e.p[1] - O[1]) < tw.orbit.r * s * 1.6) : inView;
+    let tgt = null, best = 1e9;
+    if (tw.spot) tgt = { p: [W * tw.spot.x, H * tw.spot.y], i: -5 };
+    else for (const e of cands) { const ref = O || c, d = Math.hypot(e.p[0] - ref[0], e.p[1] - ref[1]); if (d < best) { best = d; tgt = e; } }
+    let pl = null;
+    if (O) { const a = t * (tw.orbit.w || 0.5), p = add(O, mul(fa(a), tw.orbit.r * s)); pl = { p, heading: a + Math.PI / 2, door: add(p, mul(norm(sub(O, p)), s * 0.14)) }; if (look.door) pl.door = look.door(p, pl.heading, s, O); }
+    if (an.persist && (!v.mem || v.mem.key !== an.key + look.key)) v.mem = { key: an.key + look.key };
+    const aimP = an.persist && v.mem.aimAt ? v.mem.aimAt : tgt && tgt.p;
+    if (aimP) {
+      const want = Math.atan2(aimP[1] - c[1], aimP[0] - c[0]);
+      let d = fmod(want - v.aim + Math.PI, TAU) - Math.PI; const dt = Math.min(0.25, Math.max(0, t - (v.prevT || t))); const turn = 7 * dt; v.aim += Math.max(-turn, Math.min(turn, d));
+      if (tgt && tgt.i !== v.lockId) { v.lockId = tgt.i; v.lockT = t; }
+    }
+    v.prevT = t;
+    const since = t - v.last;
+    const muzzles = look.muzzles || [[look.muzzle || 0.45, 0]];
+    const muzzleAt = (m, ang, k) => pl ? pl.door : look.muzzleAt ? look.muzzleAt(m, k ?? 0, c, ang, s, info) : add(c, rot([muzzles[m % muzzles.length][0] * s, muzzles[m % muzzles.length][1] * s], look.fixed ? 0 : ang));
+    // Multi-target order: the aimed-at target first, then the rest nearest first.
+    const order = tgt && tgt.i !== -5 ? [tgt, ...cands.filter((e) => e !== tgt).sort((a, b) => Math.hypot(a.p[0] - c[0], a.p[1] - c[1]) - Math.hypot(b.p[0] - c[0], b.p[1] - c[1]))] : cands;
+    const info = { ens: cands, all, order, view: v, c, W, H, s, t, look, aim: v.aim, muzzleAt, spot: tgt && tgt.i === -5 ? tgt.p : null, orbit: O };
+    const aligned = tgt && (pl || Math.abs(fmod(Math.atan2(tgt.p[1] - c[1], tgt.p[0] - c[0]) - v.aim + Math.PI, TAU) - Math.PI) < (an.beam ? 0.15 : 0.35));
+    if (tgt && !an.beam && !an.persist && since >= an.period && aligned) {
+      v.last = t; const n = an.burst || 1;
+      for (let k = 0; k < n; k++) {
+        const target = an.multi ? (order[k % order.length] || tgt) : tgt;
+        v.shots.push({ t0: t + k * (an.gap || 0), tid: target.i, to0: target.p.slice(), k, m: (v.n = (v.n || 0) + 1) - 1 });
+      }
+    }
+    pad(c, s * (tw.size || 1));
+    for (const e of others) drawEnemy(e, s);
+    for (const e of ens) drawEnemy(e, s);
+    if (info.spot) { const q = info.spot, pu = 0.5 + 0.5 * Math.sin(t * 4); ring(q, s * (0.28 + 0.04 * pu), A(tw.color, 0.55 + 0.3 * pu), 1.5);
+      for (let i = 0; i < 4; i++) { const d = fa(i * Math.PI / 2); line(add(q, mul(d, s * 0.16)), add(q, mul(d, s * 0.36)), A(tw.color, 0.8), 1.2); } }
+    // Beams lock on first: a short acquisition (reticle on the target), then the beam fires.
+    const lockDelay = an.lock || 0, held = tgt ? t - v.lockT : 0, beamOn = an.beam && tgt && aligned && held >= lockDelay;
+    let fx;
+    if (an.beam) fx = an.fx(beamOn ? held - lockDelay : 0, an.period, !!beamOn);
+    else {
+      fx = an.fx(t - v.last, an.period, !!tgt);
+      const fired = v.shots.filter((sh) => t >= sh.t0); const lastShot = fired[fired.length - 1];
+      fx.barrel = lastShot ? lastShot.m % muzzles.length : -1; fx.barrelSince = lastShot ? t - lastShot.t0 : 9; fx.shots = lastShot ? lastShot.m + 1 : 0;
+    }
+    if (an.persist) { fx.docked = !v.mem.out; fx.mem = v.mem; }
+    look.draw(c, v.aim, s, fx, t, tw.color, info);
+    if (an.beam && tgt) {
+      if (beamOn) an.shot(muzzleAt(0, v.aim), tgt.p, held - lockDelay, s, tw.color, 0, t, info);
+      else { const q = Math.min(1, held / Math.max(0.01, lockDelay)), r0 = s * (0.35 - 0.18 * q), sp = t * 4;
+        line(muzzleAt(0, v.aim), tgt.p, A(tw.color, 0.25), 1);
+        for (let i = 0; i < 4; i++) { const a0 = sp + i * Math.PI / 2; arc(tgt.p, r0, a0, a0 + 0.7, A(tw.color, 0.5 + 0.5 * q), 2); } }
+    }
+    v.shots = v.shots.filter((sh) => t - sh.t0 < an.flight + 0.6);
+    for (const sh of v.shots) {
+      const age = t - sh.t0; if (age < 0) continue;
+      if (!sh.from) sh.from = muzzleAt(sh.m, v.aim, sh.k);
+      const live = ens.find((e) => e.i === sh.tid); const to = live ? live.p : sh.to0;
+      info.sh = sh;
+      if (age < an.flight) an.shot(sh.from, to, age / an.flight, s, tw.color, sh.k, t, info);
+      else if (an.impact) an.impact(to, (age - an.flight) / 0.6, s, tw.color, info);
+    }
+    // A persistent agent (a drone that stays out): it moves, fires and draws itself every frame; v.mem is its state.
+    if (an.persist) an.persist(v.mem, t, info, s, tw.color);
+    if (pl && look.plane) look.plane(pl.p, pl.heading, s, fx, t, tw.color, O);
+    X.restore();
+  };
+  return v;
+}
+
+// ---- Page ------------------------------------------------------------------------------------------------
+const views = [];
+function cardCanvas(w, h) { const cv = document.createElement("canvas"); cv.width = w; cv.height = h; return cv; }
+function el(tag, cls, html) { const n = document.createElement(tag); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; }
+function register(cv, tw, gl, ga, s) { const v = makeView(cv, tw, gl, ga, s); v.cv = cv; views.push(v); io && io.observe(cv); return v; }
+const io = typeof IntersectionObserver !== "undefined" ? new IntersectionObserver((es) => { for (const e of es) { const v = views.find((x) => x.cv === e.target); if (v) v.visible = e.isIntersecting; } }) : null;
+
+function buildTower(tw, root) {
+  const sec = el("section", "enemy");
+  sec.appendChild(el("div", "enemy-head", `<span class="num">${tw.num}</span><h2>${tw.name}</h2><span class="tags">${tw.cls} · ${tw.weapon} · ${tw.hits === "none" ? "no attack" : "hits " + (tw.hits === "both" ? "air and ground" : tw.hits)}</span>`));
+  sec.appendChild(el("p", "desc", tw.desc));
+  for (const kind of ["look", "anim"]) {
+    const list = kind === "look" ? tw.looks : tw.anims;
+    const grid = el("div", "grid");
+    sec.appendChild(el("h3", "", kind === "look" ? "Look" : "Firing animation"));
+    for (const o of list) {
+      const p = el("div", "panel");
+      const cv = cardCanvas(260, 180);
+      register(cv, tw, kind === "look" ? () => o : () => lookOf(tw), kind === "anim" ? () => o : () => animOf(tw), 70);
+      p.appendChild(cv);
+      p.appendChild(el("div", "meta", `<span class="key">${o.key}</span><b>${o.name}</b>`));
+      p.appendChild(el("div", "desc", kind === "look" ? o.theme : o.desc));
+      const b = el("button", "pick", "Pick " + o.key);
+      const sync = () => { const on = st(tw.id)[kind] === o.key; b.classList.toggle("on", on); b.textContent = on ? "Picked " + o.key : "Pick " + o.key; };
+      b.onclick = () => { st(tw.id)[kind] = st(tw.id)[kind] === o.key ? null : o.key; save(); refresh(); };
+      b._sync = sync; sync(); p.appendChild(b);
+      grid.appendChild(p);
+    }
+    sec.appendChild(grid);
+    const lab = el("label", "notes", (kind === "look" ? "Look" : "Animation") + " notes");
+    const ta = document.createElement("textarea"); ta.value = st(tw.id).notes[kind] || "";
+    ta.oninput = () => { st(tw.id).notes[kind] = ta.value; save(); summary(); };
+    lab.appendChild(ta); sec.appendChild(lab);
+  }
+  const combo = el("div", "combo");
+  combo.appendChild(el("div", "combo-head", "Your combination"));
+  const cv = cardCanvas(480, 300); register(cv, tw, () => lookOf(tw), () => animOf(tw), 110); combo.appendChild(cv);
+  const cap = el("div", "desc combo-cap"); combo.appendChild(cap); combo._cap = cap; combo._tw = tw;
+  sec.appendChild(combo); combos.push(combo);
+  root.appendChild(sec);
+}
+const combos = [];
+function refresh() {
+  document.querySelectorAll("button.pick").forEach((b) => b._sync && b._sync());
+  for (const c of combos) { const tw = c._tw, l = lookOf(tw), a = animOf(tw); c._cap.textContent = `Look ${l.key} ${l.name} · animation ${a.key} ${a.name}` + (st(tw.id).look ? "" : " (option A until you pick)"); }
+  summary();
+}
+function summary() {
+  const out = [PAGE.title];
+  for (const tw of TOWERS) {
+    const s0 = st(tw.id), l = tw.looks.find((x) => x.key === s0.look), a = tw.anims.find((x) => x.key === s0.anim);
+    let line = `${tw.name}: look ${l ? l.key + " " + l.name : "-"}, animation ${a ? a.key + " " + a.name : "-"}`;
+    const n = [];
+    if ((s0.notes.look || "").trim()) n.push("look: " + s0.notes.look.trim().replace(/\s+/g, " "));
+    if ((s0.notes.anim || "").trim()) n.push("animation: " + s0.notes.anim.trim().replace(/\s+/g, " "));
+    if (n.length) line += "; notes: " + n.join(" | ");
+    out.push(line);
+  }
+  const ta = document.getElementById("summary"); if (ta) { ta.value = out.join("\n"); ta.rows = out.length + 1; }
+}
+function boot() {
+  const root = document.getElementById("towers");
+  for (const tw of TOWERS) buildTower(tw, root);
+  refresh();
+  document.getElementById("copy").onclick = () => { const ta = document.getElementById("summary"), b = document.getElementById("copy");
+    const done = () => { b.textContent = "Copied"; setTimeout(() => { b.textContent = "Copy picks and notes"; }, 1500); };
+    try { navigator.clipboard.writeText(ta.value).then(done, () => ta.select()); } catch (e) { ta.select(); } };
+  document.getElementById("clear").onclick = () => { if (!confirm("Clear this page's picks and notes?")) return; state = {}; save(); location.reload(); };
+  const t0 = performance.now();
+  const tick = () => { const t = (performance.now() - t0) / 1000; for (const v of views) if (v.visible) v.frame(t); requestAnimationFrame(tick); };
+  requestAnimationFrame(tick);
+}
+if (typeof document !== "undefined" && typeof NO_BOOT === "undefined") boot(); // the second-pass pages reuse makeView without this page
+
+// ---- Tower art second pass: per-step path looks and Retrofit looks on top of a confirmed base design --------
+// Data (defined before this): PAGE {title, store}, P2 {tower, look, anim, intro, paths: [{name, theme, steps: [{name, cost,
+// effect, options: [layer x3]}] x5}], retrofits: [{name, cost, effect, options: [layer x3]}], uncapped?}.
+// A layer: {key, name, desc, under?(c, aim, s, fx, t, col, info), over?(...), muzzles?, targets?, crit?, shot?, shotFx?, impactFx?}.
+//   under/over draw before/after the base model; muzzles replace the firing points (the last layer that sets them wins);
+//   targets = enemies it fires at at once; crit = crit chance shown as a gold burst; shot replaces the base shot (last wins);
+//   shotFx/impactFx draw on top of every shot/impact.
+
+const TW = BASE.TOWERS.find((x) => x.id === P2.tower);
+const BASE_LOOK = TW.looks.find((l) => l.key === P2.look), BASE_ANIM = TW.anims.find((a) => a.key === P2.anim);
+let S2 = {};
+try { S2 = JSON.parse(localStorage.getItem(PAGE.store) || "{}") || {}; } catch (e) { S2 = {}; }
+S2.picks ||= { ...(P2.picks || {}) }; S2.notes ||= {}; S2.build ||= { lv: [0, 0, 0], r: -1 };
+function save2() { try { localStorage.setItem(PAGE.store, JSON.stringify(S2)); } catch (e) { /* storage unavailable */ } }
+const STAGE = ["1", "2", "3", "4", "M"];
+const optOf = (list, id) => list.find((o) => o.key === S2.picks[id]) || list[0];
+
+// The layers for path levels lv[] and Retrofit r (-1 none); `over` swaps one stage for a candidate option.
+function layersFor(lv, r, swap) {
+  const out = [], keys = {}; out.build = { lv: lv.slice(), r, keys, key: (id) => keys[id] || "A" };
+  P2.paths.forEach((pa, pi) => { for (let k = 0; k < lv[pi]; k++) { const id = "p" + pi + "s" + k, o = swap && swap.id === id ? swap.opt : optOf(pa.steps[k].options, id); keys[id] = o.key; out.push(o); } });
+  if (r >= 0) { const id = "r" + r, o = swap && swap.id === id ? swap.opt : optOf(P2.retrofits[r].options, id); keys[id] = o.key; out.push(o); }
+  return out;
+}
+const GOLD_C = [1, 0.78, 0.3, 1];
+function critMark(p, v, s) { if (v >= 1) return; glowDot(p, s * 0.1 * (1 - v), GOLD_C); for (let i = 0; i < 6; i++) { const d = fa(i * TAU / 6 + 0.3); line(add(p, mul(d, s * (0.06 + 0.2 * v))), add(p, mul(d, s * (0.12 + 0.24 * v))), A(GOLD_C, 1 - v), 1.4); } }
+function compose(layers) {
+  let muzzles = BASE_LOOK.muzzles, targets = 1, crit = 0, shot = null;
+  for (const L of layers) { if (L.muzzles) muzzles = L.muzzles; if (L.targets) targets = Math.max(targets, L.targets); if (L.crit) crit = Math.max(crit, L.crit); if (L.shot) shot = L.shot; }
+  const B = layers.build || { lv: [0, 0, 0], r: -1 };
+  const md = P2.mods ? P2.mods(B) : null;
+  if (md) { if (md.targets) targets = md.targets; if (md.crit != null) crit = md.crit; if (md.shot) shot = md.shot; }
+  const look = { ...BASE_LOOK, muzzles, key: BASE_LOOK.key + layers.map((L) => L.key).join(""),
+    draw(c, aim, s, fx, t, col, info) { if (P2.model) return P2.model(c, aim, s, fx, t, col, info, B);
+      for (const L of layers) if (L.under) L.under(c, aim, s, fx, t, col, info);
+      BASE_LOOK.draw.call(this, c, aim, s, fx, t, col, info); for (const L of layers) if (L.over) L.over(c, aim, s, fx, t, col, info); } };
+  if (P2.muzzleAt) look.muzzleAt = (m, k, c, aim, s, info) => P2.muzzleAt(B, m, k, c, aim, s, info);
+  const b = BASE_ANIM, every = crit > 0 ? Math.max(2, Math.round(1 / crit)) : 0;
+  const anim = { ...b, key: b.key + targets, burst: (b.burst || 1) * targets, multi: targets > 1 || b.multi, gap: targets > 1 ? 0.02 : b.gap,
+    ...(md && md.period ? { period: md.period } : {}), ...(md && md.burst ? { burst: md.burst, gap: md.gap ?? b.gap, multi: md.multi ?? false } : {}),
+    shot: (f, to, u, s, col, k, t, info) => { (shot || b.shot)(f, to, u, s, col, k, t, info); for (const L of layers) if (L.shotFx) L.shotFx(f, to, u, s, col, k, t, info); if (md && md.shotFx) md.shotFx(f, to, u, s, col, k, t, info); },
+    impact: (to, v, s, col, info) => { if (md && md.impact) md.impact(to, v, s, col, info); else if (b.impact) b.impact(to, v, s, col, info); for (const L of layers) if (L.impactFx) L.impactFx(to, v, s, col, info);
+      if (md && md.impactFx) md.impactFx(to, v, s, col, info);
+      if (every && info && info.sh && info.sh.m % every === 0) critMark(to, v, s); } };
+  return { look, anim };
+}
+function clampBuild(lv, changed) { // two paths at most; once one reaches 3, the other stops at 2
+  if (P2.uncapped) return;
+  const others = [0, 1, 2].filter((i) => i !== changed);
+  if (others.filter((i) => lv[i] > 0).length >= 2) lv[changed] = 0;
+  else if (others.some((i) => lv[i] >= 3)) lv[changed] = Math.min(lv[changed], 2);
+}
+
+function card(id, opt, lv, r, root) {
+  const p = el("div", "panel"), cv = cardCanvas(260, 180);
+  const comp = () => compose(layersFor(lv, r, { id, opt }));
+  register(cv, TW, () => comp().look, () => comp().anim, 120);
+  p.appendChild(cv); p.appendChild(el("div", "meta", `<span class="key">${opt.key}</span><b>${opt.name}</b>`)); p.appendChild(el("div", "desc", opt.desc));
+  const b = el("button", "pick"); const sync = () => { const on = S2.picks[id] === opt.key; b.classList.toggle("on", on); b.textContent = (on ? "Picked " : "Pick ") + opt.key; };
+  b.onclick = () => { S2.picks[id] = S2.picks[id] === opt.key ? null : opt.key; save2(); refresh2(); }; b._sync = sync; sync(); p.appendChild(b); root.appendChild(p);
+}
+function notesBox(key, label, root) { const lab = el("label", "notes", label); const ta = document.createElement("textarea"); ta.value = S2.notes[key] || "";
+  ta.oninput = () => { S2.notes[key] = ta.value; save2(); summary2(); }; lab.appendChild(ta); root.appendChild(lab); }
+
+function buildPreview(root) {
+  const box = el("section", "build"), cv = cardCanvas(560, 360), ctrls = el("div", "ctrls");
+  register(cv, TW, () => compose(layersFor(S2.build.lv, S2.build.r)).look, () => compose(layersFor(S2.build.lv, S2.build.r)).anim, 210);
+  box.appendChild(cv); box.appendChild(ctrls);
+  ctrls.appendChild(el("div", "combo-head", "Build preview"));
+  const roles = [];
+  P2.paths.forEach((pa, pi) => { const c = el("div", "ctrl"), lab = el("label", "", ""), inp = document.createElement("input"), role = el("span", "role", "");
+    inp.type = "range"; inp.min = 0; inp.max = 5; inp.step = 1; inp.value = S2.build.lv[pi];
+    const show = () => { const v = S2.build.lv[pi]; lab.textContent = `Path ${pi + 1}: ${pa.name}: ${v === 0 ? "none" : v === 5 ? "mastery" : "step " + v}`; inp.value = v; };
+    inp.oninput = () => { S2.build.lv[pi] = +inp.value; clampBuild(S2.build.lv, pi); save2(); roles.forEach((f) => f()); };
+    roles.push(() => { show(); const lv = S2.build.lv; role.textContent = P2.uncapped ? "" : lv[pi] >= 3 ? "primary" : lv[pi] > 0 && lv.some((x, i) => i !== pi && x >= 3) ? "secondary (max 2)" : ""; });
+    c.appendChild(lab); c.appendChild(inp); c.appendChild(role); ctrls.appendChild(c); });
+  const rc = el("div", "ctrl"), sel = document.createElement("select"); rc.appendChild(el("label", "", "Retrofit"));
+  [["-1", "None"], ...P2.retrofits.map((rf, i) => [String(i), rf.name])].forEach(([v, n]) => { const o = document.createElement("option"); o.value = v; o.textContent = n; sel.appendChild(o); });
+  sel.value = String(S2.build.r); sel.onchange = () => { S2.build.r = +sel.value; save2(); }; rc.appendChild(sel); ctrls.appendChild(rc);
+  ctrls.appendChild(el("div", "desc", "Unpicked steps show option A."));
+  roles.forEach((f) => f()); root.appendChild(box);
+}
+
+function boot2() {
+  const root = document.getElementById("towers");
+  const head = el("section", "enemy");
+  head.appendChild(el("div", "enemy-head", `<span class="num">${TW.num}</span><h2>${TW.name}</h2><span class="tags">${TW.cls} · ${TW.weapon} · base look ${BASE_LOOK.key} ${BASE_LOOK.name}, animation ${BASE_ANIM.key} ${BASE_ANIM.name}</span>`));
+  head.appendChild(el("p", "desc", P2.intro)); root.appendChild(head);
+  buildPreview(root);
+  P2.paths.forEach((pa, pi) => { const sec = el("section", "enemy");
+    sec.appendChild(el("div", "enemy-head", `<h2>Path ${pi + 1}: ${pa.name}</h2><span class="tags">${pa.theme}</span>`));
+    pa.steps.forEach((st, k) => { const row = el("div", "stage"), lv = [0, 0, 0]; lv[pi] = k + 1;
+      row.appendChild(el("div", "stage-head", `<span class="lvl">${STAGE[k]}</span><b>${st.name}</b><span class="cost">${st.cost}</span><span class="eff">${st.effect}</span>`));
+      const g = el("div", "grid3"); st.options.forEach((o) => card("p" + pi + "s" + k, o, lv, -1, g)); row.appendChild(g); sec.appendChild(row); });
+    notesBox("p" + pi, `Path ${pi + 1} notes`, sec); root.appendChild(sec); });
+  const rs = el("section", "enemy"); rs.appendChild(el("div", "enemy-head", `<h2>Retrofit</h2><span class="tags">the player picks one of three</span>`));
+  P2.retrofits.forEach((rf, ri) => { const row = el("div", "stage");
+    row.appendChild(el("div", "stage-head", `<span class="lvl">R</span><b>${rf.name}</b><span class="cost">${rf.cost}</span><span class="eff">${rf.effect}</span>`));
+    const g = el("div", "grid3"); rf.options.forEach((o) => card("r" + ri, o, [0, 0, 0], ri, g)); row.appendChild(g); rs.appendChild(row); });
+  notesBox("r", "Retrofit notes", rs); root.appendChild(rs);
+  refresh2();
+  document.getElementById("copy").onclick = () => { const ta = document.getElementById("summary"), b = document.getElementById("copy");
+    const done = () => { b.textContent = "Copied"; setTimeout(() => { b.textContent = "Copy picks and notes"; }, 1500); };
+    try { navigator.clipboard.writeText(ta.value).then(done, () => ta.select()); } catch (e) { ta.select(); } };
+  document.getElementById("clear").onclick = () => { if (!confirm("Clear this page's picks and notes?")) return; S2 = { picks: {}, notes: {}, build: { lv: [0, 0, 0], r: -1 } }; save2(); location.reload(); };
+  const t0 = performance.now();
+  const tick = () => { const t = (performance.now() - t0) / 1000; for (const v of views) if (v.visible) v.frame(t); requestAnimationFrame(tick); };
+  requestAnimationFrame(tick);
+}
+function refresh2() { document.querySelectorAll("button.pick").forEach((b) => b._sync && b._sync()); summary2(); }
+function summary2() {
+  const out = [PAGE.title], nt = (k) => (S2.notes[k] || "").trim().replace(/\s+/g, " ");
+  P2.paths.forEach((pa, pi) => { let l = `Path ${pi + 1} ${pa.name}: ` + pa.steps.map((st, k) => `${STAGE[k]} ${S2.picks["p" + pi + "s" + k] || "-"}`).join(", ");
+    if (nt("p" + pi)) l += "; notes: " + nt("p" + pi); out.push(l); });
+  let r = "Retrofits: " + P2.retrofits.map((rf, i) => `${rf.name} ${S2.picks["r" + i] || "-"}`).join(", "); if (nt("r")) r += "; notes: " + nt("r"); out.push(r);
+  const ta = document.getElementById("summary"); if (ta) { ta.value = out.join("\n"); ta.rows = out.length + 1; }
+}
+if (typeof document !== "undefined") boot2();
+
+</script>
+</body>
+</html>

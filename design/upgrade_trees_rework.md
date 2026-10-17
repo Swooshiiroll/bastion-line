@@ -96,9 +96,9 @@ Launches a volley of rockets at oncoming enemies. "Instead of shooting bullets, 
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
 | 1 | base | Rocket Salvo | 200 |  | 200 credits; a salvo of 3 rockets every 2.5 s, each on a different enemy, 19 damage with a 25 px blast; 180 range; air and ground. Without homing, rockets fly at where the target was, so very fast or blinking enemies can dodge them. | new |
-| 2 | r1 | Guidance Fins | 40 |  | Faster rockets that lead their target, so fewer misses. | new |
-| 2 | r2 | Autoloader | 55 |  | A salvo every 2.2 s instead of 2.5 s. | new |
-| 2 | r3 | Long Booster | 65 |  | +30 range (210). | new |
+| 2 | r1 | Proximity Fuses | 40 |  | Rockets burst beside flyers for +40% damage against air. Replaces Guidance Fins, which partly overlapped Range step 2's homing. | new |
+| 2 | r2 | Smoke Trails | 20 |  | Rockets leave smoke along their path that slows enemies inside it by 10% for 2 s. Replaces the Autoloader, which duplicated the Payload path's reloads (Quick Loader, Auto-Loader). | new |
+| 2 | r3 | Incendiary Warheads | 125 |  | Blasts leave burning ground, 3 damage per second for 2 s. Replaces the Long Booster, which duplicated Range step 1 (Booster Stage). | new |
 | 3 | a | HE Warheads | 105 |  | +5 damage per rocket (24) | new |
 | 4 | a | Wider Burst | 155 |  | Blast 25 to 35 px | new |
 | 5 | a | Heavy Warheads | 985 |  | 32 damage, 40 px blast | new |

@@ -374,7 +374,8 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 |---|---|---|---|
 | 1 | Gun Turret | `design/tower_art_p2_01_gun.html` | **Confirmed** (owner, 2026-10-17: "Gun turret finished") |
 | 2 | Mortar Tower | `design/tower_art_p2_02_mortar.html` | **Confirmed** (owner, 2026-10-17: "Mortar finished"; its bore glow stays) |
-| 3 | Laser Tower | `design/tower_art_p2_03_laser.html` | Round 3: every pick in (Ramp Memory C); to confirm |
+| 3 | Laser Tower | `design/tower_art_p2_03_laser.html` | **Confirmed** (owner, 2026-10-17: "Laser finished") |
+| 4 | Rocket Salvo | `design/tower_art_p2_04_rocket.html` | Round 1: picks open |
 
 ### Gun Turret (second pass)
 
@@ -510,6 +511,32 @@ paths work together.
 - **Ramp Memory's look** has three options: Charge Reservoir, Memory Coil, Afterglow Crystal. The owner picked **C,
   the Afterglow Crystal** (round 3).
 
+### Rocket Salvo (second pass)
+
+**Retrofits replaced first** (owner, 2026-10-17). Claude checked for overlaps before drawing; all three overlapped a
+path:
+
+| Was | Overlapped | Now |
+|---|---|---|
+| Guidance Fins | Range step 2's homing (partly) | **Proximity Fuses** |
+| Autoloader | the Payload path's reloads (Quick Loader, Auto-Loader) | **Smoke Trails** |
+| Long Booster | Range step 1 (Booster Stage) | **Incendiary Warheads** |
+
+Their prices are formula estimates (proposed), in `design/tower_roster.md`.
+
+**Round 1 (Claude):** one parametric model.
+- **Each Power step changes the rockets:**
+  - 1: a red band, a longer nose or a hotter exhaust.
+  - 2: an orange burst nose or fragmentation rings.
+  - 3: fatter rockets.
+  - 4: dark rockets with a yellow band.
+  - Mastery: gold noses and fuel-air blasts.
+- **Range:** a booster stage that falls away mid-flight, longer pods or a rail. From step 2 rockets home onto moving
+  targets; before it they fly at where the target was.
+- **Payload:** re-lays the launcher with 4, 6, then 8 tubes, each rocket leaving its own tube. Wide blocks are riveted
+  plates.
+- **Deck kit stays put.**
+
 ## Open questions
 
-1. **Second pass, Laser Tower** (round 3): confirm; then towers 4-20.
+1. **Second pass, Rocket Salvo** (round 1): picks for 15 steps and the 3 new Retrofits; then towers 5-20.

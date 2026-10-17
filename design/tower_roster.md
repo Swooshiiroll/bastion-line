@@ -28,7 +28,7 @@ All 20 towers are designed and confirmed by the owner (2026-10-15). Costs are bu
 | 1 | Gun Turret | Assault | Ballistic | 75 | Power / Range/Visibility / Multi-Target | Water-Cooled Barrel / Shock Rounds / Incendiary Rounds |
 | 2 | Mortar Tower | Assault | Explosive | 150 | Power/Penetration / Speed/Range / Blast Radius/Multi-Target | Field Kit / Bunker Sight / Smoke Shells |
 | 3 | Laser Tower | Assault | Energy | 250 | Power / Multi-Target / Range/Targeting | Capacitor Bank / Heat Sinks / Ramp Memory |
-| 4 | Rocket Salvo | Assault | Explosive | 200 | Power / Range/Target Acquisition / Reload/Payload | Guidance Fins / Autoloader / Long Booster |
+| 4 | Rocket Salvo | Assault | Explosive | 200 | Power / Range/Target Acquisition / Reload/Payload | Proximity Fuses / Smoke Trails / Incendiary Warheads |
 | 5 | Anti-Aircraft Turret | Assault | Ballistic | 150 | Range / Power/Blast Radius / Speed | Fire-Control Radar / Ammo Drum / Armoured Mount |
 | 6 | Artillery Cannon | Assault | Explosive | 300 | Power / Speed / Special Effects | Ammo Hoist / Heavy Recoil Mount / Wide Charge |
 | 7 | Railgun | Assault | Ballistic | 500 | Power / Range/Speed / Special Effects | Capacitor Coils / Longer Rails / Penetrator Tips |
@@ -348,7 +348,8 @@ stock tuned to the owner's 200-credit build cost.
 - **Path 2 (Range/Target Acquisition):** range, and **homing** (rockets curve onto targets and re-target if theirs
   dies).
 - **Path 3 (Reload/Payload):** **both**: steps alternate between more rockets and faster reloads.
-- **Retrofit:** **guidance fins**: rockets fly faster and miss less.
+- **Retrofit:** first **guidance fins** (rockets fly faster and miss less); all three options were replaced on
+  2026-10-17, since each overlapped a path (see below).
 
 **Stock (proposed):** 200 credits; a salvo of 3 rockets every 2.5 s, each on a different enemy, 19 damage with a 25 px
 blast; 180 range; air and ground. Without homing, rockets fly at where the target was, so very fast or blinking enemies
@@ -357,11 +358,13 @@ can dodge them.
 **Pricing values:** homing counts as ×1.15 to ×1.3 (fewer misses), and guidance fins as ×1.1. They join the Pricing
 effect list.
 
-**Retrofit (the player picks one; owner, 2026-10-15):**
-- **Guidance Fins, 40:** faster rockets that lead their target, so fewer misses. Look: tail fins and a small sensor dome
-  on each pod.
-- **Autoloader, 55:** a salvo every 2.2 s instead of 2.5 s. Look: an ammo belt feeding the launcher.
-- **Long Booster, 65:** +30 range (210). Look: longer rockets with booster stages.
+**Retrofit (the player picks one; owner, 2026-10-15; all three replaced 2026-10-17):**
+- **Proximity Fuses, 40 (formula estimate, proposed):** rockets burst beside flyers for +40% damage against air.
+  Replaces **Guidance Fins**, which partly overlapped Range step 2's homing.
+- **Smoke Trails, 20 (formula estimate, proposed):** rockets leave smoke along their path that slows enemies inside it
+  by 10% for 2 s. Replaces the **Autoloader**, which duplicated the Payload path's reloads (Quick Loader, Auto-Loader).
+- **Incendiary Warheads, 125 (formula estimate, proposed):** blasts leave burning ground, 3 damage per second for 2 s.
+  Replaces the **Long Booster**, which duplicated Range step 1 (Booster Stage).
 
 **Path 1, Power (heavier warheads):**
 
