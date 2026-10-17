@@ -448,6 +448,9 @@ paths work together.
     vanes and clamps follow that ellipse.
   - the mouth is sized to the tube, its rim just outside the tube's sides (owner: "The barrel end is too thick for the
     barrel").
+  - then pulled back toward the confirmed original (owner: "Make it look closer to the original"). It keeps the
+    original's short, thick tube and near-round bore, with only a hint of the angle: a slight flare to the mouth, the
+    breech cap, trunnion pins and a soft shadow.
 
 ## Open questions
 
