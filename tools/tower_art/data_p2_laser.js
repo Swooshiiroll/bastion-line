@@ -4,7 +4,7 @@
 // changes with the Power path (ramp, width, heat); only the turret turns (the deck kit stays put).
 // Geometry (game px, x along the aim): hex hull r ~10, heat-sink fins on both flanks (x -3..-8, y 5..9), lance barrel
 // from x 4 to its tip at x 21 with focusing rings at 8 / 12 / 16, a crystal at the tip, a capacitor orb at x -4.
-const PAGE = { title: "Laser Tower: paths and Retrofits (second pass)", store: "bl-tower-art-p2-laser-r2" };
+const PAGE = { title: "Laser Tower: paths and Retrofits (second pass)", store: "bl-tower-art-p2-laser-r3" };
 const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], COPPER = [0.78, 0.5, 0.28, 1], COOL = [0.35, 0.6, 0.9, 1];
 const Kp = (B, pi, k) => (B.lv[pi] > k ? B.key("p" + pi + "s" + k) : null);
 const rnd2 = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
@@ -192,14 +192,15 @@ const P2 = {
 function ell2(p, aim, k, r, col, g) { oval(p, r * 0.6 * k, r * k, aim, A(mix(col, WHITE, 0.4), 0.55 + 0.3 * g)); ring(p, r * k, OUTLINE, 1); glowDot(p, (0.8 + g) * k, WHITE); }
 
 // ---- Round 2 (owner's picks and notes, 2026-10-17) ----------------------------------------------------------------
-P2.intro = "Round 2: your picks drawn as one model. The Radiator Blocks replace the heat-sink fins (your note), and Power's fin steps grow and gild the blocks instead. The Focusing Lens is replaced by Ramp Memory (switching targets keeps half the ramp): pick its look below.";
-P2.picks = { p0s0: "C", p0s1: "C", p0s2: "A", p0s3: "B", p0s4: "C", p1s0: "A", p1s1: "B", p1s2: "C", p1s3: "B", p1s4: "C", p2s0: "A", p2s1: "A", p2s2: "C", p2s3: "A", p2s4: "A", r0: "C", r1: "B" };
+P2.intro = "Round 3: Ramp Memory C (Afterglow Crystal) picked. Round 2: your picks drawn as one model. The Radiator Blocks replace the heat-sink fins (your note), and Power's fin steps grow and gild the blocks instead. The Focusing Lens is replaced by Ramp Memory (switching targets keeps half the ramp): pick its look below.";
+P2.picks = { p0s0: "C", p0s1: "C", p0s2: "A", p0s3: "B", p0s4: "C", p1s0: "A", p1s1: "B", p1s2: "C", p1s3: "B", p1s4: "C", p2s0: "A", p2s1: "A", p2s2: "C", p2s3: "A", p2s4: "A", r0: "C", r1: "B", r2: "C" };
 P2.paths.forEach((pa, pi) => pa.steps.forEach((st, k) => { st.options = st.options.filter((o) => o.key === P2.picks["p" + pi + "s" + k]); }));
 [0, 1].forEach((ri) => { P2.retrofits[ri].options = P2.retrofits[ri].options.filter((o) => o.key === P2.picks["r" + ri]); });
 P2.paths[0].steps[3].options[0].desc = "Longer heat-sink fins; with the Radiator Blocks fitted, the blocks grow instead.";
 P2.paths[0].steps[4].options[0].desc = "Gold heat-sink fins (or gold radiator blocks); at full ramp the beam is wrapped in gold.";
 P2.retrofits[1].options[0].desc = "Finned radiator blocks on both flanks replace all the heat-sink fins (your note).";
-P2.retrofits[2] = { name: "Ramp Memory", cost: 55, effect: "Switching targets keeps half the ramp (replaces the Focusing Lens; 55 is a formula estimate)", options: [
+const RM = { name: "Ramp Memory", cost: 55, effect: "Switching targets keeps half the ramp (replaces the Focusing Lens; 55 is a formula estimate)", options: [
   { key: "A", name: "Charge Reservoir", desc: "A reservoir on the hull whose gauge never drops below half; the beam starts each new target half-ramped." },
   { key: "B", name: "Memory Coil", desc: "A copper coil round the lance base that stays lit between targets." },
   { key: "C", name: "Afterglow Crystal", desc: "The tip crystal keeps a steady afterglow between targets." } ] };
+P2.retrofits[2] = { ...RM, options: RM.options.filter((o) => o.key === "C") };

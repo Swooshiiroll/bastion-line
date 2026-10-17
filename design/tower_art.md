@@ -374,7 +374,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 |---|---|---|---|
 | 1 | Gun Turret | `design/tower_art_p2_01_gun.html` | **Confirmed** (owner, 2026-10-17: "Gun turret finished") |
 | 2 | Mortar Tower | `design/tower_art_p2_02_mortar.html` | **Confirmed** (owner, 2026-10-17: "Mortar finished"; its bore glow stays) |
-| 3 | Laser Tower | `design/tower_art_p2_03_laser.html` | Round 2: picks and notes applied; Ramp Memory's look to pick |
+| 3 | Laser Tower | `design/tower_art_p2_03_laser.html` | Round 3: every pick in (Ramp Memory C); to confirm |
 
 ### Gun Turret (second pass)
 
@@ -507,8 +507,9 @@ paths work together.
 - **The Heat Sinks' overlap** with Power step 1 (both ramp ceiling ×3.5) stays (owner: "Keep it as is").
 - **The Radiator Blocks replace all the heat-sink fins.** Power's Big Heat Sinks and Gold Heat Sinks then grow and gild
   the blocks instead.
-- **Ramp Memory's look** has three options: Charge Reservoir, Memory Coil, Afterglow Crystal.
+- **Ramp Memory's look** has three options: Charge Reservoir, Memory Coil, Afterglow Crystal. The owner picked **C,
+  the Afterglow Crystal** (round 3).
 
 ## Open questions
 
-1. **Second pass, Laser Tower** (round 2): Ramp Memory's look and confirmation; then towers 4-20.
+1. **Second pass, Laser Tower** (round 3): confirm; then towers 4-20.
