@@ -65,7 +65,7 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Tower rework · Tower art · second pass · tower 4 of 20 · round 1</div>
+    <div class="eyebrow">Bastion Line · Tower rework · Tower art · second pass · tower 4 of 20 · round 2</div>
     <h1>Tower art: Rocket Salvo paths and Retrofits</h1>
     <p class="note">Second pass for one tower: <b>every upgrade step and mastery</b> on each path, and each <b>Retrofit</b>, adds or changes a detail on the confirmed model. Each card shows the model with that path's earlier steps (your picks, or option A until you pick) plus the candidate. Pick one of three per step, add notes per path, then <b>Copy picks and notes</b>.</p>
     <ul class="rules">
@@ -615,7 +615,7 @@ const NO_BOOT = true;
 // Fuses, Smoke Trails, Incendiary Warheads.
 // Geometry (game px, x along the aim): pods from x -8 to their mouths at x 11.5; cross-frame bars at x -4 and 6;
 // a hazard-striped blast deflector at x -11.
-const PAGE = { title: "Rocket Salvo: paths and Retrofits (second pass)", store: "bl-tower-art-p2-rocket-r1" };
+const PAGE = { title: "Rocket Salvo: paths and Retrofits (second pass)", store: "bl-tower-art-p2-rocket-r2" };
 const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], RED = [0.9, 0.22, 0.2, 1], YEL = [1, 0.85, 0.2, 1], ORANGE = [1, 0.55, 0.2, 1];
 const SEEK = [0.35, 0.75, 1, 1], DARKR = [0.22, 0.22, 0.24, 1], PALE = [0.86, 0.88, 0.92, 1], SMOKEC = [0.55, 0.57, 0.6, 1];
 const Kp = (B, pi, k) => (B.lv[pi] > k ? B.key("p" + pi + "s" + k) : null);
@@ -630,17 +630,17 @@ const homing = (B) => B.lv[1] >= 2;
 // ---- Launch tubes: layout from the Payload path; each entry is a mouth [x, y, r] plus the pod bodies -----------------
 function layoutOf(B, t) { const P3 = B.lv[2];
   if (P3 >= 5) { const st = Kp(B, 2, 4);
-    if (st === "B") return { pods: [[-7.6, 9.6], [7.6, 9.6]], mouths: [-12, -9, -6, -3, 3, 6, 9, 12].map((y) => [11, y * 0.95, 1.25]), gold: true };
+    if (st === "B") return { pods: [[-7.4, 11], [7.4, 11]], mouths: [-1, 1].flatMap((sg) => [[11, sg * 5, 1.4], [11, sg * 9.8, 1.4], [8.2, sg * 5, 1.4], [8.2, sg * 9.8, 1.4]]), gold: true }; // 2 x 2 per side
     if (st === "C") { const sp = t * 2; return { drum: true, pods: [[0, 12]], mouths: [0, 1, 2, 3, 4, 5, 6, 7].map((i) => [11.5, Math.sin(sp + i * TAU / 8) * 4.8, 1.2]), gold: true }; }
     return { pods: [[0, 23]], mouths: [-10.5, -7.5, -4.5, -1.5, 1.5, 4.5, 7.5, 10.5].map((y, i) => [i % 2 ? 9 : 11, y, 1.3]), gold: true }; }
   if (P3 >= 3) { const st = Kp(B, 2, 2);
-    if (st === "B") return { pods: [[-7, 9], [7, 9]], mouths: [-10, -7, -4, 4, 7, 10].map((y) => [11, y, 1.4]) };
+    if (st === "B") return { pods: [[-7.2, 11], [7.2, 11]], mouths: [-10.4, -7.2, -4, 4, 7.2, 10.4].map((y) => [11, y, 1.3]) };
     if (st === "C") return { pods: [[0, 12]], mouths: [[11, -6, 1.5], [11, 0, 1.5], [11, 6, 1.5], [8.4, -3, 1.5], [8.4, 3, 1.5], [5.8, 0, 1.5]] };
     return { pods: [[0, 23]], mouths: [-10, -6, -2, 2, 6, 10].map((y) => [11, y, 1.5]) }; }
   if (P3 >= 1) { const st = Kp(B, 2, 0);
     if (st === "B") return { pods: [[-6.5, 5.2], [0, 5.2], [6.5, 5.2]], top: true, mouths: [[11.5, -6.5, 2.1], [11.5, 0, 2.1], [11.5, 6.5, 2.1], [9, 0, 1.3]] };
     if (st === "C") return { pods: [[-6.5, 5.2], [0, 5.2], [6.5, 5.2]], side: true, mouths: [[11.5, -6.5, 2.1], [11.5, 0, 2.1], [11.5, 6.5, 2.1], [8, 11.5, 1.3]] };
-    return { pods: [[-7.5, 4.4], [-2.5, 4.4], [2.5, 4.4], [7.5, 4.4]], mouths: [-7.5, -2.5, 2.5, 7.5].map((y) => [11.5, y, 1.8]) }; }
+    return { pods: [[-8, 5.4], [-2.7, 5.4], [2.7, 5.4], [8, 5.4]], mouths: [-8, -2.7, 2.7, 8].map((y) => [11.5, y, 1.6]) }; }
   return { pods: [[-6.5, 5.2], [0, 5.2], [6.5, 5.2]], mouths: [[11.5, -6.5, 2.1], [11.5, 0, 2.1], [11.5, 6.5, 2.1]] }; }
 
 // ---- The rocket: Power changes the warhead each step; Range adds boosters and seekers; the Retrofit marks it --------
@@ -650,7 +650,7 @@ function rocketBody(p, dir, k, col, B, u) { const P1 = Kp(B, 0, 0), P2s = Kp(B, 
   if (R1 === "A" && u < 0.45) solid(add(p, mul(d, -6 * K)), [[1.6, 1.1], [-2.4, 1.1], [-2.4, -1.1], [1.6, -1.1]], STEEL, dir, K, 0.6); // the booster stage, shed mid-flight
   for (const sg of [-1, 1]) fill(p, [[-1.5, sg * 1.1], [-4.2, sg * 2.8], [-4.6, sg * 2.8], [-4.2, sg * 1.1]], P2s === "B" ? STEEL : METAL_L, dir, K);
   solid(p, [[4.6, 0], [2.7, 1.35], [-4.2, 1.35], [-4.2, -1.35], [2.7, -1.35]], body, dir, K, 0.8);
-  const nose = PM === "A" || RM === "A" ? GOLD : B.lv[1] >= 2 && R2 === "A" ? SEEK : P2s === "A" ? ORANGE : RED;
+  const nose = B.lv[1] >= 2 && R2 === "A" ? SEEK : PM === "A" || RM === "A" ? GOLD : P2s === "A" ? ORANGE : RED;
   fill(p, [[P1 === "B" ? 5.6 : 4.6, 0], [2.9, 1.35], [2.9, -1.35]], nose, dir, K);
   if (P1 === "A") line(add(p, mul(o, 1.35 * K)), add(p, mul(o, -1.35 * K)), RED, 0.8 * K);
   if (P4 === "A") line(add(add(p, mul(d, -1.2 * K)), mul(o, 1.35 * K)), add(add(p, mul(d, -1.2 * K)), mul(o, -1.35 * K)), YEL, 0.7 * K);
@@ -721,7 +721,7 @@ const P2 = {
       const f2 = fx.barrel === i && (fx.barrelSince ?? 9) < 0.25 ? 1 - fx.barrelSince / 0.25 : 0; if (f2 > 0) glowDot(q, m[2] * k * f2, col);
       if (B.r === 2 && B.key("r2") === "C") ring(q, (m[2] + 0.2) * k, A(ORANGE, 0.8), 0.7 * k);
       if (B.r === 0 && B.key("r0") === "A") line(q, add(q, mul(fa(aim), 1.8 * k)), STEEL, 0.5 * k);
-      if (ready > 0.05) { orb(q, m[2] * 0.8 * k * ready, B.lv[0] >= 4 && kp(0, 3) === "A" ? DARKR : PALE); disc(add(q, mul(fa(aim), 0.4 * k)), m[2] * 0.36 * k * ready, gold && kp(0, 4) === "A" ? GOLD : B.lv[1] >= 2 && kp(1, 1) === "A" ? SEEK : RED); } }
+      if (ready > 0.05) { orb(q, m[2] * 0.8 * k * ready, B.lv[0] >= 4 && kp(0, 3) === "A" ? DARKR : PALE); disc(add(q, mul(fa(aim), 0.4 * k)), m[2] * 0.36 * k * ready, B.lv[1] >= 2 && kp(1, 1) === "A" ? SEEK : gold && kp(0, 4) === "A" ? GOLD : RED); } }
     // Launcher top kit: seeker radar, tracking dish, hunter array / eye, fuse setter.
     if (kp(1, 1) === "B") { const q = P(c, aim, k, -1, 0); disc(q, 2 * k, OUTLINE); disc(q, 1.6 * k, METAL); line(q, add(q, mul(fa(t * 3), 2.6 * k)), METAL_L, 1 * k); }
     if (kp(1, 1) === "C") { bar(P(c, aim, k, -2, -3), P(c, aim, k, -2, -9), 0.7 * k, METAL_L); glowDot(P(c, aim, k, -2, -9), 0.6 * k, SEEK); }
@@ -816,6 +816,16 @@ const P2 = {
       { key: "C", name: "Igniter Mouths", desc: "Glowing igniter rings round the tube mouths; blasts leave flames." } ] },
   ],
 };
+
+// ---- Round 2 (owner's picks and notes, 2026-10-17) ----------------------------------------------------------------
+P2.intro = "Round 2: your picks as one model, with your notes: seeker blue noses win over the Power mastery's gold (5/2/0); the pods are bigger than their mouths; the Ripple Salvo stacks its tubes 2 x 2 in each side bank.";
+P2.picks = { p0s0: "B", p0s1: "B", p0s2: "A", p0s3: "A", p0s4: "A", p1s0: "A", p1s1: "A", p1s2: "A", p1s3: "A", p1s4: "C", p2s0: "A", p2s1: "A", p2s2: "B", p2s3: "C", p2s4: "B", r0: "A", r1: "A", r2: "A" };
+P2.paths.forEach((pa, pi) => pa.steps.forEach((st, k) => { st.options = st.options.filter((o) => o.key === P2.picks["p" + pi + "s" + k]); }));
+P2.retrofits.forEach((rf, ri) => { rf.options = rf.options.filter((o) => o.key === P2.picks["r" + ri]); });
+P2.paths[0].steps[4].options[0].desc = "Gold-nosed rockets with fuel-air blasts; with Seeker Heads fitted the noses stay seeker blue (your note).";
+P2.paths[2].steps[0].options[0].desc = "Four pods, each wider than its mouth (your note).";
+P2.paths[2].steps[2].options[0].desc = "Two banks of three tubes, each bank bigger than its mouths (your note).";
+P2.paths[2].steps[4].options[0].desc = "Two gold-banded banks, their tubes stacked 2 x 2 on each side (your note).";
 
 // ---- Tower art engine: previews towers aiming and firing at enemies on a lane --------------------------
 // Data (defined before this): PAGE {title, key, store}, TOWERS [...], DEFAULTS {id: {look, anim}}.

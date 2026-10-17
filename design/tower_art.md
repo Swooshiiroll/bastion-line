@@ -375,7 +375,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 1 | Gun Turret | `design/tower_art_p2_01_gun.html` | **Confirmed** (owner, 2026-10-17: "Gun turret finished") |
 | 2 | Mortar Tower | `design/tower_art_p2_02_mortar.html` | **Confirmed** (owner, 2026-10-17: "Mortar finished"; its bore glow stays) |
 | 3 | Laser Tower | `design/tower_art_p2_03_laser.html` | **Confirmed** (owner, 2026-10-17: "Laser finished") |
-| 4 | Rocket Salvo | `design/tower_art_p2_04_rocket.html` | Round 1: picks open |
+| 4 | Rocket Salvo | `design/tower_art_p2_04_rocket.html` | Round 2: picks and notes applied; to confirm |
 
 ### Gun Turret (second pass)
 
@@ -537,6 +537,17 @@ Their prices are formula estimates (proposed), in `design/tower_roster.md`.
   plates.
 - **Deck kit stays put.**
 
+**Picks (owner, round 1):**
+- **Power:** 1 B Long Noses, 2 B Frag Sleeves, 3 A Heavy Rockets, 4 A Dense Cores, M A Gold Warheads.
+- **Range:** 1 A Booster Stages, 2 A Seeker Domes, 3 A Seeker Lights, 4 A Long-Burn Motors, M C Hunter Eye.
+- **Payload:** 1 A Fourth Pod, 2 A Loader Arm, 3 B Twin Banks, 4 C Conveyor, M B Twin Four-Banks.
+- **Retrofits:** Proximity Fuses A, Smoke Trails A, Incendiary Warheads A.
+
+**Round 2 (owner's notes):**
+- **5/2/0:** the Seeker Heads' blue nose wins over the Power mastery's gold, in flight and in the tubes.
+- **The pods and banks are bigger than their mouths.**
+- **The Ripple Salvo stacks its tubes 2 x 2** in each side bank.
+
 ## Open questions
 
-1. **Second pass, Rocket Salvo** (round 1): picks for 15 steps and the 3 new Retrofits; then towers 5-20.
+1. **Second pass, Rocket Salvo** (round 2): confirm; then towers 5-20.
