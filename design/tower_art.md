@@ -451,6 +451,10 @@ paths work together.
   - then pulled back toward the confirmed original (owner: "Make it look closer to the original"). It keeps the
     original's short, thick tube and near-round bore, with only a hint of the angle: a slight flare to the mouth, the
     breech cap, trunnion pins and a soft shadow.
+  - Layering fixed (owner: "The layering is incorrect and still looks rather odd"):
+    - each tube's shadow sits on the deck, under the legs and mount.
+    - the tube is one shaded barrel with a rounded back end, as the original draws it, instead of a ball on top.
+    - trunnion pins and a slight flare band near the mouth.
 
 ## Open questions
 

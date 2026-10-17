@@ -614,7 +614,7 @@ const NO_BOOT = true;
 // carries the other paths' details and the Retrofit's; each Power step changes the shells.
 // Geometry (game px, x along the aim, y to the side): tube from x -1 to its bore at x 9, 11 wide; bore r 6.8; four
 // braced legs on the diagonals (r 15); recoil spade at x -10; octagonal mount r 8.5.
-const PAGE = { title: "Mortar Tower: paths and Retrofits (second pass)", store: "bl-tower-art-p2-mortar-r1d" };
+const PAGE = { title: "Mortar Tower: paths and Retrofits (second pass)", store: "bl-tower-art-p2-mortar-r1e" };
 const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], COPPER = [0.78, 0.5, 0.28, 1], RED = [0.85, 0.2, 0.18, 1];
 const DARKSHELL = [0.2, 0.2, 0.22, 1], YEL = [1, 0.85, 0.2, 1], SMOKE = [0.6, 0.62, 0.64, 1], SAND = [0.62, 0.55, 0.4, 1];
 const rnd2 = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
@@ -681,17 +681,14 @@ function bore(p, k, f0, col, fx, B, flash, aim) { const f = f0 * MOUTH; const PM
   if (PM === "B") ell(p, 3.5 * RX * k * f, 6.1 * k * f, aim, GOLD, 1.2 * k);
   oval(p, 2.6 * RX * k * f, 4.5 * k * f, aim, BORE); if (P2s === "B") ell(p, 2.3 * RX * k * f, 3.9 * k * f, aim, COPPER, 0.9 * k);
   oval(p, 1.9 * RX * k * f, 3.3 * k * f, aim, A(col, 0.25 + 0.75 * flash)); if (flash > 0) glowDot(p, 3.2 * k * f * flash, col); }
-// An angled tube: it widens toward the raised mouth, with a rounded breech, cylinder shading and a long shadow.
-function angledTube(c, aim, k, x, y, L, w, r) { const half = (fr) => w * (0.46 + 0.06 * fr), x0 = x - 1 - r, x1 = x + L - r; // the original's thick tube, flaring slightly to the raised mouth
-  const sh = [[x0, -half(0)], [x1, -half(1)], [x1, half(1)], [x0, half(0)]].map(([px, py]) => add(P(c, aim, k, px, py), [k * (1 + 2 * (px - x0) / (L + 1)), k * (2 + 3 * (px - x0) / (L + 1))]));
-  poly(sh, [0, 0, 0, 0.22]);
-  const body = [[x0, -half(0)], [x1, -half(1)], [x1, half(1)], [x0, half(0)]].map(([px, py]) => P(c, aim, k, px, py)); poly(body, OUTLINE);
-  const inset = [[x0 + 0.3, -half(0) + 0.6], [x1, -half(1) + 0.6], [x1, half(1) - 0.6], [x0 + 0.3, half(0) - 0.6]].map(([px, py]) => P(c, aim, k, px, py)); poly(inset, METAL_L);
-  const lit = Math.sign(dot(orth(fa(aim)), LIGHT)) || 1; // the side facing the light
-  line(P(c, aim, k, x0 + 1, -lit * half(0) * 0.45), P(c, aim, k, x1 - 0.5, -lit * half(1) * 0.45), lt(METAL_L, 0.35), w * 0.18 * k);
-  line(P(c, aim, k, x0 + 1, lit * half(0) * 0.6), P(c, aim, k, x1 - 0.5, lit * half(1) * 0.6), dk(METAL_L, 0.3), w * 0.16 * k);
-  orb(P(c, aim, k, x0, 0), half(0) * k, dk(METAL_L, 0.05)); // the rounded breech cap
-  for (const sg of [-1, 1]) { const tp = P(c, aim, k, x0 + (L + 1) * 0.3, sg * (half(0.3) + 1)); disc(tp, 1.6 * k, OUTLINE); disc(tp, 1.2 * k, STEEL); } } // trunnion pins
+// The tube, as the original draws it: one shaded barrel with a rounded back end (bar), plus trunnion pins and a slight
+// flare band near the mouth. Its shadow is drawn separately, on the deck under the mount (tubeShadow).
+function tubeShadow(c, aim, k, x, y, L, w) { const x0 = x - 1, x1 = x + L;
+  line(add(P(c, aim, k, x0, y), [k, 2 * k]), add(P(c, aim, k, x1, y), [3 * k, 5 * k]), [0, 0, 0, 0.22], w * k); }
+function angledTube(c, aim, k, x, y, L, w, r) { const x0 = x - 1 - r, x1 = x + L - r;
+  bar(P(c, aim, k, x0, y), P(c, aim, k, x1, y), w * k, METAL_L);
+  bar(P(c, aim, k, x1 - 2.2, y - w * 0.56), P(c, aim, k, x1 - 2.2, y + w * 0.56), 1.6 * k, lt(METAL_L, 0.08)); // flare band
+  for (const sg of [-1, 1]) { const tp = P(c, aim, k, x0 + (L + 1) * 0.3, y + sg * (w * 0.5 + 0.9)); disc(tp, 1.6 * k, OUTLINE); disc(tp, 1.2 * k, STEEL); } } // trunnion pins
 
 const P2 = {
   tower: "mortar", look: "C", anim: "A",
@@ -707,6 +704,7 @@ const P2 = {
     // Field Kit: a sandbag ring or a steel baseplate under the mount.
     if (B.r === 0 && B.key("r0") === "A") for (let i = 0; i < 14; i++) { const q = add(c, mul(fa(i * TAU / 14), 17 * k)); shadedOval(q, 2.8 * k, 1.7 * k, i * TAU / 14 + Math.PI / 2, SAND); }
     if (B.r === 0 && B.key("r0") === "B") plate(c, rectPts(15, 15), STEEL, aim, k, 1.2);
+    for (let i = 0; i < n; i++) { const [x, y] = tubeAt(T, i, fx.shots); tubeShadow(c, aim, k, x, y, L, 11 * f); }
     // Legs, foot pads and the recoil spade (with the Ready Rack on it).
     for (let i = 0; i < 4; i++) { const a = Math.PI / 4 + i * Math.PI / 2, ft = P(c, aim, k, Math.cos(a) * 15, Math.sin(a) * 15);
       bar(P(c, aim, k, Math.cos(a) * 6, Math.sin(a) * 6), ft, 3 * k, lt(METAL_D, 0.12)); bar(P(c, aim, k, Math.cos(a) * 7, Math.sin(a) * 7), P(c, aim, k, Math.cos(a) * 11, Math.sin(a) * 11), 1.3 * k, METAL_L);
