@@ -553,6 +553,8 @@ Their prices are formula estimates (proposed), in `design/tower_roster.md`.
   - rockets leave their own row.
   - the mouths show only when the bank's front faces the viewer (owner: "The holes are visible from the opposite end").
   - the gold bands wrap all the way round: across the top and down every visible side (owner).
+  - the central hub sits down between the banks, drawn under them (owner: "That central ball is also visible through
+    the silos").
 
 ## Open questions
 
