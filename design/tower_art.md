@@ -373,7 +373,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | # | Tower | File | Status |
 |---|---|---|---|
 | 1 | Gun Turret | `design/tower_art_p2_01_gun.html` | **Confirmed** (owner, 2026-10-17: "Gun turret finished") |
-| 2 | Mortar Tower | `design/tower_art_p2_02_mortar.html` | Round 2: picks and notes applied; to confirm |
+| 2 | Mortar Tower | `design/tower_art_p2_02_mortar.html` | Round 3: owner's changes applied; to confirm |
 
 ### Gun Turret (second pass)
 
@@ -474,8 +474,11 @@ paths work together.
 - **Blast's mastery turns the shells gold**, in flight and in the racks.
 - **Smoke Shells:** from the note, every shell (in flight and in the racks) carries the grey smoke band; every 4th
   leaves a cloud.
-- **To confirm:** with the mount gone the barrel stands bare on the deck. Should there be a fixed pivot hub under it?
+- **Round 3 (owner):**
+  - a **stationary baseplate** under the barrel (fixed, not turning; the tube's shadow falls on it).
+  - **Smoke Shells A** (the smoke band on every shell) picked.
+  - **the bomblet rack stacks** 1 x 3 at step 3, 2 x 3 at step 4 and 2 x 4 at the mastery (gold).
 
 ## Open questions
 
-1. **Second pass, Mortar Tower** (round 2): confirm; whether a fixed pivot hub goes under the barrel; whether its bore glow stays. Then towers 3-20.
+1. **Second pass, Mortar Tower** (round 3): confirm, and whether its bore glow stays. Then towers 3-20.
