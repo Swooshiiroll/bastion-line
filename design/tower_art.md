@@ -377,6 +377,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 3 | Laser Tower | `design/tower_art_p2_03_laser.html` | **Confirmed** (owner, 2026-10-17: "Laser finished") |
 | 4 | Rocket Salvo | `design/tower_art_p2_04_rocket.html` | **Confirmed** (owner, 2026-10-17: "Rocket Salvo is done") |
 | 5 | Anti-Aircraft Turret | `design/tower_art_p2_05_aa.html` | **Confirmed** (owner, 2026-10-17: "AA Finished"; Range 3 is the Optical Director) |
+| 6 | Artillery Cannon | `design/tower_art_p2_06_artillery.html` | Round 1: three options per stage; awaiting picks |
 
 ### Gun Turret (second pass)
 
@@ -587,6 +588,26 @@ options until it's picked.
 **Round 4:** Range step 3 (Sky Watch) is B, the Optical Director (owner: "I meant optical director"). With the
 director fitted, the mastery's gold radar moves to the other side of the deck so the two don't overlap.
 
+### Artillery Cannon (second pass)
+
+**Retrofits** (owner, 2026-10-17). Claude flagged that all three duplicated a path step exactly:
+- Ammo Hoist (a shell every 3.3 s) = Speed step 1. **Replaced by the Shell Magazine** (owner's pick): every third shell
+  is a heavy round for +50% damage.
+- Heavy Recoil Mount (+15 damage, 90) = Power step 1. **Replaced by the Stabilised Mount** (owner's pick): shells land
+  within 15 px of the aimed spot instead of scattering up to 30 px.
+- Wide Charge (+15 px blast, 85) = Power step 2. **Kept** by the owner.
+
+**Round 1 (Claude):** one parametric model (base look F Rammer Howitzer, animation A Shell on the Mark).
+- **Power** changes the shell at every step (bigger, red band, orange stripes, dark yellow-banded, pointed or finned,
+  gold at the mastery); the barrel, cradle and tray carry the same marks.
+- **Speed** swaps the reloading kit (loader arm, hydraulic breech, autoloader drum, servo motor); the mastery fires
+  3-shell barrages that walk across the aimed spot.
+- **Special Effects** unlocks shell types (incendiary, shrapnel, concussion, combined); the cannon cycles through the
+  unlocked types in the build preview, and a small selector dial on the deck shows which is loaded.
+- **Deck kit is static;** only the rammer, cradle, barrel and hub turn.
+- **Assumption to confirm:** the stock cannon scatters its shells up to 30 px around the aimed spot (it isn't in the
+  confirmed stock stats), so the Stabilised Mount's 15 px shows. Say if the stock should be exact instead.
+
 ## Open questions
 
-1. **Second pass, Artillery Cannon** (tower 6): its three Retrofits each duplicate a path step; waiting on the owner's replacements before drawing. Then towers 7-20.
+1. **Second pass, Artillery Cannon** (tower 6, round 1): pick one option per stage and Retrofit, and say whether stock shells should scatter. Then towers 7-20.
