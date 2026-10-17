@@ -9,7 +9,7 @@
 //   targets, and get Power's shielding (from Power 1) and marked shroud, Range's barrels, and the Retrofit's jacket,
 //   coils or fuel line.
 // - The Water Jacket and Coil Wraps grow with the longer Range barrels.
-const PAGE = { title: "Gun Turret: paths and Retrofits (second pass)", store: "bl-tower-art-p2-gun-r5" };
+const PAGE = { title: "Gun Turret: paths and Retrofits (second pass)", store: "bl-tower-art-p2-gun-r6" };
 const GOLD = [1, 0.78, 0.3, 1], RED_TIP = [1, 0.3, 0.25, 1], STEEL = [0.42, 0.45, 0.5, 1];
 const SHOCK = [0.6, 0.85, 1, 1], FIRE = [1, 0.55, 0.2, 1], WATER = [0.3, 0.42, 0.5, 1];
 const rnd2 = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
@@ -18,6 +18,17 @@ function longTracer(f, to, u, col, w) { const a = lerp(f, to, Math.max(0, u - 0.
 function stunArcs(to, v, s, info) { if (!info || !info.sh || info.sh.m % 20 !== 0 || v >= 1) return; for (let i = 0; i < 4; i++) { const a = rnd2(i + Math.floor(v * 12)) * TAU; line(to, add(to, mul(fa(a), s * 0.16)), A(SHOCK, 1 - v), 1.4); } glowDot(to, s * 0.06 * (1 - v), SHOCK); }
 function flames(to, v, s) { if (v >= 1) return; for (let i = 0; i < 3; i++) { const q = fmod(v * 2 + i / 3, 1); disc(add(to, [(i - 1) * s * 0.05, -q * s * 0.18]), s * 0.035 * (1 - q), A(i % 2 ? FIRE : [1, 0.85, 0.3, 1], 1 - q)); } }
 function gear(p, r, k, t, n, col) { const pts = []; for (let i = 0; i < n * 2; i++) pts.push(mul(fa(t + i * Math.PI / n), i % 2 ? r * 0.78 : r)); solid(p, pts, col || METAL_L, 0, k, 0.8); disc(p, r * 0.35 * k, METAL_D); }
+// The rounds harden with each Power step (owner, 2026-10-17): 1 a thicker tracer with a heavier head; 2 a dark steel
+// tip; 3 a dark core with a yellow AP band; 4 a white-hot tungsten core; M a slim sabot dart that sheds its petals at
+// the muzzle, with a gold streak.
+function powerRound(f, to, u, s, col, Pl) { if (Pl < 1) return; const k = G(s), d = norm(sub(to, f)), o = orth(d), p = lerp(f, to, u), a = Math.atan2(d[1], d[0]);
+  if (Pl >= 5) { solid(p, [[4.4, 0], [-3.4, 1], [-3.4, -1]], [0.85, 0.86, 0.9, 1], a, k, 0.8); line(add(p, mul(d, -2.6 * k)), add(p, mul(d, -1.2 * k)), GOLD, 1.4 * k); glowDot(p, 0.6 * k, [1, 1, 1, 1]);
+    if (u < 0.25) for (const sg of [-1, 1]) { const q = add(add(f, mul(d, u * s * 0.9)), mul(o, sg * u * s * 0.5)); fill(q, [[1.5, 0], [-1, 1], [-1, -1]], [0.62, 0.64, 0.68, 1 - u * 4], a + sg * u * 8, k); }
+    return; }
+  disc(p, 2 * k, OUTLINE); disc(p, 1.7 * k, lt(col, 0.4));
+  if (Pl >= 2) { const tp = add(p, mul(d, 1.5 * k)); solid(tp, [[2.4, 0], [0, 1.3], [0, -1.3]], [0.62, 0.65, 0.7, 1], a, k, 0.8); }
+  if (Pl >= 3) { disc(p, 1.1 * k, [0.12, 0.1, 0.1, 1]); line(add(add(p, mul(d, -0.9 * k)), mul(o, 1.8 * k)), add(add(p, mul(d, -0.9 * k)), mul(o, -1.8 * k)), [1, 0.85, 0.2, 1], 0.9 * k); }
+  if (Pl >= 4) glowDot(p, 0.8 * k, [1, 0.95, 0.85, 1]); }
 function vapourAt(p, fx, s) { if (fx.flash > 0.6) smokePuff(add(p, [0, -s * 0.05]), 1 - fx.flash, s * 0.5, 0.35); }
 
 // The build: levels P (Power), R (Range/Visibility), M (Multi-Target), and the Retrofit r (0 water, 1 shock, 2 incendiary).
@@ -59,7 +70,9 @@ const P2 = {
   intro: "Round 2: your round-1 picks drawn as one model, so the paths work together (your notes). Each stage shows only your pick; use the build preview to check combinations, and note anything to change.",
   mods(B) { const L = lvOf(B), n = gunsOf(L.M);
     return { targets: n, crit: [0, 0, 0.1, 0.15, 0.2, 0.3][L.R],
-      shot: (f, to, u, s, col) => { const c2 = L.r === 2 ? FIRE : col; if (L.R >= 2) longTracer(f, to, u, c2, 1.5); else tracer(f, to, u, c2, 1.4, 0.2); if (L.P >= 3) disc(lerp(f, to, u), 1.6, [0.15, 0.12, 0.1, 1]); },
+      shot: (f, to, u, s, col) => { const c2 = L.r === 2 ? FIRE : col, w = L.P >= 1 ? 2.8 : 1.4;
+        if (L.P >= 5) line(lerp(f, to, Math.max(0, u - 0.3)), lerp(f, to, u), A(GOLD, 0.8), w * 0.8);
+        if (L.R >= 2) longTracer(f, to, u, c2, w); else tracer(f, to, u, c2, w, 0.2); powerRound(f, to, u, s, c2, L.P); },
       impactFx: (to, v, s, col, info) => { if (L.r === 1) stunArcs(to, v, s, info); if (L.r === 2) flames(to, v, s); } }; },
   muzzleAt(B, m, kk, c, aim, s, info) { const L = lvOf(B), k = G(s), n = gunsOf(L.M), i = kk % n;
     const fxF = { recoil: 1, flash: 1 }; // firing: the cluster spins fast
@@ -103,11 +116,11 @@ const P2 = {
   },
   paths: [
     { name: "Power", theme: "armour-piercing", steps: [
-      { name: "Heavier Rounds", cost: 55, effect: "+6 damage", options: [{ key: "C", name: "Reinforced Breech", desc: "A heavy breech block behind the barrels. Extra guns get a gun shield (your note)." }] },
-      { name: "Hardened Tips", cost: 40, effect: "Ignores 2 armour", options: [{ key: "C", name: "Marked Shroud", desc: "Two accent bands on the front shroud ring, over the barrels and at the muzzle wherever it is (your note); on extra guns too." }] },
-      { name: "AP Rounds", cost: 405, effect: "Ignores 50% of armour; +6 damage (primary)", options: [{ key: "C", name: "Armour Cheeks", desc: "Angled armour plates on both cheeks of the body; dark-cored rounds." }] },
-      { name: "Tungsten Core", cost: 1085, effect: "Ignores 75% of armour; +8 damage", options: [{ key: "B", name: "Counterweight", desc: "A heavy hazard-striped counterweight on the back." }] },
-      { name: "Sabot Rounds", cost: 2475, effect: "Ignores armour fully; 44 damage per hit (mastery)", options: [{ key: "B", name: "Gold-Banded Gun", desc: "The marked shroud bands turn gold instead of a new shroud being drawn (your note), with a gold ring round the body and a hot core." }] },
+      { name: "Heavier Rounds", cost: 55, effect: "+6 damage", options: [{ key: "C", name: "Reinforced Breech", desc: "A heavy breech block behind the barrels; extra guns get a gun shield. Rounds: a thicker tracer with a heavier head." }] },
+      { name: "Hardened Tips", cost: 40, effect: "Ignores 2 armour", options: [{ key: "C", name: "Marked Shroud", desc: "Two accent bands on the front shroud ring, over the barrels and at the muzzle wherever it is; on extra guns too. Rounds: a dark steel tip." }] },
+      { name: "AP Rounds", cost: 405, effect: "Ignores 50% of armour; +6 damage (primary)", options: [{ key: "C", name: "Armour Cheeks", desc: "Angled armour plates on both cheeks of the body. Rounds: a dark core with a yellow AP band." }] },
+      { name: "Tungsten Core", cost: 1085, effect: "Ignores 75% of armour; +8 damage", options: [{ key: "B", name: "Counterweight", desc: "A heavy hazard-striped counterweight on the back. Rounds: a white-hot tungsten core." }] },
+      { name: "Sabot Rounds", cost: 2475, effect: "Ignores armour fully; 44 damage per hit (mastery)", options: [{ key: "B", name: "Gold-Banded Gun", desc: "The marked shroud bands turn gold instead of a new shroud being drawn (your note), with a gold ring round the body and a hot core. Rounds: a slim sabot dart that sheds its petals at the muzzle, with a gold streak." }] },
     ] },
     { name: "Range/Visibility", theme: "precision", steps: [
       { name: "Long Barrel", cost: 25, effect: "+20 range", options: [{ key: "A", name: "Longer Barrels", desc: "The barrels are swapped for longer ones instead of an extension laid over them (your note), on extra guns too." }] },
