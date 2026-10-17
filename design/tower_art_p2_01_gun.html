@@ -619,7 +619,7 @@ const NO_BOOT = true;
 //   targets, and get Power's shielding (from Power 1) and marked shroud, Range's barrels, and the Retrofit's jacket,
 //   coils or fuel line.
 // - The Water Jacket and Coil Wraps grow with the longer Range barrels.
-const PAGE = { title: "Gun Turret: paths and Retrofits (second pass)", store: "bl-tower-art-p2-gun-r3" };
+const PAGE = { title: "Gun Turret: paths and Retrofits (second pass)", store: "bl-tower-art-p2-gun-r4" };
 const GOLD = [1, 0.78, 0.3, 1], RED_TIP = [1, 0.3, 0.25, 1], STEEL = [0.42, 0.45, 0.5, 1];
 const SHOCK = [0.6, 0.85, 1, 1], FIRE = [1, 0.55, 0.2, 1], WATER = [0.3, 0.42, 0.5, 1];
 const rnd2 = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
@@ -627,7 +627,6 @@ const spinOf = (fx, t) => t * (fx.recoil > 0 || fx.flash > 0 ? 30 : 3);
 function longTracer(f, to, u, col, w) { const a = lerp(f, to, Math.max(0, u - 0.6)), b = lerp(f, to, u); line(a, b, A(col, 0.35), w * 2.4); line(a, b, A(col, 0.95), w); line(a, b, [1, 1, 1, 0.8], w * 0.35); }
 function stunArcs(to, v, s, info) { if (!info || !info.sh || info.sh.m % 20 !== 0 || v >= 1) return; for (let i = 0; i < 4; i++) { const a = rnd2(i + Math.floor(v * 12)) * TAU; line(to, add(to, mul(fa(a), s * 0.16)), A(SHOCK, 1 - v), 1.4); } glowDot(to, s * 0.06 * (1 - v), SHOCK); }
 function flames(to, v, s) { if (v >= 1) return; for (let i = 0; i < 3; i++) { const q = fmod(v * 2 + i / 3, 1); disc(add(to, [(i - 1) * s * 0.05, -q * s * 0.18]), s * 0.035 * (1 - q), A(i % 2 ? FIRE : [1, 0.85, 0.3, 1], 1 - q)); } }
-function bore(p, k, w, fx) { disc(p, w * 0.6 * k, BORE); const f = Math.max(0, (fx.flash - 0.35) / 0.65); if (f > 0) { disc(p, w * 0.5 * k, [1, 0.92, 0.7, f]); disc(p, w * 0.9 * k * f, [1, 0.95, 0.8, 0.35 * f]); } }
 function gear(p, r, k, t, n, col) { const pts = []; for (let i = 0; i < n * 2; i++) pts.push(mul(fa(t + i * Math.PI / n), i % 2 ? r * 0.78 : r)); solid(p, pts, col || METAL_L, 0, k, 0.8); disc(p, r * 0.35 * k, METAL_D); }
 function vapourAt(p, fx, s) { if (fx.flash > 0.6) smokePuff(add(p, [0, -s * 0.05]), 1 - fx.flash, s * 0.5, 0.35); }
 
@@ -651,7 +650,12 @@ function cluster(c0, a, k, fx, t, x0, x1, rad, w, n, ringCol, R) { const sp = sp
   const bs = []; for (let i = 0; i < n; i++) bs.push({ y: Math.sin(sp + i * TAU / n) * rad, z: Math.cos(sp + i * TAU / n) }); bs.sort((p, q) => p.z - q.z);
   for (const b of bs) { bar(P(c0, a, k, x0 - rc, b.y), P(c0, a, k, x1 - rc, b.y), w * k, mix(METAL_D, METAL_L, 0.5 + 0.5 * b.z));
     if (R >= 3 && b.z > 0) for (let x = x0 + 4; x <= x1 - 2; x += 1.8) line(P(c0, a, k, x - rc, b.y - w * 0.3), P(c0, a, k, x + 0.9 - rc, b.y + w * 0.3), lt(METAL_L, 0.35), 0.6 * k); }
-  for (const x of [x0 + 3, x1 - 1]) bar(P(c0, a, k, x - rc, -rad - 1.4), P(c0, a, k, x - rc, rad + 1.4), 1.5 * k, ringCol || METAL_L); }
+  for (const x of [x0 + 3, x1 - 1]) bar(P(c0, a, k, x - rc, -rad - 1.4), P(c0, a, k, x - rc, rad + 1.4), 1.5 * k, ringCol || METAL_L);
+  for (const b of bs) disc(P(c0, a, k, x1 - rc, b.y), w * 0.32 * k, A(BORE, 0.55 + 0.45 * Math.max(0, b.z)));
+  flashTip(P(c0, a, k, x1 - rc, bs[bs.length - 1].y), k, w, fx); }
+// The firing barrel is the one on top of the spinning cluster: its lateral offset at time t.
+const topBarrelY = (t, fx, rad, n) => { const sp = spinOf(fx, t); let best = -2, y = 0; for (let i = 0; i < n; i++) { const z = Math.cos(sp + i * TAU / n); if (z > best) { best = z; y = Math.sin(sp + i * TAU / n) * rad; } } return y; };
+function flashTip(p, k, w, fx) { const f = Math.max(0, (fx.flash - 0.35) / 0.65); if (f > 0) { disc(p, w * 0.45 * k, [1, 0.92, 0.7, f]); disc(p, w * 1.2 * k * f, [1, 0.95, 0.8, 0.3 * f]); } }
 
 // What's on every gun's barrels: the Retrofit sleeve, then Power's marked shroud on the front ring.
 function barrelKit(c0, a, k, fx, t, x0, x1, half, Lv, gold, col) { const rc = fx.recoil * 1.5;
@@ -668,8 +672,9 @@ const P2 = {
       shot: (f, to, u, s, col) => { const c2 = L.r === 2 ? FIRE : col; if (L.R >= 2) longTracer(f, to, u, c2, 1.5); else tracer(f, to, u, c2, 1.4, 0.2); if (L.P >= 3) disc(lerp(f, to, u), 1.6, [0.15, 0.12, 0.1, 1]); },
       impactFx: (to, v, s, col, info) => { if (L.r === 1) stunArcs(to, v, s, info); if (L.r === 2) flames(to, v, s); } }; },
   muzzleAt(B, m, kk, c, aim, s, info) { const L = lvOf(B), k = G(s), n = gunsOf(L.M), i = kk % n;
-    if (i === 0) return P(c, aim, k, mainLen(L.R) + 1, 0);
-    const a = (info.view.ex && info.view.ex[i]) ?? aim; return P(P(c, aim, k, ...mountOf(i)), a, k, extraLen(L.R) + 1, 0); },
+    const fxF = { recoil: 1, flash: 1 }; // firing: the cluster spins fast
+    if (i === 0) return P(c, aim, k, mainLen(L.R), topBarrelY(info.t, fxF, 3.4, 4));
+    const a = (info.view.ex && info.view.ex[i]) ?? aim; return P(P(c, aim, k, ...mountOf(i)), a, k, extraLen(L.R), L.M >= 3 ? topBarrelY(info.t, fxF, 2.4, 4) : 0); },
   model(c, aim, s, fx, t, col, info, B) {
     const L = lvOf(B), k = G(s), rc = fx.recoil * 1.5, len = mainLen(L.R), n = gunsOf(L.M), gold = L.P >= 5 || L.M >= 5;
     const ex = extraAims(info, c, aim, k, n), drum = L.M >= 5 ? P(c, aim, k, -7, 6) : P(c, aim, k, -1, 8.5);
@@ -683,7 +688,6 @@ const P2 = {
     // The main gun: barrels swapped longer at Range 1, fluted at Range 3; the Retrofit sleeve; the marked shroud.
     cluster(c, aim, k, fx, t, 5, len, 3.4, 1.8, 4, L.M >= 5 ? GOLD : METAL_L, L.R);
     barrelKit(c, aim, k, fx, t, 9, len - 3, 3.4, L, gold, col);
-    bore(P(c, aim, k, len + 1 - rc, 0), k, 3, fx);
     if (L.r === 0) vapourAt(P(c, aim, k, len + 1, 0), fx, s);
     if (L.P >= 1) { plate(P(c, aim, k, 4.5 - rc, 0), rectPts(2.2, 5.4), STEEL, aim, k, 1); rivets(P(c, aim, k, 4.5 - rc, 0), rectPts(2.2, 5.4), aim, k, 0.7, 0.6 * k); }
     // The drum (red ring from Range 2's tracers), the body, its cheeks, the lens crown and the gold mastery ring.
@@ -699,7 +703,7 @@ const P2 = {
       if (L.M >= 3) cluster(mp, a, k, fx, t, 1, el, 2.4, 1.4, 4, L.M >= 5 ? GOLD : METAL_L, L.R);
       else { bar(P(mp, a, k, 1 - rc, 0), P(mp, a, k, el - rc, 0), 1.8 * k, METAL_L); if (L.R >= 3) for (let x = 4; x <= el - 2; x += 1.8) line(P(mp, a, k, x - rc, -0.6), P(mp, a, k, x + 0.9 - rc, 0.6), lt(METAL_L, 0.35), 0.5 * k); }
       barrelKit(mp, a, k, fx, t, 4, el - 2, L.M >= 3 ? 2.4 : 1, L, gold, col);
-      bore(P(mp, a, k, el + 1 - rc, 0), k, L.M >= 3 ? 2.2 : 1.6, fx);
+      if (L.M < 3) { disc(P(mp, a, k, el - rc, 0), 0.6 * k, BORE); flashTip(P(mp, a, k, el - rc, 0), k, 1.8, fx); }
       plate(mp, ngon(6, 1, 0), METAL_L, a, 5 * k, 1.1); orb(mp, 2.6 * k, METAL); glowDot(P(mp, a, k, 1, 0), 0.8 * k, col);
       if (L.P >= 1) plate(P(mp, a, k, 3, 0), [[0.8, -3.6], [0.8, 3.6], [-0.8, 3], [-0.8, -3]], STEEL, a, k, 0.9);
       if (L.r === 0) vapourAt(P(mp, a, k, el + 1, 0), fx, s);

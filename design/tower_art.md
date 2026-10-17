@@ -406,7 +406,8 @@ paths work together.
 - Multi-Target 1 is now **A Geared Swivel Ring** (was Bearing Rollers).
 - Multi-Target 4 is now **C Feed Gears** (was Ammo Hopper): spinning gears on the body and on every extra gun's mount.
 - The Water Jacket loses its tank and hose.
-- No blue muzzle glow: each muzzle is a dark bore with a short pale flash per shot.
+- No blue muzzle glow. The single bore floating in front of the cluster is gone (owner): each barrel has its own bore
+  at its tip, and a short pale flash shows at the firing barrel. Shots leave that barrel.
 
 ## Open questions
 
