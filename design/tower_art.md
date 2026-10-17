@@ -42,7 +42,7 @@ enemies on the lane and flyers overhead (air-only towers ignore the ground, and 
 |---|---|---|---|
 | 1 | Gun Turret, Mortar Tower, Laser Tower, Rocket Salvo, Anti-Aircraft Turret | `design/tower_art_1.html` | **Confirmed** (round 2) |
 | 2 | Artillery Cannon, Railgun, Tesla Tower, Drone Bay, CAS Gunship | `design/tower_art_2.html` | **Confirmed** (round 3) |
-| 3 | Mine Layer, Chemical Plant, Boost Tower, Radar Tower, Cryo Tower | `design/tower_art_3.html` | Round 2: picks open |
+| 3 | Mine Layer, Chemical Plant, Boost Tower, Radar Tower, Cryo Tower | `design/tower_art_3.html` | Round 3: mine placement change to confirm |
 | 4 | Shockwave Generator, Scrapyard, Magneto Tower, Tractor Tower, Augmentation Tower | `design/tower_art_4.html` | Not started |
 
 ## Page 1, in-game style round 1 (towers 1-5)
@@ -240,9 +240,23 @@ None of these five fires ordinary shots, so each preview runs the tower's own me
 - **Cryo Tower:** new animations **D Snow Squall**, **E Ice Spike Ring** and **F Fog Jets**. Compressor Block is
   preselected.
 
-**Picks:** to come.
+**Picks (owner, round 2):**
+
+| Tower | Look | Animation | Notes |
+|---|---|---|---|
+| Mine Layer | F Rail Launcher | C Confetti Charge | Animation: "Lay the mines in random positions on the track" |
+| Chemical Plant | F Distillery Columns | A Acid Stream | |
+| Boost Tower | F Signal Drum | F Overcharge Sparks | |
+| Radar Tower | A Dish Mast | B Sweep Beam | |
+| Cryo Tower | B Compressor Block | C Creeping Mist | |
+
+## Page 3, round 3
+
+- **Mine Layer:** mines now land at random spots anywhere along the track in reach, and across its width, instead of near
+  the tower.
+- Everything else is preselected as picked.
 
 ## Open questions
 
-1. **Page 3 picks** (round 2), and whether the Mine Layer red-orange stands.
+1. **Page 3, round 3:** the random mine placement, and whether the Mine Layer red-orange stands.
 2. Page 4, then the second pass (per-path looks and Retrofit looks).

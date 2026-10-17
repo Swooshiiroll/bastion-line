@@ -51,7 +51,7 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Tower rework · Tower art · page 3 of 4: towers 11-15 (in-game style, round 2)</div>
+    <div class="eyebrow">Bastion Line · Tower rework · Tower art · page 3 of 4: towers 11-15 (in-game style, round 3)</div>
     <h1>Tower art: towers 11-15</h1>
     <p class="note">The reworked towers' <b>models</b>, first pass: for each tower pick its <b>look</b> and its <b>firing animation</b> from three proposals each (A to C), and add notes. Mix freely. <b>Your combination</b> shows your mix (option A until you pick). Every preview runs live: the turret tracks and fires at enemies on the lane (flyers for air towers). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back. Spec: <code>design/tower_art.md</code>.</p>
     <ul class="rules">
@@ -379,7 +379,7 @@ function noses(c, aim, k, tubes, fx, r) { const ready = fx.ready ?? 1; if (ready
 // ---- Tower art page 3: towers 11-15, in the style of today's in-game towers (owner, 2026-10-16) ----------
 // Shared style helpers come from game_style.js. Every tower here is a persistent agent (mines on the track, soaks,
 // boosts, pings, cold waves) rather than a turret firing shots.
-const PAGE = { title: "Tower art page 3 (towers 11-15)", store: "bl-tower-art-3-game-v2" };
+const PAGE = { title: "Tower art page 3 (towers 11-15)", store: "bl-tower-art-3-game-v3" };
 
 const rnd = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
 const distTo = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
@@ -389,9 +389,9 @@ const FROST = [0.8, 0.92, 1, 1], ACID = [0.55, 1, 0.3, 1];
 // ---- Mine Layer: mines tossed onto the track wait there and go off when a ground enemy rolls over them ----------
 function mineAgent(cfg) { return (m, t, info, s, col) => { const k = G(s), laneY = info.H * 0.8;
   if (!m.mines) { m.mines = []; m.lastToss = t - 1; m.n = 0; }
-  const pick = (n) => [Math.max(s * 0.3, Math.min(info.W - s * 0.3, info.c[0] + (rnd(n * 3.1) - 0.25) * s * 3)), laneY + (rnd(n * 7.7) - 0.5) * s * 0.16];
-  if (!m.next) m.next = pick(m.n + 1); m.aimAt = m.next;
-  if (t - m.lastToss >= 1.5 && m.mines.filter((q) => !q.boom).length < 6) { m.n++; m.mines.push({ to: m.next, t0: t, from: add(info.c, mul(norm(sub(m.next, info.c)), s * 0.3)), n: m.n }); m.lastToss = t; m.next = pick(m.n + 1); }
+  const pick = () => [s * 0.25 + Math.random() * (info.W - s * 0.5), laneY + (Math.random() - 0.5) * s * 0.3]; // random spots along and across the track (owner)
+  if (!m.next) m.next = pick(); m.aimAt = m.next;
+  if (t - m.lastToss >= 1.5 && m.mines.filter((q) => !q.boom).length < 6) { m.n++; m.mines.push({ to: m.next, t0: t, from: add(info.c, mul(norm(sub(m.next, info.c)), s * 0.3)), n: m.n }); m.lastToss = t; m.next = pick(); }
   for (const q of m.mines) { const age = t - q.t0;
     if (q.boom) { cfg.boom(q.to, (t - q.boom) / 0.6, s, col, q.n); continue; }
     if (age < cfg.flight) { cfg.fly(q.from, q.to, age / cfg.flight, s, col, info.look, t); continue; }
@@ -441,7 +441,7 @@ function coldAgent(cfg) { return (m, t, info, s, col) => { if (!m.cold) { m.cold
 const TOWERS = [
   // 11. Mine Layer --------------------------------------------------------------------------------------
   { id: "mines", num: 11, name: "Mine Layer", cls: "Defense", weapon: "Explosive", hits: "ground", color: [1.00, 0.40, 0.25, 1],
-    desc: "Manufactures and tosses explosive mines onto the track that explode when an enemy passes over them. \"You know it's a party when the high-speed confetti start flying in every direction.\" Ground and burrowed enemies set them off; up to 20 on the track (the preview caps at 6). The look sets the fabricator and its mine. (Colour: a new red-orange; no in-game counterpart.)",
+    desc: "Manufactures and tosses explosive mines onto the track that explode when an enemy passes over them. \"You know it's a party when the high-speed confetti start flying in every direction.\" Ground and burrowed enemies set them off; up to 20 on the track (the preview caps at 6). Mines land at random spots along and across the track (round 3). The look sets the fabricator and its mine. (Colour: a new red-orange; no in-game counterpart.)",
     looks: [
       { key: "A", name: "Arm Fabricator", muzzle: 0.3, theme: "A boxy fabricator with a press hatch and a throwing arm that swings round to fling each new mine. Mine: a flat disc with a blinking red-orange light.",
         draw(c, aim, s, fx, t, col) { const k = G(s), mm = fx.mem || {}, sw = decay(t - (mm.lastToss ?? -9), 0.35); deck(c, k, col, t);
@@ -677,7 +677,7 @@ const TOWERS = [
           for (let j = 0; j < 4; j++) { const d = fa(Math.PI / 4 + j * Math.PI / 2); for (let i = 0; i < 7; i++) { const q = (i + 1) / 7; if (q > u) break; const spread = q * q * R * 0.5; for (const sg of [-1, 0, 1]) disc(add(add(c, mul(d, R * q)), mul(orth(d), sg * spread)), s * (0.08 + q * 0.12), A(FROST, 0.18 * a)); } } } }) },
     ] },
 ];
-const DEFAULTS = { mines: { anim: "C" }, chem: { anim: "A" }, radar: { look: "A", anim: "B" }, cryo: { look: "B" } };
+const DEFAULTS = { mines: { look: "F", anim: "C" }, chem: { look: "F", anim: "A" }, boost: { look: "F", anim: "F" }, radar: { look: "A", anim: "B" }, cryo: { look: "B", anim: "C" } };
 
 // ---- Tower art engine: previews towers aiming and firing at enemies on a lane --------------------------
 // Data (defined before this): PAGE {title, key, store}, TOWERS [...], DEFAULTS {id: {look, anim}}.
