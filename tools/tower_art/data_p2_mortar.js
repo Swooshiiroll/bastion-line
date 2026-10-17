@@ -4,7 +4,7 @@
 // carries the other paths' details and the Retrofit's; each Power step changes the shells.
 // Geometry (game px, x along the aim, y to the side): tube from x -1 to its bore at x 9, 11 wide; bore r 6.8; four
 // braced legs on the diagonals (r 15); recoil spade at x -10; octagonal mount r 8.5.
-const PAGE = { title: "Mortar Tower: paths and Retrofits (second pass)", store: "bl-tower-art-p2-mortar-r1f" };
+const PAGE = { title: "Mortar Tower: paths and Retrofits (second pass)", store: "bl-tower-art-p2-mortar-r1g" };
 const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], COPPER = [0.78, 0.5, 0.28, 1], RED = [0.85, 0.2, 0.18, 1];
 const DARKSHELL = [0.2, 0.2, 0.22, 1], YEL = [1, 0.85, 0.2, 1], SMOKE = [0.6, 0.62, 0.64, 1], SAND = [0.62, 0.55, 0.4, 1];
 const rnd2 = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
@@ -61,24 +61,13 @@ function mortarImpact(to, v, s, col, info, B) { const k = G(s), size = 0.45 * BL
 // ---- The model ---------------------------------------------------------------------------------------------------
 function rack(c, aim, k, x, y, n, shellCol, band, vertical) { plate(P(c, aim, k, x, y), rectPts(vertical ? 1.8 : n * 1.6 + 0.6, vertical ? n * 1.6 + 0.6 : 1.8), METAL_D, aim, k, 0.9);
   for (let i = 0; i < n; i++) { const q = vertical ? P(c, aim, k, x, y + (i - (n - 1) / 2) * 3) : P(c, aim, k, x + (i - (n - 1) / 2) * 3, y); orb(q, 1.3 * k, shellCol); if (band) disc(q, 0.5 * k, band); } }
-// The mouth of an angled tube seen from above: an ellipse squashed along the aim (the opening faces up and forward).
-function ell(p, rx, ry, a, col, w) { X.strokeStyle = css(col); X.lineWidth = w; X.beginPath(); X.ellipse(p[0], p[1], Math.max(0.1, rx), Math.max(0.1, ry), a, 0, TAU); X.stroke(); }
-const MOUTH = 0.85, RX = 1.4; // RX widens the mouth along the aim, near round like the original // mouth size relative to the old round bore, so the rim sits just outside the tube's sides
-function bore(p, k, f0, col, fx, B, flash, aim) { const f = f0 * MOUTH; const PM = Kp(B, 0, 4), X1 = Kp(B, 2, 0), P2s = Kp(B, 0, 1), S2 = Kp(B, 1, 1), sq = 0.58;
-  oval(p, 3.9 * RX * k * f, 6.9 * k * f, aim, METAL_L, 1.2); oval(add(p, mul(LIGHT, 0.4 * k)), 3.5 * k * f, 6.2 * k * f, aim, lt(METAL_L, 0.12));
-  if (X1 === "A") ell(p, 3.6 * RX * k * f, 6.4 * k * f, aim, STEEL, 1.6 * k);
-  if (S2 === "C") for (let i = 0; i < 8; i++) { const an = i * TAU / 8, q0 = add(p, rot([Math.cos(an) * 2.7 * RX * k * f, Math.sin(an) * 4.6 * k * f], aim)), q1 = add(p, rot([Math.cos(an) * 3.6 * RX * k * f, Math.sin(an) * 6.3 * k * f], aim)); line(q0, q1, [0, 0, 0, 0.5], 1 * k); }
-  if (PM === "B") ell(p, 3.5 * RX * k * f, 6.1 * k * f, aim, GOLD, 1.2 * k);
-  oval(p, 2.6 * RX * k * f, 4.5 * k * f, aim, BORE); if (P2s === "B") ell(p, 2.3 * RX * k * f, 3.9 * k * f, aim, COPPER, 0.9 * k);
-  oval(p, 1.9 * RX * k * f, 3.3 * k * f, aim, A(col, 0.25 + 0.75 * flash)); if (flash > 0) glowDot(p, 3.2 * k * f * flash, col); }
-// The tube, as the original draws it: one shaded barrel with a rounded back end (bar), plus trunnion pins and a slight
-// flare band near the mouth. Its shadow is drawn separately, on the deck under the mount (tubeShadow).
-function tubeShadow(c, aim, k, x, y, L, w) { const x0 = x - 1, x1 = x + L;
-  line(add(P(c, aim, k, x0, y), [k, 2 * k]), add(P(c, aim, k, x1, y), [3 * k, 5 * k]), [0, 0, 0, 0.22], w * k); }
-function angledTube(c, aim, k, x, y, L, w, r) { const x0 = x - 1 - r, x1 = x + L - r;
-  bar(P(c, aim, k, x0, y), P(c, aim, k, x1, y), w * k, METAL_L);
-  bar(P(c, aim, k, x1 - 2.2, y - w * 0.56), P(c, aim, k, x1 - 2.2, y + w * 0.56), 1.6 * k, lt(METAL_L, 0.08)); // flare band
-  for (const sg of [-1, 1]) { const tp = P(c, aim, k, x0 + (L + 1) * 0.3, y + sg * (w * 0.5 + 0.9)); disc(tp, 1.6 * k, OUTLINE); disc(tp, 1.2 * k, STEEL); } } // trunnion pins
+function bore(p, k, f, col, fx, B, flash) { const PM = Kp(B, 0, 4), X1 = Kp(B, 2, 0), P2s = Kp(B, 0, 1), S2 = Kp(B, 1, 1);
+  disc(p, 6.8 * k * f, OUTLINE); disc(p, 6.2 * k * f, METAL_L); ring(p, 5.4 * k * f, lt(METAL_L, 0.3), 1 * k);
+  if (X1 === "A") ring(p, 6.2 * k * f, STEEL, 1.6 * k);
+  if (S2 === "C") for (let i = 0; i < 8; i++) { const a = i * TAU / 8; line(add(p, mul(fa(a), 4.6 * k * f)), add(p, mul(fa(a), 6.4 * k * f)), [0, 0, 0, 0.5], 1 * k); }
+  if (PM === "B") ring(p, 6 * k * f, GOLD, 1.2 * k);
+  disc(p, 4.4 * k * f, BORE); if (P2s === "B") ring(p, 3.8 * k * f, COPPER, 0.9 * k);
+  disc(p, 3.3 * k * f, A(col, 0.25 + 0.75 * flash)); if (flash > 0) glowDot(p, 3.6 * k * f * flash, col); }
 
 const P2 = {
   tower: "mortar", look: "C", anim: "A",
@@ -94,7 +83,6 @@ const P2 = {
     // Field Kit: a sandbag ring or a steel baseplate under the mount.
     if (B.r === 0 && B.key("r0") === "A") for (let i = 0; i < 14; i++) { const q = add(c, mul(fa(i * TAU / 14), 17 * k)); shadedOval(q, 2.8 * k, 1.7 * k, i * TAU / 14 + Math.PI / 2, SAND); }
     if (B.r === 0 && B.key("r0") === "B") plate(c, rectPts(15, 15), STEEL, aim, k, 1.2);
-    for (let i = 0; i < n; i++) { const [x, y] = tubeAt(T, i, fx.shots); tubeShadow(c, aim, k, x, y, L, 11 * f); }
     // Legs, foot pads and the recoil spade (with the Ready Rack on it).
     for (let i = 0; i < 4; i++) { const a = Math.PI / 4 + i * Math.PI / 2, ft = P(c, aim, k, Math.cos(a) * 15, Math.sin(a) * 15);
       bar(P(c, aim, k, Math.cos(a) * 6, Math.sin(a) * 6), ft, 3 * k, lt(METAL_D, 0.12)); bar(P(c, aim, k, Math.cos(a) * 7, Math.sin(a) * 7), P(c, aim, k, Math.cos(a) * 11, Math.sin(a) * 11), 1.3 * k, METAL_L);
@@ -129,9 +117,8 @@ const P2 = {
       if (st === "C") for (const y of [8.5, 11.5]) { disc(P(c, aim, k, -6, y), 1.6 * k, OUTLINE); disc(P(c, aim, k, -6, y), 1.2 * k, BORE); } }
     // The tubes, each with the same kit; the one that fired last recoils.
     for (let i = 0; i < n; i++) { const [x, y] = tubeAt(T, i, fx.shots), r = (i === last ? decay(fx.barrelSince ?? 9, 0.3) : 0) * 2.5, w = 11 * f;
-      angledTube(c, aim, k, x, y, L, w, r);
+      bar(P(c, aim, k, x - 1 - r, y), P(c, aim, k, x + L - r, y), w * k, METAL_L);
       const tb = (fr) => P(c, aim, k, x - 1 + (L + 1) * fr - r, y);
-      const em = (an, rr) => add(tb(1), rot([Math.cos(an) * rr * 0.58 * RX * MOUTH, Math.sin(an) * rr * MOUTH], aim)); // a point on the mouth's ellipse
       if (Kp(B, 0, 0) === "A") for (const fr of [0.35, 0.6]) line(add(tb(fr), mul(orth(fa(aim)), w * 0.5 * k)), add(tb(fr), mul(orth(fa(aim)), -w * 0.5 * k)), RED, 1.1 * k);
       if (Kp(B, 0, 2) === "A") line(add(tb(0.45), mul(orth(fa(aim)), w * 0.5 * k)), add(tb(0.45), mul(orth(fa(aim)), -w * 0.5 * k)), YEL, 1.2 * k);
       if (Kp(B, 0, 2) === "B") plate(tb(0.08), rectPts(1.6, w * 0.55), STEEL, aim, k, 1);
@@ -144,13 +131,13 @@ const P2 = {
       if (Kp(B, 2, 1) === "C") hazard(c, aim, k, x - r + 1, x - r + 4, y + w * 0.5, [1, 0.55, 0.2, 1], 0.9);
       if (B.lv[2] >= 5 && Kp(B, 2, 4) === "B") for (const fr of [0.3, 0.55]) line(add(tb(fr), mul(orth(fa(aim)), w * 0.5 * k)), add(tb(fr), mul(orth(fa(aim)), -w * 0.5 * k)), GOLD, 1 * k);
       if (Kp(B, 0, 1) === "C") glowDot(add(tb(1), mul(orth(fa(aim)), w * 0.55 * k)), 0.6 * k, RED);
-      if (Kp(B, 2, 3) === "C") for (let j = 0; j < 4; j++) { const a = Math.PI / 4 + j * Math.PI / 2; line(em(a, 5.6 * k * f), em(a, 8.2 * k * f), METAL_L, 1 * k); }
-      if (Kp(B, 2, 2) === "C") for (let j = 0; j < 3; j++) disc(em(j * TAU / 3 + 0.5, 6.6 * k * f), 1 * k, METAL_D);
+      if (Kp(B, 2, 3) === "C") for (let j = 0; j < 4; j++) { const a = aim + Math.PI / 4 + j * Math.PI / 2; line(add(tb(1), mul(fa(a), 5 * k * f)), add(tb(1), mul(fa(a), 7.5 * k * f)), METAL_L, 1 * k); }
+      if (Kp(B, 2, 2) === "C") for (let j = 0; j < 3; j++) { const a = aim + j * TAU / 3; disc(add(tb(1), mul(fa(a), 6.4 * k * f)), 1 * k, METAL_D); }
       if (Kp(B, 1, 3) === "C") for (const sg of [-1, 1]) bar(tb(0.7), add(tb(0.4), mul(orth(fa(aim)), sg * w * 0.8 * k)), 0.9 * k, STEEL);
       if (B.r === 0 && i === 0) bar(add(tb(0.3), mul(orth(fa(aim)), -w * 0.55 * k)), add(tb(0.75), mul(orth(fa(aim)), -w * 0.55 * k)), 1.1 * k, METAL_D);
-      if (Kp(B, 0, 0) === "B") ell(tb(1), 4.1 * RX * k * f * MOUTH, 7.1 * k * f * MOUTH, aim, STEEL, 1.8 * k);
-      if (Kp(B, 0, 3) === "B") for (let j = 0; j < 4; j++) { const a = j * Math.PI / 2; line(em(a, 4.6 * k * f), em(a, 6.4 * k * f), [0, 0, 0, 0.5], 0.8 * k); }
-      bore(tb(1), k, f, col, fx, B, i === last ? fx.flash : 0, aim); }
+      if (Kp(B, 0, 0) === "B") ring(tb(1), 6.9 * k * f, STEEL, 1.6 * k);
+      if (Kp(B, 0, 3) === "B") for (let j = 0; j < 4; j++) { const a = aim + j * Math.PI / 2; line(add(tb(1), mul(fa(a), 4.4 * k * f)), add(tb(1), mul(fa(a), 6 * k * f)), [0, 0, 0, 0.5], 0.8 * k); }
+      bore(tb(1), k, f, col, fx, B, i === last ? fx.flash : 0); }
     // The Loader Arm swings to the bore after each shot; the Bunker Sight's periscope; the twin cradle's sight.
     if (Kp(B, 1, 0) === "B") { const sw = decay(fx.barrelSince ?? 9, 0.6), a = aim + Math.PI * 0.75 - sw * 1.2, base = P(c, aim, k, -4, 8); orb(base, 1.6 * k, METAL); bar(base, add(base, mul(fa(a), 9 * k)), 1.4 * k, METAL_L); }
     if (T.cradle) { orb(P(c, aim, k, -4, 0), 1.6 * k, METAL); glowDot(P(c, aim, k, -3.4, 0), 0.6 * k, col); }
