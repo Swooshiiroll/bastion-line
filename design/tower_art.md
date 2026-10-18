@@ -821,6 +821,9 @@ hatches, with the autocannon port and the missile bay appearing at their first s
 door and a second autocannon port. Paths 1 and 3 are both green as written; they are told apart by their places on the
 fuselage. If path 3 should be a different colour (blue, say), say so. The Retrofit parts moved so they don't cover the tallies.
 
+**Fix (owner: "move the second autocannon to the other side of the plane"):** the Autocannon Battery's second port is now on the other
+(outer) side of the fuselage, just aft of the wing, instead of beside the first; its shells leave from there.
+
 ## Open questions
 
 1. **Second pass, CAS Gunship** (tower 10, round 1): pick one option per stage and Retrofit. Then towers 11-20 (next: Mine Layer).
