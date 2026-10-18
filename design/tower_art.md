@@ -384,7 +384,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 7 | Railgun | `design/tower_art_p2_07_railgun.html` | **Confirmed** (owner, 2026-10-18: "Railgun finished"; the larger drum is for the twin build only) |
 | 8 | Tesla Tower | `design/tower_art_p2_08_tesla.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 9 | Drone Bay | `design/tower_art_p2_09_drones.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
-| 10 | CAS Gunship | `design/tower_art_p2_10_cas.html` | Round 2: all picks drawn; awaiting confirm |
+| 10 | CAS Gunship | `design/tower_art_p2_10_cas.html` | Round 3: all picks drawn, Extra Ammo note applied; awaiting confirm |
 
 ### Gun Turret (second pass)
 
@@ -870,6 +870,9 @@ battery, with a red band from HE rounds).
 missiles are now proper missiles: a white cylindrical body with a band, a pointed red nose cone (gold at Hellfire Volley), small
 tail fins and an exhaust flame, turning along their curved path, with a thinner smoke trail so the missile reads clearly.
 
+**Note (owner, round 2 paste):** "Don't make any visual changes for Extra ammo". The Extra Ammo Retrofit now draws nothing on the plane; its
++10% fire rate shows only in how fast every gun fires. (The ammo-box fairing is gone.)
+
 ## Open questions
 
-1. **Second pass, CAS Gunship** (tower 10, round 2): confirm. Then towers 11-20 (next: Mine Layer).
+1. **Second pass, CAS Gunship** (tower 10, round 3): confirm. Then towers 11-20 (next: Mine Layer).

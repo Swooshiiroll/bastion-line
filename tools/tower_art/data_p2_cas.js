@@ -9,7 +9,7 @@
 // The Retrofit overlaps (kept, stacking: the carpet rule): Extra Ammo's +10% fire rate adds to every gun's fire-rate steps.
 // Geometry (game px, plane frame: x forward, y to the inner side where the guns fire): fuselage x -12 to 13 (5 wide),
 // tail at -11, wing at x 2 (36 across), four engines at y +-6 and +-12, the side door at (1, 3.2).
-const PAGE = { title: "CAS Gunship: paths and Retrofits (second pass)", store: "bl-tower-art-p2-cas-r2" };
+const PAGE = { title: "CAS Gunship: paths and Retrofits (second pass)", store: "bl-tower-art-p2-cas-r3" };
 const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], RED = [0.85, 0.2, 0.18, 1], ORANGE = [1, 0.55, 0.2, 1], YEL = [1, 0.85, 0.2, 1], CYAN = [0.4, 0.9, 1, 1];
 const ZP = 2.0, GREEN_T = [0.35, 1, 0.45, 1]; // the plane is drawn this much bigger than the ground
 const rnd2 = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
@@ -61,10 +61,7 @@ function drawPlane(B, p, h, s, fx, t, col) {
     if (ky === "A") { disc(D(-2, 0), 2.6 * k, OUTLINE); disc(D(-2, 0), 2.1 * k, [0.7, 0.75, 0.8, 0.9]); line(D(-2, 0), add(D(-2, 0), mul(fa(sw), 2 * k)), A(col, 0.9), 0.8 * k); }
     if (ky === "B") { plate(D(11.4, 0.9), rectPts(1.2, 1), METAL_D, h, k, 0.9); glowDot(D(11.7, 0.9), 0.45 * k, A(col, 0.5 + 0.5 * Math.sin(sw))); }
     if (ky === "C") { disc(D(-3.4, 0), 2.3 * k, OUTLINE); disc(D(-3.4, 0), 1.9 * k, METAL_D); line(D(-3.4, 0), add(D(-3.4, 0), mul(fa(sw), 2.1 * k)), A(col, 0.9), 0.8 * k); } }
-  if (B.r === 1) { const ky = B.key("r1");
-    if (ky === "A") { plate(D(-4, -3.9), rectPts(2.4, 1.3), AMMO, h, k, 0.9); }
-    if (ky === "B") { orb(D(-4, -3.8), 1.6 * k, METAL_D); orb(D(-1, -3.7), 1.2 * k, METAL_D); }
-    if (ky === "C") for (let i = 0; i < 3; i++) plate(D(-5 + i * 2.2, -3.8), rectPts(0.9, 1), AMMO, h, k, 0.8); }
+  // Extra Ammo has no visual change (owner): only its +10% fire rate shows, in how fast the guns fire.
   // -- Upgrade tally marks (owner): one stroke on the fuselage's outer side for every step bought, like kill tallies. Path 1 is
   // green, path 2 red, path 3 green; the mastery strikes the four strokes through with a slash and turns that path's marks gold.
   // The option picks the stroke's style (a plain stroke, a bold stroke, a double stroke). Drawn last so nothing covers them.
@@ -206,7 +203,8 @@ const P2 = {
   ],
 };
 // ---- Round 2 (owner's picks, 2026-10-18): every stage shows only the pick; no notes.
-P2.intro = "Round 2: all your picks drawn as one model, nothing left to choose. Use the build preview to check combinations; every path is uncapped, so you can max all three guns.";
+P2.intro = "Round 3: all your picks drawn as one model, nothing left to choose; Extra Ammo has no visual change (your note). Use the build preview to check combinations; every path is uncapped, so you can max all three guns.";
 P2.picks = { p0s0: "A", p0s1: "A", p0s2: "A", p0s3: "A", p0s4: "A", p1s0: "A", p1s1: "A", p1s2: "A", p1s3: "A", p1s4: "A", p2s0: "A", p2s1: "A", p2s2: "A", p2s3: "A", p2s4: "A", r0: "C", r1: "A", r2: "B" };
 P2.paths.forEach((pa, pi) => pa.steps.forEach((st, k) => { const pk = P2.picks["p" + pi + "s" + k]; if (pk) st.options = st.options.filter((o) => o.key === pk); }));
 P2.retrofits.forEach((rf, ri) => { const pk = P2.picks["r" + ri]; if (pk) rf.options = rf.options.filter((o) => o.key === pk); });
+P2.retrofits[1].options[0].desc = "From your note: no visual change. Its +10% fire rate shows only in how fast every gun fires.";
