@@ -645,6 +645,12 @@ tray (it was a round shell with a tail). The page shows only the picks.
 like a cylinder, with wrap-around collar bands and an open mouth (a lip ring, dark bore and charge glow) instead of a
 rounded bar end with a disc.
 
+**Round 1b (owner: "new ideas for Path 1 t3, and tighten up the red rings for Boss marker"):**
+- Power step 3 (Overcharge) has three new options: **Pressure Tanks** (two deck tanks with gauge rings), **Spiral Coil** (a
+  copper helix round the back of the housing that lights turn by turn) and **Arc Pylons** (two pylons throwing sparks to
+  the drum). They replace the bigger drum, the muzzle halo and the cell row.
+- Power step 2, **Boss Marker Ring**: two thin red rings hugging the housing, instead of wide, thick ones.
+
 ## Open questions
 
 1. **Second pass, Railgun** (tower 7, round 1): pick one option per stage and Retrofit. Then towers 8-20 (next: Tesla Tower).
