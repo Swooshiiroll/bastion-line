@@ -65,7 +65,7 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Tower rework · Tower art · second pass · tower 8 of 20 · round 1</div>
+    <div class="eyebrow">Bastion Line · Tower rework · Tower art · second pass · tower 8 of 20 · round 2</div>
     <h1>Tower art: Tesla Tower paths and Retrofits</h1>
     <p class="note">Second pass for one tower: <b>every upgrade step and mastery</b> on each path, and each <b>Retrofit</b>, adds or changes a detail on the confirmed model. Each card shows the model with that path's earlier steps (your picks, or option A until you pick) plus the candidate. Pick one of three per step, add notes per path, then <b>Copy picks and notes</b>.</p>
     <ul class="rules">
@@ -763,7 +763,7 @@ const NO_BOOT = true;
 // Coils take 0.15 s off the recharge on top of the Speed path.
 // Geometry (game px, from the tower's centre): outer toroid R 11 (4 wide) with eight charge nodes, inner toroid R 6.5
 // (3 wide), a spire orb r 3.2; the arcs start at the centre.
-const PAGE = { title: "Tesla Tower: paths and Retrofits (second pass)", store: "bl-tower-art-p2-tesla-r1" };
+const PAGE = { title: "Tesla Tower: paths and Retrofits (second pass)", store: "bl-tower-art-p2-tesla-r2" };
 const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], COPPER = [0.78, 0.5, 0.28, 1], CERAM = [0.86, 0.85, 0.8, 1];
 const YEL = [1, 0.85, 0.3, 1], ORANGE = [1, 0.55, 0.2, 1], MIST = [0.7, 0.62, 0.85, 1];
 const rnd2 = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
@@ -962,7 +962,11 @@ const P2 = {
       { key: "C", name: "Ceramic Sleeves", desc: "Four white ceramic sleeves round the inner ring." } ] },
   ],
 };
-P2.picks = {};
+// ---- Round 2 (owner's picks, 2026-10-18): every stage shows only the pick; no notes.
+P2.intro = "Round 2: all your picks drawn as one model, nothing left to choose. Use the build preview to check combinations; the charge indicators fill in exactly one recharge.";
+P2.picks = { p0s0: "A", p0s1: "B", p0s2: "A", p0s3: "C", p0s4: "C", p1s0: "A", p1s1: "A", p1s2: "A", p1s3: "A", p1s4: "B", p2s0: "A", p2s1: "B", p2s2: "B", p2s3: "C", p2s4: "B", r0: "A", r1: "C", r2: "A" };
+P2.paths.forEach((pa, pi) => pa.steps.forEach((st, k) => { const pk = P2.picks["p" + pi + "s" + k]; if (pk) st.options = st.options.filter((o) => o.key === pk); }));
+P2.retrofits.forEach((rf, ri) => { const pk = P2.picks["r" + ri]; if (pk) rf.options = rf.options.filter((o) => o.key === pk); });
 
 // ---- Tower art engine: previews towers aiming and firing at enemies on a lane --------------------------
 // Data (defined before this): PAGE {title, key, store}, TOWERS [...], DEFAULTS {id: {look, anim}}.

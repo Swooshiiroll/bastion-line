@@ -382,7 +382,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 5 | Anti-Aircraft Turret | `design/tower_art_p2_05_aa.html` | **Confirmed** (owner, 2026-10-17: "AA Finished"; Range 3 is the Optical Director) |
 | 6 | Artillery Cannon | `design/tower_art_p2_06_artillery.html` | **Confirmed** (owner, 2026-10-17: "Artillery finished"; stock scatter kept as drawn, 30 px) |
 | 7 | Railgun | `design/tower_art_p2_07_railgun.html` | **Confirmed** (owner, 2026-10-18: "Railgun finished"; the larger drum is for the twin build only) |
-| 8 | Tesla Tower | `design/tower_art_p2_08_tesla.html` | Round 1: three options per stage; awaiting picks |
+| 8 | Tesla Tower | `design/tower_art_p2_08_tesla.html` | Round 2: all picks drawn; awaiting confirm |
 
 ### Gun Turret (second pass)
 
@@ -731,6 +731,15 @@ bracket, on single and twin builds alike.
   time. The charge indicators fill in exactly one recharge, from the engine's own fire clock (the Railgun lesson).
 - **Deck kit is static;** all parts sit inside the hex.
 
+**Picks (owner, round 1):**
+- **Power/Damage:** 1 A Fat Nodes, 2 B Circuit Traces, 3 A Stun Rods, 4 C Ground Straps, M C Gold Nodes.
+- **Range/Chaining:** 1 A Extra Windings, 2 A Jump Relays, 3 A Storm Rim, 4 A Wide Rim Ring, M B Gold Pylons.
+- **Speed:** 1 A Charge Cells, 2 B Cooling Fins, 3 B Discharge Spokes, 4 C Second Inner Ring, M B Gold Spokes.
+- **Retrofits:** Bigger Disk A (Corona Disk), Grounding Rods C (Stakes and Wire), Insulated Coils A (Ceramic Blocks).
+- No notes.
+
+**Round 2:** every stage is picked; the page shows only the picks.
+
 ## Open questions
 
-1. **Second pass, Tesla Tower** (tower 8, round 1): pick one option per stage and Retrofit. Then towers 9-20 (next: Drone Bay).
+1. **Second pass, Tesla Tower** (tower 8, round 2): confirm. Then towers 9-20 (next: Drone Bay).
