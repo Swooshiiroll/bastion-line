@@ -45,12 +45,12 @@ function drawPlane(B, p, h, s, fx, t, col) {
   const openAmt = (key) => { const sn = since(key), hold = HOLD[key] || 0.4; return sn < hold ? 1 : Math.max(0, 1 - (sn - hold) / 0.25); };
   // The gun wells are always open (no sliding door): a framed dark opening that glows while its gun is firing.
   const hatch = (x, key, w, hh, frameCol, yy) => { const op = openAmt(key), y = yy === undefined ? HY : yy;
-    plate(D(x, y), rectPts(w + 0.35, hh + 0.3), frameCol || STEEL, h, k, 0.8); plate(D(x, y), rectPts(w, hh), BORE, h, k, 0.8);
-    if (op > 0) glowDot(D(x, y), 0.8 * k * op, A(ORANGE, 0.9 * op)); };
-  hatch(6.4, "gat", 1.5, 0.8, PM ? GOLD : STEEL);                                  // light gun: a well forward of the wing (Twin Gatlings adds a second)
-  if (PM) hatch(10.2, "gat", 1.5, 0.8, GOLD);
-  if (B.lv[1] >= 1) { hatch(-6.5, "can", 1.4, 0.8, CM ? GOLD : STEEL); if (CM) hatch(-3.6, "can2", 1.4, 0.8, GOLD, -HY); } // the battery's second autocannon sits on the other side of the plane // medium gun
-  if (B.lv[2] >= 1) for (const wy of [8.6, 11.4]) hatch(0.9, "mis", 1.1, 0.7, MM ? GOLD : STEEL, wy);   // heavy gun: two wells under the inner wing
+    plate(D(x, y), rectPts(w + 0.22, hh + 0.2), frameCol || STEEL, h, k, 0.8); plate(D(x, y), rectPts(w, hh), BORE, h, k, 0.8);
+    if (op > 0) glowDot(D(x, y), 0.5 * k * op, A(ORANGE, 0.9 * op)); };
+  hatch(6.4, "gat", 0.85, 0.5, PM ? GOLD : STEEL);                                  // light gun: a well forward of the wing (Twin Gatlings adds a second)
+  if (PM) hatch(10.2, "gat", 0.85, 0.5, GOLD);
+  if (B.lv[1] >= 1) { hatch(-6.5, "can", 0.8, 0.5, CM ? GOLD : STEEL); if (CM) hatch(-3.6, "can2", 0.8, 0.5, GOLD, -HY); } // the battery's second autocannon sits on the other side of the plane // medium gun
+  if (B.lv[2] >= 1) for (const wy of [8.6, 11.4]) hatch(0.9, "mis", 0.7, 0.45, MM ? GOLD : STEEL, wy);   // heavy gun: two wells under the inner wing
   // -- Retrofits ------------------------------------------------------------------------------------------------------------------------
   if (B.r === 0) { const ky = B.key("r0"), sw = t * 3;
     if (ky === "A") { disc(D(-2, 0), 2.6 * k, OUTLINE); disc(D(-2, 0), 2.1 * k, [0.7, 0.75, 0.8, 0.9]); line(D(-2, 0), add(D(-2, 0), mul(fa(sw), 2 * k)), A(col, 0.9), 0.8 * k); }
