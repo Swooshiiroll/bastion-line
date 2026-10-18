@@ -765,6 +765,9 @@ only the drones move, so the paths change the DRONE:
 
 **Round 2:** every stage is picked; the page shows only the picks.
 
+**Fix (owner: "the hot barrel shroud is a little oversized"):** the Hot Barrel Shroud is now the same width as the barrel it
+wraps and a little shorter (it was about a third wider).
+
 ## Open questions
 
 1. **Second pass, Drone Bay** (tower 9, round 2): confirm. Then towers 10-20 (next: CAS Gunship).

@@ -49,7 +49,7 @@ function drawDrone(B, p, dir, k, t, col, st, spin) {
   if (rot) { const n = S3 === "B" ? 6 : 3, gys = S3 === "C" ? [-1, 1] : [0];
     for (const gy of gys) { for (let j = 0; j < n; j++) { const a = sp + j * TAU / n, off = Math.sin(a) * 0.55; bar(D(1.6, gy * 1.1 + off), D(4.4, gy * 1.1 + off), 0.45 * k, barrelC); } disc(D(1.8, gy * 1.1), 0.9 * k, OUTLINE); disc(D(1.8, gy * 1.1), 0.65 * k, METAL_L); } }
   else bar(D(1.5, 0), D(4.2 + (P1 === "A" ? 0.4 : 0), 0), bw, barrelC);
-  if (P2 === "A") bar(D(1.6, 0), D(2.8, 0), bw * 1.35, ORANGE);
+  if (P2 === "A") bar(D(2.2, 0), D(3.2, 0), bw * 0.98, ORANGE); // a slim hot shroud, the same width as the barrel it wraps
   if (P2 === "C") ring(D(4.3, 0), 0.9 * k, STEEL, 0.9 * k);
   if (S1 === "A") for (let j = 0; j < 2; j++) line(D(2 + j * 0.8, -0.9), D(2 + j * 0.8, 0.9), STEEL, 0.5 * k);
   if (S1 === "B") polyline([D(-1.5, -1.3), D(-0.6, -1.6), D(0.3, -1.0), D(1.2, -1.3)], METAL_L, 0.6 * k);
