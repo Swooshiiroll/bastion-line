@@ -63,12 +63,12 @@ function drawPlane(B, p, h, s, fx, t, col) {
   // -- Upgrade tally marks (owner): one stroke on the fuselage's outer side for every step bought, like kill tallies. Path 1 is
   // green, path 2 red, path 3 green; the mastery strikes the four strokes through with a slash and turns that path's marks gold.
   // The option picks the stroke's style (a plain stroke, a bold stroke, a double stroke). Drawn last so nothing covers them.
-  const TALLY = [[GREEN_T, 5.0, "p0"], [RED, 8.8, "p1"], [GREEN_T, -9.2, "p2"]];
-  TALLY.forEach(([tc, x0, pk], pi) => { const lv = B.lv[pi], gold = lv >= 5, c1 = gold ? GOLD : tc;
-    for (let i = 0; i < Math.min(lv, 4); i++) { const x = x0 + i * 0.9, st = B.key(pk + "s" + i), a = D(x, -2.2), b = D(x, -0.5);
-      line(a, b, A(c1, 0.3), 1.6 * k);
-      if (st === "B") line(a, b, c1, 0.9 * k); else if (st === "C") { line(D(x - 0.22, -2.2), D(x - 0.22, -0.5), c1, 0.4 * k); line(D(x + 0.22, -2.2), D(x + 0.22, -0.5), c1, 0.4 * k); } else line(a, b, c1, 0.55 * k); }
-    if (gold) { const a = D(x0 - 0.5, -0.4), b = D(x0 + 3.2, -2.3); line(a, b, A(GOLD, 0.3), 1.6 * k); line(a, b, GOLD, 0.6 * k); } });
+  const TALLY = [[GREEN_T, 5.6, "p0"], [RED, 8.6, "p1"], [GREEN_T, -9.0, "p2"]];
+  TALLY.forEach(([tc, x0, pk], pi) => { const lv = B.lv[pi], gold = lv >= 5, c1 = gold ? GOLD : tc, SP = 0.6, Y0 = -1.9, Y1 = -0.9; // small marks: 1 px long strokes 0.6 px apart
+    for (let i = 0; i < Math.min(lv, 4); i++) { const x = x0 + i * SP, st = B.key(pk + "s" + i), a = D(x, Y0), b = D(x, Y1);
+      line(a, b, A(c1, 0.3), 1.0 * k);
+      if (st === "B") line(a, b, c1, 0.6 * k); else if (st === "C") { line(D(x - 0.15, Y0), D(x - 0.15, Y1), c1, 0.25 * k); line(D(x + 0.15, Y0), D(x + 0.15, Y1), c1, 0.25 * k); } else line(a, b, c1, 0.35 * k); }
+    if (gold) { const a = D(x0 - 0.4, Y1 + 0.15), b = D(x0 + 3 * SP + 0.4, Y0 - 0.15); line(a, b, A(GOLD, 0.3), 1.0 * k); line(a, b, GOLD, 0.4 * k); } });
 }
 
 // ---- The agent: three guns on the plane's inner side, each firing at its own rate, aimed at different enemies -------------

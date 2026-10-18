@@ -834,6 +834,9 @@ wing"):**
 **Fix (owner: "shrink the gun wells, they're too big"):** all the gun wells are about half their old size (gatling 0.85 x 0.5 px, autocannon
 0.8 x 0.5, missile wells 0.7 x 0.45 half-extents), with a thinner frame and a smaller firing glow.
 
+**Fix (owner: "make all of the notches smaller"):** the tally strokes are about half as long (1 px), thinner, and set closer together (0.6 px
+apart); the gold slash is smaller to match.
+
 ## Open questions
 
 1. **Second pass, CAS Gunship** (tower 10, round 1): pick one option per stage and Retrofit. Then towers 11-20 (next: Mine Layer).
