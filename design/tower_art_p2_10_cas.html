@@ -854,8 +854,8 @@ function casAgent(B) { return (m, t, info, s, col) => { const O = info.orbit; if
         fill(add(hp, mul(dv, 0.3 * bk)), [[2.2, 0], [0, 0.95], [0, -0.95]], [0.78, 0.8, 0.85, 1], ang, bk); glowDot(sub(hp, mul(dv, 2.8 * bk)), 0.5 * bk, CM ? GOLD : ORANGE); }
       else blast(to, Math.min(0.99, (u - 1) * 1.6), s, CM ? GOLD : col, (CM ? 0.24 : 0.2) * (C3 ? 1.15 : 1)); }
     else if (q.type === "mis") { const u = el / 0.85, perp = orth(norm(sub(to, q.from))); if (u < 1) { const pos = (v) => add(lerp(q.from, to, v), mul(perp, Math.sin(Math.PI * v) * s * 0.18 * (q.j ? -1 : 1))), hp = pos(u), pb = pos(Math.max(0, u - 0.03));
-        for (let j = 6; j >= 1; j--) disc(pos(Math.max(0, u - j * 0.045)), (0.5 + j * 0.13) * k * (M3 ? 1.25 : 1), [0.7, 0.72, 0.75, 0.3 - 0.04 * j]);
-        const mv = norm(sub(hp, pb)), ma = Math.atan2(mv[1], mv[0]), mk = kz * 0.68 * (M3 ? 1.25 : 1), nose = MM ? GOLD : RED, tail = sub(hp, mul(mv, 2.6 * mk));
+        for (let j = 6; j >= 1; j--) disc(pos(Math.max(0, u - j * 0.045)), (0.38 + j * 0.1) * k * (M3 ? 1.25 : 1), [0.7, 0.72, 0.75, 0.3 - 0.04 * j]);
+        const mv = norm(sub(hp, pb)), ma = Math.atan2(mv[1], mv[0]), mk = kz * 0.5 * (M3 ? 1.25 : 1), nose = MM ? GOLD : RED, tail = sub(hp, mul(mv, 2.6 * mk));
         line(tail, sub(tail, mul(mv, 2.4 * mk)), A(ORANGE, 0.7), 1.1 * mk); glowDot(tail, 0.7 * mk, MM ? GOLD : ORANGE);                          // exhaust
         for (const sg of [-1, 1]) fill(sub(hp, mul(mv, 1.7 * mk)), [[0.6, 0], [-1, sg * 1.7], [-1, 0]], STEEL, ma, mk);                           // tail fins
         bar(tail, add(hp, mul(mv, 0.9 * mk)), 1.25 * mk, [0.93, 0.94, 0.97, 1]);                                                                // body

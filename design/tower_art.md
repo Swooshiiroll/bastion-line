@@ -878,6 +878,8 @@ tail fins and an exhaust flame, turning along their curved path, with a thinner 
   so the three paths are now three different colours.
 - The Radar's scan line is half as thick and no longer reaches past the edge of the dish.
 
+**Fix (owner: "make the missiles a bit smaller"):** the missiles are about a quarter smaller, with their smoke trail scaled down to match.
+
 ## Open questions
 
 1. **Second pass, CAS Gunship** (tower 10, round 4): confirm. Then towers 11-20 (next: Mine Layer).
