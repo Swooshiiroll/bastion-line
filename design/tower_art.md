@@ -793,6 +793,9 @@ fire-rate steps of all three paths; per the carpet rule it is kept and stacks.
 - **Wide Orbit** widens the orbit (115 px) as well as the wings; **Extra Ammo** speeds every gun by 10% on top of its path.
 - **Ground station:** fixed, as in the base.
 
+**Fix (owner: "the gunship propellers should be facing forward"):** each engine is now a nacelle on the wing with its propeller disc
+in front of it, seen edge-on from above, instead of a rotor disc lying flat over the wing.
+
 ## Open questions
 
 1. **Second pass, CAS Gunship** (tower 10, round 1): pick one option per stage and Retrofit. Then towers 11-20 (next: Mine Layer).
