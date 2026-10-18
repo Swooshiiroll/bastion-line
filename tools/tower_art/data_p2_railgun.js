@@ -75,7 +75,12 @@ const P2 = {
     for (let i = 0; i < n; i++) { const [xo, y] = T.pos[i], r = (i === last ? decay(since, 0.3) : 0) * 2.5, w = T.w * k, hw = T.w * 0.68, x0 = xo - 4 - r, x1 = xo + L - r, Pt = (x, yy) => P(c, aim, k, x, y + (yy || 0));
       const across = (x, h, cc, lw) => line(add(Pt(x - r, 0), mul(orth(fa(aim)), h * k)), add(Pt(x - r, 0), mul(orth(fa(aim)), -h * k)), cc, lw * k);
       if (T.wind) for (let j = 0; j < 9; j++) { const x = xo + 2 + j * 2.8 - r; line(P(c, aim, k, x, y - 3), P(c, aim, k, x + 1, 0), mix(COPPER, col, ch * 3 > j / 3 ? 0.7 : 0), 0.9 * k); }
-      bar(Pt(x0, 0), Pt(x1, 0), w, METAL); // housing
+      // The housing as a tube: a flat-ended body shaded like a cylinder (a bright upper edge, a dark lower edge), so it reads
+      // as a barrel rather than a bar; the open mouth is drawn at its end below.
+      const cen = Pt((x0 + x1) / 2, 0), ox = mul(orth(fa(aim)), 1);
+      plate(cen, rectPts((x1 - x0) / 2, T.w / 2), METAL, aim, k, 1.1);
+      line(Pt(x0, 0), Pt(x1, 0), A(dk(METAL, 0.3), 0.55), w * 0.3); // underside shade
+      line(add(Pt(x0, 0), mul(ox, -w * 0.32)), add(Pt(x1, 0), mul(ox, -w * 0.32)), A(lt(METAL, 0.22), 0.8), w * 0.14); // highlight along the top
       // Slot strip, then the Power/Special marks on the housing
       strip(Pt(xo - 2 - r, 0), Pt(xo + L - 1 - r, 0), 0.8 * k * (n > 1 ? 0.8 : 1), A(PM ? GOLD : col, Math.min(1, 0.2 + 0.6 * ch + 3 * (i === last ? fl : 0))));
       if (P2 === "A") line(Pt(xo + 2 - r, hw * 0.55), Pt(xo + L - 4 - r, hw * 0.55), RED, 1.4 * k);
@@ -91,8 +96,9 @@ const P2 = {
       if (B.r === 1 && R === "C") for (const x of [xo + 6, xo + 14]) across(x, hw * 0.86, METAL_L, 1.1);
       if (X1 === "B") for (let j = 0; j < 4; j++) for (const sg of [-1, 1]) line(Pt(xo + 9 + j * 2 - r, sg * hw * 0.55), Pt(xo + 9.8 + j * 2 - r, sg * hw * 0.98), METAL_L, 1.1 * k);
       // Collars (tungsten, hot or gold as the picks say), at the base positions plus one by the muzzle for longer housings
-      for (const x of [3, 10, 17]) across(xo + x, hw * 0.78, colr, 2.4);
-      if (L > 24) across(xo + L - 3.6, hw * 0.78, colr, 2.4);
+      const band = (x) => { plate(Pt(xo + x - r, 0), rectPts(1.2, T.w * 0.6), colr, aim, k, 1); line(add(Pt(xo + x - r - 0.5, 0), mul(ox, -T.w * 0.5 * k)), add(Pt(xo + x - r - 0.5, 0), mul(ox, T.w * 0.5 * k)), A(lt(colr, 0.25), 0.7), 0.8 * k); };
+      for (const x of [3, 10, 17]) band(x);
+      if (L > 24) band(L - 3.6);
       if (P3 === "C") for (let j = 0; j < 4; j++) disc(Pt(xo + 5 + j * 4 - r, hw * 0.9 * (j % 2 ? -1 : 1)), 0.7 * k, A(col, 0.3 + 0.7 * ch));
       if (P3 === "B") across(xo + L - 0.6, hw * 0.88, A(PM ? GOLD : col, 0.3 + 0.7 * ch), 2);
       if (PM === "C") for (let j = 0; j < 5; j++) { const a = aim + (j - 2) * 0.5, q = Pt(xo + L - 1 - r, 0); line(add(q, mul(fa(a), 1 * k)), add(q, mul(fa(a), 3.2 * k)), GOLD, 1.1 * k); }
@@ -111,7 +117,11 @@ const P2 = {
       if (XM === "B") for (const sg of [-1, 1]) fill(Pt(xo + L - 6 - r, sg * hw * 0.62), [[3, 0], [-3, 0.8 * sg], [-3, 0]], GOLD, aim, k);
       if (SM) ring(Pt(xo + L + 0.4 - r, 0), hw * 0.38 * k, GOLD, 1.1 * k);
       // The mouth: no bigger than the housing
-      muzzleEnd(Pt(xo + L + 0.8 - r, 0), k, Math.min(4, T.w * 0.5), PM ? GOLD : col, i === last ? fl : 0); }
+      // The open mouth: a lip ring squashed along the aim, the dark bore inside, and the charge glow (never wider than the housing)
+      { const mp = Pt(xo + L - r, 0), ry = T.w * 0.5 * k, mc = PM ? GOLD : col, f = i === last ? fl : 0;
+        oval(mp, ry * 0.5, ry * 1.04, aim, lt(METAL_L, 0.08), 1.2); oval(add(mp, mul(fa(aim), 0.5 * k)), ry * 0.36, ry * 0.76, aim, BORE);
+        oval(add(mp, mul(fa(aim), 0.8 * k)), ry * 0.22, ry * 0.5, aim, A(mc, 0.3 + 0.7 * Math.max(ch * 0.4, f)));
+        if (f > 0) glowDot(add(mp, mul(fa(aim), 1.5 * k)), (1.2 + 5 * f) * k, A(mc, f)); } }
     // -- Capacitor drum(s): above the housing, with the charge ring ----------------------------------------------------
     const big = P3 === "A", two = S3 === "A", rd = two ? (big ? 5.4 : 4.4) : big ? 7.6 : 6.5, dpos = two ? [[-8, -5.6], [-8, 5.6]] : [[-8, 0]];
     for (const [dx, dy] of dpos) { const dr = P(c, aim, k, dx, dy); orb(dr, rd * k, METAL_L); ring(dr, rd * 0.68 * k, METAL_D, 1.6 * k);

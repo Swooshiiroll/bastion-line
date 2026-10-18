@@ -641,6 +641,10 @@ tray (it was a round shell with a tail). The page shows only the picks.
 - **The slug head** runs ahead of the line: dark and pointed with Penetrator Tips.
 - **Deck kit is static;** only the housing turns.
 
+**Round 1 fix (owner: "looks more like a long bar with a circle on the end"):** the housing is now a flat-ended tube shaded
+like a cylinder, with wrap-around collar bands and an open mouth (a lip ring, dark bore and charge glow) instead of a
+rounded bar end with a disc.
+
 ## Open questions
 
 1. **Second pass, Railgun** (tower 7, round 1): pick one option per stage and Retrofit. Then towers 8-20 (next: Tesla Tower).
