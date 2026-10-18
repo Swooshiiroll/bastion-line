@@ -795,60 +795,59 @@ function drawPlane(B, p, h, s, fx, t, col) {
   // Propellers face forward (owner): each engine is a nacelle on the wing with its propeller disc in front, seen edge-on from above
   for (const y of [-12, -6, 6, 12]) { bar(D(-0.5, y), D(5, y), 2.2 * k, METAL); orb(D(5.4, y), 0.9 * k, METAL_L); const L = 2.7 * (0.9 + 0.1 * Math.sin(t * 40 + y)); line(D(6.4, y - L), D(6.4, y + L), [0.85, 0.9, 1, 0.18], 1.3 * k); line(D(6.4, y - L), D(6.4, y + L), [0.9, 0.93, 1, 0.7], 0.5 * k); }
   glowDot(D(12, 0), 0.8 * k, col); glowDot(D(2, -W), 0.7 * k, [1, 0.25, 0.25, 1]); glowDot(D(2, W), 0.7 * k, [0.3, 1, 0.45, 1]);
-  // -- Light gun (gatling) at the side door: the door, then its upgrades ---------------------------------------------------
-  const gcol = PM ? GOLD : STEEL;
-  plate(D(1, 3.2), rectPts(1.5, 0.9), METAL_D, h, k, 0.9);
-  if (P1 === "A") polyline([D(-3, 2.2), D(-2, 2.8), D(-1, 2.2), D(0, 2.8), D(1, 2.4)], YEL, 0.5 * k);
-  if (P1 === "B") plate(D(1, 3.2), rectPts(2, 1.4), STEEL, h, k, 0.9);
-  if (P1 === "C") orb(D(-1.6, 3.4), 1.3 * k, METAL_D);
-  if (P2 === "A") { const f = since("gat") < 0.1; for (let i = 0; i < 3; i++) line(D(1 + Math.cos(t * 30 + i * 2.1) * 0.9, 3.2 + Math.sin(t * 30 + i * 2.1) * 0.5), D(1 + Math.cos(t * 30 + i * 2.1 + 1) * 0.9, 3.2 + Math.sin(t * 30 + i * 2.1 + 1) * 0.5), f ? WHITE : STEEL, 0.4 * k); }
-  if (P2 === "B") for (let i = 0; i < 3; i++) line(D(-5 + i * 1.1, 1.4), D(-5 + i * 1.1, 2.4), [0, 0, 0, 0.6], 0.5 * k);
-  if (P2 === "C") plate(D(-3.6, 3.4), rectPts(1.2, 0.9), METAL, h, k, 0.9);
-  if (P3 === "A") plate(D(1, 3.2), rectPts(1.7, 1.1), [0.12, 0.12, 0.15, 1], h, k, 0.9);
-  if (P3 === "B") plate(D(-5, 3.2), rectPts(1, 0.8), AMMO, h, k, 0.8);
-  if (P3 === "C") for (let i = 0; i < 3; i++) glowDot(D(3.2 + i * 0.7, 2.2), 0.3 * k, A([0.5, 1, 0.5, 1], 0.8));
-  if (P4 === "A") { plate(D(-0.6, 4.2), rectPts(1.7, 0.7), METAL_D, h, k, 0.9); glowDot(D(-1.8, 4.2), 0.3 * k, ORANGE); }
-  if (P4 === "B") { bar(D(-3, 3.6), D(-3, 4.6), 0.9 * k, STEEL); disc(add(D(-3, 4.6), [0, -k * ((t * 0.9) % 1) * 2]), 0.7 * k, [0.8, 0.82, 0.84, 0.4]); }
-  if (P4 === "C") for (let i = 0; i < 3; i++) line(D(-2 + i * 0.7, 3.4), D(-2 + i * 0.7, 4.4), A(ORANGE, 0.9), 0.5 * k);
-  if (PM === "A") { plate(D(5.5, 3.2), rectPts(1.5, 0.9), METAL_D, h, k, 0.9); plate(D(1, 3.2), rectPts(1.5, 0.9), lt(GOLD, 0.05), h, k, 0.9); plate(D(5.5, 3.2), rectPts(1.5, 0.9), lt(GOLD, 0.05), h, k, 0.9); }
-  if (PM === "B") for (const x of [1, 5.5]) { plate(D(x, 3.2), rectPts(1.5, 0.9), METAL_D, h, k, 0.9); ring(D(x, 3.2), 1.6 * k, GOLD, 0.9 * k); }
-  if (PM === "C") { plate(D(5.5, 3.2), rectPts(1.5, 0.9), METAL_D, h, k, 0.9); orb(D(-1.6, 3.4), 1.3 * k, GOLD); }
-  const gf = since("gat") < 0.08 ? 1 : 0; if (gf) glowDot(D(1, 3.4), 1.6 * k, PM ? GOLD : col); if (gf && PM) glowDot(D(5.5, 3.4), 1.4 * k, GOLD);
-  // -- Medium gun (autocannon): appears on the flank from its first step -------------------------------------------------------
-  if (B.lv[1] >= 1) { const yc = CM ? GOLD : STEEL;
-    if (C1 === "A") { disc(D(-6.5, 3.6), 1.6 * k, OUTLINE); disc(D(-6.5, 3.6), 1.2 * k, METAL); bar(D(-6.5, 3.6), D(-6.5, 6.2), 1.1 * k, yc); }
-    if (C1 === "B") { plate(D(-6.5, 4.2), rectPts(1.8, 1.6), METAL_D, h, k, 0.9); bar(D(-6.5, 4.4), D(-6.5, 6.4), 1.1 * k, yc); }
-    if (C1 === "C") { plate(D(-6.5, 3.4), rectPts(1.7, 0.9), METAL_D, h, k, 0.9); bar(D(-6.5, 3.4), D(-6.5, 5.8), 1.1 * k, yc); plate(D(-6.5, 5), rectPts(0.4, 1.3), STEEL, h, k, 0.9); }
-    if (C2 === "A") bar(D(-9, 3), D(-6.8, 3.4), 0.8 * k, METAL_D);
-    if (C2 === "B") plate(D(-9.2, 3.2), rectPts(1.1, 0.8), AMMO, h, k, 0.8);
-    if (C2 === "C") { disc(D(-9, 3.6), 1.1 * k, OUTLINE); disc(D(-9, 3.6), 0.8 * k, METAL); }
-    if (C3 === "A") for (const x of [-6.2, -6.9]) line(D(x, 3.4), D(x, 5.8), RED, 0.5 * k);
-    if (C3 === "B") ring(D(-6.5, 5.4), 0.9 * k, RED, 0.8 * k);
-    if (C3 === "C") plate(D(-6.5, 5.6), rectPts(0.4, 1.4), RED, h, k, 0.8);
-    if (C4 === "A") for (const x of [-8.2, -9.6]) bar(D(x, 2.6), D(x, 3.6), 0.6 * k, METAL_D);
-    if (C4 === "B") plate(D(-10.4, 3), rectPts(0.7, 1.2), METAL_D, h, k, 0.8);
-    if (C4 === "C") for (const x of [-8.4, -10]) { disc(D(x, 3.2), 0.7 * k, OUTLINE); disc(D(x, 3.2), 0.5 * k, STEEL); }
-    if (CM === "A") bar(D(-9, 3.6), D(-9, 6.2), 1.1 * k, GOLD);
-    if (CM === "B") { ring(D(-6.5, 5.6), 0.9 * k, GOLD, 0.9 * k); }
-    if (CM === "C") { disc(D(-6.5, 3.6), 1.3 * k, A(GOLD, 0.9)); }
-    if (since("can") < 0.08) glowDot(D(-6.5, 6.4), 1.5 * k, CM ? GOLD : col); if (since("can2") < 0.08 && CM === "A") glowDot(D(-9, 6.4), 1.5 * k, GOLD); }
-  // -- Heavy gun (missiles): a rack on the flank / under the wing from its first step -----------------------------------------------
-  if (B.lv[2] >= 1) { const mc = MM ? GOLD : RED, n = MM ? 4 : 3;
-    const rack = (x0, y0) => { for (let i = 0; i < n; i++) { const y = y0 + i * 1.5; plate(D(x0, y), rectPts(2, 0.45), [0.85, 0.85, 0.88, 1], h, k, 0.7); disc(D(x0 + 2.1, y), 0.45 * k * (M3 === "A" ? 1.4 : 1), mc); } };
-    if (M1 === "A") { plate(D(3, 11), rectPts(2.6, 3.4), METAL_D, h, k, 0.9); rack(1.6, 9.8); }
-    if (M1 === "B") { plate(D(8, 3.8), rectPts(2.4, 1.8), METAL_D, h, k, 0.9); rack(6.6, 3.3); }
-    if (M1 === "C") for (const y of [8.5, 13]) { bar(D(3.6, y), D(0.6, y), 1.5 * k, METAL); disc(D(3.8, y), 0.7 * k, mc); }
-    if (M2 === "A") for (const y of [9, 14]) line(D(0, y), D(5, y), STEEL, 0.5 * k);
-    if (M2 === "B") bar(D(1.4, 7.6), D(4.2, 7.6), 0.8 * k, METAL_D);
-    if (M2 === "C") for (let i = 0; i < 3; i++) glowDot(D(-1.2, 9 + i * 1.4), 0.3 * k, A([0.5, 1, 0.5, 1], 0.8));
-    if (M3 === "B") for (let i = 0; i < n; i++) line(D(2.9, 9.8 + i * 1.5 - 0.4), D(2.9, 9.8 + i * 1.5 + 0.4), YEL, 0.5 * k);
-    if (M3 === "C") plate(D(3, 15), rectPts(2.8, 0.6), STEEL, h, k, 0.8);
-    if (M4 === "A") { disc(D(-0.4, 11), 1.1 * k, OUTLINE); disc(D(-0.4, 11), 0.8 * k, METAL_D); }
-    if (M4 === "B") plate(D(3, 13.6), rectPts(2.4, 0.9), METAL_D, h, k, 0.8);
-    if (M4 === "C") for (const y of [8.4, 14.2]) line(D(-0.6, y), D(6, y), METAL_L, 0.5 * k);
-    if (MM === "A") plate(D(3, 11), rectPts(2.6, 3.4), A(GOLD, 0.3), h, k, 0.9);
-    if (MM === "C") for (const sg of [-1, 1]) line(D(5, 11 + sg * 3.2), D(5.6, 11 + sg * 4), GOLD, 0.8 * k);
-    if (since("mis") < 0.12) glowDot(D(6, 10.4), 1.6 * k, MM ? GOLD : ORANGE); }
+  // -- The guns are INSIDE the fuselage (owner): each shows only a port in the hull's inner edge, a hatch that slides open as it fires --
+  // (flash and projectile leave the opening); the options are the hatch frames, panels and fairings, never a barrel or rack outside.
+  const HY = 2.5; // the hull's inner edge
+  const hatch = (x, key, w, hh, doorCol, frameCol) => { const op = since(key) < 0.14 ? 1 : 0, fr = frameCol || STEEL;
+    plate(D(x, HY), rectPts(w + 0.35, hh + 0.3), fr, h, k, 0.8); plate(D(x, HY), rectPts(w, hh), BORE, h, k, 0.8);
+    plate(D(x + op * (w * 1.7), HY), rectPts(w * 0.94, hh * 0.9), doorCol || METAL_D, h, k, 0.8); if (op) glowDot(D(x - w * 0.3, HY + 0.2), 0.7 * k, ORANGE); return op; };
+  const panel = (x, y, w, hh, c) => plate(D(x, y), rectPts(w, hh), c || METAL_D, h, k, 0.7);
+  // Light gun (gatling): the side door and the hull details round it
+  const gx = 1, gcol = PM ? GOLD : null;
+  hatch(gx, "gat", 1.5, 0.8, gcol ? lt(GOLD, 0.05) : METAL_D, P1 === "B" ? STEEL : P3 === "A" ? [0.12, 0.12, 0.15, 1] : STEEL);
+  if (PM) hatch(5.5, "gat", 1.5, 0.8, lt(GOLD, 0.05), PM === "B" ? GOLD : STEEL);
+  if (PM === "B") ring(D(gx, HY), 1.9 * k, GOLD, 0.8 * k);
+  if (PM === "C") orb(D(-1.6, 2.7), 1.1 * k, GOLD);
+  if (P1 === "A") polyline([D(-3.4, 1.5), D(-2.6, 1.9), D(-1.8, 1.5), D(-1, 1.9), D(-0.2, 1.5)], YEL, 0.5 * k);
+  if (P1 === "C") orb(D(-1.6, 2.7), 1.1 * k, METAL_D);
+  if (P2 === "A") { const open = since("gat") < 0.14; if (open) for (let i = 0; i < 3; i++) line(D(gx - 0.6 + i * 0.6, HY - 0.3), D(gx - 0.2 + i * 0.6, HY + 0.3), WHITE, 0.4 * k); }
+  if (P2 === "B") for (let i = 0; i < 3; i++) line(D(-5 + i * 1.1, 1.2), D(-5 + i * 1.1, 2.2), [0, 0, 0, 0.6], 0.5 * k);
+  if (P2 === "C") panel(-3.6, 2.2, 1.2, 0.8, METAL);
+  if (P3 === "B") panel(-5, 1.6, 1, 0.7, AMMO);
+  if (P3 === "C") for (let i = 0; i < 3; i++) glowDot(D(3.4 + i * 0.7, 1.6), 0.3 * k, A([0.5, 1, 0.5, 1], 0.8));
+  if (P4 === "A") { panel(-2, 1.5, 1.4, 0.5, METAL_D); glowDot(D(-2.8, 1.5), 0.3 * k, ORANGE); }
+  if (P4 === "B") { bar(D(-3, 1.8), D(-3, 2.9), 0.9 * k, STEEL); disc(add(D(-3, 2.9), [0, -k * ((t * 0.9) % 1) * 2]), 0.7 * k, [0.8, 0.82, 0.84, 0.4]); }
+  if (P4 === "C") for (let i = 0; i < 3; i++) line(D(-2.4 + i * 0.7, 1.7), D(-2.4 + i * 0.7, 2.7), A(ORANGE, 0.9), 0.5 * k);
+  // Medium gun (autocannon): a port aft of the door from its first step
+  if (B.lv[1] >= 1) { const cx = -6.5, cg = CM ? GOLD : null;
+    hatch(cx, "can", 1.4, 0.8, cg ? lt(GOLD, 0.05) : METAL_D, C3 === "B" ? RED : C3 === "A" ? RED : STEEL);
+    if (CM === "A") hatch(-10, "can2", 1.4, 0.8, lt(GOLD, 0.05), GOLD);
+    if (CM === "B") ring(D(cx, HY), 1.8 * k, GOLD, 0.8 * k);
+    if (CM === "C") plate(D(cx, 1.6), rectPts(1.9, 0.7), A(GOLD, 0.85), h, k, 0.7);
+    if (C1 === "A") ring(D(cx, HY), 1.6 * k, STEEL, 0.9 * k);
+    if (C1 === "B") orb(D(cx, 2.7), 1.5 * k, METAL_D);
+    if (C1 === "C") plate(D(cx, 3.3), rectPts(0.4, 1.3), STEEL, h, k, 0.8);
+    if (C2 === "A") for (const x of [-9, -8.4]) line(D(x, 1.2), D(x, 2.2), [0, 0, 0, 0.55], 0.5 * k);
+    if (C2 === "B") panel(-8.8, 1.6, 1.1, 0.7, AMMO);
+    if (C2 === "C") orb(D(-8.8, 2.4), 0.9 * k, METAL);
+    if (C3 === "C") line(D(cx - 1, HY), D(cx + 1, HY), RED, 0.9 * k);
+    if (C4 === "A") for (const x of [-4.6, -4]) line(D(x, 1.2), D(x, 2.2), [0, 0, 0, 0.55], 0.5 * k);
+    if (C4 === "B") panel(-4.2, 1.6, 0.9, 0.7, METAL_D);
+    if (C4 === "C") for (const x of [-4.6, -3.8]) { disc(D(x, 1.7), 0.5 * k, OUTLINE); disc(D(x, 1.7), 0.35 * k, STEEL); } }
+  // Heavy gun (missiles): a bay in the flank by the wing root from its first step; its doors drop open to launch
+  if (B.lv[2] >= 1) { const mx = M1 === "B" ? 9.5 : 7.5, mg = MM ? GOLD : null, w = M3 === "A" ? 3 : 2.4;
+    hatch(mx, "mis", w, 1.0, mg ? lt(GOLD, 0.05) : METAL_D, M3 === "C" ? STEEL : MM === "A" ? GOLD : STEEL);
+    if (M1 === "C") hatch(5, "mis", 1.6, 1.0, METAL_D, STEEL);
+    for (let i = -1; i <= 1; i++) line(D(mx + i * 1.2, HY - 0.5), D(mx + i * 1.2, HY + 0.5), [0.15, 0.15, 0.18, 0.7], 0.5 * k);
+    if (M2 === "A") { line(D(mx - w, HY - 0.9), D(mx + w, HY - 0.9), STEEL, 0.5 * k); line(D(mx - w, HY + 0.9), D(mx + w, HY + 0.9), STEEL, 0.5 * k); }
+    if (M2 === "B") bar(D(mx - w - 0.2, 1.4), D(mx - w + 0.8, 2.4), 0.6 * k, METAL_D);
+    if (M2 === "C") for (let i = 0; i < 3; i++) glowDot(D(mx - 2 + i * 0.7, 1.2), 0.3 * k, A([0.5, 1, 0.5, 1], 0.8));
+    if (M3 === "B") { line(D(mx - w * 0.5, HY - 0.7), D(mx - w * 0.5, HY + 0.7), YEL, 0.7 * k); line(D(mx + w * 0.5, HY - 0.7), D(mx + w * 0.5, HY + 0.7), YEL, 0.7 * k); }
+    if (M4 === "A") for (let i = 0; i < 3; i++) glowDot(D(mx - 1.4 + i * 1.4, 1.2), 0.3 * k, A(ORANGE, 0.9));
+    if (M4 === "B") hatch(mx + 4, "mis", 1.4, 0.9, METAL_D, STEEL);
+    if (M4 === "C") for (const y of [1.4, 1.9]) line(D(mx - w, y), D(mx + w, y), METAL_L, 0.4 * k);
+    if (MM === "B") plate(D(mx, HY), rectPts(w * 0.94, 0.9), A(GOLD, 0.4), h, k, 0.7);
+    if (MM === "C") for (const sx of [-1, 1]) disc(D(mx + sx * w, HY - 0.9), 0.4 * k, GOLD); }
   // -- Retrofits ------------------------------------------------------------------------------------------------------------------------
   if (B.r === 0) { const ky = B.key("r0"), sw = t * 3;
     if (ky === "A") { disc(D(-2, 0), 2.6 * k, OUTLINE); disc(D(-2, 0), 2.1 * k, [0.7, 0.75, 0.8, 0.9]); line(D(-2, 0), add(D(-2, 0), mul(fa(sw), 2 * k)), A(col, 0.9), 0.8 * k); }
@@ -867,10 +866,10 @@ function casAgent(B) { return (m, t, info, s, col) => { const O = info.orbit; if
   m.t = t; const g = m.g, ens = info.ens.slice().sort((x, y) => Math.hypot(x.p[0] - pp[0], x.p[1] - pp[1]) - Math.hypot(y.p[0] - pp[0], y.p[1] - pp[1]));
   const P1 = Kp(B, 0, 0), P3 = Kp(B, 0, 2), P4 = Kp(B, 0, 3), PM = Kp(B, 0, 4), C3 = Kp(B, 1, 2), CM = Kp(B, 1, 4), M3 = Kp(B, 2, 2), MM = Kp(B, 2, 4);
   if (ens.length) {
-    if (t - g.gat.last >= 1 / gatRate(B)) { g.gat.last = t; g.gat.fl = t; const tgt = ens[0], twin = B.lv[0] >= 5, from = twin ? D(g.gat.n % 2 ? 5.5 : 1, 3.2) : D(1, 3.2); g.gat.n++; m.shots.push({ type: "gat", t0: t, from, id: tgt.i, to0: tgt.p.slice() }); }
-    if (B.lv[1] >= 1 && t - g.can.last >= 1 / canRate(B)) { g.can.last = t; const tgt = ens[Math.min(1, ens.length - 1)], two = B.lv[1] >= 5 && g.can.n % 2; g.can.n++; if (two) g.can2.fl = t; else g.can.fl = t; m.shots.push({ type: "can", t0: t, from: D(two ? -9 : -6.5, 6.2), id: tgt.i, to0: tgt.p.slice() }); }
+    if (t - g.gat.last >= 1 / gatRate(B)) { g.gat.last = t; g.gat.fl = t; const tgt = ens[0], twin = B.lv[0] >= 5, from = twin ? D(g.gat.n % 2 ? 5.5 : 1, 2.9) : D(1, 2.9); g.gat.n++; m.shots.push({ type: "gat", t0: t, from, id: tgt.i, to0: tgt.p.slice() }); }
+    if (B.lv[1] >= 1 && t - g.can.last >= 1 / canRate(B)) { g.can.last = t; const tgt = ens[Math.min(1, ens.length - 1)], two = B.lv[1] >= 5 && g.can.n % 2; g.can.n++; if (two) g.can2.fl = t; else g.can.fl = t; m.shots.push({ type: "can", t0: t, from: D(two ? -10 : -6.5, 2.9), id: tgt.i, to0: tgt.p.slice() }); }
     if (B.lv[2] >= 1 && t - g.mis.last >= misGap(B)) { g.mis.last = t; g.mis.fl = t; g.mis.n++; const tgt = ens[ens.length - 1], dbl = MM && g.mis.n % 3 === 0;
-      for (let j = 0; j < (dbl ? 2 : 1); j++) m.shots.push({ type: "mis", t0: t + j * 0.18, from: D(6, 10.4 + j * 1.5), id: ens[Math.max(0, ens.length - 1 - j)].i, to0: ens[Math.max(0, ens.length - 1 - j)].p.slice(), j }); } }
+      for (let j = 0; j < (dbl ? 2 : 1); j++) m.shots.push({ type: "mis", t0: t + j * 0.18, from: D(Kp(B, 2, 0) === "B" ? 9.5 : (Kp(B, 2, 0) === "C" && g.mis.n % 2 ? 5 : 7.5), 2.9), id: ens[Math.max(0, ens.length - 1 - j)].i, to0: ens[Math.max(0, ens.length - 1 - j)].p.slice(), j }); } }
   m.shots = m.shots.filter((q) => t - q.t0 < 1.4);
   const gc = PM ? GOLD : col, gw = 1.5 + (P1 ? 0.3 : 0) + (P3 ? 0.2 : 0), cc = CM ? GOLD : [1, 0.9, 0.6, 1], mc = MM ? GOLD : [0.95, 0.95, 0.98, 1];
   for (const q of m.shots) { const e = info.ens.find((x) => x.i === q.id), to = e ? e.p : q.to0, el = t - q.t0; if (el < 0) continue;

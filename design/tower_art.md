@@ -784,9 +784,8 @@ gatling (built in), path 2 the medium autocannon (step 1 unlocks it), path 3 the
 fire-rate steps of all three paths; per the carpet rule it is kept and stacks.
 
 **Round 1 (Claude):** one parametric model (base look A Airfield Beacon + Four-Engine Gunship, animation A Gatling Stream).
-- **The plane carries the upgrades.** The gatling is inside the side door (its upgrades are door frames, belts, vents,
-  plates, and Twin Gatlings adds a second door); the autocannon and the missile rack appear on the flank from their first
-  step. No gun shows on top (owner's base-pass note). Masteries are gold.
+- **The plane carries the upgrades.** All three guns are inside the fuselage (see the fix below); the upgrades are hatch
+  frames, panels and fairings, and Twin Gatlings adds a second door. Masteries are gold.
 - **Each gun fires at its own rate at its own enemy** under the orbit: gatling tracers (thicker, white-cored, a second line,
   gold), autocannon shells that burst on the target (25 px, 30 px at the battery), guided missiles that curve in with a
   smoke trail and burst (45 px; Hellfire fires two every third volley).
@@ -797,6 +796,12 @@ fire-rate steps of all three paths; per the carpet rule it is kept and stacks.
 in front of it, seen edge-on from above, instead of a rotor disc lying flat over the wing.
 
 **Fix (owner: "make the propellers thinner"):** the propeller discs are about half as thick (a hairline core with a faint blur).
+
+**Fix (owner: "make it look like the guns are inside the plane"):** the autocannon barrel and the missile racks no longer stick
+out of the plane. Each gun now has only a port in the hull's inner edge, a hatch that slides open as it fires (the flash and
+the shot leave the opening): the gatling's side door, an autocannon port aft of it and a missile bay by the wing root. The
+upgrade options are the frames, panels and fairings round those ports (the red bezel for HE rounds, door rails for the quick
+rack, gold frames for the masteries); the second autocannon and the Twin Gatlings add a second port.
 
 ## Open questions
 
