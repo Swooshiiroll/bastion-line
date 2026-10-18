@@ -383,7 +383,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 6 | Artillery Cannon | `design/tower_art_p2_06_artillery.html` | **Confirmed** (owner, 2026-10-17: "Artillery finished"; stock scatter kept as drawn, 30 px) |
 | 7 | Railgun | `design/tower_art_p2_07_railgun.html` | **Confirmed** (owner, 2026-10-18: "Railgun finished"; the larger drum is for the twin build only) |
 | 8 | Tesla Tower | `design/tower_art_p2_08_tesla.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
-| 9 | Drone Bay | `design/tower_art_p2_09_drones.html` | Round 2: all picks drawn; awaiting confirm |
+| 9 | Drone Bay | `design/tower_art_p2_09_drones.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 
 ### Gun Turret (second pass)
 
@@ -776,4 +776,4 @@ rotors are smaller (radius 2.05 px, was 2.6) and sit closer in on shorter arms (
 
 ## Open questions
 
-1. **Second pass, Drone Bay** (tower 9, round 2): confirm. Then towers 10-20 (next: CAS Gunship).
+1. **Second pass, CAS Gunship** (tower 10): round 1 page being built. Then towers 11-20.
