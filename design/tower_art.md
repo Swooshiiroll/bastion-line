@@ -381,7 +381,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 4 | Rocket Salvo | `design/tower_art_p2_04_rocket.html` | **Confirmed** (owner, 2026-10-17: "Rocket Salvo is done") |
 | 5 | Anti-Aircraft Turret | `design/tower_art_p2_05_aa.html` | **Confirmed** (owner, 2026-10-17: "AA Finished"; Range 3 is the Optical Director) |
 | 6 | Artillery Cannon | `design/tower_art_p2_06_artillery.html` | **Confirmed** (owner, 2026-10-17: "Artillery finished"; stock scatter kept as drawn, 30 px) |
-| 7 | Railgun | `design/tower_art_p2_07_railgun.html` | Round 4: all picks drawn; awaiting confirm |
+| 7 | Railgun | `design/tower_art_p2_07_railgun.html` | **Confirmed** (owner, 2026-10-18: "Railgun finished"; the larger drum is for the twin build only) |
 
 ### Gun Turret (second pass)
 
@@ -716,4 +716,4 @@ bracket, on single and twin builds alike.
 
 ## Open questions
 
-1. **Second pass, Railgun** (tower 7, round 4): confirm (and say if the larger drum should apply to every build, not just the twin). Then towers 8-20 (next: Tesla Tower).
+1. **Second pass, Tesla Tower** (tower 8): round 1 page being built. Then towers 9-20.
