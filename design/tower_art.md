@@ -382,7 +382,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 5 | Anti-Aircraft Turret | `design/tower_art_p2_05_aa.html` | **Confirmed** (owner, 2026-10-17: "AA Finished"; Range 3 is the Optical Director) |
 | 6 | Artillery Cannon | `design/tower_art_p2_06_artillery.html` | **Confirmed** (owner, 2026-10-17: "Artillery finished"; stock scatter kept as drawn, 30 px) |
 | 7 | Railgun | `design/tower_art_p2_07_railgun.html` | **Confirmed** (owner, 2026-10-18: "Railgun finished"; the larger drum is for the twin build only) |
-| 8 | Tesla Tower | `design/tower_art_p2_08_tesla.html` | Round 2: all picks drawn; awaiting confirm |
+| 8 | Tesla Tower | `design/tower_art_p2_08_tesla.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 
 ### Gun Turret (second pass)
 
@@ -742,4 +742,4 @@ bracket, on single and twin builds alike.
 
 ## Open questions
 
-1. **Second pass, Tesla Tower** (tower 8, round 2): confirm. Then towers 9-20 (next: Drone Bay).
+1. **Second pass, Drone Bay** (tower 9): round 1 page being built. Then towers 10-20.
