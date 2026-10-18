@@ -381,7 +381,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 4 | Rocket Salvo | `design/tower_art_p2_04_rocket.html` | **Confirmed** (owner, 2026-10-17: "Rocket Salvo is done") |
 | 5 | Anti-Aircraft Turret | `design/tower_art_p2_05_aa.html` | **Confirmed** (owner, 2026-10-17: "AA Finished"; Range 3 is the Optical Director) |
 | 6 | Artillery Cannon | `design/tower_art_p2_06_artillery.html` | **Confirmed** (owner, 2026-10-17: "Artillery finished"; stock scatter kept as drawn, 30 px) |
-| 7 | Railgun | `design/tower_art_p2_07_railgun.html` | Round 3: picks drawn; new ideas for Shatter and Penetrator Core; awaiting picks |
+| 7 | Railgun | `design/tower_art_p2_07_railgun.html` | Round 4: all picks drawn; awaiting confirm |
 
 ### Gun Turret (second pass)
 
@@ -698,6 +698,11 @@ past the mouth). They replace the longer housing, the sleeve and the braces.
 - **New ideas:** Shatter Rounds (Hammer Ring, Shard Array, Fracture Lattice); Penetrator Core (Sabot Petals, Core Feed
   Port, Rifling Bands). Ion Cannon is still unpicked and keeps its three options.
 
+**Picks (owner, round 3):** Special Effects 1 C Fracture Lattice, 2 B Core Feed Port, 3 B Plasma Tube, 4 A Glowing Rail Edges,
+M C Gold Emitter Funnel; the other picks are unchanged. No notes.
+
+**Round 4:** every stage is picked; the page shows only the picks.
+
 ## Open questions
 
-1. **Second pass, Railgun** (tower 7, round 3): pick Shatter Rounds, Penetrator Core and Ion Cannon, and confirm the larger drum is for the twin build only. Then towers 8-20 (next: Tesla Tower).
+1. **Second pass, Railgun** (tower 7, round 4): confirm (and say if the larger drum should apply to every build, not just the twin). Then towers 8-20 (next: Tesla Tower).

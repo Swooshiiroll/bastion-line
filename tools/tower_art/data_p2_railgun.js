@@ -6,7 +6,7 @@
 // off the recharge on top of the Speed path, and Penetrator Tips take 10% off the falloff on top of Penetrator Core.
 // Geometry (game px, x along the aim, y to the side): housing x -4 to 24, 8 wide; collars at 3, 10, 17; capacitor drum
 // r 6.5 at x -8; the slug is a thin bright line (a Snap Shot) with a slug head, hitting every enemy on its line.
-const PAGE = { title: "Railgun: paths and Retrofits (second pass)", store: "bl-tower-art-p2-railgun-r3" };
+const PAGE = { title: "Railgun: paths and Retrofits (second pass)", store: "bl-tower-art-p2-railgun-r4" };
 const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], COPPER = [0.78, 0.5, 0.28, 1], RED = [0.85, 0.2, 0.18, 1];
 const ORANGE = [1, 0.55, 0.2, 1], TUNG = [0.2, 0.21, 0.24, 1], CERAM = [0.86, 0.85, 0.8, 1];
 const rnd2 = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
@@ -244,8 +244,8 @@ P2.picks = {};
 
 // ---- Round 2 (owner's picks and notes, 2026-10-18): picked stages show only the pick (re-described where a note changed
 // it); stages the owner asked for more ideas on show three new options.
-P2.intro = "Round 3: your picks drawn as one model with your notes applied: on the twin build both barrels recoil together, the drum is larger so it spans both, and the capacitor spine sits on the outside of each rail so both are external. New ideas for Shatter Rounds and Penetrator Core; Ion Cannon (Kingslayer's Special Effects mastery) and the other unpicked stages keep their options. Use the build preview to check combinations.";
-P2.picks = { p0s0: "C", p0s1: "B", p0s2: "C", p0s3: "B", p0s4: "B", p1s0: "C", p1s1: "A", p1s2: "B", p1s3: "A", p1s4: "A", p2s2: "B", p2s3: "A", r0: "A", r1: "B", r2: "A" };
+P2.intro = "Round 4: all your picks drawn, with nothing left to choose. Round 3 notes still apply: on the twin build both barrels recoil together, the drum is larger so it spans both, and the capacitor spine sits on the outside of each rail so both are external. Use the build preview to check combinations.";
+P2.picks = { p0s0: "C", p0s1: "B", p0s2: "C", p0s3: "B", p0s4: "B", p1s0: "C", p1s1: "A", p1s2: "B", p1s3: "A", p1s4: "A", p2s0: "C", p2s1: "B", p2s2: "B", p2s3: "A", p2s4: "C", r0: "A", r1: "B", r2: "A" };
 P2.paths.forEach((pa, pi) => pa.steps.forEach((st, k) => { const pk = P2.picks["p" + pi + "s" + k]; if (pk) st.options = st.options.filter((o) => o.key === pk); }));
 P2.retrofits.forEach((rf, ri) => { const pk = P2.picks["r" + ri]; if (pk) rf.options = rf.options.filter((o) => o.key === pk); });
 P2.paths[0].steps[4].options[0].desc = "From your note: only the charge-up arc and the green centreline turn gold, not the whole drum; a gold shot with gold hit flashes.";
