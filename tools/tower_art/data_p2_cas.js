@@ -37,7 +37,7 @@ function drawPlane(B, p, h, s, fx, t, col) {
   if (B.r === 2) { const R2k = B.key("r2"); if (R2k === "B") for (const sg of [-1, 1]) plate(D(2, sg * (W + 0.4)), [[2.4, 0], [1, sg * 2.2], [-1.6, sg * 2.2], [-2.4, 0]], METAL, h, k, 0.9);
     if (R2k === "C") for (const sg of [-1, 1]) line(D(2, sg * 6), D(2, sg * (W - 1)), STEEL, 0.9 * k); if (R2k === "A") for (const sg of [-1, 1]) { bar(D(2.4, sg * W), D(-1, sg * W), 1.4 * k, STEEL); } }
   // Propellers face forward (owner): each engine is a nacelle on the wing with its propeller disc in front, seen edge-on from above
-  for (const y of [-12, -6, 6, 12]) { bar(D(-0.5, y), D(5, y), 2.2 * k, METAL); orb(D(5.4, y), 0.9 * k, METAL_L); const L = 2.7 * (0.9 + 0.1 * Math.sin(t * 40 + y)); line(D(6.4, y - L), D(6.4, y + L), [0.85, 0.9, 1, 0.22], 2.6 * k); line(D(6.4, y - L), D(6.4, y + L), [0.9, 0.93, 1, 0.7], 0.9 * k); }
+  for (const y of [-12, -6, 6, 12]) { bar(D(-0.5, y), D(5, y), 2.2 * k, METAL); orb(D(5.4, y), 0.9 * k, METAL_L); const L = 2.7 * (0.9 + 0.1 * Math.sin(t * 40 + y)); line(D(6.4, y - L), D(6.4, y + L), [0.85, 0.9, 1, 0.18], 1.3 * k); line(D(6.4, y - L), D(6.4, y + L), [0.9, 0.93, 1, 0.7], 0.5 * k); }
   glowDot(D(12, 0), 0.8 * k, col); glowDot(D(2, -W), 0.7 * k, [1, 0.25, 0.25, 1]); glowDot(D(2, W), 0.7 * k, [0.3, 1, 0.45, 1]);
   // -- Light gun (gatling) at the side door: the door, then its upgrades ---------------------------------------------------
   const gcol = PM ? GOLD : STEEL;

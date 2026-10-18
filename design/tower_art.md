@@ -796,6 +796,8 @@ fire-rate steps of all three paths; per the carpet rule it is kept and stacks.
 **Fix (owner: "the gunship propellers should be facing forward"):** each engine is now a nacelle on the wing with its propeller disc
 in front of it, seen edge-on from above, instead of a rotor disc lying flat over the wing.
 
+**Fix (owner: "make the propellers thinner"):** the propeller discs are about half as thick (a hairline core with a faint blur).
+
 ## Open questions
 
 1. **Second pass, CAS Gunship** (tower 10, round 1): pick one option per stage and Retrofit. Then towers 11-20 (next: Mine Layer).
