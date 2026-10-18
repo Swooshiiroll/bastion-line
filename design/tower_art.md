@@ -383,6 +383,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 6 | Artillery Cannon | `design/tower_art_p2_06_artillery.html` | **Confirmed** (owner, 2026-10-17: "Artillery finished"; stock scatter kept as drawn, 30 px) |
 | 7 | Railgun | `design/tower_art_p2_07_railgun.html` | **Confirmed** (owner, 2026-10-18: "Railgun finished"; the larger drum is for the twin build only) |
 | 8 | Tesla Tower | `design/tower_art_p2_08_tesla.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
+| 9 | Drone Bay | `design/tower_art_p2_09_drones.html` | Round 1: three options per stage; awaiting picks |
 
 ### Gun Turret (second pass)
 
@@ -740,6 +741,22 @@ bracket, on single and twin builds alike.
 
 **Round 2:** every stage is picked; the page shows only the picks.
 
+### Drone Bay (second pass)
+
+**Retrofit:** the Drone Bay has the one Retrofit, the Second Hangar (3,200), which launches the second drone (max 2).
+It overlaps no path step. It gets three looks like every other Retrofit: twin pads, divided pads, or a bunker hatch.
+
+**Round 1 (Claude):** one parametric model (base look A Rotor Pad Hangar, animation A Hunt and Circle). The bay is fixed and
+only the drones move, so the paths change the DRONE:
+- **Power:** the guns and tracer rounds change at each step (thicker, hot orange, a white core, a second line, gold at
+  Elite Drones).
+- **Weaponry:** each step unlocks a loadout (missiles, bombs, laser, the combined kit). The drone cycles through the
+  unlocked loadouts every four seconds in the preview, and a selector dial on the bay's panel shows which is loaded.
+- **Speed:** the rate of fire (3 up to 7 shots/s); the primary step turns the chin gun into a rotary that spins as it
+  fires.
+- **Two drones:** with the Retrofit a second drone launches from the second pad and takes a different target.
+- Drones launch on the first enemy and never go home; with the lane clear they hover.
+
 ## Open questions
 
-1. **Second pass, Drone Bay** (tower 9): round 1 page being built. Then towers 10-20.
+1. **Second pass, Drone Bay** (tower 9, round 1): pick one option per stage and the Retrofit. Then towers 10-20 (next: CAS Gunship).
