@@ -866,6 +866,10 @@ should go in the middle of the wing over the fuselage"):**
 brass-cased body with a darker band, a pointed steel nose and a short hot streak behind it, turned along its flight (gold-cased at the
 battery, with a red band from HE rounds).
 
+**Fix (owner: "make them a little smaller, and make the missiles more missile shaped"):** the autocannon bullets are about a quarter smaller. The
+missiles are now proper missiles: a white cylindrical body with a band, a pointed red nose cone (gold at Hellfire Volley), small
+tail fins and an exhaust flame, turning along their curved path, with a thinner smoke trail so the missile reads clearly.
+
 ## Open questions
 
 1. **Second pass, CAS Gunship** (tower 10, round 2): confirm. Then towers 11-20 (next: Mine Layer).

@@ -93,7 +93,7 @@ function casAgent(B) { return (m, t, info, s, col) => { const O = info.orbit; if
   for (const q of m.shots) { const e = info.ens.find((x) => x.i === q.id), to = e ? e.p : q.to0, el = t - q.t0; if (el < 0) continue;
     if (q.type === "gat") { const u = el / 0.18; if (u < 1) { tracer(q.from, to, u, gc, gw, 0.3); if (P3 || PM) tracer(q.from, to, u, [1, 1, 1, 1], gw * 0.4, 0.3); if (P4) tracer(add(q.from, [0, 2]), add(to, [0, 2]), u, A(gc, 0.7), gw * 0.6, 0.25); } else if (u < 2) spark(to, (u - 1) * 0.6, s * 0.7, gc); }
     else if (q.type === "can") { const u = el / 0.35; if (u < 1) { // a heavy bullet: a fat brass-cased body with a pointed steel nose and a short hot streak (not a round ball)
-        const hp = lerp(q.from, to, u), dv = norm(sub(to, q.from)), ang = Math.atan2(dv[1], dv[0]), bk = kz * 0.55 * (C3 ? 1.15 : 1), brass = CM ? GOLD : [0.92, 0.72, 0.3, 1];
+        const hp = lerp(q.from, to, u), dv = norm(sub(to, q.from)), ang = Math.atan2(dv[1], dv[0]), bk = kz * 0.42 * (C3 ? 1.15 : 1), brass = CM ? GOLD : [0.92, 0.72, 0.3, 1];
         line(sub(hp, mul(dv, 8 * bk)), sub(hp, mul(dv, 2.8 * bk)), A(CM ? GOLD : ORANGE, 0.4), 1.3 * bk); line(sub(hp, mul(dv, 5.5 * bk)), sub(hp, mul(dv, 2.8 * bk)), A([1, 1, 1, 1], 0.4), 0.5 * bk);
         bar(sub(hp, mul(dv, 2.8 * bk)), add(hp, mul(dv, 0.3 * bk)), 1.9 * bk, brass);
         line(add(sub(hp, mul(dv, 2.0 * bk)), mul(orth(dv), 0.95 * bk)), add(sub(hp, mul(dv, 2.0 * bk)), mul(orth(dv), -0.95 * bk)), [0.5, 0.36, 0.14, 1], 0.5 * bk);
@@ -101,8 +101,13 @@ function casAgent(B) { return (m, t, info, s, col) => { const O = info.orbit; if
         fill(add(hp, mul(dv, 0.3 * bk)), [[2.2, 0], [0, 0.95], [0, -0.95]], [0.78, 0.8, 0.85, 1], ang, bk); glowDot(sub(hp, mul(dv, 2.8 * bk)), 0.5 * bk, CM ? GOLD : ORANGE); }
       else blast(to, Math.min(0.99, (u - 1) * 1.6), s, CM ? GOLD : col, (CM ? 0.24 : 0.2) * (C3 ? 1.15 : 1)); }
     else if (q.type === "mis") { const u = el / 0.85, perp = orth(norm(sub(to, q.from))); if (u < 1) { const pos = (v) => add(lerp(q.from, to, v), mul(perp, Math.sin(Math.PI * v) * s * 0.18 * (q.j ? -1 : 1))), hp = pos(u), pb = pos(Math.max(0, u - 0.03));
-        for (let j = 6; j >= 1; j--) disc(pos(Math.max(0, u - j * 0.045)), (0.9 + j * 0.28) * k * (M3 ? 1.25 : 1) * 1.4, [0.7, 0.72, 0.75, 0.3 - 0.04 * j]);
-        plate(hp, rectPts(1.7, 0.6), [0.9, 0.9, 0.93, 1], Math.atan2(hp[1] - pb[1], hp[0] - pb[0]), kz * 0.8 * (M3 ? 1.25 : 1), 0.7); glowDot(hp, 0.8 * k, MM ? GOLD : ORANGE); }
+        for (let j = 6; j >= 1; j--) disc(pos(Math.max(0, u - j * 0.045)), (0.5 + j * 0.13) * k * (M3 ? 1.25 : 1), [0.7, 0.72, 0.75, 0.3 - 0.04 * j]);
+        const mv = norm(sub(hp, pb)), ma = Math.atan2(mv[1], mv[0]), mk = kz * 0.68 * (M3 ? 1.25 : 1), nose = MM ? GOLD : RED, tail = sub(hp, mul(mv, 2.6 * mk));
+        line(tail, sub(tail, mul(mv, 2.4 * mk)), A(ORANGE, 0.7), 1.1 * mk); glowDot(tail, 0.7 * mk, MM ? GOLD : ORANGE);                          // exhaust
+        for (const sg of [-1, 1]) fill(sub(hp, mul(mv, 1.7 * mk)), [[0.6, 0], [-1, sg * 1.7], [-1, 0]], STEEL, ma, mk);                           // tail fins
+        bar(tail, add(hp, mul(mv, 0.9 * mk)), 1.25 * mk, [0.93, 0.94, 0.97, 1]);                                                                // body
+        line(add(sub(hp, mul(mv, 0.4 * mk)), mul(orth(mv), 0.65 * mk)), add(sub(hp, mul(mv, 0.4 * mk)), mul(orth(mv), -0.65 * mk)), [0.45, 0.47, 0.5, 1], 0.4 * mk); // a body band
+        fill(add(hp, mul(mv, 0.9 * mk)), [[2.4, 0], [0.4, 0.65], [0, 0.65], [0, -0.65], [0.4, -0.65]], nose, ma, mk); }                           // pointed nose cone
       else blast(to, Math.min(0.99, (u - 1) * 1.1), s, MM ? GOLD : col, (MM ? 0.4 : 0.35) * (M3 ? 1.2 : 1)); } } }; }
 
 // ---- The model: the fixed ground station; the plane and its guns are the build's real look ------------------------------------
