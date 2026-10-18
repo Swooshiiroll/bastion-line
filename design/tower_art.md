@@ -843,6 +843,9 @@ apart); the gold slash is smaller to match.
 - The propellers now visibly spin: each is a thin translucent disc seen nearly edge-on with two bright blade tips orbiting it,
   swinging fore and aft across the disc (a steady, smooth motion; the earlier random flicker stays out).
 
+**Fix (owner: "remove the balls at the end of the propellers, and make them spin faster"):** the white dots on the blade tips are gone (the blades
+and their trails remain) and the propellers spin about two and a half times faster.
+
 ## Open questions
 
 1. **Second pass, CAS Gunship** (tower 10, round 1): pick one option per stage and Retrofit. Then towers 11-20 (next: Mine Layer).

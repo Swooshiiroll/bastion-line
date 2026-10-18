@@ -796,8 +796,8 @@ function drawPlane(B, p, h, s, fx, t, col) {
   for (const y of [-12, -6, 6, 12]) { bar(D(-0.5, y), D(5, y), 2.2 * k, METAL); orb(D(5.4, y), 0.9 * k, METAL_L);
     // the propeller disc seen almost edge-on: a thin translucent ellipse with two blade tips orbiting it (they swing fore and aft across the disc)
     const pc = D(6.4, y); oval(pc, 0.9 * k, 2.7 * k, h, [0.85, 0.9, 1, 0.16], 0);
-    for (let bl = 0; bl < 2; bl++) { const th = t * 11 + y + bl * Math.PI, tip = D(6.4 + 0.9 * Math.sin(th), y + 2.7 * Math.cos(th)), tp = D(6.4 + 0.9 * Math.sin(th - 0.5), y + 2.7 * Math.cos(th - 0.5));
-      line(pc, tip, [0.9, 0.93, 1, 0.55], 0.45 * k); line(tp, tip, [0.9, 0.93, 1, 0.35], 0.9 * k); disc(tip, 0.4 * k, [1, 1, 1, 0.9]); } }
+    for (let bl = 0; bl < 2; bl++) { const th = t * 26 + y + bl * Math.PI, tip = D(6.4 + 0.9 * Math.sin(th), y + 2.7 * Math.cos(th)), tp = D(6.4 + 0.9 * Math.sin(th - 0.5), y + 2.7 * Math.cos(th - 0.5));
+      line(pc, tip, [0.9, 0.93, 1, 0.55], 0.45 * k); line(tp, tip, [0.9, 0.93, 1, 0.35], 0.9 * k); } }
   glowDot(D(12, 0), 0.8 * k, col); glowDot(D(2, -W), 0.7 * k, [1, 0.25, 0.25, 1]); glowDot(D(2, W), 0.7 * k, [0.3, 1, 0.45, 1]);
   // -- The guns are INSIDE the fuselage: a plain port for each (a hatch that slides open as it fires, held open while it keeps firing) ------
   const HY = 1.2; // inside the fuselage outline, a little in from the inner edge
