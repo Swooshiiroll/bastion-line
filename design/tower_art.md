@@ -771,6 +771,9 @@ wraps and a little shorter (it was about a third wider).
 **Fix (owner: "the body of the drone is also on top of the propellers"):** the four rotors are now drawn last, above the arms,
 body, gun and pods, instead of under the body.
 
+**Fix (owner: "make the propeller blades thinner; they also protrude too far out"):** the blades are about half as thick, the
+rotors are smaller (radius 2.05 px, was 2.6) and sit closer in on shorter arms (4.1 px, was 4.6).
+
 ## Open questions
 
 1. **Second pass, Drone Bay** (tower 9, round 2): confirm. Then towers 10-20 (next: CAS Gunship).

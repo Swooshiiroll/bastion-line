@@ -10,7 +10,7 @@
 // a 2.6 x 2 body and a chin gun forward.
 const PAGE = { title: "Drone Bay: paths and Retrofits (second pass)", store: "bl-tower-art-p2-drones-r2" };
 const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], RED = [0.85, 0.2, 0.18, 1], ORANGE = [1, 0.55, 0.2, 1], CYAN = [0.4, 0.9, 1, 1];
-const rotorD = (p, r, t, k) => { disc(p, r, [0.8, 0.85, 0.95, 0.12]); ring(p, r, [0.8, 0.86, 0.95, 0.35], 0.8); for (let q = 0; q < 2; q++) line(p, add(p, mul(fa(t * 40 + q * Math.PI), r * 0.95)), [0.85, 0.9, 1, 0.55], 1.1 * k_); };
+const rotorD = (p, r, t, k) => { disc(p, r, [0.8, 0.85, 0.95, 0.12]); ring(p, r, [0.8, 0.86, 0.95, 0.35], 0.8); for (let q = 0; q < 2; q++) line(p, add(p, mul(fa(t * 40 + q * Math.PI), r * 0.92)), [0.85, 0.9, 1, 0.6], 0.5 * k_); };
 let k_ = 1; // the scale rotorD draws its blades at (set per drone below)
 const rnd2 = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
 const Kp = (B, pi, k) => (B.lv[pi] > k ? B.key("p" + pi + "s" + k) : null);
@@ -29,8 +29,8 @@ function drawDrone(B, p, dir, k, t, col, st, spin) {
   const P1 = Kp(B, 0, 0), P2 = Kp(B, 0, 1), P3 = Kp(B, 0, 2), P4 = Kp(B, 0, 3), PM = Kp(B, 0, 4), W1 = Kp(B, 1, 0), W2 = Kp(B, 1, 1), W3 = Kp(B, 1, 2), W4 = Kp(B, 1, 3), WM = Kp(B, 1, 4);
   const S1 = Kp(B, 2, 0), S2 = Kp(B, 2, 1), S3 = Kp(B, 2, 2), S4 = Kp(B, 2, 3), SM = Kp(B, 2, 4), hardW = B.lv[1] >= 4 ? 1.25 : 1;
   const frameC = PM === "A" ? GOLD : METAL_D, rotC = PM === "B" ? GOLD : null;
-  for (let i = 0; i < 4; i++) { const q = add(p, mul(fa(dir + Math.PI / 4 + i * Math.PI / 2), 4.6 * k)); bar(p, q, 1 * k, frameC);
-    if (P4 === "A") line(add(p, mul(fa(dir + Math.PI / 4 + i * Math.PI / 2), 1.4 * k)), add(p, mul(fa(dir + Math.PI / 4 + i * Math.PI / 2), 4.3 * k)), METAL_L, 0.5 * k);
+  for (let i = 0; i < 4; i++) { const q = add(p, mul(fa(dir + Math.PI / 4 + i * Math.PI / 2), 4.1 * k)); bar(p, q, 0.9 * k, frameC);
+    if (P4 === "A") line(add(p, mul(fa(dir + Math.PI / 4 + i * Math.PI / 2), 1.4 * k)), add(p, mul(fa(dir + Math.PI / 4 + i * Math.PI / 2), 3.8 * k)), METAL_L, 0.5 * k);
   }
   // body, with the Power parts
   plate(p, rectPts(2.6, 2), PM === "A" ? lt(GOLD, 0.1) : METAL_L, dir, k, 0.9);
@@ -61,7 +61,7 @@ function drawDrone(B, p, dir, k, t, col, st, spin) {
   if (S4 === "A") glowDot(D(-1.4, 1.4), 0.3 * k, fmod(t * 6, 1) < 0.5 ? ORANGE : A(ORANGE, 0.3));
   if (S4 === "B") disc(D(-2.4, 0), 0.9 * k, METAL_D);
   if (S4 === "C") for (let j = 0; j < 3; j++) line(D(2.2 + j * 0.5, -1.3), D(2.2 + j * 0.5, 1.3), A(ORANGE, 0.9), 0.5 * k);
-  if (SM === "B") ring(p, 3.4 * k, A(GOLD, 0.85), 0.8 * k);
+  if (SM === "B") ring(p, 3.2 * k, A(GOLD, 0.85), 0.8 * k);
   if (SM === "C") for (const sg of [-1, 1]) line(D(-1, sg * 1.5), D(1.4, sg * 1.1), GOLD, 0.7 * k);
   // Weaponry: pods, racks and emitters
   const wl = (cc) => (WM ? GOLD : cc);
@@ -82,7 +82,7 @@ function drawDrone(B, p, dir, k, t, col, st, spin) {
   if (WM === "C") for (const sg of [-1, 1]) line(D(0, sg * 1.8), D(0, sg * 3.2), GOLD, 0.8 * k);
   glowDot(D(1.2, 0), 0.8 * k, gold ? GOLD : col);
   // The rotors turn above the arms and the body, so they are drawn last (owner: the body was drawing on top of them)
-  for (let i = 0; i < 4; i++) { const q = add(p, mul(fa(dir + Math.PI / 4 + i * Math.PI / 2), 4.6 * k)); rotorD(q, 2.6 * k, t * (spin ?? 1), k); if (rotC) ring(q, 2.6 * k, A(rotC, 0.9), 0.9 * k); }
+  for (let i = 0; i < 4; i++) { const q = add(p, mul(fa(dir + Math.PI / 4 + i * Math.PI / 2), 4.1 * k)); rotorD(q, 2.05 * k, t * (spin ?? 1), k); if (rotC) ring(q, 2.05 * k, A(rotC, 0.9), 0.8 * k); }
   if (fire && st.flash) glowDot(D(4.6, 0), (0.6 + 1.2 * st.flash) * k, gold ? GOLD : col);
 }
 
