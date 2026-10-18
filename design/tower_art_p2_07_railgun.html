@@ -65,7 +65,7 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Tower rework · Tower art · second pass · tower 7 of 20 · round 2</div>
+    <div class="eyebrow">Bastion Line · Tower rework · Tower art · second pass · tower 7 of 20 · round 3</div>
     <h1>Tower art: Railgun paths and Retrofits</h1>
     <p class="note">Second pass for one tower: <b>every upgrade step and mastery</b> on each path, and each <b>Retrofit</b>, adds or changes a detail on the confirmed model. Each card shows the model with that path's earlier steps (your picks, or option A until you pick) plus the candidate. Pick one of three per step, add notes per path, then <b>Copy picks and notes</b>.</p>
     <ul class="rules">
@@ -762,7 +762,7 @@ const NO_BOOT = true;
 // off the recharge on top of the Speed path, and Penetrator Tips take 10% off the falloff on top of Penetrator Core.
 // Geometry (game px, x along the aim, y to the side): housing x -4 to 24, 8 wide; collars at 3, 10, 17; capacitor drum
 // r 6.5 at x -8; the slug is a thin bright line (a Snap Shot) with a slug head, hitting every enemy on its line.
-const PAGE = { title: "Railgun: paths and Retrofits (second pass)", store: "bl-tower-art-p2-railgun-r2" };
+const PAGE = { title: "Railgun: paths and Retrofits (second pass)", store: "bl-tower-art-p2-railgun-r3" };
 const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], COPPER = [0.78, 0.5, 0.28, 1], RED = [0.85, 0.2, 0.18, 1];
 const ORANGE = [1, 0.55, 0.2, 1], TUNG = [0.2, 0.21, 0.24, 1], CERAM = [0.86, 0.85, 0.8, 1];
 const rnd2 = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
@@ -826,8 +826,6 @@ const P2 = {
     if (S1 === "C") { const q = S(-13, 10.5), sp = t * (1 + 9 * ch); disc(q, 3.4 * k, OUTLINE); disc(q, 3 * k, METAL_D); ring(q, 2.2 * k, A(col, 0.3 + 0.5 * ch), 0.8 * k); for (let i = 0; i < 3; i++) line(add(q, mul(fa(sp + i * TAU / 3), 0.6 * k)), add(q, mul(fa(sp + i * TAU / 3), 2.6 * k)), METAL_L, 1 * k); orb(q, 0.9 * k, METAL); line(add(q, [2.4 * k, -1 * k]), dcen, [0.15, 0.15, 0.18, 1], 1.5 * k); }
     // Rapid Capacitors C: a charge reservoir whose level climbs as it charges. Special: etching tank (Shatter B), core magazine (Core B), ion grid (Trail C)
     if (S3 === "C") { bar(S(14, -7), S(14, -12.5), 3.8 * k, METAL_L); bar(S(14, -7.6), S(14, -7.6 - 4.4 * ch), 2 * k, A(PM ? GOLD : col, 0.9)); ring(S(14, -12.5), 1.6 * k, METAL_D, 0.9 * k); }
-    if (X1 === "B") { plate(S(6, 12.4), rectPts(3, 1.8), [0.35, 0.55, 0.15, 1], 0, k, 1); line(S(3, 11.4), S(0, 6), [0.15, 0.2, 0.1, 1], 1 * k); }
-    if (X2 === "B") { plate(S(14, 11), rectPts(4.4, 2.4), AMMO, 0, k, 0.9); for (let i = 0; i < 4; i++) bar(S(11 + i * 0.4, 9.2 + i * 0.9), S(16.4 + i * 0.4, 9.2 + i * 0.9), 0.7 * k, i % 2 ? STEEL : TUNG); }
     if (X3 === "C") { plate(S(6, 12.4), rectPts(3.6, 2.2), METAL_D, 0, k, 1); for (let i = -1; i <= 1; i++) line(S(6 + i * 2, 10.8), S(6 + i * 2, 14), A(col, 0.3 + 0.6 * ch), 0.8 * k); for (const y of [11.8, 13]) line(S(2.8, y), S(9.2, y), A(col, 0.3 + 0.6 * ch), 0.8 * k); }
     if (R === "C" && B.r === 0) for (let i = 0; i < 3; i++) { disc(S(-6 + i * 3, -12.6), 1.6 * k, OUTLINE); disc(S(-6 + i * 3, -12.6), 1.2 * k, COPPER); ring(S(-6 + i * 3, -12.6), 1.2 * k, A(col, 0.3 + 0.7 * ch), 0.8 * k); }
     if (B.r === 2 && R === "C") { plate(S(-6, 12.6), rectPts(4.6, 1.4), AMMO, 0, k, 0.9); for (let i = 0; i < 3; i++) { bar(S(-9 + i * 3, 12.6), S(-7.4 + i * 3, 12.6), 1.2 * k, TUNG); fill(S(-6.8 + i * 3, 12.6), [[1.2, 0], [0, 0.6], [0, -0.6]], STEEL, 0, k); } }
@@ -835,7 +833,7 @@ const P2 = {
     if (P3 === "C") for (const sg of [-1, 1]) { bar(S(-14.5, sg * 9.5), S(-14.5, sg * 12), 1.8 * k, METAL_L); disc(S(-14.5, sg * 9), 1 * k, A(PM ? GOLD : col, 0.4 + 0.6 * ch)); }
     // -- The rails (the housing turns); each carries the same details ---------------------------------------------------
     const hot = false, colr = PM === "A" ? GOLD : P1 === "C" ? TUNG : hot ? mix(METAL_L, ORANGE, 0.5) : METAL_L;
-    for (let i = 0; i < n; i++) { const [xo, y] = T.pos[i], r = (i === last ? decay(since, 0.3) : 0) * 2.5, w = T.w * k, hw = T.w * 0.68, x0 = xo - 4 - r, x1 = xo + L - r, Pt = (x, yy) => P(c, aim, k, x, y + (yy || 0));
+    for (let i = 0; i < n; i++) { const [xo, y] = T.pos[i], r = decay(since, 0.3) * 2.5, w = T.w * k, hw = T.w * 0.68, x0 = xo - 4 - r, x1 = xo + L - r, Pt = (x, yy) => P(c, aim, k, x, y + (yy || 0));
       const across = (x, h, cc, lw) => line(add(Pt(x - r, 0), mul(orth(fa(aim)), h * k)), add(Pt(x - r, 0), mul(orth(fa(aim)), -h * k)), cc, lw * k);
       if (T.wind) for (let j = 0; j < 9; j++) { const x = xo + 2 + j * 2.8 - r; line(P(c, aim, k, x, y - 3), P(c, aim, k, x + 1, 0), mix(COPPER, col, ch * 3 > j / 3 ? 0.7 : 0), 0.9 * k); }
       // The housing as a tube: a flat-ended body shaded like a cylinder (a bright upper edge, a dark lower edge), so it reads
@@ -873,16 +871,19 @@ const P2 = {
       if (S4 === "B") for (const sg of [-1, 1]) { line(Pt(xo + 0 - r, sg * T.w * 0.58), Pt(xo + L - 6 - r, sg * T.w * 0.58), COPPER, 1.3 * k); for (let j = 0; j < 4; j++) disc(Pt(xo + 2 + j * 5 - r, sg * T.w * 0.58), 0.6 * k, lt(COPPER, 0.25)); }
       if (S4 === "C") { plate(Pt(xo + 4.5 - r, 0), rectPts(4.5, T.w * 0.6), [0.55, 0.75, 0.9, 1], aim, k, 1); for (let j = 0; j < 5; j++) disc(Pt(xo + 1 + j * 1.8 - r, ((j * 7) % 5 - 2) * T.w * 0.18), 0.45 * k, [0.92, 0.97, 1, 0.9]); }
       // Rapid Capacitors B: a spine of small capacitor discs along the housing that light in sequence as it charges
-      if (S3 === "B") for (let j = 0; j < 5; j++) { const q = Pt(xo + 2 + j * 3 - r, -T.w * 0.72); disc(q, 1.1 * k, OUTLINE); disc(q, 0.8 * k, ch * 5 > j ? A(PM ? GOLD : col, 0.95) : METAL_D); }
-      // Shatter Rounds (round 2 ideas): resonator fork (A), impact studs (C)
-      if (X1 === "A") { const v = Math.sin(t * 40) * 0.3 * (ch > 0.9 ? 1 : 0); plate(Pt(xo + L + 0.4 - r, 0), rectPts(0.8, 1.6), METAL_L, aim, k, 0.9); for (const sg of [-1, 1]) bar(Pt(xo + L + 1 - r, sg * 1.4), Pt(xo + L + 4.4 - r, sg * (1.9 + v)), 0.8 * k, METAL_L); }
-      if (X1 === "C") for (let j = 0; j < 6; j++) disc(Pt(xo + L - 8 + (j % 3) * 2.2 - r, (j < 3 ? -1 : 1) * T.w * 0.3), 0.7 * k, lt(METAL_L, 0.2));
-      // Penetrator Core (round 2 ideas): drill tip (A), lance prongs (C)
-      if (X2 === "A") { fill(Pt(xo + L + 0.4 - r, 0), [[4.4, 0], [0, 1.5], [0, -1.5]], STEEL, aim, k); for (let j = 0; j < 2; j++) line(Pt(xo + L + 0.8 + j * 1.4 - r, -1.2 + j * 0.5), Pt(xo + L + 1.8 + j * 1.4 - r, 1.2 - j * 0.5), [0, 0, 0, 0.55], 0.7 * k); }
-      if (X2 === "C") { for (const sg of [-1, 1]) line(Pt(xo + L - 5 - r, sg * T.w * 0.5), Pt(xo + L + 3.5 - r, sg * 0.4), METAL_L, 1 * k); line(Pt(xo + L - r, 0), Pt(xo + L + 4.4 - r, 0), STEEL, 0.9 * k); }
+      if (S3 === "B") for (let j = 0; j < 5; j++) { const q = Pt(xo + 2 + j * 3 - r, n > 1 ? (y > 0 ? 1 : -1) * T.w * 0.96 : -T.w * 0.72); disc(q, 1.1 * k, OUTLINE); disc(q, 0.8 * k, ch * 5 > j ? A(PM ? GOLD : col, 0.95) : METAL_D); }
+      // Shatter Rounds (round 3 ideas): hammer ring (A), shard array (B), fracture lattice (C)
+      const out = n > 1 ? (y > 0 ? 1 : -1) : 1, rec = decay(since, 0.3);
+      if (X1 === "A") { plate(Pt(xo + L - 6 - r, 0), rectPts(1.2, T.w * 0.6), METAL_D, aim, k, 1); for (const sg of [-1, 1]) { const e = 0.6 + 2 * rec; bar(Pt(xo + L - 6 - r, sg * T.w * 0.55), Pt(xo + L - 6 - r, sg * (T.w * 0.55 + e)), 1.6 * k, METAL_L); disc(Pt(xo + L - 6 - r, sg * (T.w * 0.55 + e)), 1 * k, lt(METAL_L, 0.2)); } }
+      if (X1 === "B") for (let j = 0; j < 3; j++) { const q = [xo + L - 14 + j * 3.2 - r, out * T.w * 0.5], h = 2.2 + (j % 2) * 1.2; fill(Pt(q[0], q[1]), [[0, 0], [1.1, out * h], [2.2, 0]], [0.7, 0.9, 1, 1], aim, k); polyline([Pt(q[0], q[1]), Pt(q[0] + 1.1, q[1] + out * h), Pt(q[0] + 2.2, q[1])], [0.2, 0.3, 0.4, 1], 0.7 * k); }
+      if (X1 === "C") for (let j = 0; j < 5; j++) { const x = xo + L - 12 + j * 2; line(Pt(x - r, -T.w * 0.46), Pt(x + 2 - r, T.w * 0.46), [0, 0, 0, 0.6], 0.8 * k); line(Pt(x - r, T.w * 0.46), Pt(x + 2 - r, -T.w * 0.46), [0, 0, 0, 0.6], 0.8 * k); }
+      // Penetrator Core (round 3 ideas): sabot petals (A), a core feed port (B), rifling bands (C)
+      if (X2 === "A") { const ang = 0.12 + 0.9 * decay(since, 0.25); for (const sg of [-1, 1]) { const q = Pt(xo + L - 1.6 - r, sg * T.w * 0.32); bar(q, add(q, mul(fa(aim + sg * ang), 4.2 * k)), 1.3 * k, METAL_L); } }
+      if (X2 === "B") { plate(Pt(xo + 9 - r, 0), rectPts(2, T.w * 0.3), METAL_D, aim, k, 1); bar(Pt(xo + 7.4 - r, 0), Pt(xo + 10.6 - r, 0), 1.1 * k, A(PM ? GOLD : col, 0.4 + 0.6 * ch)); }
+      if (X2 === "C") for (let j = 0; j < 6; j++) line(Pt(xo + L - 12 + j * 1.6 - r, -T.w * 0.5), Pt(xo + L - 10.4 + j * 1.6 - r, T.w * 0.5), STEEL, 0.8 * k);
       // Ionised Trail (round 2 ideas): ion fins (A), a plasma tube (B)
       if (X3 === "A") for (const sg of [-1, 1]) { fill(Pt(xo + L - 7 - r, sg * T.w * 0.5), [[0, 0], [6, 0], [1.8, sg * 2.6]], METAL_D, aim, k); line(Pt(xo + L - 5.2 - r, sg * T.w * 0.5 + sg * 1.4), Pt(xo + L - 1 - r, sg * T.w * 0.5), A(PM ? GOLD : col, 0.5 + 0.4 * Math.sin(t * 5)), 1 * k); }
-      if (X3 === "B") { const a0 = Pt(xo + 2 - r, T.w * 0.62), a1 = Pt(xo + L - 3 - r, T.w * 0.62); bar(a0, a1, 1.8 * k, [0.18, 0.22, 0.22, 1]); for (let j = 0; j < 5; j++) glowDot(lerp(a0, a1, fmod(t * 0.9 + j / 5, 1)), 0.5 * k, PM ? GOLD : col); }
+      if (X3 === "B") { const a0 = Pt(xo + 2 - r, (n > 1 ? (y > 0 ? 1 : -1) : 1) * T.w * 0.62), a1 = Pt(xo + L - 3 - r, (n > 1 ? (y > 0 ? 1 : -1) : 1) * T.w * 0.62); bar(a0, a1, 1.8 * k, [0.18, 0.22, 0.22, 1]); for (let j = 0; j < 5; j++) glowDot(lerp(a0, a1, fmod(t * 0.9 + j / 5, 1)), 0.5 * k, PM ? GOLD : col); }
       // Hot Rail (round 2 ideas): glowing rail edges (A), steam vents (B), a heat-fin block (C)
       if (X4 === "A") for (const sg of [-1, 1]) { line(Pt(xo - 2 - r, sg * T.w * 0.5), Pt(xo + L - 1 - r, sg * T.w * 0.5), A(ORANGE, 0.25), 3 * k); line(Pt(xo - 2 - r, sg * T.w * 0.5), Pt(xo + L - 1 - r, sg * T.w * 0.5), A(ORANGE, 0.95), 1.2 * k); }
       if (X4 === "B") for (const x of [7, 14]) { plate(Pt(xo + x - r, 0), rectPts(0.9, 1.1), METAL_D, aim, k, 0.9); for (let j = 0; j < 2; j++) { const v = fmod(t * 0.7 + j * 0.5 + x * 0.1, 1); disc(add(Pt(xo + x - r, 0), [0, -v * 6 * k]), (0.8 + v * 1.4) * k, [0.8, 0.82, 0.84, 0.5 * (1 - v)]); } }
@@ -899,7 +900,7 @@ const P2 = {
         if (f > 0) glowDot(add(mp, mul(fa(aim), 1.5 * k)), (1.2 + 5 * f) * k, A(mc, f)); } }
     if (T.clamps) for (const x of [3, 10, 17]) plate(P(c, aim, k, x, 0), rectPts(1.2, 3.5 + T.w * 0.62), colr, aim, k, 1);
     // -- Capacitor drum(s): above the housing, with the charge ring ----------------------------------------------------
-    const big = false, two = false, rd = two ? (big ? 5.4 : 4.4) : big ? 7.6 : 6.5, dpos = two ? [[-8, -5.6], [-8, 5.6]] : [[-8, 0]];
+    const big = false, two = false, rd = n > 1 ? 9 : 6.5, dpos = two ? [[-8, -5.6], [-8, 5.6]] : [[-8, 0]];
     for (const [dx, dy] of dpos) { const dr = P(c, aim, k, dx, dy); orb(dr, rd * k, METAL_L); ring(dr, rd * 0.68 * k, METAL_D, 1.6 * k);
       arc(dr, rd * 0.68 * k, -Math.PI / 2, -Math.PI / 2 + TAU * ch, A(PM || SM ? GOLD : col, 0.95), 1.4 * k); // Kingslayer: the charge-up arc goes gold (owner's note), not the whole drum
       if (P4 === "B") arc(dr, rd * 0.9 * k, -Math.PI / 2, -Math.PI / 2 + TAU * ch, A(PM ? GOLD : col, 0.8), 1 * k);
@@ -947,26 +948,26 @@ P2.paths = [
       { key: "C", name: "Guide Rails", desc: "Two slim guide rails alongside the housing with cross-struts, running on a little past the mouth." } ] },
     { name: "Rapid Capacitors", cost: 1930, effect: "Recharge 1.6 s (primary)", options: [
       { key: "A", name: "Drum Cage", desc: "A cage of struts and a glowing outer ring round the capacitor drum that brightens as it charges." },
-      { key: "B", name: "Capacitor Spine", desc: "A spine of five small capacitor discs along the housing that light one after another as it charges." },
+      { key: "B", name: "Capacitor Spine", desc: "A spine of five small capacitor discs along the outside of the housing (the outside of each rail on the twin build) that light one after another as it charges." },
       { key: "C", name: "Charge Reservoir", desc: "A tall reservoir on the deck whose glowing level climbs as it charges." } ] },
     { name: "Supercapacitors", cost: 2610, effect: "Recharge 1.35 s", options: [
       { key: "A", name: "Field Rings", desc: "Thin glowing field rings between the collars that brighten as it charges." },
       { key: "B", name: "Bus Bars", desc: "Copper bus bars with bolts along both sides of the housing." },
       { key: "C", name: "Cryo Jacket", desc: "A frosted pale-blue jacket round the back of the housing, flecked with frost." } ] },
     { name: "Twin Rails", cost: 5000, effect: "Two rails firing in turn: a slug every 1.2 s (mastery)", options: [
-      { key: "A", name: "Parallel Rails", desc: "Two housings running directly side by side, joined by clamps at the collars, each with every detail, firing in turn; gold rings at the muzzles." },
+      { key: "A", name: "Parallel Rails", desc: "Two housings running directly side by side, joined by clamps, recoiling together and firing in turn, each with every detail; a larger drum spans both; gold rings at the muzzles." },
       { key: "B", name: "Staggered Pair", desc: "Two housings, one forward and one back; gold rings at the muzzles." },
       { key: "C", name: "Split Rails", desc: "Two slim housings set wide apart with copper windings between; gold rings." } ] },
   ] },
   { name: "Special Effects", theme: "armour shatter, less falloff, an ionised trail", steps: [
     { name: "Shatter Rounds", cost: 60, effect: "Each hit strips 2 armour permanently", options: [
-      { key: "A", name: "Resonator Fork", desc: "A two-pronged fork just past the mouth that buzzes when the shot is charged; hits crack orange." },
-      { key: "B", name: "Etching Tank", desc: "An acid-green etching tank on the deck with a hose to the housing; hits crack orange." },
-      { key: "C", name: "Impact Studs", desc: "Two rows of steel studs on the front of the housing; hits crack orange." } ] },
+      { key: "A", name: "Hammer Ring", desc: "A ring of two hammer heads on the housing that punch outward as it fires; hits crack orange." },
+      { key: "B", name: "Shard Array", desc: "Three pale crystal shards standing out from the housing's side; hits crack orange." },
+      { key: "C", name: "Fracture Lattice", desc: "A cracked diamond lattice scored into the front of the housing; hits crack orange." } ] },
     { name: "Penetrator Core", cost: 260, effect: "Falloff per enemy 40% to 25%", options: [
-      { key: "A", name: "Drill Tip", desc: "A steel drill cone with cut grooves on the mouth." },
-      { key: "B", name: "Core Magazine", desc: "A rack of long, slim penetrator cores on the deck." },
-      { key: "C", name: "Lance Prongs", desc: "Three slim prongs converging ahead of the mouth into a needle." } ] },
+      { key: "A", name: "Sabot Petals", desc: "Two sabot petals at the mouth that fling open as the shot leaves." },
+      { key: "B", name: "Core Feed Port", desc: "A feed port on top of the housing with a glowing core cartridge that brightens as it charges." },
+      { key: "C", name: "Rifling Bands", desc: "Slanting steel rifling bands across the front of the housing." } ] },
     { name: "Ionised Trail", cost: 1535, effect: "The line burns for 2 s: 30 energy damage/s to every enemy on it (primary)", options: [
       { key: "A", name: "Ion Fins", desc: "Two angled fins either side of the front of the housing with glowing edges; the line lingers and crackles." },
       { key: "B", name: "Plasma Tube", desc: "A dark glass tube along the housing's side with glowing plasma flowing forward; the line lingers and crackles." },
@@ -999,8 +1000,8 @@ P2.picks = {};
 
 // ---- Round 2 (owner's picks and notes, 2026-10-18): picked stages show only the pick (re-described where a note changed
 // it); stages the owner asked for more ideas on show three new options.
-P2.intro = "Round 2: your picks drawn as one model with your notes applied: Kingslayer now turns only the charge-up arc and the centreline gold (not the drum), and the parallel Twin Rails run directly side by side, joined by clamps. New ideas for Fast Capacitors, Rapid Capacitors, Supercapacitors and every Special Effects tier; Longer Rails keeps its three options. Use the build preview to check combinations.";
-P2.picks = { p0s0: "C", p0s1: "B", p0s2: "C", p0s3: "B", p0s4: "B", p1s1: "A", p1s4: "A", r0: "A", r2: "A" };
+P2.intro = "Round 3: your picks drawn as one model with your notes applied: on the twin build both barrels recoil together, the drum is larger so it spans both, and the capacitor spine sits on the outside of each rail so both are external. New ideas for Shatter Rounds and Penetrator Core; Ion Cannon (Kingslayer's Special Effects mastery) and the other unpicked stages keep their options. Use the build preview to check combinations.";
+P2.picks = { p0s0: "C", p0s1: "B", p0s2: "C", p0s3: "B", p0s4: "B", p1s0: "C", p1s1: "A", p1s2: "B", p1s3: "A", p1s4: "A", p2s2: "B", p2s3: "A", r0: "A", r1: "B", r2: "A" };
 P2.paths.forEach((pa, pi) => pa.steps.forEach((st, k) => { const pk = P2.picks["p" + pi + "s" + k]; if (pk) st.options = st.options.filter((o) => o.key === pk); }));
 P2.retrofits.forEach((rf, ri) => { const pk = P2.picks["r" + ri]; if (pk) rf.options = rf.options.filter((o) => o.key === pk); });
 P2.paths[0].steps[4].options[0].desc = "From your note: only the charge-up arc and the green centreline turn gold, not the whole drum; a gold shot with gold hit flashes.";

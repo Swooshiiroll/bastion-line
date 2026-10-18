@@ -381,7 +381,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 4 | Rocket Salvo | `design/tower_art_p2_04_rocket.html` | **Confirmed** (owner, 2026-10-17: "Rocket Salvo is done") |
 | 5 | Anti-Aircraft Turret | `design/tower_art_p2_05_aa.html` | **Confirmed** (owner, 2026-10-17: "AA Finished"; Range 3 is the Optical Director) |
 | 6 | Artillery Cannon | `design/tower_art_p2_06_artillery.html` | **Confirmed** (owner, 2026-10-17: "Artillery finished"; stock scatter kept as drawn, 30 px) |
-| 7 | Railgun | `design/tower_art_p2_07_railgun.html` | Round 2: picks drawn; new ideas for six stages; awaiting picks |
+| 7 | Railgun | `design/tower_art_p2_07_railgun.html` | Round 3: picks drawn; new ideas for Shatter and Penetrator Core; awaiting picks |
 
 ### Gun Turret (second pass)
 
@@ -681,6 +681,23 @@ past the mouth). They replace the longer housing, the sleeve and the braces.
   Funnel).
 - Picked stages show only the pick; the Longer Rails Retrofit keeps its three options.
 
+**Picks (owner, round 2):**
+- **Power:** 1 C Tungsten Collars, 2 B Boss Marker Ring, 3 C Arc Pylons, 4 B Dual Charge Ring, M B Gold Drum Ring.
+- **Range/Speed:** 1 C Cable Reel, 2 A Telescoping Barrel, 3 B Capacitor Spine, 4 A Field Rings, M A Parallel Rails.
+- **Special Effects:** 1 none, 2 none, 3 B Plasma Tube, 4 A Glowing Rail Edges, M none.
+- **Retrofits:** Capacitor Coils A, Longer Rails B (Heavy Housing), Penetrator Tips A.
+- **Notes:** "Larger drum, both barrels reciprocate together, move the inside capacitor spine to the outside (So both
+  are external)". "Need new ideas for the shatter rounds and the penetrator core".
+
+**Round 3 (Claude):**
+- **Twin Rails:** both housings recoil together on every shot (the flash and the charge still alternate between them);
+  the drum is larger (r 9, was 6.5) so it spans both rails. I applied the larger drum to the twin build only, since
+  the notes sat with the twin-rail ones; if you meant every build, say so.
+- **Capacitor Spine:** it sits on the outside of each rail, so on the twin build both spines are external. The Plasma
+  Tube is outside too.
+- **New ideas:** Shatter Rounds (Hammer Ring, Shard Array, Fracture Lattice); Penetrator Core (Sabot Petals, Core Feed
+  Port, Rifling Bands). Ion Cannon is still unpicked and keeps its three options.
+
 ## Open questions
 
-1. **Second pass, Railgun** (tower 7, round 2): pick from the new ideas, pick the Longer Rails option, and confirm the Twin Rails reading. Then towers 8-20 (next: Tesla Tower).
+1. **Second pass, Railgun** (tower 7, round 3): pick Shatter Rounds, Penetrator Core and Ion Cannon, and confirm the larger drum is for the twin build only. Then towers 8-20 (next: Tesla Tower).
