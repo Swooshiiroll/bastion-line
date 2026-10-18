@@ -651,6 +651,10 @@ rounded bar end with a disc.
   the drum). They replace the bigger drum, the muzzle halo and the cell row.
 - Power step 2, **Boss Marker Ring**: two thin red rings hugging the housing, instead of wide, thick ones.
 
+**Round 1c (owner: "more ideas for P2T1"):** Range/Speed step 1 (Fast Capacitors) has three new options: **Charge Relay**
+(a relay box with a cable to the drum, a pulse running along it), **Flywheel** (spins faster as it charges) and **Ready
+Beacon** (dim while charging, a bright green pulse when ready). They replace the cell bank, the dial and the spare cells.
+
 ## Open questions
 
 1. **Second pass, Railgun** (tower 7, round 1): pick one option per stage and Retrofit. Then towers 8-20 (next: Tesla Tower).

@@ -61,9 +61,12 @@ const P2 = {
     deck(c, k, col, t);
     // -- Fixed deck kit (never turns) --------------------------------------------------------------------------------
     if (P1 === "B") { plate(S(-13, -11), rectPts(4.2, 2.4), AMMO, 0, k, 0.9); for (let i = 0; i < 3; i++) bar(S(-15.4 + i * 2.4, -11), S(-14 + i * 2.4, -11), 1.6 * k, B.lv[0] >= 5 ? GOLD : METAL_L); }
-    if (S1 === "A") { plate(S(-13, 11), rectPts(4.4, 2), METAL_D, 0, k, 1); for (let i = 0; i < 3; i++) disc(S(-15 + i * 2.6, 11), 0.9 * k, A(col, ch * 3 > i + 0.5 ? 0.95 : 0.25)); }
-    if (S1 === "B") { const q = S(-13, 11); disc(q, 3.2 * k, OUTLINE); disc(q, 2.6 * k, METAL_D); line(q, add(q, mul(fa(-Math.PI * 0.85 + ch * Math.PI * 0.7), 2.3 * k)), WHITE, 1 * k); }
-    if (S1 === "C") for (const x of [-15, -11]) { bar(S(x, 9.5), S(x, 12.5), 2.4 * k, METAL_L); disc(S(x, 12.5), 1.1 * k, A(col, 0.5 + 0.5 * ch)); }
+    // Fast Capacitors: a relay box with a cable to the drum (a pulse runs along it), a flywheel that spins up, a ready beacon
+    const dcen = P(c, aim, k, -8, 0);
+    if (S1 === "A") { plate(S(-13, 11), rectPts(3.2, 2.2), METAL_D, 0, k, 1); for (let i = 0; i < 3; i++) line(S(-14.8 + i * 1.8, 10), S(-14.8 + i * 1.8, 12), COPPER, 0.9 * k);
+      const a0 = S(-11, 10.4); line(a0, dcen, [0.4, 0.42, 0.46, 1], 1.8 * k); const pu = lerp(a0, dcen, fmod(t * 0.9, 1)); glowDot(pu, 0.9 * k, A(col, 0.3 + 0.7 * ch)); }
+    if (S1 === "B") { const q = S(-13, 11); disc(q, 3.4 * k, OUTLINE); disc(q, 2.8 * k, METAL_D); const spin = t * (2 + 14 * ch); for (let i = 0; i < 4; i++) line(add(q, mul(fa(spin + i * Math.PI / 2), 0.6 * k)), add(q, mul(fa(spin + i * Math.PI / 2), 2.6 * k)), METAL_L, 1.1 * k); orb(q, 0.9 * k, METAL); ring(q, 2.8 * k, A(col, 0.2 + 0.6 * ch), 0.8 * k); }
+    if (S1 === "C") { const q = S(-13, 11); bar(q, S(-13, 7), 1.6 * k, METAL_L); disc(q, 2.2 * k, OUTLINE); disc(q, 1.8 * k, METAL_D); const ready = ch >= 0.97; disc(S(-13, 7), 2 * k, OUTLINE); glowDot(S(-13, 7), (ready ? 1.5 + 0.4 * Math.sin(t * 8) : 0.9) * k, ready ? [0.4, 1, 0.5, 1] : A(col, 0.25 + 0.5 * ch)); }
     if (S3 === "C") for (let i = 0; i < 3; i++) { bar(S(14, -11 + i * 2.2), S(17, -11 + i * 2.2), 1.8 * k, METAL_L); disc(S(17, -11 + i * 2.2), 0.7 * k, A(col, 0.3 + 0.7 * ch)); }
     if (S4 === "C") { plate(S(14, 9), rectPts(3, 2.6), CERAM, 0, k, 1); for (let i = 0; i < 3; i++) line(S(12.6 + i * 1.4, 7.6), S(12.6 + i * 1.4, 10.4), [0.3, 0.3, 0.3, 0.6], 0.8 * k); }
     if (X3 === "C") { plate(S(6, 12.4), rectPts(3, 1.8), TANK2, 0, k, 1); line(S(3, 11.4), S(0, 6), [0.15, 0.15, 0.15, 1], 1 * k); }
@@ -165,9 +168,9 @@ P2.paths = [
   ] },
   { name: "Range/Speed", theme: "mostly faster recharge", steps: [
     { name: "Fast Capacitors", cost: 140, effect: "Recharge 2.2 s", options: [
-      { key: "A", name: "Capacitor Bank", desc: "A row of three charge cells on the deck that light as it charges." },
-      { key: "B", name: "Charge Gauge", desc: "A dial on the deck whose needle swings as it charges." },
-      { key: "C", name: "Spare Cells", desc: "Two cylinder cells on the deck that glow as it charges." } ] },
+      { key: "A", name: "Charge Relay", desc: "A copper relay box on the deck with a cable to the drum; a pulse runs along the cable and brightens as it charges." },
+      { key: "B", name: "Flywheel", desc: "A flywheel on the deck that spins faster and faster as it charges." },
+      { key: "C", name: "Ready Beacon", desc: "A small beacon mast on the deck: dim while it charges, a bright green pulse when it's ready to fire." } ] },
     { name: "Extended Rails", cost: 245, effect: "+40 range (420)", options: [
       { key: "A", name: "Longer Housing", desc: "The housing is swapped for a longer one." },
       { key: "B", name: "Extension Sleeve", desc: "A banded extension sleeve on the housing." },
