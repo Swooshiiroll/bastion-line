@@ -710,6 +710,10 @@ fire clock, so the arc starts empty at each shot and is full exactly when the ne
 rates, from 1.2 s to 2.7 s, with no drops). The same stale shot count affected the Artillery Cannon's Shell Magazine
 counter lamps; that is fixed too.
 
+**Floating capacitors fix (owner: "the side capacitors are floating"):** the Capacitor Spine's discs sat a few pixels off the
+housing with nothing joining them. They now hang on a backing bar along the housing's outer edge, each with its own
+bracket, on single and twin builds alike.
+
 ## Open questions
 
 1. **Second pass, Railgun** (tower 7, round 4): confirm (and say if the larger drum should apply to every build, not just the twin). Then towers 8-20 (next: Tesla Tower).
