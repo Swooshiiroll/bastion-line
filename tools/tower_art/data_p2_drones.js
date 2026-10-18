@@ -8,7 +8,7 @@
 // is drawn as a second pad. Drones launch when the first enemy shows and never go home; with the lane clear they hover.
 // Geometry (game px): hangar plate 26 x 26, landing pad r 7.4 at the centre; the quadcopter is 4.6 px arms, 2.6 px rotors,
 // a 2.6 x 2 body and a chin gun forward.
-const PAGE = { title: "Drone Bay: paths and Retrofits (second pass)", store: "bl-tower-art-p2-drones-r1" };
+const PAGE = { title: "Drone Bay: paths and Retrofits (second pass)", store: "bl-tower-art-p2-drones-r2" };
 const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], RED = [0.85, 0.2, 0.18, 1], ORANGE = [1, 0.55, 0.2, 1], CYAN = [0.4, 0.9, 1, 1];
 const rotorD = (p, r, t, k) => { disc(p, r, [0.8, 0.85, 0.95, 0.12]); ring(p, r, [0.8, 0.86, 0.95, 0.35], 0.8); for (let q = 0; q < 2; q++) line(p, add(p, mul(fa(t * 40 + q * Math.PI), r * 0.95)), [0.85, 0.9, 1, 0.55], 1.1 * k_); };
 let k_ = 1; // the scale rotorD draws its blades at (set per drone below)
@@ -216,4 +216,8 @@ const P2 = {
       { key: "C", name: "Bunker Hatch", desc: "A second pad in a small bunker with a sliding hatch that opens as its drone launches." } ] },
   ],
 };
-P2.picks = {};
+// ---- Round 2 (owner's picks, 2026-10-18): every stage shows only the pick; no notes.
+P2.intro = "Round 2: all your picks drawn as one model, nothing left to choose. Use the build preview to check combinations; the second drone appears with the Retrofit.";
+P2.picks = { p0s0: "A", p0s1: "A", p0s2: "B", p0s3: "A", p0s4: "A", p1s0: "A", p1s1: "A", p1s2: "A", p1s3: "B", p1s4: "C", p2s0: "C", p2s1: "A", p2s2: "A", p2s3: "A", p2s4: "A", r0: "A" };
+P2.paths.forEach((pa, pi) => pa.steps.forEach((st, k) => { const pk = P2.picks["p" + pi + "s" + k]; if (pk) st.options = st.options.filter((o) => o.key === pk); }));
+P2.retrofits.forEach((rf, ri) => { const pk = P2.picks["r" + ri]; if (pk) rf.options = rf.options.filter((o) => o.key === pk); });

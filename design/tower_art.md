@@ -383,7 +383,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 6 | Artillery Cannon | `design/tower_art_p2_06_artillery.html` | **Confirmed** (owner, 2026-10-17: "Artillery finished"; stock scatter kept as drawn, 30 px) |
 | 7 | Railgun | `design/tower_art_p2_07_railgun.html` | **Confirmed** (owner, 2026-10-18: "Railgun finished"; the larger drum is for the twin build only) |
 | 8 | Tesla Tower | `design/tower_art_p2_08_tesla.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
-| 9 | Drone Bay | `design/tower_art_p2_09_drones.html` | Round 1: three options per stage; awaiting picks |
+| 9 | Drone Bay | `design/tower_art_p2_09_drones.html` | Round 2: all picks drawn; awaiting confirm |
 
 ### Gun Turret (second pass)
 
@@ -757,6 +757,14 @@ only the drones move, so the paths change the DRONE:
 - **Two drones:** with the Retrofit a second drone launches from the second pad and takes a different target.
 - Drones launch on the first enemy and never go home; with the lane clear they hover.
 
+**Picks (owner, round 1):**
+- **Power:** 1 A Heavy Chin Gun, 2 A Hot Barrel Shroud, 3 B Firmware Lamp, 4 A Frame Rails, M A Gold Frame.
+- **Weaponry:** 1 A Wing Pods, 2 A Belly Bomb Rack, 3 A Laser Emitter, 4 B Reinforced Pylons, M C Gold Pylon Wings.
+- **Speed:** 1 C Ready Lamp, 2 A Twin Belts, 3 A Three-Barrel Rotary, 4 A Overclock Chip, M A Gold Barrels.
+- **Retrofit:** Second Hangar A (Twin Pads). No notes.
+
+**Round 2:** every stage is picked; the page shows only the picks.
+
 ## Open questions
 
-1. **Second pass, Drone Bay** (tower 9, round 1): pick one option per stage and the Retrofit. Then towers 10-20 (next: CAS Gunship).
+1. **Second pass, Drone Bay** (tower 9, round 2): confirm. Then towers 10-20 (next: CAS Gunship).
