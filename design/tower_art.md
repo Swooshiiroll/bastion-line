@@ -813,8 +813,7 @@ the shots start inside the hull and emerge from under it.
 
 **Tally rule (owner: "Upgrades are marked as notches on the plane. Path 1 is green notches, path 2 is red, path 3 is green.
 Mastery changes them to gold", then "I mean just add a tally mark on the side of the fuselage"):** each CAS upgrade adds one
-tally stroke on the fuselage's outer side, like a kill tally. Path 1's strokes are green and sit forward on the nose, path 2's red
-just ahead of them, path 3's green aft; a stroke only appears once its step is bought (no empty sockets). The mastery strikes
+tally stroke, like a kill tally (now on the outer wing's midpoint, see the fix below). Path 1's strokes are green, path 2's red, path 3's green; a stroke only appears once its step is bought (no empty sockets). The mastery strikes
 the four strokes through with a slash and turns all of that path's marks gold. The three options per stage are three stroke
 styles (plain, bold, double). The old frame, panel and fairing details are gone. The guns stay inside the fuselage behind plain
 hatches, with the autocannon port and the missile bay appearing at their first step; the masteries add a second gatling
@@ -836,6 +835,13 @@ wing"):**
 
 **Fix (owner: "make all of the notches smaller"):** the tally strokes are about half as long (1 px), thinner, and set closer together (0.6 px
 apart); the gold slash is smaller to match.
+
+**Fix (owner: "put the tally marks on the midpoint of the wing; also the propellers look like they're not spinning"):**
+- The tally marks now sit on the midpoint of the outer wing (half way from the fuselage to the tip, between the engines): one row
+  per path across the wing's depth (path 1 at the leading edge, then path 2, then path 3), with the same colours, the gold slash
+  and the three stroke styles. The Retrofit parts no longer need to dodge them.
+- The propellers now visibly spin: each is a thin translucent disc seen nearly edge-on with two bright blade tips orbiting it,
+  swinging fore and aft across the disc (a steady, smooth motion; the earlier random flicker stays out).
 
 ## Open questions
 

@@ -37,7 +37,11 @@ function drawPlane(B, p, h, s, fx, t, col) {
   if (B.r === 2) { const R2k = B.key("r2"); if (R2k === "B") for (const sg of [-1, 1]) plate(D(2, sg * (W + 0.4)), [[2.4, 0], [1, sg * 2.2], [-1.6, sg * 2.2], [-2.4, 0]], METAL, h, k, 0.9);
     if (R2k === "C") for (const sg of [-1, 1]) line(D(2, sg * 6), D(2, sg * (W - 1)), STEEL, 0.9 * k); if (R2k === "A") for (const sg of [-1, 1]) { bar(D(2.4, sg * W), D(-1, sg * W), 1.4 * k, STEEL); } }
   // Propellers face forward (owner): each engine is a nacelle on the wing with its propeller disc in front, seen edge-on from above
-  for (const y of [-12, -6, 6, 12]) { bar(D(-0.5, y), D(5, y), 2.2 * k, METAL); orb(D(5.4, y), 0.9 * k, METAL_L); const L = 2.7; line(D(6.4, y - L), D(6.4, y + L), [0.85, 0.9, 1, 0.18], 1.3 * k); line(D(6.4, y - L), D(6.4, y + L), [0.9, 0.93, 1, 0.7], 0.5 * k); }
+  for (const y of [-12, -6, 6, 12]) { bar(D(-0.5, y), D(5, y), 2.2 * k, METAL); orb(D(5.4, y), 0.9 * k, METAL_L);
+    // the propeller disc seen almost edge-on: a thin translucent ellipse with two blade tips orbiting it (they swing fore and aft across the disc)
+    const pc = D(6.4, y); oval(pc, 0.9 * k, 2.7 * k, h, [0.85, 0.9, 1, 0.16], 0);
+    for (let bl = 0; bl < 2; bl++) { const th = t * 11 + y + bl * Math.PI, tip = D(6.4 + 0.9 * Math.sin(th), y + 2.7 * Math.cos(th)), tp = D(6.4 + 0.9 * Math.sin(th - 0.5), y + 2.7 * Math.cos(th - 0.5));
+      line(pc, tip, [0.9, 0.93, 1, 0.55], 0.45 * k); line(tp, tip, [0.9, 0.93, 1, 0.35], 0.9 * k); disc(tip, 0.4 * k, [1, 1, 1, 0.9]); } }
   glowDot(D(12, 0), 0.8 * k, col); glowDot(D(2, -W), 0.7 * k, [1, 0.25, 0.25, 1]); glowDot(D(2, W), 0.7 * k, [0.3, 1, 0.45, 1]);
   // -- The guns are INSIDE the fuselage: a plain port for each (a hatch that slides open as it fires, held open while it keeps firing) ------
   const HY = 1.2; // inside the fuselage outline, a little in from the inner edge
@@ -63,12 +67,13 @@ function drawPlane(B, p, h, s, fx, t, col) {
   // -- Upgrade tally marks (owner): one stroke on the fuselage's outer side for every step bought, like kill tallies. Path 1 is
   // green, path 2 red, path 3 green; the mastery strikes the four strokes through with a slash and turns that path's marks gold.
   // The option picks the stroke's style (a plain stroke, a bold stroke, a double stroke). Drawn last so nothing covers them.
-  const TALLY = [[GREEN_T, 5.6, "p0"], [RED, 8.6, "p1"], [GREEN_T, -9.0, "p2"]];
-  TALLY.forEach(([tc, x0, pk], pi) => { const lv = B.lv[pi], gold = lv >= 5, c1 = gold ? GOLD : tc, SP = 0.6, Y0 = -1.9, Y1 = -0.9; // small marks: 1 px long strokes 0.6 px apart
-    for (let i = 0; i < Math.min(lv, 4); i++) { const x = x0 + i * SP, st = B.key(pk + "s" + i), a = D(x, Y0), b = D(x, Y1);
+  const TALLY = [[GREEN_T, 3.4, "p0"], [RED, 2.0, "p1"], [GREEN_T, 0.6, "p2"]]; // rows across the wing's depth: path 1 at the leading edge
+  const WMID = -9; // the midpoint of the outer wing (half way from the fuselage to the tip), clear of the engines at 6 and 12
+  TALLY.forEach(([tc, xr, pk], pi) => { const lv = B.lv[pi], gold = lv >= 5, c1 = gold ? GOLD : tc, SP = 0.6; // small marks: 1 px strokes 0.6 px apart
+    for (let i = 0; i < Math.min(lv, 4); i++) { const y = WMID - 0.9 + i * SP, st = B.key(pk + "s" + i), a = D(xr - 0.5, y), b = D(xr + 0.5, y);
       line(a, b, A(c1, 0.3), 1.0 * k);
-      if (st === "B") line(a, b, c1, 0.6 * k); else if (st === "C") { line(D(x - 0.15, Y0), D(x - 0.15, Y1), c1, 0.25 * k); line(D(x + 0.15, Y0), D(x + 0.15, Y1), c1, 0.25 * k); } else line(a, b, c1, 0.35 * k); }
-    if (gold) { const a = D(x0 - 0.4, Y1 + 0.15), b = D(x0 + 3 * SP + 0.4, Y0 - 0.15); line(a, b, A(GOLD, 0.3), 1.0 * k); line(a, b, GOLD, 0.4 * k); } });
+      if (st === "B") line(a, b, c1, 0.6 * k); else if (st === "C") { line(D(xr - 0.5, y - 0.15), D(xr + 0.5, y - 0.15), c1, 0.25 * k); line(D(xr - 0.5, y + 0.15), D(xr + 0.5, y + 0.15), c1, 0.25 * k); } else line(a, b, c1, 0.35 * k); }
+    if (gold) { const a = D(xr + 0.65, WMID - 1.15), b = D(xr - 0.65, WMID + 1.15); line(a, b, A(GOLD, 0.3), 1.0 * k); line(a, b, GOLD, 0.4 * k); } });
 }
 
 // ---- The agent: three guns on the plane's inner side, each firing at its own rate, aimed at different enemies -------------
