@@ -385,6 +385,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 8 | Tesla Tower | `design/tower_art_p2_08_tesla.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 9 | Drone Bay | `design/tower_art_p2_09_drones.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 10 | CAS Gunship | `design/tower_art_p2_10_cas.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
+| 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | Round 1: three options per stage; awaiting picks |
 
 ### Gun Turret (second pass)
 
@@ -880,6 +881,23 @@ tail fins and an exhaust flame, turning along their curved path, with a thinner 
 
 **Fix (owner: "make the missiles a bit smaller"):** the missiles are about a quarter smaller, with their smoke trail scaled down to match.
 
+### Mine Layer (second pass)
+
+**Retrofits kept, stats stacking (the carpet rule).** All three overlap a path step; Claude flagged them and kept them:
+- Conveyor Feed (a mine every 1.33 s, a 25-mine cap) = Production step 1, Quick Assembly (1.33 s, cap 24). The look takes a further
+  0.17 s off the toss gap and adds one to the cap on top of the path.
+- Shaped Charges (+15 damage, 100) = Power step 1, Heavier Charge (100 damage). Every mine gets a directional plate or cone.
+- Long Arm (+20 toss range, 140) = Range step 1, Longer Arm (140 px). The rails are lengthened by a further 3 px.
+
+**Round 1 (Claude):** one parametric model (base look F Rail Launcher, animation C Confetti Charge).
+- **Power changes the mine itself** (bigger canister, a shock ring on the blast, a dark yellow-banded HE mine, segmented
+  casing and extra fragments, a big gold-rimmed anti-tank mine and gold confetti), as well as parts on the launcher.
+- **Production** grows the magazine (a second column at Assembly Line, a third at Mine Factory) and adds presses, chutes,
+  belts and lamps, with a faster toss and a bigger cap (the preview's cap is 6 growing to 12; the game's is 20 to 45).
+- **Range** lengthens the rails and adds launch gear (springs, a mortar tube, rings, braces) and widens where mines land.
+- Mines land at random spots along and across the track within range, blink while they wait, and go off under a ground enemy
+  in a burst of confetti (gold at the mastery).
+
 ## Open questions
 
-1. **Second pass, Mine Layer** (tower 11): round 1 page being built. Then towers 12-20.
+1. **Second pass, Mine Layer** (tower 11, round 1): pick one option per stage and Retrofit. Then towers 12-20 (next: Chemical Plant).
