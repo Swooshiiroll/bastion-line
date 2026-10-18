@@ -384,7 +384,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 7 | Railgun | `design/tower_art_p2_07_railgun.html` | **Confirmed** (owner, 2026-10-18: "Railgun finished"; the larger drum is for the twin build only) |
 | 8 | Tesla Tower | `design/tower_art_p2_08_tesla.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 9 | Drone Bay | `design/tower_art_p2_09_drones.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
-| 10 | CAS Gunship | `design/tower_art_p2_10_cas.html` | Round 1: three options per stage; awaiting picks |
+| 10 | CAS Gunship | `design/tower_art_p2_10_cas.html` | Round 2: all picks drawn; awaiting confirm |
 
 ### Gun Turret (second pass)
 
@@ -846,6 +846,11 @@ apart); the gold slash is smaller to match.
 **Fix (owner: "remove the balls at the end of the propellers, and make them spin faster"):** the white dots on the blade tips are gone (the blades
 and their trails remain) and the propellers spin about two and a half times faster.
 
+**Picks (owner):** every path stage A (plain strokes); Retrofits Radar C (Rotodome), Extra Ammo A (Ammo Bay Box), Wide Orbit B
+(Winglets). No notes.
+
+**Round 2:** every stage is picked; the page shows only the picks.
+
 ## Open questions
 
-1. **Second pass, CAS Gunship** (tower 10, round 1): pick one option per stage and Retrofit. Then towers 11-20 (next: Mine Layer).
+1. **Second pass, CAS Gunship** (tower 10, round 2): confirm. Then towers 11-20 (next: Mine Layer).

@@ -9,7 +9,7 @@
 // The Retrofit overlaps (kept, stacking: the carpet rule): Extra Ammo's +10% fire rate adds to every gun's fire-rate steps.
 // Geometry (game px, plane frame: x forward, y to the inner side where the guns fire): fuselage x -12 to 13 (5 wide),
 // tail at -11, wing at x 2 (36 across), four engines at y +-6 and +-12, the side door at (1, 3.2).
-const PAGE = { title: "CAS Gunship: paths and Retrofits (second pass)", store: "bl-tower-art-p2-cas-r1" };
+const PAGE = { title: "CAS Gunship: paths and Retrofits (second pass)", store: "bl-tower-art-p2-cas-r2" };
 const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], RED = [0.85, 0.2, 0.18, 1], ORANGE = [1, 0.55, 0.2, 1], YEL = [1, 0.85, 0.2, 1], CYAN = [0.4, 0.9, 1, 1];
 const ZP = 2.0, GREEN_T = [0.35, 1, 0.45, 1]; // the plane is drawn this much bigger than the ground
 const rnd2 = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
@@ -193,4 +193,8 @@ const P2 = {
       { key: "C", name: "Wing Struts", desc: "Longer wings with strut lines; a wider orbit." } ] },
   ],
 };
-P2.picks = {};
+// ---- Round 2 (owner's picks, 2026-10-18): every stage shows only the pick; no notes.
+P2.intro = "Round 2: all your picks drawn as one model, nothing left to choose. Use the build preview to check combinations; every path is uncapped, so you can max all three guns.";
+P2.picks = { p0s0: "A", p0s1: "A", p0s2: "A", p0s3: "A", p0s4: "A", p1s0: "A", p1s1: "A", p1s2: "A", p1s3: "A", p1s4: "A", p2s0: "A", p2s1: "A", p2s2: "A", p2s3: "A", p2s4: "A", r0: "C", r1: "A", r2: "B" };
+P2.paths.forEach((pa, pi) => pa.steps.forEach((st, k) => { const pk = P2.picks["p" + pi + "s" + k]; if (pk) st.options = st.options.filter((o) => o.key === pk); }));
+P2.retrofits.forEach((rf, ri) => { const pk = P2.picks["r" + ri]; if (pk) rf.options = rf.options.filter((o) => o.key === pk); });
