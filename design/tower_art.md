@@ -824,6 +824,13 @@ fuselage. If path 3 should be a different colour (blue, say), say so. The Retrof
 **Fix (owner: "move the second autocannon to the other side of the plane"):** the Autocannon Battery's second port is now on the other
 (outer) side of the fuselage, just aft of the wing, instead of beside the first; its shells leave from there.
 
+**Fix (owner: "keep the gun-wells open with no slide. Missiles launch from under the wings. Also the light gun is sitting over the
+wing"):**
+- The gun wells are always open: a framed dark opening with no sliding door; it just glows while its gun is firing.
+- The missiles launch from under the wing: two wells on the inner wing (gold-framed at Hellfire Volley), and the shots start
+  under the wing, so the missiles emerge from beneath it. The fuselage missile bay is gone.
+- The light gun's well moved forward of the wing, onto the nose (Twin Gatlings' second well is further forward still).
+
 ## Open questions
 
 1. **Second pass, CAS Gunship** (tower 10, round 1): pick one option per stage and Retrofit. Then towers 11-20 (next: Mine Layer).

@@ -43,13 +43,14 @@ function drawPlane(B, p, h, s, fx, t, col) {
   const HY = 1.2; // inside the fuselage outline, a little in from the inner edge
   const HOLD = { gat: 0.5, can: 0.4, can2: 0.4, mis: 0.7 };
   const openAmt = (key) => { const sn = since(key), hold = HOLD[key] || 0.4; return sn < hold ? 1 : Math.max(0, 1 - (sn - hold) / 0.25); };
-  const hatch = (x, key, w, hh, doorCol, yy) => { const op = openAmt(key), y = yy === undefined ? HY : yy;
-    plate(D(x, y), rectPts(w + 0.35, hh + 0.3), STEEL, h, k, 0.8); plate(D(x, y), rectPts(w, hh), BORE, h, k, 0.8);
-    plate(D(x + op * (w * 1.7), y), rectPts(w * 0.94, hh * 0.9), doorCol || METAL_D, h, k, 0.8); if (op > 0) glowDot(D(x - w * 0.3, y + (y < 0 ? -0.2 : 0.2)), 0.7 * k * op, A(ORANGE, op)); };
-  hatch(1, "gat", 1.5, 0.8, PM ? lt(GOLD, 0.05) : METAL_D);                       // light gun: the side door (Twin Gatlings adds a second)
-  if (PM) hatch(5.5, "gat", 1.5, 0.8, lt(GOLD, 0.05));
-  if (B.lv[1] >= 1) { hatch(-6.5, "can", 1.4, 0.8, CM ? lt(GOLD, 0.05) : METAL_D); if (CM) hatch(-3.6, "can2", 1.4, 0.8, lt(GOLD, 0.05), -HY); } // the battery's second autocannon sits on the other side of the plane // medium gun
-  if (B.lv[2] >= 1) hatch(7.5, "mis", 2.4, 1.0, MM ? lt(GOLD, 0.05) : METAL_D);   // heavy gun: the missile bay
+  // The gun wells are always open (no sliding door): a framed dark opening that glows while its gun is firing.
+  const hatch = (x, key, w, hh, frameCol, yy) => { const op = openAmt(key), y = yy === undefined ? HY : yy;
+    plate(D(x, y), rectPts(w + 0.35, hh + 0.3), frameCol || STEEL, h, k, 0.8); plate(D(x, y), rectPts(w, hh), BORE, h, k, 0.8);
+    if (op > 0) glowDot(D(x, y), 0.8 * k * op, A(ORANGE, 0.9 * op)); };
+  hatch(6.4, "gat", 1.5, 0.8, PM ? GOLD : STEEL);                                  // light gun: a well forward of the wing (Twin Gatlings adds a second)
+  if (PM) hatch(10.2, "gat", 1.5, 0.8, GOLD);
+  if (B.lv[1] >= 1) { hatch(-6.5, "can", 1.4, 0.8, CM ? GOLD : STEEL); if (CM) hatch(-3.6, "can2", 1.4, 0.8, GOLD, -HY); } // the battery's second autocannon sits on the other side of the plane // medium gun
+  if (B.lv[2] >= 1) for (const wy of [8.6, 11.4]) hatch(0.9, "mis", 1.1, 0.7, MM ? GOLD : STEEL, wy);   // heavy gun: two wells under the inner wing
   // -- Retrofits ------------------------------------------------------------------------------------------------------------------------
   if (B.r === 0) { const ky = B.key("r0"), sw = t * 3;
     if (ky === "A") { disc(D(-2, 0), 2.6 * k, OUTLINE); disc(D(-2, 0), 2.1 * k, [0.7, 0.75, 0.8, 0.9]); line(D(-2, 0), add(D(-2, 0), mul(fa(sw), 2 * k)), A(col, 0.9), 0.8 * k); }
@@ -77,10 +78,10 @@ function casAgent(B) { return (m, t, info, s, col) => { const O = info.orbit; if
   m.t = t; const g = m.g, ens = info.ens.slice().sort((x, y) => Math.hypot(x.p[0] - pp[0], x.p[1] - pp[1]) - Math.hypot(y.p[0] - pp[0], y.p[1] - pp[1]));
   const P1 = Kp(B, 0, 0), P3 = Kp(B, 0, 2), P4 = Kp(B, 0, 3), PM = Kp(B, 0, 4), C3 = Kp(B, 1, 2), CM = Kp(B, 1, 4), M3 = Kp(B, 2, 2), MM = Kp(B, 2, 4);
   if (ens.length) {
-    if (t - g.gat.last >= 1 / gatRate(B)) { g.gat.last = t; g.gat.fl = t; const tgt = ens[0], twin = B.lv[0] >= 5, from = twin ? D(g.gat.n % 2 ? 5.5 : 1, 1.5) : D(1, 1.5); g.gat.n++; m.shots.push({ type: "gat", t0: t, from, id: tgt.i, to0: tgt.p.slice() }); }
+    if (t - g.gat.last >= 1 / gatRate(B)) { g.gat.last = t; g.gat.fl = t; const tgt = ens[0], twin = B.lv[0] >= 5, from = twin ? D(g.gat.n % 2 ? 10.2 : 6.4, 1.5) : D(6.4, 1.5); g.gat.n++; m.shots.push({ type: "gat", t0: t, from, id: tgt.i, to0: tgt.p.slice() }); }
     if (B.lv[1] >= 1 && t - g.can.last >= 1 / canRate(B)) { g.can.last = t; const tgt = ens[Math.min(1, ens.length - 1)], two = B.lv[1] >= 5 && g.can.n % 2; g.can.n++; if (two) g.can2.fl = t; else g.can.fl = t; m.shots.push({ type: "can", t0: t, from: two ? D(-3.6, -1.5) : D(-6.5, 1.5), id: tgt.i, to0: tgt.p.slice() }); }
     if (B.lv[2] >= 1 && t - g.mis.last >= misGap(B)) { g.mis.last = t; g.mis.fl = t; g.mis.n++; const tgt = ens[ens.length - 1], dbl = MM && g.mis.n % 3 === 0;
-      for (let j = 0; j < (dbl ? 2 : 1); j++) m.shots.push({ type: "mis", t0: t + j * 0.18, from: D(7.5, 1.5), id: ens[Math.max(0, ens.length - 1 - j)].i, to0: ens[Math.max(0, ens.length - 1 - j)].p.slice(), j }); } }
+      for (let j = 0; j < (dbl ? 2 : 1); j++) m.shots.push({ type: "mis", t0: t + j * 0.18, from: D(1.5, (g.mis.n + j) % 2 ? 11.4 : 8.6), id: ens[Math.max(0, ens.length - 1 - j)].i, to0: ens[Math.max(0, ens.length - 1 - j)].p.slice(), j }); } }
   m.shots = m.shots.filter((q) => t - q.t0 < 1.4);
   const gc = PM ? GOLD : col, gw = 1.5 + (P1 ? 0.3 : 0) + (P3 ? 0.2 : 0), cc = CM ? GOLD : [1, 0.9, 0.6, 1], mc = MM ? GOLD : [0.95, 0.95, 0.98, 1];
   for (const q of m.shots) { const e = info.ens.find((x) => x.i === q.id), to = e ? e.p : q.to0, el = t - q.t0; if (el < 0) continue;
