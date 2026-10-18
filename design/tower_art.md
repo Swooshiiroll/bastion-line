@@ -803,6 +803,11 @@ the shot leave the opening): the gatling's side door, an autocannon port aft of 
 upgrade options are the frames, panels and fairings round those ports (the red bezel for HE rounds, door rails for the quick
 rack, gold frames for the masteries); the second autocannon and the Twin Gatlings add a second port.
 
+**Fix (owner: "something is flickering on the plane"):** the gun hatches slid open and shut on every single shot, so the fast gatling
+(5 to 9 rounds/s) made its door and port glow flicker. A hatch now stays open while its gun keeps firing and eases shut a
+moment after the last shot (gatling 0.5 s, autocannon 0.4 s, missiles 0.7 s). The propeller blur also no longer changes
+length from frame to frame.
+
 ## Open questions
 
 1. **Second pass, CAS Gunship** (tower 10, round 1): pick one option per stage and Retrofit. Then towers 11-20 (next: Mine Layer).
