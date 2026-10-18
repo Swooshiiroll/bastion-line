@@ -31,7 +31,7 @@ function drawDrone(B, p, dir, k, t, col, st, spin) {
   const frameC = PM === "A" ? GOLD : METAL_D, rotC = PM === "B" ? GOLD : null;
   for (let i = 0; i < 4; i++) { const q = add(p, mul(fa(dir + Math.PI / 4 + i * Math.PI / 2), 4.6 * k)); bar(p, q, 1 * k, frameC);
     if (P4 === "A") line(add(p, mul(fa(dir + Math.PI / 4 + i * Math.PI / 2), 1.4 * k)), add(p, mul(fa(dir + Math.PI / 4 + i * Math.PI / 2), 4.3 * k)), METAL_L, 0.5 * k);
-    rotorD(q, 2.6 * k, t * (spin ?? 1), k); if (rotC) ring(q, 2.6 * k, A(rotC, 0.9), 0.9 * k); }
+  }
   // body, with the Power parts
   plate(p, rectPts(2.6, 2), PM === "A" ? lt(GOLD, 0.1) : METAL_L, dir, k, 0.9);
   if (P1 === "B") for (const sg of [-1, 1]) plate(D(-0.4, sg * 2.8), rectPts(1.1, 0.8), METAL_D, dir, k, 0.8);
@@ -81,6 +81,8 @@ function drawDrone(B, p, dir, k, t, col, st, spin) {
   if (WM === "B") for (let j = -1; j <= 1; j++) disc(D(1.1, j * 0.9), 0.25 * k, GOLD);
   if (WM === "C") for (const sg of [-1, 1]) line(D(0, sg * 1.8), D(0, sg * 3.2), GOLD, 0.8 * k);
   glowDot(D(1.2, 0), 0.8 * k, gold ? GOLD : col);
+  // The rotors turn above the arms and the body, so they are drawn last (owner: the body was drawing on top of them)
+  for (let i = 0; i < 4; i++) { const q = add(p, mul(fa(dir + Math.PI / 4 + i * Math.PI / 2), 4.6 * k)); rotorD(q, 2.6 * k, t * (spin ?? 1), k); if (rotC) ring(q, 2.6 * k, A(rotC, 0.9), 0.9 * k); }
   if (fire && st.flash) glowDot(D(4.6, 0), (0.6 + 1.2 * st.flash) * k, gold ? GOLD : col);
 }
 

@@ -768,6 +768,9 @@ only the drones move, so the paths change the DRONE:
 **Fix (owner: "the hot barrel shroud is a little oversized"):** the Hot Barrel Shroud is now the same width as the barrel it
 wraps and a little shorter (it was about a third wider).
 
+**Fix (owner: "the body of the drone is also on top of the propellers"):** the four rotors are now drawn last, above the arms,
+body, gun and pods, instead of under the body.
+
 ## Open questions
 
 1. **Second pass, Drone Bay** (tower 9, round 2): confirm. Then towers 10-20 (next: CAS Gunship).
