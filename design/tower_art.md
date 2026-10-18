@@ -384,7 +384,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 7 | Railgun | `design/tower_art_p2_07_railgun.html` | **Confirmed** (owner, 2026-10-18: "Railgun finished"; the larger drum is for the twin build only) |
 | 8 | Tesla Tower | `design/tower_art_p2_08_tesla.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 9 | Drone Bay | `design/tower_art_p2_09_drones.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
-| 10 | CAS Gunship | `design/tower_art_p2_10_cas.html` | Round 4: all picks drawn, notes applied; awaiting confirm |
+| 10 | CAS Gunship | `design/tower_art_p2_10_cas.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 
 ### Gun Turret (second pass)
 
@@ -882,4 +882,4 @@ tail fins and an exhaust flame, turning along their curved path, with a thinner 
 
 ## Open questions
 
-1. **Second pass, CAS Gunship** (tower 10, round 4): confirm. Then towers 11-20 (next: Mine Layer).
+1. **Second pass, Mine Layer** (tower 11): round 1 page being built. Then towers 12-20.
