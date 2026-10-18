@@ -808,6 +808,10 @@ rack, gold frames for the masteries); the second autocannon and the Twin Gatling
 moment after the last shot (gatling 0.5 s, autocannon 0.4 s, missiles 0.7 s). The propeller blur also no longer changes
 length from frame to frame.
 
+**Fix (owner: "guns should be in the fuselage"):** the gun ports, hatches, panels and fairings were centred on the hull's edge, so
+they hung half off the side. They now all sit inside the fuselage outline (the hatches a little in from the inner edge), and
+the shots start inside the hull and emerge from under it.
+
 ## Open questions
 
 1. **Second pass, CAS Gunship** (tower 10, round 1): pick one option per stage and Retrofit. Then towers 11-20 (next: Mine Layer).

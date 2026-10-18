@@ -41,7 +41,7 @@ function drawPlane(B, p, h, s, fx, t, col) {
   glowDot(D(12, 0), 0.8 * k, col); glowDot(D(2, -W), 0.7 * k, [1, 0.25, 0.25, 1]); glowDot(D(2, W), 0.7 * k, [0.3, 1, 0.45, 1]);
   // -- The guns are INSIDE the fuselage (owner): each shows only a port in the hull's inner edge, a hatch that slides open as it fires --
   // (flash and projectile leave the opening); the options are the hatch frames, panels and fairings, never a barrel or rack outside.
-  const HY = 2.5; // the hull's inner edge
+  const HY = 1.2; // the hatches sit inside the fuselage outline, a little in from its inner edge (the hull is 2.5 px each side of the centreline)
   // A hatch stays open while its gun keeps firing and eases shut afterwards, so a fast gun doesn't make the door flicker.
   const HOLD = { gat: 0.5, can: 0.4, can2: 0.4, mis: 0.7 };
   const openAmt = (key) => { const sn = since(key), hold = HOLD[key] || 0.4; return sn < hold ? 1 : Math.max(0, 1 - (sn - hold) / 0.25); };
@@ -54,17 +54,17 @@ function drawPlane(B, p, h, s, fx, t, col) {
   hatch(gx, "gat", 1.5, 0.8, gcol ? lt(GOLD, 0.05) : METAL_D, P1 === "B" ? STEEL : P3 === "A" ? [0.12, 0.12, 0.15, 1] : STEEL);
   if (PM) hatch(5.5, "gat", 1.5, 0.8, lt(GOLD, 0.05), PM === "B" ? GOLD : STEEL);
   if (PM === "B") ring(D(gx, HY), 1.9 * k, GOLD, 0.8 * k);
-  if (PM === "C") orb(D(-1.6, 2.7), 1.1 * k, GOLD);
+  if (PM === "C") orb(D(-1.6, 1.9), 0.9 * k, GOLD);
   if (P1 === "A") polyline([D(-3.4, 1.5), D(-2.6, 1.9), D(-1.8, 1.5), D(-1, 1.9), D(-0.2, 1.5)], YEL, 0.5 * k);
-  if (P1 === "C") orb(D(-1.6, 2.7), 1.1 * k, METAL_D);
+  if (P1 === "C") orb(D(-1.6, 1.9), 0.9 * k, METAL_D);
   if (P2 === "A" && openAmt("gat") > 0.6) for (let i = 0; i < 3; i++) line(D(gx - 0.6 + i * 0.6, HY - 0.3), D(gx - 0.2 + i * 0.6, HY + 0.3), A(WHITE, 0.6), 0.4 * k);
   if (P2 === "B") for (let i = 0; i < 3; i++) line(D(-5 + i * 1.1, 1.2), D(-5 + i * 1.1, 2.2), [0, 0, 0, 0.6], 0.5 * k);
-  if (P2 === "C") panel(-3.6, 2.2, 1.2, 0.8, METAL);
+  if (P2 === "C") panel(-3.6, 1.7, 1.2, 0.7, METAL);
   if (P3 === "B") panel(-5, 1.6, 1, 0.7, AMMO);
   if (P3 === "C") for (let i = 0; i < 3; i++) glowDot(D(3.4 + i * 0.7, 1.6), 0.3 * k, A([0.5, 1, 0.5, 1], 0.8));
   if (P4 === "A") { panel(-2, 1.5, 1.4, 0.5, METAL_D); glowDot(D(-2.8, 1.5), 0.3 * k, ORANGE); }
-  if (P4 === "B") { bar(D(-3, 1.8), D(-3, 2.9), 0.9 * k, STEEL); disc(add(D(-3, 2.9), [0, -k * ((t * 0.9) % 1) * 2]), 0.7 * k, [0.8, 0.82, 0.84, 0.4]); }
-  if (P4 === "C") for (let i = 0; i < 3; i++) line(D(-2.4 + i * 0.7, 1.7), D(-2.4 + i * 0.7, 2.7), A(ORANGE, 0.9), 0.5 * k);
+  if (P4 === "B") { bar(D(-3, 1.2), D(-3, 2.2), 0.9 * k, STEEL); disc(add(D(-3, 2.2), [0, -k * ((t * 0.9) % 1) * 2]), 0.7 * k, [0.8, 0.82, 0.84, 0.4]); }
+  if (P4 === "C") for (let i = 0; i < 3; i++) line(D(-2.4 + i * 0.7, 0.9), D(-2.4 + i * 0.7, 2), A(ORANGE, 0.9), 0.5 * k);
   // Medium gun (autocannon): a port aft of the door from its first step
   if (B.lv[1] >= 1) { const cx = -6.5, cg = CM ? GOLD : null;
     hatch(cx, "can", 1.4, 0.8, cg ? lt(GOLD, 0.05) : METAL_D, C3 === "B" ? RED : C3 === "A" ? RED : STEEL);
@@ -72,11 +72,11 @@ function drawPlane(B, p, h, s, fx, t, col) {
     if (CM === "B") ring(D(cx, HY), 1.8 * k, GOLD, 0.8 * k);
     if (CM === "C") plate(D(cx, 1.6), rectPts(1.9, 0.7), A(GOLD, 0.85), h, k, 0.7);
     if (C1 === "A") ring(D(cx, HY), 1.6 * k, STEEL, 0.9 * k);
-    if (C1 === "B") orb(D(cx, 2.7), 1.5 * k, METAL_D);
-    if (C1 === "C") plate(D(cx, 3.3), rectPts(0.4, 1.3), STEEL, h, k, 0.8);
-    if (C2 === "A") for (const x of [-9, -8.4]) line(D(x, 1.2), D(x, 2.2), [0, 0, 0, 0.55], 0.5 * k);
+    if (C1 === "B") orb(D(cx, 1.9), 1 * k, METAL_D);
+    if (C1 === "C") plate(D(cx, 2), rectPts(0.4, 0.5), STEEL, h, k, 0.8);
+    if (C2 === "A") for (const x of [-9, -8.4]) line(D(x, 0.6), D(x, 1.8), [0, 0, 0, 0.55], 0.5 * k);
     if (C2 === "B") panel(-8.8, 1.6, 1.1, 0.7, AMMO);
-    if (C2 === "C") orb(D(-8.8, 2.4), 0.9 * k, METAL);
+    if (C2 === "C") orb(D(-8.8, 1.6), 0.8 * k, METAL);
     if (C3 === "C") line(D(cx - 1, HY), D(cx + 1, HY), RED, 0.9 * k);
     if (C4 === "A") for (const x of [-4.6, -4]) line(D(x, 1.2), D(x, 2.2), [0, 0, 0, 0.55], 0.5 * k);
     if (C4 === "B") panel(-4.2, 1.6, 0.9, 0.7, METAL_D);
@@ -113,10 +113,10 @@ function casAgent(B) { return (m, t, info, s, col) => { const O = info.orbit; if
   m.t = t; const g = m.g, ens = info.ens.slice().sort((x, y) => Math.hypot(x.p[0] - pp[0], x.p[1] - pp[1]) - Math.hypot(y.p[0] - pp[0], y.p[1] - pp[1]));
   const P1 = Kp(B, 0, 0), P3 = Kp(B, 0, 2), P4 = Kp(B, 0, 3), PM = Kp(B, 0, 4), C3 = Kp(B, 1, 2), CM = Kp(B, 1, 4), M3 = Kp(B, 2, 2), MM = Kp(B, 2, 4);
   if (ens.length) {
-    if (t - g.gat.last >= 1 / gatRate(B)) { g.gat.last = t; g.gat.fl = t; const tgt = ens[0], twin = B.lv[0] >= 5, from = twin ? D(g.gat.n % 2 ? 5.5 : 1, 2.9) : D(1, 2.9); g.gat.n++; m.shots.push({ type: "gat", t0: t, from, id: tgt.i, to0: tgt.p.slice() }); }
-    if (B.lv[1] >= 1 && t - g.can.last >= 1 / canRate(B)) { g.can.last = t; const tgt = ens[Math.min(1, ens.length - 1)], two = B.lv[1] >= 5 && g.can.n % 2; g.can.n++; if (two) g.can2.fl = t; else g.can.fl = t; m.shots.push({ type: "can", t0: t, from: D(two ? -10 : -6.5, 2.9), id: tgt.i, to0: tgt.p.slice() }); }
+    if (t - g.gat.last >= 1 / gatRate(B)) { g.gat.last = t; g.gat.fl = t; const tgt = ens[0], twin = B.lv[0] >= 5, from = twin ? D(g.gat.n % 2 ? 5.5 : 1, 1.5) : D(1, 1.5); g.gat.n++; m.shots.push({ type: "gat", t0: t, from, id: tgt.i, to0: tgt.p.slice() }); }
+    if (B.lv[1] >= 1 && t - g.can.last >= 1 / canRate(B)) { g.can.last = t; const tgt = ens[Math.min(1, ens.length - 1)], two = B.lv[1] >= 5 && g.can.n % 2; g.can.n++; if (two) g.can2.fl = t; else g.can.fl = t; m.shots.push({ type: "can", t0: t, from: D(two ? -10 : -6.5, 1.5), id: tgt.i, to0: tgt.p.slice() }); }
     if (B.lv[2] >= 1 && t - g.mis.last >= misGap(B)) { g.mis.last = t; g.mis.fl = t; g.mis.n++; const tgt = ens[ens.length - 1], dbl = MM && g.mis.n % 3 === 0;
-      for (let j = 0; j < (dbl ? 2 : 1); j++) m.shots.push({ type: "mis", t0: t + j * 0.18, from: D(Kp(B, 2, 0) === "B" ? 9.5 : (Kp(B, 2, 0) === "C" && g.mis.n % 2 ? 5 : 7.5), 2.9), id: ens[Math.max(0, ens.length - 1 - j)].i, to0: ens[Math.max(0, ens.length - 1 - j)].p.slice(), j }); } }
+      for (let j = 0; j < (dbl ? 2 : 1); j++) m.shots.push({ type: "mis", t0: t + j * 0.18, from: D(Kp(B, 2, 0) === "B" ? 9.5 : (Kp(B, 2, 0) === "C" && g.mis.n % 2 ? 5 : 7.5), 1.5), id: ens[Math.max(0, ens.length - 1 - j)].i, to0: ens[Math.max(0, ens.length - 1 - j)].p.slice(), j }); } }
   m.shots = m.shots.filter((q) => t - q.t0 < 1.4);
   const gc = PM ? GOLD : col, gw = 1.5 + (P1 ? 0.3 : 0) + (P3 ? 0.2 : 0), cc = CM ? GOLD : [1, 0.9, 0.6, 1], mc = MM ? GOLD : [0.95, 0.95, 0.98, 1];
   for (const q of m.shots) { const e = info.ens.find((x) => x.i === q.id), to = e ? e.p : q.to0, el = t - q.t0; if (el < 0) continue;
