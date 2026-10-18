@@ -382,6 +382,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 5 | Anti-Aircraft Turret | `design/tower_art_p2_05_aa.html` | **Confirmed** (owner, 2026-10-17: "AA Finished"; Range 3 is the Optical Director) |
 | 6 | Artillery Cannon | `design/tower_art_p2_06_artillery.html` | **Confirmed** (owner, 2026-10-17: "Artillery finished"; stock scatter kept as drawn, 30 px) |
 | 7 | Railgun | `design/tower_art_p2_07_railgun.html` | **Confirmed** (owner, 2026-10-18: "Railgun finished"; the larger drum is for the twin build only) |
+| 8 | Tesla Tower | `design/tower_art_p2_08_tesla.html` | Round 1: three options per stage; awaiting picks |
 
 ### Gun Turret (second pass)
 
@@ -714,6 +715,22 @@ counter lamps; that is fixed too.
 housing with nothing joining them. They now hang on a backing bar along the housing's outer edge, each with its own
 bracket, on single and twin builds alike.
 
+### Tesla Tower (second pass)
+
+**Retrofits kept, stats stacking (the carpet rule).** All three overlap a path step; Claude flagged them and kept them:
+- Bigger Disk (+4 damage, +15 range) adds to High Voltage (+8 damage) and Taller Coil (+20 range).
+- Grounding Rods (+1 jump) adds to Extra Jump (4 jumps).
+- Insulated Coils (an arc every 1.1 s) adds to the Speed path; the model takes 0.15 s off the recharge on top of it.
+
+**Round 1 (Claude):** one parametric model (base look B Twin Toroid, animation C Corona Burst). The tower never turns.
+- **Power/Damage:** each step changes the arc (thicker; yellow EMP crackles at the hit; a stun halo; only a little
+  falloff per jump; gold at Lightning Rod).
+- **Range/Chaining:** more jumps (3 up to 7, plus one from Grounding Rods); from Storm Field every landing leaves a
+  crackling storm that fades over 2 s (25 px, 30 px and gold at the mastery).
+- **Speed:** the recharge goes from 1.25 s to 0.48 s (2.1 arcs/s); at the mastery sparks crawl across the toroids all the
+  time. The charge indicators fill in exactly one recharge, from the engine's own fire clock (the Railgun lesson).
+- **Deck kit is static;** all parts sit inside the hex.
+
 ## Open questions
 
-1. **Second pass, Tesla Tower** (tower 8): round 1 page being built. Then towers 9-20.
+1. **Second pass, Tesla Tower** (tower 8, round 1): pick one option per stage and Retrofit. Then towers 9-20 (next: Drone Bay).
