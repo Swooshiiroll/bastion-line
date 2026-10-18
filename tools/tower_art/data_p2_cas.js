@@ -51,10 +51,11 @@ function drawPlane(B, p, h, s, fx, t, col) {
   const hatch = (x, key, w, hh, frameCol, yy) => { const op = openAmt(key), y = yy === undefined ? HY : yy;
     plate(D(x, y), rectPts(w + 0.22, hh + 0.2), frameCol || STEEL, h, k, 0.8); plate(D(x, y), rectPts(w, hh), BORE, h, k, 0.8);
     if (op > 0) glowDot(D(x, y), 0.5 * k * op, A(ORANGE, 0.9 * op)); };
-  hatch(6.4, "gat", 0.85, 0.5, PM ? GOLD : STEEL);                                  // light gun: a well forward of the wing (Twin Gatlings adds a second)
-  if (PM) hatch(10.2, "gat", 0.85, 0.5, GOLD);
-  if (B.lv[1] >= 1) { hatch(-6.5, "can", 0.8, 0.5, CM ? GOLD : STEEL); if (CM) hatch(-3.6, "can2", 0.8, 0.5, GOLD, -HY); } // the battery's second autocannon sits on the other side of the plane // medium gun
-  if (B.lv[2] >= 1) for (const wy of [8.6, 11.4]) hatch(0.9, "mis", 0.7, 0.45, MM ? GOLD : STEEL, wy);   // heavy gun: two wells under the inner wing
+  hatch(6.4, "gat", 0.85, 0.5, PM ? GOLD : STEEL);                                  // light gun: a well forward of the wing (mirrored on the other side at the mastery)
+  if (PM) hatch(6.4, "gat2", 0.85, 0.5, GOLD, -HY);
+  if (B.lv[1] >= 1) { hatch(-6.5, "can", 0.8, 0.5, CM ? GOLD : STEEL); if (CM) hatch(-6.5, "can2", 0.8, 0.5, GOLD, -HY); } // medium gun (mirrored at the battery)
+  // Heavy gun (missiles): the launchers hang UNDER the wings, so nothing is drawn on top of the wing; the missiles come out from beneath it
+  // (the plane is drawn over the shots), from the inner wing, and from both wings once Hellfire Volley mirrors the weapon.
   // -- Retrofits ------------------------------------------------------------------------------------------------------------------------
   if (B.r === 0) { const ky = B.key("r0"), sw = t * 3;
     if (ky === "A") { disc(D(-2, 0), 2.6 * k, OUTLINE); disc(D(-2, 0), 2.1 * k, [0.7, 0.75, 0.8, 0.9]); line(D(-2, 0), add(D(-2, 0), mul(fa(sw), 2 * k)), A(col, 0.9), 0.8 * k); }
@@ -68,7 +69,7 @@ function drawPlane(B, p, h, s, fx, t, col) {
   // green, path 2 red, path 3 green; the mastery strikes the four strokes through with a slash and turns that path's marks gold.
   // The option picks the stroke's style (a plain stroke, a bold stroke, a double stroke). Drawn last so nothing covers them.
   const TALLY = [[GREEN_T, 3.4, "p0"], [RED, 2.0, "p1"], [GREEN_T, 0.6, "p2"]]; // rows across the wing's depth: path 1 at the leading edge
-  const WMID = -9; // the midpoint of the outer wing (half way from the fuselage to the tip), clear of the engines at 6 and 12
+  const WMID = 0; // the middle of the wing, where it crosses over the fuselage
   TALLY.forEach(([tc, xr, pk], pi) => { const lv = B.lv[pi], gold = lv >= 5, c1 = gold ? GOLD : tc, SP = 0.6; // small marks: 1 px strokes 0.6 px apart
     for (let i = 0; i < Math.min(lv, 4); i++) { const y = WMID - 0.9 + i * SP, st = B.key(pk + "s" + i), a = D(xr - 0.5, y), b = D(xr + 0.5, y);
       line(a, b, A(c1, 0.3), 1.0 * k);
@@ -79,14 +80,14 @@ function drawPlane(B, p, h, s, fx, t, col) {
 // ---- The agent: three guns on the plane's inner side, each firing at its own rate, aimed at different enemies -------------
 function casAgent(B) { return (m, t, info, s, col) => { const O = info.orbit; if (!O) return; const k = G(s), kz = k * ZP, or = TW.orbit.r * orbitMul(B), a = t * (TW.orbit.w || 0.5), pp = add(O, mul(fa(a), or * s)), h = a + Math.PI / 2;
   const D = (x, y) => P(pp, h, kz, x, y);
-  if (!m.g) { m.g = { gat: { last: -9, fl: -9, n: 0 }, can: { last: -9, fl: -9, n: 0 }, can2: { fl: -9 }, mis: { last: -9, fl: -9, n: 0 } }; m.shots = []; }
+  if (!m.g) { m.g = { gat: { last: -9, fl: -9, n: 0 }, gat2: { fl: -9 }, can: { last: -9, fl: -9, n: 0 }, can2: { fl: -9 }, mis: { last: -9, fl: -9, n: 0 } }; m.shots = []; }
   m.t = t; const g = m.g, ens = info.ens.slice().sort((x, y) => Math.hypot(x.p[0] - pp[0], x.p[1] - pp[1]) - Math.hypot(y.p[0] - pp[0], y.p[1] - pp[1]));
   const P1 = Kp(B, 0, 0), P3 = Kp(B, 0, 2), P4 = Kp(B, 0, 3), PM = Kp(B, 0, 4), C3 = Kp(B, 1, 2), CM = Kp(B, 1, 4), M3 = Kp(B, 2, 2), MM = Kp(B, 2, 4);
   if (ens.length) {
-    if (t - g.gat.last >= 1 / gatRate(B)) { g.gat.last = t; g.gat.fl = t; const tgt = ens[0], twin = B.lv[0] >= 5, from = twin ? D(g.gat.n % 2 ? 10.2 : 6.4, 1.5) : D(6.4, 1.5); g.gat.n++; m.shots.push({ type: "gat", t0: t, from, id: tgt.i, to0: tgt.p.slice() }); }
-    if (B.lv[1] >= 1 && t - g.can.last >= 1 / canRate(B)) { g.can.last = t; const tgt = ens[Math.min(1, ens.length - 1)], two = B.lv[1] >= 5 && g.can.n % 2; g.can.n++; if (two) g.can2.fl = t; else g.can.fl = t; m.shots.push({ type: "can", t0: t, from: two ? D(-3.6, -1.5) : D(-6.5, 1.5), id: tgt.i, to0: tgt.p.slice() }); }
+    if (t - g.gat.last >= 1 / gatRate(B)) { g.gat.last = t; const tgt = ens[0], outer = B.lv[0] >= 5 && g.gat.n % 2, from = D(6.4, outer ? -1.5 : 1.5); if (outer) g.gat2.fl = t; else g.gat.fl = t; g.gat.n++; m.shots.push({ type: "gat", t0: t, from, id: tgt.i, to0: tgt.p.slice() }); }
+    if (B.lv[1] >= 1 && t - g.can.last >= 1 / canRate(B)) { g.can.last = t; const tgt = ens[Math.min(1, ens.length - 1)], two = B.lv[1] >= 5 && g.can.n % 2; g.can.n++; if (two) g.can2.fl = t; else g.can.fl = t; m.shots.push({ type: "can", t0: t, from: D(-6.5, two ? -1.5 : 1.5), id: tgt.i, to0: tgt.p.slice() }); }
     if (B.lv[2] >= 1 && t - g.mis.last >= misGap(B)) { g.mis.last = t; g.mis.fl = t; g.mis.n++; const tgt = ens[ens.length - 1], dbl = MM && g.mis.n % 3 === 0;
-      for (let j = 0; j < (dbl ? 2 : 1); j++) m.shots.push({ type: "mis", t0: t + j * 0.18, from: D(1.5, (g.mis.n + j) % 2 ? 11.4 : 8.6), id: ens[Math.max(0, ens.length - 1 - j)].i, to0: ens[Math.max(0, ens.length - 1 - j)].p.slice(), j }); } }
+      for (let j = 0; j < (dbl ? 2 : 1); j++) m.shots.push({ type: "mis", t0: t + j * 0.18, from: D(1.5, (MM && (g.mis.n + j) % 2 === 0 ? -1 : 1) * ((MM ? (g.mis.n + j) >> 1 : g.mis.n + j) % 2 ? 11.4 : 8.6)), id: ens[Math.max(0, ens.length - 1 - j)].i, to0: ens[Math.max(0, ens.length - 1 - j)].p.slice(), j }); } }
   m.shots = m.shots.filter((q) => t - q.t0 < 1.4);
   const gc = PM ? GOLD : col, gw = 1.5 + (P1 ? 0.3 : 0) + (P3 ? 0.2 : 0), cc = CM ? GOLD : [1, 0.9, 0.6, 1], mc = MM ? GOLD : [0.95, 0.95, 0.98, 1];
   for (const q of m.shots) { const e = info.ens.find((x) => x.i === q.id), to = e ? e.p : q.to0, el = t - q.t0; if (el < 0) continue;

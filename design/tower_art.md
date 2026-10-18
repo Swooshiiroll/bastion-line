@@ -851,6 +851,17 @@ and their trails remain) and the propellers spin about two and a half times fast
 
 **Round 2:** every stage is picked; the page shows only the picks.
 
+**Fix (owner: "all weapons should mirror on both sides when fully upgraded; missiles shouldn't be visible over the wings; the tally marks
+should go in the middle of the wing over the fuselage"):**
+- **Mirrored weapons:** at each gun's mastery its well is mirrored on the other side of the plane, at the same place: the
+  gatling's pair of wells forward of the wing (Twin Gatlings), the autocannon's pair aft of it (Autocannon Battery), and the
+  missiles fly from both wings (Hellfire Volley). Shots alternate sides, and only the well that fires glows. This replaces the
+  earlier second door and the second port beside the first.
+- **Missiles:** the launchers are under the wings, so nothing is drawn on top of the wing any more (the two wing wells are gone);
+  the missiles emerge from beneath the wing, because the plane is drawn over the shots.
+- **Tally marks:** they sit in the middle of the wing where it crosses over the fuselage: one row per path across the wing's
+  depth (path 1 at the leading edge, then 2, then 3).
+
 ## Open questions
 
 1. **Second pass, CAS Gunship** (tower 10, round 2): confirm. Then towers 11-20 (next: Mine Layer).
