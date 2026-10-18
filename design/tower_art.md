@@ -384,7 +384,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 7 | Railgun | `design/tower_art_p2_07_railgun.html` | **Confirmed** (owner, 2026-10-18: "Railgun finished"; the larger drum is for the twin build only) |
 | 8 | Tesla Tower | `design/tower_art_p2_08_tesla.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 9 | Drone Bay | `design/tower_art_p2_09_drones.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
-| 10 | CAS Gunship | `design/tower_art_p2_10_cas.html` | Round 3: all picks drawn, Extra Ammo note applied; awaiting confirm |
+| 10 | CAS Gunship | `design/tower_art_p2_10_cas.html` | Round 4: all picks drawn, notes applied; awaiting confirm |
 
 ### Gun Turret (second pass)
 
@@ -873,6 +873,11 @@ tail fins and an exhaust flame, turning along their curved path, with a thinner 
 **Note (owner, round 2 paste):** "Don't make any visual changes for Extra ammo". The Extra Ammo Retrofit now draws nothing on the plane; its
 +10% fire rate shows only in how fast every gun fires. (The ammo-box fairing is gone.)
 
+**Notes (owner, round 3 paste):** "Heavy gun should be blue tallys"; "Make the radar scan line thinner. it also protrudes past the dish itself".
+- Path 3 (the heavy gun's missiles) now uses **blue** tally marks (gold at its mastery, as before). Paths 1 and 2 stay green and red,
+  so the three paths are now three different colours.
+- The Radar's scan line is half as thick and no longer reaches past the edge of the dish.
+
 ## Open questions
 
-1. **Second pass, CAS Gunship** (tower 10, round 3): confirm. Then towers 11-20 (next: Mine Layer).
+1. **Second pass, CAS Gunship** (tower 10, round 4): confirm. Then towers 11-20 (next: Mine Layer).

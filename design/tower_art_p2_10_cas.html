@@ -65,7 +65,7 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Tower rework · Tower art · second pass · tower 10 of 20 · round 3</div>
+    <div class="eyebrow">Bastion Line · Tower rework · Tower art · second pass · tower 10 of 20 · round 4</div>
     <h1>Tower art: CAS Gunship paths and Retrofits</h1>
     <p class="note">Second pass for one tower: <b>every upgrade step and mastery</b> on each path, and each <b>Retrofit</b>, adds or changes a detail on the confirmed model. Each card shows the model with that path's earlier steps (your picks, or option A until you pick) plus the candidate. Pick one of three per step, add notes per path, then <b>Copy picks and notes</b>.</p>
     <ul class="rules">
@@ -765,9 +765,9 @@ const NO_BOOT = true;
 // The Retrofit overlaps (kept, stacking: the carpet rule): Extra Ammo's +10% fire rate adds to every gun's fire-rate steps.
 // Geometry (game px, plane frame: x forward, y to the inner side where the guns fire): fuselage x -12 to 13 (5 wide),
 // tail at -11, wing at x 2 (36 across), four engines at y +-6 and +-12, the side door at (1, 3.2).
-const PAGE = { title: "CAS Gunship: paths and Retrofits (second pass)", store: "bl-tower-art-p2-cas-r3" };
+const PAGE = { title: "CAS Gunship: paths and Retrofits (second pass)", store: "bl-tower-art-p2-cas-r4" };
 const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], RED = [0.85, 0.2, 0.18, 1], ORANGE = [1, 0.55, 0.2, 1], YEL = [1, 0.85, 0.2, 1], CYAN = [0.4, 0.9, 1, 1];
-const ZP = 2.0, GREEN_T = [0.35, 1, 0.45, 1]; // the plane is drawn this much bigger than the ground
+const ZP = 2.0, GREEN_T = [0.35, 1, 0.45, 1], BLUE_T = [0.4, 0.65, 1, 1]; // the plane is drawn this much bigger than the ground
 const rnd2 = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
 const Kp = (B, pi, k) => (B.lv[pi] > k ? B.key("p" + pi + "s" + k) : null);
 const rotorC = (p, r, t, k) => { disc(p, r, [0.8, 0.85, 0.95, 0.12]); ring(p, r, [0.8, 0.86, 0.95, 0.35], 0.8); for (let q = 0; q < 2; q++) line(p, add(p, mul(fa(t * 40 + q * Math.PI), r * 0.95)), [0.85, 0.9, 1, 0.55], 1.1 * k); };
@@ -814,14 +814,14 @@ function drawPlane(B, p, h, s, fx, t, col) {
   // (the plane is drawn over the shots), from the inner wing, and from both wings once Hellfire Volley mirrors the weapon.
   // -- Retrofits ------------------------------------------------------------------------------------------------------------------------
   if (B.r === 0) { const ky = B.key("r0"), sw = t * 3;
-    if (ky === "A") { disc(D(-2, 0), 2.6 * k, OUTLINE); disc(D(-2, 0), 2.1 * k, [0.7, 0.75, 0.8, 0.9]); line(D(-2, 0), add(D(-2, 0), mul(fa(sw), 2 * k)), A(col, 0.9), 0.8 * k); }
+    if (ky === "A") { disc(D(-2, 0), 2.6 * k, OUTLINE); disc(D(-2, 0), 2.1 * k, [0.7, 0.75, 0.8, 0.9]); line(D(-2, 0), add(D(-2, 0), mul(fa(sw), 1.7 * k)), A(col, 0.9), 0.4 * k); }
     if (ky === "B") { plate(D(11.4, 0.9), rectPts(1.2, 1), METAL_D, h, k, 0.9); glowDot(D(11.7, 0.9), 0.45 * k, A(col, 0.5 + 0.5 * Math.sin(sw))); }
-    if (ky === "C") { disc(D(-3.4, 0), 2.3 * k, OUTLINE); disc(D(-3.4, 0), 1.9 * k, METAL_D); line(D(-3.4, 0), add(D(-3.4, 0), mul(fa(sw), 2.1 * k)), A(col, 0.9), 0.8 * k); } }
+    if (ky === "C") { disc(D(-3.4, 0), 2.3 * k, OUTLINE); disc(D(-3.4, 0), 1.9 * k, METAL_D); line(D(-3.4, 0), add(D(-3.4, 0), mul(fa(sw), 1.6 * k)), A(col, 0.9), 0.4 * k); } }
   // Extra Ammo has no visual change (owner): only its +10% fire rate shows, in how fast the guns fire.
   // -- Upgrade tally marks (owner): one stroke on the fuselage's outer side for every step bought, like kill tallies. Path 1 is
   // green, path 2 red, path 3 green; the mastery strikes the four strokes through with a slash and turns that path's marks gold.
   // The option picks the stroke's style (a plain stroke, a bold stroke, a double stroke). Drawn last so nothing covers them.
-  const TALLY = [[GREEN_T, 3.4, "p0"], [RED, 2.0, "p1"], [GREEN_T, 0.6, "p2"]]; // rows across the wing's depth: path 1 at the leading edge
+  const TALLY = [[GREEN_T, 3.4, "p0"], [RED, 2.0, "p1"], [BLUE_T, 0.6, "p2"]]; // rows across the wing's depth: path 1 at the leading edge
   const WMID = 0; // the middle of the wing, where it crosses over the fuselage
   TALLY.forEach(([tc, xr, pk], pi) => { const lv = B.lv[pi], gold = lv >= 5, c1 = gold ? GOLD : tc, SP = 0.6; // small marks: 1 px strokes 0.6 px apart
     for (let i = 0; i < Math.min(lv, 4); i++) { const y = WMID - 0.9 + i * SP, st = B.key(pk + "s" + i), a = D(xr - 0.5, y), b = D(xr + 0.5, y);
@@ -922,25 +922,25 @@ const P2 = {
     ] },
     { name: "Heavy gun (missiles)", theme: "the missile rack: unlock, rack speed, warheads, auto-rack, then Hellfire", steps: [
       { name: "Missile Rack", cost: 1235, effect: "Unlocks guided missiles: 150 damage, one every 3 s, 45 px blast", options: [
-        { key: "A", name: "Plain Stroke", desc: "A plain green stroke: one more green tally stroke on the fuselage side." },
-        { key: "B", name: "Bold Stroke", desc: "A bold green stroke: one more green tally stroke on the fuselage side." },
-        { key: "C", name: "Double Stroke", desc: "A double-line green stroke: one more green tally stroke on the fuselage side." } ] },
+        { key: "A", name: "Plain Stroke", desc: "A plain blue stroke: one more blue tally stroke on the fuselage side." },
+        { key: "B", name: "Bold Stroke", desc: "A bold blue stroke: one more blue tally stroke on the fuselage side." },
+        { key: "C", name: "Double Stroke", desc: "A double-line blue stroke: one more blue tally stroke on the fuselage side." } ] },
       { name: "Quick Rack", cost: 525, effect: "One every 2.5 s", options: [
-        { key: "A", name: "Plain Stroke", desc: "A plain green stroke: one more green tally stroke on the fuselage side." },
-        { key: "B", name: "Bold Stroke", desc: "A bold green stroke: one more green tally stroke on the fuselage side." },
-        { key: "C", name: "Double Stroke", desc: "A double-line green stroke: one more green tally stroke on the fuselage side." } ] },
+        { key: "A", name: "Plain Stroke", desc: "A plain blue stroke: one more blue tally stroke on the fuselage side." },
+        { key: "B", name: "Bold Stroke", desc: "A bold blue stroke: one more blue tally stroke on the fuselage side." },
+        { key: "C", name: "Double Stroke", desc: "A double-line blue stroke: one more blue tally stroke on the fuselage side." } ] },
       { name: "Heavy Warheads", cost: 1595, effect: "190 damage", options: [
-        { key: "A", name: "Plain Stroke", desc: "A plain green stroke: one more green tally stroke on the fuselage side." },
-        { key: "B", name: "Bold Stroke", desc: "A bold green stroke: one more green tally stroke on the fuselage side." },
-        { key: "C", name: "Double Stroke", desc: "A double-line green stroke: one more green tally stroke on the fuselage side." } ] },
+        { key: "A", name: "Plain Stroke", desc: "A plain blue stroke: one more blue tally stroke on the fuselage side." },
+        { key: "B", name: "Bold Stroke", desc: "A bold blue stroke: one more blue tally stroke on the fuselage side." },
+        { key: "C", name: "Double Stroke", desc: "A double-line blue stroke: one more blue tally stroke on the fuselage side." } ] },
       { name: "Auto-Rack", cost: 3785, effect: "One every 2 s", options: [
-        { key: "A", name: "Plain Stroke", desc: "A plain green stroke: one more green tally stroke on the fuselage side." },
-        { key: "B", name: "Bold Stroke", desc: "A bold green stroke: one more green tally stroke on the fuselage side." },
-        { key: "C", name: "Double Stroke", desc: "A double-line green stroke: one more green tally stroke on the fuselage side." } ] },
+        { key: "A", name: "Plain Stroke", desc: "A plain blue stroke: one more blue tally stroke on the fuselage side." },
+        { key: "B", name: "Bold Stroke", desc: "A bold blue stroke: one more blue tally stroke on the fuselage side." },
+        { key: "C", name: "Double Stroke", desc: "A double-line blue stroke: one more blue tally stroke on the fuselage side." } ] },
       { name: "Hellfire Volley", cost: 13250, effect: "Every third volley fires two missiles (mastery)", options: [
-        { key: "A", name: "Plain Stroke", desc: "A plain green stroke: a slash strikes the missile tally through and turns its marks gold." },
-        { key: "B", name: "Bold Stroke", desc: "A bold green stroke: a slash strikes the missile tally through and turns its marks gold." },
-        { key: "C", name: "Double Stroke", desc: "A double-line green stroke: a slash strikes the missile tally through and turns its marks gold." } ] },
+        { key: "A", name: "Plain Stroke", desc: "A plain blue stroke: a slash strikes the missile tally through and turns its marks gold." },
+        { key: "B", name: "Bold Stroke", desc: "A bold blue stroke: a slash strikes the missile tally through and turns its marks gold." },
+        { key: "C", name: "Double Stroke", desc: "A double-line blue stroke: a slash strikes the missile tally through and turns its marks gold." } ] },
     ] },
   ],
   retrofits: [
@@ -959,7 +959,7 @@ const P2 = {
   ],
 };
 // ---- Round 2 (owner's picks, 2026-10-18): every stage shows only the pick; no notes.
-P2.intro = "Round 3: all your picks drawn as one model, nothing left to choose; Extra Ammo has no visual change (your note). Use the build preview to check combinations; every path is uncapped, so you can max all three guns.";
+P2.intro = "Round 4: the heavy gun's tally marks are blue and the radar scan line is thinner and stays inside the dish (your notes). Round 3: all your picks drawn as one model, nothing left to choose; Extra Ammo has no visual change (your note). Use the build preview to check combinations; every path is uncapped, so you can max all three guns.";
 P2.picks = { p0s0: "A", p0s1: "A", p0s2: "A", p0s3: "A", p0s4: "A", p1s0: "A", p1s1: "A", p1s2: "A", p1s3: "A", p1s4: "A", p2s0: "A", p2s1: "A", p2s2: "A", p2s3: "A", p2s4: "A", r0: "C", r1: "A", r2: "B" };
 P2.paths.forEach((pa, pi) => pa.steps.forEach((st, k) => { const pk = P2.picks["p" + pi + "s" + k]; if (pk) st.options = st.options.filter((o) => o.key === pk); }));
 P2.retrofits.forEach((rf, ri) => { const pk = P2.picks["r" + ri]; if (pk) rf.options = rf.options.filter((o) => o.key === pk); });
