@@ -862,6 +862,10 @@ should go in the middle of the wing over the fuselage"):**
 - **Tally marks:** they sit in the middle of the wing where it crosses over the fuselage: one row per path across the wing's
   depth (path 1 at the leading edge, then 2, then 3).
 
+**Fix (owner: "make the autocannon shells look like heavy bullets"):** the autocannon's shot is now a heavy bullet instead of a round ball: a fat
+brass-cased body with a darker band, a pointed steel nose and a short hot streak behind it, turned along its flight (gold-cased at the
+battery, with a red band from HE rounds).
+
 ## Open questions
 
 1. **Second pass, CAS Gunship** (tower 10, round 2): confirm. Then towers 11-20 (next: Mine Layer).

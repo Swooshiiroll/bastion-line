@@ -848,7 +848,13 @@ function casAgent(B) { return (m, t, info, s, col) => { const O = info.orbit; if
   const gc = PM ? GOLD : col, gw = 1.5 + (P1 ? 0.3 : 0) + (P3 ? 0.2 : 0), cc = CM ? GOLD : [1, 0.9, 0.6, 1], mc = MM ? GOLD : [0.95, 0.95, 0.98, 1];
   for (const q of m.shots) { const e = info.ens.find((x) => x.i === q.id), to = e ? e.p : q.to0, el = t - q.t0; if (el < 0) continue;
     if (q.type === "gat") { const u = el / 0.18; if (u < 1) { tracer(q.from, to, u, gc, gw, 0.3); if (P3 || PM) tracer(q.from, to, u, [1, 1, 1, 1], gw * 0.4, 0.3); if (P4) tracer(add(q.from, [0, 2]), add(to, [0, 2]), u, A(gc, 0.7), gw * 0.6, 0.25); } else if (u < 2) spark(to, (u - 1) * 0.6, s * 0.7, gc); }
-    else if (q.type === "can") { const u = el / 0.35; if (u < 1) { const hp = lerp(q.from, to, u); for (let j = 3; j >= 1; j--) disc(lerp(q.from, to, Math.max(0, u - j * 0.06)), (1 + j * 0.3) * kz * 0.7, A(cc, 0.35 - 0.08 * j)); orb(hp, 1.4 * kz * 0.7 * (C3 ? 1.15 : 1), cc); glowDot(hp, 0.7 * kz * 0.7, CM ? GOLD : ORANGE); }
+    else if (q.type === "can") { const u = el / 0.35; if (u < 1) { // a heavy bullet: a fat brass-cased body with a pointed steel nose and a short hot streak (not a round ball)
+        const hp = lerp(q.from, to, u), dv = norm(sub(to, q.from)), ang = Math.atan2(dv[1], dv[0]), bk = kz * 0.55 * (C3 ? 1.15 : 1), brass = CM ? GOLD : [0.92, 0.72, 0.3, 1];
+        line(sub(hp, mul(dv, 8 * bk)), sub(hp, mul(dv, 2.8 * bk)), A(CM ? GOLD : ORANGE, 0.4), 1.3 * bk); line(sub(hp, mul(dv, 5.5 * bk)), sub(hp, mul(dv, 2.8 * bk)), A([1, 1, 1, 1], 0.4), 0.5 * bk);
+        bar(sub(hp, mul(dv, 2.8 * bk)), add(hp, mul(dv, 0.3 * bk)), 1.9 * bk, brass);
+        line(add(sub(hp, mul(dv, 2.0 * bk)), mul(orth(dv), 0.95 * bk)), add(sub(hp, mul(dv, 2.0 * bk)), mul(orth(dv), -0.95 * bk)), [0.5, 0.36, 0.14, 1], 0.5 * bk);
+        if (C3) line(add(sub(hp, mul(dv, 0.9 * bk)), mul(orth(dv), 0.95 * bk)), add(sub(hp, mul(dv, 0.9 * bk)), mul(orth(dv), -0.95 * bk)), RED, 0.6 * bk);
+        fill(add(hp, mul(dv, 0.3 * bk)), [[2.2, 0], [0, 0.95], [0, -0.95]], [0.78, 0.8, 0.85, 1], ang, bk); glowDot(sub(hp, mul(dv, 2.8 * bk)), 0.5 * bk, CM ? GOLD : ORANGE); }
       else blast(to, Math.min(0.99, (u - 1) * 1.6), s, CM ? GOLD : col, (CM ? 0.24 : 0.2) * (C3 ? 1.15 : 1)); }
     else if (q.type === "mis") { const u = el / 0.85, perp = orth(norm(sub(to, q.from))); if (u < 1) { const pos = (v) => add(lerp(q.from, to, v), mul(perp, Math.sin(Math.PI * v) * s * 0.18 * (q.j ? -1 : 1))), hp = pos(u), pb = pos(Math.max(0, u - 0.03));
         for (let j = 6; j >= 1; j--) disc(pos(Math.max(0, u - j * 0.045)), (0.9 + j * 0.28) * k * (M3 ? 1.25 : 1) * 1.4, [0.7, 0.72, 0.75, 0.3 - 0.04 * j]);
