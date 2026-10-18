@@ -655,6 +655,11 @@ rounded bar end with a disc.
 (a relay box with a cable to the drum, a pulse running along it), **Flywheel** (spins faster as it charges) and **Ready
 Beacon** (dim while charging, a bright green pulse when ready). They replace the cell bank, the dial and the spare cells.
 
+**Round 1d (owner: "more ideas for P2T2"):** Range/Speed step 2 (Extended Rails) has three new options: **Telescoping
+Barrel** (a narrower inner tube slides out of the housing, the mouth on the narrower tube), **Rangefinder** (a twin-lens
+box with scale ticks on the housing's side) and **Guide Rails** (slim rails with cross-struts alongside, running a little
+past the mouth). They replace the longer housing, the sleeve and the braces.
+
 ## Open questions
 
 1. **Second pass, Railgun** (tower 7, round 1): pick one option per stage and Retrofit. Then towers 8-20 (next: Tesla Tower).
