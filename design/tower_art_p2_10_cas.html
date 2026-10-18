@@ -65,7 +65,7 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Tower rework · Tower art · second pass · tower 10 of 20 · round 1b</div>
+    <div class="eyebrow">Bastion Line · Tower rework · Tower art · second pass · tower 10 of 20 · round 1c</div>
     <h1>Tower art: CAS Gunship paths and Retrofits</h1>
     <p class="note">Second pass for one tower: <b>every upgrade step and mastery</b> on each path, and each <b>Retrofit</b>, adds or changes a detail on the confirmed model. Each card shows the model with that path's earlier steps (your picks, or option A until you pick) plus the candidate. Pick one of three per step, add notes per path, then <b>Copy picks and notes</b>.</p>
     <ul class="rules">
@@ -767,7 +767,7 @@ const NO_BOOT = true;
 // tail at -11, wing at x 2 (36 across), four engines at y +-6 and +-12, the side door at (1, 3.2).
 const PAGE = { title: "CAS Gunship: paths and Retrofits (second pass)", store: "bl-tower-art-p2-cas-r1" };
 const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], RED = [0.85, 0.2, 0.18, 1], ORANGE = [1, 0.55, 0.2, 1], YEL = [1, 0.85, 0.2, 1], CYAN = [0.4, 0.9, 1, 1];
-const ZP = 2.0; // the plane is drawn this much bigger than the ground
+const ZP = 2.0, GREEN_T = [0.35, 1, 0.45, 1]; // the plane is drawn this much bigger than the ground
 const rnd2 = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
 const Kp = (B, pi, k) => (B.lv[pi] > k ? B.key("p" + pi + "s" + k) : null);
 const rotorC = (p, r, t, k) => { disc(p, r, [0.8, 0.85, 0.95, 0.12]); ring(p, r, [0.8, 0.86, 0.95, 0.35], 0.8); for (let q = 0; q < 2; q++) line(p, add(p, mul(fa(t * 40 + q * Math.PI), r * 0.95)), [0.85, 0.9, 1, 0.55], 1.1 * k); };
@@ -806,25 +806,24 @@ function drawPlane(B, p, h, s, fx, t, col) {
   if (PM) hatch(5.5, "gat", 1.5, 0.8, lt(GOLD, 0.05));
   if (B.lv[1] >= 1) { hatch(-6.5, "can", 1.4, 0.8, CM ? lt(GOLD, 0.05) : METAL_D); if (CM) hatch(-10, "can2", 1.4, 0.8, lt(GOLD, 0.05)); } // medium gun
   if (B.lv[2] >= 1) hatch(7.5, "mis", 2.4, 1.0, MM ? lt(GOLD, 0.05) : METAL_D);   // heavy gun: the missile bay
-  // -- The upgrade notches (owner): a panel on the tail with a row of five notches per path, one lit for each step bought.
-  // Path 1 green, path 2 red, path 3 green; the mastery turns that path's notches gold. The option picks the notch's shape.
-  const GREEN = [0.35, 1, 0.45, 1], NOTCH = [[GREEN, "p0"], [RED, "p1"], [GREEN, "p2"]];
-  plate(D(-11, 0), rectPts(1.9, 6.6), METAL_D, h, k, 0.8);
-  NOTCH.forEach(([nc, pk], pi) => { const row = -12.4 + pi * 1.3; // rows run across the tail, one per path
-    for (let st = 0; st < 5; st++) { const y = -4 + st * 2, on = B.lv[pi] > st, shape = on ? B.key(pk + "s" + st) : "A", gold = B.lv[pi] >= 5, c1 = on ? (gold ? GOLD : nc) : [0.1, 0.12, 0.13, 1], q = D(row, y);
-      if (shape === "A") plate(q, rectPts(0.4, 0.9), c1, h, k, 0.5);
-      else if (shape === "B") { fill(q, [[0.5, -0.8], [-0.5, 0], [0.5, 0.8], [0.1, 0]], c1, h, k); }
-      else disc(q, 0.55 * k, c1);
-      if (on) glowDot(q, 0.35 * k, A(c1, 0.8)); } });
   // -- Retrofits ------------------------------------------------------------------------------------------------------------------------
   if (B.r === 0) { const ky = B.key("r0"), sw = t * 3;
     if (ky === "A") { disc(D(-2, 0), 2.6 * k, OUTLINE); disc(D(-2, 0), 2.1 * k, [0.7, 0.75, 0.8, 0.9]); line(D(-2, 0), add(D(-2, 0), mul(fa(sw), 2 * k)), A(col, 0.9), 0.8 * k); }
-    if (ky === "B") { plate(D(10, 0), rectPts(1.7, 1.4), METAL_D, h, k, 0.9); glowDot(D(10.4, 0), 0.5 * k, A(col, 0.5 + 0.5 * Math.sin(sw))); }
-    if (ky === "C") { disc(D(-9, 0), 2.4 * k, OUTLINE); disc(D(-9, 0), 2 * k, METAL_D); line(D(-9, 0), add(D(-9, 0), mul(fa(sw), 2.2 * k)), A(col, 0.9), 0.8 * k); } }
+    if (ky === "B") { plate(D(11.4, 0.9), rectPts(1.2, 1), METAL_D, h, k, 0.9); glowDot(D(11.7, 0.9), 0.45 * k, A(col, 0.5 + 0.5 * Math.sin(sw))); }
+    if (ky === "C") { disc(D(-3.4, 0), 2.3 * k, OUTLINE); disc(D(-3.4, 0), 1.9 * k, METAL_D); line(D(-3.4, 0), add(D(-3.4, 0), mul(fa(sw), 2.1 * k)), A(col, 0.9), 0.8 * k); } }
   if (B.r === 1) { const ky = B.key("r1");
-    if (ky === "A") { plate(D(-4, -2.6), rectPts(2.4, 1.4), AMMO, h, k, 0.9); }
-    if (ky === "B") { orb(D(-4, -2.4), 1.7 * k, METAL_D); orb(D(-1, -2.4), 1.3 * k, METAL_D); }
-    if (ky === "C") for (let i = 0; i < 3; i++) plate(D(-5 + i * 2.2, -2.5), rectPts(0.9, 1.1), AMMO, h, k, 0.8); }
+    if (ky === "A") { plate(D(-4, -3.9), rectPts(2.4, 1.3), AMMO, h, k, 0.9); }
+    if (ky === "B") { orb(D(-4, -3.8), 1.6 * k, METAL_D); orb(D(-1, -3.7), 1.2 * k, METAL_D); }
+    if (ky === "C") for (let i = 0; i < 3; i++) plate(D(-5 + i * 2.2, -3.8), rectPts(0.9, 1), AMMO, h, k, 0.8); }
+  // -- Upgrade tally marks (owner): one stroke on the fuselage's outer side for every step bought, like kill tallies. Path 1 is
+  // green, path 2 red, path 3 green; the mastery strikes the four strokes through with a slash and turns that path's marks gold.
+  // The option picks the stroke's style (a plain stroke, a bold stroke, a double stroke). Drawn last so nothing covers them.
+  const TALLY = [[GREEN_T, 5.0, "p0"], [RED, 8.8, "p1"], [GREEN_T, -9.2, "p2"]];
+  TALLY.forEach(([tc, x0, pk], pi) => { const lv = B.lv[pi], gold = lv >= 5, c1 = gold ? GOLD : tc;
+    for (let i = 0; i < Math.min(lv, 4); i++) { const x = x0 + i * 0.9, st = B.key(pk + "s" + i), a = D(x, -2.2), b = D(x, -0.5);
+      line(a, b, A(c1, 0.3), 1.6 * k);
+      if (st === "B") line(a, b, c1, 0.9 * k); else if (st === "C") { line(D(x - 0.22, -2.2), D(x - 0.22, -0.5), c1, 0.4 * k); line(D(x + 0.22, -2.2), D(x + 0.22, -0.5), c1, 0.4 * k); } else line(a, b, c1, 0.55 * k); }
+    if (gold) { const a = D(x0 - 0.5, -0.4), b = D(x0 + 3.2, -2.3); line(a, b, A(GOLD, 0.3), 1.6 * k); line(a, b, GOLD, 0.6 * k); } });
 }
 
 // ---- The agent: three guns on the plane's inner side, each firing at its own rate, aimed at different enemies -------------
@@ -852,7 +851,7 @@ function casAgent(B) { return (m, t, info, s, col) => { const O = info.orbit; if
 // ---- The model: the fixed ground station; the plane and its guns are the build's real look ------------------------------------
 const P2 = {
   tower: "cas", look: "A", anim: "A", uncapped: true,
-  intro: "Round 1b (owner's notch rule): the upgrades are marked as notches on a panel on the plane's tail, one row per path with five notches (four steps and the mastery). Path 1 is green, path 2 red, path 3 green, and the mastery turns that path's notches gold; the three options per stage are three notch shapes (bar, chevron, dot). The guns themselves stay inside the fuselage behind plain hatches. Before that, Round 1: three options for every step and the Retrofits, drawn as one model. This tower has its own upgrade system: every path is uncapped and upgrades one gun, so you can max all three. Path 1 is the light gatling (built in, inside the side door), path 2 the medium autocannon, path 3 the heavy guided missiles; step 1 of paths 2 and 3 adds the gun to the plane's flank. Each gun fires at its own rate at its own enemy under the orbit. The plane stays high with its shadow far below, and no gun shows on top. Extra Ammo's +10% fire rate stacks with the fire-rate steps (the carpet rule); Wide Orbit widens the orbit as well as the wings. Unpicked steps show option A.",
+  intro: "Round 1c (owner): the upgrades are marked with tally marks on the side of the fuselage, one stroke for each step bought, like kill tallies. Path 1 is green, path 2 red, path 3 green; the mastery strikes the four strokes through with a slash and turns that path's marks gold. The three options per stage are three stroke styles (plain, bold, double). The guns stay inside the fuselage behind plain hatches. Before that, Round 1: three options for every step and the Retrofits, drawn as one model. This tower has its own upgrade system: every path is uncapped and upgrades one gun, so you can max all three. Path 1 is the light gatling (built in, inside the side door), path 2 the medium autocannon, path 3 the heavy guided missiles; step 1 of paths 2 and 3 adds the gun to the plane's flank. Each gun fires at its own rate at its own enemy under the orbit. The plane stays high with its shadow far below, and no gun shows on top. Extra Ammo's +10% fire rate stacks with the fire-rate steps (the carpet rule); Wide Orbit widens the orbit as well as the wings. Unpicked steps show option A.",
   mods(B) { return { period: 0.2, flight: 0.2, multi: false, persist: casAgent(B) }; },
   orbitR(B, r) { return r * orbitMul(B); },
   door(B, p, h, s) { return P(p, h, G(s) * ZP, 1, 3.2); },
@@ -864,69 +863,69 @@ const P2 = {
   paths: [
     { name: "Light gun (gatling)", theme: "the built-in gatling in the side door: damage, rate, damage, rate, then Twin Gatlings", steps: [
       { name: "Heavier Rounds", cost: 175, effect: "Damage 12 to 15", options: [
-        { key: "A", name: "Bar Notch", desc: "A square green bar notch: a green notch lights on the tail panel." },
-        { key: "B", name: "Chevron Notch", desc: "A green chevron notch: a green notch lights on the tail panel." },
-        { key: "C", name: "Dot Notch", desc: "A round green dot notch: a green notch lights on the tail panel." } ] },
+        { key: "A", name: "Plain Stroke", desc: "A plain green stroke: one more green tally stroke on the fuselage side." },
+        { key: "B", name: "Bold Stroke", desc: "A bold green stroke: one more green tally stroke on the fuselage side." },
+        { key: "C", name: "Double Stroke", desc: "A double-line green stroke: one more green tally stroke on the fuselage side." } ] },
       { name: "Faster Spin", cost: 350, effect: "6 rounds/s", options: [
-        { key: "A", name: "Bar Notch", desc: "A square green bar notch: a green notch lights on the tail panel." },
-        { key: "B", name: "Chevron Notch", desc: "A green chevron notch: a green notch lights on the tail panel." },
-        { key: "C", name: "Dot Notch", desc: "A round green dot notch: a green notch lights on the tail panel." } ] },
+        { key: "A", name: "Plain Stroke", desc: "A plain green stroke: one more green tally stroke on the fuselage side." },
+        { key: "B", name: "Bold Stroke", desc: "A bold green stroke: one more green tally stroke on the fuselage side." },
+        { key: "C", name: "Double Stroke", desc: "A double-line green stroke: one more green tally stroke on the fuselage side." } ] },
       { name: "Hardened Rounds", cost: 1125, effect: "19 damage", options: [
-        { key: "A", name: "Bar Notch", desc: "A square green bar notch: a green notch lights on the tail panel." },
-        { key: "B", name: "Chevron Notch", desc: "A green chevron notch: a green notch lights on the tail panel." },
-        { key: "C", name: "Dot Notch", desc: "A round green dot notch: a green notch lights on the tail panel." } ] },
+        { key: "A", name: "Plain Stroke", desc: "A plain green stroke: one more green tally stroke on the fuselage side." },
+        { key: "B", name: "Bold Stroke", desc: "A bold green stroke: one more green tally stroke on the fuselage side." },
+        { key: "C", name: "Double Stroke", desc: "A double-line green stroke: one more green tally stroke on the fuselage side." } ] },
       { name: "Overdrive Motor", cost: 2670, effect: "7.5 rounds/s", options: [
-        { key: "A", name: "Bar Notch", desc: "A square green bar notch: a green notch lights on the tail panel." },
-        { key: "B", name: "Chevron Notch", desc: "A green chevron notch: a green notch lights on the tail panel." },
-        { key: "C", name: "Dot Notch", desc: "A round green dot notch: a green notch lights on the tail panel." } ] },
+        { key: "A", name: "Plain Stroke", desc: "A plain green stroke: one more green tally stroke on the fuselage side." },
+        { key: "B", name: "Bold Stroke", desc: "A bold green stroke: one more green tally stroke on the fuselage side." },
+        { key: "C", name: "Double Stroke", desc: "A double-line green stroke: one more green tally stroke on the fuselage side." } ] },
       { name: "Twin Gatlings", cost: 5345, effect: "9 rounds/s (mastery)", options: [
-        { key: "A", name: "Bar Notch", desc: "A square green bar notch: the mastery turns every gatling notch gold and adds a second door." },
-        { key: "B", name: "Chevron Notch", desc: "A green chevron notch: the mastery turns every gatling notch gold and adds a second door." },
-        { key: "C", name: "Dot Notch", desc: "A round green dot notch: the mastery turns every gatling notch gold and adds a second door." } ] },
+        { key: "A", name: "Plain Stroke", desc: "A plain green stroke: a slash strikes the gatling tally through and turns its marks gold; a second door is added." },
+        { key: "B", name: "Bold Stroke", desc: "A bold green stroke: a slash strikes the gatling tally through and turns its marks gold; a second door is added." },
+        { key: "C", name: "Double Stroke", desc: "A double-line green stroke: a slash strikes the gatling tally through and turns its marks gold; a second door is added." } ] },
     ] },
     { name: "Medium gun (autocannon)", theme: "the autocannon on the flank: unlock, feed, rounds, feed, then the battery", steps: [
       { name: "Autocannon", cost: 1145, effect: "Unlocks the autocannon: 40 damage, 1.5 shots/s, 25 px blast", options: [
-        { key: "A", name: "Bar Notch", desc: "A square red bar notch: a red notch lights on the tail panel." },
-        { key: "B", name: "Chevron Notch", desc: "A red chevron notch: a red notch lights on the tail panel." },
-        { key: "C", name: "Dot Notch", desc: "A round red dot notch: a red notch lights on the tail panel." } ] },
+        { key: "A", name: "Plain Stroke", desc: "A plain red stroke: one more red tally stroke on the fuselage side." },
+        { key: "B", name: "Bold Stroke", desc: "A bold red stroke: one more red tally stroke on the fuselage side." },
+        { key: "C", name: "Double Stroke", desc: "A double-line red stroke: one more red tally stroke on the fuselage side." } ] },
       { name: "Faster Feed", cost: 455, effect: "1.8 shots/s", options: [
-        { key: "A", name: "Bar Notch", desc: "A square red bar notch: a red notch lights on the tail panel." },
-        { key: "B", name: "Chevron Notch", desc: "A red chevron notch: a red notch lights on the tail panel." },
-        { key: "C", name: "Dot Notch", desc: "A round red dot notch: a red notch lights on the tail panel." } ] },
+        { key: "A", name: "Plain Stroke", desc: "A plain red stroke: one more red tally stroke on the fuselage side." },
+        { key: "B", name: "Bold Stroke", desc: "A bold red stroke: one more red tally stroke on the fuselage side." },
+        { key: "C", name: "Double Stroke", desc: "A double-line red stroke: one more red tally stroke on the fuselage side." } ] },
       { name: "HE Rounds", cost: 1645, effect: "52 damage", options: [
-        { key: "A", name: "Bar Notch", desc: "A square red bar notch: a red notch lights on the tail panel." },
-        { key: "B", name: "Chevron Notch", desc: "A red chevron notch: a red notch lights on the tail panel." },
-        { key: "C", name: "Dot Notch", desc: "A round red dot notch: a red notch lights on the tail panel." } ] },
+        { key: "A", name: "Plain Stroke", desc: "A plain red stroke: one more red tally stroke on the fuselage side." },
+        { key: "B", name: "Bold Stroke", desc: "A bold red stroke: one more red tally stroke on the fuselage side." },
+        { key: "C", name: "Double Stroke", desc: "A double-line red stroke: one more red tally stroke on the fuselage side." } ] },
       { name: "Twin Feed", cost: 3170, effect: "2.2 shots/s", options: [
-        { key: "A", name: "Bar Notch", desc: "A square red bar notch: a red notch lights on the tail panel." },
-        { key: "B", name: "Chevron Notch", desc: "A red chevron notch: a red notch lights on the tail panel." },
-        { key: "C", name: "Dot Notch", desc: "A round red dot notch: a red notch lights on the tail panel." } ] },
+        { key: "A", name: "Plain Stroke", desc: "A plain red stroke: one more red tally stroke on the fuselage side." },
+        { key: "B", name: "Bold Stroke", desc: "A bold red stroke: one more red tally stroke on the fuselage side." },
+        { key: "C", name: "Double Stroke", desc: "A double-line red stroke: one more red tally stroke on the fuselage side." } ] },
       { name: "Autocannon Battery", cost: 7015, effect: "58 damage; 30 px blast (mastery)", options: [
-        { key: "A", name: "Bar Notch", desc: "A square red bar notch: the mastery turns every autocannon notch gold and adds a second port." },
-        { key: "B", name: "Chevron Notch", desc: "A red chevron notch: the mastery turns every autocannon notch gold and adds a second port." },
-        { key: "C", name: "Dot Notch", desc: "A round red dot notch: the mastery turns every autocannon notch gold and adds a second port." } ] },
+        { key: "A", name: "Plain Stroke", desc: "A plain red stroke: a slash strikes the autocannon tally through and turns its marks gold; a second port is added." },
+        { key: "B", name: "Bold Stroke", desc: "A bold red stroke: a slash strikes the autocannon tally through and turns its marks gold; a second port is added." },
+        { key: "C", name: "Double Stroke", desc: "A double-line red stroke: a slash strikes the autocannon tally through and turns its marks gold; a second port is added." } ] },
     ] },
     { name: "Heavy gun (missiles)", theme: "the missile rack: unlock, rack speed, warheads, auto-rack, then Hellfire", steps: [
       { name: "Missile Rack", cost: 1235, effect: "Unlocks guided missiles: 150 damage, one every 3 s, 45 px blast", options: [
-        { key: "A", name: "Bar Notch", desc: "A square green bar notch: a green notch lights on the tail panel." },
-        { key: "B", name: "Chevron Notch", desc: "A green chevron notch: a green notch lights on the tail panel." },
-        { key: "C", name: "Dot Notch", desc: "A round green dot notch: a green notch lights on the tail panel." } ] },
+        { key: "A", name: "Plain Stroke", desc: "A plain green stroke: one more green tally stroke on the fuselage side." },
+        { key: "B", name: "Bold Stroke", desc: "A bold green stroke: one more green tally stroke on the fuselage side." },
+        { key: "C", name: "Double Stroke", desc: "A double-line green stroke: one more green tally stroke on the fuselage side." } ] },
       { name: "Quick Rack", cost: 525, effect: "One every 2.5 s", options: [
-        { key: "A", name: "Bar Notch", desc: "A square green bar notch: a green notch lights on the tail panel." },
-        { key: "B", name: "Chevron Notch", desc: "A green chevron notch: a green notch lights on the tail panel." },
-        { key: "C", name: "Dot Notch", desc: "A round green dot notch: a green notch lights on the tail panel." } ] },
+        { key: "A", name: "Plain Stroke", desc: "A plain green stroke: one more green tally stroke on the fuselage side." },
+        { key: "B", name: "Bold Stroke", desc: "A bold green stroke: one more green tally stroke on the fuselage side." },
+        { key: "C", name: "Double Stroke", desc: "A double-line green stroke: one more green tally stroke on the fuselage side." } ] },
       { name: "Heavy Warheads", cost: 1595, effect: "190 damage", options: [
-        { key: "A", name: "Bar Notch", desc: "A square green bar notch: a green notch lights on the tail panel." },
-        { key: "B", name: "Chevron Notch", desc: "A green chevron notch: a green notch lights on the tail panel." },
-        { key: "C", name: "Dot Notch", desc: "A round green dot notch: a green notch lights on the tail panel." } ] },
+        { key: "A", name: "Plain Stroke", desc: "A plain green stroke: one more green tally stroke on the fuselage side." },
+        { key: "B", name: "Bold Stroke", desc: "A bold green stroke: one more green tally stroke on the fuselage side." },
+        { key: "C", name: "Double Stroke", desc: "A double-line green stroke: one more green tally stroke on the fuselage side." } ] },
       { name: "Auto-Rack", cost: 3785, effect: "One every 2 s", options: [
-        { key: "A", name: "Bar Notch", desc: "A square green bar notch: a green notch lights on the tail panel." },
-        { key: "B", name: "Chevron Notch", desc: "A green chevron notch: a green notch lights on the tail panel." },
-        { key: "C", name: "Dot Notch", desc: "A round green dot notch: a green notch lights on the tail panel." } ] },
+        { key: "A", name: "Plain Stroke", desc: "A plain green stroke: one more green tally stroke on the fuselage side." },
+        { key: "B", name: "Bold Stroke", desc: "A bold green stroke: one more green tally stroke on the fuselage side." },
+        { key: "C", name: "Double Stroke", desc: "A double-line green stroke: one more green tally stroke on the fuselage side." } ] },
       { name: "Hellfire Volley", cost: 13250, effect: "Every third volley fires two missiles (mastery)", options: [
-        { key: "A", name: "Bar Notch", desc: "A square green bar notch: the mastery turns every missile notch gold." },
-        { key: "B", name: "Chevron Notch", desc: "A green chevron notch: the mastery turns every missile notch gold." },
-        { key: "C", name: "Dot Notch", desc: "A round green dot notch: the mastery turns every missile notch gold." } ] },
+        { key: "A", name: "Plain Stroke", desc: "A plain green stroke: a slash strikes the missile tally through and turns its marks gold." },
+        { key: "B", name: "Bold Stroke", desc: "A bold green stroke: a slash strikes the missile tally through and turns its marks gold." },
+        { key: "C", name: "Double Stroke", desc: "A double-line green stroke: a slash strikes the missile tally through and turns its marks gold." } ] },
     ] },
   ],
   retrofits: [

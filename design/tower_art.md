@@ -811,14 +811,15 @@ length from frame to frame.
 they hung half off the side. They now all sit inside the fuselage outline (the hatches a little in from the inner edge), and
 the shots start inside the hull and emerge from under it.
 
-**Notch rule (owner: "Upgrades are marked as notches on the plane. Path 1 is green notches, path 2 is red, path 3 is green.
-Mastery changes them to gold"):** the CAS upgrades are now shown as notches. A panel on the plane's tail has one row per path
-with five notches (four steps and the mastery). Each step bought lights its notch: path 1 green, path 2 red, path 3 green; the
-mastery turns all of that path's notches gold. The three options per stage are now three notch shapes (square bar, chevron,
-round dot). The old frame, panel and fairing details are gone. The guns stay inside the fuselage behind plain hatches, with the
-autocannon port and the missile bay appearing at their first step; the masteries add a second gatling door and a second
-autocannon port. Paths 1 and 3 are both green as written; they are told apart by their rows. If path 3 should be a different
-colour (blue, say), say so.
+**Tally rule (owner: "Upgrades are marked as notches on the plane. Path 1 is green notches, path 2 is red, path 3 is green.
+Mastery changes them to gold", then "I mean just add a tally mark on the side of the fuselage"):** each CAS upgrade adds one
+tally stroke on the fuselage's outer side, like a kill tally. Path 1's strokes are green and sit forward on the nose, path 2's red
+just ahead of them, path 3's green aft; a stroke only appears once its step is bought (no empty sockets). The mastery strikes
+the four strokes through with a slash and turns all of that path's marks gold. The three options per stage are three stroke
+styles (plain, bold, double). The old frame, panel and fairing details are gone. The guns stay inside the fuselage behind plain
+hatches, with the autocannon port and the missile bay appearing at their first step; the masteries add a second gatling
+door and a second autocannon port. Paths 1 and 3 are both green as written; they are told apart by their places on the
+fuselage. If path 3 should be a different colour (blue, say), say so. The Retrofit parts moved so they don't cover the tallies.
 
 ## Open questions
 
