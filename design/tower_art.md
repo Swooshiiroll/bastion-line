@@ -377,7 +377,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 3 | Laser Tower | `design/tower_art_p2_03_laser.html` | **Confirmed** (owner, 2026-10-17: "Laser finished") |
 | 4 | Rocket Salvo | `design/tower_art_p2_04_rocket.html` | **Confirmed** (owner, 2026-10-17: "Rocket Salvo is done") |
 | 5 | Anti-Aircraft Turret | `design/tower_art_p2_05_aa.html` | **Confirmed** (owner, 2026-10-17: "AA Finished"; Range 3 is the Optical Director) |
-| 6 | Artillery Cannon | `design/tower_art_p2_06_artillery.html` | Round 2: picks drawn, note applied; awaiting confirm |
+| 6 | Artillery Cannon | `design/tower_art_p2_06_artillery.html` | **Confirmed** (owner, 2026-10-17: "Artillery finished"; stock scatter kept as drawn, 30 px) |
 
 ### Gun Turret (second pass)
 
@@ -620,4 +620,4 @@ tray (it was a round shell with a tail). The page shows only the picks.
 
 ## Open questions
 
-1. **Second pass, Artillery Cannon** (tower 6, round 2): confirm, and say whether stock shells should scatter (the Stabilised Mount assumes 30 px). Then towers 7-20.
+1. **Second pass, Railgun** (tower 7): its Retrofits are being checked for overlaps with its paths before drawing. Then towers 8-20.
