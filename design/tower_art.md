@@ -356,6 +356,9 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 
 **Decided:**
 - **Every step and the mastery** of every path changes the look. Each upgrade **adds or changes a detail**.
+- **Overlapping Retrofits stack (owner, 2026-10-17, "the carpet rule"):** from the Railgun (tower 7) on, a Retrofit that
+  overlaps a path step is kept as written and its stats stack on the path's. No replacement is asked for. Towers 1 to 6
+  are settled as they are.
 - **Both the primary and the secondary show**, and their details overlap (owner: "Each upgrades adds or changes a
   detail to the tower, so they overlap").
 - **Three options per stage:** every step and mastery is picked separately (A/B/C) and can be mixed freely. Each
@@ -378,6 +381,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 4 | Rocket Salvo | `design/tower_art_p2_04_rocket.html` | **Confirmed** (owner, 2026-10-17: "Rocket Salvo is done") |
 | 5 | Anti-Aircraft Turret | `design/tower_art_p2_05_aa.html` | **Confirmed** (owner, 2026-10-17: "AA Finished"; Range 3 is the Optical Director) |
 | 6 | Artillery Cannon | `design/tower_art_p2_06_artillery.html` | **Confirmed** (owner, 2026-10-17: "Artillery finished"; stock scatter kept as drawn, 30 px) |
+| 7 | Railgun | `design/tower_art_p2_07_railgun.html` | Round 1: three options per stage; awaiting picks |
 
 ### Gun Turret (second pass)
 
@@ -618,6 +622,25 @@ director fitted, the mastery's gold radar moves to the other side of the deck so
 **Round 2:** the Long Penetrators now change the round itself: a long slim shell with a steel tip, in flight and in the
 tray (it was a round shell with a tail). The page shows only the picks.
 
+### Railgun (second pass)
+
+**Retrofits kept, stats stacking (owner, 2026-10-17, the carpet rule).** Claude flagged that all three overlap a path:
+- Capacitor Coils (recharge 2.5 to 2.2 s) = Speed step 1, Fast Capacitors (2.2 s). It takes a further 0.3 s off.
+- Longer Rails (+15 damage, +30 range) overlaps Power step 1 (damage) and Speed step 2, Extended Rails (range, and the
+  same look). Both lengthen the housing.
+- Penetrator Tips (falloff 40% to 30%) overlaps Special step 2, Penetrator Core (40% to 25%). It takes a further 10%
+  off the falloff.
+
+**Round 1 (Claude):** one parametric model (base look B Sealed Accelerator, animation A Snap Shot).
+- **Power** thickens and tints the shot at each step (red edges for Boss Rounds, a white core for Kill Charge, gold
+  at Kingslayer); the housing, collars and drum carry the matching parts.
+- **Range/Speed** swaps the capacitor and housing parts; the mastery splits the housing into two rails that fire in
+  turn, each with every detail.
+- **Special Effects:** hits crack from Shatter; the hit flashes shrink by the falloff (none at the mastery); the
+  Ionised Trail lingers and crackles along the line.
+- **The slug head** runs ahead of the line: dark and pointed with Penetrator Tips.
+- **Deck kit is static;** only the housing turns.
+
 ## Open questions
 
-1. **Second pass, Railgun** (tower 7): its Retrofits are being checked for overlaps with its paths before drawing. Then towers 8-20.
+1. **Second pass, Railgun** (tower 7, round 1): pick one option per stage and Retrofit. Then towers 8-20 (next: Tesla Tower).
