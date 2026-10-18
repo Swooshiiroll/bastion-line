@@ -784,8 +784,7 @@ gatling (built in), path 2 the medium autocannon (step 1 unlocks it), path 3 the
 fire-rate steps of all three paths; per the carpet rule it is kept and stacks.
 
 **Round 1 (Claude):** one parametric model (base look A Airfield Beacon + Four-Engine Gunship, animation A Gatling Stream).
-- **The plane carries the upgrades.** All three guns are inside the fuselage (see the fix below); the upgrades are hatch
-  frames, panels and fairings, and Twin Gatlings adds a second door. Masteries are gold.
+- **The plane carries the upgrades** (superseded by the notch rule below). All three guns are inside the fuselage.
 - **Each gun fires at its own rate at its own enemy** under the orbit: gatling tracers (thicker, white-cored, a second line,
   gold), autocannon shells that burst on the target (25 px, 30 px at the battery), guided missiles that curve in with a
   smoke trail and burst (45 px; Hellfire fires two every third volley).
@@ -811,6 +810,15 @@ length from frame to frame.
 **Fix (owner: "guns should be in the fuselage"):** the gun ports, hatches, panels and fairings were centred on the hull's edge, so
 they hung half off the side. They now all sit inside the fuselage outline (the hatches a little in from the inner edge), and
 the shots start inside the hull and emerge from under it.
+
+**Notch rule (owner: "Upgrades are marked as notches on the plane. Path 1 is green notches, path 2 is red, path 3 is green.
+Mastery changes them to gold"):** the CAS upgrades are now shown as notches. A panel on the plane's tail has one row per path
+with five notches (four steps and the mastery). Each step bought lights its notch: path 1 green, path 2 red, path 3 green; the
+mastery turns all of that path's notches gold. The three options per stage are now three notch shapes (square bar, chevron,
+round dot). The old frame, panel and fairing details are gone. The guns stay inside the fuselage behind plain hatches, with the
+autocannon port and the missile bay appearing at their first step; the masteries add a second gatling door and a second
+autocannon port. Paths 1 and 3 are both green as written; they are told apart by their rows. If path 3 should be a different
+colour (blue, say), say so.
 
 ## Open questions
 
