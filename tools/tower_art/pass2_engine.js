@@ -34,6 +34,9 @@ function compose(layers) {
     draw(c, aim, s, fx, t, col, info) { if (P2.model) return P2.model(c, aim, s, fx, t, col, info, B);
       for (const L of layers) if (L.under) L.under(c, aim, s, fx, t, col, info);
       BASE_LOOK.draw.call(this, c, aim, s, fx, t, col, info); for (const L of layers) if (L.over) L.over(c, aim, s, fx, t, col, info); } };
+  if (P2.plane) look.plane = (p, h, s, fx, t, col, O) => P2.plane(B, p, h, s, fx, t, col, O);
+  if (P2.door) look.door = (p, h, s, O) => P2.door(B, p, h, s, O);
+  if (P2.orbitR) look.orbitR = (r) => P2.orbitR(B, r);
   if (P2.muzzleAt) look.muzzleAt = (m, k, c, aim, s, info) => P2.muzzleAt(B, m, k, c, aim, s, info);
   const b = BASE_ANIM, every = crit > 0 ? Math.max(2, Math.round(1 / crit)) : 0;
   const anim = { ...b, key: b.key + targets, burst: (b.burst || 1) * targets, multi: targets > 1 || b.multi, gap: targets > 1 ? 0.02 : b.gap,

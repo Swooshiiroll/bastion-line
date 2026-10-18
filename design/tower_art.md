@@ -384,6 +384,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 7 | Railgun | `design/tower_art_p2_07_railgun.html` | **Confirmed** (owner, 2026-10-18: "Railgun finished"; the larger drum is for the twin build only) |
 | 8 | Tesla Tower | `design/tower_art_p2_08_tesla.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 9 | Drone Bay | `design/tower_art_p2_09_drones.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
+| 10 | CAS Gunship | `design/tower_art_p2_10_cas.html` | Round 1: three options per stage; awaiting picks |
 
 ### Gun Turret (second pass)
 
@@ -774,6 +775,24 @@ body, gun and pods, instead of under the body.
 **Fix (owner: "make the propeller blades thinner; they also protrude too far out"):** the blades are about half as thick, the
 rotors are smaller (radius 2.05 px, was 2.6) and sit closer in on shorter arms (4.1 px, was 4.6).
 
+### CAS Gunship (second pass)
+
+**Its own upgrade system (owner):** every path is uncapped and upgrades one gun, so all three can be maxed: path 1 the light
+gatling (built in), path 2 the medium autocannon (step 1 unlocks it), path 3 the heavy guided missiles (step 1 unlocks it).
+
+**Retrofits:** Radar and Wide Orbit overlap no path step. **Extra Ammo** (+10% fire rate on every gun) overlaps the
+fire-rate steps of all three paths; per the carpet rule it is kept and stacks.
+
+**Round 1 (Claude):** one parametric model (base look A Airfield Beacon + Four-Engine Gunship, animation A Gatling Stream).
+- **The plane carries the upgrades.** The gatling is inside the side door (its upgrades are door frames, belts, vents,
+  plates, and Twin Gatlings adds a second door); the autocannon and the missile rack appear on the flank from their first
+  step. No gun shows on top (owner's base-pass note). Masteries are gold.
+- **Each gun fires at its own rate at its own enemy** under the orbit: gatling tracers (thicker, white-cored, a second line,
+  gold), autocannon shells that burst on the target (25 px, 30 px at the battery), guided missiles that curve in with a
+  smoke trail and burst (45 px; Hellfire fires two every third volley).
+- **Wide Orbit** widens the orbit (115 px) as well as the wings; **Extra Ammo** speeds every gun by 10% on top of its path.
+- **Ground station:** fixed, as in the base.
+
 ## Open questions
 
-1. **Second pass, CAS Gunship** (tower 10): round 1 page being built. Then towers 11-20.
+1. **Second pass, CAS Gunship** (tower 10, round 1): pick one option per stage and Retrofit. Then towers 11-20 (next: Mine Layer).

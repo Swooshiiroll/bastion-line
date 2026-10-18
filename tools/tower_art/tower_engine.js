@@ -62,13 +62,14 @@ function makeView(canvas, tw, getLook, getAnim, scale) {
     const inView = ens.filter((e) => e.p[0] > 10 && e.p[0] < W - 10);
     // tw.spot: the player aims it at a fixed point (it ignores enemies). tw.orbit: an aircraft circles a designated
     // point and fires at enemies near it.
+    const orR = tw.orbit ? (look.orbitR ? look.orbitR(tw.orbit.r) : tw.orbit.r) : 0; // a look may widen the orbit (the CAS Wide Orbit Retrofit)
     const O = tw.orbit ? [W * tw.orbit.x, H * tw.orbit.y] : null;
-    const cands = O ? inView.filter((e) => Math.hypot(e.p[0] - O[0], e.p[1] - O[1]) < tw.orbit.r * s * 1.6) : inView;
+    const cands = O ? inView.filter((e) => Math.hypot(e.p[0] - O[0], e.p[1] - O[1]) < orR * s * 1.6) : inView;
     let tgt = null, best = 1e9;
     if (tw.spot) tgt = { p: [W * tw.spot.x, H * tw.spot.y], i: -5 };
     else for (const e of cands) { const ref = O || c, d = Math.hypot(e.p[0] - ref[0], e.p[1] - ref[1]); if (d < best) { best = d; tgt = e; } }
     let pl = null;
-    if (O) { const a = t * (tw.orbit.w || 0.5), p = add(O, mul(fa(a), tw.orbit.r * s)); pl = { p, heading: a + Math.PI / 2, door: add(p, mul(norm(sub(O, p)), s * 0.14)) }; if (look.door) pl.door = look.door(p, pl.heading, s, O); }
+    if (O) { const a = t * (tw.orbit.w || 0.5), p = add(O, mul(fa(a), orR * s)); pl = { p, heading: a + Math.PI / 2, door: add(p, mul(norm(sub(O, p)), s * 0.14)) }; if (look.door) pl.door = look.door(p, pl.heading, s, O); }
     if (an.persist && (!v.mem || v.mem.key !== an.key + look.key)) v.mem = { key: an.key + look.key };
     const aimP = an.persist && v.mem.aimAt ? v.mem.aimAt : tgt && tgt.p;
     if (aimP) {
