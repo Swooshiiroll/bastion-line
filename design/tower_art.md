@@ -381,7 +381,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 4 | Rocket Salvo | `design/tower_art_p2_04_rocket.html` | **Confirmed** (owner, 2026-10-17: "Rocket Salvo is done") |
 | 5 | Anti-Aircraft Turret | `design/tower_art_p2_05_aa.html` | **Confirmed** (owner, 2026-10-17: "AA Finished"; Range 3 is the Optical Director) |
 | 6 | Artillery Cannon | `design/tower_art_p2_06_artillery.html` | **Confirmed** (owner, 2026-10-17: "Artillery finished"; stock scatter kept as drawn, 30 px) |
-| 7 | Railgun | `design/tower_art_p2_07_railgun.html` | Round 1: three options per stage; awaiting picks |
+| 7 | Railgun | `design/tower_art_p2_07_railgun.html` | Round 2: picks drawn; new ideas for six stages; awaiting picks |
 
 ### Gun Turret (second pass)
 
@@ -660,6 +660,27 @@ Barrel** (a narrower inner tube slides out of the housing, the mouth on the narr
 box with scale ticks on the housing's side) and **Guide Rails** (slim rails with cross-struts alongside, running a little
 past the mouth). They replace the longer housing, the sleeve and the braces.
 
+**Picks (owner, round 1, with the new-idea rounds 1b to 1d):**
+- **Power:** 1 C Tungsten Collars, 2 B Boss Marker Ring, 3 C Arc Pylons, 4 B Dual Charge Ring, M B Gold Drum Ring.
+- **Range/Speed:** 1 C Ready Beacon, 2 A Telescoping Barrel, 3 C Capacitor Stack, 4 A Copper Windings, M A Parallel Rails.
+- **Special Effects:** 1 C Crack Lamp, 2 C Piercing Cage, 3 A Ion Rings, 4 B Heat Vents, M none.
+- **Retrofits:** Capacitor Coils A, Longer Rails none, Penetrator Tips A.
+- **Notes:** Kingslayer: "Have the chargeup and the green centerline gold instead of the whole drum". Twin Rails: "Have the
+  parallel rails run side by side". "More ideas" for Fast Capacitors, Rapid Capacitors, Supercapacitors, and every Special
+  Effects tier.
+
+**Round 2 (Claude):**
+- **Kingslayer B:** only the charge-up arc and the green centreline go gold now; the gold ring round the whole drum is gone.
+- **Twin Rails A:** the two housings now run directly side by side (touching, centres 7 px apart) and are joined by
+  clamps at the collars. I read "side by side" as close together; if you meant something else (say, firing together),
+  tell me.
+- **New ideas:** Fast Capacitors (Coolant Loop, Spark Gap, Cable Reel); Rapid Capacitors (Drum Cage, Capacitor Spine,
+  Charge Reservoir); Supercapacitors (Field Rings, Bus Bars, Cryo Jacket); Shatter Rounds (Resonator Fork, Etching Tank,
+  Impact Studs); Penetrator Core (Drill Tip, Core Magazine, Lance Prongs); Ionised Trail (Ion Fins, Plasma Tube, Ion
+  Grid); Hot Rail (Glowing Rail Edges, Steam Vents, Heat-Fin Block); Ion Cannon (Gold Lens Ring, Gold Spine, Gold Emitter
+  Funnel).
+- Picked stages show only the pick; the Longer Rails Retrofit keeps its three options.
+
 ## Open questions
 
-1. **Second pass, Railgun** (tower 7, round 1): pick one option per stage and Retrofit. Then towers 8-20 (next: Tesla Tower).
+1. **Second pass, Railgun** (tower 7, round 2): pick from the new ideas, pick the Longer Rails option, and confirm the Twin Rails reading. Then towers 8-20 (next: Tesla Tower).

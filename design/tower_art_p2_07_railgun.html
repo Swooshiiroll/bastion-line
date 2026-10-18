@@ -65,7 +65,7 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Tower rework · Tower art · second pass · tower 7 of 20 · round 1d</div>
+    <div class="eyebrow">Bastion Line · Tower rework · Tower art · second pass · tower 7 of 20 · round 2</div>
     <h1>Tower art: Railgun paths and Retrofits</h1>
     <p class="note">Second pass for one tower: <b>every upgrade step and mastery</b> on each path, and each <b>Retrofit</b>, adds or changes a detail on the confirmed model. Each card shows the model with that path's earlier steps (your picks, or option A until you pick) plus the candidate. Pick one of three per step, add notes per path, then <b>Copy picks and notes</b>.</p>
     <ul class="rules">
@@ -762,7 +762,7 @@ const NO_BOOT = true;
 // off the recharge on top of the Speed path, and Penetrator Tips take 10% off the falloff on top of Penetrator Core.
 // Geometry (game px, x along the aim, y to the side): housing x -4 to 24, 8 wide; collars at 3, 10, 17; capacitor drum
 // r 6.5 at x -8; the slug is a thin bright line (a Snap Shot) with a slug head, hitting every enemy on its line.
-const PAGE = { title: "Railgun: paths and Retrofits (second pass)", store: "bl-tower-art-p2-railgun-r1" };
+const PAGE = { title: "Railgun: paths and Retrofits (second pass)", store: "bl-tower-art-p2-railgun-r2" };
 const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], COPPER = [0.78, 0.5, 0.28, 1], RED = [0.85, 0.2, 0.18, 1];
 const ORANGE = [1, 0.55, 0.2, 1], TUNG = [0.2, 0.21, 0.24, 1], CERAM = [0.86, 0.85, 0.8, 1];
 const rnd2 = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
@@ -775,7 +775,7 @@ function zag(a, b, col, w, seed) { const n = 7, d = sub(b, a), o = orth(norm(d))
 
 // ---- Rails: one housing, or two (Twin Rails); lengths from Extended Rails and the Longer Rails Retrofit ---------------
 function railsOf(B) { const S = B.lv[1];
-  if (S >= 5) { const st = Kp(B, 1, 4); if (st === "B") return { w: 5.6, pos: [[2.5, -5], [-2.5, 5]] }; if (st === "C") return { w: 4.6, pos: [[0, -7.5], [0, 7.5]], wind: true }; return { w: 5.6, pos: [[0, -5.5], [0, 5.5]] }; }
+  if (S >= 5) { const st = Kp(B, 1, 4); if (st === "B") return { w: 5.6, pos: [[2.5, -5], [-2.5, 5]] }; if (st === "C") return { w: 4.6, pos: [[0, -7.5], [0, 7.5]], wind: true }; return { w: 6.4, pos: [[0, -3.5], [0, 3.5]], clamps: true }; }
   return { w: 8 + (Kp(B, 0, 0) === "A" ? 1.6 : 0) + (B.r === 1 && B.key("r1") === "B" ? 1.2 : 0), pos: [[0, 0]] }; }
 const lenOf = (B) => 24 + (B.lv[1] >= 2 ? ({ A: 4, B: 0, C: 3 }[Kp(B, 1, 1)] || 0) : 0) + (B.r === 1 ? 3 : 0);
 // Recharge (s): the Speed path, minus the Capacitor Coils Retrofit (stacked), plus Overcharge's longer charge.
@@ -817,22 +817,24 @@ const P2 = {
     deck(c, k, col, t);
     // -- Fixed deck kit (never turns) --------------------------------------------------------------------------------
     if (P1 === "B") { plate(S(-13, -11), rectPts(4.2, 2.4), AMMO, 0, k, 0.9); for (let i = 0; i < 3; i++) bar(S(-15.4 + i * 2.4, -11), S(-14 + i * 2.4, -11), 1.6 * k, B.lv[0] >= 5 ? GOLD : METAL_L); }
-    // Fast Capacitors: a relay box with a cable to the drum (a pulse runs along it), a flywheel that spins up, a ready beacon
+    // Fast Capacitors (round 2 ideas): a coolant loop to the drum, a spark gap that sparks faster as it charges, a cable reel
     const dcen = P(c, aim, k, -8, 0);
-    if (S1 === "A") { plate(S(-13, 11), rectPts(3.2, 2.2), METAL_D, 0, k, 1); for (let i = 0; i < 3; i++) line(S(-14.8 + i * 1.8, 10), S(-14.8 + i * 1.8, 12), COPPER, 0.9 * k);
-      const a0 = S(-11, 10.4); line(a0, dcen, [0.4, 0.42, 0.46, 1], 1.8 * k); const pu = lerp(a0, dcen, fmod(t * 0.9, 1)); glowDot(pu, 0.9 * k, A(col, 0.3 + 0.7 * ch)); }
-    if (S1 === "B") { const q = S(-13, 11); disc(q, 3.4 * k, OUTLINE); disc(q, 2.8 * k, METAL_D); const spin = t * (2 + 14 * ch); for (let i = 0; i < 4; i++) line(add(q, mul(fa(spin + i * Math.PI / 2), 0.6 * k)), add(q, mul(fa(spin + i * Math.PI / 2), 2.6 * k)), METAL_L, 1.1 * k); orb(q, 0.9 * k, METAL); ring(q, 2.8 * k, A(col, 0.2 + 0.6 * ch), 0.8 * k); }
-    if (S1 === "C") { const q = S(-13, 11); bar(q, S(-13, 7), 1.6 * k, METAL_L); disc(q, 2.2 * k, OUTLINE); disc(q, 1.8 * k, METAL_D); const ready = ch >= 0.97; disc(S(-13, 7), 2 * k, OUTLINE); glowDot(S(-13, 7), (ready ? 1.5 + 0.4 * Math.sin(t * 8) : 0.9) * k, ready ? [0.4, 1, 0.5, 1] : A(col, 0.25 + 0.5 * ch)); }
-    if (S3 === "C") for (let i = 0; i < 3; i++) { bar(S(14, -11 + i * 2.2), S(17, -11 + i * 2.2), 1.8 * k, METAL_L); disc(S(17, -11 + i * 2.2), 0.7 * k, A(col, 0.3 + 0.7 * ch)); }
-    if (S4 === "C") { plate(S(14, 9), rectPts(3, 2.6), CERAM, 0, k, 1); for (let i = 0; i < 3; i++) line(S(12.6 + i * 1.4, 7.6), S(12.6 + i * 1.4, 10.4), [0.3, 0.3, 0.3, 0.6], 0.8 * k); }
-    if (X3 === "C") { plate(S(6, 12.4), rectPts(3, 1.8), TANK2, 0, k, 1); line(S(3, 11.4), S(0, 6), [0.15, 0.15, 0.15, 1], 1 * k); }
-    if (X4 === "C") { plate(S(6, -12.4), rectPts(3.4, 1.8), METAL_D, 0, k, 1); for (let i = 0; i < 4; i++) line(S(3.6 + i * 1.6, -13.5), S(3.6 + i * 1.6, -11.3), A(ORANGE, 0.9), 0.9 * k); }
+    if (S1 === "A") { plate(S(-13, 11), rectPts(2.8, 2.2), [0.25, 0.5, 0.58, 1], 0, k, 1); const a0 = S(-10.5, 10.4); line(a0, dcen, [0.3, 0.55, 0.62, 1], 1.6 * k);
+      for (let j = 0; j < 3; j++) glowDot(lerp(a0, dcen, fmod(t * (0.4 + 1.2 * ch) + j / 3, 1)), 0.6 * k, [0.5, 0.85, 1, 1]); }
+    if (S1 === "B") { plate(S(-13, 11.5), rectPts(3.2, 1.2), METAL_D, 0, k, 1); for (const x of [-14.4, -11.6]) { bar(S(x, 10.6), S(x, 8.6), 1 * k, METAL_L); disc(S(x, 8.4), 0.6 * k, STEEL); }
+      if (ch > 0.12) zag(S(-14.4, 8.4), S(-11.6, 8.4), A([0.9, 1, 1, 1], 0.5 + 0.5 * ch), 1 * k, Math.floor(t * (6 + 14 * ch))); }
+    if (S1 === "C") { const q = S(-13, 10.5), sp = t * (1 + 9 * ch); disc(q, 3.4 * k, OUTLINE); disc(q, 3 * k, METAL_D); ring(q, 2.2 * k, A(col, 0.3 + 0.5 * ch), 0.8 * k); for (let i = 0; i < 3; i++) line(add(q, mul(fa(sp + i * TAU / 3), 0.6 * k)), add(q, mul(fa(sp + i * TAU / 3), 2.6 * k)), METAL_L, 1 * k); orb(q, 0.9 * k, METAL); line(add(q, [2.4 * k, -1 * k]), dcen, [0.15, 0.15, 0.18, 1], 1.5 * k); }
+    // Rapid Capacitors C: a charge reservoir whose level climbs as it charges. Special: etching tank (Shatter B), core magazine (Core B), ion grid (Trail C)
+    if (S3 === "C") { bar(S(14, -7), S(14, -12.5), 3.8 * k, METAL_L); bar(S(14, -7.6), S(14, -7.6 - 4.4 * ch), 2 * k, A(PM ? GOLD : col, 0.9)); ring(S(14, -12.5), 1.6 * k, METAL_D, 0.9 * k); }
+    if (X1 === "B") { plate(S(6, 12.4), rectPts(3, 1.8), [0.35, 0.55, 0.15, 1], 0, k, 1); line(S(3, 11.4), S(0, 6), [0.15, 0.2, 0.1, 1], 1 * k); }
+    if (X2 === "B") { plate(S(14, 11), rectPts(4.4, 2.4), AMMO, 0, k, 0.9); for (let i = 0; i < 4; i++) bar(S(11 + i * 0.4, 9.2 + i * 0.9), S(16.4 + i * 0.4, 9.2 + i * 0.9), 0.7 * k, i % 2 ? STEEL : TUNG); }
+    if (X3 === "C") { plate(S(6, 12.4), rectPts(3.6, 2.2), METAL_D, 0, k, 1); for (let i = -1; i <= 1; i++) line(S(6 + i * 2, 10.8), S(6 + i * 2, 14), A(col, 0.3 + 0.6 * ch), 0.8 * k); for (const y of [11.8, 13]) line(S(2.8, y), S(9.2, y), A(col, 0.3 + 0.6 * ch), 0.8 * k); }
     if (R === "C" && B.r === 0) for (let i = 0; i < 3; i++) { disc(S(-6 + i * 3, -12.6), 1.6 * k, OUTLINE); disc(S(-6 + i * 3, -12.6), 1.2 * k, COPPER); ring(S(-6 + i * 3, -12.6), 1.2 * k, A(col, 0.3 + 0.7 * ch), 0.8 * k); }
     if (B.r === 2 && R === "C") { plate(S(-6, 12.6), rectPts(4.6, 1.4), AMMO, 0, k, 0.9); for (let i = 0; i < 3; i++) { bar(S(-9 + i * 3, 12.6), S(-7.4 + i * 3, 12.6), 1.2 * k, TUNG); fill(S(-6.8 + i * 3, 12.6), [[1.2, 0], [0, 0.6], [0, -0.6]], STEEL, 0, k); } }
     if (P3 === "A") for (const sg of [-1, 1]) { const q0 = S(-2, sg * 11.5), q1 = S(3, sg * 11.5); bar(q0, q1, 3.4 * k, METAL_L); bar(q0, add(q0, [1.2 * k, 0]), 3.4 * k, METAL_D); ring(lerp(q0, q1, 0.5), 1.2 * k, A(col, 0.3 + 0.7 * ch), 0.9 * k); line(add(q0, [0, -sg * 2 * k]), S(-1, sg * 8), METAL_D, 1 * k); }
     if (P3 === "C") for (const sg of [-1, 1]) { bar(S(-14.5, sg * 9.5), S(-14.5, sg * 12), 1.8 * k, METAL_L); disc(S(-14.5, sg * 9), 1 * k, A(PM ? GOLD : col, 0.4 + 0.6 * ch)); }
     // -- The rails (the housing turns); each carries the same details ---------------------------------------------------
-    const hot = X4 === "A", colr = PM === "A" ? GOLD : P1 === "C" ? TUNG : hot ? mix(METAL_L, ORANGE, 0.5) : METAL_L;
+    const hot = false, colr = PM === "A" ? GOLD : P1 === "C" ? TUNG : hot ? mix(METAL_L, ORANGE, 0.5) : METAL_L;
     for (let i = 0; i < n; i++) { const [xo, y] = T.pos[i], r = (i === last ? decay(since, 0.3) : 0) * 2.5, w = T.w * k, hw = T.w * 0.68, x0 = xo - 4 - r, x1 = xo + L - r, Pt = (x, yy) => P(c, aim, k, x, y + (yy || 0));
       const across = (x, h, cc, lw) => line(add(Pt(x - r, 0), mul(orth(fa(aim)), h * k)), add(Pt(x - r, 0), mul(orth(fa(aim)), -h * k)), cc, lw * k);
       if (T.wind) for (let j = 0; j < 9; j++) { const x = xo + 2 + j * 2.8 - r; line(P(c, aim, k, x, y - 3), P(c, aim, k, x + 1, 0), mix(COPPER, col, ch * 3 > j / 3 ? 0.7 : 0), 0.9 * k); }
@@ -849,16 +851,12 @@ const P2 = {
       if (P2 === "A") line(Pt(xo + 2 - r, hw * 0.55), Pt(xo + L - 4 - r, hw * 0.55), RED, 1.4 * k);
       if (P2 === "B") { across(xo + 12, T.w * 0.54, RED, 1.1); across(xo + 13.6, T.w * 0.54, RED, 0.8); }
       if (P2 === "C") for (const sg of [-1, 1]) plate(Pt(xo + 10 - r, sg * (T.w * 0.6)), rectPts(4.2, 1), RED, aim, k, 0.9);
-      if (S4 === "B") for (const sg of [-1, 1]) line(Pt(xo - 6 - r, sg * hw * 0.62), Pt(xo + L - 5 - r, sg * hw * 0.62), STEEL, 1.1 * k);
-      if (S4 === "A") for (let j = 0; j < 4; j++) across(xo + 5 + j * 4, hw * 0.55, COPPER, 1.2);
       // Rangefinder (B): a box with twin lenses on the housing's side. Guide Rails (C): two slim rails alongside that run on past the mouth.
       if (S2 === "B") { const q = Pt(xo + 4 - r, -T.w * 0.78); plate(q, rectPts(3.6, 1.7), METAL_D, aim, k, 1); for (const sg of [-1, 1]) glowDot(Pt(xo + 6.4 - r, -T.w * 0.78 + sg * 0.8), 0.55 * k, sg > 0 ? [1, 0.3, 0.3, 1] : A(col, 0.5 + 0.5 * ch)); for (let j = 0; j < 4; j++) line(Pt(xo + 1.6 + j * 0.9 - r, -T.w * 0.78 - 1.2), Pt(xo + 1.6 + j * 0.9 - r, -T.w * 0.78 - (j % 2 ? 1.9 : 2.5)), METAL_L, 0.6 * k); }
       if (S2 === "C") for (const sg of [-1, 1]) { const yy = sg * (T.w * 0.5 + 1.2); bar(Pt(xo + 4 - r, yy), Pt(xo + L + 2 - r, yy), 1.2 * k, METAL_L); for (const x of [8, 14, 20]) line(Pt(xo + x - r, yy), Pt(xo + x - r, sg * T.w * 0.5), METAL_D, 0.9 * k); }
-      if (X4 === "B") for (let j = 0; j < 4; j++) { const q = Pt(xo + 5 + j * 4 - r, 0); line(add(q, mul(orth(fa(aim)), hw * 0.2 * k)), add(q, mul(orth(fa(aim)), -hw * 0.2 * k)), A(ORANGE, 0.9), 1.3 * k); }
       if (R === "A" && B.r === 0) for (let j = 0; j < 5; j++) { const x = xo + 2 + j * 4 - r; line(Pt(x, -hw * 0.5), Pt(x + 1.6, hw * 0.5), mix(COPPER, col, ch * 5 > j ? 0.7 : 0), 1.1 * k); }
       if (B.r === 1 && R === "A") for (const sg of [-1, 1]) line(Pt(xo - 2 - r, sg * hw * 0.78), Pt(xo + L - 3 - r, sg * hw * 0.78), METAL_L, 1.1 * k);
       if (B.r === 1 && R === "C") for (const x of [xo + 6, xo + 14]) across(x, hw * 0.86, METAL_L, 1.1);
-      if (X1 === "B") for (let j = 0; j < 4; j++) for (const sg of [-1, 1]) line(Pt(xo + 9 + j * 2 - r, sg * hw * 0.55), Pt(xo + 9.8 + j * 2 - r, sg * hw * 0.98), METAL_L, 1.1 * k);
       // Collars (tungsten, hot or gold as the picks say), at the base positions plus one by the muzzle for longer housings
       const band = (x) => { plate(Pt(xo + x - r, 0), rectPts(1.2, T.w * 0.6), colr, aim, k, 1); line(add(Pt(xo + x - r - 0.5, 0), mul(ox, -T.w * 0.5 * k)), add(Pt(xo + x - r - 0.5, 0), mul(ox, T.w * 0.5 * k)), A(lt(colr, 0.25), 0.7), 0.8 * k); };
       for (const x of [3, 10, 17]) band(x);
@@ -869,30 +867,43 @@ const P2 = {
       if (P4 === "A") plate(Pt(xo + L - 1.2 - r, 0), rectPts(1.4, hw * 0.9), METAL_L, aim, k, 1);
       if (P4 === "C") fill(Pt(xo + L + 0.6 - r, 0), [[3.2, 0], [0, 1.4], [0, -1.4]], mix(METAL_L, col, 0.2), aim, k);
       if (B.r === 2 && R === "B") fill(Pt(xo + L + 0.6 - r, 0), [[2.6, 0], [0, 1], [0, -1]], TUNG, aim, k);
-      if (X1 === "A") for (let j = 0; j < 4; j++) { const sg = j % 2 ? -1 : 1, q = Pt(xo + L - 2.4 + j * 0.6 - r, sg * hw * 0.5); fill(q, [[1, 0], [-0.8, 0.7], [-0.8, -0.7]], METAL_L, aim, k); }
-      if (X1 === "C") { const q = Pt(xo + L - 4 - r, hw * 0.65); disc(q, 0.9 * k, [1, 0.7, 0.2, fmod(t * 3, 1) < 0.6 ? 1 : 0.4]); }
-      if (X2 === "A") fill(Pt(xo + L + 0.4 - r, 0), [[3.6, 0], [0, 0.8], [0, -0.8]], STEEL, aim, k);
-      if (X2 === "B") line(Pt(xo + 2 - r, hw * 0.3), Pt(xo + L - 2 - r, hw * 0.3), STEEL, 1 * k);
-      if (X2 === "C") for (const sg of [-1, 1]) bar(Pt(xo + L - 7 - r, sg * hw * 0.55), Pt(xo + L + 0.4 - r, sg * hw * 0.55), 0.8 * k, METAL_L);
-      if (X3 === "A") for (const x of [xo + L - 5, xo + L - 3]) across(x, hw * 0.7, XM === "A" ? GOLD : col, 1.6);
-      if (X3 === "B") for (const sg of [-1, 1]) { const q = Pt(xo + L - 6 - r, sg * hw * 0.7); bar(q, Pt(xo + L - 1 - r, sg * hw * 0.7), 0.9 * k, METAL_L); if (fmod(t * 4 + sg, 1) < 0.5) glowDot(Pt(xo + L - 1 - r, sg * hw * 0.7), 0.5 * k, col); }
-      if (X4 === "B") { /* vents are the cross slits above */ }
-      if (XM === "A") for (const x of [xo + L - 8, xo + L - 5.5, xo + L - 3]) across(x, hw * 0.7, GOLD, 1.5);
-      if (XM === "B") for (const sg of [-1, 1]) fill(Pt(xo + L - 6 - r, sg * hw * 0.62), [[3, 0], [-3, 0.8 * sg], [-3, 0]], GOLD, aim, k);
       if (SM) ring(Pt(xo + L + 0.4 - r, 0), hw * 0.38 * k, GOLD, 1.1 * k);
+      // Supercapacitors (round 2 ideas): field rings, copper bus bars, a cryo jacket
+      if (S4 === "A") for (const x of [6.5, 13.5, 20.5]) across(xo + x, T.w * 0.56, A(PM ? GOLD : col, 0.3 + 0.7 * ch), 1.1);
+      if (S4 === "B") for (const sg of [-1, 1]) { line(Pt(xo + 0 - r, sg * T.w * 0.58), Pt(xo + L - 6 - r, sg * T.w * 0.58), COPPER, 1.3 * k); for (let j = 0; j < 4; j++) disc(Pt(xo + 2 + j * 5 - r, sg * T.w * 0.58), 0.6 * k, lt(COPPER, 0.25)); }
+      if (S4 === "C") { plate(Pt(xo + 4.5 - r, 0), rectPts(4.5, T.w * 0.6), [0.55, 0.75, 0.9, 1], aim, k, 1); for (let j = 0; j < 5; j++) disc(Pt(xo + 1 + j * 1.8 - r, ((j * 7) % 5 - 2) * T.w * 0.18), 0.45 * k, [0.92, 0.97, 1, 0.9]); }
+      // Rapid Capacitors B: a spine of small capacitor discs along the housing that light in sequence as it charges
+      if (S3 === "B") for (let j = 0; j < 5; j++) { const q = Pt(xo + 2 + j * 3 - r, -T.w * 0.72); disc(q, 1.1 * k, OUTLINE); disc(q, 0.8 * k, ch * 5 > j ? A(PM ? GOLD : col, 0.95) : METAL_D); }
+      // Shatter Rounds (round 2 ideas): resonator fork (A), impact studs (C)
+      if (X1 === "A") { const v = Math.sin(t * 40) * 0.3 * (ch > 0.9 ? 1 : 0); plate(Pt(xo + L + 0.4 - r, 0), rectPts(0.8, 1.6), METAL_L, aim, k, 0.9); for (const sg of [-1, 1]) bar(Pt(xo + L + 1 - r, sg * 1.4), Pt(xo + L + 4.4 - r, sg * (1.9 + v)), 0.8 * k, METAL_L); }
+      if (X1 === "C") for (let j = 0; j < 6; j++) disc(Pt(xo + L - 8 + (j % 3) * 2.2 - r, (j < 3 ? -1 : 1) * T.w * 0.3), 0.7 * k, lt(METAL_L, 0.2));
+      // Penetrator Core (round 2 ideas): drill tip (A), lance prongs (C)
+      if (X2 === "A") { fill(Pt(xo + L + 0.4 - r, 0), [[4.4, 0], [0, 1.5], [0, -1.5]], STEEL, aim, k); for (let j = 0; j < 2; j++) line(Pt(xo + L + 0.8 + j * 1.4 - r, -1.2 + j * 0.5), Pt(xo + L + 1.8 + j * 1.4 - r, 1.2 - j * 0.5), [0, 0, 0, 0.55], 0.7 * k); }
+      if (X2 === "C") { for (const sg of [-1, 1]) line(Pt(xo + L - 5 - r, sg * T.w * 0.5), Pt(xo + L + 3.5 - r, sg * 0.4), METAL_L, 1 * k); line(Pt(xo + L - r, 0), Pt(xo + L + 4.4 - r, 0), STEEL, 0.9 * k); }
+      // Ionised Trail (round 2 ideas): ion fins (A), a plasma tube (B)
+      if (X3 === "A") for (const sg of [-1, 1]) { fill(Pt(xo + L - 7 - r, sg * T.w * 0.5), [[0, 0], [6, 0], [1.8, sg * 2.6]], METAL_D, aim, k); line(Pt(xo + L - 5.2 - r, sg * T.w * 0.5 + sg * 1.4), Pt(xo + L - 1 - r, sg * T.w * 0.5), A(PM ? GOLD : col, 0.5 + 0.4 * Math.sin(t * 5)), 1 * k); }
+      if (X3 === "B") { const a0 = Pt(xo + 2 - r, T.w * 0.62), a1 = Pt(xo + L - 3 - r, T.w * 0.62); bar(a0, a1, 1.8 * k, [0.18, 0.22, 0.22, 1]); for (let j = 0; j < 5; j++) glowDot(lerp(a0, a1, fmod(t * 0.9 + j / 5, 1)), 0.5 * k, PM ? GOLD : col); }
+      // Hot Rail (round 2 ideas): glowing rail edges (A), steam vents (B), a heat-fin block (C)
+      if (X4 === "A") for (const sg of [-1, 1]) { line(Pt(xo - 2 - r, sg * T.w * 0.5), Pt(xo + L - 1 - r, sg * T.w * 0.5), A(ORANGE, 0.25), 3 * k); line(Pt(xo - 2 - r, sg * T.w * 0.5), Pt(xo + L - 1 - r, sg * T.w * 0.5), A(ORANGE, 0.95), 1.2 * k); }
+      if (X4 === "B") for (const x of [7, 14]) { plate(Pt(xo + x - r, 0), rectPts(0.9, 1.1), METAL_D, aim, k, 0.9); for (let j = 0; j < 2; j++) { const v = fmod(t * 0.7 + j * 0.5 + x * 0.1, 1); disc(add(Pt(xo + x - r, 0), [0, -v * 6 * k]), (0.8 + v * 1.4) * k, [0.8, 0.82, 0.84, 0.5 * (1 - v)]); } }
+      if (X4 === "C") { plate(Pt(xo + 10 - r, -T.w * 0.7), rectPts(6, 1.4), METAL_D, aim, k, 1); for (let j = 0; j < 4; j++) line(Pt(xo + 5.4 + j * 2.4 - r, -T.w * 0.7 - 1.1), Pt(xo + 5.4 + j * 2.4 - r, -T.w * 0.7 + 1.1), A(ORANGE, 0.95), 1 * k); }
+      // Ion Cannon (round 2 ideas): a gold spine (B), a gold emitter funnel (C); the gold lens ring (A) is on the mouth below
+      if (XM === "B") { plate(Pt(xo + L - 8 - r, -T.w * 0.12), rectPts(6, 0.8), GOLD, aim, k, 0.9); for (let j = 0; j < 4; j++) line(Pt(xo + L - 12 + j * 2.4 - r, -T.w * 0.12 - 0.8), Pt(xo + L - 12 + j * 2.4 - r, -T.w * 0.12 + 0.8), [0, 0, 0, 0.5], 0.7 * k); }
+      if (XM === "C") fill(Pt(xo + L - 2.6 - r, 0), [[0, T.w * -0.34], [2.6, T.w * -0.52], [2.6, T.w * 0.52], [0, T.w * 0.34]], GOLD, aim, k);
       // The mouth: no bigger than the housing
       // The open mouth: a lip ring squashed along the aim, the dark bore inside, and the charge glow (never wider than the housing)
       { const mp = Pt(xo + L - r, 0), ry = T.w * 0.5 * k * (S2 === "A" ? 0.7 : 1), mc = PM ? GOLD : col, f = i === last ? fl : 0;
         oval(mp, ry * 0.5, ry * 1.04, aim, lt(METAL_L, 0.08), 1.2); oval(add(mp, mul(fa(aim), 0.5 * k)), ry * 0.36, ry * 0.76, aim, BORE);
         oval(add(mp, mul(fa(aim), 0.8 * k)), ry * 0.22, ry * 0.5, aim, A(mc, 0.3 + 0.7 * Math.max(ch * 0.4, f)));
+        if (XM === "A") { oval(add(mp, mul(fa(aim), 0.2 * k)), ry * 0.62, ry * 1.06, aim, GOLD, 1.8); oval(add(mp, mul(fa(aim), 0.6 * k)), ry * 0.36, ry * 0.76, aim, BORE); oval(add(mp, mul(fa(aim), 0.9 * k)), ry * 0.22, ry * 0.5, aim, A(mc, 0.3 + 0.7 * Math.max(ch * 0.4, f))); }
         if (f > 0) glowDot(add(mp, mul(fa(aim), 1.5 * k)), (1.2 + 5 * f) * k, A(mc, f)); } }
+    if (T.clamps) for (const x of [3, 10, 17]) plate(P(c, aim, k, x, 0), rectPts(1.2, 3.5 + T.w * 0.62), colr, aim, k, 1);
     // -- Capacitor drum(s): above the housing, with the charge ring ----------------------------------------------------
-    const big = false, two = S3 === "A", rd = two ? (big ? 5.4 : 4.4) : big ? 7.6 : 6.5, dpos = two ? [[-8, -5.6], [-8, 5.6]] : [[-8, 0]];
+    const big = false, two = false, rd = two ? (big ? 5.4 : 4.4) : big ? 7.6 : 6.5, dpos = two ? [[-8, -5.6], [-8, 5.6]] : [[-8, 0]];
     for (const [dx, dy] of dpos) { const dr = P(c, aim, k, dx, dy); orb(dr, rd * k, METAL_L); ring(dr, rd * 0.68 * k, METAL_D, 1.6 * k);
-      arc(dr, rd * 0.68 * k, -Math.PI / 2, -Math.PI / 2 + TAU * ch, A(PM === "B" || SM ? GOLD : col, 0.95), 1.4 * k);
-      if (P4 === "B") arc(dr, rd * 0.9 * k, -Math.PI / 2, -Math.PI / 2 + TAU * ch, A(col, 0.8), 1 * k);
-      if (S3 === "B") for (let j = 0; j < 8; j++) { const a = j * TAU / 8; line(add(dr, mul(fa(a), rd * 0.95 * k)), add(dr, mul(fa(a), (rd + 1.8) * k)), METAL_L, 1 * k); }
-      if (PM === "B") ring(dr, rd * 0.95 * k, GOLD, 1.2 * k);
+      arc(dr, rd * 0.68 * k, -Math.PI / 2, -Math.PI / 2 + TAU * ch, A(PM || SM ? GOLD : col, 0.95), 1.4 * k); // Kingslayer: the charge-up arc goes gold (owner's note), not the whole drum
+      if (P4 === "B") arc(dr, rd * 0.9 * k, -Math.PI / 2, -Math.PI / 2 + TAU * ch, A(PM ? GOLD : col, 0.8), 1 * k);
+      if (S3 === "A") { for (let j = 0; j < 8; j++) { const a = j * TAU / 8; line(add(dr, mul(fa(a), rd * 0.9 * k)), add(dr, mul(fa(a), (rd + 1.6) * k)), METAL_L, 1 * k); } ring(dr, (rd + 1.5) * k, A(col, 0.3 + 0.7 * ch), 1.1 * k); }
       if (SM === "C") for (let j = 0; j < 3; j++) disc(add(dr, mul(fa(j * TAU / 3 + t * 0.4), rd * 0.34 * k)), 0.6 * k, GOLD);
       if (B.r === 0 && R === "B") for (let j = 0; j < 10; j++) { const a = j * TAU / 10; line(add(dr, mul(fa(a), (rd - 0.4) * k)), add(dr, mul(fa(a + 0.5), (rd + 0.8) * k)), mix(COPPER, col, ch), 1 * k); }
       glowDot(dr, 1.4 * k, col); }
@@ -927,47 +938,47 @@ P2.paths = [
   ] },
   { name: "Range/Speed", theme: "mostly faster recharge", steps: [
     { name: "Fast Capacitors", cost: 140, effect: "Recharge 2.2 s", options: [
-      { key: "A", name: "Charge Relay", desc: "A copper relay box on the deck with a cable to the drum; a pulse runs along the cable and brightens as it charges." },
-      { key: "B", name: "Flywheel", desc: "A flywheel on the deck that spins faster and faster as it charges." },
-      { key: "C", name: "Ready Beacon", desc: "A small beacon mast on the deck: dim while it charges, a bright green pulse when it's ready to fire." } ] },
+      { key: "A", name: "Coolant Loop", desc: "A small coolant tank on the deck with a pipe to the drum; blue coolant beads flow along it faster as it charges." },
+      { key: "B", name: "Spark Gap", desc: "Two electrodes on the deck with a spark that jumps between them, quicker and brighter as it charges." },
+      { key: "C", name: "Cable Reel", desc: "A cable reel on the deck, spinning faster as it charges, with its cable running to the drum." } ] },
     { name: "Extended Rails", cost: 245, effect: "+40 range (420)", options: [
       { key: "A", name: "Telescoping Barrel", desc: "A narrower inner tube slides out of the housing's end, with a step ring at the joint; the mouth is on the narrower tube." },
       { key: "B", name: "Rangefinder", desc: "A rangefinder box with twin lenses and scale ticks on the housing's side (one red, one charge-coloured)." },
       { key: "C", name: "Guide Rails", desc: "Two slim guide rails alongside the housing with cross-struts, running on a little past the mouth." } ] },
     { name: "Rapid Capacitors", cost: 1930, effect: "Recharge 1.6 s (primary)", options: [
-      { key: "A", name: "Twin Drums", desc: "Two smaller capacitor drums swap the single drum." },
-      { key: "B", name: "Cooling Fins", desc: "Cooling fins ring the drum." },
-      { key: "C", name: "Capacitor Stack", desc: "A stack of capacitor cans on the deck that glow as it charges." } ] },
+      { key: "A", name: "Drum Cage", desc: "A cage of struts and a glowing outer ring round the capacitor drum that brightens as it charges." },
+      { key: "B", name: "Capacitor Spine", desc: "A spine of five small capacitor discs along the housing that light one after another as it charges." },
+      { key: "C", name: "Charge Reservoir", desc: "A tall reservoir on the deck whose glowing level climbs as it charges." } ] },
     { name: "Supercapacitors", cost: 2610, effect: "Recharge 1.35 s", options: [
-      { key: "A", name: "Copper Windings", desc: "Copper winding bands along the housing." },
-      { key: "B", name: "Heat Pipes", desc: "Heat pipes run the length of the housing." },
-      { key: "C", name: "Ceramic Bank", desc: "A ceramic capacitor bank on the deck." } ] },
+      { key: "A", name: "Field Rings", desc: "Thin glowing field rings between the collars that brighten as it charges." },
+      { key: "B", name: "Bus Bars", desc: "Copper bus bars with bolts along both sides of the housing." },
+      { key: "C", name: "Cryo Jacket", desc: "A frosted pale-blue jacket round the back of the housing, flecked with frost." } ] },
     { name: "Twin Rails", cost: 5000, effect: "Two rails firing in turn: a slug every 1.2 s (mastery)", options: [
-      { key: "A", name: "Parallel Rails", desc: "Two housings side by side, each with every detail, firing in turn; gold rings at the muzzles." },
+      { key: "A", name: "Parallel Rails", desc: "Two housings running directly side by side, joined by clamps at the collars, each with every detail, firing in turn; gold rings at the muzzles." },
       { key: "B", name: "Staggered Pair", desc: "Two housings, one forward and one back; gold rings at the muzzles." },
       { key: "C", name: "Split Rails", desc: "Two slim housings set wide apart with copper windings between; gold rings." } ] },
   ] },
   { name: "Special Effects", theme: "armour shatter, less falloff, an ionised trail", steps: [
     { name: "Shatter Rounds", cost: 60, effect: "Each hit strips 2 armour permanently", options: [
-      { key: "A", name: "Cracker Teeth", desc: "Serrated teeth at the muzzle; hits crack orange." },
-      { key: "B", name: "Spike Collar", desc: "A spiked ring round the housing; hits crack." },
-      { key: "C", name: "Crack Lamp", desc: "An amber lamp by the muzzle; hits crack orange." } ] },
+      { key: "A", name: "Resonator Fork", desc: "A two-pronged fork just past the mouth that buzzes when the shot is charged; hits crack orange." },
+      { key: "B", name: "Etching Tank", desc: "An acid-green etching tank on the deck with a hose to the housing; hits crack orange." },
+      { key: "C", name: "Impact Studs", desc: "Two rows of steel studs on the front of the housing; hits crack orange." } ] },
     { name: "Penetrator Core", cost: 260, effect: "Falloff per enemy 40% to 25%", options: [
-      { key: "A", name: "Needle Nose", desc: "A steel needle on the muzzle; the hit flashes shrink more slowly down the line." },
-      { key: "B", name: "Core Rod", desc: "A thin core rod along the housing." },
-      { key: "C", name: "Piercing Cage", desc: "Cage bars round the muzzle." } ] },
+      { key: "A", name: "Drill Tip", desc: "A steel drill cone with cut grooves on the mouth." },
+      { key: "B", name: "Core Magazine", desc: "A rack of long, slim penetrator cores on the deck." },
+      { key: "C", name: "Lance Prongs", desc: "Three slim prongs converging ahead of the mouth into a needle." } ] },
     { name: "Ionised Trail", cost: 1535, effect: "The line burns for 2 s: 30 energy damage/s to every enemy on it (primary)", options: [
-      { key: "A", name: "Ion Rings", desc: "Two glowing rings at the muzzle; the line lingers and crackles with ion arcs." },
-      { key: "B", name: "Emitter Rods", desc: "Two emitter rods either side of the muzzle that spark; the line lingers and crackles." },
-      { key: "C", name: "Ion Tank", desc: "An ion tank on the deck with a hose to the housing; the line lingers and crackles." } ] },
+      { key: "A", name: "Ion Fins", desc: "Two angled fins either side of the front of the housing with glowing edges; the line lingers and crackles." },
+      { key: "B", name: "Plasma Tube", desc: "A dark glass tube along the housing's side with glowing plasma flowing forward; the line lingers and crackles." },
+      { key: "C", name: "Ion Grid", desc: "A glowing grid panel on the deck; the line lingers and crackles." } ] },
     { name: "Hot Rail", cost: 3685, effect: "Shatter 4 armour; trail 45/s; falloff 15%", options: [
-      { key: "A", name: "Hot Collars", desc: "The collars glow orange-hot." },
-      { key: "B", name: "Heat Vents", desc: "Orange vent slits along the housing." },
-      { key: "C", name: "Radiator", desc: "A glowing radiator on the deck." } ] },
+      { key: "A", name: "Glowing Rail Edges", desc: "The housing's side edges glow orange-hot." },
+      { key: "B", name: "Steam Vents", desc: "Two short vent pipes on the housing that puff steam." },
+      { key: "C", name: "Heat-Fin Block", desc: "A fin block alongside the housing with glowing orange fins." } ] },
     { name: "Ion Cannon", cost: 6920, effect: "Shatter 6; trail 50/s; no falloff (mastery)", options: [
-      { key: "A", name: "Gold Ion Rings", desc: "Three gold rings at the muzzle; every hit flashes at full size down the line, gold." },
-      { key: "B", name: "Gold Emitter Fins", desc: "Gold emitter fins either side of the muzzle; gold full-size hits." },
-      { key: "C", name: "Gold Capacitor Crown", desc: "Gold prongs round the muzzle; gold full-size hits." } ] },
+      { key: "A", name: "Gold Lens Ring", desc: "A gold lens ring round the mouth; gold shot, every hit flashes at full size down the line." },
+      { key: "B", name: "Gold Spine", desc: "A gold dorsal spine along the housing; gold shot, full-size hits." },
+      { key: "C", name: "Gold Emitter Funnel", desc: "A flared gold emitter funnel behind the mouth; gold shot, full-size hits." } ] },
   ] },
 ];
 P2.retrofits = [
@@ -985,6 +996,14 @@ P2.retrofits = [
     { key: "C", name: "Tip Rack", desc: "A rack of pointed dark slugs on the deck; the slug head is dark and pointed." } ] },
 ];
 P2.picks = {};
+
+// ---- Round 2 (owner's picks and notes, 2026-10-18): picked stages show only the pick (re-described where a note changed
+// it); stages the owner asked for more ideas on show three new options.
+P2.intro = "Round 2: your picks drawn as one model with your notes applied: Kingslayer now turns only the charge-up arc and the centreline gold (not the drum), and the parallel Twin Rails run directly side by side, joined by clamps. New ideas for Fast Capacitors, Rapid Capacitors, Supercapacitors and every Special Effects tier; Longer Rails keeps its three options. Use the build preview to check combinations.";
+P2.picks = { p0s0: "C", p0s1: "B", p0s2: "C", p0s3: "B", p0s4: "B", p1s1: "A", p1s4: "A", r0: "A", r2: "A" };
+P2.paths.forEach((pa, pi) => pa.steps.forEach((st, k) => { const pk = P2.picks["p" + pi + "s" + k]; if (pk) st.options = st.options.filter((o) => o.key === pk); }));
+P2.retrofits.forEach((rf, ri) => { const pk = P2.picks["r" + ri]; if (pk) rf.options = rf.options.filter((o) => o.key === pk); });
+P2.paths[0].steps[4].options[0].desc = "From your note: only the charge-up arc and the green centreline turn gold, not the whole drum; a gold shot with gold hit flashes.";
 
 // ---- Tower art engine: previews towers aiming and firing at enemies on a lane --------------------------
 // Data (defined before this): PAGE {title, key, store}, TOWERS [...], DEFAULTS {id: {look, anim}}.
