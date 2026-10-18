@@ -703,6 +703,13 @@ M C Gold Emitter Funnel; the other picks are unchanged. No notes.
 
 **Round 4:** every stage is picked; the page shows only the picks.
 
+**Charge sync fix (owner: "make sure the charge circle fills in sync with the fire rate"):** the charge arc (and everything
+else that charges) used the engine's `fx.barrelSince`, which drops back to "never fired" once a shot's flight is over
+(flight + 0.6 s), so on slow recharges the arc jumped to full early and sat there. The model now reads the engine's own
+fire clock, so the arc starts empty at each shot and is full exactly when the next shot fires (checked at five recharge
+rates, from 1.2 s to 2.7 s, with no drops). The same stale shot count affected the Artillery Cannon's Shell Magazine
+counter lamps; that is fixed too.
+
 ## Open questions
 
 1. **Second pass, Railgun** (tower 7, round 4): confirm (and say if the larger drum should apply to every build, not just the twin). Then towers 8-20 (next: Tesla Tower).

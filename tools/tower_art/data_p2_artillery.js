@@ -83,7 +83,8 @@ const P2 = {
   muzzleAt(B, m, kk, c, aim, s, info) { return P(c, aim, G(s), lenFor(B), 0); },
   model(c, aim, s, fx, t, col, info, B) {
     const k = G(s), since = fx.barrelSince ?? 9, rc = decay(since, 0.4), fl = decay(since, 0.18), r = rc * 3.5, S = (x, y) => P(c, 0, k, x, y);
-    const body = bodyCol(B), shots = fx.shots || 0, ty = typesOf(B)[Math.floor(Math.max(0, shots - 1) / perBarrage(B)) % typesOf(B).length];
+    const V = info && info.view, shots = V && typeof V.n === "number" ? V.n : fx.shots || 0; // the engine's shot count (fx.shots drops back to 0 once a shot's flight is over)
+    const body = bodyCol(B), ty = typesOf(B)[Math.floor(Math.max(0, shots - 1) / perBarrage(B)) % typesOf(B).length];
     deck(c, k, col, t);
     // -- Fixed deck kit (never turns) ------------------------------------------------------------------------------
     const heavyNext = B.r === 0 && shots % 3 === 2;

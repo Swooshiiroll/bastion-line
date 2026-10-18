@@ -839,7 +839,8 @@ const P2 = {
   muzzleAt(B, m, kk, c, aim, s, info) { return P(c, aim, G(s), lenFor(B), 0); },
   model(c, aim, s, fx, t, col, info, B) {
     const k = G(s), since = fx.barrelSince ?? 9, rc = decay(since, 0.4), fl = decay(since, 0.18), r = rc * 3.5, S = (x, y) => P(c, 0, k, x, y);
-    const body = bodyCol(B), shots = fx.shots || 0, ty = typesOf(B)[Math.floor(Math.max(0, shots - 1) / perBarrage(B)) % typesOf(B).length];
+    const V = info && info.view, shots = V && typeof V.n === "number" ? V.n : fx.shots || 0; // the engine's shot count (fx.shots drops back to 0 once a shot's flight is over)
+    const body = bodyCol(B), ty = typesOf(B)[Math.floor(Math.max(0, shots - 1) / perBarrage(B)) % typesOf(B).length];
     deck(c, k, col, t);
     // -- Fixed deck kit (never turns) ------------------------------------------------------------------------------
     const heavyNext = B.r === 0 && shots % 3 === 2;
@@ -1268,7 +1269,7 @@ function compose(layers) {
   if (P2.muzzleAt) look.muzzleAt = (m, k, c, aim, s, info) => P2.muzzleAt(B, m, k, c, aim, s, info);
   const b = BASE_ANIM, every = crit > 0 ? Math.max(2, Math.round(1 / crit)) : 0;
   const anim = { ...b, key: b.key + targets, burst: (b.burst || 1) * targets, multi: targets > 1 || b.multi, gap: targets > 1 ? 0.02 : b.gap,
-    ...(md && md.period ? { period: md.period } : {}), ...(md && md.burst ? { burst: md.burst, gap: md.gap ?? b.gap, multi: md.multi ?? false } : {}),
+    ...(md && md.period ? { period: md.period } : {}), ...(md && md.flight ? { flight: md.flight } : {}), ...(md && md.burst ? { burst: md.burst, gap: md.gap ?? b.gap, multi: md.multi ?? false } : {}),
     shot: (f, to, u, s, col, k, t, info) => { (shot || b.shot)(f, to, u, s, col, k, t, info); for (const L of layers) if (L.shotFx) L.shotFx(f, to, u, s, col, k, t, info); if (md && md.shotFx) md.shotFx(f, to, u, s, col, k, t, info); },
     impact: (to, v, s, col, info) => { if (md && md.impact) md.impact(to, v, s, col, info); else if (b.impact) b.impact(to, v, s, col, info); for (const L of layers) if (L.impactFx) L.impactFx(to, v, s, col, info);
       if (md && md.impactFx) md.impactFx(to, v, s, col, info);

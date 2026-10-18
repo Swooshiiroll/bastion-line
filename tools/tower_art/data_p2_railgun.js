@@ -54,7 +54,11 @@ const P2 = {
       shot: (f, to, u, s, col, kk, t, info) => railShot(f, to, u, s, col, B, info) }; },
   muzzleAt(B, m, kk, c, aim, s, info) { const T = railsOf(B), k = G(s), i = m % T.pos.length, [x, y] = T.pos[i]; return P(c, aim, k, x + lenOf(B) + 2, y); },
   model(c, aim, s, fx, t, col, info, B) {
-    const k = G(s), T = railsOf(B), n = T.pos.length, L = lenOf(B), since = fx.barrelSince ?? 9, per = periodOf(B), ch = Math.min(1, since / (per * 0.92)), fl = decay(since, 0.15), shots = fx.shots || 0;
+    const k = G(s), T = railsOf(B), n = T.pos.length, L = lenOf(B), per = periodOf(B),
+      // Timing comes from the engine's own fire clock (view.last, view.n), not fx.barrelSince/fx.shots: those are dropped once a
+      // shot's flight is over, which made the charge jump to full early on slow recharges. The charge fills in exactly one recharge.
+      V = info && info.view, live = V && typeof V.last === "number" && typeof info.t === "number", since = live ? Math.max(0, info.t - V.last) : fx.barrelSince ?? 9,
+      shots = live && typeof V.n === "number" ? V.n : fx.shots || 0, ch = Math.min(1, since / per), fl = decay(since, 0.15);
     const S = (x, y) => P(c, 0, k, x, y), last = (shots - 1 + n * 1000) % n;
     const P1 = Kp(B, 0, 0), P2 = Kp(B, 0, 1), P3 = Kp(B, 0, 2), P4 = Kp(B, 0, 3), PM = Kp(B, 0, 4), S1 = Kp(B, 1, 0), S2 = Kp(B, 1, 1), S3 = Kp(B, 1, 2), S4 = Kp(B, 1, 3), SM = Kp(B, 1, 4);
     const X1 = Kp(B, 2, 0), X2 = Kp(B, 2, 1), X3 = Kp(B, 2, 2), X4 = Kp(B, 2, 3), XM = Kp(B, 2, 4), R = B.r >= 0 ? B.key("r" + B.r) : null;
