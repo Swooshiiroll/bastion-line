@@ -388,7 +388,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 13 | Boost Tower | `design/tower_art_p2_13_boost.html` | **Confirmed** (owner, 2026-10-19: "finished") |
-| 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | Round 1: pick one option per stage and Retrofit |
+| 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | Round 2: Path 3 redesigned, Signal Processor options again; awaiting picks |
 
 ### Gun Turret (second pass)
 
@@ -1062,6 +1062,10 @@ Base: look A Dish Mast, animation B Sweep Beam (the sweep follows the dish). Eve
 - **Carpet-rule overlaps (kept, stacking):** Bigger Dish's +20 px stacks with the path-1 range steps; the Signal Processor's 1.5 s reveal stacks with the path-2 and path-3 reveal steps.
 - The radiation circle only hurts revealed enemies (owner); in the preview a revealed or uncloaked enemy inside it glows red.
 
+**Picks (owner, round 1):** Path 1: 1 A Solid Dish, 2 C Tiered Tower, 3 C Twin Prong Emitter, 4 B Capacitor Bank, M B Twin Gold Dish. Path 2: 1-4 B Curved Array, M A Gold Cable Ring. Path 3: none picked. Retrofits: Bigger Dish C Sub-Reflector, Signal Processor none, Early Warning B Lookout Tower.
+**Note (owner):** "Give some more redesign ideas rather than trickle additions" (Path 3).
+**Round 2:** Path 3 is redesigned: instead of a new cabinet per step, all four corner stations are rebuilt to a new design at every step (racks/consoles/posts, then decoder towers/dish pods/yagi masts, then tracking turrets/radar domes/eye pylons, then prism arrays/lens rings/filter gates, then gold citadels/lighthouses/obelisks). The mark on a revealed enemy now changes style per step (brackets and rank tag, diamond, lock ring and tether, hex frame and check badge, gold lock rings) rather than gaining extras. The Signal Processor shows its three options again.
+
 ## Open questions
 
-1. **Second pass, Radar Tower** (tower 14, round 1): pick one option per stage and Retrofit. Then towers 15-20 (next: Cryo Tower).
+1. **Second pass, Radar Tower** (tower 14, round 2): pick Path 3 and the Signal Processor. Then towers 15-20 (next: Cryo Tower).
