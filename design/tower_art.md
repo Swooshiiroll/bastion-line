@@ -386,6 +386,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 9 | Drone Bay | `design/tower_art_p2_09_drones.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 10 | CAS Gunship | `design/tower_art_p2_10_cas.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
+| 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | Round 1: three options per stage; awaiting picks |
 
 ### Gun Turret (second pass)
 
@@ -970,6 +971,21 @@ size bigger. Wider Charge is back to your wide flange (B), shown only on the thr
 **Picks (owner, round 8):** Heavier Charge A (Thick Rim); the rest as before (Power 2 B Wide Flange, 3 A, 4 A, M A; Production C, A, A, A, A; Range A, A, B, A, C;
 Retrofits Adhesive Mines A, Shaped Charges A, Long Arm A). No notes. **Round 9:** every stage is picked; the page shows only the picks.
 
+### Chemical Plant (second pass)
+
+**Retrofits kept, stats stacking (the carpet rule).** All three overlap a path step; Claude flagged them and kept them:
+- Pressure Pump (a spray every 1.33 s, +20 range) overlaps the Speed path's spray rate (Quick Valve 1.25 s onward); the look takes a further 0.17 s off the gap.
+- Mist Nozzle (each spray also soaks one more enemy beside the target) overlaps the Twin Nozzles mastery (two enemies at once); the extra enemy is misted too.
+- Bigger Tanks (soaks last 5 s) = Speed step 2, Long-Lasting Mix (5 s); the look adds one second on top.
+
+**Round 1 (Claude):** one parametric model (base look F Distillery Columns, animation A Acid Stream).
+- **Damage/Armor stripping:** the spray itself changes at every step (bigger drops, a yellower mix, a brighter mix, a dark bubbling mix, gold at the
+  Dissolver) and a soaked enemy sheds flakes of armour and fizzes more; the columns and the deck gain the matching parts.
+- **Speed:** valves, pumps and gauges on the still and nozzle pipe; the Twin Nozzles mastery adds a second gold nozzle that sprays two enemies at once
+  (three ways: parallel, fanned or forked).
+- **Slowing:** a gel coat on soaked enemies that gets thicker and drippier with each step; gel pipes, pumps, tanks and, at the mastery, gold foam gear.
+- The plant sprays one unsoaked enemy at a time and the soak lasts 4 s growing to 8 s with the Speed path and Bigger Tanks.
+
 ## Open questions
 
-1. **Second pass, Chemical Plant** (tower 12): round 1 page being built. Then towers 13-20.
+1. **Second pass, Chemical Plant** (tower 12, round 1): pick one option per stage and Retrofit. Then towers 13-20 (next: Boost Tower).
