@@ -389,7 +389,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 13 | Boost Tower | `design/tower_art_p2_13_boost.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | **Confirmed** (owner, 2026-10-19: "finished") |
-| 15 | Cryo Tower | `design/tower_art_p2_15_cryo.html` | Round 5: central light gold, Deep Cold new ideas; awaiting the Deep Cold pick |
+| 15 | Cryo Tower | `design/tower_art_p2_15_cryo.html` | **Confirmed** (owner, 2026-10-19: "Finished"; Deep Cold C Frost Collar) |
 
 ### Gun Turret (second pass)
 
