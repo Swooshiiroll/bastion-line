@@ -390,7 +390,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 13 | Boost Tower | `design/tower_art_p2_13_boost.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 15 | Cryo Tower | `design/tower_art_p2_15_cryo.html` | **Confirmed** (owner, 2026-10-19: "Finished"; Deep Cold C Frost Collar) |
-| 16 | Shockwave Generator | `design/tower_art_p2_16_shock.html` | Round 3: Path 3 new direction; awaiting Path 3 picks |
+| 16 | Shockwave Generator | `design/tower_art_p2_16_shock.html` | Round 4: five new Path 3 directions, bigger cloud; awaiting Path 3 picks |
 
 ### Gun Turret (second pass)
 
@@ -1131,6 +1131,9 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
 **Picks (owner, round 2):** Path 1: 1 A, 2 B, 3 B, 4 C, M C. Path 2: every step and the mastery C (Turbine Ring). Path 3: none. Retrofits: Wave Focus C Focus Collar, Containment Coils C Toroid Coils, Reactor Venting C. **Notes:** "Move all paths the gyro rings" (Path 1); "Move a completely different design direction. modify the tower" (Path 3); "Increase the force of the smoke releasing and give the particles a lifetime, rather than tying them to the animation cycle".
 **Round 3:** Path 1 uses the gyro rings at every step (my reading of the unclear Path 1 note; to be confirmed by the owner). Path 2 is the Turbine Ring throughout. Path 3 is a new direction that modifies the tower itself: a violet cage (posts and bars, then bracing, humming strings and corner breaker wedges), a shield dome (ribs, a pulsing ring, fracture lines) or a halo of prism spikes (more and longer at each step), built round the ring; gold at the mastery. The Reactor Venting smoke is a real particle system in the agent: 9 puffs per corner per burst, thrown out hard and slowing with drag, each living 2.4 to 3.6 s on its own clock.
 
+**Picks (owner, round 3):** Path 1 all C (gyro rings; confirms the round 3 reading), Path 2 all C, Path 3 none, Retrofits all C. **Notes:** "Make each upgrade make a bigger cloud bellow. Give it lifetime instead of tying it to the animation" (Path 1); "Nope, different ideas. Give me more selections to choose from as well" (Path 3); "Make the smoke puff out farther" (Reactor Venting).
+**Round 4:** the mushroom cloud is now a particle system with its own lifetimes (2.4 to 3.6 s per puff, a hot start fading to smoke grey) and it grows with every Power step (8 + 4 per step puffs, 28% bigger per step). The Reactor Venting smoke is thrown about twice as far. Path 3 shows five all-new directions (five options per step instead of three): heavy hammers on arms that strike the ring, sonic horns that push out sound arcs, a fractured ring with glowing cracks, a starburst of tuning rods, and a turning prism lens over the core. Each grows at every step and is gold at the mastery.
+
 ## Open questions
 
-1. **Second pass, Shockwave Generator** (tower 16, round 3): pick Path 3 and confirm the Path 1 reading. Then towers 17-20 (next: Scrapyard).
+1. **Second pass, Shockwave Generator** (tower 16, round 4): pick Path 3 (five options per step). Then towers 17-20 (next: Scrapyard).
