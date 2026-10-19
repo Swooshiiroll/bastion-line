@@ -386,7 +386,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 9 | Drone Bay | `design/tower_art_p2_09_drones.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 10 | CAS Gunship | `design/tower_art_p2_10_cas.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
-| 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | Round 4: all picks drawn, twin-sprayer fix; awaiting confirm |
+| 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | Round 5: notes applied; awaiting confirm |
 
 ### Gun Turret (second pass)
 
@@ -1016,6 +1016,15 @@ changes apply to all columns." "Change the pump house design."
 - With Twin Valves B (twin stills) the two independent sprayers grow from the two stills, one each (a gold ring marks each), instead of from hubs between them, so
   nothing fights the stills. The Pump Hall (High-Flow Pump A) becomes the base plate under both stills with a piston for each.
 
+**Notes (owner, round 4 paste):** "No change is visible on T2. Each nozzle for the Twin Nozzles should sit on a stationary still." "Change or reduce the effect of T2. Cooling ring should
+sit under the nozzle and silos." "The mist nozzle design is too crude."
+- **Speed T2 (Long-Lasting Mix, Ring Main):** the ring main was hidden behind the columns; it is now a visible ring just outside them with a spoke from every column and
+  bolts (the gel ring main sits just inside it).
+- **Twin Nozzles:** each sprayer sits on a stationary still; the twin stills (and the Pump Hall under them) no longer turn with the aim, only the sprayers turn on top.
+- **Slowing T2 (Thick Gel):** reduced to a thin, pale gel coat on the columns (it was a thick bright ring).
+- **Slowing T4 (Cooling Coil):** drawn under the columns and silos and under the nozzle, not over them.
+- **Mist Nozzle (Fan Head):** redesigned as a flared, ribbed metal head with a perforated face and a fine mist plume when it sprays (it was a flat triangle).
+
 ## Open questions
 
-1. **Second pass, Chemical Plant** (tower 12, round 4): confirm. Then towers 13-20 (next: Boost Tower).
+1. **Second pass, Chemical Plant** (tower 12, round 5): confirm. Then towers 13-20 (next: Boost Tower).
