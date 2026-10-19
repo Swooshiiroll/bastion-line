@@ -388,7 +388,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 13 | Boost Tower | `design/tower_art_p2_13_boost.html` | **Confirmed** (owner, 2026-10-19: "finished") |
-| 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | Round 7: all picks drawn with notes applied; awaiting confirm |
+| 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | Round 8: all picks drawn, spars and antennae grey; awaiting confirm |
 
 ### Gun Turret (second pass)
 
@@ -1078,6 +1078,8 @@ Base: look A Dish Mast, animation B Sweep Beam (the sweep follows the dish). Eve
 **Picks (owner, round 6):** Path 1 mastery A Horn Ring; Path 3 mastery B Gold Lamp (all other picks unchanged).
 **Round 7 (owner notes):** Path 2 mastery: the ring is grey; both dishes and the emitter are gold; both dishes have a scan line; the array bodies are grey with gold lights. Path 3: "remove the light cones from the trackers": the turret-to-enemy lines and the lamp beam are gone, and the Gold Lamp is now a pulsing gold lamp on each turret. Every stage is picked; the page shows only the picks.
 
+**Round 8 (owner notes):** "Keep the spars holding the dishes, and the antennae grey. The bodies for the curved arrays are still gold. The second antenna light is not gold". The spars and the antenna (feed) arms are grey on both dishes (only the dishes are gold); the curved arrays now show small gold lamps on a grey body (the big lamp halos read as a gold body); the second dish's light is drawn on top of everything, in gold.
+
 ## Open questions
 
-1. **Second pass, Radar Tower** (tower 14, round 7): confirm. Then towers 15-20 (next: Cryo Tower).
+1. **Second pass, Radar Tower** (tower 14, round 8): confirm. Then towers 15-20 (next: Cryo Tower).
