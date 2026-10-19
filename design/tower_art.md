@@ -386,7 +386,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 9 | Drone Bay | `design/tower_art_p2_09_drones.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 10 | CAS Gunship | `design/tower_art_p2_10_cas.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
-| 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | Round 7: mist heads on the sprayers, rounder stills; awaiting confirm |
+| 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 
 ### Gun Turret (second pass)
 
@@ -1036,4 +1036,4 @@ something else by "tower frame" (the columns, say), tell me.
 
 ## Open questions
 
-1. **Second pass, Chemical Plant** (tower 12, round 7): confirm. Then towers 13-20 (next: Boost Tower).
+1. **Second pass, Boost Tower** (tower 13): round 1 page being built. Then towers 14-20.
