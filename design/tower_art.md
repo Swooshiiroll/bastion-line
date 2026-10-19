@@ -386,7 +386,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 9 | Drone Bay | `design/tower_art_p2_09_drones.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 10 | CAS Gunship | `design/tower_art_p2_10_cas.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
-| 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | Round 5: notes applied; awaiting confirm |
+| 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | Round 6: ring pipe under the frame; awaiting confirm |
 
 ### Gun Turret (second pass)
 
@@ -1025,6 +1025,10 @@ sit under the nozzle and silos." "The mist nozzle design is too crude."
 - **Slowing T4 (Cooling Coil):** drawn under the columns and silos and under the nozzle, not over them.
 - **Mist Nozzle (Fan Head):** redesigned as a flared, ribbed metal head with a perforated face and a fine mist plume when it sprays (it was a flat triangle).
 
+**Note (owner, round 5 paste):** "drop the ring pipe below the tower frame." I read this as layering: the ring pipes (the Speed ring main, the gel ring main) were
+lying over the deck's armoured frame at the flats, so the frame (its band, trim and corner bolts) is now drawn over them and the pipes run under it. If you meant
+something else by "tower frame" (the columns, say), tell me.
+
 ## Open questions
 
-1. **Second pass, Chemical Plant** (tower 12, round 5): confirm. Then towers 13-20 (next: Boost Tower).
+1. **Second pass, Chemical Plant** (tower 12, round 6): confirm. Then towers 13-20 (next: Boost Tower).
