@@ -391,7 +391,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 15 | Cryo Tower | `design/tower_art_p2_15_cryo.html` | **Confirmed** (owner, 2026-10-19: "Finished"; Deep Cold C Frost Collar) |
 | 16 | Shockwave Generator | `design/tower_art_p2_16_shock.html` | **Confirmed** (owner, 2026-10-19: "Finished") |
-| 17 | Scrapyard | `design/tower_art_p17_scrapyard.html` | **Restarted:** base look being redone; pick one of three new looks and an animation |
+| 17 | Scrapyard | `design/tower_art_p2_17_scrap.html` | Base **confirmed** (owner, 2026-10-19: A Armoured Vault Depot, B Sparks and Sale; base page `design/tower_art_p17_scrapyard.html`). Second pass round 1: pick one option per stage and Retrofit |
 
 ### Gun Turret (second pass)
 
@@ -1159,8 +1159,17 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
 - **C. Smeltworks:** one big smelter with a glowing crucible mouth and a smoking chimney; a ladle arm swings out and pours into a stack of gold ingots at each payout; nothing else.
 - **Animations (pick one):** Round Payout (a coin spray with a floating +100), Sparks and Sale (ambient sparks, a credit-stack flash at the payout), Wreck Collector (also shows the kill bonus: a wrecked enemy's scrap flies into the yard as a coin).
 
-**Then (after the owner confirms a look):** the second pass for the Scrapyard on top of it, with all the earlier rules (structure over decoration, options swap parts, masteries gold, the carpet rule: the Second Crusher's +30 income stacks with the Passive Income steps and the Bigger Yard's +30 px stacks with both field radii, the 2x2 preview scales), then towers 18 to 20: Magneto, Tractor, Augmentation.
+**Confirmed (owner, 2026-10-19, "Finished"):** look A Armoured Vault Depot, animation B Sparks and Sale.
+
+### Scrapyard (second pass on the Armoured Vault Depot)
+
+Page `design/tower_art_p2_17_scrap.html` (data `tools/tower_art/data_p2_scrap.js` on the base `data_scrap_looks.js`; the 2x2 previews are smaller so the whole yard fits). Simple and bold: every step rebuilds one big part in place; the agent runs the real rules (the payout, the kill bonus, the discount field).
+- **Path 1, Passive Income (the vault in the middle):** a layered vault door (more rings, bolts and locking bars, an eight-spoke wheel from step 3), a mint hall (a small door and two, three, then four stamping presses that pound at each payout) or a treasure dome (more seams, a banded rim); gold at the Reserve Bank, with a +3% interest tag on each payout.
+- **Path 2, Kill Income (the intake over the weighbridge):** a magnet gantry (a bigger magnet, then twin magnets), sorting belts (one to four) or a compactor line (one to three compactors pressing bales); the orange kill ring widens; wrecked enemies in it send a coin to the vault with the bonus amount; gold at the Reclamation Plant.
+- **Path 3, Discounts (the four corner bunkers):** supply bunkers (more crates), radio masts (a turning dish, more signal arcs) or freight hoists (a swinging hook); the blue discount ring widens and shows the percentage off; gold at Forward Command.
+- **Retrofits:** Second Crusher (jaw crusher, roller crusher or hammer mill, top-left inside the wall), Bigger Yard (a second armoured wall, a spiked fence or concrete barriers), Salvage Crane (a gantry, a jib crane or a crane truck above the top wall).
+- **Carpet-rule overlaps (kept, stacking):** the Second Crusher's +30 income stacks with the Passive Income steps; the Bigger Yard's +30 px stacks with both field radii.
 
 ## Open questions
 
-1. **Scrapyard restart** (tower 17): pick one of the three new base looks and an animation (then say "Scrapyard base finished"). Then its second pass, then towers 18-20 (Magneto, Tractor, Augmentation).
+1. **Second pass, Scrapyard** (tower 17, round 1, on the confirmed Armoured Vault Depot): pick one option per stage and Retrofit. Then towers 18-20 (next: Magneto Tower).
