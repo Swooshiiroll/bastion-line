@@ -934,6 +934,12 @@ in the center. The notching on the rotunda shouldn't appear until Rapid Line." "
 - **Rotunda:** the notched ring of ticks only appears from Rapid Line (Production step 4) and spins faster with Servo Motors.
 - **Rails:** the thickened end sections are gone and every Range step simply makes the rails longer (a further 5 px each time).
 
+**Notes (owner, round 4 paste):** "The ending length is too long. Decrease the increments of length increase. Also make sure to add more bands to the
+launcher as it gets longer."
+- The rails now grow in small steps (1.5 px per Range step, 8 px at the mastery, 1.5 px more with the Long Arm), so the longest launcher
+  is about 23 px, down from 37 px.
+- The launcher carries a band every 6 px, so it gains a band as it lengthens (two bands at stock, four at the mastery).
+
 ## Open questions
 
 1. **Second pass, Mine Layer** (tower 11, round 4): confirm. Then towers 12-20 (next: Chemical Plant).

@@ -17,7 +17,7 @@ const gapOf = (B) => Math.max(0.4, GAP[B.lv[1]] - (B.r === 0 ? 0.17 : 0));      
 const capOf = (B) => [6, 7, 8, 9, 10, 12][B.lv[1]] + (B.r === 0 ? 1 : 0);          // the preview's cap (the game's is 20 to 45)
 const BLAST = [40, 40, 50, 50, 60, 65];                                            // blast px by Power level
 const RANGE = [120, 140, 160, 190, 220, 260];
-const railExt = (B) => [0, 3, 6, 10, 14, 19][B.lv[2]] + (B.r === 2 ? 3 : 0); // the rails simply get longer (owner)
+const railExt = (B) => [0, 1.5, 3, 4.5, 6, 8][B.lv[2]] + (B.r === 2 ? 1.5 : 0); // the rails simply get longer, in small steps (owner: the end length was too long)
 
 // ---- The mine: a canister whose look follows the Power steps and the Shaped Charges Retrofit -----------------------------
 function drawMine(B, p, k, t, col, blink, mini) {
@@ -108,7 +108,7 @@ const P2 = {
     const twinA = S2 === "A", LA = twinA ? [3.8, -3.8] : [0], hf = twinA ? 1.5 : 2.6;
     LA.forEach((yc) => { const act = twinA ? (mm.lastYc === yc ? fl : 0) : fl, ry = [yc - hf, yc + hf];
       for (const y of ry) bar(D(-2, y), D(L, y), 1.8 * k, RM ? mix(METAL_L, GOLD, 0.5) : METAL_L);
-      for (const x of [3, 9]) bar(D(x, yc - hf - 1.4), D(x, yc + hf + 1.4), 1.4 * k, dk(col, 0.2));
+      for (let x = 3; x < L - 2; x += 6) bar(D(x, yc - hf - 1.4), D(x, yc + hf + 1.4), 1.4 * k, dk(col, 0.2)); // a band every 6 px, so a longer launcher carries more bands
       strip(D(0, yc), D(L, yc), 0.6 * k, A(col, 0.3 + 0.7 * act));
       if (R1 === "B") for (const y of ry) bar(D(L - 5, y), D(L - 2, y), 2.8 * k, METAL);
       if (R1 === "C") for (let i = 0; i < 3; i++) ring(D(4 + i * 4, yc), (hf + 0.8) * k, A(col, 0.5), 0.9 * k);
