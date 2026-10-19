@@ -390,7 +390,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 13 | Boost Tower | `design/tower_art_p2_13_boost.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 15 | Cryo Tower | `design/tower_art_p2_15_cryo.html` | **Confirmed** (owner, 2026-10-19: "Finished"; Deep Cold C Frost Collar) |
-| 16 | Shockwave Generator | `design/tower_art_p2_16_shock.html` | Round 5: tower-resonance Path 3, one-burst cloud; awaiting Path 3 picks |
+| 16 | Shockwave Generator | `design/tower_art_p2_16_shock.html` | Round 6: all picks drawn; awaiting confirm |
 
 ### Gun Turret (second pass)
 
@@ -1137,6 +1137,9 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
 **Picks (owner, round 4):** Path 1 all C, Path 2 all C, Path 3 none, Retrofits all C. **Notes:** "Make larger bursts at one time, not a longer generation period" (Path 1); "Scrap these designs. start fresh. Design something that would make the tower itself cause resonance without adding things to it" (Path 3).
 **Round 5:** the Power cloud leaves in one larger burst: every puff starts at the same moment (it used to be spread over 0.3 s) and only the count and the size grow. Path 3 starts fresh with nothing added to the tower: the tower's own parts resonate. Five ways, each harder at every step and gold at the mastery: the ring's edges ripple in a standing wave (3 to 6 lobes), the deck hums with ripples rolling across it, the ring sings with bright lobes travelling round it, the whole tower shakes (with echoes of the ring), or the ring turns to violet glass with light running round it.
 
+**Picks (owner, round 5):** Path 1, Path 2 and the Retrofits all C; Path 3 every step and the mastery A (the rippling ring). **Notes:** "Add a nuclear explosion effect to the bellowing for Megaton Wave" (Path 1); Path 3 spec: one white band: T1 faint with a subtle ripple, bursts bend it a little; T2 slightly brighter, slightly stronger ripple, bursts bend and stretch it more; T3 brighter, stronger ripple, bursts bend and stretch it more; T4 bright, a slightly sporadic ripple, bursts bend and stretch it a lot more; M gold, strong and sporadic ripple, bursts stretch and bend it massively.
+**Round 6:** every stage is picked; the page shows only the picks. Path 3 now follows the spec to the letter: one band (white, gold at the mastery) whose brightness, ripple and burst response grow per step, with a sporadic ripple from T4. The Megaton Wave burst adds a nuclear explosion to the billow: a white flash, an incandescent fireball that cools to smoke, a stem and a rolling mushroom cap.
+
 ## Open questions
 
-1. **Second pass, Shockwave Generator** (tower 16, round 5): pick Path 3 (five options per step). Then towers 17-20 (next: Scrapyard).
+1. **Second pass, Shockwave Generator** (tower 16, round 6): confirm. Then towers 17-20 (next: Scrapyard).
