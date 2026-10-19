@@ -389,6 +389,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 13 | Boost Tower | `design/tower_art_p2_13_boost.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | **Confirmed** (owner, 2026-10-19: "finished") |
+| 15 | Cryo Tower | `design/tower_art_p2_15_cryo.html` | Round 1: pick one option per stage and Retrofit |
 
 ### Gun Turret (second pass)
 
@@ -1094,6 +1095,16 @@ Base: look A Dish Mast, animation B Sweep Beam (the sweep follows the dish). Eve
 
 **Round 15 (owner note):** "They can rotate, but they dont spin like the main dish. They're free moving. They dont reset position after a target lock is lost, they sit until another enemy comes in range". The tracker turrets turn freely to follow a revealed enemy (no spinning, no idle sweep), and when the lock is lost they stay at their last aim until another enemy is revealed in range. They start pointing outward from their corner.
 
+### Cryo Tower (second pass)
+
+Base: look B Compressor Block, animation C Creeping Mist. Every step rebuilds a part (the new design replaces the old one in all four places at once); the agent runs the real rules (wave rate, range, slow strength, permanent chill, the 4th-wave freeze, frostbite).
+- **Path 1, Slowing (the corners):** four stations (banded tanks, frosted vaults or crystal clusters) rebuilt bigger and colder at each step; Permafrost keeps a faint frost ring on chilled enemies outside the range; Deep Freeze (mastery) adds gold and freezes enemies in an ice block on every 4th wave.
+- **Path 2, Power/Range (the edges):** a frost rim on the middle of each edge (spike rows, fans or ice crystals) rebuilt longer and denser each step, gold-tipped at Blizzard; the range ring widens; hit enemies shed ice shards (frostbite).
+- **Path 3, Speed (the middle):** the big fan is rebuilt (swept turbine, ducted shroud or nozzle ring) with more blades and a faster wave; Cold Front (mastery) is gold with a constant gold-white field.
+- **Retrofits:** Coolant Tank (side tank, twin tanks or sphere, left), Compressor (box, pistons or scroll, right), Deep Cold (white vents, domes or louvres, bottom).
+- **Carpet-rule overlaps (kept, stacking):** the Compressor's 1.7 s wave stacks with the path-3 wave rate; Deep Cold's +5% slow stacks with the path-1 slows; the Coolant Tank's longer slow stacks with the permanent chill.
+- **Lessons carried from the Radar Tower:** the new design replaces the old one rather than adding extras; masteries are gold on trim and lights; per-frame draw order (the model runs before the agent) is not relied on.
+
 ## Open questions
 
-1. **Second pass, Radar Tower** (tower 14, round 15): confirm. Then towers 15-20 (next: Cryo Tower).
+1. **Second pass, Cryo Tower** (tower 15, round 1): pick one option per stage and Retrofit. Then towers 16-20 (next: Shockwave Generator).
