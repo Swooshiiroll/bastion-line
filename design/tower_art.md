@@ -387,7 +387,8 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 10 | CAS Gunship | `design/tower_art_p2_10_cas.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | **Confirmed** (owner, 2026-10-19: "finished") |
-| 13 | Boost Tower | `design/tower_art_p2_13_boost.html` | Round 2: all picks drawn; awaiting confirm |
+| 13 | Boost Tower | `design/tower_art_p2_13_boost.html` | **Confirmed** (owner, 2026-10-19: "finished") |
+| 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | Round 1: pick one option per stage and Retrofit |
 
 ### Gun Turret (second pass)
 
@@ -1051,6 +1052,16 @@ Crit Link and Wide Mast overlap no path step (Wide Mast widens the radius only; 
 
 **Picks (owner):** every path stage B (Ringed Disc); Retrofits Signal Booster C (Spire), Crit Link C (Gold Crown), Wide Mast C (Spoked Ring). No notes. **Round 2:** every stage is picked; the page shows only the picks.
 
+### Radar Tower (second pass)
+
+Base: look A Dish Mast, animation B Sweep Beam (the sweep follows the dish). Every step rebuilds a part of the station; the agent runs the real rules, so the preview shows the ping rate, reveal time, range and the radiation circle.
+- **Path 1, Power/Range (the centre):** 1 a bigger dish (solid, ribbed or mesh), 2 a mast under it (guyed lattice, tripod, tiered tower), 3 a radiation emitter at the focus with a faint red inner circle, 4 heat sinks, capacitors or arc pylons with a wider circle, M a gold dish plus a horn ring, twin gold dish or gold lattice array, with a gold circle.
+- **Path 2, Speed/Frequency (the edges):** a phased-array panel on the south, north, east, west edge (tile, curved or louvre), and the dish turns at the ping rate; M turns them gold with a steady gold field (constant reveal).
+- **Path 3, Unmasking (the corners):** a cabinet in the NW, NE, SE, SW corner (each a different gadget). The marks on revealed enemies grow: rank tag, unmask diamond, track-lock tether, fake-check badge, gold lock that lingers 5 s.
+- **Retrofits:** Bigger Dish (rim, flared ends or sub-reflector), Signal Processor (chip ring, fan box or chip stack), Early Warning (beacon mast, lookout tower or strobe pylons).
+- **Carpet-rule overlaps (kept, stacking):** Bigger Dish's +20 px stacks with the path-1 range steps; the Signal Processor's 1.5 s reveal stacks with the path-2 and path-3 reveal steps.
+- The radiation circle only hurts revealed enemies (owner); in the preview a revealed or uncloaked enemy inside it glows red.
+
 ## Open questions
 
-1. **Second pass, Boost Tower** (tower 13, round 2): confirm. Then towers 14-20 (next: Radar Tower).
+1. **Second pass, Radar Tower** (tower 14, round 1): pick one option per stage and Retrofit. Then towers 15-20 (next: Cryo Tower).
