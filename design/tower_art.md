@@ -388,7 +388,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 13 | Boost Tower | `design/tower_art_p2_13_boost.html` | **Confirmed** (owner, 2026-10-19: "finished") |
-| 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | Round 3: turret carried to the mastery; awaiting the mastery pick |
+| 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | Round 4: smaller turrets, mastery recolours only; awaiting the mastery pick |
 
 ### Gun Turret (second pass)
 
@@ -1069,6 +1069,8 @@ Base: look A Dish Mast, animation B Sweep Beam (the sweep follows the dish). Eve
 **Picks (owner, round 2):** Path 3: 1 B Scope Consoles, 2 A Decoder Towers, 3 A Tracking Turrets, 4 B Lens Rings, M none. Retrofits: Signal Processor A Chip Ring. **Note:** "keep the tracking turret idea for T4 > M".
 **Round 3:** the tracking turret (it turns to follow revealed enemies) stays from Track Lock through the mastery. Illusion Filter builds a lens ring round it; Total Exposure shows three gold turret builds (gold citadel and wall, lighthouse lamp, obelisk base with a twin barrel), still to pick.
 
+**Round 4 (owner notes):** "Shrink the turrets down a bit and remove the squares from underneath them. Only change the blue on them to gold for the mastery". The tracking turrets are smaller, nothing sits under them (no citadel plate, base disc or obelisk), and at the mastery only the blue accents (glow, tether, lens ring) turn gold; the body stays metal. The three mastery options are now a gold wall joining the four turrets, a sweeping gold lamp, or a twin barrel.
+
 ## Open questions
 
-1. **Second pass, Radar Tower** (tower 14, round 3): pick the Total Exposure mastery (Path 3). Then towers 15-20 (next: Cryo Tower).
+1. **Second pass, Radar Tower** (tower 14, round 4): pick the Total Exposure mastery (Path 3). Then towers 15-20 (next: Cryo Tower).
