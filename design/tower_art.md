@@ -387,7 +387,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 10 | CAS Gunship | `design/tower_art_p2_10_cas.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | **Confirmed** (owner, 2026-10-19: "finished") |
-| 13 | Boost Tower | `design/tower_art_p2_13_boost.html` | Round 1: three options per stage; awaiting picks |
+| 13 | Boost Tower | `design/tower_art_p2_13_boost.html` | Round 1b: modules fade toward gold; awaiting picks |
 
 ### Gun Turret (second pass)
 
@@ -1041,8 +1041,9 @@ something else by "tower frame" (the columns, say), tell me.
 Crit Link and Wide Mast overlap no path step (Wide Mast widens the radius only; no path does).
 
 **Round 1 (Claude):** one parametric model (base look F Signal Drum, animation F Overcharge Sparks), built with the owner's Chemical Plant note in mind (upgrades change structure).
-- **Each path owns an emitter module on the drum's top** (damage orange at 90 degrees, speed cyan at 210, range lime at 330). Every step builds another tier onto that module, in the shape
-  the option picks (round, square or triangular); the module grows wider and taller, and turns gold at the mastery.
+- **Each path owns a disc-shaped emitter module on the drum's top** (damage orange at 90 degrees, speed cyan at 210, range lime at 330). *Round 1b (owner: "have the circles fade more and more into gold with each
+  upgrade rather than change size/add more rings"):* the disc keeps its size and gains no rings; every step fades its colour a step further toward gold (pure gold at the mastery), and the last step's
+  option is the disc's style (glossy, ringed or six-petalled). The first version built tiers onto the module and grew it; that is gone.
 - **Boosted towers** show a stack of chevrons for each stat (orange, cyan, lime): one each at stock, more with each path level, gold at the mastery.
 - **Retrofits rebuild the tower:** Signal Booster an antenna mast, a loop antenna or a spire at the centre (and a wider faint radius ring); Crit Link a gold ring, collar or crown (and a gold crit spark
   by each boosted tower); Wide Mast a lattice frame, braced truss legs or a spoked ring (the widest radius ring).

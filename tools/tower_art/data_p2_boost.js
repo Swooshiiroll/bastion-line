@@ -29,7 +29,7 @@ function boostAgent(B) { return (m, t, info, s, col) => { const mates = matesOf(
 // ---- The model: the drum, its struts and three emitter modules that grow tier by tier ----------------------------------------------
 const P2 = {
   tower: "boost", look: "F", anim: "F",
-  intro: "Round 1: three options for every step and Retrofit, drawn as one model. Following your Chemical Plant note, the upgrades rebuild the tower instead of decorating it: each path owns an emitter module on the drum's top (damage in orange, speed in cyan, range in lime) and every step builds another tier onto it, in the shape the option picks (round, square or triangular), so the module grows wider and turns gold at the mastery. The boosted towers show a chevron stack for each stat. The Retrofits rebuild the centre (an antenna mast), the rim (a gold crown) or add a lattice frame, and widen the faint boost radius. The Signal Booster's extra +5% overlaps the boost steps and is kept, stacking (the carpet rule). Unpicked steps show option A.",
+  intro: "Round 1b: each path owns a disc-shaped emitter module on the drum's top (damage orange, speed cyan, range lime). The disc keeps its size and fades further toward gold with every step (pure gold at the mastery); the last step's option is its style (glossy, ringed or petalled). Before that, Round 1: The boosted towers show a chevron stack for each stat. The Retrofits rebuild the centre (an antenna mast), the rim (a gold crown) or add a lattice frame, and widen the faint boost radius. The Signal Booster's extra +5% overlaps the boost steps and is kept, stacking (the carpet rule). Unpicked steps show option A.",
   mods(B) { return { period: 1, flight: 1, multi: false, persist: boostAgent(B) }; },
   muzzleAt(B, m, kk, c) { return c; },
   model(c, aim, s, fx, t, col, info, B) {
@@ -40,15 +40,14 @@ const P2 = {
     for (let i = 0; i < 3; i++) { const d = fa(Math.PI / 2 + i * TAU / 3), e = wide && R === "B" ? 16 : 14; bar(add(c, mul(d, 9 * k)), add(c, mul(d, e * k)), 2 * k, METAL); if (wide && R === "B") { line(add(c, mul(d, 12 * k)), add(c, mul(fa(Math.PI / 2 + i * TAU / 3 + 0.35), 15 * k)), METAL_L, 1 * k); line(add(c, mul(d, 12 * k)), add(c, mul(fa(Math.PI / 2 + i * TAU / 3 - 0.35), 15 * k)), METAL_L, 1 * k); } }
     disc(c, 11 * k, OUTLINE); disc(c, 10.3 * k, METAL_L); disc(c, 8.6 * k, METAL_D);
     for (let i = 0; i < 3; i++) { const r = fmod(beat + i / 3, 1); ring(c, (2 + 6.4 * r) * k, A(col, 0.6 * (1 - r)), 1.1 * k); }
-    // ---- The three modules: a stack of tiers per path (a tier per step bought; the option is the tier's shape), growing with the path ------------------------
-    for (let st = 0; st < 3; st++) { const lv = B.lv[st], mc = lv >= 5 ? GOLD : SCOL[st], a = Math.PI / 2 + st * TAU / 3, q = add(c, mul(fa(a), 6.2 * k)), base = 2 + 0.5 * lv;
-      disc(q, (base + 0.5) * k, OUTLINE); disc(q, base * k, dk(SCOL[st], 0.55));                                                       // the socket the tiers stand on
-      for (let i = 0; i < lv; i++) { const key = B.key("p" + st + "s" + i), r = (base - 0.2 - i * 0.55) * k, body = lv >= 5 ? mix(GOLD, METAL_L, 0.12 + 0.08 * (4 - i)) : mix(METAL_L, SCOL[st], 0.3 + 0.1 * i); // the mastery turns the whole module gold
-        if (key === "B") { plate(q, rectPts(1, 1), body, a + Math.PI / 4, r * 0.95, 0.9); }
-        else if (key === "C") { plate(q, ngon(3, 1, a), body, 0, r * 1.05, 0.9); }
-        else { disc(q, r + 0.7, OUTLINE); disc(q, r, body); }
-        if (i === lv - 1) glowDot(q, 0.5 * k * (1 + 0.4 * Math.sin(t * 5 + st)), mc); }
-      if (lv === 0) glowDot(q, 0.5 * k, A(SCOL[st], 0.6)); }
+    // ---- The three modules: one disc per path that FADES toward gold with every step (it never grows or gains rings); the last step's option is its style ----
+    for (let st = 0; st < 3; st++) { const lv = B.lv[st], a = Math.PI / 2 + st * TAU / 3, q = add(c, mul(fa(a), 6.2 * k)), fade = lv / 5, mc = mix(SCOL[st], GOLD, fade), key = lv > 0 ? B.key("p" + st + "s" + (lv - 1)) : "A", r = 3.2 * k;
+      disc(q, r + 0.6 * k, OUTLINE); disc(q, r, dk(mc, 0.45));
+      if (lv === 0) { ring(q, r * 0.6, A(SCOL[st], 0.5), 0.9 * k); glowDot(q, 0.5 * k, A(SCOL[st], 0.6)); continue; }
+      if (key === "A") { orb(q, r * 0.88, mix(METAL_L, mc, 0.8 + 0.2 * fade)); }                                                      // a glossy disc
+      else if (key === "B") { disc(q, r * 0.88, mix(METAL_L, mc, 0.8 + 0.2 * fade)); ring(q, r * 0.58, A(dk(mc, 0.3), 0.9), 1 * k); disc(q, r * 0.3, mc); }  // a disc with an inner ring and core
+      else { for (let i = 0; i < 6; i++) { const aa = i * TAU / 6 + 0.2; fill(q, [[0, 0], [Math.cos(aa) * r * 0.92 / k, Math.sin(aa) * r * 0.92 / k], [Math.cos(aa + TAU / 6) * r * 0.92 / k, Math.sin(aa + TAU / 6) * r * 0.92 / k]], i % 2 ? mix(METAL_L, mc, 0.75 + 0.25 * fade) : mc, 0, k); } }  // a six-petal disc
+      glowDot(q, 0.55 * k * (1 + 0.35 * Math.sin(t * 5 + st)), mc); }
     // ---- The Retrofits rebuild the centre, the rim, or add a frame -----------------------------------------------------------------------------------------
     if (B.r === 0) { if (R === "A") { for (let st = 0; st < 3; st++) { const a = Math.PI / 2 + st * TAU / 3; line(c, add(c, mul(fa(a), 6.2 * k)), A(STEEL, 0.9), 0.8 * k); } disc(c, 2.4 * k, OUTLINE); disc(c, 1.9 * k, METAL); line(c, add(c, [0, -6 * k]), METAL_L, 1.2 * k); glowDot(add(c, [0, -6.4 * k]), 0.7 * k, [1, 0.3, 0.3, 1]); }  // an antenna mast with guy wires
       if (R === "B") { ring(c, 3.4 * k, METAL_L, 1.6 * k); for (let i = 0; i < 3; i++) line(add(c, mul(fa(i * TAU / 3 + 0.5), 3.4 * k)), add(c, mul(fa(i * TAU / 3 + 0.5), 5.4 * k)), METAL_L, 1.2 * k); glowDot(c, 1.2 * k, col); }       // a loop antenna
@@ -63,69 +62,69 @@ const P2 = {
   paths: [
     { name: "Damage boost", theme: "the orange module: each step builds another tier on it", steps: [
       { name: "Amplifier", cost: 615, effect: "Damage boost +15%", options: [
-        { key: "A", name: "Round Tier", desc: "A round tier on the damage module; boosted towers carry another orange chevron." },
-        { key: "B", name: "Square Tier", desc: "A square tier on the damage module; another orange chevron on boosted towers." },
-        { key: "C", name: "Triangle Tier", desc: "A triangular tier on the damage module; another orange chevron on boosted towers." } ] },
+        { key: "A", name: "Glossy Disc", desc: "The damage module is a glossy disc; it fades a step further from orange toward gold." },
+        { key: "B", name: "Ringed Disc", desc: "The damage module is a disc with an inner ring and a core; it fades a step further from orange toward gold." },
+        { key: "C", name: "Petal Disc", desc: "The damage module is a six-petal disc; it fades a step further from orange toward gold." } ] },
       { name: "Power Relay", cost: 860, effect: "+22%", options: [
-        { key: "A", name: "Round Tier", desc: "A second round tier on the damage module." },
-        { key: "B", name: "Square Tier", desc: "A second square tier on the damage module." },
-        { key: "C", name: "Triangle Tier", desc: "A second triangular tier on the damage module." } ] },
+        { key: "A", name: "Glossy Disc", desc: "The damage module is a glossy disc; it fades a step further from orange toward gold." },
+        { key: "B", name: "Ringed Disc", desc: "The damage module is a disc with an inner ring and a core; it fades a step further from orange toward gold." },
+        { key: "C", name: "Petal Disc", desc: "The damage module is a six-petal disc; it fades a step further from orange toward gold." } ] },
       { name: "Overcharge Link", cost: 2460, effect: "+32% (primary)", options: [
-        { key: "A", name: "Round Tier", desc: "A third round tier; the module is wider and taller." },
-        { key: "B", name: "Square Tier", desc: "A third square tier; the module is wider and taller." },
-        { key: "C", name: "Triangle Tier", desc: "A third triangular tier; the module is wider and taller." } ] },
+        { key: "A", name: "Glossy Disc", desc: "The damage module is a glossy disc; it fades a step further from orange toward gold." },
+        { key: "B", name: "Ringed Disc", desc: "The damage module is a disc with an inner ring and a core; it fades a step further from orange toward gold." },
+        { key: "C", name: "Petal Disc", desc: "The damage module is a six-petal disc; it fades a step further from orange toward gold." } ] },
       { name: "Surge Link", cost: 3940, effect: "+40%", options: [
-        { key: "A", name: "Round Tier", desc: "A fourth round tier on the damage module." },
-        { key: "B", name: "Square Tier", desc: "A fourth square tier on the damage module." },
-        { key: "C", name: "Triangle Tier", desc: "A fourth triangular tier on the damage module." } ] },
+        { key: "A", name: "Glossy Disc", desc: "The damage module is a glossy disc; it fades a step further from orange toward gold." },
+        { key: "B", name: "Ringed Disc", desc: "The damage module is a disc with an inner ring and a core; it fades a step further from orange toward gold." },
+        { key: "C", name: "Petal Disc", desc: "The damage module is a six-petal disc; it fades a step further from orange toward gold." } ] },
       { name: "Battle Network", cost: 9845, effect: "+50% damage (mastery)", options: [
-        { key: "A", name: "Gold Round Crown", desc: "A gold round crown tier tops the module; the whole module turns gold, and so do the chevrons." },
-        { key: "B", name: "Gold Square Crown", desc: "A gold square crown tier; the module and chevrons turn gold." },
-        { key: "C", name: "Gold Triangle Crown", desc: "A gold triangular crown tier; the module and chevrons turn gold." } ] },
+        { key: "A", name: "Glossy Disc", desc: "The damage module is a glossy disc; it is pure gold, and so are the chevrons." },
+        { key: "B", name: "Ringed Disc", desc: "The damage module is a disc with an inner ring and a core; it is pure gold, and so are the chevrons." },
+        { key: "C", name: "Petal Disc", desc: "The damage module is a six-petal disc; it is pure gold, and so are the chevrons." } ] },
     ] },
     { name: "Speed boost", theme: "the cyan module: each step builds another tier on it", steps: [
       { name: "Clock Sync", cost: 615, effect: "Fire-rate boost +15%", options: [
-        { key: "A", name: "Round Tier", desc: "A round tier on the speed module; another cyan chevron on boosted towers." },
-        { key: "B", name: "Square Tier", desc: "A square tier on the speed module; another cyan chevron." },
-        { key: "C", name: "Triangle Tier", desc: "A triangular tier on the speed module; another cyan chevron." } ] },
+        { key: "A", name: "Glossy Disc", desc: "The speed module is a glossy disc; it fades a step further from cyan toward gold." },
+        { key: "B", name: "Ringed Disc", desc: "The speed module is a disc with an inner ring and a core; it fades a step further from cyan toward gold." },
+        { key: "C", name: "Petal Disc", desc: "The speed module is a six-petal disc; it fades a step further from cyan toward gold." } ] },
       { name: "Fast Sync", cost: 860, effect: "+22%", options: [
-        { key: "A", name: "Round Tier", desc: "A second round tier on the speed module." },
-        { key: "B", name: "Square Tier", desc: "A second square tier on the speed module." },
-        { key: "C", name: "Triangle Tier", desc: "A second triangular tier on the speed module." } ] },
+        { key: "A", name: "Glossy Disc", desc: "The speed module is a glossy disc; it fades a step further from cyan toward gold." },
+        { key: "B", name: "Ringed Disc", desc: "The speed module is a disc with an inner ring and a core; it fades a step further from cyan toward gold." },
+        { key: "C", name: "Petal Disc", desc: "The speed module is a six-petal disc; it fades a step further from cyan toward gold." } ] },
       { name: "Overclock Link", cost: 2460, effect: "+32% (primary)", options: [
-        { key: "A", name: "Round Tier", desc: "A third round tier; the module is wider and taller." },
-        { key: "B", name: "Square Tier", desc: "A third square tier; the module is wider and taller." },
-        { key: "C", name: "Triangle Tier", desc: "A third triangular tier; the module is wider and taller." } ] },
+        { key: "A", name: "Glossy Disc", desc: "The speed module is a glossy disc; it fades a step further from cyan toward gold." },
+        { key: "B", name: "Ringed Disc", desc: "The speed module is a disc with an inner ring and a core; it fades a step further from cyan toward gold." },
+        { key: "C", name: "Petal Disc", desc: "The speed module is a six-petal disc; it fades a step further from cyan toward gold." } ] },
       { name: "Turbo Link", cost: 3940, effect: "+40%", options: [
-        { key: "A", name: "Round Tier", desc: "A fourth round tier on the speed module." },
-        { key: "B", name: "Square Tier", desc: "A fourth square tier on the speed module." },
-        { key: "C", name: "Triangle Tier", desc: "A fourth triangular tier on the speed module." } ] },
+        { key: "A", name: "Glossy Disc", desc: "The speed module is a glossy disc; it fades a step further from cyan toward gold." },
+        { key: "B", name: "Ringed Disc", desc: "The speed module is a disc with an inner ring and a core; it fades a step further from cyan toward gold." },
+        { key: "C", name: "Petal Disc", desc: "The speed module is a six-petal disc; it fades a step further from cyan toward gold." } ] },
       { name: "Rapid Network", cost: 9845, effect: "+50% fire rate (mastery)", options: [
-        { key: "A", name: "Gold Round Crown", desc: "A gold round crown tier; the module and chevrons turn gold." },
-        { key: "B", name: "Gold Square Crown", desc: "A gold square crown tier; the module and chevrons turn gold." },
-        { key: "C", name: "Gold Triangle Crown", desc: "A gold triangular crown tier; the module and chevrons turn gold." } ] },
+        { key: "A", name: "Glossy Disc", desc: "The speed module is a glossy disc; it is pure gold, and so are the chevrons." },
+        { key: "B", name: "Ringed Disc", desc: "The speed module is a disc with an inner ring and a core; it is pure gold, and so are the chevrons." },
+        { key: "C", name: "Petal Disc", desc: "The speed module is a six-petal disc; it is pure gold, and so are the chevrons." } ] },
     ] },
     { name: "Range boost", theme: "the lime module: each step builds another tier on it", steps: [
       { name: "Spotting Relay", cost: 370, effect: "Range boost +15%", options: [
-        { key: "A", name: "Round Tier", desc: "A round tier on the range module; another lime chevron on boosted towers." },
-        { key: "B", name: "Square Tier", desc: "A square tier on the range module; another lime chevron." },
-        { key: "C", name: "Triangle Tier", desc: "A triangular tier on the range module; another lime chevron." } ] },
+        { key: "A", name: "Glossy Disc", desc: "The range module is a glossy disc; it fades a step further from lime toward gold." },
+        { key: "B", name: "Ringed Disc", desc: "The range module is a disc with an inner ring and a core; it fades a step further from lime toward gold." },
+        { key: "C", name: "Petal Disc", desc: "The range module is a six-petal disc; it fades a step further from lime toward gold." } ] },
       { name: "Wide Relay", cost: 515, effect: "+22%", options: [
-        { key: "A", name: "Round Tier", desc: "A second round tier on the range module." },
-        { key: "B", name: "Square Tier", desc: "A second square tier on the range module." },
-        { key: "C", name: "Triangle Tier", desc: "A second triangular tier on the range module." } ] },
+        { key: "A", name: "Glossy Disc", desc: "The range module is a glossy disc; it fades a step further from lime toward gold." },
+        { key: "B", name: "Ringed Disc", desc: "The range module is a disc with an inner ring and a core; it fades a step further from lime toward gold." },
+        { key: "C", name: "Petal Disc", desc: "The range module is a six-petal disc; it fades a step further from lime toward gold." } ] },
       { name: "Targeting Link", cost: 1475, effect: "+32% (primary)", options: [
-        { key: "A", name: "Round Tier", desc: "A third round tier; the module is wider and taller." },
-        { key: "B", name: "Square Tier", desc: "A third square tier; the module is wider and taller." },
-        { key: "C", name: "Triangle Tier", desc: "A third triangular tier; the module is wider and taller." } ] },
+        { key: "A", name: "Glossy Disc", desc: "The range module is a glossy disc; it fades a step further from lime toward gold." },
+        { key: "B", name: "Ringed Disc", desc: "The range module is a disc with an inner ring and a core; it fades a step further from lime toward gold." },
+        { key: "C", name: "Petal Disc", desc: "The range module is a six-petal disc; it fades a step further from lime toward gold." } ] },
       { name: "Long Link", cost: 2365, effect: "+40%", options: [
-        { key: "A", name: "Round Tier", desc: "A fourth round tier on the range module." },
-        { key: "B", name: "Square Tier", desc: "A fourth square tier on the range module." },
-        { key: "C", name: "Triangle Tier", desc: "A fourth triangular tier on the range module." } ] },
+        { key: "A", name: "Glossy Disc", desc: "The range module is a glossy disc; it fades a step further from lime toward gold." },
+        { key: "B", name: "Ringed Disc", desc: "The range module is a disc with an inner ring and a core; it fades a step further from lime toward gold." },
+        { key: "C", name: "Petal Disc", desc: "The range module is a six-petal disc; it fades a step further from lime toward gold." } ] },
       { name: "Overwatch Network", cost: 5910, effect: "+50% range (mastery)", options: [
-        { key: "A", name: "Gold Round Crown", desc: "A gold round crown tier; the module and chevrons turn gold." },
-        { key: "B", name: "Gold Square Crown", desc: "A gold square crown tier; the module and chevrons turn gold." },
-        { key: "C", name: "Gold Triangle Crown", desc: "A gold triangular crown tier; the module and chevrons turn gold." } ] },
+        { key: "A", name: "Glossy Disc", desc: "The range module is a glossy disc; it is pure gold, and so are the chevrons." },
+        { key: "B", name: "Ringed Disc", desc: "The range module is a disc with an inner ring and a core; it is pure gold, and so are the chevrons." },
+        { key: "C", name: "Petal Disc", desc: "The range module is a six-petal disc; it is pure gold, and so are the chevrons." } ] },
     ] },
   ],
   retrofits: [
