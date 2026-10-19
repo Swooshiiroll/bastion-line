@@ -386,7 +386,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 9 | Drone Bay | `design/tower_art_p2_09_drones.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 10 | CAS Gunship | `design/tower_art_p2_10_cas.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
-| 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | Round 6: ring pipe under the frame; awaiting confirm |
+| 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | Round 7: mist heads on the sprayers, rounder stills; awaiting confirm |
 
 ### Gun Turret (second pass)
 
@@ -1029,6 +1029,11 @@ sit under the nozzle and silos." "The mist nozzle design is too crude."
 lying over the deck's armoured frame at the flats, so the frame (its band, trim and corner bolts) is now drawn over them and the pipes run under it. If you meant
 something else by "tower frame" (the columns, say), tell me.
 
+**Notes (owner):** "The mist nozzle does not sit properly on the ends of the sprayers. Also the stills are too blocky for the mastery."
+- The Mist Nozzle's ribbed head now sits on the end of every sprayer (both sprayers at the Twin Nozzles mastery), pointing the way each one points, instead of
+  floating off the first nozzle.
+- The stills are rounder: the twin stills stand on a capsule-shaped base (it was a square plate), and a single pump hall is an octagon.
+
 ## Open questions
 
-1. **Second pass, Chemical Plant** (tower 12, round 6): confirm. Then towers 13-20 (next: Boost Tower).
+1. **Second pass, Chemical Plant** (tower 12, round 7): confirm. Then towers 13-20 (next: Boost Tower).
