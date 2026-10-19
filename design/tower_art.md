@@ -389,7 +389,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 13 | Boost Tower | `design/tower_art_p2_13_boost.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | **Confirmed** (owner, 2026-10-19: "finished") |
-| 15 | Cryo Tower | `design/tower_art_p2_15_cryo.html` | Round 4: round housing, spines on the rim, only fan blades gold; awaiting confirm |
+| 15 | Cryo Tower | `design/tower_art_p2_15_cryo.html` | Round 5: central light gold, Deep Cold new ideas; awaiting the Deep Cold pick |
 
 ### Gun Turret (second pass)
 
@@ -1113,6 +1113,8 @@ Base: look B Compressor Block, animation C Creeping Mist. Every step rebuilds a 
 
 **Round 4 (owner notes):** "With the Coolant Tank retrofit, make sure the ice spines sit around the circular tank instead of floating"; "Keep only the fan blades gold for the mastery"; "Remove the external tank from Coolant Tank". The Coolant Tank (option C, now called Round Housing) is only the circular central housing, with no external tank; the Path 2 ice spines sit on the housing's circular rim, pointing radially, instead of on a straight edge. At the Path 3 mastery only the fan blades are gold; the fan ring, hub, light and the mist stay ice-coloured.
 
+**Round 5 (owner notes):** "Make the central light gold too" (Path 3 mastery: the blades and the central light are gold); "Lets look for different ideas for Deep Cold". Deep Cold now shows three new ideas: a white rime coat on the housing rim, two vapour stacks on the bottom edge, or a frost collar with inward fins round the fan. Everything else stays as picked.
+
 ## Open questions
 
-1. **Second pass, Cryo Tower** (tower 15, round 4): confirm. Then towers 16-20 (next: Shockwave Generator).
+1. **Second pass, Cryo Tower** (tower 15, round 5): pick Deep Cold. Then towers 16-20 (next: Shockwave Generator).
