@@ -388,7 +388,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 13 | Boost Tower | `design/tower_art_p2_13_boost.html` | **Confirmed** (owner, 2026-10-19: "finished") |
-| 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | Round 12: laser line aligned with the dish; awaiting confirm |
+| 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | Round 13: tracking lines from the turret antennae; awaiting confirm |
 
 ### Gun Turret (second pass)
 
@@ -1088,6 +1088,8 @@ Base: look A Dish Mast, animation B Sweep Beam (the sweep follows the dish). Eve
 
 **Round 12 (owner screenshot):** the bright laser line sat off to one side of the dish's middle strut. Cause: the engine draws the tower model first and the scan-line agent after it in the same frame, and the agent advanced the dish angle before drawing, so the line was drawn one frame ahead of the dish (a few degrees at full speed, a lot more when the page runs slowly, such as over Remote Desktop). The agent now draws the line and beam at the angle the dish was drawn at, so the line runs down the dish's middle strut.
 
+**Round 13 (owner screenshot and note):** "The tracking lines from the tracker turrets should come from the tracker antennae". The tether lines that ran from the centre of the tower to revealed enemies (lock-ring marks, steps 3 to mastery) are gone. Each revealed enemy is now tracked by one turret (the nearest one) and a thin tracking line runs from that turret's antenna tip to the enemy (so there are no converging cones, which was the round 7 note). The line is gold at the mastery.
+
 ## Open questions
 
-1. **Second pass, Radar Tower** (tower 14, round 12): confirm. Then towers 15-20 (next: Cryo Tower).
+1. **Second pass, Radar Tower** (tower 14, round 13): confirm. Then towers 15-20 (next: Cryo Tower).
