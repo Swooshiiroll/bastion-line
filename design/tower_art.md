@@ -388,7 +388,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 13 | Boost Tower | `design/tower_art_p2_13_boost.html` | **Confirmed** (owner, 2026-10-19: "finished") |
-| 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | Round 13: tracking lines from the turret antennae; awaiting confirm |
+| 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | Round 14: turrets rest, then swing freely to targets; awaiting confirm |
 
 ### Gun Turret (second pass)
 
@@ -1090,6 +1090,8 @@ Base: look A Dish Mast, animation B Sweep Beam (the sweep follows the dish). Eve
 
 **Round 13 (owner screenshot and note):** "The tracking lines from the tracker turrets should come from the tracker antennae". The tether lines that ran from the centre of the tower to revealed enemies (lock-ring marks, steps 3 to mastery) are gone. Each revealed enemy is now tracked by one turret (the nearest one) and a thin tracking line runs from that turret's antenna tip to the enemy (so there are no converging cones, which was the round 7 note). The line is gold at the mastery.
 
+**Round 14 (owner note):** "Make the tracker turrets not rotate but track enemies freely". The tracker turrets no longer spin while idle: they rest pointing outward from their corner, and swing freely (through any angle, smoothly) to the revealed enemy they follow, then return to rest when nothing is revealed.
+
 ## Open questions
 
-1. **Second pass, Radar Tower** (tower 14, round 13): confirm. Then towers 15-20 (next: Cryo Tower).
+1. **Second pass, Radar Tower** (tower 14, round 14): confirm. Then towers 15-20 (next: Cryo Tower).
