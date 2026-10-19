@@ -389,7 +389,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 13 | Boost Tower | `design/tower_art_p2_13_boost.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | **Confirmed** (owner, 2026-10-19: "finished") |
-| 15 | Cryo Tower | `design/tower_art_p2_15_cryo.html` | Round 3: all picks drawn; awaiting confirm |
+| 15 | Cryo Tower | `design/tower_art_p2_15_cryo.html` | Round 4: round housing, spines on the rim, only fan blades gold; awaiting confirm |
 
 ### Gun Turret (second pass)
 
@@ -1111,6 +1111,8 @@ Base: look B Compressor Block, animation C Creeping Mist. Every step rebuilds a 
 **Picks (owner, round 2):** Path 1: 1 A Cooling Coils, 2 A Cryo Pumps, 3 C Permafrost Drills, 4 A Cryo Reactors, M A Gold-Core Reactors. Path 2: all C. Path 3: all A. Retrofits: Coolant Tank C, Compressor C Radial Compressor, Deep Cold A. **Note:** "Shrink the gold core reactors".
 **Round 3:** every stage is picked; the page shows only the picks. The gold-core reactors are about a third smaller (smaller than the step 4 reactors).
 
+**Round 4 (owner notes):** "With the Coolant Tank retrofit, make sure the ice spines sit around the circular tank instead of floating"; "Keep only the fan blades gold for the mastery"; "Remove the external tank from Coolant Tank". The Coolant Tank (option C, now called Round Housing) is only the circular central housing, with no external tank; the Path 2 ice spines sit on the housing's circular rim, pointing radially, instead of on a straight edge. At the Path 3 mastery only the fan blades are gold; the fan ring, hub, light and the mist stay ice-coloured.
+
 ## Open questions
 
-1. **Second pass, Cryo Tower** (tower 15, round 3): confirm. Then towers 16-20 (next: Shockwave Generator).
+1. **Second pass, Cryo Tower** (tower 15, round 4): confirm. Then towers 16-20 (next: Shockwave Generator).

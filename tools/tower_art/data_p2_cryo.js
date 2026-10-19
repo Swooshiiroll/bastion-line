@@ -7,7 +7,7 @@
 // jagged frost). The Retrofits add a coolant tank on the left, a compressor on the right and frost-white vents at the bottom.
 // Overlaps kept and stacking (the carpet rule): Compressor's wave every 1.7 s with the path-3 wave rate, Deep Cold's +5% slow with the path-1 slows,
 // Coolant Tank's longer slow with the permanent chill.
-const PAGE = { title: "Cryo Tower: paths and Retrofits (second pass)", store: "bl-tower-art-p2-cryo-r3" };
+const PAGE = { title: "Cryo Tower: paths and Retrofits (second pass)", store: "bl-tower-art-p2-cryo-r4" };
 const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], ICE = [0.75, 0.92, 1, 1], DEEP = [0.35, 0.6, 0.85, 1];
 const rnd = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
 const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
@@ -28,11 +28,11 @@ function frostShards(p, s, t0, t, n) { const age = t - t0; if (age < 0 || age > 
 
 // ---- The agent: waves of creeping mist; every enemy it reaches is chilled; permanent chill, the 4th-wave freeze and frostbite follow the paths -------
 function coldAgent(B) { return (m, t, info, s, col) => { if (!m.cold) { m.cold = {}; m.perm = {}; m.fz = {}; m.hit = {}; m.wave = -9; m.n = 0; }
-  const L1 = B.lv[0], L2 = B.lv[1], L3 = B.lv[2], constant = L3 >= 5, per = constant ? 1.2 : periodOf(B), c = info.c, gold = L1 >= 5 || L2 >= 5 || constant;
+  const L1 = B.lv[0], L2 = B.lv[1], L3 = B.lv[2], constant = L3 >= 5, per = constant ? 1.2 : periodOf(B), c = info.c, gold = L1 >= 5 || L2 >= 5;
   if (t - m.wave >= per) { m.wave = t; m.n++; }
-  const R = s * 2.3 * radiusPx(B) / 110, travel = constant ? 1 : 1.8, raw = (t - m.wave) / travel, u = Math.min(1, raw), a = 0.55 + 0.45 * (1 - Math.min(1, raw / 2)), mist = constant ? GOLD : ICE;
+  const R = s * 2.3 * radiusPx(B) / 110, travel = constant ? 1 : 1.8, raw = (t - m.wave) / travel, u = Math.min(1, raw), a = 0.55 + 0.45 * (1 - Math.min(1, raw / 2)), mist = ICE;
   ring(c, R, A(mist, 0.14), 1); for (let i = 0; i < 24; i += 2) line(add(c, mul(fa(i * TAU / 24 + t * 0.04), R)), add(c, mul(fa((i + 1) * TAU / 24 + t * 0.04), R)), A(mist, 0.28), 1.2);
-  if (constant) { disc(c, R, A(GOLD, 0.05)); disc(c, R, A(ICE, 0.05)); }
+  if (constant) { disc(c, R, A(ICE, 0.08)); }
   for (let i = 0; i < 22; i++) { const ang = rnd(i) * TAU + t * 0.1 * (i % 2 ? 1 : -1), rr = R * Math.min(constant ? 1 : u, rnd(i + 9)), p = add(c, mul(fa(ang), rr)); disc(p, s * (0.12 + 0.04 * Math.sin(t * 1.5 + i)), A(mist, 0.16 * a)); }
   const front = R * u; if (!constant && raw < 1.2) ring(c, front, A(ICE, 0.35 * (1 - raw / 1.2)), 2);
   for (const e of info.ens) { const d = dist(e.p, c), reached = constant ? d < R : raw <= 1.2 && d < front;
@@ -66,7 +66,7 @@ function station(p, L, key, k, t, i, puff, sz, tr, g, out) { const ix = "ABC".in
 const CORN = [[-10, -10], [10, -10], [10, 10], [-10, 10]], EDGE = [[0, -12.2, -Math.PI / 2], [0, 12.2, Math.PI / 2], [-12.2, 0, Math.PI], [12.2, 0, 0]];
 const P2 = {
   tower: "cryo", look: "B", anim: "C",
-  intro: "Round 3: every stage is picked and drawn as one model, nothing left to choose (Path 1: Cooling Coils, Cryo Pumps, Permafrost Drills, Cryo Reactors, Gold-Core Reactors; the gold-core reactors are smaller, your note). Use the build preview to check combinations. Round 2: your Path 2 (all C, Ice Crystals) and Path 3 (all A, Swept Fan) picks are drawn, Deep Cold is the Vent Row, and the Coolant Tank (spherical) makes the central box circular. Path 1 (Slowing) and the Compressor show all-new ideas (your notes): Path 1 rebuilds the corner stations as coils, snow guns and flasks, then pumps, dewars and exchangers, then pylons, domes and drills, then reactors, beacons and rime generators, then gold versions. Round 1: every step rebuilds a part, in all four places at once. Path 1 (Slowing) rebuilds the four corner stations (tanks, vaults or crystals that grow bigger and colder; the mastery adds gold). Path 2 (Power/Range) rebuilds the frost rim on the middle of each edge (jagged frost that grows into a gold-tipped crown) and widens the range. Path 3 (Speed) rebuilds the big fan in the middle and speeds the waves up; the mastery makes a constant gold field. Permafrost keeps a faint frost ring on enemies outside the range, Deep Freeze freezes them solid on every 4th wave, and frostbite shows ice shards falling on each hit enemy. The Retrofits add a coolant tank, a compressor or frost-white vents. Overlapping Retrofits are kept and stack (the carpet rule). Unpicked steps show option A.",
+  intro: "Round 4: your notes: with the Coolant Tank the ice spines now sit round the circular housing instead of floating, and the Coolant Tank has no external tank (the round housing is the Retrofit); at the Path 3 mastery only the fan blades are gold (the ring, hub, light and the mist stay ice-coloured). Round 3: every stage is picked and drawn as one model, nothing left to choose (Path 1: Cooling Coils, Cryo Pumps, Permafrost Drills, Cryo Reactors, Gold-Core Reactors; the gold-core reactors are smaller, your note). Use the build preview to check combinations. Round 2: your Path 2 (all C, Ice Crystals) and Path 3 (all A, Swept Fan) picks are drawn, Deep Cold is the Vent Row, and the Coolant Tank (spherical) makes the central box circular. Path 1 (Slowing) and the Compressor show all-new ideas (your notes): Path 1 rebuilds the corner stations as coils, snow guns and flasks, then pumps, dewars and exchangers, then pylons, domes and drills, then reactors, beacons and rime generators, then gold versions. Round 1: every step rebuilds a part, in all four places at once. Path 1 (Slowing) rebuilds the four corner stations (tanks, vaults or crystals that grow bigger and colder; the mastery adds gold). Path 2 (Power/Range) rebuilds the frost rim on the middle of each edge (jagged frost that grows into a gold-tipped crown) and widens the range. Path 3 (Speed) rebuilds the big fan in the middle and speeds the waves up; the mastery makes a constant gold field. Permafrost keeps a faint frost ring on enemies outside the range, Deep Freeze freezes them solid on every 4th wave, and frostbite shows ice shards falling on each hit enemy. The Retrofits add a coolant tank, a compressor or frost-white vents. Overlapping Retrofits are kept and stack (the carpet rule). Unpicked steps show option A.",
   mods(B) { return { period: 1, flight: 1, multi: false, persist: coldAgent(B) }; },
   muzzleAt(B, m, kk, c) { return c; },
   model(c, aim, s, fx, t, col, info, B) {
@@ -77,9 +77,9 @@ const P2 = {
     // ---- Path 2: the frost rim on the middle of each edge (rebuilt each step; the new design replaces the old) -------------------------------------------
     if (L2 > 0) { const key = B.key("p1s" + (L2 - 1)), len = [0, 2.4, 3.2, 4.2, 5.2, 6][L2], n = L2 + 2;
       EDGE.forEach(([x, y, a]) => { const p = S(x, y), d = fa(a), o = orth(d), tip = (f) => (g2 ? GOLD : ICE);
-        if (key === "A") for (let j = -n; j <= n; j++) { const q = add(p, mul(o, j * 1.5 * k)), h = len * (1 - Math.abs(j) / (n + 2) * 0.45); fill(q, [[0, -0.7], [h, 0], [0, 0.7]], ICE, a, k); if (g2) fill(add(q, mul(d, h * 0.62 * k)), [[0, -0.3], [h * 0.38, 0], [0, 0.3]], GOLD, a, k); }   // a row of ice spikes
+        if (key === "A") for (let j = -n; j <= n; j++) { const aj = a + j * 1.5 / 11.6, q = rnd0 ? add(c, mul(fa(aj), 11.2 * k)) : add(p, mul(o, j * 1.5 * k)), ra = rnd0 ? aj : a, dd = fa(ra), h = len * (1 - Math.abs(j) / (n + 2) * 0.45); fill(q, [[0, -0.7], [h, 0], [0, 0.7]], ICE, ra, k); if (g2) fill(add(q, mul(dd, h * 0.62 * k)), [[0, -0.3], [h * 0.38, 0], [0, 0.3]], GOLD, ra, k); }   // a row of ice spikes
         if (key === "B") for (let j = -n; j <= n; j++) { const aa = a + j * (0.45 / (n + 1)) * 2, q = add(p, mul(d, -1 * k)); fill(q, [[0, -0.5], [len + 1.2, 0], [0, 0.5]], j % 2 ? DEEP : ICE, aa, k); if (g2) disc(add(q, mul(fa(aa), (len + 1.2) * k)), 0.6 * k, GOLD); }   // a fan of spikes
-        if (key === "C") for (let j = -Math.ceil(n / 2); j <= Math.ceil(n / 2); j++) { const q = add(p, mul(o, j * 2.3 * k)), h = len * (1 - Math.abs(j) * 0.18); fill(q, [[0, -1], [h * 0.5, -1.2], [h, 0], [h * 0.5, 1.2], [0, 1]], mix(ICE, DEEP, 0.2), a, k); line(q, add(q, mul(d, h * k)), [1, 1, 1, 0.7], 0.7 * k); if (g2) glowDot(add(q, mul(d, h * k)), 0.5 * k, GOLD); }   // chunky ice crystals
+        if (key === "C") for (let j = -Math.ceil(n / 2); j <= Math.ceil(n / 2); j++) { const aj = a + j * 2.3 / 11.6, q = rnd0 ? add(c, mul(fa(aj), 11.2 * k)) : add(p, mul(o, j * 2.3 * k)), ra = rnd0 ? aj : a, dd = fa(ra), h = len * (1 - Math.abs(j) * 0.18); fill(q, [[0, -1], [h * 0.5, -1.2], [h, 0], [h * 0.5, 1.2], [0, 1]], mix(ICE, DEEP, 0.2), ra, k); line(q, add(q, mul(dd, h * k)), [1, 1, 1, 0.7], 0.7 * k); if (g2) glowDot(add(q, mul(dd, h * k)), 0.5 * k, GOLD); }   // chunky ice crystals
       }); }
     // ---- Path 1: a station in each corner, rebuilt each step (round 2: all new designs) -----------------------------------------------------------------------
     if (L1 > 0) { const key = B.key("p0s" + (L1 - 1)), sz = [0, 2.4, 2.9, 3.3, 3.7, 4.1][L1], tr = g1 ? GOLD : ICE;
@@ -87,17 +87,17 @@ const P2 = {
     // ---- Path 3: the big fan in the middle, rebuilt each step (more blades, tighter housing, vents); gold and constant at the mastery -----------------------
     { const key = L3 > 0 ? B.key("p2s" + (L3 - 1)) : "A", nb = 5 + Math.min(L3, 4), fc = g3 ? GOLD : METAL_L;
       disc(c, 8.6 * k, OUTLINE); disc(c, 8 * k, METAL_D);
-      if (key === "B" && L3 > 0) { ring(c, 8.2 * k, g3 ? GOLD : METAL_L, 1.6 * k); for (let j = 0; j < 8; j++) disc(add(c, mul(fa(j * TAU / 8 + 0.2), 8.2 * k)), 0.55 * k, g3 ? GOLD : STEEL); }   // a ducted shroud
-      if (key === "C" && L3 > 0) for (let j = 0; j < 6 + L3; j++) { const a = j * TAU / (6 + L3); fill(add(c, mul(fa(a), 8.6 * k)), [[0, -1], [1.8, 0], [0, 1]], g3 ? GOLD : ICE, a, k); }   // a ring of vent nozzles
+      if (key === "B" && L3 > 0) { ring(c, 8.2 * k, METAL_L, 1.6 * k); for (let j = 0; j < 8; j++) disc(add(c, mul(fa(j * TAU / 8 + 0.2), 8.2 * k)), 0.55 * k, STEEL); }   // a ducted shroud
+      if (key === "C" && L3 > 0) for (let j = 0; j < 6 + L3; j++) { const a = j * TAU / (6 + L3); fill(add(c, mul(fa(a), 8.6 * k)), [[0, -1], [1.8, 0], [0, 1]], ICE, a, k); }   // a ring of vent nozzles
       for (let j = 0; j < nb; j++) { const a = mm.fan + j * TAU / nb;
         if (key === "A" && L3 > 0) { const pts = []; for (let q = 0; q <= 5; q++) pts.push(add(c, mul(fa(a + q * 0.13), (1.4 + q * 1.15) * k))); polyline(pts, OUTLINE, 3 * k); polyline(pts, fc, 1.8 * k); }   // swept turbine blades
         else fill(c, [[1.4, 0], [7, 1.8], [7, -1.4]], fc, a, k); }
-      ring(c, 8 * k, g3 ? GOLD : METAL, 1.2 * k); orb(c, 1.9 * k, g3 ? GOLD : METAL); glowDot(c, (1 + puff + (g3 ? 0.5 : 0)) * k, g3 ? GOLD : col); }
+      ring(c, 8 * k, METAL, 1.2 * k); orb(c, 1.9 * k, METAL); glowDot(c, (1 + puff) * k, col); }                  // only the blades turn gold at the mastery
     // ---- The Retrofits: a coolant tank (left), a compressor (right) or frost-white vents (bottom) -------------------------------------------------------------
     if (B.r === 0) { const p = S(-15.4, 0);
       if (R === "A") { plate(p, rectPts(2.6, 5.4), METAL_L, 0, k, 1.2); for (let j = -1; j <= 1; j++) line(add(p, [-2.6 * k, j * 2.4 * k]), add(p, [2.6 * k, j * 2.4 * k]), STEEL, 0.9 * k); fill(add(p, [0, -5.4 * k]), [[-2.6, 0], [2.6, 0], [0, -1.6]], A(ICE, 0.9), 0, k); }                           // a frosted side tank
       if (R === "B") for (const y of [-3, 3]) { const q = add(p, [0, y * k]); disc(q, 2.5 * k, OUTLINE); disc(q, 2.1 * k, METAL_L); disc(q, 1.1 * k, A(ICE, 0.9)); ring(q, 1.7 * k, STEEL, 0.8 * k); }                                          // twin tanks
-      if (R === "C") { disc(p, 4 * k, OUTLINE); orb(p, 3.6 * k, mix(METAL_L, ICE, 0.3)); ring(p, 3.6 * k, A(ICE, 0.7), 1 * k); line(add(p, [-3.6 * k, 0]), add(p, [3.6 * k, 0]), STEEL, 0.9 * k); } }                                         // a spherical tank
+      /* option C: no external tank; the round housing is the whole Retrofit */ }                                         // a spherical tank
     if (B.r === 1) { const p = S(15.4, 0), hum = Math.sin(t * 40) * 0.2;
       if (R === "A") { disc(add(p, [hum * k, 0]), 3.6 * k, OUTLINE); plate(add(p, [hum * k, 0]), rectPts(3.2, 4.4), METAL_L, 0, k, 1.2); for (let j = 0; j < 3; j++) ring(add(p, [hum * k, (-2.6 + j * 2.6) * k]), 2.6 * k, STEEL, 0.9 * k); disc(add(p, [(3.2 + hum) * k, 0]), 1 * k, METAL_D); glowDot(add(p, [hum * k, 0]), 0.45 * k, col); }                                          // a humming compressor drum with rings
       if (R === "B") { const a = S(14.2, -3.2), b = S(14.2, 3.2), ph = t * 5; disc(a, 2 * k, OUTLINE); disc(a, 1.6 * k, METAL_L); disc(b, 2.6 * k, OUTLINE); disc(b, 2.2 * k, METAL_L); bar(add(a, [0, -2 * k]), add(b, [0, -2.6 * k]), 0.8 * k, [0.1, 0.1, 0.12, 1]);
@@ -137,7 +137,7 @@ P2.paths = [
   ] },
 ];
 P2.retrofits = [
-  { name: "Coolant Tank", cost: 80, effect: "The slow lasts 2.2 s (stacks with the permanent chill)", options: T(["Side Tank", "A frosted tank with bands on the left side."], ["Twin Tanks", "Two small frosted tanks on the left side."], ["Spherical Tank", "A frosted spherical tank on the left side."]) },
+  { name: "Coolant Tank", cost: 80, effect: "The slow lasts 2.2 s (stacks with the permanent chill)", options: T(["Side Tank", "A frosted tank with bands on the left side."], ["Twin Tanks", "Two small frosted tanks on the left side."], ["Round Housing", "The central box becomes a circular housing, with the ice spines round its rim; no external tank."]) },
   { name: "Compressor", cost: 35, effect: "A wave every 1.7 s (stacks with the Speed path)", options: T(["Compressor Drum", "A humming compressor drum with rings on the right side."], ["Belt Drive", "Two belt-driven pulleys on the right side."], ["Radial Compressor", "A spinning impeller in a snail casing on the right side."]) },
   { name: "Deep Cold", cost: 75, effect: "Slow +5% (stacks with the Slowing path)", options: T(["Vent Row", "A row of frost-white vents along the bottom edge."], ["Vent Domes", "Three frost-white vent domes on the bottom edge."], ["Frost Louvres", "Three frost-white louvre vents on the bottom edge."]) },
 ];
