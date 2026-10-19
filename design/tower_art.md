@@ -387,6 +387,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 10 | CAS Gunship | `design/tower_art_p2_10_cas.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | **Confirmed** (owner, 2026-10-19: "finished") |
+| 13 | Boost Tower | `design/tower_art_p2_13_boost.html` | Round 1: three options per stage; awaiting picks |
 
 ### Gun Turret (second pass)
 
@@ -1034,6 +1035,19 @@ something else by "tower frame" (the columns, say), tell me.
   floating off the first nozzle.
 - The stills are rounder: the twin stills stand on a capsule-shaped base (it was a square plate), and a single pump hall is an octagon.
 
+### Boost Tower (second pass)
+
+**Retrofits kept, stats stacking (the carpet rule).** Signal Booster (radius 168 px and +5% to all three boosts) overlaps the paths' boost steps; it is kept and the +5% stacks on top.
+Crit Link and Wide Mast overlap no path step (Wide Mast widens the radius only; no path does).
+
+**Round 1 (Claude):** one parametric model (base look F Signal Drum, animation F Overcharge Sparks), built with the owner's Chemical Plant note in mind (upgrades change structure).
+- **Each path owns an emitter module on the drum's top** (damage orange at 90 degrees, speed cyan at 210, range lime at 330). Every step builds another tier onto that module, in the shape
+  the option picks (round, square or triangular); the module grows wider and taller, and turns gold at the mastery.
+- **Boosted towers** show a stack of chevrons for each stat (orange, cyan, lime): one each at stock, more with each path level, gold at the mastery.
+- **Retrofits rebuild the tower:** Signal Booster an antenna mast, a loop antenna or a spire at the centre (and a wider faint radius ring); Crit Link a gold ring, collar or crown (and a gold crit spark
+  by each boosted tower); Wide Mast a lattice frame, braced truss legs or a spoked ring (the widest radius ring).
+- The faint boost radius ring and the sparks that jump to each boosted tower in turn are in the preview.
+
 ## Open questions
 
-1. **Second pass, Boost Tower** (tower 13): round 1 page being built. Then towers 14-20.
+1. **Second pass, Boost Tower** (tower 13, round 1): pick one option per stage and Retrofit. Then towers 14-20 (next: Radar Tower).
