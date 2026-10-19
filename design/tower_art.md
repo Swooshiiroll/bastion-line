@@ -390,7 +390,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 13 | Boost Tower | `design/tower_art_p2_13_boost.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 15 | Cryo Tower | `design/tower_art_p2_15_cryo.html` | **Confirmed** (owner, 2026-10-19: "Finished"; Deep Cold C Frost Collar) |
-| 16 | Shockwave Generator | `design/tower_art_p2_16_shock.html` | Round 2: Speed and Effect redesigned; awaiting picks |
+| 16 | Shockwave Generator | `design/tower_art_p2_16_shock.html` | Round 3: Path 3 new direction; awaiting Path 3 picks |
 
 ### Gun Turret (second pass)
 
@@ -1128,6 +1128,9 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
 **Picks (owner, round 1):** Path 1: 1 A Fuel Rods, 2 B Dense Sphere, 3 B Corona Sphere, 4 C Gyro Rings, M C Gyro Rings (white-hot). Path 2 and 3: none ("Change the idea for these. Visual changes rather than adding little things"). Retrofits: Wave Focus none, Containment Coils none, Reactor Venting C. **Notes:** "Dont make these ones gold, make them brigter" (Path 1); "For Reactor Venting, merge option A and C. Have smoke bellow out each burst".
 **Round 2:** Path 1 is white-hot (a bloom) at the mastery instead of gold, as are the waves and the ring glow. Path 2 (Speed) now rebuilds the containment ring itself: turning segments, a flywheel or a turbine that spins faster at each step (gold at the mastery). Path 3 (Effect) now rebuilds the three clamps as big violet resonators (tuning forks, ripple drums or crystals) that grow at each step (gold at the mastery). Reactor Venting C merges the stacks and the blast vents, and grey smoke billows out of each corner with every burst. Wave Focus and Containment Coils show their three options again. The owner's "not gold" note was for Path 1 only; the other masteries stay gold.
 
+**Picks (owner, round 2):** Path 1: 1 A, 2 B, 3 B, 4 C, M C. Path 2: every step and the mastery C (Turbine Ring). Path 3: none. Retrofits: Wave Focus C Focus Collar, Containment Coils C Toroid Coils, Reactor Venting C. **Notes:** "Move all paths the gyro rings" (Path 1); "Move a completely different design direction. modify the tower" (Path 3); "Increase the force of the smoke releasing and give the particles a lifetime, rather than tying them to the animation cycle".
+**Round 3:** Path 1 uses the gyro rings at every step (my reading of the unclear Path 1 note; to be confirmed by the owner). Path 2 is the Turbine Ring throughout. Path 3 is a new direction that modifies the tower itself: a violet cage (posts and bars, then bracing, humming strings and corner breaker wedges), a shield dome (ribs, a pulsing ring, fracture lines) or a halo of prism spikes (more and longer at each step), built round the ring; gold at the mastery. The Reactor Venting smoke is a real particle system in the agent: 9 puffs per corner per burst, thrown out hard and slowing with drag, each living 2.4 to 3.6 s on its own clock.
+
 ## Open questions
 
-1. **Second pass, Shockwave Generator** (tower 16, round 2): pick Path 2, Path 3, Wave Focus and Containment Coils. Then towers 17-20 (next: Scrapyard).
+1. **Second pass, Shockwave Generator** (tower 16, round 3): pick Path 3 and confirm the Path 1 reading. Then towers 17-20 (next: Scrapyard).
