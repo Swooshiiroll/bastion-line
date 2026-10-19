@@ -390,7 +390,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 13 | Boost Tower | `design/tower_art_p2_13_boost.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 15 | Cryo Tower | `design/tower_art_p2_15_cryo.html` | **Confirmed** (owner, 2026-10-19: "Finished"; Deep Cold C Frost Collar) |
-| 16 | Shockwave Generator | `design/tower_art_p2_16_shock.html` | Round 1: pick one option per stage and Retrofit |
+| 16 | Shockwave Generator | `design/tower_art_p2_16_shock.html` | Round 2: Speed and Effect redesigned; awaiting picks |
 
 ### Gun Turret (second pass)
 
@@ -1125,6 +1125,9 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
 - **Retrofits:** Wave Focus (focus ring, lens array or focus collar round the core), Containment Coils (glowing coils, coil cage or toroids round the core), Reactor Venting (stacks, louvres or blast vents at the corners).
 - **Carpet-rule overlaps (kept, stacking):** Wave Focus's +15 px with the path-1 radius; Containment Coils' +10 damage with the path-1 damage; Reactor Venting's 1.5 s wave with the path-2 wave rate.
 
+**Picks (owner, round 1):** Path 1: 1 A Fuel Rods, 2 B Dense Sphere, 3 B Corona Sphere, 4 C Gyro Rings, M C Gyro Rings (white-hot). Path 2 and 3: none ("Change the idea for these. Visual changes rather than adding little things"). Retrofits: Wave Focus none, Containment Coils none, Reactor Venting C. **Notes:** "Dont make these ones gold, make them brigter" (Path 1); "For Reactor Venting, merge option A and C. Have smoke bellow out each burst".
+**Round 2:** Path 1 is white-hot (a bloom) at the mastery instead of gold, as are the waves and the ring glow. Path 2 (Speed) now rebuilds the containment ring itself: turning segments, a flywheel or a turbine that spins faster at each step (gold at the mastery). Path 3 (Effect) now rebuilds the three clamps as big violet resonators (tuning forks, ripple drums or crystals) that grow at each step (gold at the mastery). Reactor Venting C merges the stacks and the blast vents, and grey smoke billows out of each corner with every burst. Wave Focus and Containment Coils show their three options again. The owner's "not gold" note was for Path 1 only; the other masteries stay gold.
+
 ## Open questions
 
-1. **Second pass, Shockwave Generator** (tower 16, round 1): pick one option per stage and Retrofit. Then towers 17-20 (next: Scrapyard).
+1. **Second pass, Shockwave Generator** (tower 16, round 2): pick Path 2, Path 3, Wave Focus and Containment Coils. Then towers 17-20 (next: Scrapyard).
