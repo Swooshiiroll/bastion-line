@@ -388,7 +388,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 13 | Boost Tower | `design/tower_art_p2_13_boost.html` | **Confirmed** (owner, 2026-10-19: "finished") |
-| 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | Round 10: all scan lines from the antenna light, beam centred; awaiting confirm |
+| 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | Round 11: scan-line changes reverted; awaiting confirm |
 
 ### Gun Turret (second pass)
 
@@ -1084,6 +1084,8 @@ Base: look A Dish Mast, animation B Sweep Beam (the sweep follows the dish). Eve
 
 **Round 10 (owner notes):** "I mean all scan lines in general. The scan lines are also not centered". Every scan line (the normal sweep as well as Constant Track's) now starts at the antenna light. The sweep beam used to trail behind its line (the line sat on the beam's edge); it is now a beam centred on the line, brightest in the middle, and an enemy is revealed as the line passes over its middle.
 
+**Round 11 (owner notes):** "I mean the bright laser line is not centered evenly. Revert the changes with the scanlines". The scan-line changes of rounds 9 and 10 are reverted: the scan lines and the sweep beam start at the centre of the tower again, with the beam trailing behind its line, as in round 8. The gold antenna lights from round 9 stay. Open: the bright laser line (the thin line at the head of the beam) still isn't evenly centred; the owner hasn't said what it should be centred on.
+
 ## Open questions
 
-1. **Second pass, Radar Tower** (tower 14, round 10): confirm. Then towers 15-20 (next: Cryo Tower).
+1. **Second pass, Radar Tower** (tower 14, round 11): confirm, or say what the bright laser line should be centred on. Then towers 15-20 (next: Cryo Tower).
