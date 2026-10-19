@@ -386,7 +386,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 9 | Drone Bay | `design/tower_art_p2_09_drones.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 10 | CAS Gunship | `design/tower_art_p2_10_cas.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
-| 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | Round 2: Acid picks drawn; Speed, Slowing and Retrofits redesigned; awaiting picks |
+| 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | Round 3: picks drawn, notes applied; awaiting High-Flow Pump pick |
 
 ### Gun Turret (second pass)
 
@@ -999,6 +999,19 @@ designs to change the structure more than add little things here and there."
   cooling tower or cooling coil (Setting Glue); a gold foam dome, cannon or silo (Quick-Set Foam). The Retrofits likewise: a pump house, tower or skid; a fan
   head, mist manifold or ring head; larger, extra or double-height columns.
 
+**Picks (owner, round 2):** Speed 1 B (Direct Feed), 2 C (Ring Main), 3 B (Twin Stills), 4 none, M B; Slowing 1 B (Gel Ring Main), 2 A, 3 B, 4 C (Cooling Coil), M A (Gold Foam Dome);
+Retrofits Pressure Pump A, Mist Nozzle A (Fan Head), Bigger Tanks A (Larger Columns). **Notes:** "Twin Nozzles should have two independent sprayers." "Make any column
+changes apply to all columns." "Change the pump house design."
+
+**Round 3 (Claude):**
+- **Twin Nozzles are two independent sprayers:** each has its own pipe and head (and its own hub in the Twin Turrets look) and turns to its own enemy, so two
+  different enemies are sprayed at the same time. The second sprayer follows the first when only one enemy is in reach.
+- **Column changes apply to all columns:** the gel columns (Sticky Gel, Thick Gel's gel coat), the glue halls, towers and stacks (Glue) and the gold foam silos
+  (Quick-Set Foam) are now on every column, not just one. (Sticky Gel A is now "Gel Columns" and Thick Gel A "Gel-Coated Columns".)
+- **A new Pump House:** a roofed building on the deck beside the plant, with a flywheel that spins up as it sprays and a chimney that puffs, piped
+  into the still (it was a box beside the still).
+- **High-Flow Pump** (Speed step 4) was left unpicked, so its three options show again.
+
 ## Open questions
 
-1. **Second pass, Chemical Plant** (tower 12, round 2): pick Speed, Slowing and the Retrofits. Then towers 13-20 (next: Boost Tower).
+1. **Second pass, Chemical Plant** (tower 12, round 3): pick High-Flow Pump; confirm. Then towers 13-20 (next: Boost Tower).
