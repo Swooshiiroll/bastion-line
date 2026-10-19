@@ -388,7 +388,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 13 | Boost Tower | `design/tower_art_p2_13_boost.html` | **Confirmed** (owner, 2026-10-19: "finished") |
-| 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | Round 14: turrets rest, then swing freely to targets; awaiting confirm |
+| 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | Round 15: turrets hold their last aim; awaiting confirm |
 
 ### Gun Turret (second pass)
 
@@ -1092,6 +1092,8 @@ Base: look A Dish Mast, animation B Sweep Beam (the sweep follows the dish). Eve
 
 **Round 14 (owner note):** "Make the tracker turrets not rotate but track enemies freely". The tracker turrets no longer spin while idle: they rest pointing outward from their corner, and swing freely (through any angle, smoothly) to the revealed enemy they follow, then return to rest when nothing is revealed.
 
+**Round 15 (owner note):** "They can rotate, but they dont spin like the main dish. They're free moving. They dont reset position after a target lock is lost, they sit until another enemy comes in range". The tracker turrets turn freely to follow a revealed enemy (no spinning, no idle sweep), and when the lock is lost they stay at their last aim until another enemy is revealed in range. They start pointing outward from their corner.
+
 ## Open questions
 
-1. **Second pass, Radar Tower** (tower 14, round 14): confirm. Then towers 15-20 (next: Cryo Tower).
+1. **Second pass, Radar Tower** (tower 14, round 15): confirm. Then towers 15-20 (next: Cryo Tower).
