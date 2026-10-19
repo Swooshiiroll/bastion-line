@@ -385,7 +385,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 8 | Tesla Tower | `design/tower_art_p2_08_tesla.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 9 | Drone Bay | `design/tower_art_p2_09_drones.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 10 | CAS Gunship | `design/tower_art_p2_10_cas.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
-| 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | Round 4: all picks drawn, notes applied; awaiting confirm |
+| 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | Round 5: picks drawn, notes applied, Long Arm open again; awaiting picks |
 
 ### Gun Turret (second pass)
 
@@ -940,6 +940,12 @@ launcher as it gets longer."
   is about 23 px, down from 37 px.
 - The launcher carries a band every 6 px, so it gains a band as it lengthens (two bands at stock, four at the mastery).
 
+**Notes (owner, round 4 paste):** "Remove the wide flange from the launcher. The visual effects should only be on the mine canister itself." Long Arm was
+left unpicked (the length note repeated, and was already applied last round).
+- The Wider Charge flange is now drawn only on the thrown mine (in flight and on the track). It no longer appears on the magazine canisters or on
+  the mine waiting on the rails.
+- Long Arm shows its three options again for a pick.
+
 ## Open questions
 
-1. **Second pass, Mine Layer** (tower 11, round 4): confirm. Then towers 12-20 (next: Chemical Plant).
+1. **Second pass, Mine Layer** (tower 11, round 5): pick the Long Arm; confirm. Then towers 12-20 (next: Chemical Plant).
