@@ -385,7 +385,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 8 | Tesla Tower | `design/tower_art_p2_08_tesla.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 9 | Drone Bay | `design/tower_art_p2_09_drones.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 10 | CAS Gunship | `design/tower_art_p2_10_cas.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
-| 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | Round 6: Conveyor Feed replaced by Adhesive Mines; awaiting its pick |
+| 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | Round 7: Wider Charge has three new looks; awaiting its pick |
 
 ### Gun Turret (second pass)
 
@@ -957,6 +957,11 @@ a glossy gel coat with drips on every mine (A), a gel tank with a hose on the de
 puddle on the track after each blast (it lingers 2 s and fades). The Production path no longer gets a Retrofit bonus to its toss gap or cap.
 Shaped Charges (A) and Long Arm (A) are picked.
 
+**Note (owner, round 6 paste):** "Remove the wide flange. Let's change this upgrade." Wider Charge (Power step 2) now has three new looks, all on the mine
+canister itself and inside its outline (nothing sticks out round it): a raised charge dome (A), a ring of steel charge studs (B) and two red
+blast bands (C). The blast keeps its shock ring. The flange is gone everywhere. Adhesive Mines is picked (Gel Coating); Shaped Charges and
+Long Arm are picked.
+
 ## Open questions
 
-1. **Second pass, Mine Layer** (tower 11, round 6): pick the Adhesive Mines look; confirm. Then towers 12-20 (next: Chemical Plant).
+1. **Second pass, Mine Layer** (tower 11, round 7): pick Wider Charge; confirm. Then towers 12-20 (next: Chemical Plant).

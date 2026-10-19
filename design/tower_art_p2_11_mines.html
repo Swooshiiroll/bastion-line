@@ -65,7 +65,7 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Tower rework · Tower art · second pass · tower 11 of 20 · round 6</div>
+    <div class="eyebrow">Bastion Line · Tower rework · Tower art · second pass · tower 11 of 20 · round 7</div>
     <h1>Tower art: Mine Layer paths and Retrofits</h1>
     <p class="note">Second pass for one tower: <b>every upgrade step and mastery</b> on each path, and each <b>Retrofit</b>, adds or changes a detail on the confirmed model. Each card shows the model with that path's earlier steps (your picks, or option A until you pick) plus the candidate. Pick one of three per step, add notes per path, then <b>Copy picks and notes</b>.</p>
     <ul class="rules">
@@ -706,7 +706,7 @@ const NO_BOOT = true;
 // stacking (the carpet rule): Shaped Charges adds to Heavier Charge and Long Arm to Longer Arm (the Conveyor Feed was replaced by Adhesive Mines).
 // Geometry (game px): a round mount r 10 with a magazine of canisters behind it and two rails ahead (x -2 to 15); a mine
 // is a squat canister (r 3.6) with a glowing band that blinks while it waits on the track.
-const PAGE = { title: "Mine Layer: paths and Retrofits (second pass)", store: "bl-tower-art-p2-mines-r6" };
+const PAGE = { title: "Mine Layer: paths and Retrofits (second pass)", store: "bl-tower-art-p2-mines-r7" };
 const GEL = [0.65, 0.9, 0.2, 1], TANKG = [0.3, 0.45, 0.15, 1], GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], RED = [0.85, 0.2, 0.18, 1], YEL = [1, 0.85, 0.2, 1], ORANGE = [1, 0.55, 0.2, 1];
 const rnd2 = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
 const Kp = (B, pi, k) => (B.lv[pi] > k ? B.key("p" + pi + "s" + k) : null);
@@ -721,15 +721,14 @@ const RANGE = [120, 140, 160, 190, 220, 260];
 const railExt = (B) => [0, 1.5, 3, 4.5, 6, 8][B.lv[2]] + (B.r === 2 ? 1.5 : 0); // the rails simply get longer, in small steps (owner: the end length was too long)
 
 // ---- The mine: a canister whose look follows the Power steps and the Shaped Charges Retrofit -----------------------------
-// The Wider Charge flange belongs to the thrown mine only (owner): never on the launcher, so not on the magazine canisters or the mine ready on the rails.
+// Every Power effect lives on the mine canister itself, inside its outline (owner): nothing sticks out round it and nothing is on the launcher.
 function drawMine(B, p, k, t, col, blink, mini, onLauncher) {
   const P1 = Kp(B, 0, 0), P2m = Kp(B, 0, 1), P3 = Kp(B, 0, 2), P4 = Kp(B, 0, 3), PM = Kp(B, 0, 4), z = (P1 ? 1.12 : 1) * (PM ? 1.25 : 1) * (mini ? 0.55 : 1), r = 3.6 * k * z;
   ellipse(add(p, [k * 0.8, k * 1.6]), 4 * k * z, 1.8 * k * z, [0, 0, 0, 0.3]);
-  const flange = !mini && !onLauncher ? P2m : null;
-  if (flange === "A") { disc(p, r * 1.32, OUTLINE); disc(p, r * 1.24, METAL_D); }                                        // a flared skirt
-  if (flange === "B") { disc(p, r * 1.3, OUTLINE); disc(p, r * 1.22, STEEL); for (let i = 0; i < 8; i++) disc(add(p, mul(fa(i * TAU / 8 + 0.2), r * 1.22)), 0.45 * k * z, METAL_L); }  // a wide flange with tabs
-  if (flange === "C") { disc(p, r * 1.2, OUTLINE); disc(p, r * 1.13, dk(METAL, 0.2)); for (let i = 0; i < 4; i++) disc(add(p, mul(fa(i * Math.PI / 2 + 0.4), r * 1.13)), 0.5 * k * z, METAL_L); } // a blast collar with bolts
   disc(p, r, OUTLINE); disc(p, r * 0.86, P3 ? [0.2, 0.2, 0.22, 1] : METAL_L);
+  if (P2m === "A") { orb(p, r * 0.5, P3 ? [0.3, 0.3, 0.33, 1] : METAL_L); ring(p, r * 0.5, WHITE, 0.6 * k * z); }                                  // a raised charge dome
+  if (P2m === "B") for (let i = 0; i < 8; i++) disc(add(p, mul(fa(i * TAU / 8 + 0.2), r * 0.72)), 0.42 * k * z, STEEL);                          // a ring of charge studs
+  if (P2m === "C") for (const sg of [-1, 1]) line(add(p, [-r * 0.66, sg * r * 0.3]), add(p, [r * 0.66, sg * r * 0.3]), RED, 0.8 * k * z);       // two red blast bands
   if (PM) { ring(p, r * 0.95, GOLD, 1 * k); ring(p, r * 0.55, GOLD, 0.7 * k); }
   if (P3) ring(p, r * 0.62, YEL, 0.9 * k * z);
   if (P4) for (let i = 0; i < 6; i++) line(add(p, mul(fa(i * TAU / 6), r * 0.25)), add(p, mul(fa(i * TAU / 6), r * 0.85)), [0, 0, 0, 0.5], 0.5 * k);
@@ -846,9 +845,9 @@ const P2 = {
         { key: "B", name: "Heavy Rail Clamps", desc: "Thick clamps on both rails; the mines are a size bigger." },
         { key: "C", name: "Charge Hopper", desc: "A charge hopper behind the magazine; the mines are a size bigger." } ] },
       { name: "Wider Charge", cost: 265, effect: "50 px blast", options: [
-        { key: "A", name: "Flared Skirt", desc: "A flared skirt round each mine; the blast is wider, with a shock ring." },
-        { key: "B", name: "Wide Flange", desc: "A wide steel flange with tabs round each mine; a wider blast with a shock ring." },
-        { key: "C", name: "Blast Collar", desc: "A bolted blast collar round each mine; a wider blast with a shock ring." } ] },
+        { key: "A", name: "Charge Dome", desc: "A raised charge dome on top of each mine canister; the blast is wider, with a shock ring." },
+        { key: "B", name: "Charge Studs", desc: "A ring of steel charge studs round the face of each mine canister; a wider blast with a shock ring." },
+        { key: "C", name: "Blast Bands", desc: "Two red blast bands across each mine canister; a wider blast with a shock ring." } ] },
       { name: "HE Mines", cost: 1190, effect: "125 damage (primary)", options: [
         { key: "A", name: "HE-Banded Canisters", desc: "Yellow bands on the magazine canisters; dark mines with a yellow band." },
         { key: "B", name: "Red Fuse Box", desc: "A fuse box with a red lamp; dark yellow-banded mines." },
@@ -926,11 +925,10 @@ P2.picks = {};
 
 // ---- Round 2 (owner's picks and notes, 2026-10-18): picked stages show only the pick (re-described where a note changed it);
 // Quick Assembly and Twin Press show new ideas.
-P2.intro = "Round 6: the Conveyor Feed Retrofit is replaced by Adhesive Mines (your pick): gel-coated mines or a gel tank, and each blast leaves a sticky gel puddle that slows enemies. Long Arm is picked (Long Arm Rails). Round 5: the wide flange is only on the thrown mine, never on the launcher; Long Arm shows its three options again. Round 4: all your picks drawn with your latest notes: the two launchers are identical and centred on the circle and the mines alternate between them, the central eye is bigger, the belt runs on over the mount to the launcher in the centre, the notched rotunda only appears from Rapid Line, and the rails are simply longer (no thickened parts). Round 2's notes still apply: only the three original canisters sit behind the tower; Wider Charge changes the mine (a flange round it) rather than the thrower; the Assembly Line feeds straight into the centre; the Servo Motors sit on the mount and speed its ring of ticks up (the rotunda); the Mine Mortar and Long Mortar stretch the original rails instead of adding pieces; the Long Arm replaces the rails with longer ones. Use the build preview to check combinations.";
-P2.picks = { p0s0: "B", p0s1: "B", p0s2: "A", p0s3: "A", p0s4: "A", p1s0: "C", p1s1: "A", p1s2: "A", p1s3: "A", p1s4: "A", p2s0: "A", p2s1: "A", p2s2: "B", p2s3: "A", p2s4: "C", r0: undefined, r1: "A", r2: "A" };
+P2.intro = "Round 7: the wide flange is gone and Wider Charge has three new looks, all on the mine canister itself (a raised dome, a ring of studs, or red bands); Adhesive Mines is picked (Gel Coating). Round 6: the Conveyor Feed Retrofit is replaced by Adhesive Mines (your pick): gel-coated mines or a gel tank, and each blast leaves a sticky gel puddle that slows enemies. Long Arm is picked (Long Arm Rails). Round 5: the wide flange is only on the thrown mine, never on the launcher; Long Arm shows its three options again. Round 4: all your picks drawn with your latest notes: the two launchers are identical and centred on the circle and the mines alternate between them, the central eye is bigger, the belt runs on over the mount to the launcher in the centre, the notched rotunda only appears from Rapid Line, and the rails are simply longer (no thickened parts). Round 2's notes still apply: only the three original canisters sit behind the tower; Wider Charge changes the mine (a flange round it) rather than the thrower; the Assembly Line feeds straight into the centre; the Servo Motors sit on the mount and speed its ring of ticks up (the rotunda); the Mine Mortar and Long Mortar stretch the original rails instead of adding pieces; the Long Arm replaces the rails with longer ones. Use the build preview to check combinations.";
+P2.picks = { p0s0: "B", p0s1: undefined, p0s2: "A", p0s3: "A", p0s4: "A", p1s0: "C", p1s1: "A", p1s2: "A", p1s3: "A", p1s4: "A", p2s0: "A", p2s1: "A", p2s2: "B", p2s3: "A", p2s4: "C", r0: "A", r1: "A", r2: "A" };
 P2.paths.forEach((pa, pi) => pa.steps.forEach((st, k) => { const pk = P2.picks["p" + pi + "s" + k]; if (pk) st.options = st.options.filter((o) => o.key === pk); }));
 P2.retrofits.forEach((rf, ri) => { const pk = P2.picks["r" + ri]; if (pk) rf.options = rf.options.filter((o) => o.key === pk); });
-P2.paths[0].steps[1].options[0].desc = "From your note: the wide blast belongs to the mine, not the thrower: a wide steel flange with tabs round each mine and a shock ring on the blast.";
 
 // ---- Tower art engine: previews towers aiming and firing at enemies on a lane --------------------------
 // Data (defined before this): PAGE {title, key, store}, TOWERS [...], DEFAULTS {id: {look, anim}}.
