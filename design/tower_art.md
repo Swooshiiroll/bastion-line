@@ -390,6 +390,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 13 | Boost Tower | `design/tower_art_p2_13_boost.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 15 | Cryo Tower | `design/tower_art_p2_15_cryo.html` | **Confirmed** (owner, 2026-10-19: "Finished"; Deep Cold C Frost Collar) |
+| 16 | Shockwave Generator | `design/tower_art_p2_16_shock.html` | Round 1: pick one option per stage and Retrofit |
 
 ### Gun Turret (second pass)
 
@@ -1115,6 +1116,15 @@ Base: look B Compressor Block, animation C Creeping Mist. Every step rebuilds a 
 
 **Round 5 (owner notes):** "Make the central light gold too" (Path 3 mastery: the blades and the central light are gold); "Lets look for different ideas for Deep Cold". Deep Cold now shows three new ideas: a white rime coat on the housing rim, two vapour stacks on the bottom edge, or a frost collar with inward fins round the fan. Everything else stays as picked.
 
+### Shockwave Generator (second pass)
+
+Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a part (the new design replaces the old one); the agent runs the real rules (wave rate, radius, damage, barrier shatter).
+- **Path 1, Power/Range (the core inside the ring):** rods, a plasma sphere or spinning rings, rebuilt bigger, denser and whiter at each step; the Megaton Wave (mastery) turns the core, the waves and the ring gold.
+- **Path 2, Speed (outside the ring):** pulsing emitters (coils, dishes or spike-and-ball), two, four, six, eight, then twelve gold ones; the wave comes faster.
+- **Path 3, Effect (on the ring):** three violet resonance stations between the clamps (forks, ripple plates or spires) rebuilt at each step; barrier enemies (every third preview enemy) show a blue barrier that the waves chew through faster per step, and Shatter Shock (gold) halves it on every hit and stops it regrowing for 5 s.
+- **Retrofits:** Wave Focus (focus ring, lens array or focus collar round the core), Containment Coils (glowing coils, coil cage or toroids round the core), Reactor Venting (stacks, louvres or blast vents at the corners).
+- **Carpet-rule overlaps (kept, stacking):** Wave Focus's +15 px with the path-1 radius; Containment Coils' +10 damage with the path-1 damage; Reactor Venting's 1.5 s wave with the path-2 wave rate.
+
 ## Open questions
 
-1. **Second pass, Cryo Tower** (tower 15, round 5): pick Deep Cold. Then towers 16-20 (next: Shockwave Generator).
+1. **Second pass, Shockwave Generator** (tower 16, round 1): pick one option per stage and Retrofit. Then towers 17-20 (next: Scrapyard).
