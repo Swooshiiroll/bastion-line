@@ -57,7 +57,7 @@ function clampBuild(lv, changed) { // two paths at most; once one reaches 3, the
 function card(id, opt, lv, r, root) {
   const p = el("div", "panel"), cv = cardCanvas(260, 180);
   const comp = () => compose(layersFor(lv, r, { id, opt }));
-  register(cv, TW, () => comp().look, () => comp().anim, 120);
+  register(cv, TW, () => comp().look, () => comp().anim, P2.sCard || 120);
   p.appendChild(cv); p.appendChild(el("div", "meta", `<span class="key">${opt.key}</span><b>${opt.name}</b>`)); p.appendChild(el("div", "desc", opt.desc));
   const b = el("button", "pick"); const sync = () => { const on = S2.picks[id] === opt.key; b.classList.toggle("on", on); b.textContent = (on ? "Picked " : "Pick ") + opt.key; };
   b.onclick = () => { S2.picks[id] = S2.picks[id] === opt.key ? null : opt.key; save2(); refresh2(); }; b._sync = sync; sync(); p.appendChild(b); root.appendChild(p);
@@ -67,7 +67,7 @@ function notesBox(key, label, root) { const lab = el("label", "notes", label); c
 
 function buildPreview(root) {
   const box = el("section", "build"), cv = cardCanvas(560, 360), ctrls = el("div", "ctrls");
-  register(cv, TW, () => compose(layersFor(S2.build.lv, S2.build.r)).look, () => compose(layersFor(S2.build.lv, S2.build.r)).anim, 210);
+  register(cv, TW, () => compose(layersFor(S2.build.lv, S2.build.r)).look, () => compose(layersFor(S2.build.lv, S2.build.r)).anim, P2.sBuild || 210);
   box.appendChild(cv); box.appendChild(ctrls);
   ctrls.appendChild(el("div", "combo-head", "Build preview"));
   const roles = [];
