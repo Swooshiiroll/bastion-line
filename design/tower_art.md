@@ -390,7 +390,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 13 | Boost Tower | `design/tower_art_p2_13_boost.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 15 | Cryo Tower | `design/tower_art_p2_15_cryo.html` | **Confirmed** (owner, 2026-10-19: "Finished"; Deep Cold C Frost Collar) |
-| 16 | Shockwave Generator | `design/tower_art_p2_16_shock.html` | Round 4: five new Path 3 directions, bigger cloud; awaiting Path 3 picks |
+| 16 | Shockwave Generator | `design/tower_art_p2_16_shock.html` | Round 5: tower-resonance Path 3, one-burst cloud; awaiting Path 3 picks |
 
 ### Gun Turret (second pass)
 
@@ -1134,6 +1134,9 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
 **Picks (owner, round 3):** Path 1 all C (gyro rings; confirms the round 3 reading), Path 2 all C, Path 3 none, Retrofits all C. **Notes:** "Make each upgrade make a bigger cloud bellow. Give it lifetime instead of tying it to the animation" (Path 1); "Nope, different ideas. Give me more selections to choose from as well" (Path 3); "Make the smoke puff out farther" (Reactor Venting).
 **Round 4:** the mushroom cloud is now a particle system with its own lifetimes (2.4 to 3.6 s per puff, a hot start fading to smoke grey) and it grows with every Power step (8 + 4 per step puffs, 28% bigger per step). The Reactor Venting smoke is thrown about twice as far. Path 3 shows five all-new directions (five options per step instead of three): heavy hammers on arms that strike the ring, sonic horns that push out sound arcs, a fractured ring with glowing cracks, a starburst of tuning rods, and a turning prism lens over the core. Each grows at every step and is gold at the mastery.
 
+**Picks (owner, round 4):** Path 1 all C, Path 2 all C, Path 3 none, Retrofits all C. **Notes:** "Make larger bursts at one time, not a longer generation period" (Path 1); "Scrap these designs. start fresh. Design something that would make the tower itself cause resonance without adding things to it" (Path 3).
+**Round 5:** the Power cloud leaves in one larger burst: every puff starts at the same moment (it used to be spread over 0.3 s) and only the count and the size grow. Path 3 starts fresh with nothing added to the tower: the tower's own parts resonate. Five ways, each harder at every step and gold at the mastery: the ring's edges ripple in a standing wave (3 to 6 lobes), the deck hums with ripples rolling across it, the ring sings with bright lobes travelling round it, the whole tower shakes (with echoes of the ring), or the ring turns to violet glass with light running round it.
+
 ## Open questions
 
-1. **Second pass, Shockwave Generator** (tower 16, round 4): pick Path 3 (five options per step). Then towers 17-20 (next: Scrapyard).
+1. **Second pass, Shockwave Generator** (tower 16, round 5): pick Path 3 (five options per step). Then towers 17-20 (next: Scrapyard).
