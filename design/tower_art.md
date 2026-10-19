@@ -388,7 +388,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 13 | Boost Tower | `design/tower_art_p2_13_boost.html` | **Confirmed** (owner, 2026-10-19: "finished") |
-| 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | Round 9: antenna lights gold, scan lines from the lights; awaiting confirm |
+| 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | Round 10: all scan lines from the antenna light, beam centred; awaiting confirm |
 
 ### Gun Turret (second pass)
 
@@ -1082,6 +1082,8 @@ Base: look A Dish Mast, animation B Sweep Beam (the sweep follows the dish). Eve
 
 **Round 9 (owner notes):** "The second light is still not gold. Also, make the scan lines come from the antenna light instead of the center of the tower". With Constant Track, both antenna lights are gold (the first dish's light stayed teal when no emitter was fitted, which is what showed as not gold), and each dish's scan line starts at its antenna light and runs out to the range.
 
+**Round 10 (owner notes):** "I mean all scan lines in general. The scan lines are also not centered". Every scan line (the normal sweep as well as Constant Track's) now starts at the antenna light. The sweep beam used to trail behind its line (the line sat on the beam's edge); it is now a beam centred on the line, brightest in the middle, and an enemy is revealed as the line passes over its middle.
+
 ## Open questions
 
-1. **Second pass, Radar Tower** (tower 14, round 9): confirm. Then towers 15-20 (next: Cryo Tower).
+1. **Second pass, Radar Tower** (tower 14, round 10): confirm. Then towers 15-20 (next: Cryo Tower).
