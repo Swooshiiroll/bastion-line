@@ -386,7 +386,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 9 | Drone Bay | `design/tower_art_p2_09_drones.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 10 | CAS Gunship | `design/tower_art_p2_10_cas.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
-| 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | Round 1: three options per stage; awaiting picks |
+| 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | Round 2: Acid picks drawn; Speed, Slowing and Retrofits redesigned; awaiting picks |
 
 ### Gun Turret (second pass)
 
@@ -986,6 +986,19 @@ Retrofits Adhesive Mines A, Shaped Charges A, Long Arm A). No notes. **Round 9:*
 - **Slowing:** a gel coat on soaked enemies that gets thicker and drippier with each step; gel pipes, pumps, tanks and, at the mastery, gold foam gear.
 - The plant sprays one unsoaked enemy at a time and the soak lasts 4 s growing to 8 s with the Speed path and Bigger Tanks.
 
+**Picks (owner, round 1):** Damage/Armor stripping 1 B (Scrap Bin), 2 C (Etch Rings), 3 C (Reaction Lamps), 4 A (Concentrate Press), M C (Gold Core). Speed,
+Slowing and the Retrofits were unpicked. **Notes:** "Remove that gold dot" (the gold disc beside the columns at the Dissolver). And: "Change the upgrade
+designs to change the structure more than add little things here and there."
+
+**Round 2 (Claude):**
+- The gold dot is gone (the Dissolver's Gold Core is now only the gold ring on the still).
+- **A new design rule for the Chemical Plant: upgrades rebuild the structure.** Speed, Slowing and the three Retrofits were redrawn that way (the Acid picks
+  keep their parts, as you picked them): a bigger still, thick direct feed pipes or a short wide neck (Quick Valve); taller columns, a fourth column or a ring
+  main (Long-Lasting Mix); a split feed pipe, twin stills or a valve manifold ring (Twin Valves); a pump hall, a double ring main or a pipe network
+  (High-Flow Pump); gel columns, a gel ring main or annex (Sticky Gel, Thick Gel); a glue cauldron hall, tower or stack replacing a column (Glue); a curing hood,
+  cooling tower or cooling coil (Setting Glue); a gold foam dome, cannon or silo (Quick-Set Foam). The Retrofits likewise: a pump house, tower or skid; a fan
+  head, mist manifold or ring head; larger, extra or double-height columns.
+
 ## Open questions
 
-1. **Second pass, Chemical Plant** (tower 12, round 1): pick one option per stage and Retrofit. Then towers 13-20 (next: Boost Tower).
+1. **Second pass, Chemical Plant** (tower 12, round 2): pick Speed, Slowing and the Retrofits. Then towers 13-20 (next: Boost Tower).

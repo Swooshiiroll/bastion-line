@@ -65,7 +65,7 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Tower rework · Tower art · second pass · tower 12 of 20 · round 1</div>
+    <div class="eyebrow">Bastion Line · Tower rework · Tower art · second pass · tower 12 of 20 · round 2</div>
     <h1>Tower art: Chemical Plant paths and Retrofits</h1>
     <p class="note">Second pass for one tower: <b>every upgrade step and mastery</b> on each path, and each <b>Retrofit</b>, adds or changes a detail on the confirmed model. Each card shows the model with that path's earlier steps (your picks, or option A until you pick) plus the candidate. Pick one of three per step, add notes per path, then <b>Copy picks and notes</b>.</p>
     <ul class="rules">
@@ -706,7 +706,7 @@ const NO_BOOT = true;
 // Pressure Pump adds to the Speed path's spray rate, Mist Nozzle to Twin Nozzles, Bigger Tanks to the soak length.
 // Geometry (game px): three columns at radius 10 round a central still (r 5) with a gooseneck nozzle that turns to spray; the
 // plant sprays one unsoaked enemy at a time; a soaked enemy drips and fizzes until the soak wears off.
-const PAGE = { title: "Chemical Plant: paths and Retrofits (second pass)", store: "bl-tower-art-p2-chem-r1" };
+const PAGE = { title: "Chemical Plant: paths and Retrofits (second pass)", store: "bl-tower-art-p2-chem-r2" };
 const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], RED = [0.85, 0.2, 0.18, 1], GELC = [0.8, 1, 0.45, 1], YEL = [1, 0.85, 0.2, 1];
 const rnd2 = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
 const Kp = (B, pi, k) => (B.lv[pi] > k ? B.key("p" + pi + "s" + k) : null);
@@ -750,70 +750,66 @@ const P2 = {
   model(c, aim, s, fx, t, col, info, B) {
     const k = G(s), D = (x, y) => P(c, aim, k, x, y), S = (x, y) => add(c, [x * k, y * k]), mm = fx.mem || {}, since = t - (mm.last ?? -9), fl = decay(since, 0.25), ac = acidCol(B, col);
     const A1 = Kp(B, 0, 0), A2 = Kp(B, 0, 1), A3 = Kp(B, 0, 2), A4 = Kp(B, 0, 3), AM = Kp(B, 0, 4), V1 = Kp(B, 1, 0), V2 = Kp(B, 1, 1), V3 = Kp(B, 1, 2), V4 = Kp(B, 1, 3), VM = Kp(B, 1, 4);
-    const G1 = Kp(B, 2, 0), G2 = Kp(B, 2, 1), G3 = Kp(B, 2, 2), G4 = Kp(B, 2, 3), GM = Kp(B, 2, 4), R = B.r >= 0 ? B.key("r" + B.r) : null, gold = (c0) => (B.lv[0] >= 5 ? GOLD : c0);
+    const G1 = Kp(B, 2, 0), G2 = Kp(B, 2, 1), G3 = Kp(B, 2, 2), G4 = Kp(B, 2, 3), GM = Kp(B, 2, 4), R = B.r >= 0 ? B.key("r" + B.r) : null;
     deck(c, k, col, t);
-    // -- The three columns, bigger with Bigger Tanks (option A), with the Acid/Speed/Slowing parts on them ----------------------
-    const colR = (B.r === 2 && R === "A" ? 4.8 : 4);
-    for (let i = 0; i < 3; i++) { const a = -Math.PI / 2 + i * TAU / 3, q = add(c, mul(fa(a), 10 * k)); bar(c, q, 1.4 * k, METAL); orb(q, colR * k, METAL_L); ring(q, (colR - 1.2) * k, METAL, 0.8 * k); glowDot(q, 0.9 * k, A(ac, 0.5 + 0.5 * Math.sin(t * 2 + i)));
-      if (A1 === "A") ring(q, (colR - 0.2) * k, YEL, 0.8 * k);
+    // ---- Structure first: the columns, the pipes, the still (the upgrades rebuild these rather than add little parts) ----------------------
+    const bigCol = V2 === "A" || (B.r === 2 && R === "A") || (B.r === 2 && R === "C");
+    const colR = bigCol ? 4.9 : 4, angs = [-Math.PI / 2, Math.PI / 6, 5 * Math.PI / 6];
+    if (V2 === "B" || (B.r === 2 && R === "B")) angs.push(Math.PI / 2);                               // a fourth column
+    const pw = V1 === "B" ? 2.8 : V4 === "C" ? 3 : 1.4;                                                  // feed pipe thickness
+    const gelA = G1 === "A" ? [1] : [], gelB = G2 === "A" ? [2] : [], gelCols = [...gelA, ...gelB];
+    const gelMain = G1 === "B" || G2 === "C";
+    if (V2 === "C" || V4 === "B") ring(c, 10 * k, METAL, 1.8 * k);                                       // a ring main round the columns
+    if (V4 === "B") ring(c, 12.6 * k, METAL, 1.6 * k);                                                    // and a second, outer one
+    if (gelMain) { ring(c, 12.6 * k, GELC, (G2 === "C" ? 2.6 : 1.6) * k); for (let i = 0; i < 3; i++) line(add(c, mul(fa(i * TAU / 3 + 0.5), 10 * k)), add(c, mul(fa(i * TAU / 3 + 0.5), 12.6 * k)), GELC, 1.2 * k); }
+    if (V3 === "C") { ring(c, 7.4 * k, METAL_L, 1.6 * k); for (const a of angs) line(add(c, mul(fa(a), 7.4 * k)), add(c, mul(fa(a), 10 * k)), METAL_L, 1.4 * k); }  // a valve manifold ring with a spoke to each column
+    if (V4 === "C") for (let i = 0; i < angs.length; i++) line(add(c, mul(fa(angs[i]), 10 * k)), add(c, mul(fa(angs[(i + 1) % angs.length]), 10 * k)), METAL, pw * k); // a pipe network linking the columns
+    angs.forEach((a, i) => { const q = add(c, mul(fa(a), 10 * k)), isGel = gelCols.includes(i), body = isGel ? mix(METAL_L, GELC, 0.35) : METAL_L, glow = isGel ? GELC : ac;
+      bar(c, q, pw * k, METAL); orb(q, colR * k, body); ring(q, (colR - 1.2) * k, METAL, 0.8 * k); glowDot(q, 0.9 * k, A(glow, 0.5 + 0.5 * Math.sin(t * 2 + i)));
+      if (B.r === 2 && R === "C") { orb(add(q, [0, -1.6 * k]), (colR - 0.8) * k, body); ring(add(q, [0, -1.6 * k]), (colR - 2) * k, METAL, 0.8 * k); }      // double-height columns
+      if (V2 === "A") ring(q, (colR - 0.3) * k, STEEL, 1 * k);
+      if (isGel && G1 === "A") arc(q, (colR - 0.6) * k, Math.PI * 1.1, Math.PI * 1.9, A(GELC, 0.9), 1.4 * k);
       if (A1 === "B" && i === 0) plate(add(q, [0, -colR * k - 1.6 * k]), rectPts(2.6, 1.2), METAL_D, 0, k, 0.9);
-      if (A2 === "A") for (let j = 0; j < 3; j++) line(add(q, mul(fa(j * 2.1 + 0.5), (colR - 1.8) * k)), add(q, mul(fa(j * 2.1 + 0.5), (colR - 0.3) * k)), [0, 0, 0, 0.5], 0.6 * k);
       if (A2 === "C") ring(q, (colR - 2.2) * k, A(ac, 0.7), 1.2 * k);
-      if (V3 === "A") orb(add(q, mul(fa(a + 0.7), (colR - 0.6) * k)), 0.8 * k, METAL);
-      if (G1 === "A" && i === 1) disc(add(q, [colR * 0.4 * k, colR * 0.7 * k]), 1.3 * k, GELC);
-      if (R === "C" && B.r === 2) ring(q, (colR + 0.3) * k, STEEL, 0.9 * k);
-      if (AM === "A") ring(q, colR * k, GOLD, 1 * k); }
-    // -- Fixed kit between the columns ------------------------------------------------------------------------------------------------
-    if (A1 === "C") { const q = S(12.5, -3.5); disc(q, 2.2 * k, OUTLINE); disc(q, 1.8 * k, [0.9, 0.9, 0.85, 1]); line(q, add(q, mul(fa(-2 + Math.sin(t * 2) * 0.4), 1.4 * k)), RED, 0.6 * k); }
-    if (A2 === "B") { plate(S(-12.5, -3.5), rectPts(2.4, 1.8), AMMO, 0, k, 0.9); for (let i = 0; i < 3; i++) fill(S(-13.6 + i * 1.1, -3.5), rectPts(0.5, 0.5), [0.5, 0.52, 0.55, 1], i, k); }
-    if (A3 === "A") { plate(S(5, 13), rectPts(2.6, 1.5), METAL_D, 0, k, 1); glowDot(S(5, 13), 0.6 * k, ac); }
-    if (A3 === "B") { disc(S(5, 13), 2.2 * k, OUTLINE); disc(S(5, 13), 1.8 * k, dk(ac, 0.45)); }
+      if (AM === "A") ring(q, colR * k, GOLD, 1 * k); });
+    // Slowing: the glue structures replace the third column's look
+    const q3 = add(c, mul(fa(5 * Math.PI / 6), 10 * k));
+    if (G3 === "A") { disc(q3, 6.2 * k, OUTLINE); disc(q3, 5.6 * k, [0.4, 0.34, 0.2, 1]); disc(q3, 3.4 * k, A(GELC, 0.6)); glowDot(q3, 1 * k, GELC); }
+    if (G3 === "B") { orb(q3, 5.4 * k, [0.45, 0.4, 0.22, 1]); for (const rr of [4.2, 2.8]) ring(q3, rr * k, METAL, 0.9 * k); glowDot(q3, 1 * k, GELC); }
+    if (G3 === "C") { disc(add(q3, [0, 2 * k]), 4.2 * k, OUTLINE); disc(add(q3, [0, 2 * k]), 3.7 * k, dk(GELC, 0.4)); orb(add(q3, [0, -1.4 * k]), 3.8 * k, [0.45, 0.4, 0.22, 1]); }
+    if (G4 === "B") { const ct = S(0, 12.6); disc(ct, 5.6 * k, OUTLINE); disc(ct, 5 * k, lt(METAL_L, 0.1)); disc(ct, 3.2 * k, dk([0.5, 0.8, 1, 1], 0.5)); for (let i = 0; i < 3; i++) { const v = fmod(t * 0.5 + i / 3, 1); disc(add(ct, [v * 2 * k, -v * 6 * k]), (1.6 + v * 2.4) * k, A([0.85, 0.95, 1, 1], 0.25 * (1 - v))); } }
+    // ---- The still: bigger (Quick Valve A), twin stills (Twin Valves B), a pump hall (High-Flow A), or the Pressure Pump's skid ----------------------
+    if (B.r === 0 && R === "C") { plate(c, rectPts(7, 5), METAL_D, aim, k, 1); for (const y of [-3, 3]) bar(D(-3, y), D(3, y), 2.4 * k, METAL_L); }
+    if (V3 === "B") { for (const y of [-3.4, 3.4]) { orb(D(0, y), 4 * k, mix(METAL_L, ac, 0.15)); ring(D(0, y), 2.6 * k, METAL, 0.8 * k); } bar(D(0, -3.4), D(0, 3.4), 1.6 * k, METAL); }
+    else if (V4 === "A") { plate(c, rectPts(6.4, 6.4), METAL_L, aim, k, 1.2); rivets(c, rectPts(6.4, 6.4), aim, k, 0.8, 0.7 * k); const pr = fl > 0.2 ? -0.8 : 0.6; bar(D(2 + pr, 0), D(7, 0), 1.6 * k, STEEL); plate(D(2 + pr, 0), rectPts(0.8, 2.4), METAL_D, aim, k, 0.9); }
+    else { const rs = V1 === "A" ? 6.2 : 5; orb(c, rs * k, mix(METAL_L, ac, 0.15)); if (V1 === "A") ring(c, 5 * k, METAL, 1.2 * k); }
+    if (B.r === 0 && R === "B") { orb(c, 3.8 * k, METAL_L); ring(c, 3.8 * k, OUTLINE, 1 * k); ring(c, 2.4 * k, METAL, 0.9 * k); }                          // a raised pump tower
+    if (B.r === 0 && R === "A") { plate(D(0, 7.8), rectPts(4.4, 2.6), METAL_L, aim, k, 1.1); bar(D(0, 5.2), D(0, 7.8), 1.4 * k, METAL); plate(D(-1.4 + (fl > 0.2 ? 0.8 : 0), 7.8), rectPts(0.7, 1.8), METAL_D, aim, k, 0.9); } // a pump house beside the still
+    // ---- Fixed kit that the picked Acid options keep ------------------------------------------------------------------------------------
     if (A3 === "C") for (let i = 0; i < 3; i++) glowDot(S(3 + i * 2, 13), 0.5 * k, A(ac, 0.4 + 0.5 * Math.sin(t * 4 + i)));
     if (A4 === "A") { bar(S(-5, 12.5), S(-1, 12.5), 1.6 * k, METAL); orb(S(-5.8, 12.5), 1.4 * k, METAL_L); }
-    if (A4 === "B") for (let i = 0; i < 3; i++) ring(S(-3, 12.5), (1 + i * 0.9) * k, A(ac, 0.5 - i * 0.12), 0.8 * k);
-    if (A4 === "C") plate(S(-3, 12.5), rectPts(2.8, 1.2), METAL_D, 0, k, 0.9);
     if (AM === "B") plate(S(12.5, 5), rectPts(2.4, 2.4), GOLD, 0, k, 1);
-    if (AM === "C") { disc(S(-12.5, 5), 2.4 * k, OUTLINE); disc(S(-12.5, 5), 2 * k, GOLD); }
-    if (G2 === "A") for (const x of [-12.8, -10.6]) bar(S(x, 8), S(x, 11), 1.4 * k, GELC);
-    if (G2 === "B") { plate(S(-12, 9.5), rectPts(2.4, 1.6), METAL_D, 0, k, 1); glowDot(S(-12, 9.5), 0.5 * k, GELC); }
-    if (G2 === "C") { disc(S(-12, 9.5), 2.2 * k, OUTLINE); disc(S(-12, 9.5), 1.8 * k, dk(GELC, 0.45)); }
-    if (G3 === "A") { disc(S(12.5, 9.5), 2.6 * k, OUTLINE); disc(S(12.5, 9.5), 2.1 * k, [0.45, 0.4, 0.25, 1]); glowDot(S(12.5, 9.5), 0.6 * k, GELC); }
-    if (G3 === "B") { plate(S(12.5, 9.5), rectPts(1.8, 2.2), METAL_L, 0, k, 1); ring(S(12.5, 8.4), 1.4 * k, GELC, 0.7 * k); }
-    if (G3 === "C") { bar(S(10.5, 10), S(14.5, 8.5), 1.4 * k, METAL); orb(S(14.8, 8.4), 0.9 * k, GELC); }
-    if (G4 === "A") { bar(S(7.5, 12.5), S(7.5, 14.5), 1.2 * k, STEEL); glowDot(S(7.5, 14.8), 0.6 * k, [0.5, 0.8, 1, 1]); }
-    if (G4 === "B") { plate(S(8, 13.4), rectPts(2, 0.9), METAL_D, 0, k, 0.9); glowDot(S(8, 13.4), 0.5 * k, [0.5, 0.8, 1, 1]); }
-    if (G4 === "C") { const fa2 = t * 9; for (let i = 0; i < 3; i++) line(S(8, 13.4), add(S(8, 13.4), mul(fa(fa2 + i * TAU / 3), 2.2 * k)), STEEL, 1 * k); }
-    if (GM === "A") { fill(S(-4, 13.4), [[0, -1.2], [3, 0], [0, 1.2]], GOLD, 0, k); }
-    if (GM === "B") { plate(S(-4, 13.4), rectPts(2.2, 1.6), GOLD, 0, k, 1); }
-    if (GM === "C") { disc(S(-4, 13.4), 2 * k, OUTLINE); disc(S(-4, 13.4), 1.6 * k, GOLD); }
-    if (B.r === 2 && R === "B") plate(S(0, -13.6), rectPts(3, 1.8), TANKC, 0, k, 1);
-    // -- The still, the Retrofit gauges, and the gooseneck nozzle(s) (these turn to the target) ---------------------------------------
-    orb(c, 5 * k, mix(METAL_L, ac, 0.15));
-    if (V1 === "A") { const w = D(-3, -3.4); disc(w, 1.4 * k, OUTLINE); ring(w, 1.1 * k, RED, 0.9 * k); line(w, add(w, mul(fa(t * (since < 0.4 ? 8 : 1)), 1.1 * k)), RED, 0.6 * k); }
-    if (V1 === "B") { const w = D(-3, -3.4); disc(w, 1.4 * k, OUTLINE); disc(w, 1.1 * k, [0.9, 0.9, 0.85, 1]); line(w, add(w, mul(fa(-2 + (1 - fl) * 1.2), 1 * k)), RED, 0.5 * k); }
-    if (V1 === "C") { ring(D(-3, -3.4), 1.8 * k, METAL_D, 1.6 * k); ring(D(-3, -3.4), 1 * k, METAL_D, 1.2 * k); }
-    if (V2 === "A") { const w = D(-3.4, 3.4); disc(w, 1.6 * k, OUTLINE); for (let i = 0; i < 3; i++) line(w, add(w, mul(fa(t * 3 + i * TAU / 3), 1.4 * k)), METAL_L, 0.9 * k); }
-    if (V2 === "B") { plate(D(-3.4, 3.4), rectPts(1.6, 1.4), METAL_D, aim, k, 0.9); glowDot(D(-3.4, 3.4), 0.5 * k, ac); }
-    if (V2 === "C") for (let i = 0; i < 3; i++) ring(D(-3.4, 3.4), (0.8 + i * 0.5) * k, A(ac, 0.6 - i * 0.15), 0.7 * k);
-    if (V3 === "B") plate(D(2, 0), rectPts(0.8, 3.4), METAL_D, aim, k, 0.9);
-    if (V3 === "C") for (const y of [-2.4, 2.4]) bar(D(2, y), D(7, y), 0.9 * k, STEEL);
-    if (V4 === "A") { plate(D(0.5, 3.8), rectPts(1.6, 1), METAL_D, aim, k, 0.9); bar(D(0.5 + (fl > 0.2 ? -0.6 : 0.4), 3.8), D(2, 3.8), 0.7 * k, METAL_L); }
-    if (V4 === "B") { bar(D(1, -3), D(6, -3), 1.4 * k, METAL); }
-    if (V4 === "C") { const w = D(0.5, -3.6); disc(w, 1.3 * k, OUTLINE); disc(w, 1 * k, [0.9, 0.9, 0.85, 1]); line(w, add(w, mul(fa(aim + 1 - fl * 0.8), 0.9 * k)), RED, 0.5 * k); }
-    bar(c, D(6, 0), 2.4 * k, METAL);
-    const nozzle = (y, gc) => { bar(D(6, y), D(13, y), 1.6 * k, gc ? GOLD : METAL); glowDot(D(13.4, y), (0.7 + 1.4 * fl) * k, A(ac, 0.5 + 0.5 * fl)); };
+    // ---- The nozzle (it turns to the target) ------------------------------------------------------------------------------------------
+    const neck = V1 === "C" ? 3.6 : 2.4;
+    if (V3 === "A") { for (const y of [-1.6, 1.6]) bar(D(2, y), D(9, y), 1.4 * k, METAL); bar(D(9, -1.6), D(11, 0), 1.4 * k, METAL); bar(D(9, 1.6), D(11, 0), 1.4 * k, METAL); bar(D(11, 0), D(13, 0), 1.8 * k, METAL); }
+    else bar(c, D(6, 0), neck * k, METAL);
+    const nozzle = (y, gc, w) => { bar(D(6, y), D(13, y), (w || 1.6) * k, gc ? GOLD : METAL); glowDot(D(13.4, y), (0.7 + 1.4 * fl) * k, A(ac, 0.5 + 0.5 * fl)); };
     if (VM === "A") { nozzle(-1.8, true); nozzle(1.8, true); }
     else if (VM === "B") { for (const sg of [-1, 1]) { const dd = (x, y) => P(c, aim + sg * 0.22, k, x, y); bar(dd(6, 0), dd(13, 0), 1.5 * k, GOLD); glowDot(dd(13.4, 0), (0.7 + 1.4 * fl) * k, A(ac, 0.5 + 0.5 * fl)); } }
     else if (VM === "C") { bar(D(6, 0), D(9, 0), 2 * k, GOLD); for (const sg of [-1, 1]) { bar(D(9, 0), D(13, sg * 2.6), 1.4 * k, GOLD); glowDot(D(13.4, sg * 2.8), (0.7 + 1.4 * fl) * k, A(ac, 0.5 + 0.5 * fl)); } }
+    else if (GM === "B") { bar(D(6, 0), D(10, 0), 2 * k, GOLD); fill(D(10, 0), [[0, -1], [4, -3.2], [4, 3.2], [0, 1]], GOLD, aim, k); glowDot(D(14, 0), (0.7 + 1.4 * fl) * k, A(ac, 0.5 + 0.5 * fl)); }
+    else if (B.r === 1 && R === "B") { bar(D(6, 0), D(10, 0), 1.8 * k, METAL); for (const sg of [-1, 0, 1]) { bar(D(10, 0), D(13, sg * 2.4), 1.2 * k, METAL); glowDot(D(13.4, sg * 2.6), (0.5 + 1 * fl) * k, A(ac, 0.5 + 0.5 * fl)); } }
     else nozzle(0, false);
-    if (R === "A" && B.r === 0) { for (const sg of [-1, 1]) { const w = D(9, sg * 2.4); disc(w, 1.1 * k, OUTLINE); disc(w, 0.85 * k, [0.9, 0.9, 0.85, 1]); line(w, add(w, mul(fa(aim + 0.5 + sg * fl), 0.8 * k)), RED, 0.5 * k); } }
-    if (R === "B" && B.r === 0) { plate(D(10, 0), rectPts(1.2, 3), METAL_D, aim, k, 0.9); for (let i = -1; i <= 1; i++) glowDot(D(10, i * 1.8), 0.4 * k, A(ac, 0.4 + 0.5 * fl)); }
-    if (R === "C" && B.r === 0) for (let i = 0; i < 4; i++) ring(D(8 + i * 1.6, 0), 1.7 * k, A(STEEL, 0.9), 0.9 * k);
-    if (R === "A" && B.r === 1) for (const sg of [-1, 1]) { const dd = (x, y) => P(c, aim + sg * 0.35, k, x, y); bar(dd(8, 0), dd(13, 0), 1.4 * k, METAL_L); }
-    if (R === "B" && B.r === 1) { fill(D(13, 0), [[0, 0], [3, -2.6], [3, 2.6]], A(METAL_L, 0.9), aim, k); }
-    if (R === "C" && B.r === 1) ring(D(12, 0), 2 * k, METAL_L, 1.4 * k);
+    if (B.r === 1 && R === "A") fill(D(13, 0), [[0, 0], [3.4, -3.4], [3.4, 3.4]], A(METAL_L, 0.9), aim, k);                                   // the nozzle opens into a wide fan head
+    if (B.r === 1 && R === "C") { ring(D(13, 0), 2.4 * k, METAL_L, 1.6 * k); ring(D(13, 0), 1.2 * k, METAL, 1 * k); }                         // a big ring head
+    // ---- Slowing structures over the plant ------------------------------------------------------------------------------------------------
+    if (G2 === "B") { disc(c, 7.2 * k, A(GELC, 0.16)); ring(c, 7.2 * k, A(GELC, 0.8), 1.2 * k); }                                                 // a gel dome over the still
+    if (G4 === "A") { arc(D(6, 0), 4.6 * k, aim - 1.3, aim + 1.3, METAL_L, 2.2 * k); glowDot(D(6, -4), 0.6 * k, [0.5, 0.8, 1, 1]); glowDot(D(6, 4), 0.6 * k, [0.5, 0.8, 1, 1]); } // a curing hood over the nozzle
+    if (G4 === "C") { ring(c, 7.4 * k, [0.5, 0.8, 1, 1], 2 * k); for (let i = 0; i < 12; i++) { const a = i * TAU / 12 + t * 0.3; line(add(c, mul(fa(a), 6.6 * k)), add(c, mul(fa(a), 8.2 * k)), A([0.85, 0.95, 1, 1], 0.7), 0.7 * k); } } // a cooling coil round the still
+    if (GM === "A") { disc(c, 7.6 * k, A(GOLD, 0.14)); ring(c, 7.6 * k, GOLD, 1.4 * k); ring(c, 6.2 * k, A(GOLD, 0.6), 0.8 * k); }                      // a gold foam dome
+    if (GM === "C") { orb(q3, 5.4 * k, GOLD); ring(q3, 4 * k, METAL, 0.9 * k); }                                                                   // a gold foam silo
     glowDot(c, 1.1 * k, ac);
-    if (AM === "C" || AM === "A") ring(c, 5 * k, GOLD, 1 * k);
+    if (AM === "A" || AM === "C") ring(c, 5 * k, GOLD, 1 * k);
   },
   paths: [
     { name: "Damage/Armor stripping", theme: "acid that strips armour for good: the spray gets stronger and the soaked enemy burns", steps: [
@@ -836,25 +832,25 @@ const P2 = {
       { name: "Dissolver", cost: 5335, effect: "7 armour per soak; 20 damage/s (mastery)", options: [
         { key: "A", name: "Gold Column Rings", desc: "Gold rings on every column and the still; a gold dissolving mix." },
         { key: "B", name: "Gold Plate", desc: "A gold plate by the columns; a gold mix." },
-        { key: "C", name: "Gold Core", desc: "A gold core ring on the still and a gold disc; a gold mix." } ] },
+        { key: "C", name: "Gold Core", desc: "A gold core ring on the still; a gold mix." } ] },
     ] },
     { name: "Speed", theme: "valves, pumps and finally a second nozzle: a faster spray and a longer soak", steps: [
       { name: "Quick Valve", cost: 100, effect: "A spray every 1.25 s", options: [
-        { key: "A", name: "Valve Wheel", desc: "A red valve wheel on the still that spins when it sprays." },
-        { key: "B", name: "Pressure Gauge", desc: "A pressure gauge on the still whose needle drops as it sprays." },
-        { key: "C", name: "Hose Coil", desc: "A hose coil round the still." } ] },
+        { key: "A", name: "Big Still", desc: "The central still is rebuilt bigger, with a thick pressure rim." },
+        { key: "B", name: "Direct Feed", desc: "The pipes from the columns are rebuilt thick and straight into the still." },
+        { key: "C", name: "Wide Neck", desc: "The nozzle pipe is rebuilt as a short, wide neck." } ] },
       { name: "Long-Lasting Mix", cost: 140, effect: "The soak lasts 5 s", options: [
-        { key: "A", name: "Mixing Drum", desc: "A mixing drum on the still with stirring blades." },
-        { key: "B", name: "Reserve Block", desc: "A reserve block with a glowing lamp on the still." },
-        { key: "C", name: "Stabiliser Rings", desc: "Stabiliser rings round the still." } ] },
+        { key: "A", name: "Taller Columns", desc: "All the columns are rebuilt bigger and banded." },
+        { key: "B", name: "Fourth Column", desc: "A fourth column is built onto the plant." },
+        { key: "C", name: "Ring Main", desc: "A ring pipe is built round all the columns." } ] },
       { name: "Twin Valves", cost: 990, effect: "A spray every second; the soak lasts 6 s (primary)", options: [
-        { key: "A", name: "Valve Studs", desc: "A valve stud on every column." },
-        { key: "B", name: "Manifold", desc: "A manifold bar across the nozzle pipe." },
-        { key: "C", name: "Booster Pipes", desc: "Two booster pipes alongside the nozzle pipe." } ] },
+        { key: "A", name: "Split Feed", desc: "The nozzle pipe is rebuilt as a twin pipe that joins into the nozzle head." },
+        { key: "B", name: "Twin Stills", desc: "The single still is rebuilt as two linked stills." },
+        { key: "C", name: "Valve Manifold", desc: "A manifold ring with a spoke to every column is built round the still." } ] },
       { name: "High-Flow Pump", cost: 1470, effect: "A spray every 0.83 s", options: [
-        { key: "A", name: "Pump Housing", desc: "A pump housing with a piston that thumps with each spray." },
-        { key: "B", name: "Big Pipe", desc: "A fat feed pipe beside the nozzle." },
-        { key: "C", name: "Flow Meter", desc: "A flow meter whose needle moves with each spray." } ] },
+        { key: "A", name: "Pump Hall", desc: "The still is replaced by a big square pump hall with a piston that thumps with each spray." },
+        { key: "B", name: "Double Ring Main", desc: "A second, outer ring main is built round the plant." },
+        { key: "C", name: "Pipe Network", desc: "Thick pipes are built linking every column to the next." } ] },
       { name: "Twin Nozzles", cost: 7760, effect: "Sprays two enemies at once; the soak lasts 7 s (mastery)", options: [
         { key: "A", name: "Parallel Nozzles", desc: "Two gold gooseneck nozzles side by side; they spray two enemies at once." },
         { key: "B", name: "Fanned Nozzles", desc: "Two gold nozzles fanned apart; two enemies at once." },
@@ -862,44 +858,48 @@ const P2 = {
     ] },
     { name: "Slowing", theme: "gel that coats soaked enemies thicker and thicker", steps: [
       { name: "Sticky Gel", cost: 250, effect: "Soaked enemies are slowed 15%", options: [
-        { key: "A", name: "Gel Blob", desc: "A gel blob on a column; soaked enemies get a thin coat of gel." },
-        { key: "B", name: "Gel Hose", desc: "A pale gel hose; soaked enemies get a thin gel coat." },
-        { key: "C", name: "Gel Cartridges", desc: "A rack of gel cartridges; a thin gel coat on soaked enemies." } ] },
+        { key: "A", name: "Gel Column", desc: "One column is rebuilt as a gel column: tinted, with a gel cap." },
+        { key: "B", name: "Gel Ring Main", desc: "A gel ring main is built round the plant with feeds to the columns." },
+        { key: "C", name: "Gel Annex", desc: "A gel annex is built on." } ] },
       { name: "Thick Gel", cost: 335, effect: "25%", options: [
-        { key: "A", name: "Gel Pipes", desc: "Two thicker gel pipes; a thicker coat." },
-        { key: "B", name: "Gel Pump", desc: "A gel pump with a glowing lamp; a thicker coat." },
-        { key: "C", name: "Gel Tank", desc: "A gel tank; a thicker coat." } ] },
+        { key: "A", name: "Second Gel Column", desc: "A second column is rebuilt as a gel column." },
+        { key: "B", name: "Gel Dome", desc: "A gel dome is built over the still." },
+        { key: "C", name: "Wide Gel Main", desc: "The gel ring main is rebuilt as a wide main." } ] },
       { name: "Glue", cost: 665, effect: "35% (primary)", options: [
-        { key: "A", name: "Glue Cauldron", desc: "A glue cauldron; a still thicker coat that drips slowly." },
-        { key: "B", name: "Glue Drum", desc: "A glue drum with a spout ring; a thick drippy coat." },
-        { key: "C", name: "Glue Spout", desc: "A glue spout; a thick drippy coat." } ] },
+        { key: "A", name: "Glue Cauldron Hall", desc: "One column is replaced by a big glue cauldron hall." },
+        { key: "B", name: "Glue Tower", desc: "One column is replaced by a taller banded glue tower." },
+        { key: "C", name: "Glue Stack", desc: "One column is replaced by a stack of a glue tank and a tower." } ] },
       { name: "Setting Glue", cost: 1335, effect: "45%", options: [
-        { key: "A", name: "Curing Lamp", desc: "A cool blue curing lamp on a stalk; the coat is thicker and sets." },
-        { key: "B", name: "Curing Rack", desc: "A rack with a blue curing lamp; a thicker, setting coat." },
-        { key: "C", name: "Cooling Fan", desc: "A spinning cooling fan; a thicker, setting coat." } ] },
+        { key: "A", name: "Curing Hood", desc: "A curing hood is built over the nozzle." },
+        { key: "B", name: "Cooling Tower", desc: "A cooling tower is built onto the deck." },
+        { key: "C", name: "Cooling Coil", desc: "A cooling coil is built round the still." } ] },
       { name: "Quick-Set Foam", cost: 2665, effect: "55%: nearly frozen (mastery)", options: [
-        { key: "A", name: "Gold Foam Cone", desc: "A gold foam cone; the thickest, nearly frozen coat." },
-        { key: "B", name: "Gold Foam Tank", desc: "A gold foam tank; the thickest coat." },
-        { key: "C", name: "Gold Foam Generator", desc: "A gold foam generator disc; the thickest coat." } ] },
+        { key: "A", name: "Gold Foam Dome", desc: "A gold foam dome is built over the still." },
+        { key: "B", name: "Gold Foam Cannon", desc: "The nozzle is rebuilt as a wide gold foam cannon." },
+        { key: "C", name: "Gold Foam Silo", desc: "One column is replaced by a gold foam silo." } ] },
     ] },
   ],
   retrofits: [
     { name: "Pressure Pump", cost: 150, effect: "A spray every 1.33 s, and +20 range (150) (stacks with the Speed path)", options: [
-      { key: "A", name: "Gauge Heads", desc: "Two pressure gauges on the spray head." },
-      { key: "B", name: "Pump Block", desc: "A pump block with three glowing ports on the spray pipe." },
-      { key: "C", name: "Pressure Coil", desc: "Four steel pressure coils round the spray pipe." } ] },
+        { key: "A", name: "Pump House", desc: "A pump house is built beside the still." },
+        { key: "B", name: "Pump Tower", desc: "A raised pump tower is built on the still." },
+        { key: "C", name: "Pump Skid", desc: "The still is rebuilt on a pump skid with two cylinders." } ] },
     { name: "Mist Nozzle", cost: 300, effect: "Each spray also soaks one more enemy next to the target (stacks with Twin Nozzles)", options: [
-      { key: "A", name: "Side Mist Nozzles", desc: "Two small mist nozzles beside the spray pipe; each spray also mists a neighbour." },
-      { key: "B", name: "Wide Mist Head", desc: "A wide misting fan on the nozzle; each spray also mists a neighbour." },
-      { key: "C", name: "Mist Ring", desc: "A ring on the nozzle tip; each spray also mists a neighbour." } ] },
+        { key: "A", name: "Fan Head", desc: "The nozzle opens into a wide fan head." },
+        { key: "B", name: "Mist Manifold", desc: "The nozzle is rebuilt as a three-spout mist manifold." },
+        { key: "C", name: "Mist Ring Head", desc: "The nozzle tip is rebuilt as a big ring head." } ] },
     { name: "Bigger Tanks", cost: 60, effect: "Soaks last 5 s (stacks with Long-Lasting Mix)", options: [
-      { key: "A", name: "Larger Columns", desc: "Bigger columns." },
-      { key: "B", name: "Extra Tank", desc: "An extra tank on the deck." },
-      { key: "C", name: "Tank Bands", desc: "Steel bands round the columns." } ] },
+        { key: "A", name: "Larger Columns", desc: "All the columns are rebuilt bigger." },
+        { key: "B", name: "Fourth Tank", desc: "A fourth column is built onto the plant." },
+        { key: "C", name: "Double-Height Columns", desc: "Every column is rebuilt double height." } ] },
   ],
 };
 const TANKC = [0.3, 0.5, 0.2, 1];
-P2.picks = {};
+// ---- Round 2 (owner's picks and notes, 2026-10-19): picked Acid stages show only the pick; Speed, Slowing and the Retrofits are redesigned
+// so they rebuild the plant's structure rather than add small parts.
+P2.intro = "Round 2: your Acid picks drawn (the gold dot beside the columns is gone), and Speed, Slowing and the three Retrofits redesigned: they now rebuild the plant's structure (bigger stills and columns, a fourth column, ring mains, twin stills, a pump hall, glue towers, domes and cooling towers) instead of adding small parts here and there. Use the build preview to check combinations.";
+P2.picks = { p0s0: "B", p0s1: "C", p0s2: "C", p0s3: "A", p0s4: "C" };
+P2.paths.forEach((pa, pi) => pa.steps.forEach((st, k) => { const pk = P2.picks["p" + pi + "s" + k]; if (pk) st.options = st.options.filter((o) => o.key === pk); }));
 
 // ---- Tower art engine: previews towers aiming and firing at enemies on a lane --------------------------
 // Data (defined before this): PAGE {title, key, store}, TOWERS [...], DEFAULTS {id: {look, anim}}.
