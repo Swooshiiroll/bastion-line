@@ -388,7 +388,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 13 | Boost Tower | `design/tower_art_p2_13_boost.html` | **Confirmed** (owner, 2026-10-19: "finished") |
-| 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | Round 5: turrets smaller and inside the deck, dish thinner; awaiting the mastery pick |
+| 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | Round 6: dish struts, solid V emitter, double radar moved to Path 2 mastery; awaiting the Path 1 and 3 mastery picks |
 
 ### Gun Turret (second pass)
 
@@ -1073,6 +1073,8 @@ Base: look A Dish Mast, animation B Sweep Beam (the sweep follows the dish). Eve
 
 **Round 5 (owner notes):** "Shrink them a bit more so they fit cleanly on the tower, and make the radar dish thinner". The turrets (and lens rings, shields, barrels) are smaller and the corner slots are pulled in so they sit inside the deck; every dish stroke is thinner (outline and body).
 
+**Round 6 (owner notes):** "Make it look like the dishes are connected to the center mast. Make the emitter prongs look like one solid V rather than two struts laying overtop of each other. Move the double radar idea for the Mastery for Path 2". Three struts now join each dish to the centre mast; the Twin Prong Emitter is one solid V; the double radar (a second gold dish opposite the first, on its own struts) is now part of the Path 2 mastery, Constant Track (picked A, Gold Cable Ring). So Path 1's mastery shows its three options again (A Horn Ring, B Gold Feed Tripod replacing the twin dish, C Gold Lattice Array).
+
 ## Open questions
 
-1. **Second pass, Radar Tower** (tower 14, round 5): pick the Total Exposure mastery (Path 3). Then towers 15-20 (next: Cryo Tower).
+1. **Second pass, Radar Tower** (tower 14, round 6): pick the Path 1 mastery and the Total Exposure mastery (Path 3). Then towers 15-20 (next: Cryo Tower).
