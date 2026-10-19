@@ -385,7 +385,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 8 | Tesla Tower | `design/tower_art_p2_08_tesla.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 9 | Drone Bay | `design/tower_art_p2_09_drones.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 10 | CAS Gunship | `design/tower_art_p2_10_cas.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
-| 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | Round 1: three options per stage; awaiting picks |
+| 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | Round 2: picks drawn, notes applied, new ideas for two stages; awaiting picks |
 
 ### Gun Turret (second pass)
 
@@ -898,6 +898,28 @@ tail fins and an exhaust flame, turning along their curved path, with a thinner 
 - Mines land at random spots along and across the track within range, blink while they wait, and go off under a ground enemy
   in a burst of confetti (gold at the mastery).
 
+**Picks (owner, round 1):**
+- **Power/Damage:** 1 B Heavy Rail Clamps, 2 B Wide Muzzle Bar, 3 A HE-Banded Canisters, 4 A Segmented Canisters, M A Gold Canisters.
+- **Production Speed:** 1 C Counter Lamps, 2 none, 3 A Conveyor Belt, 4 A Servo Motors, M A Gold Belt.
+- **Range:** 1 A Extension Rails, 2 A Coil Springs, 3 B Breech Block, 4 A Longer Tube, M C Gold Braces.
+- **Retrofits:** Conveyor Feed B (Hopper Chute), Shaped Charges A (Plated Mines), Long Arm A (Long Arm Rails).
+- **Notes:** "Wide blast should affect the mine, not the thrower." "Give different ideas for Quick Assembly. Twin Press should
+  introduce a second rail. Assembly line should feed directly into the center. Servo Motors go on and speed up the rotunda."
+  "Mine Mortar and Long Mortar should elongate to original tubes, not add extensions." "Rails are replaced with longer rails."
+  And: "Don't add more mines behind the tower, only leave the 3 original."
+
+**Round 2 (Claude):**
+- **Magazine:** only the three original canisters sit behind the tower now (no extra columns).
+- **Wider Charge** now changes the mine, not the thrower: a flange round each mine (the picked Wide Flange has tabs) and a shock
+  ring on the blast; the thrower-side bar is gone.
+- **Quick Assembly:** three new ideas (Mine Hopper, Charge Gauge, Loader Arm). **Twin Press** now adds a second rail (Side-by-Side,
+  Angled or Underslung), and the tosses alternate between the rails.
+- **Assembly Line** (and the other belts) now run in from the deck edge straight to the centre of the mount. **Servo Motors**
+  sit on the mount's rim and spin its ring of ticks (the rotunda) much faster; the ring appears from the first Production
+  step and speeds up with each.
+- **Mine Mortar and Long Mortar** stretch the original rails instead of adding pieces; the **Long Arm** replaces the rails with
+  longer ones (no cap piece).
+
 ## Open questions
 
-1. **Second pass, Mine Layer** (tower 11, round 1): pick one option per stage and Retrofit. Then towers 12-20 (next: Chemical Plant).
+1. **Second pass, Mine Layer** (tower 11, round 2): pick Quick Assembly and Twin Press; confirm. Then towers 12-20 (next: Chemical Plant).
