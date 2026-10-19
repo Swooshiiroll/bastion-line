@@ -390,7 +390,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 13 | Boost Tower | `design/tower_art_p2_13_boost.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 15 | Cryo Tower | `design/tower_art_p2_15_cryo.html` | **Confirmed** (owner, 2026-10-19: "Finished"; Deep Cold C Frost Collar) |
-| 16 | Shockwave Generator | `design/tower_art_p2_16_shock.html` | Round 9: springier band; awaiting confirm |
+| 16 | Shockwave Generator | `design/tower_art_p2_16_shock.html` | **Confirmed** (owner, 2026-10-19: "Finished") |
 
 ### Gun Turret (second pass)
 
