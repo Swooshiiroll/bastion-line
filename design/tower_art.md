@@ -389,7 +389,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 13 | Boost Tower | `design/tower_art_p2_13_boost.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | **Confirmed** (owner, 2026-10-19: "finished") |
-| 15 | Cryo Tower | `design/tower_art_p2_15_cryo.html` | Round 2: Path 1 and Compressor ideas again; awaiting picks |
+| 15 | Cryo Tower | `design/tower_art_p2_15_cryo.html` | Round 3: all picks drawn; awaiting confirm |
 
 ### Gun Turret (second pass)
 
@@ -1108,6 +1108,9 @@ Base: look B Compressor Block, animation C Creeping Mist. Every step rebuilds a 
 **Picks (owner, round 1):** Path 1: none (needs more ideas). Path 2: every step and the mastery C (Ice Crystals line: Ice Nubs, Ice Crystals, Crystal Banks, Crystal Crowns, Gold-Studded Crowns). Path 3: every step and the mastery A (Swept Fan, Gold Turbine). Retrofits: Coolant Tank C Spherical Tank, Compressor none (needs more ideas), Deep Cold A Vent Row. **Notes:** "I need some more ideas for these" (Path 1); "For Coolant tank, the central box becomes circular. More ideas for Compressor".
 **Round 2:** Path 1 shows all-new corner stations: coils, snow guns and flasks (step 1); pumps, nitrogen dewars and heat exchangers (2); ice-core pylons, frozen domes and drills (3); cryo reactors, cold beacons and rime generators (4); gold-core reactors, gold-ringed beacons and gold-edged obelisks (mastery). The Coolant Tank (spherical) now makes the central housing circular. The Compressor shows new ideas: a humming drum with rings, a belt drive and a radial compressor (impeller in a snail casing).
 
+**Picks (owner, round 2):** Path 1: 1 A Cooling Coils, 2 A Cryo Pumps, 3 C Permafrost Drills, 4 A Cryo Reactors, M A Gold-Core Reactors. Path 2: all C. Path 3: all A. Retrofits: Coolant Tank C, Compressor C Radial Compressor, Deep Cold A. **Note:** "Shrink the gold core reactors".
+**Round 3:** every stage is picked; the page shows only the picks. The gold-core reactors are about a third smaller (smaller than the step 4 reactors).
+
 ## Open questions
 
-1. **Second pass, Cryo Tower** (tower 15, round 2): pick Path 1 (all five stages) and the Compressor. Then towers 16-20 (next: Shockwave Generator).
+1. **Second pass, Cryo Tower** (tower 15, round 3): confirm. Then towers 16-20 (next: Shockwave Generator).
