@@ -388,7 +388,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 13 | Boost Tower | `design/tower_art_p2_13_boost.html` | **Confirmed** (owner, 2026-10-19: "finished") |
-| 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | Round 15: turrets hold their last aim; awaiting confirm |
+| 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 
 ### Gun Turret (second pass)
 
