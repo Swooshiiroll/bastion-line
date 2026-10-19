@@ -391,7 +391,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 15 | Cryo Tower | `design/tower_art_p2_15_cryo.html` | **Confirmed** (owner, 2026-10-19: "Finished"; Deep Cold C Frost Collar) |
 | 16 | Shockwave Generator | `design/tower_art_p2_16_shock.html` | **Confirmed** (owner, 2026-10-19: "Finished") |
-| 17 | Scrapyard | `design/tower_art_p2_17_scrap.html` | Round 1: pick one option per stage and Retrofit |
+| 17 | Scrapyard | `design/tower_art_p2_17_scrap.html` | Redesigned from scratch (Smelting Works), round 1: pick one option per stage and Retrofit |
 
 ### Gun Turret (second pass)
 
@@ -1147,15 +1147,16 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
 
 **Round 9 (owner note):** "Make the elasticity stronger, so the bands reciprocate faster". The Path 3 band now opens in under 0.2 s and then swings in and out about 2.3 times faster (a spring of about 3.3 swings a second instead of 1.4) with less than half the damping, so it reciprocates several times before settling; the expansion (3 to 14 px) and the bend are stronger too.
 
-### Scrapyard (second pass)
+### Scrapyard (second pass, redesigned from scratch)
 
-Base: look C Magnet Yard, animation B Sparks and Sale. A 2x2 yard (the previews are smaller so the whole yard fits: `sBuild` and `sCard` in the data file, honoured by `pass2_engine.js`). Every step rebuilds a building in place; the agent runs the real rules (the payout at each clear, the kill bonus, the discount field).
-- **Path 1, Passive Income (bottom-right corner):** a press house (a thumping stamp, a chimney from step 3), a vault block (round doors, a spinning wheel, twin doors from step 3) or a mint tower (ringed by coin stacks), rebuilt bigger at each step; gold at the Reserve Bank, with a +3% interest tag on each payout.
-- **Path 2, Kill Income (top-right corner and the crane):** a collector rig (more claws per step), a sorting line (more bins) or a smelter (a glowing crucible, a chimney from step 4); the crane's magnet grows and the orange kill-field ring widens; wrecked enemies in the field send a coin to the yard with the bonus amount; gold at the Reclamation Plant.
-- **Path 3, Discounts (top-left corner):** a crate shed, a warehouse office (lit windows) or a rail siding (a boxcar, faster at each step); the blue discount-field ring widens and shows the percentage off; gold frame at Forward Command.
-- **Retrofits:** Second Crusher (a crusher block, a baler or shredder drums on the bottom edge), Bigger Yard (an outer fence with round posts, wire or concrete posts), Salvage Crane (a gantry, a jib crane or a crane truck on the left edge).
+**Redesign (owner, 2026-10-19: "Lets completely redesign the scrapyard from scratch"; scope: everything, including the confirmed base look; direction: Smelting Works).** The Magnet Yard base look and the first set of upgrade designs (the press house, vault and mint tower; the collector rig, sorting line and smelter; the crate shed, warehouse and rail siding) are dropped. New base files: `tools/tower_art/data_scrap_base.js` (a single placeholder look and animation, so the page header names them) and `tools/tower_art/data_p2_scrap.js` (the whole yard is drawn by the model at every level). The 2x2 previews are smaller (`sBuild`, `sCard`, honoured by `pass2_engine.js`) so the whole yard fits.
+- **Base look (new): Smelting Works.** A yard with a hazard-striped edge: a brick furnace with a glowing mouth, a chimney breathing smoke, a scrap conveyor from the left edge feeding it, a molten channel down to a casting strip of three ingot moulds along the bottom. At each payout the channel flares, the ingots flash gold and the coins pop with the amount. The preview pays every 4 s.
+- **Path 1, Passive Income (the casting strip):** ingot moulds (3 to 8, a canopy rail from step 3), a vault store (round doors, stacked ingots) or mint presses (stamping at each payout); gold at the Reserve Bank, with a +3% interest tag on each payout.
+- **Path 2, Kill Income (the furnace itself):** a brick furnace (bigger, with a steel band from step 3), a blast furnace (bellows pipes, fire slits) or a crucible works (crucibles on arms round a pit); the orange kill ring widens; wrecked enemies in it send a coin into the furnace with the bonus amount and flare it; gold rim and molten gold at the Reclamation Plant.
+- **Path 3, Discounts (the left-edge supply strip):** chutes with crates, ore silos or a rail siding with a wagon, one more at each step; the blue discount ring widens and shows the percentage off; gold frame at Forward Command.
+- **Retrofits:** Second Crusher (jaw crusher, roller crusher or hammer mill, top-left), Bigger Yard (slag wall, pipe fence or bollard fence round the works), Salvage Crane (gantry, jib crane or crane truck, top edge).
 - **Carpet-rule overlaps (kept, stacking):** the Second Crusher's +30 income with the path-1 income; the Bigger Yard's +30 px with both field radii.
 
 ## Open questions
 
-1. **Second pass, Scrapyard** (tower 17, round 1): pick one option per stage and Retrofit. Then towers 18-20 (next: Magneto Tower).
+1. **Second pass, Scrapyard, redesigned as a Smelting Works** (tower 17, round 1): say whether the base look works, then pick one option per stage and Retrofit. Then towers 18-20 (next: Magneto Tower).

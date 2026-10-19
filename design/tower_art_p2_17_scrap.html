@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tower Art: Scrapyard paths and Retrofits</title>
+<title>Tower Art: Scrapyard (smelting works) paths and Retrofits</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
   :root {
@@ -65,8 +65,8 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Tower rework · Tower art · second pass · tower 17 of 20 · round 1</div>
-    <h1>Tower art: Scrapyard paths and Retrofits</h1>
+    <div class="eyebrow">Bastion Line · Tower rework · Tower art · second pass · tower 17 of 20 · redesign round 1</div>
+    <h1>Tower art: Scrapyard (smelting works) paths and Retrofits</h1>
     <p class="note">Second pass for one tower: <b>every upgrade step and mastery</b> on each path, and each <b>Retrofit</b>, adds or changes a detail on the confirmed model. Each card shows the model with that path's earlier steps (your picks, or option A until you pick) plus the candidate. Pick one of three per step, add notes per path, then <b>Copy picks and notes</b>.</p>
     <ul class="rules">
       <li><b>Details stack:</b> the primary path's steps and the secondary's (capped at 2) both show and overlap, as in the build preview.</li>
@@ -399,357 +399,120 @@ function mateTower(p, k, col, t, boosted, bcol, aimAt) { deck(p, k * 0.75, col, 
 
 
 const BASE = (() => {
-// ---- Tower art page 4: towers 16-20, in the style of today's in-game towers (owner, 2026-10-16) ----------
-// Shared style helpers (and the stand-in neighbour towers) come from game_style.js.
-const PAGE = { title: "Tower art page 4 (towers 16-20)", store: "bl-tower-art-4-game-v2" };
-
-const rnd = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
-const distTo = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
-const nearestTo = (p, list) => { let best = null, bd = 1e9; for (const e of list) { const d = distTo(e.p, p); if (d < bd) { bd = d; best = e; } } return best; };
-const enemyR = (s) => Math.max(4, Math.min(11, s * 0.12));
-function txt(p, str, col, px) { X.save(); X.font = "bold " + Math.round(px) + "px sans-serif"; X.textAlign = "center"; X.fillStyle = css(OUTLINE); X.fillText(str, p[0] + 1, p[1] + 1); X.fillStyle = css(col); X.fillText(str, p[0], p[1]); X.restore(); }
-const GOLDC = [1, 0.78, 0.3, 1], COPPER = [0.78, 0.5, 0.28, 1], RUST = [0.45, 0.3, 0.2, 1];
-
-// ---- Shockwave Generator: a wave every 1.75 s hits every enemy within 100 px ------------------------------------
-function shockAgent(cfg) { return (m, t, info, s, col) => { if (!m.hit) { m.hit = {}; m.wave = t; }
-  if (t - m.wave >= 1.75) m.wave = t;
-  const R = s * 100 / 48, raw = (t - m.wave) / cfg.travel; cfg.draw(info.c, Math.min(1, raw), R, s, col, t, raw);
-  for (const e of info.ens) { if (raw <= 1 && Math.abs(distTo(e.p, info.c) - R * raw) < s * 0.2 && !(m.hit[e.i] > m.wave)) m.hit[e.i] = t;
-    const h = t - (m.hit[e.i] ?? -9); if (h < 0.3) { glowDot(e.p, enemyR(s) * (1 - h / 0.3), [1, 1, 0.9, 1]); ring(e.p, enemyR(s) + h * 20, A(col, 1 - h / 0.3), 1.5); } } }; }
-
-// ---- Magneto Tower: a constant field that slows everything in it; enemies lean toward the magnet --------------------
-function magnetAgent(cfg) { return (m, t, info, s, col) => { const R = s * 120 / 48; cfg.draw(info.c, R, s, col, t);
-  for (const e of info.ens) { const d = distTo(e.p, info.c); if (d > R) continue; const dir = norm(sub(info.c, e.p)), q = add(e.p, mul(dir, enemyR(s) + 3));
-    line(q, add(q, mul(dir, s * 0.12)), A(col, 0.85), 1.6); fill(add(q, mul(dir, s * 0.12)), [[3, 0], [-1, 2.2], [-1, -2.2]], A(col, 0.85), Math.atan2(dir[1], dir[0]), 1);
-    if (cfg.mark) cfg.mark(e, s, col, t, d / R, info.c); } }; }
-
-// ---- Tractor Tower: grabs one enemy, hauls it 80 px back along the track for 1.5 s, lets go, recharges ------------
-// The preview can't move the real enemy, so it hides it and draws the held one where the beam drags it.
-const CYCLE = 4; // the real recharge is 6 s; the preview shortens it
-function tractorAgent(cfg) { return (m, t, info, s, col) => { const back = s * 80 / 48;
-  if (!m.state) { m.state = "ready"; m.t0 = t; }
-  if (m.state === "ready") { const e = nearestTo(info.c, info.ens.filter((x) => distTo(x.p, info.c) < s * 3.3 && x.p[0] > s * 0.6)); if (e) { m.state = "hold"; m.t0 = t; m.id = e.i; m.p0 = e.p.slice(); m.air = e.air; } }
-  if (m.state === "hold" || m.state === "drop") { const e = info.all.find((x) => x.i === m.id), u = Math.min(1, (t - m.t0) / 1.5);
-    if (!e) { m.state = "cool"; m.t0 = t; return; }
-    const held = add(m.p0, [-back * ease(u), m.air ? Math.sin(t * 6) * 2 : 0]);
-    if (m.state === "hold") { m.aimAt = held; disc(e.p, enemyR(s) + 2, e.air ? [0.072, 0.093, 0.08, 0.92] : [0.16, 0.15, 0.13, 0.92]);
-      cfg.beam(info.muzzleAt(0, info.aim), held, u, s, col, t); for (let i = 1; i <= 2; i++) { X.save(); X.globalAlpha = 0.25 / i; drawEnemy({ ...e, p: add(held, [i * 5, 0]) }, s); X.restore(); }
-      drawEnemy({ ...e, p: held }, s); if (cfg.held) cfg.held(held, s, col, t); if (u >= 1) { m.state = "drop"; m.t0 = t; m.final = held; } }
-    else { const v = (t - m.t0) / 0.4; X.save(); X.globalAlpha = Math.max(0, 1 - v); drawEnemy({ ...e, p: m.final }, s); X.restore(); disc(e.p, enemyR(s) + 2, A(e.air ? [0.072, 0.093, 0.08, 1] : [0.16, 0.15, 0.13, 1], 0.92 * Math.max(0, 1 - v))); if (v >= 1) { m.state = "cool"; m.t0 = t; } } }
-  if (m.state === "cool") { m.aimAt = null; if (t - m.t0 > CYCLE - 1.9) m.state = "ready"; }
-  m.charge = m.state === "cool" ? Math.min(1, (t - m.t0) / (CYCLE - 1.9)) : m.state === "ready" ? 1 : 0; }; }
-
-// ---- Augmentation Tower: links to neighbour towers; at stock they get a 5% crit chance -------------------------
-function augmentAgent(cfg) { return (m, t, info, s, col) => { if (!m.shots) { m.shots = []; m.n = 0; }
-  matesOf(info).forEach((mt, i) => { const foe = nearestTo(mt.p, info.ens), aim = foe ? Math.atan2(foe.p[1] - mt.p[1], foe.p[0] - mt.p[0]) : undefined;
-    cfg.link(info.c, mt.p, s, col, t, i); mateTower(mt.p, G(s), mt.col, t, 0, col, aim);
-    if (foe && fmod(t * 1.2 + i * 0.33, 1) < 0.02 && t - (m.last?.[i] ?? -9) > 0.5) { (m.last ||= {})[i] = t; m.n++; m.shots.push({ t0: t, from: P(mt.p, aim, G(s) * 0.75, 15, 0), id: foe.i, crit: m.n % 3 === 0 }); } });
-  m.shots = m.shots.filter((q) => t - q.t0 < 0.8);
-  for (const q of m.shots) { const e = info.ens.find((x) => x.i === q.id); if (!e) continue; const u = (t - q.t0) / 0.18;
-    if (u < 1) tracer(q.from, e.p, u, q.crit ? GOLDC : [1, 0.9, 0.7, 1], q.crit ? 2.2 : 1.4, 0.3); else if (q.crit) cfg.crit(e.p, (u - 1) * 0.18 / 0.6, s, col); else spark(e.p, (u - 1) * 0.18 / 0.6, s * 0.6, [1, 0.9, 0.7, 1]); } }; }
-function critBurst(p, v, s) { if (v >= 1) return; glowDot(p, s * 0.1 * (1 - v), GOLDC); for (let i = 0; i < 6; i++) { const d = fa(i * TAU / 6 + 0.3); line(add(p, mul(d, s * (0.06 + 0.2 * v))), add(p, mul(d, s * (0.12 + 0.24 * v))), A(GOLDC, 1 - v), 1.4); } txt(add(p, [0, -s * 0.22 - v * s * 0.2]), "CRIT", A(GOLDC, 1 - v), Math.max(9, s * 0.15)); }
-
-// ---- Scrapyard: a 2x2 yard that pays at each round's clear (the preview pays every 4 s) ----------------------------
-function scrapPile(p, r, k, seed) { const pts = []; for (let i = 0; i < 9; i++) { const a = i * TAU / 9; pts.push([Math.cos(a) * r * (0.65 + 0.35 * rnd(seed + i)), Math.sin(a) * r * (0.65 + 0.35 * rnd(seed + i + 20))]); }
-  ellipse(add(p, [k * 1.5, k * 2.5]), r * k, r * k * 0.5, [0, 0, 0, 0.3]); solid(p, pts, mix(RUST, METAL, 0.4), 0, k, 1);
-  for (let i = 0; i < 5; i++) { const q = add(p, [(rnd(seed + i * 3) - 0.5) * r * k * 1.1, (rnd(seed + i * 5) - 0.5) * r * k * 0.9]); line(q, add(q, mul(fa(rnd(seed + i) * TAU), r * k * 0.35)), i % 2 ? METAL_L : RUST, 1.4 * k); } }
-function yardBase(c, k, col, t) { const h = 46; ellipse(add(c, [0, 8 * k]), 44 * k, 16 * k, [0, 0, 0, 0.3]); plate(c, rectPts(h, h), lt(METAL_D, 0.04), 0, k, 1.3); fill(c, rectPts(h - 4, h - 4), [0.2, 0.19, 0.17, 1], 0, k);
-  outline(c, rectPts(h - 2, h - 2), A(col, 0.5 + 0.2 * Math.sin(t * 2.2)), 1.4 * k, 0, k); for (let i = -4; i <= 4; i++) for (const sg of [-1, 1]) { disc(add(c, [i * 10 * k, sg * (h - 2) * k]), 1.1 * k, METAL_L); disc(add(c, [sg * (h - 2) * k, i * 10 * k]), 1.1 * k, METAL_L); } }
-function scrapAgent(cfg) { return (m, t, info, s, col) => { if (!m.pays) { m.pays = []; m.last = t; }
-  if (t - m.last >= 4) { m.last = t; m.pays.push(t); } m.pays = m.pays.filter((q) => t - q < 1.6);
-  if (cfg.extra) cfg.extra(m, t, info, s, col);
-  for (const q of m.pays) { const v = (t - q) / 1.6; cfg.pay(info.c, v, s, col, t); } }; }
-function coinPop(c, v, s, col) { for (let i = 0; i < 6; i++) { const d = fa(-Math.PI / 2 + (i - 2.5) * 0.35), p = add(add(c, mul(d, s * 0.5 * Math.min(1, v * 2))), [0, v * v * s * 0.4]); disc(p, s * 0.045 + 1, A(OUTLINE, 0.95 * (1 - v))); disc(p, s * 0.045, A(GOLDC, 1 - v)); }
-  txt(add(c, [0, -s * 0.4 - v * s * 0.5]), "+100", A(GOLDC, Math.min(1, 2 - v * 2)), Math.max(11, s * 0.2)); }
-
+// ---- Scrapyard: a fresh base design (owner, 2026-10-19: "completely redesign the scrapyard from scratch", direction: Smelting Works) ----------------
+// The old Magnet Yard base look and every old upgrade design are dropped. The look itself is drawn by the second-pass model (data_p2_scrap.js), which
+// draws the whole yard at every level, so this base file only names the look and the animation for the page header.
+const PAGE = { title: "Scrapyard base (smelting works)", store: "bl-tower-art-scrap-base-sw" };
 const TOWERS = [
-  // 16. Shockwave Generator -----------------------------------------------------------------------------
-  { id: "shock", num: 16, name: "Shockwave Generator", cls: "Assault", weapon: "Field", hits: "both", color: [1.00, 0.70, 0.28, 1],
-    desc: "Generates powerful shockwaves by creating small nuclear explosions. \"Radioactive fallout? What radioactive fallout?\" A wave every 1.75 s hits every enemy within 100 px (cloaked ones too); no aiming. Enemies flash as the wave passes them. (Colour: today's Nova Reactor amber.)",
+  { id: "scrap", num: 17, name: "Scrapyard", cls: "Utility", weapon: "None", hits: "none", size: 2, center: [0.3, 0.4], color: [1.0, 0.62, 0.22, 1],
+    desc: "Various collections of scrap metal sold at a profit. \"One mans toxic waste is another mans potpourri\" A 2x2 smelting works; it attacks nothing and pays 100 credits at each round's clear (the preview pays every 4 s).",
     looks: [
-      { key: "A", name: "Caged Reactor", muzzle: 0, fixed: true, theme: "A squat reactor in a heavy containment cage: corner posts and bars round a glowing core seen through its vents.",
-        draw(c, aim, s, fx, t, col) { const k = G(s), mm = fx.mem || {}, fl = decay(t - (mm.wave ?? -9), 0.4); deck(c, k, col, t);
-          orb(c, 8 * k, METAL); for (let i = 0; i < 8; i++) { const a = i * TAU / 8; line(add(c, mul(fa(a), 3 * k)), add(c, mul(fa(a), 6.5 * k)), A(col, 0.4 + 0.5 * fl), 1.3 * k); } glowDot(c, (2 + 3 * fl) * k, lt(col, 0.3 * fl));
-          const sq = [[-11, -11], [11, -11], [11, 11], [-11, 11]].map((q) => add(c, mul(q, k))); for (let i = 0; i < 4; i++) { bar(sq[i], sq[(i + 1) % 4], 2.2 * k, METAL_L); plate(sq[i], rectPts(2.4, 2.4), METAL_D, 0, k, 1); }
-          for (const x of [-5.5, 0, 5.5]) { bar(add(c, [x * k, -11 * k]), add(c, [x * k, -8.4 * k]), 1.4 * k, METAL_L); bar(add(c, [x * k, 11 * k]), add(c, [x * k, 8.4 * k]), 1.4 * k, METAL_L); } } },
-      { key: "B", name: "Ring Reactor", muzzle: 0, fixed: true, theme: "A thick toroidal containment ring held by three clamps round a blinding core; the ring glows when it fires.",
-        draw(c, aim, s, fx, t, col) { const k = G(s), mm = fx.mem || {}, fl = decay(t - (mm.wave ?? -9), 0.4); deck(c, k, col, t);
-          ring(c, 10 * k, OUTLINE, 6.4 * k); ring(c, 10 * k, METAL_L, 5 * k); arc(c, 10 * k, Math.PI * 1.05, Math.PI * 1.6, lt(METAL_L, 0.4), 1.4 * k); ring(c, 10 * k, A(col, 0.2 + 0.7 * fl), 1.4 * k);
-          for (let i = 0; i < 3; i++) plate(add(c, mul(fa(-Math.PI / 2 + i * TAU / 3), 10 * k)), rectPts(2, 3.6), METAL_D, -Math.PI / 2 + i * TAU / 3, k, 1);
-          disc(c, 5.5 * k, [0.08, 0.06, 0.04, 1]); glowDot(c, (2.4 + 3 * fl) * k, lt(col, 0.2 + 0.4 * fl)); } },
-      { key: "C", name: "Piston Thumper", muzzle: 0, fixed: true, theme: "A reactor drum ringed by four heavy pistons that punch outward on every wave, the core flaring in the middle.",
-        draw(c, aim, s, fx, t, col) { const k = G(s), mm = fx.mem || {}, fl = decay(t - (mm.wave ?? -9), 0.35); deck(c, k, col, t);
-          for (let i = 0; i < 4; i++) { const a = Math.PI / 4 + i * Math.PI / 2, d = fa(a), ext = 11 + 3.5 * fl; bar(add(c, mul(d, 5 * k)), add(c, mul(d, ext * k)), 3.4 * k, METAL); plate(add(c, mul(d, ext * k)), rectPts(1.6, 3.6), METAL_L, a, k, 1); }
-          plate(c, ngon(8, 1, Math.PI / 8), METAL_L, 0, 8 * k, 1.3); rivets(c, ngon(8, 1, Math.PI / 8), 0, 8 * k, 0.82, 0.7 * k); disc(c, 4 * k, [0.08, 0.06, 0.04, 1]); glowDot(c, (1.6 + 3 * fl) * k, col); } },
+      { key: "A", name: "Smelting Works", muzzle: 0, fixed: true, theme: "A foundry yard: a brick furnace with a glowing mouth fed by a scrap conveyor, a chimney, and a molten channel running to a row of ingot moulds.", draw() {} },
     ],
     anims: [
-      { key: "A", name: "Blast Ring", desc: "The core flashes and a bright ring of force bursts out to the edge of range; every enemy it crosses flashes white.", period: 1, flight: 1, fx: () => ({}),
-        persist: shockAgent({ travel: 0.4, draw: (c, u, R, s, col, t, raw) => { if (raw > 1.4) return; const a = Math.max(0, 1 - raw / 1.4);
-          if (raw < 0.15) glowDot(c, s * 0.3 * (1 - raw / 0.15), [1, 0.95, 0.8, 1]); disc(c, R * u, A(col, 0.08 * a)); ring(c, R * u, A([1, 0.95, 0.8, 1], 0.8 * a), 3); ring(c, R * u, A(col, 0.6 * a), 6); } }) },
-      { key: "B", name: "Mushroom Pulse", desc: "The core flares into a tiny mushroom cloud: a rising fireball with rings rolling out along the ground under it.", period: 1, flight: 1, fx: () => ({}),
-        persist: shockAgent({ travel: 0.6, draw: (c, u, R, s, col, t, raw) => { if (raw > 1.8) return; const a = Math.max(0, 1 - raw / 1.8);
-          for (let j = 0; j < 2; j++) { const q = u - j * 0.2; if (q > 0) ring(c, R * q, A(col, 0.7 * a * (1 - j * 0.4)), 2.5 - j); }
-          const up = Math.min(1, raw) * s * 0.5; disc(add(c, [0, -up * 0.5]), s * 0.06, A([0.4, 0.35, 0.3, 1], 0.7 * a)); disc(add(c, [0, -up]), s * (0.12 + 0.1 * Math.min(1, raw)), A(mix(col, [0.4, 0.35, 0.3, 1], Math.min(1, raw)), 0.75 * a)); } }) },
-      { key: "C", name: "Double Shock", desc: "A fast thin ring snaps out, then a slower, heavier ring follows it, kicking up dust along its edge.", period: 1, flight: 1, fx: () => ({}),
-        persist: shockAgent({ travel: 0.6, draw: (c, u, R, s, col, t, raw) => { if (raw > 1.5) return; const a = Math.max(0, 1 - raw / 1.5);
-          const fast = Math.min(1, raw * 2.2); if (fast < 1) ring(c, R * fast, A([1, 0.95, 0.85, 1], 0.8 * (1 - fast)), 1.5);
-          ring(c, R * u, A(col, 0.85 * a), 4); for (let i = 0; i < 14; i++) disc(add(c, mul(fa(i * TAU / 14 + 0.2), R * u)), s * 0.06 * a, [0.55, 0.5, 0.42, 0.5 * a]); } }) },
-    ] },
-
-  // 17. Scrapyard ---------------------------------------------------------------------------------------
-  { id: "scrap", num: 17, name: "Scrapyard", cls: "Utility", weapon: "None", hits: "none", size: 2, center: [0.3, 0.4], color: [0.95, 0.72, 0.42, 1],
-    desc: "Various collections of scrap metal sold at a profit. \"One mans toxic waste is another mans potpourri\" A 2×2 yard; it attacks nothing and pays 100 credits at each round's clear (the preview pays every 4 s). (Colour: today's Scrapyard copper.)",
-    looks: [
-      { key: "A", name: "Crusher Yard", muzzle: 0, fixed: true, theme: "A fenced yard of rusting scrap heaps with a hydraulic crusher block in one corner and a swinging crane in the other.",
-        draw(c, aim, s, fx, t, col) { const k = G(s), mm = fx.mem || {}, thump = decay(t - (mm.last ?? -9), 0.3); yardBase(c, k, col, t);
-          scrapPile(add(c, [-18 * k, 14 * k]), 14, k, 1); scrapPile(add(c, [14 * k, 20 * k]), 11, k, 7); scrapPile(add(c, [-20 * k, -16 * k]), 9, k, 13);
-          const cr = add(c, [20 * k, -20 * k]); plate(cr, rectPts(10, 10), METAL_L, 0, k, 1.3); plate(cr, rectPts(6.5 - 2 * thump, 6.5 - 2 * thump), METAL, 0, k, 1); hazard(cr, 0, k, -8, 8, 11, col, 1.4); glowDot(add(cr, [7 * k, -7 * k]), 1 * k, col);
-          const base = add(c, [-4 * k, 0]), a = Math.sin(t * 0.6) * 1.2 - 0.6, tip = add(base, mul(fa(a), 26 * k)); orb(base, 3.4 * k, METAL); bar(base, tip, 2.4 * k, [0.85, 0.65, 0.2, 1]); line(tip, add(tip, [0, 5 * k]), METAL_D, 0.8 * k); disc(add(tip, [0, 5 * k]), 2 * k, METAL_L); } },
-      { key: "B", name: "Compactor Plant", muzzle: 0, fixed: true, theme: "A corrugated compactor shed with a conveyor carrying scrap in and neat stacked bales of crushed metal coming out.",
-        draw(c, aim, s, fx, t, col) { const k = G(s); yardBase(c, k, col, t); const sh = add(c, [-12 * k, -12 * k]); plate(sh, rectPts(18, 14), METAL_L, 0, k, 1.3); for (let i = -3; i <= 3; i++) line(add(sh, [i * 5 * k, -13 * k]), add(sh, [i * 5 * k, 13 * k]), [0, 0, 0, 0.3], 1);
-          plate(add(c, [12 * k, -12 * k]), rectPts(14, 3.4), METAL_D, 0, k, 1); for (let i = 0; i < 4; i++) { const x = 1 + fmod(t * 6 + i * 7, 26); scrapPile(add(c, [(26 - x) * k, -12 * k]), 2.4, k, i * 3); }
-          for (let i = 0; i < 3; i++) for (let j = 0; j < 2; j++) plate(add(c, [(-18 + i * 9) * k, (14 + j * 9) * k]), rectPts(4, 4), mix(RUST, METAL_L, 0.3 + 0.2 * ((i + j) % 2)), 0, k, 1);
-          scrapPile(add(c, [22 * k, 20 * k]), 11, k, 21); glowDot(add(sh, [14 * k, 10 * k]), 1 * k, col); } },
-      { key: "C", name: "Magnet Yard", muzzle: 0, fixed: true, theme: "Scrap heaps under a big crane boom with an electromagnet disc that lifts wreckage and drops it in a hopper.",
-        draw(c, aim, s, fx, t, col) { const k = G(s); yardBase(c, k, col, t); scrapPile(add(c, [-18 * k, 16 * k]), 15, k, 3); scrapPile(add(c, [18 * k, 18 * k]), 12, k, 9); scrapPile(add(c, [-20 * k, -18 * k]), 10, k, 17);
-          plate(add(c, [20 * k, -20 * k]), rectPts(8, 8), METAL_D, 0, k, 1.2); fill(add(c, [20 * k, -20 * k]), rectPts(5, 5), BORE, 0, k);
-          const a = -0.4 + Math.sin(t * 0.5) * 1.6, tip = add(c, mul(fa(a), 30 * k)); plate(c, ngon(6, 1, 0), METAL_L, a, 6 * k, 1.2); bar(c, tip, 3 * k, [0.85, 0.65, 0.2, 1]);
-          disc(tip, 5 * k, OUTLINE); disc(tip, 4.4 * k, METAL); ring(tip, 3 * k, A(col, 0.7), 1 * k); if (Math.sin(t * 0.5) < 0) scrapPile(add(tip, [0, 5 * k]), 3, k, 5); } },
-    ],
-    anims: [
-      { key: "A", name: "Round Payout", desc: "At each round's clear a spray of credit coins pops out of the yard with a floating +100, and the crusher thumps.", period: 1, flight: 1, fx: () => ({}),
-        persist: scrapAgent({ pay: (c, v, s, col) => coinPop(c, v, s, col) }) },
-      { key: "B", name: "Sparks and Sale", desc: "Cutting sparks fly from the heaps all the time; at the payout a stack of credits flashes on the yard and the +100 rises from it.", period: 1, flight: 1, fx: () => ({}),
-        persist: scrapAgent({ extra: (m, t, info, s) => { for (let i = 0; i < 6; i++) { const q = fmod(t * 2.2 + i / 6, 1), o = add(info.c, [(rnd(Math.floor(t * 2.2 + i / 6) + i) - 0.5) * s * 1.2, (rnd(i + 3) - 0.5) * s]); disc(add(o, mul(fa(-1.2 - i * 0.3), q * s * 0.2)), 1.2, [1, 0.8, 0.4, 1 - q]); } },
-          pay: (c, v, s, col) => { if (v < 0.3) glowDot(c, s * 0.3 * (1 - v / 0.3), GOLDC); for (let j = 0; j < 4; j++) { const p = add(c, [0, -j * s * 0.05]); ellipse(p, s * 0.12, s * 0.05, A(dk(GOLDC, 0.2), 1 - v)); } txt(add(c, [0, -s * 0.45 - v * s * 0.5]), "+100", A(GOLDC, Math.min(1, 2 - v * 2)), Math.max(11, s * 0.2)); } }) },
-      { key: "C", name: "Wreck Collector", desc: "Shows the kill bonus too: an enemy wrecked near the yard bursts and its scrap flies into the yard as a coin; the round payout pops +100.", period: 1, flight: 1, fx: () => ({}),
-        persist: scrapAgent({ extra: (m, t, info, s, col) => { const near = info.all.filter((e) => !e.air && distTo(e.p, info.c) < s * 3.1);
-            if (near.length && (!m.kill || t - m.kill.t0 > 1.5)) { const e = near[Math.floor(rnd(Math.floor(t)) * near.length)]; m.kill = { t0: t, p: e.p.slice() }; }
-            if (m.kill) { const v = (t - m.kill.t0) / 1.0; if (v < 0.3) blast(m.kill.p, v / 0.3, s, col, 0.25); if (v < 1) { const p = add(lerp(m.kill.p, info.c, v), [0, -Math.sin(Math.PI * v) * s * 0.5]); disc(p, s * 0.05 + 1, OUTLINE); disc(p, s * 0.05, GOLDC); if (v < 0.5) txt(add(m.kill.p, [0, -s * 0.25 - v * s * 0.3]), "+5", A(GOLDC, 1 - v * 2), Math.max(9, s * 0.15)); } } },
-          pay: (c, v, s, col) => coinPop(c, v, s, col) }) },
-    ] },
-
-  // 18. Magneto Tower -----------------------------------------------------------------------------------
-  { id: "magneto", num: 18, name: "Magneto Tower", cls: "Defense", weapon: "Field", hits: "both", color: [0.60, 0.45, 1.00, 1],
-    desc: "A massive electromagnet that magnetically pulls against enemies in range, slowing them down and pulling off armor. \"Yeah, science!\" A constant 120 px field slows every enemy in it (heavier roles resist); enemies inside show a pull arrow toward the magnet. (Colour: today's Gravity Well violet, close to the Tesla's purple.)",
-    looks: [
-      { key: "A", name: "Horseshoe Magnet", muzzle: 0, fixed: true, theme: "A giant horseshoe magnet seen from above, red and grey pole tips facing the track, its base wound with copper coil.",
-        draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t); arc(c, 9 * k, Math.PI * 0.85, Math.PI * 2.15, OUTLINE, 7.4 * k); arc(c, 9 * k, Math.PI * 0.85, Math.PI * 2.15, METAL_L, 6 * k);
-          for (let i = 0; i < 9; i++) { const a = Math.PI * 0.95 + i * 0.13; line(add(c, mul(fa(a), 6.4 * k)), add(c, mul(fa(a), 11.6 * k)), COPPER, 1 * k); }
-          plate(add(c, [-8 * k, 6 * k]), rectPts(3.4, 3), [0.85, 0.2, 0.2, 1], 0, k, 1); plate(add(c, [8 * k, 6 * k]), rectPts(3.4, 3), [0.6, 0.62, 0.66, 1], 0, k, 1); glowDot(add(c, [0, 6 * k]), 1.2 * k, col); } },
-      { key: "B", name: "Coil Drum", muzzle: 0, fixed: true, theme: "A massive round electromagnet drum wound in copper bands under a heavy pole cap, humming with a violet glow at its edge.",
-        draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t); disc(c, 13 * k, OUTLINE); disc(c, 12.3 * k, COPPER); for (let i = 0; i < 5; i++) ring(c, (8.6 + i * 0.8) * k, dk(COPPER, 0.25 * (i % 2)), 0.7 * k);
-          orb(c, 8 * k, METAL_L); fill(c, rectPts(4, 4), [0.85, 0.2, 0.2, 1], Math.PI / 4, k); ring(c, 12.6 * k, A(col, 0.4 + 0.3 * Math.sin(t * 6)), 1 * k); } },
-      { key: "C", name: "Twin Pole Pylons", muzzle: 0, fixed: true, theme: "Two squat pole pylons, one red and one grey, joined by a coil bridge; field lines arc between them.",
-        draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t); bar(add(c, [-8 * k, 0]), add(c, [8 * k, 0]), 5 * k, METAL); for (let i = -4; i <= 4; i++) line(add(c, [i * 1.4 * k, -2.4 * k]), add(c, [i * 1.4 * k, 2.4 * k]), COPPER, 0.9 * k);
-          for (const [x, cc] of [[-9, [0.85, 0.2, 0.2, 1]], [9, [0.6, 0.62, 0.66, 1]]]) { disc(add(c, [x * k, 0]), 5.4 * k, OUTLINE); orb(add(c, [x * k, 0]), 4.8 * k, cc); }
-          for (let i = 0; i < 3; i++) { const h = (3 + i * 2.6) * k; X.strokeStyle = css(A(col, 0.5 - i * 0.12)); X.lineWidth = 1; X.beginPath(); X.moveTo(c[0] - 9 * k, c[1]); X.quadraticCurveTo(c[0], c[1] - h * 2.2, c[0] + 9 * k, c[1]); X.stroke(); } } },
-      { key: "D", name: "Ring Electromagnet", muzzle: 0, fixed: true, theme: "A big flat ring magnet lying on the deck, its rim split into alternating red and grey pole segments with copper windings between.",
-        draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t); ring(c, 10.5 * k, OUTLINE, 7.4 * k);
-          for (let i = 0; i < 8; i++) { const a0 = i * TAU / 8 + 0.06, a1 = (i + 1) * TAU / 8 - 0.06; arc(c, 10.5 * k, a0, a1, i % 2 ? [0.6, 0.62, 0.66, 1] : [0.85, 0.2, 0.2, 1], 6 * k); line(add(c, mul(fa(a1 + 0.06), 7.6 * k)), add(c, mul(fa(a1 + 0.06), 13.4 * k)), COPPER, 1.2 * k); }
-          orb(c, 5 * k, METAL); glowDot(c, 1.3 * k, col); ring(c, 13.6 * k, A(col, 0.3 + 0.3 * Math.sin(t * 5)), 1 * k); } },
-      { key: "E", name: "Lifting Magnet Crane", muzzle: 0, fixed: true, theme: "A short crane boom on a turntable carrying a huge round lifting magnet that sweeps slowly back and forth over the field.",
-        draw(c, aim, s, fx, t, col) { const k = G(s), a = -0.4 + Math.sin(t * 0.4) * 0.9, tip = add(c, mul(fa(a), 13 * k)); deck(c, k, col, t); plate(c, ngon(8, 1, Math.PI / 8), METAL_L, a, 7 * k, 1.2);
-          bar(c, tip, 3 * k, [0.85, 0.65, 0.2, 1]); disc(tip, 7 * k, OUTLINE); disc(tip, 6.3 * k, METAL); ring(tip, 4.6 * k, COPPER, 1.4 * k); disc(tip, 2.4 * k, [0.85, 0.2, 0.2, 1]); ring(tip, 7.6 * k, A(col, 0.4 + 0.3 * Math.sin(t * 6)), 1 * k); orb(c, 2.6 * k, METAL); } },
-      { key: "F", name: "Stacked Coil Tower", muzzle: 0, fixed: true, theme: "Three coil rings stacked into a stepped tower, each smaller than the one below, topped with a red pole cap that glows as the field hums.",
-        draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t);
-          for (const [r, w] of [[12, 3.2], [8.6, 2.8], [5.4, 2.4]]) { ring(c, r * k, OUTLINE, (w + 1.4) * k); ring(c, r * k, COPPER, w * k); arc(c, r * k, Math.PI * 1.05, Math.PI * 1.6, lt(COPPER, 0.4), w * 0.35 * k); }
-          orb(c, 3 * k, [0.85, 0.2, 0.2, 1]); glowDot(c, (1 + 0.5 * Math.sin(t * 5)) * k, col); } },
-    ],
-    anims: [
-      { key: "A", name: "Field Lines", desc: "Shimmering field lines loop out from the magnet's poles across the field; enemies inside lean toward the magnet.", period: 1, flight: 1, fx: () => ({}),
-        persist: magnetAgent({ draw: (c, R, s, col, t) => { ring(c, R, A(col, 0.25), 1); for (let i = 0; i < 6; i++) { const a = i * TAU / 6 + t * 0.15, w = R * (0.5 + 0.08 * Math.sin(t * 3 + i));
-            X.strokeStyle = css(A(col, 0.25 + 0.15 * Math.sin(t * 4 + i))); X.lineWidth = 1.2; X.beginPath(); X.ellipse(c[0] + Math.cos(a) * w, c[1] + Math.sin(a) * w, w, w * 0.4, a, 0, TAU); X.stroke(); } } }) },
-      { key: "B", name: "Pulse Pull", desc: "Rings of force keep contracting in toward the magnet, as if reeling the field in; pulled enemies jitter toward it.", period: 1, flight: 1, fx: () => ({}),
-        persist: magnetAgent({ draw: (c, R, s, col, t) => { ring(c, R, A(col, 0.3), 1.2); for (let i = 0; i < 3; i++) { const q = 1 - fmod(t * 0.6 + i / 3, 1); ring(c, R * q, A(col, 0.55 * (1 - q) + 0.1), 2); } },
-          mark: (e, s, col, t) => ring(add(e.p, [Math.sin(t * 30 + e.i) * 1.2, 0]), enemyR(s) + 2, A(col, 0.5), 1) }) },
-      { key: "C", name: "Iron Filings", desc: "Glinting metal filings drift round the field along its lines, and sparks snap off the enemies being pulled.", period: 1, flight: 1, fx: () => ({}),
-        persist: magnetAgent({ draw: (c, R, s, col, t) => { disc(c, R, A(col, 0.05)); for (let i = 0; i < 40; i++) { const r = R * (0.2 + 0.8 * rnd(i)), a = rnd(i + 40) * TAU + t * (0.3 + 0.6 * (1 - r / R)), p = add(c, mul(fa(a), r));
-            line(p, add(p, mul(fa(a + Math.PI / 2), 3)), [0.75, 0.75, 0.8, 0.6], 1); } },
-          mark: (e, s, col, t) => { if (fmod(t * 3 + e.i * 0.3, 1) < 0.25) for (let i = 0; i < 3; i++) line(e.p, add(e.p, mul(fa(rnd(Math.floor(t * 12) + i + e.i) * TAU), enemyR(s) + 4)), A(lt(col, 0.4), 0.9), 1); } }) },
-      { key: "D", name: "Spark Arcs", desc: "Violet arcs crackle from the magnet out to every enemy in its field, flickering as they're dragged against the pull.", period: 1, flight: 1, fx: () => ({}),
-        persist: magnetAgent({ draw: (c, R, s, col, t) => { disc(c, R, A(col, 0.05)); ring(c, R, A(col, 0.3), 1); },
-          mark: (e, s, col, t, fr, c) => { if (fmod(t * 4 + e.i * 0.37, 1) > 0.6) return; const pts = [c]; for (let j = 1; j < 6; j++) pts.push(add(lerp(c, e.p, j / 6), mul(orth(norm(sub(e.p, c))), (rnd(Math.floor(t * 20) + j + e.i) - 0.5) * s * 0.2))); pts.push(e.p);
-            polyline(pts, A(col, 0.3), 3); polyline(pts, A(lt(col, 0.3), 0.9), 1); } }) },
-      { key: "E", name: "Gravity Ripple", desc: "The ground inside the field darkens and ripples inward in rings toward the magnet, like a well; enemies inside dip and slow.", period: 1, flight: 1, fx: () => ({}),
-        persist: magnetAgent({ draw: (c, R, s, col, t) => { disc(c, R, [0, 0, 0, 0.18]); disc(c, R * 0.6, [0, 0, 0, 0.12]); for (let i = 0; i < 5; i++) { const q = 1 - fmod(t * 0.4 + i / 5, 1); ring(c, R * q, A(col, 0.12 + 0.3 * q * (1 - q) * 4 * 0.5), 1.5); } },
-          mark: (e, s, col, t) => ellipse(add(e.p, [0, enemyR(s) * 0.8]), enemyR(s) * 1.2, enemyR(s) * 0.45, A(col, 0.35)) }) },
-      { key: "F", name: "Drag Trails", desc: "Enemies in the field smear behind themselves as they're held back, leaving violet drag trails, and the field's edge glows where they cross it.", period: 1, flight: 1, fx: () => ({}),
-        persist: magnetAgent({ draw: (c, R, s, col, t) => { ring(c, R, A(col, 0.45), 2); ring(c, R - 3, A(col, 0.15), 3); },
-          mark: (e, s, col, t) => { for (let i = 1; i <= 4; i++) disc(sub(e.p, [i * enemyR(s) * 0.6, 0]), enemyR(s) * (1 - i * 0.15), A(col, 0.25 - i * 0.05)); } }) },
-    ] },
-
-  // 19. Tractor Tower -----------------------------------------------------------------------------------
-  { id: "tractor", num: 19, name: "Tractor Tower", cls: "Defense", weapon: "Energy", hits: "both", color: [0.40, 0.95, 1.00, 1],
-    desc: "A dish-mounted emitter that locks a tractor beam onto a single enemy and hauls it back down the track before letting go. \"You're my friend now.\" It grabs one enemy, holds it 1.5 s while dragging it back 80 px, lets go, then recharges (6 s; the preview shortens it). The preview can't really move enemies, so the held one is redrawn where the beam drags it. (Colour: cyan, as the roster's look; close to the Gun Turret's.)",
-    looks: [
-      { key: "A", name: "Dish Emitter", muzzle: 13 / 48, theme: "A wide dish on a slim mast block with an emitter spike at its centre; a charge ring fills while it recharges.",
-        draw(c, aim, s, fx, t, col) { const k = G(s), ch = fx.mem?.charge ?? 1; deck(c, k, col, t); plate(c, rectPts(5, 5), METAL, 0, k, 1.1);
-          arc(c, 10 * k, aim - 1.2 + Math.PI, aim + 1.2 + Math.PI, OUTLINE, 4 * k); disc(P(c, aim, k, 2, 0), 9 * k, OUTLINE); disc(P(c, aim, k, 2, 0), 8.3 * k, METAL_L); disc(P(c, aim, k, 3, 0), 6.4 * k, METAL); bar(P(c, aim, k, 3, 0), P(c, aim, k, 13, 0), 1.6 * k, METAL_L);
-          arc(c, 11.5 * k, -Math.PI / 2, -Math.PI / 2 + TAU * ch, A(col, 0.8), 1.2 * k); glowDot(P(c, aim, k, 13, 0), (0.8 + ch) * k, col); } },
-      { key: "B", name: "Gimbal Projector", muzzle: 12 / 48, theme: "Two gimbal rings turning round a lens projector; the rings spin up as it grabs and slow while it recharges.",
-        draw(c, aim, s, fx, t, col) { const k = G(s), ch = fx.mem?.charge ?? 1, sp = fx.mem?.state === "hold" ? 6 : 1; deck(c, k, col, t);
-          for (const [r, ph] of [[10, 0], [7, 1]]) { const a = t * sp * (ph ? -1 : 1); X.strokeStyle = css(OUTLINE); X.lineWidth = 3.4 * k; X.beginPath(); X.ellipse(c[0], c[1], r * k, r * k * Math.abs(Math.cos(a)) + 1, aim + ph, 0, TAU); X.stroke();
-            X.strokeStyle = css(METAL_L); X.lineWidth = 2 * k; X.stroke(); }
-          orb(c, 4 * k, METAL); bar(c, P(c, aim, k, 12, 0), 2 * k, METAL); glowDot(P(c, aim, k, 12, 0), (0.8 + ch) * k, col); } },
-      { key: "C", name: "Claw Emitter", muzzle: 15 / 48, theme: "A stubby emitter barrel ending in three clamp claws that close when it grabs, on a riveted turret.",
-        draw(c, aim, s, fx, t, col) { const k = G(s), held = fx.mem?.state === "hold" ? 1 : 0; deck(c, k, col, t); plate(c, ngon(8, 1, Math.PI / 8), METAL_L, aim, 8 * k, 1.2); rivets(c, ngon(8, 1, Math.PI / 8), aim, 8 * k, 0.82, 0.7 * k);
-          bar(c, P(c, aim, k, 12, 0), 4 * k, METAL); for (const sg of [-1, 0, 1]) { const base = P(c, aim, k, 11, sg * 2.6), tip = P(c, aim + sg * (0.5 - 0.35 * held), k, 17, sg * (3.6 - 2.4 * held)); bar(base, tip, 1.3 * k, METAL_L); }
-          glowDot(P(c, aim, k, 13, 0), 1.2 * k, col); orb(c, 3 * k, METAL); } },
-    ],
-    anims: [
-      { key: "A", name: "Beam Cone", desc: "A cyan cone of light widens from the emitter onto the enemy, which hovers with fading afterimages as it glides back down the track.", period: 1, flight: 1, fx: () => ({}),
-        persist: tractorAgent({ beam: (f, to, u, s, col) => { const d = norm(sub(to, f)), o = orth(d), w = enemyR(s) + 4; poly([f, add(to, mul(o, w)), sub(to, mul(o, w))], A(col, 0.18)); line(f, add(to, mul(o, w)), A(col, 0.5), 1); line(f, sub(to, mul(o, w)), A(col, 0.5), 1); } }) },
-      { key: "B", name: "Grapple Beam", desc: "A straight beam shoots out with rings sliding down it to the enemy, then the rings reel back in as it's hauled; the enemy shakes in the grip.", period: 1, flight: 1, fx: () => ({}),
-        persist: tractorAgent({ beam: (f, to, u, s, col, t) => { beam(f, to, 1.8, col, 0.8); const d = norm(sub(to, f)), L = distTo(f, to);
-            for (let i = 0; i < 4; i++) { const q = fmod(-t * 0.8 + i / 4, 1), p = add(f, mul(d, L * q)); X.strokeStyle = css(A(col, 0.8)); X.lineWidth = 1.4; X.beginPath(); X.ellipse(p[0], p[1], 2.5, 6, Math.atan2(d[1], d[0]), 0, TAU); X.stroke(); } },
-          held: (p, s, col, t) => ring(add(p, [Math.sin(t * 40), 0]), enemyR(s) + 3, A(col, 0.7), 1.2) }) },
-      { key: "C", name: "Spiral Lock", desc: "A twisting double-helix beam locks on and wraps the enemy in a glowing bubble that drifts back with it.", period: 1, flight: 1, fx: () => ({}),
-        persist: tractorAgent({ beam: (f, to, u, s, col, t) => { const d = norm(sub(to, f)), o = orth(d), L = distTo(f, to); for (const ph of [0, Math.PI]) { const pts = []; for (let i = 0; i <= 24; i++) { const q = i / 24; pts.push(add(add(f, mul(d, L * q)), mul(o, Math.sin(q * 14 - t * 10 + ph) * s * 0.06))); } polyline(pts, A(col, 0.75), 1.3); }
-            line(f, to, A(col, 0.25), 3); },
-          held: (p, s, col, t) => { disc(p, enemyR(s) + 6, A(col, 0.12)); ring(p, enemyR(s) + 6, A(col, 0.6 + 0.2 * Math.sin(t * 8)), 1.4); arc(p, enemyR(s) + 4, Math.PI * 1.1, Math.PI * 1.5, [1, 1, 1, 0.6], 1); } }) },
-    ] },
-
-  // 20. Augmentation Tower ------------------------------------------------------------------------------
-  { id: "augment", num: 20, name: "Augmentation Tower", cls: "Support", weapon: "None", hits: "none", color: [0.78, 0.71, 1.00, 1],
-    desc: "Neighboring towers are given special augmentations to their weaponry through mysterious means. \"So my 12-guage shotgun shoots thermonuclear explosives now apparently.\" It attacks nothing; at stock, towers within 2 tiles get a 5% crit chance (every third stand-in shot crits here, so it shows). Links run in the effect colours: gold for crits, cyan for energy, green for ricochet. (Colour: a new lavender; no in-game counterpart.)",
-    looks: [
-      { key: "A", name: "Crystal Emitter", muzzle: 0, fixed: true, theme: "A hexagonal plinth crowned with one big faceted crystal that glows from inside, slowly pulsing.",
-        draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t); plate(c, ngon(6, 1, Math.PI / 6), METAL_L, 0, 9.5 * k, 1.2);
-          const pu = 0.6 + 0.4 * Math.sin(t * 2); solid(c, [[0, -9], [5.5, -3], [4, 6], [0, 8.5], [-4, 6], [-5.5, -3]], A(mix(col, [1, 1, 1, 1], 0.2), 0.9), 0, k, 1);
-          for (const q of [[0, -9], [5.5, -3], [4, 6], [-4, 6], [-5.5, -3]]) line(c, add(c, mul(q, k)), [1, 1, 1, 0.35], 0.8); glowDot(c, (1.4 + pu) * k, col); } },
-      { key: "B", name: "Orbiting Shards", muzzle: 0, fixed: true, theme: "A low pedestal with three crystal shards circling above it on a slow orbit, trailing faint light.",
-        draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t); disc(c, 7 * k, OUTLINE); disc(c, 6.3 * k, METAL); ring(c, 4.5 * k, A(col, 0.6), 1 * k); glowDot(c, 1.4 * k, col);
-          for (let i = 0; i < 3; i++) { const a = t * 1.2 + i * TAU / 3, p = add(c, mul(fa(a), 11 * k)); arc(c, 11 * k, a - 0.6, a, A(col, 0.3), 1.2 * k); solid(p, [[0, -3.6], [2, 0], [0, 3.6], [-2, 0]], A(lt(col, 0.2), 0.95), a, k, 0.8); } } },
-      { key: "C", name: "Caged Prism", muzzle: 0, fixed: true, theme: "A triangular prism turning slowly inside a ring cage on four posts, splitting its light into the three effect colours.",
-        draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t); ring(c, 11 * k, OUTLINE, 3 * k); ring(c, 11 * k, METAL_L, 1.8 * k); for (let i = 0; i < 4; i++) orb(add(c, mul(fa(Math.PI / 4 + i * Math.PI / 2), 11 * k)), 1.8 * k, METAL);
-          solid(c, ngon(3, 1, t * 0.5), A(mix(col, [1, 1, 1, 1], 0.3), 0.85), 0, 7.5 * k, 1);
-          [GOLDC, [0.3, 0.9, 1, 1], [0.4, 1, 0.5, 1]].forEach((cc, i) => { const a = t * 0.5 + i * TAU / 3; line(c, add(c, mul(fa(a + Math.PI / 3), 10 * k)), A(cc, 0.6), 1 * k); }); glowDot(c, 1.2 * k, col); } },
-      { key: "D", name: "Tuning Fork Spire", muzzle: 0, fixed: true, theme: "A two-pronged tuning-fork emitter on a round base, its prongs humming so that faint rings shiver off it.",
-        draw(c, aim, s, fx, t, col) { const k = G(s), hum = Math.sin(t * 40) * 0.4; deck(c, k, col, t); disc(c, 8 * k, OUTLINE); disc(c, 7.3 * k, METAL);
-          for (const sg of [-1, 1]) { bar(add(c, [sg * (3.4 + hum) * k, 4 * k]), add(c, [sg * (3.4 + hum) * k, -10 * k]), 2.2 * k, METAL_L); glowDot(add(c, [sg * (3.4 + hum) * k, -10 * k]), 0.9 * k, col); }
-          bar(add(c, [-3.4 * k, 4 * k]), add(c, [3.4 * k, 4 * k]), 2.2 * k, METAL_L); for (let i = 0; i < 2; i++) { const q = fmod(t * 1.5 + i / 2, 1); ring(add(c, [0, -6 * k]), (2 + q * 9) * k, A(col, 0.5 * (1 - q)), 1); } } },
-      { key: "E", name: "Glyph Ring", muzzle: 0, fixed: true, theme: "A ring of small glowing glyph plates floating round a central orb, turning slowly, each plate lighting in turn.",
-        draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t); orb(c, 4.6 * k, METAL_L); glowDot(c, 1.6 * k, col);
-          for (let i = 0; i < 6; i++) { const a = t * 0.6 + i * TAU / 6, p = add(c, mul(fa(a), 11 * k)), on = fmod(t * 2 - i, 6) < 1;
-            plate(p, rectPts(2.4, 1.8), METAL, a, k, 0.8); line(add(p, mul(fa(a + 1.2), 1.2 * k)), add(p, mul(fa(a - 1.2), 1.2 * k)), A(col, on ? 1 : 0.4), 0.9 * k); if (on) glowDot(p, 1 * k, col); } } },
-      { key: "F", name: "Nanite Hive", muzzle: 0, fixed: true, theme: "A low dome of hexagonal cells that light up one after another as nanite swarms drift in and out of them.",
-        draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t); orb(c, 12 * k, METAL_L);
-          for (let q = -2; q <= 2; q++) for (let r = -2; r <= 2; r++) { const x = (q + r * 0.5) * 4.4, y = r * 3.8; if (x * x + y * y > 95) continue; const on = rnd(q * 7 + r * 13 + Math.floor(t * 3)) > 0.75;
-            outline(add(c, [x * k, y * k]), ngon(6, 1, Math.PI / 6), A(on ? col : METAL, on ? 0.95 : 0.7), 0.8 * k, 0, 2.2 * k); }
-          for (let i = 0; i < 6; i++) glowDot(add(c, mul(fa(t * 1.5 + i), (6 + 6 * fmod(t * 0.5 + i / 6, 1)) * k)), 0.5 * k, col); } },
-    ],
-    anims: [
-      { key: "A", name: "Crit Links", desc: "Gold links run from the tower to each tower in range; their shots fly as usual, and a crit lands as a gold burst marked CRIT.", period: 1, flight: 1, fx: () => ({}),
-        persist: augmentAgent({ link: (c, p, s, col, t, i) => { line(c, p, A(GOLDC, 0.25), 3); line(c, p, A(GOLDC, 0.7), 1); glowDot(lerp(c, p, fmod(t * 0.7 + i * 0.3, 1)), s * 0.025, GOLDC); }, crit: (p, v, s) => critBurst(p, v, s) }) },
-      { key: "B", name: "Augment Glow", desc: "Each boosted tower's base takes on a gold glow and a faint aura joins it to the tower; crit shots fly as thick gold tracers and burst.", period: 1, flight: 1, fx: () => ({}),
-        persist: augmentAgent({ link: (c, p, s, col, t) => { ring(p, s * 0.34, A(GOLDC, 0.35 + 0.2 * Math.sin(t * 3)), 2); disc(p, s * 0.34, A(GOLDC, 0.06)); line(c, p, A(col, 0.18), 6); }, crit: (p, v, s) => critBurst(p, v, s) }) },
-      { key: "C", name: "Shard Stream", desc: "Tiny crystal shards stream from the tower into each boosted tower; a crit shot shatters into gold splinters on the target.", period: 1, flight: 1, fx: () => ({}),
-        persist: augmentAgent({ link: (c, p, s, col, t, i) => { for (let j = 0; j < 3; j++) { const q = fmod(t * 0.9 + j / 3 + i * 0.17, 1), pp = add(lerp(c, p, q), mul(orth(norm(sub(p, c))), Math.sin(q * Math.PI * 2) * s * 0.06)); fill(pp, [[0, -2.4], [1.3, 0], [0, 2.4], [-1.3, 0]], A(lt(col, 0.2), 0.9), t * 3 + j, 1); } },
-          crit: (p, v, s) => { critBurst(p, v, s); for (let i = 0; i < 8; i++) { const d = fa(i * TAU / 8); fill(add(p, mul(d, s * 0.35 * v)), [[0, -2], [1, 0], [0, 2], [-1, 0]], A(GOLDC, 1 - v), i, 1); } } }) },
-      { key: "D", name: "Nanite Swarm", desc: "Clouds of nanite specks drift from the tower to each tower in range and cling round its barrel; a crit bursts into a cloud of glittering specks.", period: 1, flight: 1, fx: () => ({}),
-        persist: augmentAgent({ link: (c, p, s, col, t, i) => { for (let j = 0; j < 6; j++) { const q = fmod(t * 0.5 + j / 6 + i * 0.13, 1), pp = add(lerp(c, p, q), mul(fa(t * 3 + j * 2), s * 0.05)); disc(pp, 1.1, A(col, 0.8)); }
-            for (let j = 0; j < 5; j++) disc(add(p, mul(fa(t * 2.4 + j * 1.3 + i), s * 0.2)), 1, A(col, 0.85)); },
-          crit: (p, v, s, col) => { critBurst(p, v, s); for (let i = 0; i < 12; i++) disc(add(p, mul(fa(i * 0.52 + 0.2), s * 0.4 * v * (0.5 + rnd(i)))), 1.2, A(col, 1 - v)); } }) },
-      { key: "E", name: "Heartbeat Tethers", desc: "Tethers run to each tower in range and pulse like a heartbeat, a ring travelling down each on the beat; a crit strikes the target with a gold bolt.", period: 1, flight: 1, fx: () => ({}),
-        persist: augmentAgent({ link: (c, p, s, col, t) => { const b = fmod(t * 1.1, 1); line(c, p, A(col, 0.35 + 0.4 * Math.max(0, 1 - b * 5)), 1.6); const q = lerp(c, p, b); ring(q, s * 0.06, A(col, 1 - b), 1.4); },
-          crit: (p, v, s) => { critBurst(p, v, s); if (v < 0.4) { const top = add(p, [0, -s * 0.8]), pts = [top]; for (let j = 1; j < 5; j++) pts.push(add(lerp(top, p, j / 5), [(rnd(j + Math.floor(v * 30)) - 0.5) * s * 0.2, 0])); pts.push(p); polyline(pts, A(GOLDC, 1 - v * 2.5), 2); } } }) },
-      { key: "F", name: "Overdrive Halo", desc: "Each tower in range wears a turning halo above it; crit shots leave a gold afterimage trail and a starburst on the target.", period: 1, flight: 1, fx: () => ({}),
-        persist: augmentAgent({ link: (c, p, s, col, t, i) => { const h = add(p, [0, -s * 0.38]); X.strokeStyle = css(A(col, 0.85)); X.lineWidth = 1.6; X.beginPath(); X.ellipse(h[0], h[1], s * 0.16, s * 0.05, 0, 0, TAU); X.stroke();
-            glowDot(add(h, [Math.cos(t * 3 + i) * s * 0.16, Math.sin(t * 3 + i) * s * 0.05]), s * 0.02, col); },
-          crit: (p, v, s) => { critBurst(p, v, s); for (let i = 0; i < 8; i++) { const d = fa(i * TAU / 8); line(add(p, mul(d, s * 0.05)), add(p, mul(d, s * (0.15 + 0.3 * v))), A(GOLDC, 1 - v), 1.2); } } }) },
+      { key: "A", name: "Pour and Payout", desc: "At each round's clear the furnace flares, molten metal runs down the channel into the moulds, the ingots flash gold and a spray of credit coins pops out with the payout.", period: 1, flight: 1, fx: () => ({}), persist: () => {} },
     ] },
 ];
-const DEFAULTS = { shock: { look: "B", anim: "B" }, scrap: { look: "C", anim: "B" }, magneto: { look: "F", anim: "F" }, tractor: { look: "C", anim: "C" }, augment: { look: "F", anim: "D" } };
 
 return { TOWERS };
 })();
 const NO_BOOT = true;
-// ---- Tower art second pass: Scrapyard (tower 17), round 1 ----------------------------------------------------------
-// Base: look C Magnet Yard, animation B Sparks and Sale. A 2x2 yard (half-width 46 px). One parametric model built on the lessons so far: every
-// step REBUILDS a building (the new design replaces the old one), the options swap that building's style, masteries are gold, overlapping
-// Retrofits are kept and stack (the carpet rule), and the agent runs the real rules (the payout at each clear, the kill bonus, the discount field).
-//  - Path 1 (Passive Income) rebuilds the money building in the bottom-right (a press house, a vault or a mint tower); gold at the Reserve Bank.
-//  - Path 2 (Kill Income) rebuilds the plant in the top-right (collector rig, sorting line or smelter) and the crane's magnet; its field ring widens.
-//  - Path 3 (Discounts) rebuilds the depot in the top-left (a shed with crates, a warehouse office or a rail siding); its field ring widens.
+// ---- Tower art second pass: Scrapyard (tower 17), REDESIGNED FROM SCRATCH as a smelting works (owner, 2026-10-19) -----------------------------------
+// Everything is new: the base look (a foundry: brick furnace, scrap conveyor, molten channel, ingot moulds, chimney) and all three paths. The
+// model draws the whole yard at every level. Lessons carried over: every step REBUILDS a part in place (the new design replaces the old one),
+// the options swap that part's style, masteries are gold, overlapping Retrofits are kept and stack (the carpet rule), and the agent runs the
+// real rules (the payout at each clear, the kill bonus, the discount field). Layout (game px, a 2x2 yard, half-width 46):
+//  - the furnace in the middle-left, fed by a scrap conveyor from the left edge, with a chimney;
+//  - a molten channel from the furnace down to the casting strip along the bottom edge;
+//  - Path 1 (Passive Income) rebuilds the casting strip (ingot moulds, a vault store or mint presses); gold at the Reserve Bank;
+//  - Path 2 (Kill Income) rebuilds the furnace itself (a brick furnace, a blast furnace or a crucible works); wrecked enemies feed it;
+//  - Path 3 (Discounts) rebuilds the supply strip down the left edge (chutes with crates, ore silos or a rail siding).
 // Overlaps kept and stacking: the Second Crusher's +30 with the path-1 income, the Bigger Yard's +30 px with both field radii.
-const PAGE = { title: "Scrapyard: paths and Retrofits (second pass)", store: "bl-tower-art-p2-scrap-r1" };
-const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], COPPER = [0.78, 0.5, 0.28, 1], RUST = [0.45, 0.3, 0.2, 1], KILL = [1, 0.55, 0.25, 1], DISCC = [0.45, 0.82, 0.95, 1], YEL = [0.85, 0.65, 0.2, 1];
+const PAGE = { title: "Scrapyard (smelting works): paths and Retrofits (second pass)", store: "bl-tower-art-p2-scrap-sw1" };
+const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], BRICK = [0.55, 0.27, 0.2, 1], SLAG = [0.16, 0.14, 0.13, 1], MOLTEN = [1, 0.55, 0.15, 1], HOTM = [1, 0.85, 0.45, 1], KILL = [1, 0.5, 0.2, 1], DISCC = [0.45, 0.82, 0.95, 1], YEL = [0.9, 0.7, 0.15, 1];
 const rnd = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
 const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 const INCOME = [100, 130, 165, 220, 270, 320], KILLPX = [0, 140, 150, 170, 190, 210], DISCPX = [0, 140, 150, 160, 175, 190], KBONUS = [0, 0.15, 0.25, 0.35, 0.45, 0.6], DOFF = ["", "-5%", "-10%", "-15%", "-20%", "-25%"];
 const incomeOf = (B) => INCOME[B.lv[0]] + (B.r === 0 ? 30 : 0);
 const killR = (B) => KILLPX[B.lv[1]] + (B.r === 1 && B.lv[1] > 0 ? 30 : 0), discR = (B) => DISCPX[B.lv[2]] + (B.r === 1 && B.lv[2] > 0 ? 30 : 0);
+const FP = [-6, -4];                                                                                  // the furnace's centre (yard units)
 function txt(p, str, col, px) { X.save(); X.font = "bold " + Math.round(px) + "px sans-serif"; X.textAlign = "center"; X.fillStyle = css(OUTLINE); X.fillText(str, p[0] + 1, p[1] + 1); X.fillStyle = css(col); X.fillText(str, p[0], p[1]); X.restore(); }
 function coinPop(c, v, s) { for (let i = 0; i < 6; i++) { const d = fa(-Math.PI / 2 + (i - 2.5) * 0.35), p = add(add(c, mul(d, s * 0.5 * Math.min(1, v * 2))), [0, v * v * s * 0.4]); disc(p, s * 0.045 + 1, A(OUTLINE, 0.95 * (1 - v))); disc(p, s * 0.045, A(GOLD, 1 - v)); } }
-function scrapPile(p, r, k, seed) { const pts = []; for (let i = 0; i < 9; i++) { const a = i * TAU / 9; pts.push([Math.cos(a) * r * (0.65 + 0.35 * rnd(seed + i)), Math.sin(a) * r * (0.65 + 0.35 * rnd(seed + i + 20))]); }
-  ellipse(add(p, [k * 1.5, k * 2.5]), r * k, r * k * 0.5, [0, 0, 0, 0.3]); solid(p, pts, mix(RUST, METAL, 0.4), 0, k, 1);
-  for (let i = 0; i < 5; i++) { const q = add(p, [(rnd(seed + i * 3) - 0.5) * r * k * 1.1, (rnd(seed + i * 5) - 0.5) * r * k * 0.9]); line(q, add(q, mul(fa(rnd(seed + i) * TAU), r * k * 0.35)), i % 2 ? METAL_L : RUST, 1.4 * k); } }
-function yardBase(c, k, col, t) { const h = 46; ellipse(add(c, [0, 8 * k]), 44 * k, 16 * k, [0, 0, 0, 0.3]); plate(c, rectPts(h, h), lt(METAL_D, 0.04), 0, k, 1.3); fill(c, rectPts(h - 4, h - 4), [0.2, 0.19, 0.17, 1], 0, k);
-  outline(c, rectPts(h - 2, h - 2), A(col, 0.5 + 0.2 * Math.sin(t * 2.2)), 1.4 * k, 0, k); for (let i = -4; i <= 4; i++) for (const sg of [-1, 1]) { disc(add(c, [i * 10 * k, sg * (h - 2) * k]), 1.1 * k, METAL_L); disc(add(c, [sg * (h - 2) * k, i * 10 * k]), 1.1 * k, METAL_L); } }
+const goldOr = (g, col) => (g ? GOLD : col);
 
-// ---- The agent: a payout at each (preview) clear, kill-bonus coins from wrecked enemies in the field, and the two field rings ----------------------------
+// ---- The agent: the payout at each (preview) clear, kill coins from wrecked enemies in the field, and the two field rings -------------------------------
 function scrapAgent(B) { return (m, t, info, s, col) => { if (!m.pays) { m.pays = []; m.last = t; m.kills = []; m.kt = t; }
-  const L1 = B.lv[0], L2 = B.lv[1], L3 = B.lv[2], c = info.c;
+  const L1 = B.lv[0], L2 = B.lv[1], L3 = B.lv[2], c = info.c, k = G(s), furn = add(c, [FP[0] * k, FP[1] * k]);
   if (t - m.last >= 4) { m.last = t; m.pays.push(t); } m.pays = m.pays.filter((q) => t - q < 1.8);
   if (L2 > 0) { const R = s * killR(B) / 48; ring(c, R, A(KILL, 0.2), 1.2); for (let i = 0; i < 24; i += 2) line(add(c, mul(fa(i * TAU / 24 + t * 0.03), R)), add(c, mul(fa((i + 1) * TAU / 24 + t * 0.03), R)), A(KILL, 0.34), 1.2); }
   if (L3 > 0) { const R = s * discR(B) / 48; ring(c, R, A(DISCC, 0.2), 1.2); for (let i = 1; i < 24; i += 2) line(add(c, mul(fa(i * TAU / 24 - t * 0.03), R)), add(c, mul(fa((i + 1) * TAU / 24 - t * 0.03), R)), A(DISCC, 0.34), 1.2); txt(add(c, [R * 0.7, -R * 0.7]), DOFF[L3], A(DISCC, 0.9), Math.max(10, s * 0.14)); }
-  if (L2 > 0 && t - m.kt >= 1.7) { const near = info.all.filter((e) => !e.air && dist(e.p, c) < s * killR(B) / 48); if (near.length) { const e = near[Math.floor(rnd(Math.floor(t) + 1) * near.length)]; m.kills.push({ t0: t, p: e.p.slice() }); m.kt = t; } }
+  if (L2 > 0 && t - m.kt >= 1.7) { const near = info.all.filter((e) => !e.air && dist(e.p, c) < s * killR(B) / 48); if (near.length) { const e = near[Math.floor(rnd(Math.floor(t) + 1) * near.length)]; m.kills.push({ t0: t, p: e.p.slice() }); m.kt = t; m.feed = t; } }
   m.kills = m.kills.filter((q) => t - q.t0 < 1);
-  for (const q of m.kills) { const v = (t - q.t0) / 1; if (v < 0.25) { const r = Math.max(4, Math.min(11, s * 0.12)); glowDot(q.p, r * (1 - v / 0.25), [1, 0.9, 0.7, 1]); ring(q.p, r + v * 40, A(KILL, 1 - v / 0.25), 1.6); }
-    const p = add(lerp(q.p, c, Math.min(1, v * 1.1)), [0, -Math.sin(Math.PI * Math.min(1, v)) * s * 0.4]); disc(p, s * 0.05 + 1, OUTLINE); disc(p, s * 0.05, g2c(L2));
-    if (v < 0.55) txt(add(q.p, [0, -s * 0.22 - v * s * 0.3]), "+" + Math.round(5 * (1 + KBONUS[L2])), A(g2c(L2), 1 - v * 1.8), Math.max(9, s * 0.15)); }
-  for (const q of m.pays) { const v = (t - q) / 1.6; if (v > 1) continue; coinPop(c, v, s); if (v < 0.3) glowDot(c, s * 0.3 * (1 - v / 0.3), GOLD);
-    txt(add(c, [0, -s * 0.45 - v * s * 0.5]), "+" + incomeOf(B), A(GOLD, Math.min(1, 2 - v * 2)), Math.max(11, s * 0.2));
-    if (L1 >= 5 && v > 0.1) txt(add(c, [s * 0.5, -s * 0.25 - v * s * 0.4]), "+3%", A([0.8, 1, 0.6, 1], Math.min(1, 2 - v * 2)), Math.max(9, s * 0.14)); } }; }
-const g2c = (L2) => (L2 >= 5 ? GOLD : KILL);
+  for (const q of m.kills) { const v = (t - q.t0) / 1, gc = L2 >= 5 ? GOLD : MOLTEN; if (v < 0.25) { const r = Math.max(4, Math.min(11, s * 0.12)); glowDot(q.p, r * (1 - v / 0.25), [1, 0.9, 0.7, 1]); ring(q.p, r + v * 40, A(KILL, 1 - v / 0.25), 1.6); }
+    const p = add(lerp(q.p, furn, Math.min(1, v * 1.1)), [0, -Math.sin(Math.PI * Math.min(1, v)) * s * 0.4]); disc(p, s * 0.05 + 1, OUTLINE); disc(p, s * 0.05, gc);
+    if (v < 0.55) txt(add(q.p, [0, -s * 0.22 - v * s * 0.3]), "+" + Math.round(5 * (1 + KBONUS[L2])), A(gc, 1 - v * 1.8), Math.max(9, s * 0.15)); }
+  for (const q of m.pays) { const v = (t - q) / 1.6; if (v > 1) continue; const cp = add(c, [0, 30 * k]); coinPop(cp, v, s); if (v < 0.3) glowDot(cp, s * 0.3 * (1 - v / 0.3), HOTM);
+    txt(add(cp, [0, -s * 0.45 - v * s * 0.5]), "+" + incomeOf(B), A(GOLD, Math.min(1, 2 - v * 2)), Math.max(11, s * 0.2));
+    if (L1 >= 5 && v > 0.1) txt(add(cp, [s * 0.5, -s * 0.25 - v * s * 0.4]), "+3%", A([0.8, 1, 0.6, 1], Math.min(1, 2 - v * 2)), Math.max(9, s * 0.14)); } }; }
 
 // ---- The model ---------------------------------------------------------------------------------------------------------------------------------------
 const P2 = {
-  tower: "scrap", look: "C", anim: "B", sBuild: 112, sCard: 64,                                  // a 2x2 yard: smaller previews so the whole yard fits
-  intro: "Round 1: every step rebuilds a building, in place. Path 1 (Passive Income) rebuilds the money building in the bottom-right corner: a press house, a vault or a mint tower, bigger at each step and gold at the Reserve Bank; the payout pops at each clear. Path 2 (Kill Income) rebuilds the plant in the top-right corner (a collector rig, a sorting line or a smelter) and the crane's magnet, widens the orange kill-field ring, and wrecked enemies in the field send a coin to the yard with a bonus. Path 3 (Discounts) rebuilds the depot in the top-left corner (a crate shed, a warehouse office or a rail siding) and widens the blue discount ring (with the percentage off). The Retrofits add a second crusher, a wider fence or a salvage crane. Overlapping Retrofits are kept and stack (the carpet rule). Unpicked steps show option A.",
+  tower: "scrap", look: "A", anim: "A", sBuild: 112, sCard: 64,                                 // a 2x2 yard: smaller previews so the whole yard fits
+  intro: "Round 1 of the redesign: a fresh Smelting Works (the old Magnet Yard and every old upgrade design are gone). A brick furnace with a glowing mouth is fed by a scrap conveyor and breathes smoke from its chimney; a molten channel runs down to a casting strip of ingot moulds, and at each payout the channel flares and the ingots flash gold. Path 1 (Passive Income) rebuilds the casting strip (ingot moulds, a vault store or mint presses; gold at the Reserve Bank). Path 2 (Kill Income) rebuilds the furnace itself (a bigger brick furnace, a blast furnace or a crucible works), widens the orange kill ring, and wrecked enemies in it feed the furnace a coin with the bonus. Path 3 (Discounts) rebuilds the supply strip down the left edge (chutes with crates, ore silos or a rail siding) and widens the blue discount ring. The Retrofits add a second crusher, a wider wall or a salvage crane. Overlapping Retrofits are kept and stack (the carpet rule). Unpicked steps show option A.",
   mods(B) { return { period: 1, flight: 1, multi: false, persist: scrapAgent(B) }; },
   muzzleAt(B, m, kk, c) { return c; },
   model(c, aim, s, fx, t, col, info, B) {
-    const k = G(s), mm = fx.mem || {}, thump = decay(t - (mm.last ?? -9), 0.3), L1 = B.lv[0], L2 = B.lv[1], L3 = B.lv[2], S = (x, y) => add(c, [x * k, y * k]), R = B.r >= 0 ? B.key("r" + B.r) : null, g1 = L1 >= 5, g2 = L2 >= 5, g3 = L3 >= 5;
-    if (B.r === 1) { outline(c, rectPts(54, 54), A(COPPER, 0.9), 2.2 * k, 0, k);                                                          // the Bigger Yard's outer fence (options below add its style)
-      for (let i = -5; i <= 5; i++) for (const sg of [-1, 1]) { if (R === "A") { disc(S(i * 10.8, sg * 54), 1.4 * k, METAL_L); disc(S(sg * 54, i * 10.8), 1.4 * k, METAL_L); }
-        if (R === "B") { line(S(i * 10.8, sg * 54), S(i * 10.8 + 5.4, sg * 54 - sg * 3), A(METAL_L, 0.9), 0.8 * k); line(S(sg * 54, i * 10.8), S(sg * 54 - sg * 3, i * 10.8 + 5.4), A(METAL_L, 0.9), 0.8 * k); }
-        if (R === "C" && (i + 6) % 3 === 0) { plate(S(i * 10.8, sg * 54), rectPts(2.4, 2.4), METAL_D, 0, k, 1); plate(S(sg * 54, i * 10.8), rectPts(2.4, 2.4), METAL_D, 0, k, 1); } } }
-    yardBase(c, k, col, t);
-    scrapPile(S(-18, 16), 14, k, 1); if (L1 === 0) scrapPile(S(18, 18), 12, k, 9); if (L3 === 0) scrapPile(S(-20, -18), 10, k, 17);
-    // ---- Path 3: the depot in the top-left, rebuilt each step (a crate shed, a warehouse office or a rail siding) ---------------------------------------------------
-    if (L3 > 0) { const key = B.key("p2s" + (L3 - 1)), z = [0, 8, 10, 12, 14, 16][L3], p = S(-22, -20), ac = g3 ? GOLD : DISCC;
-      if (key === "A") { plate(p, rectPts(z, z * 0.7), METAL_L, 0, k, 1.2); line(add(p, [-z * k, -z * 0.7 * k * 0.1]), add(p, [z * k, -z * 0.7 * k * 0.1]), A(OUTLINE, 0.5), 1.2 * k); for (let q = 0; q < L3 + 1; q++) { const cx = -z * 0.7 + (q % 3) * z * 0.7, cy = z * 0.9 + Math.floor(q / 3) * 3.4; plate(add(p, [cx * k, cy * k]), rectPts(2.4, 1.8), mix(YEL, RUST, 0.5 + 0.1 * (q % 2)), 0, k, 0.9); } glowDot(add(p, [z * 0.8 * k, -z * 0.5 * k]), 0.5 * k, ac); }   // a shed with crates
-      if (key === "B") { plate(p, rectPts(z, z * 0.75), METAL_L, 0, k, 1.2); plate(p, rectPts(z * 0.9, z * 0.62), METAL_D, 0, k, 0.9); for (let q = 0; q < 3 + Math.floor(L3 / 2); q++) rect(p[0] + (-z * 0.8 + q * z * 1.6 / (2 + Math.floor(L3 / 2))) * k, p[1] - z * 0.2 * k, 1.8 * k, 1.5 * k, fmod(t * 1.5 + q * 0.7, 3) < 2 ? ac : [0.1, 0.12, 0.12, 1]); if (g3) line(add(p, [-z * k, z * 0.75 * k]), add(p, [z * k, z * 0.75 * k]), GOLD, 1.6 * k); }   // a warehouse office with lit windows
-      if (key === "C") { for (const dy of [-2.2, 2.2]) line(add(p, [-z * k, dy * k]), add(p, [z * k, dy * k]), STEEL, 1.1 * k); for (let q = -z; q <= z; q += 2.4) line(add(p, [q * k, -3 * k]), add(p, [q * k, 3 * k]), A(RUST, 0.8), 1.4 * k); const bx = -z + 2 + fmod(t * (4 + L3), (z * 2 - 5)); plate(add(p, [bx * k, 0]), rectPts(3.4, 2), g3 ? dk(GOLD, 0.45) : mix(METAL_L, DISCC, 0.3), 0, k, 1); glowDot(add(p, [bx * k + 2.4 * k, 0]), 0.4 * k, ac); }   // a rail siding with a boxcar
-      if (g3) outline(p, rectPts(z + 2, z * 0.8 + 2), A(GOLD, 0.8), 1.4 * k, 0, k); }
-    // ---- Path 2: the plant in the top-right, rebuilt each step (a collector rig, a sorting line or a smelter) -------------------------------------------------------
-    if (L2 > 0) { const key = B.key("p1s" + (L2 - 1)), z = [0, 8, 10, 12, 14, 16][L2], p = S(22, -20), ac = g2 ? GOLD : KILL;
-      if (key === "A") { plate(p, rectPts(z * 0.9, z * 0.9), METAL_D, 0, k, 1.2); const cl = 0.4 + 0.3 * Math.sin(t * 2); for (let q = 0; q < 1 + Math.ceil(L2 / 2); q++) { const o = (q - (Math.ceil(L2 / 2)) / 2) * 4.2; bar(add(p, [o * k, -z * 0.9 * k]), add(p, [o * k, (-z * 0.2) * k]), 1.4 * k, g2 ? GOLD : YEL); fill(add(p, [o * k, -z * 0.2 * k]), [[-1.8, 0], [-0.6 - cl, 2.4], [0.6 + cl, 2.4], [1.8, 0]], METAL_L, 0, k); } }   // a collector rig with grabbing claws
-      if (key === "B") { plate(p, rectPts(z, z * 0.5), METAL_D, 0, k, 1.1); for (let q = 0; q < 6; q++) { const x = -z + fmod(t * 5 + q * z / 3, z * 2); fill(add(p, [x * k, 0]), [[-1, -0.5], [1, -0.5], [0.5, 0.6], [-0.5, 0.6]], q % 2 ? RUST : mix(METAL_L, ac, 0.5), 0, k); } for (let q = 0; q < 1 + L2; q++) plate(add(p, [(-z + 2 + q * (z * 2 - 4) / (L2 + 0.0001)) * k, z * 0.7 * k]), rectPts(1.6, 1.4), mix(RUST, ac, 0.4 + 0.1 * (q % 3)), 0, k, 0.9); }   // a sorting line with bins
-      if (key === "C") { plate(p, rectPts(z * 0.8, z * 0.8), METAL_D, 0, k, 1.2); disc(p, z * 0.45 * k, OUTLINE); disc(p, z * 0.38 * k, mix([0.4, 0.1, 0.05, 1], ac, 0.35 + 0.15 * Math.sin(t * 5))); glowDot(p, 0.8 * k, g2 ? GOLD : lt(KILL, 0.3)); if (L2 >= 4) { disc(add(p, [z * 0.6 * k, -z * 0.6 * k]), 1.4 * k, METAL); for (let q = 0; q < 3; q++) { const u = fmod(t * 0.6 + q / 3, 1); disc(add(p, [z * 0.6 * k, (-z * 0.6 - u * 8) * k]), (0.8 + u) * k, A([0.5, 0.5, 0.5, 1], 0.5 * (1 - u))); } } }   // a smelter with a glowing crucible
-      if (g2) outline(p, rectPts(z + 2, z * 0.9 + 2), A(GOLD, 0.85), 1.4 * k, 0, k); }
-    // ---- Path 1: the money building in the bottom-right, rebuilt each step (a press house, a vault or a mint tower) ---------------------------------------------------
-    if (L1 > 0) { const key = B.key("p0s" + (L1 - 1)), z = [0, 8, 10, 12, 14, 16][L1], p = S(20, 20), ac = g1 ? GOLD : lt(COPPER, 0.2);
-      if (key === "A") { plate(p, rectPts(z, z * 0.8), g1 ? dk(GOLD, 0.5) : METAL_L, 0, k, 1.3); line(add(p, [-z * k, 0]), add(p, [z * k, 0]), A(OUTLINE, 0.5), 1.4 * k); const ph = (1 - thump * 0.8) * z * 0.3; plate(add(p, [0, -ph * k]), rectPts(z * 0.35, z * 0.25), STEEL, 0, k, 1); bar(add(p, [0, -z * 0.7 * k]), add(p, [0, -ph * k]), 1.6 * k, METAL);
-        if (L1 >= 3) { disc(add(p, [z * 0.75 * k, -z * 0.55 * k]), 1.6 * k, METAL_D); for (let q = 0; q < 3; q++) { const u = fmod(t * 0.55 + q / 3, 1); disc(add(p, [(z * 0.75 + u * 3) * k, (-z * 0.55 - u * 9) * k]), (1 + u * 1.6) * k, A([0.6, 0.6, 0.6, 1], 0.5 * (1 - u))); } }
-        if (g1) for (const sx of [-1, 1]) disc(add(p, [sx * z * 0.8 * k, z * 0.85 * k]), 1.2 * k, GOLD); }   // a press house with a thumping stamp (a chimney from step 3, gold columns at the bank)
-      if (key === "B") { plate(p, rectPts(z, z), METAL_D, 0, k, 1.3); const nd = L1 >= 3 ? 2 : 1; for (let q = 0; q < nd; q++) { const o = nd === 2 ? (q - 0.5) * z * 1.0 : 0, dr = z * (nd === 2 ? 0.4 : 0.6), q0 = add(p, [o * k, 0]); disc(q0, dr * k + 1.2 * k, OUTLINE); disc(q0, dr * k, g1 ? dk(GOLD, 0.4) : METAL_L); ring(q0, dr * 0.72 * k, ac, 1.2 * k); for (let j = 0; j < 4; j++) line(q0, add(q0, mul(fa(j * Math.PI / 2 + thump * 1.6), dr * 0.7 * k)), ac, 1.4 * k); disc(q0, 0.8 * k, METAL); } }   // a vault block with round doors and a spinning wheel
-      if (key === "C") { fill(p, ngon(8, 1, Math.PI / 8), METAL_D, 0, (z * 0.78 + 1.2) * k); fill(p, ngon(8, 1, Math.PI / 8), g1 ? dk(GOLD, 0.4) : METAL_L, 0, z * 0.78 * k); for (let q = 0; q < L1 + 2; q++) { const a = q * TAU / (L1 + 2) + 0.3, cp = add(p, mul(fa(a), z * 0.95 * k)); for (let j = 0; j < 3; j++) ellipse(add(cp, [0, -j * 0.9 * k]), 1.6 * k, 0.8 * k, A(dk(GOLD, 0.2 * j), 1)); } disc(p, z * 0.28 * k, g1 ? GOLD : COPPER); glowDot(p, (0.7 + thump) * k, GOLD); }   // a mint tower ringed by coin stacks
-      if (g1) outline(p, rectPts(z + 2, z + 2), A(GOLD, 0.85), 1.4 * k, 0, k); }
-    // ---- The crane (always there; Path 2 makes its magnet bigger and gold at the mastery) --------------------------------------------------------------------------------
-    { const a = -0.4 + Math.sin(t * 0.5) * 1.6, tip = add(c, mul(fa(a), 30 * k)), mr = [4.4, 4.8, 5.4, 6, 6.6, 7.4][L2];
-      plate(c, ngon(6, 1, 0), METAL_L, a, 6 * k, 1.2); bar(c, tip, 3 * k, g2 ? GOLD : YEL); disc(tip, mr * k + 0.6 * k, OUTLINE); disc(tip, mr * k, METAL); ring(tip, mr * 0.68 * k, g2 ? GOLD : A(col, 0.7), 1 * k); if (Math.sin(t * 0.5) < 0) scrapPile(add(tip, [0, 5 * k]), 3, k, 5); }
-    // ---- The Retrofits: a second crusher (bottom edge), the Bigger Yard (the fence, above) or a salvage crane (left edge) ------------------------------------------------------
-    if (B.r === 0) { const p = S(0, 34);
-      if (R === "A") { plate(p, rectPts(10, 5), METAL_L, 0, k, 1.3); plate(p, rectPts(6 - 2 * thump, 3 - 1.2 * thump), METAL, 0, k, 1); hazard(p, 0, k, -8, 8, 4.4, col, 1.2); glowDot(add(p, [8 * k, -3.6 * k]), 0.7 * k, col); }
-      if (R === "B") { plate(p, rectPts(10, 5), METAL_D, 0, k, 1.2); const w = 8 - 5 * thump; plate(add(p, [-5 * k, 0]), rectPts(w * 0.5, 3.5), METAL_L, 0, k, 1); plate(add(p, [5 * k, 0]), rectPts(w * 0.5, 3.5), METAL_L, 0, k, 1); plate(p, rectPts(1.4, 3.5), mix(RUST, METAL, 0.4), 0, k, 1); }
-      if (R === "C") { plate(p, rectPts(10, 5), METAL_D, 0, k, 1.2); for (let q = 0; q < 3; q++) { const cx = (-6 + q * 6) * k; disc(add(p, [cx, 0]), 2.6 * k, OUTLINE); disc(add(p, [cx, 0]), 2.2 * k, METAL_L); for (let j = 0; j < 6; j++) line(add(p, [cx, 0]), add(add(p, [cx, 0]), mul(fa(t * (q % 2 ? -5 : 5) + j * Math.PI / 3), 2.1 * k)), STEEL, 0.9 * k); } } }
-    if (B.r === 2) { const p = S(-34, 8), sw = Math.sin(t * 0.8);
-      if (R === "A") { plate(p, rectPts(3, 14), METAL_D, 0, k, 1.1); const hx = add(p, [(1 + sw * 1.5) * k, 0]); bar(add(p, [0, 0]), add(hx, [0, 0]), 2.2 * k, YEL); line(hx, add(hx, [0, 6 * k]), METAL_D, 0.9 * k); disc(add(hx, [0, 6 * k]), 1.6 * k, METAL_L); }
-      if (R === "B") { disc(p, 3.6 * k, OUTLINE); disc(p, 3 * k, METAL); const a = -Math.PI / 2 + sw * 1.2, tip = add(p, mul(fa(a), 16 * k)); bar(p, tip, 2.2 * k, YEL); disc(tip, 2 * k, METAL_L); line(tip, add(tip, [0, 5 * k]), METAL_D, 0.9 * k); }
-      if (R === "C") { plate(p, rectPts(4, 7), METAL_L, 0, k, 1.2); const a = -0.6 + sw * 0.5, tip = add(p, mul(fa(a), 15 * k)); bar(p, tip, 2.2 * k, YEL); line(tip, add(tip, [0, 4 * k]), METAL_D, 0.9 * k); fill(add(tip, [0, 4 * k]), [[-1.6, 0], [1.6, 0], [0.8, 2.6], [-0.8, 2.6]], METAL_L, 0, k); disc(add(p, [-1.4 * k, 6 * k]), 1.2 * k, METAL_D); disc(add(p, [1.4 * k, 6 * k]), 1.2 * k, METAL_D); } }
+    const k = G(s), mm = fx.mem || {}, pour = decay(t - (mm.last ?? -9), 1.4), fed = decay(t - (mm.feed ?? -9), 0.8), L1 = B.lv[0], L2 = B.lv[1], L3 = B.lv[2], S = (x, y) => add(c, [x * k, y * k]), R = B.r >= 0 ? B.key("r" + B.r) : null, g1 = L1 >= 5, g2 = L2 >= 5, g3 = L3 >= 5;
+    // ---- the Bigger Yard: a second, wider wall round the works -----------------------------------------------------------------------------------------------------
+    if (B.r === 1) {
+      const pts = [S(-54, -54), S(54, -54), S(54, 54), S(-54, 54), S(-54, -54)];
+      if (R === "A") { polyline(pts, OUTLINE, 5 * k); polyline(pts, mix(BRICK, SLAG, 0.4), 3.4 * k); polyline(pts, A(MOLTEN, 0.35 + 0.2 * pour), 1 * k); }
+      if (R === "B") { polyline(pts, OUTLINE, 3 * k); polyline(pts, METAL_L, 1.6 * k); for (let i = -5; i <= 5; i++) for (const sg of [-1, 1]) { line(S(i * 10.8, sg * 54), S(i * 10.8, sg * 54 - sg * 6), STEEL, 1.1 * k); line(S(sg * 54, i * 10.8), S(sg * 54 - sg * 6, i * 10.8), STEEL, 1.1 * k); } }
+      if (R === "C") { polyline(pts, OUTLINE, 2.4 * k); polyline(pts, A(STEEL, 0.9), 1.1 * k); for (let i = -5; i <= 5; i++) for (const sg of [-1, 1]) { disc(S(i * 10.8, sg * 54), 1.5 * k, METAL_D); disc(S(sg * 54, i * 10.8), 1.5 * k, METAL_D); } } }
+    // ---- the yard floor: dark slag with a hazard-striped edge --------------------------------------------------------------------------------------------------------
+    ellipse(add(c, [0, 8 * k]), 44 * k, 16 * k, [0, 0, 0, 0.3]); plate(c, rectPts(46, 46), lt(METAL_D, 0.03), 0, k, 1.3); fill(c, rectPts(44, 44), SLAG, 0, k);
+    for (let j = 0; j < 22; j++) { const a0 = -44 + j * 4, cc = j % 2 ? YEL : [0.08, 0.07, 0.06, 1]; line(S(a0, -44.5), S(a0 + 4, -44.5), cc, 2.2 * k); line(S(a0, 44.5), S(a0 + 4, 44.5), cc, 2.2 * k); line(S(-44.5, a0), S(-44.5, a0 + 4), cc, 2.2 * k); line(S(44.5, a0), S(44.5, a0 + 4), cc, 2.2 * k); }
+    for (let i = 0; i < 9; i++) disc(S(-36 + i * 9 + rnd(i) * 3, -40 + rnd(i + 9) * 80), (0.8 + rnd(i + 3)) * k, A(MOLTEN, 0.08));
+    // ---- the scrap conveyor from the left edge into the furnace --------------------------------------------------------------------------------------------------------
+    plate(S(-33, FP[1]), rectPts(13.5, 2.6), METAL_D, 0, k, 1.1); for (let j = 0; j < 4; j++) { const x = -46 + fmod(t * 8 + j * 7, 27); plate(S(x, FP[1] + (j % 2 ? 0.6 : -0.5)), rectPts(1.6 + (j % 3) * 0.4, 1.2), mix(BRICK, STEEL, 0.4 + 0.15 * (j % 2)), j, k, 0.8); }
+    for (let j = 0; j < 6; j++) line(S(-45 + j * 4.5 + fmod(t * 4, 4.5), FP[1] - 2.6), S(-43.5 + j * 4.5 + fmod(t * 4, 4.5), FP[1] - 1.6), A(STEEL, 0.6), 0.8 * k);
+    // ---- the molten channel from the furnace to the casting strip (flares at each payout) ---------------------------------------------------------------------------------
+    { const pts = [S(2, 2), S(8, 10), S(8, 24)]; polyline(pts, OUTLINE, 4.6 * k); polyline(pts, mix(BRICK, SLAG, 0.5), 3.4 * k); polyline(pts, A(MOLTEN, 0.45 + 0.5 * pour), 2 * k); if (pour > 0.2) polyline(pts, A(HOTM, pour), 1 * k); }
+    // ---- Path 3: the supply strip down the left edge, rebuilt each step (chutes with crates, ore silos or a rail siding) ----------------------------------------------------
+    if (L3 > 0) { const key = B.key("p2s" + (L3 - 1)), n = [0, 2, 3, 4, 5, 6][L3], ac = g3 ? GOLD : DISCC;
+      if (key === "A") for (let q = 0; q < n; q++) { const p = S(-37, 8 + q * 6.2); plate(p, rectPts(6, 2.4), METAL_D, 0, k, 1); fill(add(p, [-6 * k, 0]), [[0, -2.2], [2.2, -1.2], [2.2, 1.2], [0, 2.2]], METAL_L, 0, k); for (let j = 0; j < 2 + (q % 2); j++) plate(add(p, [(-2 + j * 3.2) * k, 0]), rectPts(1.3, 1.4), mix(YEL, BRICK, 0.4 + 0.15 * j), 0, k, 0.8); if (q === n - 1) glowDot(add(p, [5 * k, 0]), 0.45 * k, ac); }   // chutes with crates
+      if (key === "B") for (let q = 0; q < n; q++) { const p = S(-37 + (q % 2) * 5.6, 8 + q * 5.6); disc(p, 2.9 * k + 0.9 * k, OUTLINE); disc(p, 2.9 * k, METAL_L); ring(p, 1.9 * k, STEEL, 0.9 * k); disc(p, 0.9 * k, ac); }   // ore silos
+      if (key === "C") { for (const dx of [-1.6, 1.6]) line(S(-37 + dx, 8), S(-37 + dx, 8 + 6 * n + 2), STEEL, 1.1 * k); for (let j = 0; j < 3 + n; j++) line(S(-39.4, 9 + j * 6 * n / (3 + n)), S(-34.6, 9 + j * 6 * n / (3 + n)), A(BRICK, 0.9), 1.4 * k);
+        const wy = 9 + fmod(t * (3 + n), 6 * n - 3); plate(S(-37, wy), rectPts(2.6, 2.8), g3 ? dk(GOLD, 0.45) : mix(METAL_L, DISCC, 0.3), 0, k, 1); glowDot(S(-37, wy + 2.8), 0.4 * k, ac); }   // a rail siding with a wagon
+      if (g3) outline(S(-37, 8 + 3 * n), rectPts(7, 3 * n + 2), A(GOLD, 0.85), 1.4 * k, 0, k); }
+    // ---- Path 1: the casting strip along the bottom edge, rebuilt each step (ingot moulds, a vault store or mint presses) --------------------------------------------------
+    { const key = L1 > 0 ? B.key("p0s" + (L1 - 1)) : "-", n = [3, 4, 5, 6, 7, 8][L1], ac = goldOr(g1, HOTM), ing = (p, w, h, a0) => { const hot = Math.max(pour, 0.0); fill(p, rectPts(w, h), mix([0.4, 0.38, 0.36, 1], g1 ? GOLD : MOLTEN, Math.max(0.15, hot)), 0, k); line(add(p, [-w * k, -h * 0.4 * k]), add(p, [w * k, -h * 0.4 * k]), A([1, 1, 1, 1], 0.35 + 0.4 * hot), 0.8 * k); };
+      if (key === "-" || key === "A") { for (let q = 0; q < n; q++) { const x = -28 + (q + 0.5) * 56 / n, p = S(x, 33), w = 4.2 - n * 0.15; plate(p, rectPts(w + 0.8, 2.8), METAL_D, 0, k, 1); ing(p, w, 2, q); }
+        if (L1 >= 3) { polyline([S(-30, 27), S(30, 27)], A(OUTLINE, 0.7), 2 * k); polyline([S(-30, 27), S(30, 27)], g1 ? GOLD : A(METAL_L, 0.9), 1.1 * k); } }   // a row of ingot moulds (a canopy rail from step 3)
+      if (key === "B") { const w = [0, 14, 18, 22, 26, 30][L1]; plate(S(0, 34), rectPts(w, 6), g1 ? dk(GOLD, 0.45) : METAL_D, 0, k, 1.3); const nd = 1 + Math.floor(L1 / 2); for (let q = 0; q < nd; q++) { const p = S((q - (nd - 1) / 2) * w * 0.9, 34); disc(p, 4.2 * k + 1 * k, OUTLINE); disc(p, 4.2 * k, g1 ? dk(GOLD, 0.3) : METAL_L); ring(p, 2.9 * k, ac, 1.1 * k); for (let j = 0; j < 4; j++) line(p, add(p, mul(fa(j * Math.PI / 2 + pour * 1.6), 2.6 * k)), ac, 1.2 * k); disc(p, 0.8 * k, METAL); }
+        for (let q = 0; q < 2 + L1; q++) ing(S(-w * 0.95 + q * 2.6, 39.4), 1.1, 0.8, q); if (g1) outline(S(0, 34), rectPts(w + 1.4, 7.4), A(GOLD, 0.85), 1.4 * k, 0, k); }   // a vault store with round doors and stacked ingots
+      if (key === "C") { const np = [0, 2, 3, 3, 4, 4][L1]; for (let q = 0; q < np; q++) { const x = (q - (np - 1) / 2) * 15, p = S(x, 33); plate(p, rectPts(5, 5), g1 ? dk(GOLD, 0.45) : METAL_D, 0, k, 1.2); const ph = pour * 2.2; plate(add(p, [0, (-1.5 + ph) * k]), rectPts(3, 1.6), STEEL, 0, k, 1); bar(add(p, [0, -5 * k]), add(p, [0, (-1.5 + ph) * k]), 1.4 * k, METAL); for (let j = 0; j < 3; j++) ellipse(add(p, [(5.6 + (j % 2) * 0.4) * k, (-1 + j * 1.2) * k]), 1.3 * k, 0.6 * k, A(g1 ? GOLD : dk(GOLD, 0.2 * j), 1)); if (g1) glowDot(add(p, [0, 4 * k]), 0.4 * k, GOLD); } }   // mint presses stamping coins
+    }
+    // ---- Path 2: the furnace, rebuilt each step (a bigger brick furnace, a blast furnace or a crucible works); gold at the mastery ---------------------------------------
+    { const key = L2 > 0 ? B.key("p1s" + (L2 - 1)) : "A", rf = [11, 12.5, 14, 15.5, 17, 18.5][L2], F = S(FP[0], FP[1]), flame = 0.5 + 0.5 * Math.sin(t * 7), mo = goldOr(g2, MOLTEN), mh = goldOr(g2, HOTM);
+      if (key === "A") { disc(F, rf * k + 1.4 * k, OUTLINE); disc(F, rf * k, BRICK); for (let q = 0; q < 18 + L2 * 2; q++) { const a = q * TAU / (18 + L2 * 2); line(add(F, mul(fa(a), rf * 0.62 * k)), add(F, mul(fa(a), rf * 0.98 * k)), A([0.3, 0.14, 0.1, 1], 0.9), 1 * k); } ring(F, rf * 0.8 * k, A([0.75, 0.4, 0.28, 1], 0.9), 1.2 * k);
+        disc(F, rf * 0.52 * k, OUTLINE); disc(F, rf * 0.46 * k, mix([0.4, 0.1, 0.04, 1], mo, 0.4 + 0.3 * flame + 0.3 * fed)); disc(F, rf * (0.2 + 0.05 * flame) * k, A(mh, 0.9)); glowDot(F, (1 + 1.4 * fed) * k, mh); if (L2 >= 3) ring(F, rf * 0.98 * k, goldOr(g2, STEEL), 1.8 * k); }   // a brick furnace (a steel band from step 3)
+      if (key === "B") { plate(F, rectPts(rf * 0.92, rf * 0.92), BRICK, 0, k, 1.4); plate(F, rectPts(rf * 0.72, rf * 0.72), mix(BRICK, SLAG, 0.4), 0, k, 1); for (let q = 0; q < 2 + Math.floor(L2 / 2); q++) { const yy = (-rf * 0.5 + q * rf / (1 + Math.floor(L2 / 2))) * k, w = 0.6 + 0.4 * Math.sin(t * 9 + q * 2); bar(add(F, [-rf * 1.2 * k, yy]), add(F, [-rf * 0.9 * k, yy]), 1.6 * k, goldOr(g2, METAL_L)); rect(F[0] - rf * 0.55 * k, F[1] + yy - 0.7 * k, rf * 1.1 * k, 1.4 * k, A(mo, 0.5 + 0.4 * w)); }
+        disc(F, rf * 0.34 * k, OUTLINE); disc(F, rf * 0.28 * k, mix([0.4, 0.1, 0.04, 1], mo, 0.5 + 0.5 * flame)); glowDot(F, (0.8 + 1.2 * fed) * k, mh); }   // a blast furnace with bellows pipes and fire slits
+      if (key === "C") { disc(F, rf * 0.55 * k, OUTLINE); disc(F, rf * 0.5 * k, mix(BRICK, SLAG, 0.4)); disc(F, rf * 0.32 * k, mix([0.4, 0.1, 0.04, 1], mo, 0.45 + 0.4 * flame + 0.2 * fed)); glowDot(F, (0.8 + 1.2 * fed) * k, mh); const nc = [0, 2, 3, 4, 5, 6][L2];
+        for (let q = 0; q < Math.max(nc, 1); q++) { const a = q * TAU / Math.max(nc, 1) + 0.4, cp = add(F, mul(fa(a), rf * 0.92 * k)), la = a + Math.sin(t * 0.8 + q) * 0.3; disc(cp, 2.4 * k + 0.8 * k, OUTLINE); disc(cp, 2.4 * k, METAL_D); disc(cp, 1.7 * k, mix([0.4, 0.1, 0.04, 1], mo, 0.5 + 0.4 * Math.sin(t * 3 + q))); bar(add(F, mul(fa(a), rf * 0.5 * k)), cp, 1.2 * k, goldOr(g2, METAL)); line(cp, add(cp, mul(fa(la), 3.6 * k)), goldOr(g2, METAL_L), 1 * k); } }   // a crucible works: crucibles on arms round a central pit
+      if (g2) ring(F, rf * 1.12 * k, A(GOLD, 0.8), 1.4 * k);
+      const ch = add(F, [rf * 0.78 * k, -rf * 0.8 * k]); disc(ch, 3.4 * k + 0.9 * k, OUTLINE); disc(ch, 3.4 * k, METAL_D); disc(ch, 1.9 * k, [0.05, 0.05, 0.05, 1]); for (let q = 0; q < 4; q++) { const u = fmod(t * 0.5 + q / 4, 1); disc(add(ch, [u * 3 * k, -u * 14 * k]), (1 + u * 2.4) * k, A([0.5, 0.48, 0.46, 1], 0.55 * (1 - u))); } }
+    // ---- the Retrofits: a second crusher (top-left), the Bigger Yard (the wall, above) or a salvage crane (top edge) ----------------------------------------------------------
+    const thump = decay(t - (mm.last ?? -9), 0.35);
+    if (B.r === 0) { const p = S(-33, -28);
+      if (R === "A") { plate(p, rectPts(10, 6), METAL_L, 0, k, 1.3); const j = 2.4 + 2.6 * (1 - thump); fill(add(p, [-6 * k, 0]), [[0, -4], [j, 0], [0, 4]], STEEL, 0, k); fill(add(p, [6 * k, 0]), [[0, -4], [-j, 0], [0, 4]], STEEL, 0, k); glowDot(add(p, [0, -4.6 * k]), 0.5 * k, col); }
+      if (R === "B") { plate(p, rectPts(10, 6), METAL_D, 0, k, 1.2); for (const sx of [-1, 1]) { const q = add(p, [sx * 3.4 * k, 0]); disc(q, 3 * k, OUTLINE); disc(q, 2.6 * k, METAL_L); for (let j = 0; j < 6; j++) line(q, add(q, mul(fa(t * 5 * sx + j * Math.PI / 3), 2.5 * k)), STEEL, 0.9 * k); } }
+      if (R === "C") { plate(p, rectPts(10, 6), METAL_D, 0, k, 1.2); disc(p, 4.4 * k, OUTLINE); disc(p, 3.8 * k, METAL); for (let j = 0; j < 4; j++) { const a = t * 9 + j * Math.PI / 2; bar(p, add(p, mul(fa(a), 4.8 * k)), 1.2 * k, METAL_L); disc(add(p, mul(fa(a), 4.8 * k)), 1 * k, STEEL); } } }
+    if (B.r === 2) { const p = S(8, -41), sw = Math.sin(t * 0.8);
+      if (R === "A") { bar(S(-24, -41), S(40, -41), 2 * k, METAL_D); const hx = add(p, [sw * 12 * k, 0]); plate(hx, rectPts(2.4, 1.6), YEL, 0, k, 1); line(hx, add(hx, [0, 6 * k]), METAL_D, 0.9 * k); disc(add(hx, [0, 6 * k]), 1.6 * k, METAL_L); }
+      if (R === "B") { disc(p, 3.6 * k, OUTLINE); disc(p, 3 * k, METAL); const a = sw * 1.1, tip = add(p, mul(fa(a), 20 * k)); bar(p, tip, 2.2 * k, YEL); disc(tip, 2 * k, METAL_L); line(tip, add(tip, [0, 5 * k]), METAL_D, 0.9 * k); }
+      if (R === "C") { plate(p, rectPts(7, 3.4), METAL_L, 0, k, 1.2); const a = 0.4 + sw * 0.4, tip = add(add(p, [-3 * k, 0]), mul(fa(a), 16 * k)); bar(add(p, [-3 * k, 0]), tip, 2.2 * k, YEL); line(tip, add(tip, [0, 4 * k]), METAL_D, 0.9 * k); fill(add(tip, [0, 4 * k]), [[-1.6, 0], [1.6, 0], [0.8, 2.6], [-0.8, 2.6]], METAL_L, 0, k); for (const sx of [-1, 1]) disc(add(p, [sx * 4.4 * k, 2 * k]), 1.3 * k, METAL_D); } }
   },
   paths: [], retrofits: [],
 };
@@ -757,32 +520,32 @@ const P2 = {
 // ---- Option tables ---------------------------------------------------------------------------------------------------------------------------------------
 const T = (a, b, c) => [["A", ...a], ["B", ...b], ["C", ...c]].map(([key, name, desc]) => ({ key, name, desc }));
 P2.paths = [
-  { name: "Passive Income", theme: "the bottom-right corner: the money building is rebuilt at every step; gold at the Reserve Bank", steps: [
-    { name: "Stamping Press", cost: 525, effect: "130 per round", options: T(["Press House", "A small press house with a thumping stamp is built in the corner."], ["Vault Block", "A small vault block with a round door and a spinning wheel is built in the corner."], ["Mint Tower", "A small octagonal mint tower ringed by coin stacks is built in the corner."]) },
-    { name: "Vault Doors", cost: 1225, effect: "165 per round", options: T(["Press House", "The press house is rebuilt bigger."], ["Vault Block", "The vault block is rebuilt bigger."], ["Mint Tower", "The mint tower is rebuilt bigger, with more coin stacks."]) },
-    { name: "Credit Mint", cost: 3850, effect: "220 per round (primary)", options: T(["Chimney Press House", "The press house is rebuilt bigger, with a smoking chimney."], ["Twin Vault", "The vault block is rebuilt bigger, with two doors."], ["Credit Mint Tower", "The mint tower is rebuilt bigger, with more coin stacks."]) },
-    { name: "Treasury Link", cost: 7000, effect: "270 per round", options: T(["Big Press House", "The press house is rebuilt bigger again."], ["Big Twin Vault", "The twin vault is rebuilt bigger."], ["Grand Mint Tower", "The mint tower is rebuilt bigger again."]) },
-    { name: "Reserve Bank", cost: 27440, effect: "320 per round, plus 3% interest on banked credits at each clear (mastery)", options: T(["Gold Bank House", "The press house turns gold with gold columns; each payout adds a +3% interest tag."], ["Gold Vault Bank", "The twin vault turns gold; each payout adds a +3% interest tag."], ["Gold Mint Bank", "The mint tower turns gold; each payout adds a +3% interest tag."]) },
+  { name: "Passive Income", theme: "the casting strip along the bottom edge: rebuilt at every step; gold at the Reserve Bank", steps: [
+    { name: "Stamping Press", cost: 525, effect: "130 per round", options: T(["Ingot Moulds", "The casting strip is rebuilt with four ingot moulds; the channel feeds them at each payout."], ["Vault Store", "The casting strip is rebuilt as a small vault store with a round door and stacked ingots."], ["Mint Presses", "The casting strip is rebuilt with two mint presses that stamp coins at each payout."]) },
+    { name: "Vault Doors", cost: 1225, effect: "165 per round", options: T(["Ingot Moulds", "The casting strip is rebuilt with five bigger moulds."], ["Vault Store", "The vault store is rebuilt wider, with more stacked ingots."], ["Mint Presses", "The casting strip is rebuilt with three mint presses."]) },
+    { name: "Credit Mint", cost: 3850, effect: "220 per round (primary)", options: T(["Canopy Moulds", "The casting strip is rebuilt with six moulds under a canopy rail."], ["Twin Vault", "The vault store is rebuilt wider with two round doors."], ["Mint Row", "The casting strip is rebuilt with three bigger mint presses."]) },
+    { name: "Treasury Link", cost: 7000, effect: "270 per round", options: T(["Long Mould Row", "The casting strip is rebuilt with seven moulds."], ["Big Twin Vault", "The vault store is rebuilt wider again."], ["Four Presses", "The casting strip is rebuilt with four mint presses."]) },
+    { name: "Reserve Bank", cost: 27440, effect: "320 per round, plus 3% interest on banked credits at each clear (mastery)", options: T(["Gold Mould Row", "Eight moulds of gold ingots under a gold canopy; each payout adds a +3% interest tag."], ["Gold Vault Bank", "The vault store turns gold, with gold doors and ingots; each payout adds a +3% interest tag."], ["Gold Mint Row", "The four mint presses turn gold and stamp gold coins; each payout adds a +3% interest tag."]) },
   ] },
-  { name: "Kill Income", theme: "the top-right corner: the plant is rebuilt at every step and the crane's magnet grows; the orange kill-field ring widens", steps: [
-    { name: "Scrap Collector", cost: 345, effect: "Enemies destroyed within 140 px pay 15% more", options: T(["Collector Rig", "A collector rig with one grabbing claw is built in the corner; wrecked enemies in the field pay +15%."], ["Sorting Line", "A small sorting line with bins is built in the corner; wrecked enemies in the field pay +15%."], ["Smelter", "A small smelter with a glowing crucible is built in the corner; wrecked enemies in the field pay +15%."]) },
-    { name: "Magnet Cranes", cost: 625, effect: "+25%; 150 px", options: T(["Collector Rig", "The rig is rebuilt with two claws and the magnet grows."], ["Sorting Line", "The sorting line is rebuilt bigger and the magnet grows."], ["Smelter", "The smelter is rebuilt bigger and the magnet grows."]) },
-    { name: "Sorting Line", cost: 2095, effect: "+35%; 170 px (primary)", options: T(["Three-Claw Rig", "The rig is rebuilt with three claws."], ["Long Sorting Line", "The sorting line is rebuilt longer with more bins."], ["Big Smelter", "The smelter is rebuilt bigger."]) },
-    { name: "Smelter", cost: 5720, effect: "+45%; 190 px", options: T(["Four-Claw Rig", "The rig is rebuilt with four claws."], ["Full Sorting Line", "The sorting line is rebuilt with more bins."], ["Smelter Works", "The smelter is rebuilt bigger, with a smoking chimney."]) },
-    { name: "Reclamation Plant", cost: 28945, effect: "+60%; 210 px; bosses pay double (mastery)", options: T(["Gold Rig", "The rig turns gold, and so do the magnet and the field coins."], ["Gold Sorting Line", "The sorting line turns gold, and so do the magnet and the field coins."], ["Gold Smelter", "The smelter turns gold, and so do the magnet and the field coins."]) },
+  { name: "Kill Income", theme: "the furnace: rebuilt at every step, hotter and bigger; the orange kill-field ring widens and wrecked enemies feed the furnace", steps: [
+    { name: "Scrap Collector", cost: 345, effect: "Enemies destroyed within 140 px pay 15% more", options: T(["Brick Furnace", "The furnace is rebuilt in brick with a hotter mouth; wrecked enemies in the field pay +15%."], ["Blast Furnace", "The furnace is rebuilt as a square blast furnace with two bellows pipes; wrecked enemies in the field pay +15%."], ["Crucible Works", "The furnace is rebuilt as a crucible works with two crucibles on arms; wrecked enemies in the field pay +15%."]) },
+    { name: "Magnet Cranes", cost: 625, effect: "+25%; 150 px", options: T(["Bigger Brick Furnace", "The furnace is rebuilt bigger."], ["Bigger Blast Furnace", "The furnace is rebuilt bigger, with three bellows pipes."], ["Three Crucibles", "The works is rebuilt bigger, with three crucibles."]) },
+    { name: "Sorting Line", cost: 2095, effect: "+35%; 170 px (primary)", options: T(["Banded Furnace", "The furnace is rebuilt bigger, with a steel band."], ["Big Blast Furnace", "The furnace is rebuilt bigger, with more slits."], ["Four Crucibles", "The works is rebuilt bigger, with four crucibles."]) },
+    { name: "Smelter", cost: 5720, effect: "+45%; 190 px", options: T(["Great Furnace", "The furnace is rebuilt bigger again."], ["Great Blast Furnace", "The furnace is rebuilt bigger again."], ["Five Crucibles", "The works is rebuilt bigger, with five crucibles."]) },
+    { name: "Reclamation Plant", cost: 28945, effect: "+60%; 210 px; bosses pay double (mastery)", options: T(["Gold Furnace", "The furnace's mouth turns molten gold, with a gold rim; the field coins turn gold."], ["Gold Blast Furnace", "The blast furnace glows molten gold, with a gold rim; the field coins turn gold."], ["Gold Crucible Works", "Six gold crucibles pour molten gold, with a gold rim; the field coins turn gold."]) },
   ] },
-  { name: "Discounts", theme: "the top-left corner: the depot is rebuilt at every step; the blue discount ring widens and shows the percentage off", steps: [
-    { name: "Supply Depot", cost: 190, effect: "Towers within 140 px upgrade for 5% less", options: T(["Crate Shed", "A small shed with stacked crates is built in the corner; towers nearby upgrade 5% cheaper."], ["Warehouse Office", "A small warehouse office with lit windows is built in the corner; towers nearby upgrade 5% cheaper."], ["Rail Siding", "A short rail siding with a boxcar is built in the corner; towers nearby upgrade 5% cheaper."]) },
-    { name: "Bulk Orders", cost: 495, effect: "10% off upgrades; 150 px", options: T(["Crate Shed", "The shed is rebuilt bigger, with more crates."], ["Warehouse Office", "The warehouse office is rebuilt bigger, with more windows."], ["Rail Siding", "The siding is rebuilt longer."]) },
-    { name: "Procurement Office", cost: 2035, effect: "15% off upgrades, 5% off builds; 160 px (primary)", options: T(["Big Crate Shed", "The shed is rebuilt bigger again."], ["Procurement Office", "The warehouse office is rebuilt bigger again."], ["Long Siding", "The siding is rebuilt longer, with a faster boxcar."]) },
-    { name: "Freight Rail", cost: 3865, effect: "20% off upgrades; 175 px", options: T(["Freight Shed", "The shed is rebuilt bigger, with many crates."], ["Freight Office", "The office is rebuilt bigger, with more windows."], ["Freight Rail", "The siding is rebuilt longer, with a faster boxcar."]) },
-    { name: "Forward Command", cost: 20935, effect: "25% off upgrades, 10% off builds; 190 px; towers in the field sell back for everything spent on them (mastery)", options: T(["Gold Depot", "The shed gets a gold frame."], ["Gold Command Office", "The office gets a gold frame and gold lit windows."], ["Gold Rail Yard", "The siding gets a gold frame and a gold boxcar."]) },
+  { name: "Discounts", theme: "the supply strip down the left edge: rebuilt at every step; the blue discount ring widens and shows the percentage off", steps: [
+    { name: "Supply Depot", cost: 190, effect: "Towers within 140 px upgrade for 5% less", options: T(["Supply Chutes", "Two chutes with crates are built on the left edge; towers nearby upgrade 5% cheaper."], ["Ore Silos", "Two ore silos are built on the left edge; towers nearby upgrade 5% cheaper."], ["Rail Siding", "A short rail siding with a wagon is built on the left edge; towers nearby upgrade 5% cheaper."]) },
+    { name: "Bulk Orders", cost: 495, effect: "10% off upgrades; 150 px", options: T(["More Chutes", "Three chutes with crates."], ["More Silos", "Three ore silos."], ["Longer Siding", "A longer siding, with a faster wagon."]) },
+    { name: "Procurement Office", cost: 2035, effect: "15% off upgrades, 5% off builds; 160 px (primary)", options: T(["Four Chutes", "Four chutes with crates."], ["Four Silos", "Four ore silos."], ["Long Siding", "A long siding, with a faster wagon."]) },
+    { name: "Freight Rail", cost: 3865, effect: "20% off upgrades; 175 px", options: T(["Five Chutes", "Five chutes with crates."], ["Five Silos", "Five ore silos."], ["Freight Siding", "A freight siding, with a faster wagon."]) },
+    { name: "Forward Command", cost: 20935, effect: "25% off upgrades, 10% off builds; 190 px; towers in the field sell back for everything spent on them (mastery)", options: T(["Gold-Framed Chutes", "Six chutes with a gold frame and a gold light."], ["Gold-Framed Silos", "Six silos with gold hearts inside a gold frame."], ["Gold-Framed Siding", "A long siding with a gold frame and a gold wagon."]) },
   ] },
 ];
 P2.retrofits = [
-  { name: "Second Crusher", cost: 525, effect: "+30 income per round (stacks with the Passive Income path)", options: T(["Crusher Block", "A second hydraulic crusher block on the bottom edge, thumping with each payout."], ["Baler", "A scrap baler on the bottom edge that squeezes with each payout."], ["Shredder Drums", "Three spinning shredder drums on the bottom edge."]) },
-  { name: "Bigger Yard", cost: 260, effect: "+30 px to its fields (stacks with the Kill and Discount paths)", options: T(["Outer Fence", "A second, wider fence with round posts surrounds the yard."], ["Wire Fence", "A second, wider wire fence surrounds the yard."], ["Concrete Wall", "A second, wider fence with concrete posts surrounds the yard."]) },
-  { name: "Salvage Crane", cost: 260, effect: "Towers sold in its field refund 15% more", options: T(["Gantry Crane", "A gantry crane with a swinging hook on the left edge."], ["Jib Crane", "A jib crane with a swinging boom on the left edge."], ["Crane Truck", "A crane truck with a swinging boom on the left edge."]) },
+  { name: "Second Crusher", cost: 525, effect: "+30 income per round (stacks with the Passive Income path)", options: T(["Jaw Crusher", "A second crusher with steel jaws that close at each payout, in the top-left corner."], ["Roller Crusher", "Two spinning rollers in the top-left corner."], ["Hammer Mill", "A spinning hammer mill in the top-left corner."]) },
+  { name: "Bigger Yard", cost: 260, effect: "+30 px to its fields (stacks with the Kill and Discount paths)", options: T(["Slag Wall", "A second, wider wall of slag brick with a glowing seam surrounds the works."], ["Pipe Fence", "A second, wider steel fence with posts surrounds the works."], ["Bollard Fence", "A second, wider rail with round bollards surrounds the works."]) },
+  { name: "Salvage Crane", cost: 260, effect: "Towers sold in its field refund 15% more", options: T(["Overhead Gantry", "An overhead gantry beam with a trolley and hook across the top edge."], ["Jib Crane", "A jib crane with a swinging boom on the top edge."], ["Crane Truck", "A crane truck with a swinging boom on the top edge."]) },
 ];
 
 // ---- Tower art engine: previews towers aiming and firing at enemies on a lane --------------------------
