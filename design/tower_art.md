@@ -391,7 +391,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 15 | Cryo Tower | `design/tower_art_p2_15_cryo.html` | **Confirmed** (owner, 2026-10-19: "Finished"; Deep Cold C Frost Collar) |
 | 16 | Shockwave Generator | `design/tower_art_p2_16_shock.html` | **Confirmed** (owner, 2026-10-19: "Finished") |
-| 17 | Scrapyard | `design/tower_art_p2_17_scrap.html` | Redesigned from scratch (Smelting Works), round 1: pick one option per stage and Retrofit |
+| 17 | Scrapyard | `design/tower_art_p17_scrapyard.html` | **Restarted:** base look being redone; pick one of three new looks and an animation |
 
 ### Gun Turret (second pass)
 
@@ -1147,16 +1147,20 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
 
 **Round 9 (owner note):** "Make the elasticity stronger, so the bands reciprocate faster". The Path 3 band now opens in under 0.2 s and then swings in and out about 2.3 times faster (a spring of about 3.3 swings a second instead of 1.4) with less than half the damping, so it reciprocates several times before settling; the expansion (3 to 14 px) and the bend are stronger too.
 
-### Scrapyard (second pass, redesigned from scratch)
+### Scrapyard (restart: base look first)
 
-**Redesign (owner, 2026-10-19: "Lets completely redesign the scrapyard from scratch"; scope: everything, including the confirmed base look; direction: Smelting Works).** The Magnet Yard base look and the first set of upgrade designs (the press house, vault and mint tower; the collector rig, sorting line and smelter; the crate shed, warehouse and rail siding) are dropped. New base files: `tools/tower_art/data_scrap_base.js` (a single placeholder look and animation, so the page header names them) and `tools/tower_art/data_p2_scrap.js` (the whole yard is drawn by the model at every level). The 2x2 previews are smaller (`sBuild`, `sCard`, honoured by `pass2_engine.js`) so the whole yard fits.
-- **Base look (new): Smelting Works.** A yard with a hazard-striped edge: a brick furnace with a glowing mouth, a chimney breathing smoke, a scrap conveyor from the left edge feeding it, a molten channel down to a casting strip of three ingot moulds along the bottom. At each payout the channel flares, the ingots flash gold and the coins pop with the amount. The preview pays every 4 s.
-- **Path 1, Passive Income (the casting strip):** ingot moulds (3 to 8, a canopy rail from step 3), a vault store (round doors, stacked ingots) or mint presses (stamping at each payout); gold at the Reserve Bank, with a +3% interest tag on each payout.
-- **Path 2, Kill Income (the furnace itself):** a brick furnace (bigger, with a steel band from step 3), a blast furnace (bellows pipes, fire slits) or a crucible works (crucibles on arms round a pit); the orange kill ring widens; wrecked enemies in it send a coin into the furnace with the bonus amount and flare it; gold rim and molten gold at the Reclamation Plant.
-- **Path 3, Discounts (the left-edge supply strip):** chutes with crates, ore silos or a rail siding with a wagon, one more at each step; the blue discount ring widens and shows the percentage off; gold frame at Forward Command.
-- **Retrofits:** Second Crusher (jaw crusher, roller crusher or hammer mill, top-left), Bigger Yard (slag wall, pipe fence or bollard fence round the works), Salvage Crane (gantry, jib crane or crane truck, top edge).
-- **Carpet-rule overlaps (kept, stacking):** the Second Crusher's +30 income with the path-1 income; the Bigger Yard's +30 px with both field radii.
+**History.** The Scrapyard second-pass page was built twice and rejected twice: the confirmed Magnet Yard base look with its first set of upgrade designs, then a from-scratch Smelting Works with all-new paths (owner: "didn't like the overall design"). The owner then said: "Start over with the Scrapyard in its entirety. Back to the drawing board." Both builds are deleted (`data_scrap_base.js`, `data_p2_scrap.js`, the old p2 page; git keeps them). The `sBuild`/`sCard` preview-scale hook in `pass2_engine.js` stays, since the 2x2 yard needs it for the second pass.
+
+**Restart process (owner's answers):** base looks first (three new looks and an animation to pick, as in the first pass); the upgrades and Retrofits are designed only after a look is confirmed. Directions the owner chose: an **armoured vault depot**, a **wreck breaker's yard** and a **smeltworks** (a fresh, simpler execution than the first one).
+
+**The page** (`design/tower_art_p17_scrapyard.html`, from `tools/tower_art/data_scrap_looks.js`) shows three new looks, each simple and bold with one clear focal element:
+- **A. Armoured Vault Depot:** thick armoured walls with corner bunkers and a sliding gate, a searchlight sweeping the yard, one huge round vault door (the wheel spins at each payout), a weighbridge and crushed-metal bales.
+- **B. Wreck Breaker's Yard:** a half-stripped tank hulk (turret gone, plates cut away) in a hazard-lined yard, a gantry with a cutting torch spraying sparks over it, a drone hull and a pile of stripped plates.
+- **C. Smeltworks:** one big smelter with a glowing crucible mouth and a smoking chimney; a ladle arm swings out and pours into a stack of gold ingots at each payout; nothing else.
+- **Animations (pick one):** Round Payout (a coin spray with a floating +100), Sparks and Sale (ambient sparks, a credit-stack flash at the payout), Wreck Collector (also shows the kill bonus: a wrecked enemy's scrap flies into the yard as a coin).
+
+**Then (after the owner confirms a look):** the second pass for the Scrapyard on top of it, with all the earlier rules (structure over decoration, options swap parts, masteries gold, the carpet rule: the Second Crusher's +30 income stacks with the Passive Income steps and the Bigger Yard's +30 px stacks with both field radii, the 2x2 preview scales), then towers 18 to 20: Magneto, Tractor, Augmentation.
 
 ## Open questions
 
-1. **Second pass, Scrapyard, redesigned as a Smelting Works** (tower 17, round 1): say whether the base look works, then pick one option per stage and Retrofit. Then towers 18-20 (next: Magneto Tower).
+1. **Scrapyard restart** (tower 17): pick one of the three new base looks and an animation (then say "Scrapyard base finished"). Then its second pass, then towers 18-20 (Magneto, Tractor, Augmentation).

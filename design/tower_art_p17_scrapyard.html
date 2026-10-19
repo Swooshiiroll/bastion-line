@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Tower Art: Scrapyard (smelting works) paths and Retrofits</title>
+<title>Tower Art: Scrapyard base look (restart)</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
   :root {
@@ -45,34 +45,20 @@
   .combo-head { font: 600 12px var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
   .out { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px 2px 12px 2px; padding: 12px 14px; display: grid; gap: 8px; }
   #summary { width: 100%; min-height: 100px; background: #071019; color: var(--text); border: 1px solid var(--rule); border-radius: 6px; font: 12px var(--mono); padding: 8px; }
-  .stage { display: grid; gap: 6px; border-top: 1px solid var(--rule); padding-top: 8px; }
-  .stage-head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
-  .lvl { font: 700 13px var(--display); color: #031018; background: var(--gold); border-radius: 4px; padding: 0 7px; }
-  .cost { font: 500 12px var(--mono); color: var(--gold); }
-  .eff { color: var(--dim); font-size: 13px; }
-  .grid3 { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; }
-  .build { display: grid; gap: 10px; grid-template-columns: minmax(0, 560px) minmax(220px, 1fr); align-items: start; border: 1px solid var(--gold); border-radius: 8px; padding: 10px; background: rgba(255,200,90,.04); }
-  .ctrls { display: grid; gap: 10px; }
-  .ctrl { display: grid; gap: 3px; }
-  .ctrl label { font: 600 12px var(--display); letter-spacing: .08em; color: var(--text); }
-  .ctrl input[type=range] { width: 100%; accent-color: var(--gold); }
-  .ctrl select { background: #071019; color: var(--text); border: 1px solid var(--rule); border-radius: 6px; padding: 4px 6px; font: 13px var(--body); }
-  .role { font: 600 11px var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
-  @media (max-width: 860px) { .build { grid-template-columns: 1fr; } }
   @media (max-width: 760px) { h1 { font-size: 24px; } }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Tower rework · Tower art · second pass · tower 17 of 20 · redesign round 1</div>
-    <h1>Tower art: Scrapyard (smelting works) paths and Retrofits</h1>
-    <p class="note">Second pass for one tower: <b>every upgrade step and mastery</b> on each path, and each <b>Retrofit</b>, adds or changes a detail on the confirmed model. Each card shows the model with that path's earlier steps (your picks, or option A until you pick) plus the candidate. Pick one of three per step, add notes per path, then <b>Copy picks and notes</b>.</p>
+    <div class="eyebrow">Bastion Line · Tower rework · Tower art · scrapyard base look · restart</div>
+    <h1>Tower art: Scrapyard base look (restart)</h1>
+    <p class="note">The reworked towers' <b>models</b>, first pass: for each tower pick its <b>look</b> and its <b>firing animation</b> from three proposals each (A to C), and add notes. Mix freely. <b>Your combination</b> shows your mix (option A until you pick). Every preview runs live: the turret tracks and fires at enemies on the lane (flyers for air towers). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back. Spec: <code>design/tower_art.md</code>.</p>
     <ul class="rules">
-      <li><b>Details stack:</b> the primary path's steps and the secondary's (capped at 2) both show and overlap, as in the build preview.</li>
-      <li><b>Build preview:</b> set each path's level (M is the mastery) and a Retrofit; it enforces the primary/secondary rule (two paths at most; once one reaches 3, the other stops at 2).</li>
-      <li><b>Masteries</b> get gold trim, as today's tier-4 towers do.</li>
-      <li>Same style as the base pass: dark gunmetal lit from the upper left, the tower's accent colour, top-down.</li>
+      <li><b>Like today's in-game towers</b>: dark gunmetal armour lit from the upper left (bevelled plates, rivets, shaded barrels and domes) on the hex deck, with glowing accents in the tower's colour. Weapons stay as named: bullets, shells, rockets, beams.</li>
+      <li><b>Each tower its own colour</b> (today's colour for its nearest in-game tower) and its own look.</li>
+      <li><b>Top-down</b>, like the game: a static base and a turret that rotates to aim.</li>
+      <li><b>This pass:</b> base look and firing animation. Per-path looks (#6) and the Retrofit looks come next, on top of what you pick.</li>
     </ul>
   </header>
   <div id="towers" class="wrap"></div>
@@ -398,155 +384,80 @@ function mateTower(p, k, col, t, boosted, bcol, aimAt) { deck(p, k * 0.75, col, 
   if (boosted > 0) for (let i = 0; i < 2; i++) { const q = add(p, [0, -(16 + i * 3.4) * k * 0.75]); polyline([add(q, [-2.6 * k, 1.6 * k]), q, add(q, [2.6 * k, 1.6 * k])], A(bcol, boosted), 1.6 * k); } }
 
 
-const BASE = (() => {
-// ---- Scrapyard: a fresh base design (owner, 2026-10-19: "completely redesign the scrapyard from scratch", direction: Smelting Works) ----------------
-// The old Magnet Yard base look and every old upgrade design are dropped. The look itself is drawn by the second-pass model (data_p2_scrap.js), which
-// draws the whole yard at every level, so this base file only names the look and the animation for the page header.
-const PAGE = { title: "Scrapyard base (smelting works)", store: "bl-tower-art-scrap-base-sw" };
+// ---- Scrapyard base-look page (restart, owner 2026-10-19: "Back to the drawing board") ------------------------------------------------------------
+// Three new, clearly different looks for the 2x2 Scrapyard, each simple and bold with one clear focal element, and three payout animations.
+// The directions are the owner's: an armoured vault depot, a wreck breaker's yard and a (simpler) smeltworks.
+const PAGE = { title: "Scrapyard base look (restart)", store: "bl-tower-art-scrap-looks-1" };
+const rnd = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
+const distTo = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+const enemyR = (s) => Math.max(4, Math.min(11, s * 0.12));
+function txt(p, str, col, px) { X.save(); X.font = "bold " + Math.round(px) + "px sans-serif"; X.textAlign = "center"; X.fillStyle = css(OUTLINE); X.fillText(str, p[0] + 1, p[1] + 1); X.fillStyle = css(col); X.fillText(str, p[0], p[1]); X.restore(); }
+const GOLDC = [1, 0.78, 0.3, 1], COPPER = [0.78, 0.5, 0.28, 1], RUST = [0.45, 0.3, 0.2, 1], BRICK = [0.55, 0.27, 0.2, 1], MOLTEN = [1, 0.55, 0.15, 1], HOTM = [1, 0.85, 0.45, 1];
+function scrapPile(p, r, k, seed) { const pts = []; for (let i = 0; i < 9; i++) { const a = i * TAU / 9; pts.push([Math.cos(a) * r * (0.65 + 0.35 * rnd(seed + i)), Math.sin(a) * r * (0.65 + 0.35 * rnd(seed + i + 20))]); }
+  ellipse(add(p, [k * 1.5, k * 2.5]), r * k, r * k * 0.5, [0, 0, 0, 0.3]); solid(p, pts, mix(RUST, METAL, 0.4), 0, k, 1);
+  for (let i = 0; i < 5; i++) { const q = add(p, [(rnd(seed + i * 3) - 0.5) * r * k * 1.1, (rnd(seed + i * 5) - 0.5) * r * k * 0.9]); line(q, add(q, mul(fa(rnd(seed + i) * TAU), r * k * 0.35)), i % 2 ? METAL_L : RUST, 1.4 * k); } }
+function coinPop(c, v, s) { for (let i = 0; i < 6; i++) { const d = fa(-Math.PI / 2 + (i - 2.5) * 0.35), p = add(add(c, mul(d, s * 0.5 * Math.min(1, v * 2))), [0, v * v * s * 0.4]); disc(p, s * 0.045 + 1, A(OUTLINE, 0.95 * (1 - v))); disc(p, s * 0.045, A(GOLDC, 1 - v)); }
+  txt(add(c, [0, -s * 0.4 - v * s * 0.5]), "+100", A(GOLDC, Math.min(1, 2 - v * 2)), Math.max(11, s * 0.2)); }
+function scrapAgent(cfg) { return (m, t, info, s, col) => { if (!m.pays) { m.pays = []; m.last = t; }
+  if (t - m.last >= 4) { m.last = t; m.pays.push(t); } m.pays = m.pays.filter((q) => t - q < 1.6);
+  if (cfg.extra) cfg.extra(m, t, info, s, col);
+  for (const q of m.pays) { const v = (t - q) / 1.6; cfg.pay(info.c, v, s, col, t); } }; }
+
 const TOWERS = [
-  { id: "scrap", num: 17, name: "Scrapyard", cls: "Utility", weapon: "None", hits: "none", size: 2, center: [0.3, 0.4], color: [1.0, 0.62, 0.22, 1],
-    desc: "Various collections of scrap metal sold at a profit. \"One mans toxic waste is another mans potpourri\" A 2x2 smelting works; it attacks nothing and pays 100 credits at each round's clear (the preview pays every 4 s).",
+  { id: "scrap", num: 17, name: "Scrapyard", cls: "Utility", weapon: "None", hits: "none", size: 2, center: [0.3, 0.4], color: [0.95, 0.72, 0.42, 1],
+    desc: "Various collections of scrap metal sold at a profit. \"One mans toxic waste is another mans potpourri\" A 2x2 yard; it attacks nothing and pays 100 credits at each round's clear (the preview pays every 4 s). Restart: three new looks, each with one bold focal element. (Colour: today's Scrapyard copper.)",
     looks: [
-      { key: "A", name: "Smelting Works", muzzle: 0, fixed: true, theme: "A foundry yard: a brick furnace with a glowing mouth fed by a scrap conveyor, a chimney, and a molten channel running to a row of ingot moulds.", draw() {} },
+      { key: "A", name: "Armoured Vault Depot", muzzle: 0, fixed: true, theme: "A hardened compound: thick armoured walls with corner bunkers and a sliding gate, a searchlight sweeping the yard, and one huge round vault door in the middle, with a weighbridge and crushed-metal bales beside it.",
+        draw(c, aim, s, fx, t, col) { const k = G(s), mm = fx.mem || {}, pay = decay(t - (mm.last ?? -9), 1.3), S = (x, y) => add(c, [x * k, y * k]);
+          ellipse(add(c, [0, 8 * k]), 44 * k, 16 * k, [0, 0, 0, 0.3]); plate(c, rectPts(46, 46), lt(METAL_D, 0.05), 0, k, 1.4); fill(c, rectPts(41, 41), [0.2, 0.2, 0.21, 1], 0, k);
+          for (const [x, y, w, h] of [[0, -43.5, 46, 2.6], [-43.5, 0, 2.6, 46], [43.5, 0, 2.6, 46], [-30, 43.5, 16, 2.6], [30, 43.5, 16, 2.6]]) { plate(S(x, y), rectPts(w, h), METAL, 0, k, 1.2); rivets(S(x, y), rectPts(w, h), 0, k, 0.84, 0.7 * k); }
+          plate(S(-9.5, 43.5), rectPts(6, 1.8), METAL_L, 0, k, 1); plate(S(9.5, 43.5), rectPts(6, 1.8), METAL_L, 0, k, 1); hazard(S(0, 43.5), 0, k, -3, 3, 0, col, 1.6);
+          for (const [x, y] of [[-43, -43], [43, -43], [-43, 43], [43, 43]]) { plate(S(x, y), ngon(8, 1, Math.PI / 8), METAL_L, 0, 6 * k, 1.3); disc(S(x, y), 2.4 * k, METAL_D); }
+          const sp = S(43, -43), sa = Math.atan2(c[1] - sp[1], c[0] - sp[0]) + Math.sin(t * 0.8) * 0.8; poly([sp, add(sp, mul(fa(sa - 0.13), 62 * k)), add(sp, mul(fa(sa + 0.13), 62 * k))], [1, 1, 0.85, 0.1]); glowDot(sp, 1.1 * k, [1, 1, 0.85, 1]);
+          const vc = S(0, -8); plate(vc, ngon(8, 1, Math.PI / 8), METAL_L, 0, 26 * k, 1.5); plate(vc, ngon(8, 1, Math.PI / 8), METAL, 0, 22.4 * k, 1.1); rivets(vc, ngon(8, 1, Math.PI / 8), 0, 26 * k, 0.9, 0.9 * k);
+          disc(vc, 16.4 * k, OUTLINE); disc(vc, 15.4 * k, METAL_D); ring(vc, 13 * k, METAL_L, 1.8 * k); ring(vc, 9.6 * k, METAL, 1.2 * k); for (let i = 0; i < 12; i++) disc(add(vc, mul(fa(i * TAU / 12 + 0.2), 14.2 * k)), 0.9 * k, lt(METAL_L, 0.1));
+          const wa = pay * 2.8 + 0.3; for (let i = 0; i < 6; i++) { const e = add(vc, mul(fa(wa + i * Math.PI / 3), 8 * k)); line(vc, e, METAL_L, 1.8 * k); disc(e, 1.3 * k, METAL_L); } disc(vc, 2.8 * k, METAL); glowDot(vc, (1 + 1.6 * pay) * k, A(GOLDC, 0.4 + 0.6 * pay)); glowDot(S(0, -34.5), 0.9 * k, pay > 0.05 ? GOLDC : [0.4, 1, 0.5, 1]);
+          const wb = S(-26, 30); plate(wb, rectPts(15, 4.2), METAL_D, 0, k, 1.2); for (let i = -6; i <= 6; i++) line(add(wb, [i * 2.2 * k, -3 * k]), add(wb, [i * 2.2 * k, 3 * k]), [0, 0, 0, 0.3], 1); plate(S(-43, 30), rectPts(2.6, 3.4), METAL_L, 0, k, 1); glowDot(S(-43, 28.4), 0.5 * k, col);
+          for (const [x, y] of [[22, 32], [31, 32], [26.5, 24.5]]) { plate(S(x, y), rectPts(4.2, 3.8), mix(RUST, METAL, 0.3), 0, k, 1.1); line(S(x - 4.2, y), S(x + 4.2, y), METAL_D, 1 * k); } } },
+      { key: "B", name: "Wreck Breaker's Yard", muzzle: 0, fixed: true, theme: "A half-stripped tank hulk lying in the middle of a hazard-lined yard, its turret gone, a gantry with a cutting torch working over it in a spray of sparks, a drone hull and a pile of stripped plates in the corners.",
+        draw(c, aim, s, fx, t, col) { const k = G(s), S = (x, y) => add(c, [x * k, y * k]), ang = -0.12, tc = S(0, 4), o = (x, y) => add(tc, rot([x * k, y * k], ang));
+          ellipse(add(c, [0, 8 * k]), 44 * k, 16 * k, [0, 0, 0, 0.3]); plate(c, rectPts(46, 46), lt(METAL_D, 0.04), 0, k, 1.3); fill(c, rectPts(44, 44), [0.24, 0.22, 0.2, 1], 0, k); outline(c, rectPts(44, 44), A(col, 0.5 + 0.2 * Math.sin(t * 2.2)), 1.4 * k, 0, k);
+          for (const y of [-30, 40]) hazard(S(0, y), 0, k, -40, 40, 0, col, 1.4);
+          for (const sg of [-1, 1]) { plate(o(0, sg * 15), rectPts(29, 3.8), [0.13, 0.12, 0.12, 1], ang, k, 1.2); for (let j = -13; j <= 13; j += 2.6) line(o(j, sg * 12.6), o(j, sg * 17.4), [0.32, 0.3, 0.27, 1], 0.9 * k); }
+          plate(tc, rectPts(26, 13.5), mix(RUST, METAL, 0.35), ang, k, 1.5); plate(o(10, -2.5), rectPts(8, 6), [0.1, 0.09, 0.09, 1], ang, k, 1); plate(o(-14, 3.5), rectPts(6, 5), [0.1, 0.09, 0.09, 1], ang, k, 1);
+          disc(o(-3, 0), 8 * k, OUTLINE); disc(o(-3, 0), 7 * k, [0.05, 0.05, 0.05, 1]); ring(o(-3, 0), 7.6 * k, RUST, 1.8 * k); for (let i = 0; i < 6; i++) { const a = i * TAU / 6 + 0.3; line(add(o(-3, 0), mul(fa(a), 7.8 * k)), add(o(-3, 0), mul(fa(a), 9.6 * k)), mix(RUST, METAL_L, 0.3), 1.4 * k); }
+          for (let i = -2; i <= 2; i++) line(o(14.5, i * 2.2), o(18.5, i * 2.2 + 0.7), [0.3, 0.14, 0.1, 1], 1.2 * k);
+          bar(S(-36, -22), S(-14, -28), 3.2 * k, METAL_D); disc(S(-36, -22), 2 * k, METAL_D);
+          const gx = Math.sin(t * 0.7) * 22, tip = o(gx, -2); bar(S(-44, -39), S(44, -39), 2.4 * k, METAL_D); for (const x of [-44, 44]) { plate(S(x, -36), rectPts(1.8, 4), METAL_L, 0, k, 1); } plate(S(gx, -39), rectPts(3, 2), METAL_L, 0, k, 1); line(S(gx, -39), tip, METAL_D, 1.2 * k); disc(tip, 1.2 * k, METAL);
+          glowDot(tip, (0.8 + 0.3 * Math.sin(t * 40)) * k, [0.8, 0.9, 1, 1]); for (let i = 0; i < 9; i++) { const q = fmod(t * 3 + i / 9, 1), a = -Math.PI / 2 + (rnd(Math.floor(t * 3 + i / 9) + i) - 0.5) * 2.4; disc(add(tip, mul(fa(a), q * s * 0.22)), 1.2 * (1 - q) + 0.4, [1, 0.8, 0.4, 1 - q]); }
+          const dr = S(30, 28); plate(dr, rectPts(7, 4.4), mix(RUST, METAL, 0.45), 0.3, k, 1.2); for (let i = 0; i < 4; i++) { const a = 0.3 + Math.PI / 4 + i * Math.PI / 2, e = add(dr, mul(fa(a), 9 * k)); bar(dr, e, 1.4 * k, METAL_D); ring(e, 3 * k, RUST, 1.2 * k); }
+          scrapPile(S(-28, 28), 11, k, 5); scrapPile(S(-30, 10), 6, k, 12); } },
+      { key: "C", name: "Smeltworks", muzzle: 0, fixed: true, theme: "One big smelter with a glowing crucible mouth and a single smoking chimney; a ladle arm swings out and pours into a stack of gold ingots at each payout. Nothing else.",
+        draw(c, aim, s, fx, t, col) { const k = G(s), mm = fx.mem || {}, age = t - (mm.last ?? -9), pay = decay(age, 1.4), S = (x, y) => add(c, [x * k, y * k]), F = S(-10, -2);
+          ellipse(add(c, [0, 8 * k]), 44 * k, 16 * k, [0, 0, 0, 0.3]); plate(c, rectPts(46, 46), lt(METAL_D, 0.03), 0, k, 1.3); fill(c, rectPts(44, 44), [0.16, 0.14, 0.13, 1], 0, k); outline(c, rectPts(44, 44), A(MOLTEN, 0.3 + 0.2 * Math.sin(t * 2.2)), 1.4 * k, 0, k);
+          disc(F, 24 * k + 1.6 * k, OUTLINE); disc(F, 24 * k, BRICK); for (let i = 0; i < 28; i++) { const a = i * TAU / 28; line(add(F, mul(fa(a), 16 * k)), add(F, mul(fa(a), 23.4 * k)), [0.3, 0.14, 0.1, 1], 1.1 * k); } ring(F, 18.5 * k, [0.75, 0.4, 0.28, 1], 1.4 * k); ring(F, 23 * k, METAL, 2 * k);
+          const fl = 0.5 + 0.5 * Math.sin(t * 6); disc(F, 13 * k, OUTLINE); disc(F, 12 * k, mix([0.4, 0.1, 0.04, 1], MOLTEN, 0.45 + 0.35 * fl + 0.2 * pay)); disc(F, (5 + 1.4 * fl) * k, A(HOTM, 0.9)); glowDot(F, (2 + 1.6 * pay) * k, HOTM);
+          const ch = S(8, -34); disc(ch, 6.6 * k, OUTLINE); disc(ch, 5.8 * k, METAL_D); disc(ch, 3.2 * k, [0.05, 0.05, 0.05, 1]); for (let i = 0; i < 5; i++) { const u = fmod(t * 0.5 + i / 5, 1); disc(add(ch, [u * 5 * k, -u * 20 * k]), (1.6 + u * 4) * k, A([0.5, 0.48, 0.46, 1], 0.55 * (1 - u))); }
+          const pv = S(14, 12), a0 = Math.PI * 0.82, a1 = 0.45, sw = age < 0.5 ? ease(age / 0.5) : age < 1.1 ? 1 : 1 - ease(Math.min(1, (age - 1.1) / 0.5)), ba = a0 + (a1 - a0) * sw, tipL = add(pv, mul(fa(ba), 24 * k));
+          disc(pv, 3.4 * k, OUTLINE); disc(pv, 2.8 * k, METAL); bar(pv, tipL, 2.4 * k, [0.85, 0.65, 0.2, 1]); disc(tipL, 3.4 * k, OUTLINE); disc(tipL, 2.8 * k, METAL_D); disc(tipL, 1.8 * k, mix([0.4, 0.1, 0.04, 1], MOLTEN, 0.7));
+          if (sw > 0.9 && age < 1.1) line(tipL, S(30, 24), A(MOLTEN, 0.95), 1.8 * k);
+          const ig = S(30, 28); for (let r = 0; r < 3; r++) for (let q = 0; q <= 2 - r; q++) { const p = add(ig, [(q - (2 - r) / 2) * 7.6 * k, -r * 3.6 * k]); fill(p, [[-3.4, -1.7], [3.4, -1.7], [2.6, 1.7], [-2.6, 1.7]], mix([0.9, 0.7, 0.2, 1], HOTM, 0.5 * pay), 0, k); outline(p, [[-3.4, -1.7], [3.4, -1.7], [2.6, 1.7], [-2.6, 1.7]], OUTLINE, 1 * k, 0, k); }
+          glowDot(add(ig, [0, -3 * k]), (0.8 + 2 * pay) * k, A(GOLDC, 0.3 + 0.7 * pay)); scrapPile(S(-30, 32), 8, k, 3); } },
     ],
     anims: [
-      { key: "A", name: "Pour and Payout", desc: "At each round's clear the furnace flares, molten metal runs down the channel into the moulds, the ingots flash gold and a spray of credit coins pops out with the payout.", period: 1, flight: 1, fx: () => ({}), persist: () => {} },
+      { key: "A", name: "Round Payout", desc: "At each round's clear a spray of credit coins pops out of the yard with a floating +100, and the yard's focal part (the vault wheel, the ingots or the smelter) reacts.", period: 1, flight: 1, fx: () => ({}),
+        persist: scrapAgent({ pay: (c, v, s, col) => coinPop(c, v, s, col) }) },
+      { key: "B", name: "Sparks and Sale", desc: "Cutting sparks fly all the time; at the payout a stack of credits flashes on the yard and the +100 rises from it.", period: 1, flight: 1, fx: () => ({}),
+        persist: scrapAgent({ extra: (m, t, info, s) => { for (let i = 0; i < 6; i++) { const q = fmod(t * 2.2 + i / 6, 1), o = add(info.c, [(rnd(Math.floor(t * 2.2 + i / 6) + i) - 0.5) * s * 1.2, (rnd(i + 3) - 0.5) * s]); disc(add(o, mul(fa(-1.2 - i * 0.3), q * s * 0.2)), 1.2, [1, 0.8, 0.4, 1 - q]); } },
+          pay: (c, v, s, col) => { if (v < 0.3) glowDot(c, s * 0.3 * (1 - v / 0.3), GOLDC); for (let j = 0; j < 4; j++) ellipse(add(c, [0, -j * s * 0.05]), s * 0.12, s * 0.05, A(dk(GOLDC, 0.2), 1 - v)); txt(add(c, [0, -s * 0.45 - v * s * 0.5]), "+100", A(GOLDC, Math.min(1, 2 - v * 2)), Math.max(11, s * 0.2)); } }) },
+      { key: "C", name: "Wreck Collector", desc: "Shows the kill bonus too: an enemy wrecked near the yard bursts and its scrap flies into the yard as a coin; the round payout pops +100.", period: 1, flight: 1, fx: () => ({}),
+        persist: scrapAgent({ extra: (m, t, info, s, col) => { const near = info.all.filter((e) => !e.air && distTo(e.p, info.c) < s * 3.1);
+            if (near.length && (!m.kill || t - m.kill.t0 > 1.5)) { const e = near[Math.floor(rnd(Math.floor(t)) * near.length)]; m.kill = { t0: t, p: e.p.slice() }; }
+            if (m.kill) { const v = (t - m.kill.t0) / 1.0; if (v < 0.3) blast(m.kill.p, v / 0.3, s, col, 0.25); if (v < 1) { const p = add(lerp(m.kill.p, info.c, v), [0, -Math.sin(Math.PI * v) * s * 0.5]); disc(p, s * 0.05 + 1, OUTLINE); disc(p, s * 0.05, GOLDC); if (v < 0.5) txt(add(m.kill.p, [0, -s * 0.25 - v * s * 0.3]), "+5", A(GOLDC, 1 - v * 2), Math.max(9, s * 0.15)); } } },
+          pay: (c, v, s, col) => coinPop(c, v, s, col) }) },
     ] },
 ];
-
-return { TOWERS };
-})();
-const NO_BOOT = true;
-// ---- Tower art second pass: Scrapyard (tower 17), REDESIGNED FROM SCRATCH as a smelting works (owner, 2026-10-19) -----------------------------------
-// Everything is new: the base look (a foundry: brick furnace, scrap conveyor, molten channel, ingot moulds, chimney) and all three paths. The
-// model draws the whole yard at every level. Lessons carried over: every step REBUILDS a part in place (the new design replaces the old one),
-// the options swap that part's style, masteries are gold, overlapping Retrofits are kept and stack (the carpet rule), and the agent runs the
-// real rules (the payout at each clear, the kill bonus, the discount field). Layout (game px, a 2x2 yard, half-width 46):
-//  - the furnace in the middle-left, fed by a scrap conveyor from the left edge, with a chimney;
-//  - a molten channel from the furnace down to the casting strip along the bottom edge;
-//  - Path 1 (Passive Income) rebuilds the casting strip (ingot moulds, a vault store or mint presses); gold at the Reserve Bank;
-//  - Path 2 (Kill Income) rebuilds the furnace itself (a brick furnace, a blast furnace or a crucible works); wrecked enemies feed it;
-//  - Path 3 (Discounts) rebuilds the supply strip down the left edge (chutes with crates, ore silos or a rail siding).
-// Overlaps kept and stacking: the Second Crusher's +30 with the path-1 income, the Bigger Yard's +30 px with both field radii.
-const PAGE = { title: "Scrapyard (smelting works): paths and Retrofits (second pass)", store: "bl-tower-art-p2-scrap-sw1" };
-const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], BRICK = [0.55, 0.27, 0.2, 1], SLAG = [0.16, 0.14, 0.13, 1], MOLTEN = [1, 0.55, 0.15, 1], HOTM = [1, 0.85, 0.45, 1], KILL = [1, 0.5, 0.2, 1], DISCC = [0.45, 0.82, 0.95, 1], YEL = [0.9, 0.7, 0.15, 1];
-const rnd = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
-const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
-const INCOME = [100, 130, 165, 220, 270, 320], KILLPX = [0, 140, 150, 170, 190, 210], DISCPX = [0, 140, 150, 160, 175, 190], KBONUS = [0, 0.15, 0.25, 0.35, 0.45, 0.6], DOFF = ["", "-5%", "-10%", "-15%", "-20%", "-25%"];
-const incomeOf = (B) => INCOME[B.lv[0]] + (B.r === 0 ? 30 : 0);
-const killR = (B) => KILLPX[B.lv[1]] + (B.r === 1 && B.lv[1] > 0 ? 30 : 0), discR = (B) => DISCPX[B.lv[2]] + (B.r === 1 && B.lv[2] > 0 ? 30 : 0);
-const FP = [-6, -4];                                                                                  // the furnace's centre (yard units)
-function txt(p, str, col, px) { X.save(); X.font = "bold " + Math.round(px) + "px sans-serif"; X.textAlign = "center"; X.fillStyle = css(OUTLINE); X.fillText(str, p[0] + 1, p[1] + 1); X.fillStyle = css(col); X.fillText(str, p[0], p[1]); X.restore(); }
-function coinPop(c, v, s) { for (let i = 0; i < 6; i++) { const d = fa(-Math.PI / 2 + (i - 2.5) * 0.35), p = add(add(c, mul(d, s * 0.5 * Math.min(1, v * 2))), [0, v * v * s * 0.4]); disc(p, s * 0.045 + 1, A(OUTLINE, 0.95 * (1 - v))); disc(p, s * 0.045, A(GOLD, 1 - v)); } }
-const goldOr = (g, col) => (g ? GOLD : col);
-
-// ---- The agent: the payout at each (preview) clear, kill coins from wrecked enemies in the field, and the two field rings -------------------------------
-function scrapAgent(B) { return (m, t, info, s, col) => { if (!m.pays) { m.pays = []; m.last = t; m.kills = []; m.kt = t; }
-  const L1 = B.lv[0], L2 = B.lv[1], L3 = B.lv[2], c = info.c, k = G(s), furn = add(c, [FP[0] * k, FP[1] * k]);
-  if (t - m.last >= 4) { m.last = t; m.pays.push(t); } m.pays = m.pays.filter((q) => t - q < 1.8);
-  if (L2 > 0) { const R = s * killR(B) / 48; ring(c, R, A(KILL, 0.2), 1.2); for (let i = 0; i < 24; i += 2) line(add(c, mul(fa(i * TAU / 24 + t * 0.03), R)), add(c, mul(fa((i + 1) * TAU / 24 + t * 0.03), R)), A(KILL, 0.34), 1.2); }
-  if (L3 > 0) { const R = s * discR(B) / 48; ring(c, R, A(DISCC, 0.2), 1.2); for (let i = 1; i < 24; i += 2) line(add(c, mul(fa(i * TAU / 24 - t * 0.03), R)), add(c, mul(fa((i + 1) * TAU / 24 - t * 0.03), R)), A(DISCC, 0.34), 1.2); txt(add(c, [R * 0.7, -R * 0.7]), DOFF[L3], A(DISCC, 0.9), Math.max(10, s * 0.14)); }
-  if (L2 > 0 && t - m.kt >= 1.7) { const near = info.all.filter((e) => !e.air && dist(e.p, c) < s * killR(B) / 48); if (near.length) { const e = near[Math.floor(rnd(Math.floor(t) + 1) * near.length)]; m.kills.push({ t0: t, p: e.p.slice() }); m.kt = t; m.feed = t; } }
-  m.kills = m.kills.filter((q) => t - q.t0 < 1);
-  for (const q of m.kills) { const v = (t - q.t0) / 1, gc = L2 >= 5 ? GOLD : MOLTEN; if (v < 0.25) { const r = Math.max(4, Math.min(11, s * 0.12)); glowDot(q.p, r * (1 - v / 0.25), [1, 0.9, 0.7, 1]); ring(q.p, r + v * 40, A(KILL, 1 - v / 0.25), 1.6); }
-    const p = add(lerp(q.p, furn, Math.min(1, v * 1.1)), [0, -Math.sin(Math.PI * Math.min(1, v)) * s * 0.4]); disc(p, s * 0.05 + 1, OUTLINE); disc(p, s * 0.05, gc);
-    if (v < 0.55) txt(add(q.p, [0, -s * 0.22 - v * s * 0.3]), "+" + Math.round(5 * (1 + KBONUS[L2])), A(gc, 1 - v * 1.8), Math.max(9, s * 0.15)); }
-  for (const q of m.pays) { const v = (t - q) / 1.6; if (v > 1) continue; const cp = add(c, [0, 30 * k]); coinPop(cp, v, s); if (v < 0.3) glowDot(cp, s * 0.3 * (1 - v / 0.3), HOTM);
-    txt(add(cp, [0, -s * 0.45 - v * s * 0.5]), "+" + incomeOf(B), A(GOLD, Math.min(1, 2 - v * 2)), Math.max(11, s * 0.2));
-    if (L1 >= 5 && v > 0.1) txt(add(cp, [s * 0.5, -s * 0.25 - v * s * 0.4]), "+3%", A([0.8, 1, 0.6, 1], Math.min(1, 2 - v * 2)), Math.max(9, s * 0.14)); } }; }
-
-// ---- The model ---------------------------------------------------------------------------------------------------------------------------------------
-const P2 = {
-  tower: "scrap", look: "A", anim: "A", sBuild: 112, sCard: 64,                                 // a 2x2 yard: smaller previews so the whole yard fits
-  intro: "Round 1 of the redesign: a fresh Smelting Works (the old Magnet Yard and every old upgrade design are gone). A brick furnace with a glowing mouth is fed by a scrap conveyor and breathes smoke from its chimney; a molten channel runs down to a casting strip of ingot moulds, and at each payout the channel flares and the ingots flash gold. Path 1 (Passive Income) rebuilds the casting strip (ingot moulds, a vault store or mint presses; gold at the Reserve Bank). Path 2 (Kill Income) rebuilds the furnace itself (a bigger brick furnace, a blast furnace or a crucible works), widens the orange kill ring, and wrecked enemies in it feed the furnace a coin with the bonus. Path 3 (Discounts) rebuilds the supply strip down the left edge (chutes with crates, ore silos or a rail siding) and widens the blue discount ring. The Retrofits add a second crusher, a wider wall or a salvage crane. Overlapping Retrofits are kept and stack (the carpet rule). Unpicked steps show option A.",
-  mods(B) { return { period: 1, flight: 1, multi: false, persist: scrapAgent(B) }; },
-  muzzleAt(B, m, kk, c) { return c; },
-  model(c, aim, s, fx, t, col, info, B) {
-    const k = G(s), mm = fx.mem || {}, pour = decay(t - (mm.last ?? -9), 1.4), fed = decay(t - (mm.feed ?? -9), 0.8), L1 = B.lv[0], L2 = B.lv[1], L3 = B.lv[2], S = (x, y) => add(c, [x * k, y * k]), R = B.r >= 0 ? B.key("r" + B.r) : null, g1 = L1 >= 5, g2 = L2 >= 5, g3 = L3 >= 5;
-    // ---- the Bigger Yard: a second, wider wall round the works -----------------------------------------------------------------------------------------------------
-    if (B.r === 1) {
-      const pts = [S(-54, -54), S(54, -54), S(54, 54), S(-54, 54), S(-54, -54)];
-      if (R === "A") { polyline(pts, OUTLINE, 5 * k); polyline(pts, mix(BRICK, SLAG, 0.4), 3.4 * k); polyline(pts, A(MOLTEN, 0.35 + 0.2 * pour), 1 * k); }
-      if (R === "B") { polyline(pts, OUTLINE, 3 * k); polyline(pts, METAL_L, 1.6 * k); for (let i = -5; i <= 5; i++) for (const sg of [-1, 1]) { line(S(i * 10.8, sg * 54), S(i * 10.8, sg * 54 - sg * 6), STEEL, 1.1 * k); line(S(sg * 54, i * 10.8), S(sg * 54 - sg * 6, i * 10.8), STEEL, 1.1 * k); } }
-      if (R === "C") { polyline(pts, OUTLINE, 2.4 * k); polyline(pts, A(STEEL, 0.9), 1.1 * k); for (let i = -5; i <= 5; i++) for (const sg of [-1, 1]) { disc(S(i * 10.8, sg * 54), 1.5 * k, METAL_D); disc(S(sg * 54, i * 10.8), 1.5 * k, METAL_D); } } }
-    // ---- the yard floor: dark slag with a hazard-striped edge --------------------------------------------------------------------------------------------------------
-    ellipse(add(c, [0, 8 * k]), 44 * k, 16 * k, [0, 0, 0, 0.3]); plate(c, rectPts(46, 46), lt(METAL_D, 0.03), 0, k, 1.3); fill(c, rectPts(44, 44), SLAG, 0, k);
-    for (let j = 0; j < 22; j++) { const a0 = -44 + j * 4, cc = j % 2 ? YEL : [0.08, 0.07, 0.06, 1]; line(S(a0, -44.5), S(a0 + 4, -44.5), cc, 2.2 * k); line(S(a0, 44.5), S(a0 + 4, 44.5), cc, 2.2 * k); line(S(-44.5, a0), S(-44.5, a0 + 4), cc, 2.2 * k); line(S(44.5, a0), S(44.5, a0 + 4), cc, 2.2 * k); }
-    for (let i = 0; i < 9; i++) disc(S(-36 + i * 9 + rnd(i) * 3, -40 + rnd(i + 9) * 80), (0.8 + rnd(i + 3)) * k, A(MOLTEN, 0.08));
-    // ---- the scrap conveyor from the left edge into the furnace --------------------------------------------------------------------------------------------------------
-    plate(S(-33, FP[1]), rectPts(13.5, 2.6), METAL_D, 0, k, 1.1); for (let j = 0; j < 4; j++) { const x = -46 + fmod(t * 8 + j * 7, 27); plate(S(x, FP[1] + (j % 2 ? 0.6 : -0.5)), rectPts(1.6 + (j % 3) * 0.4, 1.2), mix(BRICK, STEEL, 0.4 + 0.15 * (j % 2)), j, k, 0.8); }
-    for (let j = 0; j < 6; j++) line(S(-45 + j * 4.5 + fmod(t * 4, 4.5), FP[1] - 2.6), S(-43.5 + j * 4.5 + fmod(t * 4, 4.5), FP[1] - 1.6), A(STEEL, 0.6), 0.8 * k);
-    // ---- the molten channel from the furnace to the casting strip (flares at each payout) ---------------------------------------------------------------------------------
-    { const pts = [S(2, 2), S(8, 10), S(8, 24)]; polyline(pts, OUTLINE, 4.6 * k); polyline(pts, mix(BRICK, SLAG, 0.5), 3.4 * k); polyline(pts, A(MOLTEN, 0.45 + 0.5 * pour), 2 * k); if (pour > 0.2) polyline(pts, A(HOTM, pour), 1 * k); }
-    // ---- Path 3: the supply strip down the left edge, rebuilt each step (chutes with crates, ore silos or a rail siding) ----------------------------------------------------
-    if (L3 > 0) { const key = B.key("p2s" + (L3 - 1)), n = [0, 2, 3, 4, 5, 6][L3], ac = g3 ? GOLD : DISCC;
-      if (key === "A") for (let q = 0; q < n; q++) { const p = S(-37, 8 + q * 6.2); plate(p, rectPts(6, 2.4), METAL_D, 0, k, 1); fill(add(p, [-6 * k, 0]), [[0, -2.2], [2.2, -1.2], [2.2, 1.2], [0, 2.2]], METAL_L, 0, k); for (let j = 0; j < 2 + (q % 2); j++) plate(add(p, [(-2 + j * 3.2) * k, 0]), rectPts(1.3, 1.4), mix(YEL, BRICK, 0.4 + 0.15 * j), 0, k, 0.8); if (q === n - 1) glowDot(add(p, [5 * k, 0]), 0.45 * k, ac); }   // chutes with crates
-      if (key === "B") for (let q = 0; q < n; q++) { const p = S(-37 + (q % 2) * 5.6, 8 + q * 5.6); disc(p, 2.9 * k + 0.9 * k, OUTLINE); disc(p, 2.9 * k, METAL_L); ring(p, 1.9 * k, STEEL, 0.9 * k); disc(p, 0.9 * k, ac); }   // ore silos
-      if (key === "C") { for (const dx of [-1.6, 1.6]) line(S(-37 + dx, 8), S(-37 + dx, 8 + 6 * n + 2), STEEL, 1.1 * k); for (let j = 0; j < 3 + n; j++) line(S(-39.4, 9 + j * 6 * n / (3 + n)), S(-34.6, 9 + j * 6 * n / (3 + n)), A(BRICK, 0.9), 1.4 * k);
-        const wy = 9 + fmod(t * (3 + n), 6 * n - 3); plate(S(-37, wy), rectPts(2.6, 2.8), g3 ? dk(GOLD, 0.45) : mix(METAL_L, DISCC, 0.3), 0, k, 1); glowDot(S(-37, wy + 2.8), 0.4 * k, ac); }   // a rail siding with a wagon
-      if (g3) outline(S(-37, 8 + 3 * n), rectPts(7, 3 * n + 2), A(GOLD, 0.85), 1.4 * k, 0, k); }
-    // ---- Path 1: the casting strip along the bottom edge, rebuilt each step (ingot moulds, a vault store or mint presses) --------------------------------------------------
-    { const key = L1 > 0 ? B.key("p0s" + (L1 - 1)) : "-", n = [3, 4, 5, 6, 7, 8][L1], ac = goldOr(g1, HOTM), ing = (p, w, h, a0) => { const hot = Math.max(pour, 0.0); fill(p, rectPts(w, h), mix([0.4, 0.38, 0.36, 1], g1 ? GOLD : MOLTEN, Math.max(0.15, hot)), 0, k); line(add(p, [-w * k, -h * 0.4 * k]), add(p, [w * k, -h * 0.4 * k]), A([1, 1, 1, 1], 0.35 + 0.4 * hot), 0.8 * k); };
-      if (key === "-" || key === "A") { for (let q = 0; q < n; q++) { const x = -28 + (q + 0.5) * 56 / n, p = S(x, 33), w = 4.2 - n * 0.15; plate(p, rectPts(w + 0.8, 2.8), METAL_D, 0, k, 1); ing(p, w, 2, q); }
-        if (L1 >= 3) { polyline([S(-30, 27), S(30, 27)], A(OUTLINE, 0.7), 2 * k); polyline([S(-30, 27), S(30, 27)], g1 ? GOLD : A(METAL_L, 0.9), 1.1 * k); } }   // a row of ingot moulds (a canopy rail from step 3)
-      if (key === "B") { const w = [0, 14, 18, 22, 26, 30][L1]; plate(S(0, 34), rectPts(w, 6), g1 ? dk(GOLD, 0.45) : METAL_D, 0, k, 1.3); const nd = 1 + Math.floor(L1 / 2); for (let q = 0; q < nd; q++) { const p = S((q - (nd - 1) / 2) * w * 0.9, 34); disc(p, 4.2 * k + 1 * k, OUTLINE); disc(p, 4.2 * k, g1 ? dk(GOLD, 0.3) : METAL_L); ring(p, 2.9 * k, ac, 1.1 * k); for (let j = 0; j < 4; j++) line(p, add(p, mul(fa(j * Math.PI / 2 + pour * 1.6), 2.6 * k)), ac, 1.2 * k); disc(p, 0.8 * k, METAL); }
-        for (let q = 0; q < 2 + L1; q++) ing(S(-w * 0.95 + q * 2.6, 39.4), 1.1, 0.8, q); if (g1) outline(S(0, 34), rectPts(w + 1.4, 7.4), A(GOLD, 0.85), 1.4 * k, 0, k); }   // a vault store with round doors and stacked ingots
-      if (key === "C") { const np = [0, 2, 3, 3, 4, 4][L1]; for (let q = 0; q < np; q++) { const x = (q - (np - 1) / 2) * 15, p = S(x, 33); plate(p, rectPts(5, 5), g1 ? dk(GOLD, 0.45) : METAL_D, 0, k, 1.2); const ph = pour * 2.2; plate(add(p, [0, (-1.5 + ph) * k]), rectPts(3, 1.6), STEEL, 0, k, 1); bar(add(p, [0, -5 * k]), add(p, [0, (-1.5 + ph) * k]), 1.4 * k, METAL); for (let j = 0; j < 3; j++) ellipse(add(p, [(5.6 + (j % 2) * 0.4) * k, (-1 + j * 1.2) * k]), 1.3 * k, 0.6 * k, A(g1 ? GOLD : dk(GOLD, 0.2 * j), 1)); if (g1) glowDot(add(p, [0, 4 * k]), 0.4 * k, GOLD); } }   // mint presses stamping coins
-    }
-    // ---- Path 2: the furnace, rebuilt each step (a bigger brick furnace, a blast furnace or a crucible works); gold at the mastery ---------------------------------------
-    { const key = L2 > 0 ? B.key("p1s" + (L2 - 1)) : "A", rf = [11, 12.5, 14, 15.5, 17, 18.5][L2], F = S(FP[0], FP[1]), flame = 0.5 + 0.5 * Math.sin(t * 7), mo = goldOr(g2, MOLTEN), mh = goldOr(g2, HOTM);
-      if (key === "A") { disc(F, rf * k + 1.4 * k, OUTLINE); disc(F, rf * k, BRICK); for (let q = 0; q < 18 + L2 * 2; q++) { const a = q * TAU / (18 + L2 * 2); line(add(F, mul(fa(a), rf * 0.62 * k)), add(F, mul(fa(a), rf * 0.98 * k)), A([0.3, 0.14, 0.1, 1], 0.9), 1 * k); } ring(F, rf * 0.8 * k, A([0.75, 0.4, 0.28, 1], 0.9), 1.2 * k);
-        disc(F, rf * 0.52 * k, OUTLINE); disc(F, rf * 0.46 * k, mix([0.4, 0.1, 0.04, 1], mo, 0.4 + 0.3 * flame + 0.3 * fed)); disc(F, rf * (0.2 + 0.05 * flame) * k, A(mh, 0.9)); glowDot(F, (1 + 1.4 * fed) * k, mh); if (L2 >= 3) ring(F, rf * 0.98 * k, goldOr(g2, STEEL), 1.8 * k); }   // a brick furnace (a steel band from step 3)
-      if (key === "B") { plate(F, rectPts(rf * 0.92, rf * 0.92), BRICK, 0, k, 1.4); plate(F, rectPts(rf * 0.72, rf * 0.72), mix(BRICK, SLAG, 0.4), 0, k, 1); for (let q = 0; q < 2 + Math.floor(L2 / 2); q++) { const yy = (-rf * 0.5 + q * rf / (1 + Math.floor(L2 / 2))) * k, w = 0.6 + 0.4 * Math.sin(t * 9 + q * 2); bar(add(F, [-rf * 1.2 * k, yy]), add(F, [-rf * 0.9 * k, yy]), 1.6 * k, goldOr(g2, METAL_L)); rect(F[0] - rf * 0.55 * k, F[1] + yy - 0.7 * k, rf * 1.1 * k, 1.4 * k, A(mo, 0.5 + 0.4 * w)); }
-        disc(F, rf * 0.34 * k, OUTLINE); disc(F, rf * 0.28 * k, mix([0.4, 0.1, 0.04, 1], mo, 0.5 + 0.5 * flame)); glowDot(F, (0.8 + 1.2 * fed) * k, mh); }   // a blast furnace with bellows pipes and fire slits
-      if (key === "C") { disc(F, rf * 0.55 * k, OUTLINE); disc(F, rf * 0.5 * k, mix(BRICK, SLAG, 0.4)); disc(F, rf * 0.32 * k, mix([0.4, 0.1, 0.04, 1], mo, 0.45 + 0.4 * flame + 0.2 * fed)); glowDot(F, (0.8 + 1.2 * fed) * k, mh); const nc = [0, 2, 3, 4, 5, 6][L2];
-        for (let q = 0; q < Math.max(nc, 1); q++) { const a = q * TAU / Math.max(nc, 1) + 0.4, cp = add(F, mul(fa(a), rf * 0.92 * k)), la = a + Math.sin(t * 0.8 + q) * 0.3; disc(cp, 2.4 * k + 0.8 * k, OUTLINE); disc(cp, 2.4 * k, METAL_D); disc(cp, 1.7 * k, mix([0.4, 0.1, 0.04, 1], mo, 0.5 + 0.4 * Math.sin(t * 3 + q))); bar(add(F, mul(fa(a), rf * 0.5 * k)), cp, 1.2 * k, goldOr(g2, METAL)); line(cp, add(cp, mul(fa(la), 3.6 * k)), goldOr(g2, METAL_L), 1 * k); } }   // a crucible works: crucibles on arms round a central pit
-      if (g2) ring(F, rf * 1.12 * k, A(GOLD, 0.8), 1.4 * k);
-      const ch = add(F, [rf * 0.78 * k, -rf * 0.8 * k]); disc(ch, 3.4 * k + 0.9 * k, OUTLINE); disc(ch, 3.4 * k, METAL_D); disc(ch, 1.9 * k, [0.05, 0.05, 0.05, 1]); for (let q = 0; q < 4; q++) { const u = fmod(t * 0.5 + q / 4, 1); disc(add(ch, [u * 3 * k, -u * 14 * k]), (1 + u * 2.4) * k, A([0.5, 0.48, 0.46, 1], 0.55 * (1 - u))); } }
-    // ---- the Retrofits: a second crusher (top-left), the Bigger Yard (the wall, above) or a salvage crane (top edge) ----------------------------------------------------------
-    const thump = decay(t - (mm.last ?? -9), 0.35);
-    if (B.r === 0) { const p = S(-33, -28);
-      if (R === "A") { plate(p, rectPts(10, 6), METAL_L, 0, k, 1.3); const j = 2.4 + 2.6 * (1 - thump); fill(add(p, [-6 * k, 0]), [[0, -4], [j, 0], [0, 4]], STEEL, 0, k); fill(add(p, [6 * k, 0]), [[0, -4], [-j, 0], [0, 4]], STEEL, 0, k); glowDot(add(p, [0, -4.6 * k]), 0.5 * k, col); }
-      if (R === "B") { plate(p, rectPts(10, 6), METAL_D, 0, k, 1.2); for (const sx of [-1, 1]) { const q = add(p, [sx * 3.4 * k, 0]); disc(q, 3 * k, OUTLINE); disc(q, 2.6 * k, METAL_L); for (let j = 0; j < 6; j++) line(q, add(q, mul(fa(t * 5 * sx + j * Math.PI / 3), 2.5 * k)), STEEL, 0.9 * k); } }
-      if (R === "C") { plate(p, rectPts(10, 6), METAL_D, 0, k, 1.2); disc(p, 4.4 * k, OUTLINE); disc(p, 3.8 * k, METAL); for (let j = 0; j < 4; j++) { const a = t * 9 + j * Math.PI / 2; bar(p, add(p, mul(fa(a), 4.8 * k)), 1.2 * k, METAL_L); disc(add(p, mul(fa(a), 4.8 * k)), 1 * k, STEEL); } } }
-    if (B.r === 2) { const p = S(8, -41), sw = Math.sin(t * 0.8);
-      if (R === "A") { bar(S(-24, -41), S(40, -41), 2 * k, METAL_D); const hx = add(p, [sw * 12 * k, 0]); plate(hx, rectPts(2.4, 1.6), YEL, 0, k, 1); line(hx, add(hx, [0, 6 * k]), METAL_D, 0.9 * k); disc(add(hx, [0, 6 * k]), 1.6 * k, METAL_L); }
-      if (R === "B") { disc(p, 3.6 * k, OUTLINE); disc(p, 3 * k, METAL); const a = sw * 1.1, tip = add(p, mul(fa(a), 20 * k)); bar(p, tip, 2.2 * k, YEL); disc(tip, 2 * k, METAL_L); line(tip, add(tip, [0, 5 * k]), METAL_D, 0.9 * k); }
-      if (R === "C") { plate(p, rectPts(7, 3.4), METAL_L, 0, k, 1.2); const a = 0.4 + sw * 0.4, tip = add(add(p, [-3 * k, 0]), mul(fa(a), 16 * k)); bar(add(p, [-3 * k, 0]), tip, 2.2 * k, YEL); line(tip, add(tip, [0, 4 * k]), METAL_D, 0.9 * k); fill(add(tip, [0, 4 * k]), [[-1.6, 0], [1.6, 0], [0.8, 2.6], [-0.8, 2.6]], METAL_L, 0, k); for (const sx of [-1, 1]) disc(add(p, [sx * 4.4 * k, 2 * k]), 1.3 * k, METAL_D); } }
-  },
-  paths: [], retrofits: [],
-};
-
-// ---- Option tables ---------------------------------------------------------------------------------------------------------------------------------------
-const T = (a, b, c) => [["A", ...a], ["B", ...b], ["C", ...c]].map(([key, name, desc]) => ({ key, name, desc }));
-P2.paths = [
-  { name: "Passive Income", theme: "the casting strip along the bottom edge: rebuilt at every step; gold at the Reserve Bank", steps: [
-    { name: "Stamping Press", cost: 525, effect: "130 per round", options: T(["Ingot Moulds", "The casting strip is rebuilt with four ingot moulds; the channel feeds them at each payout."], ["Vault Store", "The casting strip is rebuilt as a small vault store with a round door and stacked ingots."], ["Mint Presses", "The casting strip is rebuilt with two mint presses that stamp coins at each payout."]) },
-    { name: "Vault Doors", cost: 1225, effect: "165 per round", options: T(["Ingot Moulds", "The casting strip is rebuilt with five bigger moulds."], ["Vault Store", "The vault store is rebuilt wider, with more stacked ingots."], ["Mint Presses", "The casting strip is rebuilt with three mint presses."]) },
-    { name: "Credit Mint", cost: 3850, effect: "220 per round (primary)", options: T(["Canopy Moulds", "The casting strip is rebuilt with six moulds under a canopy rail."], ["Twin Vault", "The vault store is rebuilt wider with two round doors."], ["Mint Row", "The casting strip is rebuilt with three bigger mint presses."]) },
-    { name: "Treasury Link", cost: 7000, effect: "270 per round", options: T(["Long Mould Row", "The casting strip is rebuilt with seven moulds."], ["Big Twin Vault", "The vault store is rebuilt wider again."], ["Four Presses", "The casting strip is rebuilt with four mint presses."]) },
-    { name: "Reserve Bank", cost: 27440, effect: "320 per round, plus 3% interest on banked credits at each clear (mastery)", options: T(["Gold Mould Row", "Eight moulds of gold ingots under a gold canopy; each payout adds a +3% interest tag."], ["Gold Vault Bank", "The vault store turns gold, with gold doors and ingots; each payout adds a +3% interest tag."], ["Gold Mint Row", "The four mint presses turn gold and stamp gold coins; each payout adds a +3% interest tag."]) },
-  ] },
-  { name: "Kill Income", theme: "the furnace: rebuilt at every step, hotter and bigger; the orange kill-field ring widens and wrecked enemies feed the furnace", steps: [
-    { name: "Scrap Collector", cost: 345, effect: "Enemies destroyed within 140 px pay 15% more", options: T(["Brick Furnace", "The furnace is rebuilt in brick with a hotter mouth; wrecked enemies in the field pay +15%."], ["Blast Furnace", "The furnace is rebuilt as a square blast furnace with two bellows pipes; wrecked enemies in the field pay +15%."], ["Crucible Works", "The furnace is rebuilt as a crucible works with two crucibles on arms; wrecked enemies in the field pay +15%."]) },
-    { name: "Magnet Cranes", cost: 625, effect: "+25%; 150 px", options: T(["Bigger Brick Furnace", "The furnace is rebuilt bigger."], ["Bigger Blast Furnace", "The furnace is rebuilt bigger, with three bellows pipes."], ["Three Crucibles", "The works is rebuilt bigger, with three crucibles."]) },
-    { name: "Sorting Line", cost: 2095, effect: "+35%; 170 px (primary)", options: T(["Banded Furnace", "The furnace is rebuilt bigger, with a steel band."], ["Big Blast Furnace", "The furnace is rebuilt bigger, with more slits."], ["Four Crucibles", "The works is rebuilt bigger, with four crucibles."]) },
-    { name: "Smelter", cost: 5720, effect: "+45%; 190 px", options: T(["Great Furnace", "The furnace is rebuilt bigger again."], ["Great Blast Furnace", "The furnace is rebuilt bigger again."], ["Five Crucibles", "The works is rebuilt bigger, with five crucibles."]) },
-    { name: "Reclamation Plant", cost: 28945, effect: "+60%; 210 px; bosses pay double (mastery)", options: T(["Gold Furnace", "The furnace's mouth turns molten gold, with a gold rim; the field coins turn gold."], ["Gold Blast Furnace", "The blast furnace glows molten gold, with a gold rim; the field coins turn gold."], ["Gold Crucible Works", "Six gold crucibles pour molten gold, with a gold rim; the field coins turn gold."]) },
-  ] },
-  { name: "Discounts", theme: "the supply strip down the left edge: rebuilt at every step; the blue discount ring widens and shows the percentage off", steps: [
-    { name: "Supply Depot", cost: 190, effect: "Towers within 140 px upgrade for 5% less", options: T(["Supply Chutes", "Two chutes with crates are built on the left edge; towers nearby upgrade 5% cheaper."], ["Ore Silos", "Two ore silos are built on the left edge; towers nearby upgrade 5% cheaper."], ["Rail Siding", "A short rail siding with a wagon is built on the left edge; towers nearby upgrade 5% cheaper."]) },
-    { name: "Bulk Orders", cost: 495, effect: "10% off upgrades; 150 px", options: T(["More Chutes", "Three chutes with crates."], ["More Silos", "Three ore silos."], ["Longer Siding", "A longer siding, with a faster wagon."]) },
-    { name: "Procurement Office", cost: 2035, effect: "15% off upgrades, 5% off builds; 160 px (primary)", options: T(["Four Chutes", "Four chutes with crates."], ["Four Silos", "Four ore silos."], ["Long Siding", "A long siding, with a faster wagon."]) },
-    { name: "Freight Rail", cost: 3865, effect: "20% off upgrades; 175 px", options: T(["Five Chutes", "Five chutes with crates."], ["Five Silos", "Five ore silos."], ["Freight Siding", "A freight siding, with a faster wagon."]) },
-    { name: "Forward Command", cost: 20935, effect: "25% off upgrades, 10% off builds; 190 px; towers in the field sell back for everything spent on them (mastery)", options: T(["Gold-Framed Chutes", "Six chutes with a gold frame and a gold light."], ["Gold-Framed Silos", "Six silos with gold hearts inside a gold frame."], ["Gold-Framed Siding", "A long siding with a gold frame and a gold wagon."]) },
-  ] },
-];
-P2.retrofits = [
-  { name: "Second Crusher", cost: 525, effect: "+30 income per round (stacks with the Passive Income path)", options: T(["Jaw Crusher", "A second crusher with steel jaws that close at each payout, in the top-left corner."], ["Roller Crusher", "Two spinning rollers in the top-left corner."], ["Hammer Mill", "A spinning hammer mill in the top-left corner."]) },
-  { name: "Bigger Yard", cost: 260, effect: "+30 px to its fields (stacks with the Kill and Discount paths)", options: T(["Slag Wall", "A second, wider wall of slag brick with a glowing seam surrounds the works."], ["Pipe Fence", "A second, wider steel fence with posts surrounds the works."], ["Bollard Fence", "A second, wider rail with round bollards surrounds the works."]) },
-  { name: "Salvage Crane", cost: 260, effect: "Towers sold in its field refund 15% more", options: T(["Overhead Gantry", "An overhead gantry beam with a trolley and hook across the top edge."], ["Jib Crane", "A jib crane with a swinging boom on the top edge."], ["Crane Truck", "A crane truck with a swinging boom on the top edge."]) },
-];
+const DEFAULTS = { scrap: { look: "A", anim: "B" } };
 
 // ---- Tower art engine: previews towers aiming and firing at enemies on a lane --------------------------
 // Data (defined before this): PAGE {title, key, store}, TOWERS [...], DEFAULTS {id: {look, anim}}.
@@ -754,128 +665,6 @@ function boot() {
   requestAnimationFrame(tick);
 }
 if (typeof document !== "undefined" && typeof NO_BOOT === "undefined") boot(); // the second-pass pages reuse makeView without this page
-
-// ---- Tower art second pass: per-step path looks and Retrofit looks on top of a confirmed base design --------
-// Data (defined before this): PAGE {title, store}, P2 {tower, look, anim, intro, paths: [{name, theme, steps: [{name, cost,
-// effect, options: [layer x3]}] x5}], retrofits: [{name, cost, effect, options: [layer x3]}], uncapped?}.
-// A layer: {key, name, desc, under?(c, aim, s, fx, t, col, info), over?(...), muzzles?, targets?, crit?, shot?, shotFx?, impactFx?}.
-//   under/over draw before/after the base model; muzzles replace the firing points (the last layer that sets them wins);
-//   targets = enemies it fires at at once; crit = crit chance shown as a gold burst; shot replaces the base shot (last wins);
-//   shotFx/impactFx draw on top of every shot/impact.
-
-const TW = BASE.TOWERS.find((x) => x.id === P2.tower);
-const BASE_LOOK = TW.looks.find((l) => l.key === P2.look), BASE_ANIM = TW.anims.find((a) => a.key === P2.anim);
-let S2 = {};
-try { S2 = JSON.parse(localStorage.getItem(PAGE.store) || "{}") || {}; } catch (e) { S2 = {}; }
-S2.picks ||= { ...(P2.picks || {}) }; S2.notes ||= {}; S2.build ||= { lv: [0, 0, 0], r: -1 };
-function save2() { try { localStorage.setItem(PAGE.store, JSON.stringify(S2)); } catch (e) { /* storage unavailable */ } }
-const STAGE = ["1", "2", "3", "4", "M"];
-const optOf = (list, id) => list.find((o) => o.key === S2.picks[id]) || list[0];
-
-// The layers for path levels lv[] and Retrofit r (-1 none); `over` swaps one stage for a candidate option.
-function layersFor(lv, r, swap) {
-  const out = [], keys = {}; out.build = { lv: lv.slice(), r, keys, key: (id) => keys[id] || "A" };
-  P2.paths.forEach((pa, pi) => { for (let k = 0; k < lv[pi]; k++) { const id = "p" + pi + "s" + k, o = swap && swap.id === id ? swap.opt : optOf(pa.steps[k].options, id); keys[id] = o.key; out.push(o); } });
-  if (r >= 0) { const id = "r" + r, o = swap && swap.id === id ? swap.opt : optOf(P2.retrofits[r].options, id); keys[id] = o.key; out.push(o); }
-  return out;
-}
-const GOLD_C = [1, 0.78, 0.3, 1];
-function critMark(p, v, s) { if (v >= 1) return; glowDot(p, s * 0.1 * (1 - v), GOLD_C); for (let i = 0; i < 6; i++) { const d = fa(i * TAU / 6 + 0.3); line(add(p, mul(d, s * (0.06 + 0.2 * v))), add(p, mul(d, s * (0.12 + 0.24 * v))), A(GOLD_C, 1 - v), 1.4); } }
-function compose(layers) {
-  let muzzles = BASE_LOOK.muzzles, targets = 1, crit = 0, shot = null;
-  for (const L of layers) { if (L.muzzles) muzzles = L.muzzles; if (L.targets) targets = Math.max(targets, L.targets); if (L.crit) crit = Math.max(crit, L.crit); if (L.shot) shot = L.shot; }
-  const B = layers.build || { lv: [0, 0, 0], r: -1 };
-  const md = P2.mods ? P2.mods(B) : null;
-  if (md) { if (md.targets) targets = md.targets; if (md.crit != null) crit = md.crit; if (md.shot) shot = md.shot; }
-  const look = { ...BASE_LOOK, muzzles, key: BASE_LOOK.key + layers.map((L) => L.key).join(""),
-    draw(c, aim, s, fx, t, col, info) { if (P2.model) return P2.model(c, aim, s, fx, t, col, info, B);
-      for (const L of layers) if (L.under) L.under(c, aim, s, fx, t, col, info);
-      BASE_LOOK.draw.call(this, c, aim, s, fx, t, col, info); for (const L of layers) if (L.over) L.over(c, aim, s, fx, t, col, info); } };
-  if (P2.plane) look.plane = (p, h, s, fx, t, col, O) => P2.plane(B, p, h, s, fx, t, col, O);
-  if (P2.door) look.door = (p, h, s, O) => P2.door(B, p, h, s, O);
-  if (P2.orbitR) look.orbitR = (r) => P2.orbitR(B, r);
-  if (P2.muzzleAt) look.muzzleAt = (m, k, c, aim, s, info) => P2.muzzleAt(B, m, k, c, aim, s, info);
-  const b = BASE_ANIM, every = crit > 0 ? Math.max(2, Math.round(1 / crit)) : 0;
-  const anim = { ...b, key: b.key + targets, burst: (b.burst || 1) * targets, multi: targets > 1 || b.multi, gap: targets > 1 ? 0.02 : b.gap,
-    ...(md && md.period ? { period: md.period } : {}), ...(md && md.flight ? { flight: md.flight } : {}), ...(md && md.persist ? { persist: md.persist } : {}), ...(md && md.burst ? { burst: md.burst, gap: md.gap ?? b.gap, multi: md.multi ?? false } : {}),
-    shot: (f, to, u, s, col, k, t, info) => { (shot || b.shot)(f, to, u, s, col, k, t, info); for (const L of layers) if (L.shotFx) L.shotFx(f, to, u, s, col, k, t, info); if (md && md.shotFx) md.shotFx(f, to, u, s, col, k, t, info); },
-    impact: (to, v, s, col, info) => { if (md && md.impact) md.impact(to, v, s, col, info); else if (b.impact) b.impact(to, v, s, col, info); for (const L of layers) if (L.impactFx) L.impactFx(to, v, s, col, info);
-      if (md && md.impactFx) md.impactFx(to, v, s, col, info);
-      if (every && info && info.sh && info.sh.m % every === 0) critMark(to, v, s); } };
-  return { look, anim };
-}
-function clampBuild(lv, changed) { // two paths at most; once one reaches 3, the other stops at 2
-  if (P2.uncapped) return;
-  const others = [0, 1, 2].filter((i) => i !== changed);
-  if (others.filter((i) => lv[i] > 0).length >= 2) lv[changed] = 0;
-  else if (others.some((i) => lv[i] >= 3)) lv[changed] = Math.min(lv[changed], 2);
-}
-
-function card(id, opt, lv, r, root) {
-  const p = el("div", "panel"), cv = cardCanvas(260, 180);
-  const comp = () => compose(layersFor(lv, r, { id, opt }));
-  register(cv, TW, () => comp().look, () => comp().anim, P2.sCard || 120);
-  p.appendChild(cv); p.appendChild(el("div", "meta", `<span class="key">${opt.key}</span><b>${opt.name}</b>`)); p.appendChild(el("div", "desc", opt.desc));
-  const b = el("button", "pick"); const sync = () => { const on = S2.picks[id] === opt.key; b.classList.toggle("on", on); b.textContent = (on ? "Picked " : "Pick ") + opt.key; };
-  b.onclick = () => { S2.picks[id] = S2.picks[id] === opt.key ? null : opt.key; save2(); refresh2(); }; b._sync = sync; sync(); p.appendChild(b); root.appendChild(p);
-}
-function notesBox(key, label, root) { const lab = el("label", "notes", label); const ta = document.createElement("textarea"); ta.value = S2.notes[key] || "";
-  ta.oninput = () => { S2.notes[key] = ta.value; save2(); summary2(); }; lab.appendChild(ta); root.appendChild(lab); }
-
-function buildPreview(root) {
-  const box = el("section", "build"), cv = cardCanvas(560, 360), ctrls = el("div", "ctrls");
-  register(cv, TW, () => compose(layersFor(S2.build.lv, S2.build.r)).look, () => compose(layersFor(S2.build.lv, S2.build.r)).anim, P2.sBuild || 210);
-  box.appendChild(cv); box.appendChild(ctrls);
-  ctrls.appendChild(el("div", "combo-head", "Build preview"));
-  const roles = [];
-  P2.paths.forEach((pa, pi) => { const c = el("div", "ctrl"), lab = el("label", "", ""), inp = document.createElement("input"), role = el("span", "role", "");
-    inp.type = "range"; inp.min = 0; inp.max = 5; inp.step = 1; inp.value = S2.build.lv[pi];
-    const show = () => { const v = S2.build.lv[pi]; lab.textContent = `Path ${pi + 1}: ${pa.name}: ${v === 0 ? "none" : v === 5 ? "mastery" : "step " + v}`; inp.value = v; };
-    inp.oninput = () => { S2.build.lv[pi] = +inp.value; clampBuild(S2.build.lv, pi); save2(); roles.forEach((f) => f()); };
-    roles.push(() => { show(); const lv = S2.build.lv; role.textContent = P2.uncapped ? "" : lv[pi] >= 3 ? "primary" : lv[pi] > 0 && lv.some((x, i) => i !== pi && x >= 3) ? "secondary (max 2)" : ""; });
-    c.appendChild(lab); c.appendChild(inp); c.appendChild(role); ctrls.appendChild(c); });
-  const rc = el("div", "ctrl"), sel = document.createElement("select"); rc.appendChild(el("label", "", "Retrofit"));
-  [["-1", "None"], ...P2.retrofits.map((rf, i) => [String(i), rf.name])].forEach(([v, n]) => { const o = document.createElement("option"); o.value = v; o.textContent = n; sel.appendChild(o); });
-  sel.value = String(S2.build.r); sel.onchange = () => { S2.build.r = +sel.value; save2(); }; rc.appendChild(sel); ctrls.appendChild(rc);
-  ctrls.appendChild(el("div", "desc", "Unpicked steps show option A."));
-  roles.forEach((f) => f()); root.appendChild(box);
-}
-
-function boot2() {
-  const root = document.getElementById("towers");
-  const head = el("section", "enemy");
-  head.appendChild(el("div", "enemy-head", `<span class="num">${TW.num}</span><h2>${TW.name}</h2><span class="tags">${TW.cls} · ${TW.weapon} · base look ${BASE_LOOK.key} ${BASE_LOOK.name}, animation ${BASE_ANIM.key} ${BASE_ANIM.name}</span>`));
-  head.appendChild(el("p", "desc", P2.intro)); root.appendChild(head);
-  buildPreview(root);
-  P2.paths.forEach((pa, pi) => { const sec = el("section", "enemy");
-    sec.appendChild(el("div", "enemy-head", `<h2>Path ${pi + 1}: ${pa.name}</h2><span class="tags">${pa.theme}</span>`));
-    pa.steps.forEach((st, k) => { const row = el("div", "stage"), lv = [0, 0, 0]; lv[pi] = k + 1;
-      row.appendChild(el("div", "stage-head", `<span class="lvl">${STAGE[k]}</span><b>${st.name}</b><span class="cost">${st.cost}</span><span class="eff">${st.effect}</span>`));
-      const g = el("div", "grid3"); st.options.forEach((o) => card("p" + pi + "s" + k, o, lv, -1, g)); row.appendChild(g); sec.appendChild(row); });
-    notesBox("p" + pi, `Path ${pi + 1} notes`, sec); root.appendChild(sec); });
-  const rs = el("section", "enemy"); rs.appendChild(el("div", "enemy-head", `<h2>Retrofit</h2><span class="tags">the player picks one of three</span>`));
-  P2.retrofits.forEach((rf, ri) => { const row = el("div", "stage");
-    row.appendChild(el("div", "stage-head", `<span class="lvl">R</span><b>${rf.name}</b><span class="cost">${rf.cost}</span><span class="eff">${rf.effect}</span>`));
-    const g = el("div", "grid3"); rf.options.forEach((o) => card("r" + ri, o, [0, 0, 0], ri, g)); row.appendChild(g); rs.appendChild(row); });
-  notesBox("r", "Retrofit notes", rs); root.appendChild(rs);
-  refresh2();
-  document.getElementById("copy").onclick = () => { const ta = document.getElementById("summary"), b = document.getElementById("copy");
-    const done = () => { b.textContent = "Copied"; setTimeout(() => { b.textContent = "Copy picks and notes"; }, 1500); };
-    try { navigator.clipboard.writeText(ta.value).then(done, () => ta.select()); } catch (e) { ta.select(); } };
-  document.getElementById("clear").onclick = () => { if (!confirm("Clear this page's picks and notes?")) return; S2 = { picks: {}, notes: {}, build: { lv: [0, 0, 0], r: -1 } }; save2(); location.reload(); };
-  const t0 = performance.now();
-  const tick = () => { const t = (performance.now() - t0) / 1000; for (const v of views) if (v.visible) v.frame(t); requestAnimationFrame(tick); };
-  requestAnimationFrame(tick);
-}
-function refresh2() { document.querySelectorAll("button.pick").forEach((b) => b._sync && b._sync()); summary2(); }
-function summary2() {
-  const out = [PAGE.title], nt = (k) => (S2.notes[k] || "").trim().replace(/\s+/g, " ");
-  P2.paths.forEach((pa, pi) => { let l = `Path ${pi + 1} ${pa.name}: ` + pa.steps.map((st, k) => `${STAGE[k]} ${S2.picks["p" + pi + "s" + k] || "-"}`).join(", ");
-    if (nt("p" + pi)) l += "; notes: " + nt("p" + pi); out.push(l); });
-  let r = "Retrofits: " + P2.retrofits.map((rf, i) => `${rf.name} ${S2.picks["r" + i] || "-"}`).join(", "); if (nt("r")) r += "; notes: " + nt("r"); out.push(r);
-  const ta = document.getElementById("summary"); if (ta) { ta.value = out.join("\n"); ta.rows = out.length + 1; }
-}
-if (typeof document !== "undefined") boot2();
 
 </script>
 </body>
