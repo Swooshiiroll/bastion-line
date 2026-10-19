@@ -740,7 +740,7 @@ function drawMine(B, p, k, t, col, blink, mini, onLauncher) {
 // ---- The agent: tosses mines onto random spots along the track in range; they arm, blink and go off under a ground enemy ----
 // The launcher a mine leaves from: with Twin Press A two identical launchers either side of the centre take turns (m.n is the mine being thrown).
 function tossFrom(B, m, info, s) { const o = Kp(B, 1, 1), kk = G(s);
-  if (o === "A") { const yc = m.n % 2 ? -3.8 : 3.8; m.lastYc = yc; return add(info.c, rot([s * 0.3, yc * kk], info.aim)); }
+  if (o === "A") { const yc = m.n % 2 ? -4.5 : 4.5; m.lastYc = yc; return add(info.c, rot([s * 0.3, yc * kk], info.aim)); }
   m.lastYc = 0;
   if (B.lv[1] >= 2 && m.n % 2) return o === "B" ? add(info.c, mul(fa(info.aim + 0.45), s * 0.3)) : add(info.c, rot([s * 0.3, -6.4 * kk], info.aim));
   return add(info.c, mul(fa(info.aim), s * 0.3)); }
@@ -808,7 +808,7 @@ const P2 = {
     if (P4 === "C") plate(D(-12, -7.6), rectPts(2.2, 1.4), AMMO, aim, k, 0.9);
     // -- The launchers: one pair of rails centred on the circle, or (Twin Press, side by side) two IDENTICAL pairs set symmetrically either
     // side of the centre; the mines alternate between them and the one that fired glows. Longer with Range, with the gear of each step.
-    const twinA = S2 === "A", LA = twinA ? [3.8, -3.8] : [0], hf = twinA ? 1.5 : 2.6;
+    const twinA = S2 === "A", LA = twinA ? [4.5, -4.5] : [0], hf = 2.6; // every launcher keeps the single launcher's rail size and spacing (owner)
     LA.forEach((yc) => { const act = twinA ? (mm.lastYc === yc ? fl : 0) : fl, ry = [yc - hf, yc + hf];
       for (const y of ry) bar(D(-2, y), D(L, y), 1.8 * k, RM ? mix(METAL_L, GOLD, 0.5) : METAL_L);
       for (let x = 3; x < L - 2; x += 6) bar(D(x, yc - hf - 1.4), D(x, yc + hf + 1.4), 1.4 * k, dk(col, 0.2)); // a band every 6 px, so a longer launcher carries more bands
@@ -832,7 +832,7 @@ const P2 = {
     if (S2 === "B") { const D2 = (x, y) => P(c, aim + 0.45, k, x, y); for (const y of [-2.6, 2.6]) bar(D2(-2, y), D2(L * 0.92, y), 1.6 * k, METAL_L); strip(D2(0, 0), D2(L * 0.92, 0), 0.5 * k, A(col, 0.2 + 0.6 * fl)); }
     if (S2 === "C") { bar(D(-2, -6.4), D(L, -6.4), 2.4 * k, METAL_L); strip(D(0, -6.4), D(L, -6.4), 0.5 * k, A(col, 0.2 + 0.6 * fl)); bar(D(2, -6.4), D(2, -2.6), 1.1 * k, STEEL); }
     // -- The mine ready on the rails, and the hub ----------------------------------------------------------------------------------
-    const nextYc = twinA ? (((mm.n || 0) + 1) % 2 ? -3.8 : 3.8) : 0;
+    const nextYc = twinA ? (((mm.n || 0) + 1) % 2 ? -4.5 : 4.5) : 0;
     if (since > 0.5) drawMine(B, D(6, nextYc), k * 0.7, t, col, false, false, true);
     orb(c, 3.8 * k, METAL); ring(c, 3.8 * k, OUTLINE, 1 * k); glowDot(c, 1.8 * k, PM ? GOLD : col); // the central eye
   },

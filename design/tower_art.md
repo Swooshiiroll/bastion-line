@@ -946,6 +946,10 @@ left unpicked (the length note repeated, and was already applied last round).
   the mine waiting on the rails.
 - Long Arm shows its three options again for a pick.
 
+**Fix (owner: "keep the spacing and size of the rails for each launcher the same with the twin press"):** with the Side-by-Side Twin Press each launcher
+now has exactly the single launcher's rails (the same size, the same 5.2 px spacing, the same bands); the two launchers sit 9 px apart,
+symmetric about the centre, instead of the narrower pairs I used before.
+
 ## Open questions
 
 1. **Second pass, Mine Layer** (tower 11, round 5): pick the Long Arm; confirm. Then towers 12-20 (next: Chemical Plant).
