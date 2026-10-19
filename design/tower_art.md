@@ -385,7 +385,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 8 | Tesla Tower | `design/tower_art_p2_08_tesla.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 9 | Drone Bay | `design/tower_art_p2_09_drones.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 10 | CAS Gunship | `design/tower_art_p2_10_cas.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
-| 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | Round 8: Heavier Charge has three new looks; awaiting its pick |
+| 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | Round 9: all picks drawn; awaiting confirm |
 
 ### Gun Turret (second pass)
 
@@ -967,6 +967,9 @@ Wider Charge. So: the clamps (and the other step-1 parts on the launcher and mou
 canister itself and inside its outline: a thick dark rim (A), two steel weight plates (B) and a dark charge core (C); the mines are still a
 size bigger. Wider Charge is back to your wide flange (B), shown only on the thrown mine, never on the launcher.
 
+**Picks (owner, round 8):** Heavier Charge A (Thick Rim); the rest as before (Power 2 B Wide Flange, 3 A, 4 A, M A; Production C, A, A, A, A; Range A, A, B, A, C;
+Retrofits Adhesive Mines A, Shaped Charges A, Long Arm A). No notes. **Round 9:** every stage is picked; the page shows only the picks.
+
 ## Open questions
 
-1. **Second pass, Mine Layer** (tower 11, round 8): pick Heavier Charge; confirm. Then towers 12-20 (next: Chemical Plant).
+1. **Second pass, Mine Layer** (tower 11, round 9): confirm. Then towers 12-20 (next: Chemical Plant).
