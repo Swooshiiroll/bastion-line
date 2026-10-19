@@ -388,7 +388,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 13 | Boost Tower | `design/tower_art_p2_13_boost.html` | **Confirmed** (owner, 2026-10-19: "finished") |
-| 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | Round 4: smaller turrets, mastery recolours only; awaiting the mastery pick |
+| 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | Round 5: turrets smaller and inside the deck, dish thinner; awaiting the mastery pick |
 
 ### Gun Turret (second pass)
 
@@ -1071,6 +1071,8 @@ Base: look A Dish Mast, animation B Sweep Beam (the sweep follows the dish). Eve
 
 **Round 4 (owner notes):** "Shrink the turrets down a bit and remove the squares from underneath them. Only change the blue on them to gold for the mastery". The tracking turrets are smaller, nothing sits under them (no citadel plate, base disc or obelisk), and at the mastery only the blue accents (glow, tether, lens ring) turn gold; the body stays metal. The three mastery options are now a gold wall joining the four turrets, a sweeping gold lamp, or a twin barrel.
 
+**Round 5 (owner notes):** "Shrink them a bit more so they fit cleanly on the tower, and make the radar dish thinner". The turrets (and lens rings, shields, barrels) are smaller and the corner slots are pulled in so they sit inside the deck; every dish stroke is thinner (outline and body).
+
 ## Open questions
 
-1. **Second pass, Radar Tower** (tower 14, round 4): pick the Total Exposure mastery (Path 3). Then towers 15-20 (next: Cryo Tower).
+1. **Second pass, Radar Tower** (tower 14, round 5): pick the Total Exposure mastery (Path 3). Then towers 15-20 (next: Cryo Tower).
