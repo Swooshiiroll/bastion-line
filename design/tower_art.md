@@ -386,7 +386,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 9 | Drone Bay | `design/tower_art_p2_09_drones.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 10 | CAS Gunship | `design/tower_art_p2_10_cas.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
-| 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | Round 3: picks drawn, notes applied; awaiting High-Flow Pump pick |
+| 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | Round 4: all picks drawn, twin-sprayer fix; awaiting confirm |
 
 ### Gun Turret (second pass)
 
@@ -1012,6 +1012,10 @@ changes apply to all columns." "Change the pump house design."
   into the still (it was a box beside the still).
 - **High-Flow Pump** (Speed step 4) was left unpicked, so its three options show again.
 
+**Notes (owner, round 3 paste):** "The Twin turret looks strange with the twin valves." High-Flow Pump A (the Pump Hall) is now picked.
+- With Twin Valves B (twin stills) the two independent sprayers grow from the two stills, one each (a gold ring marks each), instead of from hubs between them, so
+  nothing fights the stills. The Pump Hall (High-Flow Pump A) becomes the base plate under both stills with a piston for each.
+
 ## Open questions
 
-1. **Second pass, Chemical Plant** (tower 12, round 3): pick High-Flow Pump; confirm. Then towers 13-20 (next: Boost Tower).
+1. **Second pass, Chemical Plant** (tower 12, round 4): confirm. Then towers 13-20 (next: Boost Tower).
