@@ -390,7 +390,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 13 | Boost Tower | `design/tower_art_p2_13_boost.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 15 | Cryo Tower | `design/tower_art_p2_15_cryo.html` | **Confirmed** (owner, 2026-10-19: "Finished"; Deep Cold C Frost Collar) |
-| 16 | Shockwave Generator | `design/tower_art_p2_16_shock.html` | Round 7: thin band, smooth ripple, chaos, elastic stretch; awaiting confirm |
+| 16 | Shockwave Generator | `design/tower_art_p2_16_shock.html` | Round 8: band expands on a blast; awaiting confirm |
 
 ### Gun Turret (second pass)
 
@@ -1142,6 +1142,8 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
 
 **Round 7 (owner notes):** "Keep the band a thin line. ripple effects should stay gentle and smooth. Sporadic should introduce chaos into the ripple effect. Make the stretch effect stronger and more elastic". The Path 3 band is a thin line (about 1 px, with only a faint halo); the ripple is two gentle, smooth sine lobes; the sporadic steps (T4 slightly, the mastery strongly) add chaos by mixing five harmonics that drift independently; and every burst stretches and bends the band harder (about 1.5 times the old strength), elastically: it overshoots and rings back like a spring over about a second.
 
+**Round 8 (owner note):** "The bands should expand on a blast". On every blast the Path 3 band expands outward with the wave (quickly, over about 0.3 s, by 2.5 px at the first step up to 12 px at the mastery), then springs back and rings, overshooting; the bend and stretch distortions from round 7 stay.
+
 ## Open questions
 
-1. **Second pass, Shockwave Generator** (tower 16, round 7): confirm. Then towers 17-20 (next: Scrapyard).
+1. **Second pass, Shockwave Generator** (tower 16, round 8): confirm. Then towers 17-20 (next: Scrapyard).
