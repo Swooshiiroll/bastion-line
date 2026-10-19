@@ -388,7 +388,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 13 | Boost Tower | `design/tower_art_p2_13_boost.html` | **Confirmed** (owner, 2026-10-19: "finished") |
-| 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | Round 8: all picks drawn, spars and antennae grey; awaiting confirm |
+| 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | Round 9: antenna lights gold, scan lines from the lights; awaiting confirm |
 
 ### Gun Turret (second pass)
 
@@ -1080,6 +1080,8 @@ Base: look A Dish Mast, animation B Sweep Beam (the sweep follows the dish). Eve
 
 **Round 8 (owner notes):** "Keep the spars holding the dishes, and the antennae grey. The bodies for the curved arrays are still gold. The second antenna light is not gold". The spars and the antenna (feed) arms are grey on both dishes (only the dishes are gold); the curved arrays now show small gold lamps on a grey body (the big lamp halos read as a gold body); the second dish's light is drawn on top of everything, in gold.
 
+**Round 9 (owner notes):** "The second light is still not gold. Also, make the scan lines come from the antenna light instead of the center of the tower". With Constant Track, both antenna lights are gold (the first dish's light stayed teal when no emitter was fitted, which is what showed as not gold), and each dish's scan line starts at its antenna light and runs out to the range.
+
 ## Open questions
 
-1. **Second pass, Radar Tower** (tower 14, round 8): confirm. Then towers 15-20 (next: Cryo Tower).
+1. **Second pass, Radar Tower** (tower 14, round 9): confirm. Then towers 15-20 (next: Cryo Tower).
