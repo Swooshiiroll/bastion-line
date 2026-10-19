@@ -385,7 +385,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 8 | Tesla Tower | `design/tower_art_p2_08_tesla.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 9 | Drone Bay | `design/tower_art_p2_09_drones.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 10 | CAS Gunship | `design/tower_art_p2_10_cas.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
-| 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | Round 9: all picks drawn; awaiting confirm |
+| 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 
 ### Gun Turret (second pass)
 
@@ -972,4 +972,4 @@ Retrofits Adhesive Mines A, Shaped Charges A, Long Arm A). No notes. **Round 9:*
 
 ## Open questions
 
-1. **Second pass, Mine Layer** (tower 11, round 9): confirm. Then towers 12-20 (next: Chemical Plant).
+1. **Second pass, Chemical Plant** (tower 12): round 1 page being built. Then towers 13-20.
