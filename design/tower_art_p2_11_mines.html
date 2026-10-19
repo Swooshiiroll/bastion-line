@@ -65,7 +65,7 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Tower rework · Tower art · second pass · tower 11 of 20 · round 3</div>
+    <div class="eyebrow">Bastion Line · Tower rework · Tower art · second pass · tower 11 of 20 · round 4</div>
     <h1>Tower art: Mine Layer paths and Retrofits</h1>
     <p class="note">Second pass for one tower: <b>every upgrade step and mastery</b> on each path, and each <b>Retrofit</b>, adds or changes a detail on the confirmed model. Each card shows the model with that path's earlier steps (your picks, or option A until you pick) plus the candidate. Pick one of three per step, add notes per path, then <b>Copy picks and notes</b>.</p>
     <ul class="rules">
@@ -706,7 +706,7 @@ const NO_BOOT = true;
 // stacking (the carpet rule): Conveyor Feed adds to Quick Assembly, Shaped Charges to Heavier Charge, Long Arm to Longer Arm.
 // Geometry (game px): a round mount r 10 with a magazine of canisters behind it and two rails ahead (x -2 to 15); a mine
 // is a squat canister (r 3.6) with a glowing band that blinks while it waits on the track.
-const PAGE = { title: "Mine Layer: paths and Retrofits (second pass)", store: "bl-tower-art-p2-mines-r3" };
+const PAGE = { title: "Mine Layer: paths and Retrofits (second pass)", store: "bl-tower-art-p2-mines-r4" };
 const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], RED = [0.85, 0.2, 0.18, 1], YEL = [1, 0.85, 0.2, 1], ORANGE = [1, 0.55, 0.2, 1];
 const rnd2 = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
 const Kp = (B, pi, k) => (B.lv[pi] > k ? B.key("p" + pi + "s" + k) : null);
@@ -718,7 +718,7 @@ const gapOf = (B) => Math.max(0.4, GAP[B.lv[1]] - (B.r === 0 ? 0.17 : 0));      
 const capOf = (B) => [6, 7, 8, 9, 10, 12][B.lv[1]] + (B.r === 0 ? 1 : 0);          // the preview's cap (the game's is 20 to 45)
 const BLAST = [40, 40, 50, 50, 60, 65];                                            // blast px by Power level
 const RANGE = [120, 140, 160, 190, 220, 260];
-const railExt = (B) => [0, 2, 4, 7, 10, 14][B.lv[2]] + (B.r === 2 ? 3 : 0);
+const railExt = (B) => [0, 3, 6, 10, 14, 19][B.lv[2]] + (B.r === 2 ? 3 : 0); // the rails simply get longer (owner)
 
 // ---- The mine: a canister whose look follows the Power steps and the Shaped Charges Retrofit -----------------------------
 function drawMine(B, p, k, t, col, blink, mini) {
@@ -736,12 +736,18 @@ function drawMine(B, p, k, t, col, blink, mini) {
   if (blink) glowDot(p, 1.2 * k * z, A(PM ? GOLD : col, 1)); }
 
 // ---- The agent: tosses mines onto random spots along the track in range; they arm, blink and go off under a ground enemy ----
+// The launcher a mine leaves from: with Twin Press A two identical launchers either side of the centre take turns (m.n is the mine being thrown).
+function tossFrom(B, m, info, s) { const o = Kp(B, 1, 1), kk = G(s);
+  if (o === "A") { const yc = m.n % 2 ? -3.8 : 3.8; m.lastYc = yc; return add(info.c, rot([s * 0.3, yc * kk], info.aim)); }
+  m.lastYc = 0;
+  if (B.lv[1] >= 2 && m.n % 2) return o === "B" ? add(info.c, mul(fa(info.aim + 0.45), s * 0.3)) : add(info.c, rot([s * 0.3, -6.4 * kk], info.aim));
+  return add(info.c, mul(fa(info.aim), s * 0.3)); }
 function mineAgent(B) { return (m, t, info, s, col) => { const k = G(s), laneY = info.H * 0.8, cap = capOf(B), gap = gapOf(B), PM = Kp(B, 0, 4), P2 = Kp(B, 0, 1), P4 = Kp(B, 0, 3), blastPx = BLAST[B.lv[0]];
   if (!m.mines) { m.mines = []; m.lastToss = t - 1; m.n = 0; }
   const R = (RANGE[B.lv[2]] + (B.r === 2 ? 20 : 0)) / 48 * s * 0.55;
   const pick = () => { const x = Math.max(s * 0.25, Math.min(info.W - s * 0.25, info.c[0] + (rnd2(m.n * 3.7 + 1.1) * 2 - 1) * R + R * 0.4)); return [x, laneY + (rnd2(m.n * 5.3 + 2.7) - 0.5) * s * 0.3]; };
   if (!m.next) m.next = pick(); m.aimAt = m.next;
-  if (t - m.lastToss >= gap && m.mines.filter((q) => !q.boom).length < cap) { m.n++; m.mines.push({ to: m.next, t0: t, from: (B.lv[1] >= 2 && m.n % 2) ? (Kp(B, 1, 1) === "B" ? add(info.c, mul(fa(info.aim + 0.45), s * 0.3)) : add(info.c, rot([s * 0.3, (Kp(B, 1, 1) === "C" ? -6.4 : 7.8) * G(s)], info.aim))) : add(info.c, mul(fa(info.aim), s * 0.3)), n: m.n }); m.lastToss = t; m.next = pick(); }
+  if (t - m.lastToss >= gap && m.mines.filter((q) => !q.boom).length < cap) { m.n++; m.mines.push({ to: m.next, t0: t, from: tossFrom(B, m, info, s), n: m.n }); m.lastToss = t; m.next = pick(); }
   for (const q of m.mines) { const age = t - q.t0;
     if (q.boom) { const v = (t - q.boom) / 0.6, size = 0.3 * blastPx / 40;
       blast(q.to, v, s, PM ? GOLD : col, size); if (P2) ring(q.to, s * size * (0.8 + v), A(PM ? GOLD : col, 0.5 * (1 - v)), 1);
@@ -779,15 +785,17 @@ const P2 = {
       if (kind === "gantry") for (let i = 1; i < 4; i++) { const q = lerp(from, c, i / 4.4), o = orth(norm(sub(c, from))); line(add(q, mul(o, 2.4 * k)), add(q, mul(o, -2.4 * k)), METAL_L, 1.1 * k); }
       if (kind === "roller") for (let i = 1; i < 8; i++) disc(lerp(from, c, i / 8.6), 1 * k, STEEL);
       for (let i = 0; i < 4; i++) { const u = fmod(t * 0.45 + i / 4, 1); if (u < 0.82) drawMine(B, lerp(from, c, u), k * 0.5, t, col, false, true); } };
-    if (S3) beltIn(S(-15, 10), SM === "A" ? GOLD : METAL_D, S3 === "B" ? "gantry" : S3 === "C" ? "roller" : "belt");
-    else if (SM === "A") beltIn(S(-15, 10), GOLD, "belt");
-    if (S4 === "B") beltIn(S(-15, -10), METAL_D, "belt");
     if (S4 === "C") for (let i = 0; i < 6; i++) { const a = Math.PI * 0.55 + i * 0.32; glowDot(add(c, mul(fa(a), 10.6 * k)), 0.4 * k, A(ORANGE, 0.4 + 0.5 * Math.sin(t * 6 + i))); }
     if (SM === "B") for (const x of [-11, -6]) plate(S(x, -9), rectPts(2.2, 1.8), GOLD, 0, k, 1);
     if (SM === "C") plate(S(-13, 6), rectPts(2.4, 2.4), GOLD, 0, k, 1);
     // -- The mount and the magazine (a stack of canisters behind it; one more column with each Production step) ---------------
     disc(c, 10 * k, OUTLINE); disc(c, 9.2 * k, PM === "C" ? mix(METAL, GOLD, 0.3) : METAL); if (P1 === "A") for (const rr of [9.6, 7.6]) ring(c, rr * k, METAL_L, 0.9 * k); if (PM === "C") ring(c, 9.4 * k, GOLD, 1.2 * k);
-    if (B.lv[1] >= 1) { const w = 0.5 + 0.4 * B.lv[1] + (S4 === "A" ? 2.2 : 0); for (let i = 0; i < 16; i++) { const a = i * TAU / 16 + t * w; line(add(c, mul(fa(a), 8.3 * k)), add(c, mul(fa(a), 9.3 * k)), A(PM ? GOLD : METAL_L, 0.85), 0.8 * k); } }
+    // The belts run in over the mount and end at the launcher in the centre (owner)
+    if (S3) beltIn(S(-15, 10), SM === "A" ? GOLD : METAL_D, S3 === "B" ? "gantry" : S3 === "C" ? "roller" : "belt");
+    else if (SM === "A") beltIn(S(-15, 10), GOLD, "belt");
+    if (S4 === "B") beltIn(S(-15, -10), METAL_D, "belt");
+
+    if (B.lv[1] >= 4) { const w = 0.8 + 0.5 * (B.lv[1] - 3) + (S4 === "A" ? 2.2 : 0); for (let i = 0; i < 16; i++) { const a = i * TAU / 16 + t * w; line(add(c, mul(fa(a), 8.3 * k)), add(c, mul(fa(a), 9.3 * k)), A(PM ? GOLD : METAL_L, 0.85), 0.8 * k); } }
     if (S4 === "A") for (const a of [Math.PI * 0.62, Math.PI * 1.38]) { const q = add(c, mul(fa(a), 10.4 * k)); plate(q, rectPts(1.8, 1.3), METAL_D, a, k, 0.9); glowDot(add(q, mul(fa(a), 0.2 * k)), 0.45 * k, fmod(t * 5, 1) < 0.5 ? ORANGE : A(ORANGE, 0.3)); }
     const cols = 1; // only the three original canisters sit behind the tower (owner)
     for (let cl = 0; cl < cols; cl++) for (let i = 0; i < 3; i++) { const q = D(-6 - cl * 3, (i - 1) * 4.2), mine = { lv: B.lv, r: B.r, key: B.key }; drawMine(B, q, k * 0.55, t, col, false, true);
@@ -796,32 +804,35 @@ const P2 = {
     if (P3 === "B") { plate(D(-11, -8.4), rectPts(1.8, 1.2), METAL_D, aim, k, 0.9); glowDot(D(-11, -8.4), 0.5 * k, RED); }
     if (P3 === "C") { plate(D(-12, 7.6), rectPts(2.4, 1.3), AMMO, aim, k, 0.9); for (let i = 0; i < 3; i++) ring(D(-13 + i * 1.6, 7.6), 0.55 * k, YEL, 0.5 * k); }
     if (P4 === "C") plate(D(-12, -7.6), rectPts(2.2, 1.4), AMMO, aim, k, 0.9);
-    // -- The rails: longer with Range, with the launch gear of each Range step ---------------------------------------------------
-    for (const y of [-2.6, 2.6]) bar(D(-2, y), D(L, y), 1.8 * k, RM ? mix(METAL_L, GOLD, 0.5) : METAL_L);
-    for (const x of [3, 9]) bar(D(x, -4), D(x, 4), 1.4 * k, dk(col, 0.2));
-    strip(D(0, 0), D(L, 0), 0.6 * k, A(col, 0.3 + 0.7 * fl));
-    if (R1 === "A") for (const y of [-2.6, 2.6]) bar(D(15, y), D(L, y), 2.2 * k, METAL);
-    if (R1 === "B") for (const y of [-2.6, 2.6]) { bar(D(L - 5, y), D(L - 2, y), 2.8 * k, METAL); }
-    if (R1 === "C") for (let i = 0; i < 3; i++) { ring(D(4 + i * 4, 0), 3.4 * k, A(col, 0.5), 0.9 * k); }
-    if (R2 === "A") for (const y of [-2.6, 2.6]) for (let i = 0; i < 4; i++) line(D(1 + i * 3, y - 1), D(2.4 + i * 3, y + 1), STEEL, 1 * k);
-    if (R2 === "B") { bar(D(-4, 0), D(-1, 0), 2.6 * k, METAL_D); orb(D(-4.6, 0), 1.5 * k, METAL); }
-    if (R2 === "C") for (const y of [-4, 4]) plate(D(4, y), rectPts(2, 0.8), METAL_D, aim, k, 0.9);
-    if (R3 === "B") plate(D(0, 0), rectPts(2.6, 5), METAL_D, aim, k, 1);
-    if (R3 === "C") for (let i = 0; i < 3; i++) { disc(D(-3, -3 + i * 3), 0.8 * k, OUTLINE); glowDot(D(-3, -3 + i * 3), 0.45 * k, A(col, 0.4 + 0.6 * fl)); }
-    if (R4 === "B") for (let i = 0; i < 3; i++) bar(D(L - 8 + i * 2.4, -3.2), D(L - 8 + i * 2.4, 3.2), 1.4 * k, STEEL);
-    if (R4 === "C") for (const y of [-4.6, 4.6]) bar(D(2, y), D(L - 3, y), 0.9 * k, STEEL);
-    if (RM === "A") { bar(D(L - 3, 0), D(L + 1, 0), 5.6 * k, GOLD); }
-    if (RM === "B") for (const x of [L - 10, L - 7, L - 4]) bar(D(x, -3.2), D(x, 3.2), 1.2 * k, GOLD);
-    if (RM === "C") for (const y of [-4.6, 4.6]) bar(D(2, y), D(L - 3, y), 1 * k, GOLD);
-    if (P1 === "B") for (const y of [-2.6, 2.6]) bar(D(6, y), D(7.6, y), 2.8 * k, METAL_D);
-    if (P4 === "B") for (const y of [-2.6, 2.6]) for (let i = 0; i < 3; i++) line(D(10 + i * 1.5, y - 1.2), D(10 + i * 1.5, y + 1.2), [0, 0, 0, 0.55], 0.7 * k);
-    if (PM === "B") for (const y of [-2.6, 2.6]) bar(D(L - 1.5, y), D(L, y), 2.2 * k, GOLD);
+    // -- The launchers: one pair of rails centred on the circle, or (Twin Press, side by side) two IDENTICAL pairs set symmetrically either
+    // side of the centre; the mines alternate between them and the one that fired glows. Longer with Range, with the gear of each step.
+    const twinA = S2 === "A", LA = twinA ? [3.8, -3.8] : [0], hf = twinA ? 1.5 : 2.6;
+    LA.forEach((yc) => { const act = twinA ? (mm.lastYc === yc ? fl : 0) : fl, ry = [yc - hf, yc + hf];
+      for (const y of ry) bar(D(-2, y), D(L, y), 1.8 * k, RM ? mix(METAL_L, GOLD, 0.5) : METAL_L);
+      for (const x of [3, 9]) bar(D(x, yc - hf - 1.4), D(x, yc + hf + 1.4), 1.4 * k, dk(col, 0.2));
+      strip(D(0, yc), D(L, yc), 0.6 * k, A(col, 0.3 + 0.7 * act));
+      if (R1 === "B") for (const y of ry) bar(D(L - 5, y), D(L - 2, y), 2.8 * k, METAL);
+      if (R1 === "C") for (let i = 0; i < 3; i++) ring(D(4 + i * 4, yc), (hf + 0.8) * k, A(col, 0.5), 0.9 * k);
+      if (R2 === "A") for (const y of ry) for (let i = 0; i < 4; i++) line(D(1 + i * 3, y - 1), D(2.4 + i * 3, y + 1), STEEL, 1 * k);
+      if (R2 === "B") { bar(D(-4, yc), D(-1, yc), 2.6 * k, METAL_D); orb(D(-4.6, yc), 1.5 * k, METAL); }
+      if (R2 === "C") for (const y of [yc - hf - 1.4, yc + hf + 1.4]) plate(D(4, y), rectPts(2, 0.8), METAL_D, aim, k, 0.9);
+      if (R3 === "B") plate(D(0, yc), rectPts(2.6, hf + 2.4), METAL_D, aim, k, 1);
+      if (R3 === "C") for (let i = 0; i < 3; i++) { disc(D(-3, yc - 3 + i * 3), 0.8 * k, OUTLINE); glowDot(D(-3, yc - 3 + i * 3), 0.45 * k, A(col, 0.4 + 0.6 * act)); }
+      if (R4 === "B") for (let i = 0; i < 3; i++) bar(D(L - 8 + i * 2.4, yc - hf - 0.6), D(L - 8 + i * 2.4, yc + hf + 0.6), 1.4 * k, STEEL);
+      if (R4 === "C") for (const y of [yc - hf - 2, yc + hf + 2]) bar(D(2, y), D(L - 3, y), 0.9 * k, STEEL);
+      if (RM === "A") bar(D(L - 3, yc), D(L + 1, yc), (hf * 2 + 0.4) * k, GOLD);
+      if (RM === "B") for (const x of [L - 10, L - 7, L - 4]) bar(D(x, yc - hf - 0.6), D(x, yc + hf + 0.6), 1.2 * k, GOLD);
+      if (RM === "C") for (const y of [yc - hf - 2, yc + hf + 2]) bar(D(2, y), D(L - 3, y), 1 * k, GOLD);
+      if (P1 === "B") for (const y of ry) bar(D(6, y), D(7.6, y), 2.8 * k, METAL_D);
+      if (P4 === "B") for (const y of ry) for (let i = 0; i < 3; i++) line(D(10 + i * 1.5, y - 1.2), D(10 + i * 1.5, y + 1.2), [0, 0, 0, 0.55], 0.7 * k);
+      if (PM === "B") for (const y of ry) bar(D(L - 1.5, y), D(L, y), 2.2 * k, GOLD); });
     if (B.r === 1) { const ky = B.key("r1"); if (ky === "B") { plate(S(10, 8), rectPts(3.4, 2), AMMO, 0, k, 1); for (let i = 0; i < 3; i++) drawMine(B, S(8 + i * 2.4, 8), k * 0.4, t, col, false, true); } }
-    if (S2 === "A") { for (const y of [5.2, 10.4]) bar(D(-2, y), D(L, y), 1.6 * k, METAL_L); strip(D(0, 7.8), D(L, 7.8), 0.5 * k, A(col, 0.2 + 0.6 * fl)); bar(D(1, 5.2), D(1, 10.4), 1.2 * k, STEEL); }
     if (S2 === "B") { const D2 = (x, y) => P(c, aim + 0.45, k, x, y); for (const y of [-2.6, 2.6]) bar(D2(-2, y), D2(L * 0.92, y), 1.6 * k, METAL_L); strip(D2(0, 0), D2(L * 0.92, 0), 0.5 * k, A(col, 0.2 + 0.6 * fl)); }
     if (S2 === "C") { bar(D(-2, -6.4), D(L, -6.4), 2.4 * k, METAL_L); strip(D(0, -6.4), D(L, -6.4), 0.5 * k, A(col, 0.2 + 0.6 * fl)); bar(D(2, -6.4), D(2, -2.6), 1.1 * k, STEEL); }
     // -- The mine ready on the rails, and the hub ----------------------------------------------------------------------------------
-    if (since > 0.5) drawMine(B, D(6, 0), k * 0.7, t, col, false); orb(c, 2.6 * k, METAL); glowDot(c, 1 * k, PM ? GOLD : col);
+    const nextYc = twinA ? (((mm.n || 0) + 1) % 2 ? -3.8 : 3.8) : 0;
+    if (since > 0.5) drawMine(B, D(6, nextYc), k * 0.7, t, col, false);
+    orb(c, 3.8 * k, METAL); ring(c, 3.8 * k, OUTLINE, 1 * k); glowDot(c, 1.8 * k, PM ? GOLD : col); // the central eye
   },
   paths: [
     { name: "Power/Damage", theme: "the mine itself and its blast change at every step", steps: [
@@ -852,7 +863,7 @@ const P2 = {
         { key: "B", name: "Charge Gauge", desc: "A dial beside the mount whose needle swings as the next mine is made." },
         { key: "C", name: "Loader Arm", desc: "A loader arm beside the mount that swings with each mine." } ] },
       { name: "Twin Press", cost: 270, effect: "Every 1.2 s; cap 28", options: [
-        { key: "A", name: "Side-by-Side Rail", desc: "A second pair of rails alongside the first; mines alternate between the two rails." },
+        { key: "A", name: "Side-by-Side Launchers", desc: "Two identical launchers set symmetrically either side of the centre of the circle; the mines alternate between them, and the one that fired glows." },
         { key: "B", name: "Angled Rail", desc: "A second pair of rails fanned out at an angle; mines alternate between the rails." },
         { key: "C", name: "Underslung Rail", desc: "A second, single rail slung under the mount; mines alternate between the rails." } ] },
       { name: "Assembly Line", cost: 1080, effect: "Every 0.95 s; cap 32 (primary)", options: [
@@ -870,7 +881,7 @@ const P2 = {
     ] },
     { name: "Range", theme: "how far it tosses: the rails lengthen and gain launch gear", steps: [
       { name: "Longer Arm", cost: 150, effect: "140 px", options: [
-        { key: "A", name: "Extension Rails", desc: "The rails are extended with thicker end sections." },
+        { key: "A", name: "Longer Rails", desc: "The rails are simply made longer, with no thickened parts." },
         { key: "B", name: "Rail Sleeves", desc: "Heavy sleeves on the ends of the rails." },
         { key: "C", name: "Boost Coils", desc: "Three glowing boost coils round the rails." } ] },
       { name: "Spring Launcher", cost: 300, effect: "160 px", options: [
@@ -910,7 +921,7 @@ P2.picks = {};
 
 // ---- Round 2 (owner's picks and notes, 2026-10-18): picked stages show only the pick (re-described where a note changed it);
 // Quick Assembly and Twin Press show new ideas.
-P2.intro = "Round 3: all your picks drawn, nothing left to choose. Round 2's notes still apply: only the three original canisters sit behind the tower; Wider Charge changes the mine (a flange round it) rather than the thrower; the Assembly Line feeds straight into the centre; the Servo Motors sit on the mount and speed its ring of ticks up (the rotunda); the Mine Mortar and Long Mortar stretch the original rails instead of adding pieces; the Long Arm replaces the rails with longer ones. Use the build preview to check combinations.";
+P2.intro = "Round 4: all your picks drawn with your latest notes: the two launchers are identical and centred on the circle and the mines alternate between them, the central eye is bigger, the belt runs on over the mount to the launcher in the centre, the notched rotunda only appears from Rapid Line, and the rails are simply longer (no thickened parts). Round 2's notes still apply: only the three original canisters sit behind the tower; Wider Charge changes the mine (a flange round it) rather than the thrower; the Assembly Line feeds straight into the centre; the Servo Motors sit on the mount and speed its ring of ticks up (the rotunda); the Mine Mortar and Long Mortar stretch the original rails instead of adding pieces; the Long Arm replaces the rails with longer ones. Use the build preview to check combinations.";
 P2.picks = { p0s0: "B", p0s1: "B", p0s2: "A", p0s3: "A", p0s4: "A", p1s0: "C", p1s1: "A", p1s2: "A", p1s3: "A", p1s4: "A", p2s0: "A", p2s1: "A", p2s2: "B", p2s3: "A", p2s4: "C", r0: "B", r1: "A", r2: "A" };
 P2.paths.forEach((pa, pi) => pa.steps.forEach((st, k) => { const pk = P2.picks["p" + pi + "s" + k]; if (pk) st.options = st.options.filter((o) => o.key === pk); }));
 P2.retrofits.forEach((rf, ri) => { const pk = P2.picks["r" + ri]; if (pk) rf.options = rf.options.filter((o) => o.key === pk); });

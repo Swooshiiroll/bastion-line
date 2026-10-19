@@ -385,7 +385,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 8 | Tesla Tower | `design/tower_art_p2_08_tesla.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 9 | Drone Bay | `design/tower_art_p2_09_drones.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 10 | CAS Gunship | `design/tower_art_p2_10_cas.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
-| 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | Round 3: all picks drawn; awaiting confirm |
+| 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | Round 4: all picks drawn, notes applied; awaiting confirm |
 
 ### Gun Turret (second pass)
 
@@ -924,6 +924,16 @@ tail fins and an exhaust flame, turning along their curved path, with a thinner 
 
 **Round 3:** every stage is picked; the page shows only the picks.
 
+**Notes (owner, round 3 paste):** "The mines should alternate being thrown from each launcher. The launchers should be centered on the circle and
+should be identical to each other. Make sure the central eye is large enough. The conveyer belt should feed directly to the launcher
+in the center. The notching on the rotunda shouldn't appear until Rapid Line." "Remove the thickening part of the rails. Make them longer."
+- **Launchers:** with Twin Press (Side-by-Side) there are now two identical launchers set symmetrically either side of the centre of
+  the circle; the mines alternate between them and the one that fired glows. A single launcher is centred on the circle as before.
+- **Central eye:** bigger (a 3.8 px hub with a larger glow, drawn above the rails).
+- **Belt:** it now runs on over the mount and ends at the launcher in the centre (it used to vanish under the mount's edge).
+- **Rotunda:** the notched ring of ticks only appears from Rapid Line (Production step 4) and spins faster with Servo Motors.
+- **Rails:** the thickened end sections are gone and every Range step simply makes the rails longer (a further 5 px each time).
+
 ## Open questions
 
-1. **Second pass, Mine Layer** (tower 11, round 3): confirm. Then towers 12-20 (next: Chemical Plant).
+1. **Second pass, Mine Layer** (tower 11, round 4): confirm. Then towers 12-20 (next: Chemical Plant).
