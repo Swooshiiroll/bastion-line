@@ -6,7 +6,7 @@
 // added south, north, east, west (path 2, Speed/Frequency); an analysis cabinet in each corner, added NW, NE, SE, SW (path 3, Unmasking).
 // The Bigger Dish Retrofit's +20 px overlaps the path-1 range steps and the Signal Processor's longer reveal overlaps the reveal
 // steps; both are kept and stack (the carpet rule). The radiation circle (path 1, step 3 on) only hurts revealed enemies (owner).
-const PAGE = { title: "Radar Tower: paths and Retrofits (second pass)", store: "bl-tower-art-p2-radar-r6" };
+const PAGE = { title: "Radar Tower: paths and Retrofits (second pass)", store: "bl-tower-art-p2-radar-r7" };
 const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], RAD = [1, 0.3, 0.25, 1], DARKP = [0.12, 0.16, 0.16, 1];
 const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 const cloaked = (e) => e.i % 2 === 0;                                                // every other enemy is cloaked in the preview
@@ -40,7 +40,8 @@ function radarAgent(B) { return (m, t, info, s, col) => { if (!m.seen) { m.seen 
   if (rr > 0) { const rc = L1 >= 5 ? GOLD : RAD, pulse = 0.5 + 0.5 * Math.sin(t * 3); disc(c, rr, A(rc, 0.07 + 0.05 * pulse)); arcSegments(c, rr, 20, 0.22, t * 0.4, A(rc, 0.55), 1.3); ring(c, rr * 0.92, A(rc, 0.12), 1); }
   if (constant) { disc(c, R, A(GOLD, 0.05)); ring(c, R * (0.55 + 0.05 * Math.sin(t * 2)), A(GOLD, 0.2), 1); }
   else for (let i = 0; i < 6; i++) { const a0 = ang - i * 0.08; poly([c, add(c, mul(fa(a0 - 0.08), R)), add(c, mul(fa(a0), R))], A(col, 0.16 * (1 - i / 6))); }
-  line(c, add(c, mul(fa(ang), R)), A(wc, constant ? 0.3 : 0.7), constant ? 1 : 1.3);
+  if (constant) for (const a of [ang, ang + Math.PI]) line(c, add(c, mul(fa(a), R)), A(GOLD, 0.6), 1);                            // Constant Track: a scan line for each dish
+  else line(c, add(c, mul(fa(ang), R)), A(wc, 0.7), 1.3);
   for (const e of info.all) { const d = dist(e.p, c), inR = d < R;
     if (!cloaked(e)) { if (rr > 0 && d < rr) radHit(e.p, s, t, e.i, L1); continue; }
     const b = fmod(Math.atan2(e.p[1] - c[1], e.p[0] - c[0]), TAU), dd = fmod(ang - b, TAU), hit = inR && (constant || dd < Math.max(0.2, 2 * TAU * dt / PER[L2]));
@@ -56,7 +57,7 @@ const PSLOT = [[0, 12.2, 0], [0, -12.2, Math.PI], [12.8, 0, -Math.PI / 2], [-12.
 const CSLOT = [[-7.4, -7.4], [7.4, -7.4], [7.4, 7.4], [-7.4, 7.4]];                                                          // cabinet slots: NW, NE, SE, SW
 const P2 = {
   tower: "radar", look: "A", anim: "B",
-  intro: "Round 6: three struts join the dish to the centre mast; the Twin Prong Emitter is one solid V; the double radar moved to the Path 2 mastery (Constant Track builds a second gold dish), so the Path 1 mastery shows its three options again, with the twin dish replaced by a gold feed tripod. Round 5: the tracking turrets are smaller again and sit inside the deck, and the radar dish is thinner (your notes). Round 4: the tracking turrets are smaller, nothing sits under them, and the mastery only turns their blue accents gold (your notes); the three mastery options differ by a gold wall, a sweeping gold lamp or a twin barrel. Round 3: your picks drawn with your note applied: the tracking turret stays from Track Lock on, the Illusion Filter builds onto it (a lens ring) and the Total Exposure mastery shows three gold turret builds (still to pick). Round 2: your Path 1 and Path 2 picks are drawn; Path 3 is redesigned (your note): instead of adding a cabinet at a time, all four corner stations are rebuilt to a new design at every step, and the mark on a revealed enemy changes style rather than gaining extras. The Signal Processor shows its three options again. Round 1: every step rebuilds a part of the station. Path 1 (Power/Range) owns the centre: a bigger dish, a taller mast, then a radiation emitter (with a faint red inner circle that only hurts revealed enemies), heat-sinks or capacitors, and a gold microwave array. Path 2 (Speed/Frequency) adds a phased-array panel on each edge (south, north, east, west) and the dish turns faster to match the ping rate; the mastery turns them gold with a constant reveal. Path 3 (Unmasking) adds an analysis cabinet in each corner (NW, NE, SE, SW) and the marks on revealed enemies grow with each step (rank tag, unmask diamond, track-lock tether, fake-check badge, gold lock). The Retrofits rebuild the dish, the hub or the mast. Overlapping Retrofits are kept and stack (the carpet rule). Unpicked steps show option A.",
+  intro: "Round 7: every stage is picked and your notes are applied: the Constant Track ring is grey, its dishes and the emitter are gold, both dishes have a scan line and the array bodies are grey with gold lights; the trackers have no light cones. Use the build preview to check combinations. Round 6: three struts join the dish to the centre mast; the Twin Prong Emitter is one solid V; the double radar moved to the Path 2 mastery (Constant Track builds a second gold dish), so the Path 1 mastery shows its three options again, with the twin dish replaced by a gold feed tripod. Round 5: the tracking turrets are smaller again and sit inside the deck, and the radar dish is thinner (your notes). Round 4: the tracking turrets are smaller, nothing sits under them, and the mastery only turns their blue accents gold (your notes); the three mastery options differ by a gold wall, a glowing gold lamp or a twin barrel. Round 3: your picks drawn with your note applied: the tracking turret stays from Track Lock on, the Illusion Filter builds onto it (a lens ring) and the Total Exposure mastery shows three gold turret builds (still to pick). Round 2: your Path 1 and Path 2 picks are drawn; Path 3 is redesigned (your note): instead of adding a cabinet at a time, all four corner stations are rebuilt to a new design at every step, and the mark on a revealed enemy changes style rather than gaining extras. The Signal Processor shows its three options again. Round 1: every step rebuilds a part of the station. Path 1 (Power/Range) owns the centre: a bigger dish, a taller mast, then a radiation emitter (with a faint red inner circle that only hurts revealed enemies), heat-sinks or capacitors, and a gold microwave array. Path 2 (Speed/Frequency) adds a phased-array panel on each edge (south, north, east, west) and the dish turns faster to match the ping rate; the mastery turns them gold with a constant reveal. Path 3 (Unmasking) adds an analysis cabinet in each corner (NW, NE, SE, SW) and the marks on revealed enemies grow with each step (rank tag, unmask diamond, track-lock tether, fake-check badge, gold lock). The Retrofits rebuild the dish, the hub or the mast. Overlapping Retrofits are kept and stack (the carpet rule). Unpicked steps show option A.",
   mods(B) { return { period: 1, flight: 1, multi: false, persist: radarAgent(B) }; },
   muzzleAt(B, m, kk, c) { return c; },
   model(c, aim, s, fx, t, col, info, B) {
@@ -65,14 +66,14 @@ const P2 = {
     // ---- Path 2: a phased-array panel on each edge; the tiles light in sequence at the ping rate ------------------------------------------------------------
     const gold2 = L2 >= 5, lc2 = gold2 ? GOLD : col, ph = t * (2.2 + 0.5 * L2);
     if (gold2) { const key = B.key("p1s4");
-      if (key === "A") ring(c, 10.2 * k, A(GOLD, 0.85), 1.4 * k);
+      if (key === "A") ring(c, 10.2 * k, A(STEEL, 0.95), 1.4 * k);   // a grey cable ring
       if (key === "C") for (let i = 0; i < 4; i++) { const a0 = i * Math.PI / 2 + Math.PI / 4 - 0.5, a1 = a0 + 1; arc(c, 12.2 * k, a0, a1, OUTLINE, 3.4 * k); arc(c, 12.2 * k, a0, a1, GOLD, 1.8 * k); } }
     for (let i = 0; i < 4; i++) { if (L2 <= i) break; const key = B.key("p1s" + i), [x, y, rt] = PSLOT[i], p = S(x, y), lw = (lx, ly) => add(p, mul(rot([lx, ly], rt), k));
       const tile = (lx, ly, on) => fill(lw(lx, ly), [[-0.75, -0.75], [0.75, -0.75], [0.75, 0.75], [-0.75, 0.75]], on ? A(lc2, 0.95) : DARKP, rt, k);
-      if (key === "A") { plate(p, rectPts(5.2, 1.9), gold2 ? dk(GOLD, 0.45) : METAL_L, rt, k, 1.1); for (let j = 0; j < 5; j++) tile(-4 + j * 2, 0.1, gold2 || fmod(ph - j * 0.35, 2) < 0.7); }
+      if (key === "A") { plate(p, rectPts(5.2, 1.9), METAL_L, rt, k, 1.1); for (let j = 0; j < 5; j++) tile(-4 + j * 2, 0.1, gold2 || fmod(ph - j * 0.35, 2) < 0.7); }
       if (key === "B") { const pts = []; for (let j = 0; j < 5; j++) { const a = -0.85 + j * 0.425; pts.push(lw(5.6 * Math.sin(a), 3.2 * Math.cos(a) - 1.8)); }
-        polyline(pts, OUTLINE, 3.6 * k); polyline(pts, gold2 ? dk(GOLD, 0.45) : METAL_L, 2.2 * k); pts.forEach((q, j) => { disc(q, 1 * k, DARKP); if (gold2 || fmod(ph - j * 0.35, 2) < 0.7) glowDot(q, 0.75 * k, lc2); }); }
-      if (key === "C") { plate(p, rectPts(5, 1.7), gold2 ? dk(GOLD, 0.5) : METAL_D, rt, k, 1.1); for (let j = 0; j < 4; j++) { const on = gold2 || fmod(ph - j * 0.4, 2) < 0.7; line(lw(-3.8 + j * 2.5, -1.2), lw(-2.6 + j * 2.5, 1.2), on ? A(lc2, 0.95) : STEEL, 1.4 * k); } }
+        polyline(pts, OUTLINE, 3.6 * k); polyline(pts, METAL_L, 2.2 * k); pts.forEach((q, j) => { disc(q, 1 * k, DARKP); if (gold2 || fmod(ph - j * 0.35, 2) < 0.7) glowDot(q, 0.75 * k, lc2); }); }
+      if (key === "C") { plate(p, rectPts(5, 1.7), METAL_D, rt, k, 1.1); for (let j = 0; j < 4; j++) { const on = gold2 || fmod(ph - j * 0.4, 2) < 0.7; line(lw(-3.8 + j * 2.5, -1.2), lw(-2.6 + j * 2.5, 1.2), on ? A(lc2, 0.95) : STEEL, 1.4 * k); } }
       if (gold2 && B.key("p1s4") === "B") { outline(p, rectPts(5.9, 2.5), GOLD, 1.6, rt, k); for (const [ex, ey] of [[-5.9, -2.5], [5.9, -2.5], [5.9, 2.5], [-5.9, 2.5]]) disc(lw(ex, ey), 0.7 * k, GOLD); }
       if (gold2) glowDot(lw(0, 2.4), 0.5 * k, GOLD); }
     // ---- Path 3: the four corner stations are REBUILT at every step (a new design replaces the old one in all four corners); the mastery makes them gold ---
@@ -94,19 +95,18 @@ const P2 = {
           if (k4 === "B") { disc(p, tsz * k + 1.8 * k, OUTLINE); disc(p, tsz * k + 1.4 * k, A(lc3, 0.28)); ring(p, tsz * k + 1.4 * k, METAL_L, 1 * k); ring(p, tsz * k + 0.7 * k, A(lc3, 0.8), 0.7 * k); arc(p, tsz * k + 1.05 * k, t * 0.8 + i, t * 0.8 + i + 1.1, [1, 1, 1, 0.55], 1 * k); }   // Lens Ring: a big glass ring round the turret
           if (k4 === "C") for (let g = 0; g < 4; g++) { const a0 = g * Math.PI / 2 + Math.PI / 4 - 0.55; arc(p, tsz * k + 1.3 * k, a0, a0 + 1.1, OUTLINE, 2.2 * k); arc(p, tsz * k + 1.3 * k, a0, a0 + 1.1, A(lc3, 0.9), 1 * k); }   // Filter Gate: four grille shields round the turret
           // Gold Citadel: no base under the turrets; the gold wall joins the four (drawn above)
-          if (k5 === "B") { const a = t * 3 + i; poly([p, add(p, mul(fa(a - 0.3), 7 * k)), add(p, mul(fa(a + 0.3), 7 * k))], A(GOLD, 0.2)); ring(p, tsz * k + 1.1 * k, GOLD, 0.9 * k); }   // a gold lighthouse lamp beam sweeps round the turret
+          if (k5 === "B") { ring(p, tsz * k + 1.1 * k, GOLD, 0.9 * k); glowDot(add(p, mul(fa(ta + Math.PI), tsz * 0.5 * k)), (0.55 + 0.2 * Math.sin(t * 4 + i)) * k, GOLD); }   // a gold lamp glows on the turret (no beam)
           // Gold Obelisk: no base; the turret gets a twin barrel (below)
           let mz;
           if (ts === "A") { disc(p, tsz * k + 1.2 * k, OUTLINE); disc(p, tsz * k, tb); ring(p, tsz * 0.78 * k, STEEL, 1 * k); mz = add(p, mul(fa(ta), 3 * k)); bar(p, mz, 1.2 * k, METAL_L); if (k5 === "C") { const o = orth(fa(ta)); bar(add(p, mul(o, 0.9 * k)), add(mz, mul(o, 0.9 * k)), 0.8 * k, METAL_L); } }                 // a tracking turret that follows a revealed enemy
           else if (ts === "B") { disc(p, tsz * k + 1.2 * k, OUTLINE); orb(p, tsz * k, tb); for (let j = 0; j < 3; j++) { const a = t * 2 + i + j * TAU / 3; line(p, add(p, mul(fa(a), (tsz + 1.6) * k)), tt, 1.1 * k); } mz = add(p, mul(fa(ta), 2.6 * k)); bar(p, mz, 1 * k, METAL_L); }             // a radar dome with a tracking arm
           else { plate(p, rectPts(tsz * 0.7, tsz * 0.7), tb, Math.PI / 4, k, 1.2); orb(p, tsz * 0.62 * k, METAL); disc(p, tsz * 0.32 * k, DARKP); mz = add(p, mul(fa(ta), tsz * 0.14 * k)); }    // an eye pylon
           if (ts !== "C") glowDot(mz, 0.6 * k, tt); else glowDot(mz, (0.55 + 0.15 * Math.sin(t * 6)) * k, tt);
-          if (near) line(mz, near.p, A(tt, 0.3), 1);
           if (k4 === "A") { fill(mz, [[0, -1.6], [2, 1.2], [-2, 1.2]], A(lc3, 0.5), ta + Math.PI / 2, k); outline(mz, [[0, -1.6], [2, 1.2], [-2, 1.2]], lc3, 1, ta + Math.PI / 2, k); } }   // Prism: a prism on the muzzle
         });  // the corner stations
     }
     // ---- Path 1: the centre. Footing, then the mast (step 2), the Retrofit hub, the emitter kit (steps 3 and 4), the hub and the dish ----------------
-    const gold1 = L1 >= 5, dc = gold1 ? GOLD : METAL_L, rD = 10 + [0, 1.2, 2, 2.2, 3, 3.4][L1] + (B.r === 0 ? 1.2 : 0), mast = Kp(B, 0, 1);
+    const gold1 = L1 >= 5, dc = (gold1 || gold2) ? GOLD : METAL_L, rD = 10 + [0, 1.2, 2, 2.2, 3, 3.4][L1] + (B.r === 0 ? 1.2 : 0), mast = Kp(B, 0, 1);
     plate(c, ngon(6, 1), METAL_D, 0, 7 * k, 1.2); ring(c, 6.2 * k, A(OUTLINE, 0.6), 1 * k);
     if (mast === "A") { plate(c, rectPts(3.2, 3.2), METAL, Math.PI / 4, k, 1); line(S(-2.2, -2.2), S(2.2, 2.2), METAL_L, 0.9 * k); line(S(2.2, -2.2), S(-2.2, 2.2), METAL_L, 0.9 * k);
       for (const [gx, gy] of [[-6.4, -6.4], [6.4, -6.4], [6.4, 6.4], [-6.4, 6.4]]) line(c, S(gx, gy), A(STEEL, 0.9), 0.8 * k); }
@@ -119,7 +119,7 @@ const P2 = {
       if (R === "B") { plate(c, rectPts(4, 4), METAL_L, Math.PI / 4, k, 1.2); plate(c, rectPts(2.8, 2.8), METAL_D, Math.PI / 4, k, 0.9); for (let i = 0; i < 4; i++) { const d = fa(Math.PI / 4 + i * Math.PI / 2); bar(add(c, mul(d, 3 * k)), add(c, mul(d, 7 * k)), 1.2 * k, METAL); disc(add(c, mul(d, 3 * k)), 0.5 * k, YELLOW_W); } }
       if (R === "C") for (let i = 0; i < 4; i++) { const d = fa(Math.PI / 4 + i * Math.PI / 2), q = add(c, mul(d, 5.6 * k)); bar(c, q, 1.3 * k, METAL); disc(q, 1.2 * k, OUTLINE); const on = Math.floor(t * 4) % 4 === i; disc(q, 0.9 * k, on ? [1, 1, 1, 1] : DARKP); if (on) glowDot(q, 0.9 * k, [1, 1, 1, 1]); } }
     // path 1, steps 3 and 4: the emitter kit
-    const fp = add(c, mul(fa(ang), 6.2 * k)), em = Kp(B, 0, 2), hp = Kp(B, 0, 3), ec = gold1 ? GOLD : RAD;
+    const fp = add(c, mul(fa(ang), 6.2 * k)), em = Kp(B, 0, 2), hp = Kp(B, 0, 3), ec = (gold1 || gold2) ? GOLD : RAD;
     if (hp === "A") for (let i = 0; i < 4; i++) { const d = fa(Math.PI / 4 + i * Math.PI / 2 + 0.3), q = add(c, mul(d, 4.2 * k)); plate(q, rectPts(1.1, 1.8), METAL_D, Math.atan2(d[1], d[0]), k, 0.9); for (let j = -1; j <= 1; j++) line(add(q, mul(orth(d), j * 0.8 * k)), add(add(q, mul(orth(d), j * 0.8 * k)), mul(d, 1.8 * k)), METAL_L, 0.7 * k); }
     if (hp === "B") for (let i = 0; i < 3; i++) { const q = add(c, mul(fa(Math.PI / 2 + i * TAU / 3 + 0.5), 4.8 * k)); disc(q, 1.7 * k, OUTLINE); disc(q, 1.4 * k, METAL_D); ring(q, 1.1 * k, A(ec, 0.9), 0.8 * k); glowDot(q, 0.45 * k, ec); }
     if (hp === "C") { const a = add(c, [-5.6 * k, 0]), b = add(c, [5.6 * k, 0]); for (const q of [a, b]) { bar(add(q, [0, 1.8 * k]), add(q, [0, -1.8 * k]), 1.3 * k, METAL); disc(add(q, [0, -2 * k]), 0.9 * k, METAL_L); }
@@ -145,11 +145,11 @@ const P2 = {
       if (R === "C") { arc(c, rD * 0.6 * k, ang - 1.1, ang + 1.1, OUTLINE, 2.4 * k); arc(c, rD * 0.6 * k, ang - 1.1, ang + 1.1, dc, 1.2 * k); } }
     line(c, fp, dc, 1 * k);
     if (L1 >= 5 && B.key("p0s4") === "B") { for (const sg of [-1, 0, 1]) bar(add(c, mul(fa(ang + sg * 0.9), rD * k)), fp, 0.9 * k, GOLD); fill(fp, [[0, -1.2], [3.4, -2.6], [3.4, 2.6], [0, 1.2]], GOLD, ang, k); }   // Gold Feed Tripod
-    if (em === "A") fill(fp, [[0, -0.9], [3.2, -2.3], [3.2, 2.3], [0, 0.9]], gold1 ? GOLD : lt(RAD, 0.1), ang, k);
+    if (em === "A") fill(fp, [[0, -0.9], [3.2, -2.3], [3.2, 2.3], [0, 0.9]], (gold1 || gold2) ? GOLD : lt(RAD, 0.1), ang, k);
     if (em === "B") { const pts = []; for (let j = 0; j <= 8; j++) pts.push(add(add(c, mul(fa(ang), (5 + j * 0.55) * k)), mul(orth(fa(ang)), (j % 2 ? 1.2 : -1.2) * k))); polyline(pts, OUTLINE, 3 * k); polyline(pts, ec, 1.4 * k); }
     if (em === "C") { const u = fa(ang), v = orth(u), P0 = add(c, mul(u, 5 * k)), Tp = add(add(c, mul(u, 8.4 * k)), mul(v, 2.6 * k)), Tm = add(add(c, mul(u, 8.4 * k)), mul(v, -2.6 * k)),
         vp = [P0, Tp, add(Tp, mul(v, -1.4 * k)), add(P0, mul(u, 2.6 * k)), add(Tm, mul(v, 1.4 * k)), Tm];                                                       // one solid V, not two bars
-      polyline([...vp, vp[0]], OUTLINE, 2 * k); poly(vp, gold1 ? GOLD : lt(RAD, 0.1)); }
+      polyline([...vp, vp[0]], OUTLINE, 2 * k); poly(vp, (gold1 || gold2) ? GOLD : lt(RAD, 0.1)); }
     glowDot(add(c, mul(fa(ang), (em ? 7.6 : 6.2) * k)), (em ? 0.9 + 0.3 * Math.sin(t * 6) : 0.9) * k, em ? ec : col);
   },
   paths: [], retrofits: [],
@@ -178,7 +178,7 @@ P2.paths = [
     { name: "Disguise Breaker", cost: 460, effect: "Pings unmask the Masquerade early", options: T(["Decoder Towers", "The corner racks are replaced by taller decoder towers with whip antennas; revealed enemies get a diamond frame instead of brackets."], ["Dish Pods", "The corner consoles are replaced by round dish pods; revealed enemies get a diamond frame instead of brackets."], ["Yagi Masts", "The corner posts are replaced by long yagi masts; revealed enemies get a diamond frame instead of brackets."]) },
     { name: "Track Lock", cost: 1930, effect: "Reveals last 1.3 s (primary)", options: T(["Tracking Turrets", "The corner towers are replaced by round tracking turrets that turn to follow revealed enemies; the mark becomes a lock ring with a tether."], ["Radar Domes", "The corner pods are replaced by radar domes with turning prongs; the mark becomes a lock ring with a tether."], ["Eye Pylons", "The corner masts are replaced by eye pylons whose pupils follow revealed enemies; the mark becomes a lock ring with a tether."]) },
     { name: "Illusion Filter", cost: 2390, effect: "Pings mark Mirage holograms as fakes", options: T(["Turret Prisms", "Each tracking turret gets a glass prism on its muzzle that splits the beam; the mark becomes a hex frame with a fake-check badge."], ["Turret Lens Rings", "Each tracking turret is ringed by a big glass lens; the mark becomes a hex frame with a fake-check badge."], ["Turret Filter Gates", "Each tracking turret is ringed by four grille shields; the mark becomes a hex frame with a fake-check badge."]) },
-    { name: "Total Exposure", cost: 3590, effect: "Revealed enemies can't re-cloak, re-disguise or re-burrow for 5 s after leaving range (mastery)", options: T(["Gold Wall", "Each tracking turret's blue accents turn gold and a gold wall joins the four; the marks become gold lock rings that linger after the enemy leaves."], ["Gold Lamp", "Each tracking turret's blue accents turn gold and a gold lighthouse lamp sweeps round it; the marks become gold lock rings that linger after the enemy leaves."], ["Twin Barrel", "Each tracking turret's blue accents turn gold and it gains a twin barrel; the marks become gold lock rings that linger after the enemy leaves."]) },
+    { name: "Total Exposure", cost: 3590, effect: "Revealed enemies can't re-cloak, re-disguise or re-burrow for 5 s after leaving range (mastery)", options: T(["Gold Wall", "Each tracking turret's blue accents turn gold and a gold wall joins the four; the marks become gold lock rings that linger after the enemy leaves."], ["Gold Lamp", "Each tracking turret's blue accents turn gold and a gold lamp glows on it; the marks become gold lock rings that linger after the enemy leaves."], ["Twin Barrel", "Each tracking turret's blue accents turn gold and it gains a twin barrel; the marks become gold lock rings that linger after the enemy leaves."]) },
   ] },
 ];
 P2.retrofits = [
@@ -188,6 +188,6 @@ P2.retrofits = [
 ];
 
 // ---- Round 2 (owner's picks, 2026-10-19). Path 3 and the Signal Processor are unpicked: they show their options again.
-P2.picks = { p0s0: "A", p0s1: "C", p0s2: "C", p0s3: "B", p1s0: "B", p1s1: "B", p1s2: "B", p1s3: "B", p1s4: "A", p2s0: "B", p2s1: "A", p2s2: "A", p2s3: "B", r0: "C", r1: "A", r2: "B" };
+P2.picks = { p0s0: "A", p0s1: "C", p0s2: "C", p0s3: "B", p0s4: "A", p1s0: "B", p1s1: "B", p1s2: "B", p1s3: "B", p1s4: "A", p2s0: "B", p2s1: "A", p2s2: "A", p2s3: "B", p2s4: "B", r0: "C", r1: "A", r2: "B" };
 P2.paths.forEach((pa, pi) => pa.steps.forEach((st, k) => { const pk = P2.picks["p" + pi + "s" + k]; if (pk) st.options = st.options.filter((o) => o.key === pk); }));
 P2.retrofits.forEach((rf, ri) => { const pk = P2.picks["r" + ri]; if (pk) rf.options = rf.options.filter((o) => o.key === pk); });

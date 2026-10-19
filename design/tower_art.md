@@ -388,7 +388,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 13 | Boost Tower | `design/tower_art_p2_13_boost.html` | **Confirmed** (owner, 2026-10-19: "finished") |
-| 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | Round 6: dish struts, solid V emitter, double radar moved to Path 2 mastery; awaiting the Path 1 and 3 mastery picks |
+| 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | Round 7: all picks drawn with notes applied; awaiting confirm |
 
 ### Gun Turret (second pass)
 
@@ -1075,6 +1075,9 @@ Base: look A Dish Mast, animation B Sweep Beam (the sweep follows the dish). Eve
 
 **Round 6 (owner notes):** "Make it look like the dishes are connected to the center mast. Make the emitter prongs look like one solid V rather than two struts laying overtop of each other. Move the double radar idea for the Mastery for Path 2". Three struts now join each dish to the centre mast; the Twin Prong Emitter is one solid V; the double radar (a second gold dish opposite the first, on its own struts) is now part of the Path 2 mastery, Constant Track (picked A, Gold Cable Ring). So Path 1's mastery shows its three options again (A Horn Ring, B Gold Feed Tripod replacing the twin dish, C Gold Lattice Array).
 
+**Picks (owner, round 6):** Path 1 mastery A Horn Ring; Path 3 mastery B Gold Lamp (all other picks unchanged).
+**Round 7 (owner notes):** Path 2 mastery: the ring is grey; both dishes and the emitter are gold; both dishes have a scan line; the array bodies are grey with gold lights. Path 3: "remove the light cones from the trackers": the turret-to-enemy lines and the lamp beam are gone, and the Gold Lamp is now a pulsing gold lamp on each turret. Every stage is picked; the page shows only the picks.
+
 ## Open questions
 
-1. **Second pass, Radar Tower** (tower 14, round 6): pick the Path 1 mastery and the Total Exposure mastery (Path 3). Then towers 15-20 (next: Cryo Tower).
+1. **Second pass, Radar Tower** (tower 14, round 7): confirm. Then towers 15-20 (next: Cryo Tower).
