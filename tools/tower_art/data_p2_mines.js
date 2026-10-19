@@ -5,7 +5,7 @@
 // stacking (the carpet rule): Shaped Charges adds to Heavier Charge and Long Arm to Longer Arm (the Conveyor Feed was replaced by Adhesive Mines).
 // Geometry (game px): a round mount r 10 with a magazine of canisters behind it and two rails ahead (x -2 to 15); a mine
 // is a squat canister (r 3.6) with a glowing band that blinks while it waits on the track.
-const PAGE = { title: "Mine Layer: paths and Retrofits (second pass)", store: "bl-tower-art-p2-mines-r7" };
+const PAGE = { title: "Mine Layer: paths and Retrofits (second pass)", store: "bl-tower-art-p2-mines-r8" };
 const GEL = [0.65, 0.9, 0.2, 1], TANKG = [0.3, 0.45, 0.15, 1], GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], RED = [0.85, 0.2, 0.18, 1], YEL = [1, 0.85, 0.2, 1], ORANGE = [1, 0.55, 0.2, 1];
 const rnd2 = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
 const Kp = (B, pi, k) => (B.lv[pi] > k ? B.key("p" + pi + "s" + k) : null);
@@ -24,10 +24,14 @@ const railExt = (B) => [0, 1.5, 3, 4.5, 6, 8][B.lv[2]] + (B.r === 2 ? 1.5 : 0); 
 function drawMine(B, p, k, t, col, blink, mini, onLauncher) {
   const P1 = Kp(B, 0, 0), P2m = Kp(B, 0, 1), P3 = Kp(B, 0, 2), P4 = Kp(B, 0, 3), PM = Kp(B, 0, 4), z = (P1 ? 1.12 : 1) * (PM ? 1.25 : 1) * (mini ? 0.55 : 1), r = 3.6 * k * z;
   ellipse(add(p, [k * 0.8, k * 1.6]), 4 * k * z, 1.8 * k * z, [0, 0, 0, 0.3]);
+  const flange = !mini && !onLauncher ? P2m : null; // the Wider Charge flange belongs to the thrown mine only (owner)
+  if (flange === "A") { disc(p, r * 1.32, OUTLINE); disc(p, r * 1.24, METAL_D); }                                        // a flared skirt
+  if (flange === "B") { disc(p, r * 1.3, OUTLINE); disc(p, r * 1.22, STEEL); for (let i = 0; i < 8; i++) disc(add(p, mul(fa(i * TAU / 8 + 0.2), r * 1.22)), 0.45 * k * z, METAL_L); }  // a wide flange with tabs
+  if (flange === "C") { disc(p, r * 1.2, OUTLINE); disc(p, r * 1.13, dk(METAL, 0.2)); for (let i = 0; i < 4; i++) disc(add(p, mul(fa(i * Math.PI / 2 + 0.4), r * 1.13)), 0.5 * k * z, METAL_L); } // a blast collar with bolts
   disc(p, r, OUTLINE); disc(p, r * 0.86, P3 ? [0.2, 0.2, 0.22, 1] : METAL_L);
-  if (P2m === "A") { orb(p, r * 0.5, P3 ? [0.3, 0.3, 0.33, 1] : METAL_L); ring(p, r * 0.5, WHITE, 0.6 * k * z); }                                  // a raised charge dome
-  if (P2m === "B") for (let i = 0; i < 8; i++) disc(add(p, mul(fa(i * TAU / 8 + 0.2), r * 0.72)), 0.42 * k * z, STEEL);                          // a ring of charge studs
-  if (P2m === "C") for (const sg of [-1, 1]) line(add(p, [-r * 0.66, sg * r * 0.3]), add(p, [r * 0.66, sg * r * 0.3]), RED, 0.8 * k * z);       // two red blast bands
+  if (P1 === "A") ring(p, r * 0.9, [0.1, 0.1, 0.12, 1], 1.5 * k * z);                                                                         // a thick dark rim
+  if (P1 === "B") for (const sg of [-1, 1]) plate(add(p, [0, sg * r * 0.45]), rectPts(r * 0.55, r * 0.14), STEEL, 0, 1, 0.6);                    // two steel weight plates
+  if (P1 === "C") { disc(p, r * 0.42, [0.12, 0.12, 0.14, 1]); ring(p, r * 0.42, WHITE, 0.5 * k * z); }                                           // a dark charge core
   if (PM) { ring(p, r * 0.95, GOLD, 1 * k); ring(p, r * 0.55, GOLD, 0.7 * k); }
   if (P3) ring(p, r * 0.62, YEL, 0.9 * k * z);
   if (P4) for (let i = 0; i < 6; i++) line(add(p, mul(fa(i * TAU / 6), r * 0.25)), add(p, mul(fa(i * TAU / 6), r * 0.85)), [0, 0, 0, 0.5], 0.5 * k);
@@ -92,7 +96,7 @@ const P2 = {
     if (SM === "B") for (const x of [-11, -6]) plate(S(x, -9), rectPts(2.2, 1.8), GOLD, 0, k, 1);
     if (SM === "C") plate(S(-13, 6), rectPts(2.4, 2.4), GOLD, 0, k, 1);
     // -- The mount and the magazine (a stack of canisters behind it; one more column with each Production step) ---------------
-    disc(c, 10 * k, OUTLINE); disc(c, 9.2 * k, PM === "C" ? mix(METAL, GOLD, 0.3) : METAL); if (P1 === "A") for (const rr of [9.6, 7.6]) ring(c, rr * k, METAL_L, 0.9 * k); if (PM === "C") ring(c, 9.4 * k, GOLD, 1.2 * k);
+    disc(c, 10 * k, OUTLINE); disc(c, 9.2 * k, PM === "C" ? mix(METAL, GOLD, 0.3) : METAL);  if (PM === "C") ring(c, 9.4 * k, GOLD, 1.2 * k);
     // The belts run in over the mount and end at the launcher in the centre (owner)
     if (S3) beltIn(S(-15, 10), SM === "A" ? GOLD : METAL_D, S3 === "B" ? "gantry" : S3 === "C" ? "roller" : "belt");
     else if (SM === "A") beltIn(S(-15, 10), GOLD, "belt");
@@ -103,7 +107,6 @@ const P2 = {
     const cols = 1; // only the three original canisters sit behind the tower (owner)
     for (let cl = 0; cl < cols; cl++) for (let i = 0; i < 3; i++) { const q = D(-6 - cl * 3, (i - 1) * 4.2), mine = { lv: B.lv, r: B.r, key: B.key }; drawMine(B, q, k * 0.55, t, col, false, true);
       if (P3 === "A") ring(q, 1.5 * k, YEL, 0.6 * k); if (P4 === "A") for (let j = 0; j < 3; j++) line(add(q, mul(fa(j * 2.1), 0.5 * k)), add(q, mul(fa(j * 2.1), 1.9 * k)), [0, 0, 0, 0.5], 0.4 * k); if (PM === "A") ring(q, 1.8 * k, GOLD, 0.6 * k); }
-    if (P1 === "C") plate(D(-13, 0), rectPts(2, 5), AMMO, aim, k, 0.9);
     if (P3 === "B") { plate(D(-11, -8.4), rectPts(1.8, 1.2), METAL_D, aim, k, 0.9); glowDot(D(-11, -8.4), 0.5 * k, RED); }
     if (P3 === "C") { plate(D(-12, 7.6), rectPts(2.4, 1.3), AMMO, aim, k, 0.9); for (let i = 0; i < 3; i++) ring(D(-13 + i * 1.6, 7.6), 0.55 * k, YEL, 0.5 * k); }
     if (P4 === "C") plate(D(-12, -7.6), rectPts(2.2, 1.4), AMMO, aim, k, 0.9);
@@ -126,7 +129,6 @@ const P2 = {
       if (RM === "A") bar(D(L - 3, yc), D(L + 1, yc), (hf * 2 + 0.4) * k, GOLD);
       if (RM === "B") for (const x of [L - 10, L - 7, L - 4]) bar(D(x, yc - hf - 0.6), D(x, yc + hf + 0.6), 1.2 * k, GOLD);
       if (RM === "C") for (const y of [yc - hf - 2, yc + hf + 2]) bar(D(2, y), D(L - 3, y), 1 * k, GOLD);
-      if (P1 === "B") for (const y of ry) bar(D(6, y), D(7.6, y), 2.8 * k, METAL_D);
       if (P4 === "B") for (const y of ry) for (let i = 0; i < 3; i++) line(D(10 + i * 1.5, y - 1.2), D(10 + i * 1.5, y + 1.2), [0, 0, 0, 0.55], 0.7 * k);
       if (PM === "B") for (const y of ry) bar(D(L - 1.5, y), D(L, y), 2.2 * k, GOLD); });
     if (B.r === 1) { const ky = B.key("r1"); if (ky === "B") { plate(S(10, 8), rectPts(3.4, 2), AMMO, 0, k, 1); for (let i = 0; i < 3; i++) drawMine(B, S(8 + i * 2.4, 8), k * 0.4, t, col, false, true); } }
@@ -140,13 +142,13 @@ const P2 = {
   paths: [
     { name: "Power/Damage", theme: "the mine itself and its blast change at every step", steps: [
       { name: "Heavier Charge", cost: 160, effect: "100 damage", options: [
-        { key: "A", name: "Charge Rings", desc: "Extra rings round the mount; the mines are a size bigger." },
-        { key: "B", name: "Heavy Rail Clamps", desc: "Thick clamps on both rails; the mines are a size bigger." },
-        { key: "C", name: "Charge Hopper", desc: "A charge hopper behind the magazine; the mines are a size bigger." } ] },
+        { key: "A", name: "Thick Rim", desc: "A thick dark rim round each mine canister; the mines are a size bigger." },
+        { key: "B", name: "Weight Plates", desc: "Two steel weight plates across each mine canister; the mines are a size bigger." },
+        { key: "C", name: "Charge Core", desc: "A dark charge core with a white rim on each mine canister; the mines are a size bigger." } ] },
       { name: "Wider Charge", cost: 265, effect: "50 px blast", options: [
-        { key: "A", name: "Charge Dome", desc: "A raised charge dome on top of each mine canister; the blast is wider, with a shock ring." },
-        { key: "B", name: "Charge Studs", desc: "A ring of steel charge studs round the face of each mine canister; a wider blast with a shock ring." },
-        { key: "C", name: "Blast Bands", desc: "Two red blast bands across each mine canister; a wider blast with a shock ring." } ] },
+        { key: "A", name: "Flared Skirt", desc: "A flared skirt round each thrown mine; the blast is wider, with a shock ring." },
+        { key: "B", name: "Wide Flange", desc: "A wide steel flange with tabs round each thrown mine (never on the launcher); a wider blast with a shock ring." },
+        { key: "C", name: "Blast Collar", desc: "A bolted blast collar round each thrown mine; a wider blast with a shock ring." } ] },
       { name: "HE Mines", cost: 1190, effect: "125 damage (primary)", options: [
         { key: "A", name: "HE-Banded Canisters", desc: "Yellow bands on the magazine canisters; dark mines with a yellow band." },
         { key: "B", name: "Red Fuse Box", desc: "A fuse box with a red lamp; dark yellow-banded mines." },
@@ -224,7 +226,7 @@ P2.picks = {};
 
 // ---- Round 2 (owner's picks and notes, 2026-10-18): picked stages show only the pick (re-described where a note changed it);
 // Quick Assembly and Twin Press show new ideas.
-P2.intro = "Round 7: the wide flange is gone and Wider Charge has three new looks, all on the mine canister itself (a raised dome, a ring of studs, or red bands); Adhesive Mines is picked (Gel Coating). Round 6: the Conveyor Feed Retrofit is replaced by Adhesive Mines (your pick): gel-coated mines or a gel tank, and each blast leaves a sticky gel puddle that slows enemies. Long Arm is picked (Long Arm Rails). Round 5: the wide flange is only on the thrown mine, never on the launcher; Long Arm shows its three options again. Round 4: all your picks drawn with your latest notes: the two launchers are identical and centred on the circle and the mines alternate between them, the central eye is bigger, the belt runs on over the mount to the launcher in the centre, the notched rotunda only appears from Rapid Line, and the rails are simply longer (no thickened parts). Round 2's notes still apply: only the three original canisters sit behind the tower; Wider Charge changes the mine (a flange round it) rather than the thrower; the Assembly Line feeds straight into the centre; the Servo Motors sit on the mount and speed its ring of ticks up (the rotunda); the Mine Mortar and Long Mortar stretch the original rails instead of adding pieces; the Long Arm replaces the rails with longer ones. Use the build preview to check combinations.";
-P2.picks = { p0s0: "B", p0s1: undefined, p0s2: "A", p0s3: "A", p0s4: "A", p1s0: "C", p1s1: "A", p1s2: "A", p1s3: "A", p1s4: "A", p2s0: "A", p2s1: "A", p2s2: "B", p2s3: "A", p2s4: "C", r0: "A", r1: "A", r2: "A" };
+P2.intro = "Round 8: it was the thin clamps (Heavier Charge) you meant, so those are gone from the launcher and Heavier Charge has three new looks on the mine canister; Wider Charge is back to your wide flange on the thrown mine. Round 7: the wide flange is gone and Wider Charge has three new looks, all on the mine canister itself (a raised dome, a ring of studs, or red bands); Adhesive Mines is picked (Gel Coating). Round 6: the Conveyor Feed Retrofit is replaced by Adhesive Mines (your pick): gel-coated mines or a gel tank, and each blast leaves a sticky gel puddle that slows enemies. Long Arm is picked (Long Arm Rails). Round 5: the wide flange is only on the thrown mine, never on the launcher; Long Arm shows its three options again. Round 4: all your picks drawn with your latest notes: the two launchers are identical and centred on the circle and the mines alternate between them, the central eye is bigger, the belt runs on over the mount to the launcher in the centre, the notched rotunda only appears from Rapid Line, and the rails are simply longer (no thickened parts). Round 2's notes still apply: only the three original canisters sit behind the tower; Wider Charge changes the mine (a flange round it) rather than the thrower; the Assembly Line feeds straight into the centre; the Servo Motors sit on the mount and speed its ring of ticks up (the rotunda); the Mine Mortar and Long Mortar stretch the original rails instead of adding pieces; the Long Arm replaces the rails with longer ones. Use the build preview to check combinations.";
+P2.picks = { p0s0: undefined, p0s1: "B", p0s2: "A", p0s3: "A", p0s4: "A", p1s0: "C", p1s1: "A", p1s2: "A", p1s3: "A", p1s4: "A", p2s0: "A", p2s1: "A", p2s2: "B", p2s3: "A", p2s4: "C", r0: "A", r1: "A", r2: "A" };
 P2.paths.forEach((pa, pi) => pa.steps.forEach((st, k) => { const pk = P2.picks["p" + pi + "s" + k]; if (pk) st.options = st.options.filter((o) => o.key === pk); }));
 P2.retrofits.forEach((rf, ri) => { const pk = P2.picks["r" + ri]; if (pk) rf.options = rf.options.filter((o) => o.key === pk); });
