@@ -387,7 +387,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 10 | CAS Gunship | `design/tower_art_p2_10_cas.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 12 | Chemical Plant | `design/tower_art_p2_12_chem.html` | **Confirmed** (owner, 2026-10-19: "finished") |
-| 13 | Boost Tower | `design/tower_art_p2_13_boost.html` | Round 1b: modules fade toward gold; awaiting picks |
+| 13 | Boost Tower | `design/tower_art_p2_13_boost.html` | Round 2: all picks drawn; awaiting confirm |
 
 ### Gun Turret (second pass)
 
@@ -1049,6 +1049,8 @@ Crit Link and Wide Mast overlap no path step (Wide Mast widens the radius only; 
   by each boosted tower); Wide Mast a lattice frame, braced truss legs or a spoked ring (the widest radius ring).
 - The faint boost radius ring and the sparks that jump to each boosted tower in turn are in the preview.
 
+**Picks (owner):** every path stage B (Ringed Disc); Retrofits Signal Booster C (Spire), Crit Link C (Gold Crown), Wide Mast C (Spoked Ring). No notes. **Round 2:** every stage is picked; the page shows only the picks.
+
 ## Open questions
 
-1. **Second pass, Boost Tower** (tower 13, round 1): pick one option per stage and Retrofit. Then towers 14-20 (next: Radar Tower).
+1. **Second pass, Boost Tower** (tower 13, round 2): confirm. Then towers 14-20 (next: Radar Tower).

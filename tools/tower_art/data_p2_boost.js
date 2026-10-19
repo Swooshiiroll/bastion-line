@@ -6,7 +6,7 @@
 // The Retrofits rebuild the centre and the rim (an antenna mast, a gold crown, a lattice frame) and widen the boost radius.
 // The Signal Booster Retrofit's extra +5% to every boost overlaps the paths' boost steps and is kept, stacking (the carpet rule).
 // Geometry (game px): a round drum r 11 (membrane rings ripple on each beat) braced by three struts; modules at r 6.2 on the drum top.
-const PAGE = { title: "Boost Tower: paths and Retrofits (second pass)", store: "bl-tower-art-p2-boost-r1" };
+const PAGE = { title: "Boost Tower: paths and Retrofits (second pass)", store: "bl-tower-art-p2-boost-r2" };
 const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1];
 const SCOL = [[1, 0.5, 0.2, 1], [0.4, 0.9, 1, 1], [0.7, 1, 0.3, 1]]; // damage, speed, range
 const rnd2 = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
@@ -142,4 +142,8 @@ const P2 = {
       { key: "C", name: "Spoked Ring", desc: "A wide spoked ring is built round the drum; a wider radius ring." } ] },
   ],
 };
-P2.picks = {};
+// ---- Round 2 (owner's picks, 2026-10-19): every stage shows only the pick; no notes.
+P2.intro = "Round 2: all your picks drawn as one model, nothing left to choose. Use the build preview to check combinations; the module discs fade toward gold with each step.";
+P2.picks = { p0s0: "B", p0s1: "B", p0s2: "B", p0s3: "B", p0s4: "B", p1s0: "B", p1s1: "B", p1s2: "B", p1s3: "B", p1s4: "B", p2s0: "B", p2s1: "B", p2s2: "B", p2s3: "B", p2s4: "B", r0: "C", r1: "C", r2: "C" };
+P2.paths.forEach((pa, pi) => pa.steps.forEach((st, k) => { const pk = P2.picks["p" + pi + "s" + k]; if (pk) st.options = st.options.filter((o) => o.key === pk); }));
+P2.retrofits.forEach((rf, ri) => { const pk = P2.picks["r" + ri]; if (pk) rf.options = rf.options.filter((o) => o.key === pk); });
