@@ -35,7 +35,7 @@ All 20 towers are designed and confirmed by the owner (2026-10-15). Costs are bu
 | 8 | Tesla Tower | Assault | Energy | 250 | Power (Damage) / Range/Chaining / Speed | Bigger Disk / Grounding Rods / Insulated Coils |
 | 9 | Drone Bay | Assault | Deployable | 300 | Power (overall) / Weaponry (upgrades/additions) / Speed | Second Hangar (only) |
 | 10 | CAS Gunship | Assault | Deployable | 650 | Light gun / Medium gun / Heavy gun (its own system) | Radar / Extra Ammo / Wide Orbit |
-| 11 | Mine Layer | Defense | Explosive | 450 | Power/Damage / Production Speed / Range | Conveyor Feed / Shaped Charges / Long Arm |
+| 11 | Mine Layer | Defense | Explosive | 450 | Power/Damage / Production Speed / Range | Adhesive Mines / Shaped Charges / Long Arm |
 | 12 | Chemical Plant | Support | Chemical | 250 | Damage/Armor stripping / Speed / Slowing | Pressure Pump / Mist Nozzle / Bigger Tanks |
 | 13 | Boost Tower (was Rally Beacon) | Support | None | 400 | Damage boost / Speed boost / Range Boost | Signal Booster / Crit Link / Wide Mast |
 | 14 | Radar Tower | Utility | Energy | 575 | Power/Range / Speed/Frequency / Special Targeting | Bigger Dish / Signal Processor / Early Warning |
@@ -994,7 +994,7 @@ stock tuned to the owner's 450-credit build cost.
 - **Path 1 (Power/Damage):** **damage and larger blasts.**
 - **Path 2 (Production Speed):** **faster laying and a bigger cap.**
 - **Path 3 (Range):** **how far it tosses** mines.
-- **Retrofit:** **faster production and a higher cap.**
+- **Retrofit:** a **three-way choice** (the Conveyor Feed, which sped production up and raised the cap, was replaced on 2026-10-18).
 
 **Stock (proposed):** 450 credits; tosses a mine onto the track within 120 px every 1.5 s, up to 20 at once. Each mine
 blasts 85 damage in 40 px when a ground or burrowed enemy passes over. Mines spread along the track in range, nearest
@@ -1003,8 +1003,9 @@ the entrance end first.
 **Pricing value:** mines count like blasts (production rate × damage × area), plus ×1.1 for hitting burrowed enemies.
 The cap isn't priced.
 
-**Retrofit (the player picks one; owner, 2026-10-15):**
-- **Conveyor Feed, 110:** a mine every 1.33 s, and a 25-mine cap. Look: a conveyor belt and a hopper of ready mines.
+**Retrofit (the player picks one; owner, 2026-10-15; the first replaced 2026-10-18):**
+- **Adhesive Mines, 40 (formula estimate, proposed):** each mine's blast leaves sticky gel on the track that slows enemies 20% for 2 s. Look: gel-coated
+  mines and a gel puddle after each blast. Replaces the **Conveyor Feed**, which did the Production path's job (and the belt now belongs to Assembly Line).
 - **Shaped Charges, 160:** +15 damage per mine (100). Look: mines with a directional charge plate.
 - **Long Arm, 150:** +20 toss range (140). Look: a longer throwing arm.
 

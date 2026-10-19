@@ -385,7 +385,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 8 | Tesla Tower | `design/tower_art_p2_08_tesla.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 9 | Drone Bay | `design/tower_art_p2_09_drones.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 10 | CAS Gunship | `design/tower_art_p2_10_cas.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
-| 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | Round 5: picks drawn, notes applied, Long Arm open again; awaiting picks |
+| 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | Round 6: Conveyor Feed replaced by Adhesive Mines; awaiting its pick |
 
 ### Gun Turret (second pass)
 
@@ -884,7 +884,7 @@ tail fins and an exhaust flame, turning along their curved path, with a thinner 
 ### Mine Layer (second pass)
 
 **Retrofits kept, stats stacking (the carpet rule).** All three overlap a path step; Claude flagged them and kept them:
-- Conveyor Feed (a mine every 1.33 s, a 25-mine cap) = Production step 1, Quick Assembly (1.33 s, cap 24). The look takes a further
+- (Conveyor Feed was replaced on 2026-10-18, see below.) It was a mine every 1.33 s with a 25-mine cap, the same as Production step 1, Quick Assembly. The look took a further
   0.17 s off the toss gap and adds one to the cap on top of the path.
 - Shaped Charges (+15 damage, 100) = Power step 1, Heavier Charge (100 damage). Every mine gets a directional plate or cone.
 - Long Arm (+20 toss range, 140) = Range step 1, Longer Arm (140 px). The rails are lengthened by a further 3 px.
@@ -950,6 +950,13 @@ left unpicked (the length note repeated, and was already applied last round).
 now has exactly the single launcher's rails (the same size, the same 5.2 px spacing, the same bands); the two launchers sit 9 px apart,
 symmetric about the centre, instead of the narrower pairs I used before.
 
+**Retrofit replaced (owner, 2026-10-18: "we need to change conveyer feed to something else"; chose Adhesive Mines):** the Conveyor Feed did the Production
+path's job and its belt now belongs to Assembly Line. The Mine Layer's first Retrofit is now **Adhesive Mines** (40): each mine's
+blast leaves sticky gel on the track that slows enemies 20% for 2 s. It is in `tower_roster.md` and the regenerated trees. Its three looks:
+a glossy gel coat with drips on every mine (A), a gel tank with a hose on the deck (B), a rack of gel cartridges (C); all three leave a green gel
+puddle on the track after each blast (it lingers 2 s and fades). The Production path no longer gets a Retrofit bonus to its toss gap or cap.
+Shaped Charges (A) and Long Arm (A) are picked.
+
 ## Open questions
 
-1. **Second pass, Mine Layer** (tower 11, round 5): pick the Long Arm; confirm. Then towers 12-20 (next: Chemical Plant).
+1. **Second pass, Mine Layer** (tower 11, round 6): pick the Adhesive Mines look; confirm. Then towers 12-20 (next: Chemical Plant).

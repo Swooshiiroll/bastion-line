@@ -276,7 +276,7 @@ Manufactures and tosses explosive mines onto the track that explode when an enem
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
 | 1 | base | Mine Layer | 450 |  | 450 credits; tosses a mine onto the track within 120 px every 1.5 s, up to 20 at once. Each mine blasts 85 damage in 40 px when a ground or burrowed enemy passes over. Mines spread along the track in range, nearest the entrance end first. | new |
-| 2 | r1 | Conveyor Feed | 110 |  | A mine every 1.33 s, and a 25-mine cap. | new |
+| 2 | r1 | Adhesive Mines | 40 |  | Each mine's blast leaves sticky gel on the track that slows enemies 20% for 2 s. | new |
 | 2 | r2 | Shaped Charges | 160 |  | +15 damage per mine (100). | new |
 | 2 | r3 | Long Arm | 150 |  | +20 toss range (140). | new |
 | 3 | a | Heavier Charge | 160 |  | 100 damage | new |
