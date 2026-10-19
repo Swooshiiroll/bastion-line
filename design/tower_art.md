@@ -385,7 +385,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 8 | Tesla Tower | `design/tower_art_p2_08_tesla.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 9 | Drone Bay | `design/tower_art_p2_09_drones.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
 | 10 | CAS Gunship | `design/tower_art_p2_10_cas.html` | **Confirmed** (owner, 2026-10-18: "Finished") |
-| 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | Round 2: picks drawn, notes applied, new ideas for two stages; awaiting picks |
+| 11 | Mine Layer | `design/tower_art_p2_11_mines.html` | Round 3: all picks drawn; awaiting confirm |
 
 ### Gun Turret (second pass)
 
@@ -920,6 +920,10 @@ tail fins and an exhaust flame, turning along their curved path, with a thinner 
 - **Mine Mortar and Long Mortar** stretch the original rails instead of adding pieces; the **Long Arm** replaces the rails with
   longer ones (no cap piece).
 
+**Picks (owner, round 2):** Quick Assembly C (Loader Arm) and Twin Press A (Side-by-Side Rail); the other picks are unchanged. No notes.
+
+**Round 3:** every stage is picked; the page shows only the picks.
+
 ## Open questions
 
-1. **Second pass, Mine Layer** (tower 11, round 2): pick Quick Assembly and Twin Press; confirm. Then towers 12-20 (next: Chemical Plant).
+1. **Second pass, Mine Layer** (tower 11, round 3): confirm. Then towers 12-20 (next: Chemical Plant).
