@@ -462,13 +462,14 @@ func _show_detail(id: String) -> void:
 	blurb.position = Vector2(0, 54)
 	_detail.add_child(blurb)
 	if nd.effects.get("mastery", false):
-		var branches: Array = TowerTrees.TREES[tree].branches
+		var reworked := Towers.is_rework(tree)
+		var branches: Array = Towers.Rework.TREES[tree].paths if reworked else TowerTrees.TREES[tree].branches
 		for i in branches.size():
 			var br: Dictionary = branches[i]
 			var m: Dictionary = br.mastery
 			var box := UiKit.vbox(0)
 			box.position = Vector2(i * 300, 80)
-			box.add_child(UiKit.label("%s  >  %s   (%d cr)" % [br.nodes[0].name, m.name, int(m.cost)], 13, Draw.accent(tree, str(br.id))))
+			box.add_child(UiKit.label("%s  >  %s   (%d cr)" % [br.name if reworked else br.nodes[0].name, m.name, int(m.cost)], 13, Draw.accent(tree, "" if reworked else str(br.id))))
 			box.add_child(UiKit.wrap_label(m.blurb, 285, 12, UiKit.DIM))
 			_detail.add_child(box)
 	elif not nd.requires.is_empty():

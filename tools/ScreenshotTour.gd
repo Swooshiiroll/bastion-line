@@ -825,6 +825,18 @@ func _research_checks() -> void:
 	Input.parse_input_event(motion)
 	await _wait(0.5)
 	await _shot("13_research_lab")
+	# The reworked Gun Turret's tree: its Mastery node lists the three masteries by path.
+	lab.panel.focus_tree("gun_turret")
+	await _wait(0.4)
+	var gun_hover: Vector2 = get_viewport().get_final_transform() * (lab.panel.node_buttons["gun_turret_m"].get_global_rect().get_center() + UiKit.view_offset())
+	var gun_motion := InputEventMouseMotion.new()
+	gun_motion.position = gun_hover
+	gun_motion.global_position = gun_hover
+	Input.parse_input_event(gun_motion)
+	await _wait(0.5)
+	await _shot("13b_research_gun_turret")
+	lab.panel.focus_tree("sniper")
+	await _wait(0.3)
 	var sp_layer := CanvasLayer.new()
 	sp_layer.layer = 40
 	app.add_child(sp_layer)
