@@ -391,7 +391,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 15 | Cryo Tower | `design/tower_art_p2_15_cryo.html` | **Confirmed** (owner, 2026-10-19: "Finished"; Deep Cold C Frost Collar) |
 | 16 | Shockwave Generator | `design/tower_art_p2_16_shock.html` | **Confirmed** (owner, 2026-10-19: "Finished") |
-| 17 | Scrapyard | `design/tower_art_p17_scrapyard.html` | **Restarted again** (owner, 2026-10-19). New base-look page (three parts: furnace stack, junkyard, warehouse; three layouts, three animations): pick a look and an animation |
+| 17 | Scrapyard | `design/tower_art_p17_scrapyard.html` | **Restarted again** (owner, 2026-10-19). Base round 2: picks B Production Line, B Melt and Pour, with the crane's arm drawn over the smelter; waiting for "Scrapyard base finished" |
 
 ### Gun Turret (second pass)
 
@@ -1168,6 +1168,8 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
 - **Animations (pick one):** Scrap Flow (scrap arcs from the junkyard into the stack and ingots slide to the warehouse; at the payout the doors roll up and a crate ships out with +100), Melt and Pour (embers rise from the stack; at the payout its core flares and a fountain of coins vents with +100), Wreck to Coin (also shows the kill bonus: a wrecked enemy's hulk flies into the junkyard and a +5 coin jumps out of the stack; +100 over the warehouse at the payout).
 - In every look the stack flares and the warehouse doors roll up at each payout.
 
+**Round 2 (owner's picks, 2026-10-19):** look **B Production Line**, animation **B Melt and Pour**. Note: "Make sure the crane bar is over top of the smelter": the grab crane is now drawn after the stack, so its arm and claw pass over the smelter when it swings across. The page shows only the picks.
+
 ## Open questions
 
-1. **Scrapyard base look, third restart** (tower 17): pick one of the three layouts and one animation, then say "Scrapyard base finished". Then the new upgrade names, the second pass, and towers 18-20 (next: Magneto Tower).
+1. **Scrapyard base look, third restart** (tower 17, round 2: B Production Line, B Melt and Pour, crane over the smelter): confirm with "Scrapyard base finished". Then the new upgrade names, the second pass, and towers 18-20 (next: Magneto Tower).

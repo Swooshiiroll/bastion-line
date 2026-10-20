@@ -2,7 +2,7 @@
 // The owner's brief: the tower is three parts, a recycler/smelter (a tall furnace stack, the focal part), a junkyard and a warehouse. Each path will
 // later rebuild one part (Passive Income the stack, Kill Income the junkyard, Discounts the warehouse). The three looks are the same three parts in
 // three layouts; the three animations are picked separately. Every look names its parts' spots (look.parts, in units) so the animations can use them.
-const PAGE = { title: "Scrapyard base look (three parts)", store: "bl-tower-art-scrap-parts-1" };
+const PAGE = { title: "Scrapyard base look (three parts)", store: "bl-tower-art-scrap-parts-2" };
 const rnd = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
 const distTo = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 function txt(p, str, col, px) { X.save(); X.font = "bold " + Math.round(px) + "px sans-serif"; X.textAlign = "center"; X.fillStyle = css(OUTLINE); X.fillText(str, p[0] + 1, p[1] + 1); X.fillStyle = css(col); X.fillText(str, p[0], p[1]); X.restore(); }
@@ -82,10 +82,12 @@ const TOWERS = [
         theme: "Left to right: the junkyard (heaps, a tank hulk, a grab crane) feeds a conveyor up into the furnace stack in the middle, and a short ingot belt runs from the stack into a tall warehouse on the right.",
         draw(c, aim, s, fx, t, col) { const k = G(s), age = payAge(fx, t), S = (x, y) => add(c, [x * k, y * k]);
           yardFloor(c, k, col, t); dirt(c, -44, -44, -15, 44, k, 5);
-          scrapPile(S(-31, -30), 9, k, 2); scrapPile(S(-33, 4), 7, k, 13); wreck(S(-30, 30), 1.45, k); crane(S(-21, -10), 15, Math.PI * 0.2, t, k);
+          scrapPile(S(-31, -30), 9, k, 2); scrapPile(S(-33, 4), 7, k, 13); wreck(S(-30, 30), 1.45, k);
           warehouse(S(33, 0), 40, 9.5, Math.PI / 2, 4, age, k); crates(S(4, 32), 2, 2, k);
           conveyor(S(-24, 26), S(-7, 3), t, k); conveyor(S(10, -8), S(23, -8), t, k);
-          stack(S(0, -8), 14, [], t, age, k); smoke(S(0, -8), 14, t, k); } },
+          stack(S(0, -8), 14, [], t, age, k);
+          crane(S(-21, -10), 15, Math.PI * 0.2, t, k);                                                              // round 2 (owner): the crane's arm swings over the top of the smelter
+          smoke(S(0, -8), 14, t, k); } },
       { key: "C", name: "Yard Corner", muzzle: 0, fixed: true, parts: { junk: [10, 18], mouth: [-29, -29], door: [14, -22] },
         theme: "The warehouse runs along the top edge with its doors facing down, and the furnace stack stands in the top-left corner, fed by chutes from the open junkyard that fills the bottom-right (heaps, a tank hulk, a big grab crane).",
         draw(c, aim, s, fx, t, col) { const k = G(s), age = payAge(fx, t), S = (x, y) => add(c, [x * k, y * k]);
@@ -114,4 +116,6 @@ const TOWERS = [
           pay: (v, s, col, P, W) => coinPop(W(P.door), v, s) }) },
     ] },
 ];
-const DEFAULTS = { scrap: { look: "A", anim: "A" } };
+// Round 2 (owner, 2026-10-19): look B Production Line, animation B Melt and Pour; note "Make sure the crane bar is over top of the smelter" (the crane is now drawn after the stack).
+TOWERS[0].looks = TOWERS[0].looks.filter((l) => l.key === "B"); TOWERS[0].anims = TOWERS[0].anims.filter((a) => a.key === "B");
+const DEFAULTS = { scrap: { look: "B", anim: "B" } };
