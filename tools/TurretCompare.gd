@@ -14,8 +14,10 @@ const BRANCHES := {
 	"sensor": ["deepscan", "painter", "disruptor"], "gravity": ["repulsor", "crush", "well"], "nullifier": ["purge", "dampener", "feedback"],
 	"nova": ["supernova", "pulsereactor", "solarflare"], "drones": ["interceptors", "bombers", "hunters"], "scrap": ["mint", "collector", "depot"],
 }
+## The reworked towers (issue #59) show their look as a key; four looks each: stock, then three mastered builds.
+const REWORK_LOOKS := {"gun_turret": [["", "-1|0|0|0"], ["", "0|5|2|0"], ["", "1|2|5|0"], ["", "2|0|2|5"]]}
 const AIMS := [-0.5, 2.4]
-const SIZE := Vector2i(1700, 1500)
+const SIZE := Vector2i(1700, 1700)
 const CELL := 100.0
 const MAX_DIFF := 12.0
 var views: Array = []
@@ -58,6 +60,14 @@ func _cells() -> Array:
 				out.append({"type": type, "tier": look[0], "spec": look[1], "aim": aim,
 					"pos": Vector2(CELL * 0.5 + float(col) * CELL * 2.0 + float(row % 2) * CELL, CELL * 0.5 + float(row) * CELL)})
 				col += 1
+		row += 1
+	for type in REWORK_LOOKS:
+		var col2 := 0
+		for look in REWORK_LOOKS[type]:
+			for aim in AIMS:
+				out.append({"type": type, "tier": 3, "spec": look[1], "aim": aim,
+					"pos": Vector2(CELL * 0.5 + float(col2) * CELL * 2.0 + float(row % 2) * CELL, CELL * 0.5 + float(row) * CELL)})
+				col2 += 1
 		row += 1
 	return out
 

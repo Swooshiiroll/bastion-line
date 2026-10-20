@@ -1066,6 +1066,7 @@ func _update_tower(t, dt: float) -> void:
 func _fire_gun(t, target, s: Dictionary) -> void:
 	_fire_projectile(t, target, s)
 	var shots: Array = [target]
+	t.shot_targets = shots
 	var extra := int(s.get("multishot", 1)) - 1
 	var side := float(s.get("side_gun", 0.0))
 	if extra <= 0 and side > 0.0:

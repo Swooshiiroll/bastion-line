@@ -10,6 +10,8 @@ var world
 static var timing := {}
 static var timing_on := false
 var _aim := {}
+## Each extra gun's smoothed aim, per tower (the Gun Turret's flank guns turn on their own).
+var _extra_aim := {}
 var _font: Font
 
 
@@ -33,7 +35,10 @@ func _draw() -> void:
 		if tw.target != null and tw.target.alive:
 			cur = lerp_angle(cur, (tw.target.pos - tw.pos).angle(), 0.35)
 		_aim[key] = cur
-		Draw.tower(self, tw.type, tw.tier, tw.pos, cur, 1.0 if tw.size <= 1 else 1.8, t + float(tw.cell.x) * 0.3, tw.fire_flash, tw.spec, tw.shown_spec)
+		var extra: Array = []
+		if tw.is_rework and tw.type == "gun_turret":
+			extra = _extra_aims(tw, key, cur)
+		Draw.tower(self, tw.type, tw.tier, tw.pos, cur, 1.0 if tw.size <= 1 else 1.8, t + float(tw.cell.x) * 0.3, tw.fire_flash, tw.spec, tw.shown_spec, extra)
 		if tw.disabled > 0.0:
 			Draw.tower_offline(self, tw.pos, t)
 		if tw.buff_dmg > 0.0:
@@ -115,6 +120,20 @@ func _wing(tw, t: float) -> void:
 		var bob := sin(t * 5.0 + float(i)) * 1.5
 		Draw.ellipse(self, p + Vector2(0, 9), 4.0, 1.6, Color(0, 0, 0, 0.22))
 		Draw.drone(self, p + Vector2(0, bob), facing, 1.25, t + float(i), tw.spec, acc, d.kind == "bomber")
+
+## Turns each extra gun toward the enemy its shots go at (the main aim when it has none).
+func _extra_aims(tw, key: int, main: float) -> Array:
+	var aims: Array = _extra_aim.get(key, [main, main, main])
+	for i in range(1, 3):
+		var want := main
+		if i < tw.shot_targets.size() and tw.shot_targets[i] != null and tw.shot_targets[i].alive:
+			var mount := Vector2(1.0, -10.5 if i == 1 else 10.5)
+			var mp: Vector2 = tw.pos + Vector2.from_angle(main) * mount.x + Vector2(-sin(main), cos(main)) * mount.y
+			want = (tw.shot_targets[i].pos - mp).angle()
+		aims[i] = lerp_angle(float(aims[i]), want, 0.3)
+	_extra_aim[key] = aims
+	return aims
+
 
 func _projectile(p) -> void:
 	match p.kind:

@@ -3,6 +3,7 @@ extends RefCounted
 ## CanvasItem passed in, so the same art serves the battlefield and the UI icons.
 
 const Towers = preload("res://data/towers.gd")
+const GunTurretArt = preload("res://scripts/view/towers/GunTurretArt.gd")
 const Difficulty = preload("res://data/difficulty.gd")
 
 const OUTLINE := Color(0.03, 0.04, 0.06, 0.95)
@@ -29,6 +30,7 @@ const ACCENT := {
 	"nova": Color(1.00, 0.70, 0.28),
 	"drones": Color(0.62, 0.91, 0.44),
 	"scrap": Color(0.95, 0.72, 0.42),
+	"gun_turret": Color(0.30, 0.90, 1.00),
 }
 const SPEC_ALT := {
 	"mint": Color(1.00, 0.84, 0.30),
@@ -435,7 +437,9 @@ static var _bake_seg := 0
 static var _seg_used := {}
 static var _turrets := {}
 static var _live := {}
-const AIMED := ["arrow", "cannon", "sniper", "laser", "missile", "flak"]
+const AIMED := ["arrow", "cannon", "sniper", "laser", "missile", "flak", "gun_turret"]
+## The aim of each extra gun of the tower being drawn (gun 0 is the main one); set by tower().
+static var _extra: Array = []
 const TURRET_BUCKETS := 8
 const TURRET_SCALE := 2.5
 
@@ -590,7 +594,8 @@ static func arc_segments(ci: CanvasItem, c: Vector2, r: float, count: int, gap: 
 
 ## `spec` shapes the model; `tint_spec` (default: the same) picks its accent colour, so a tower can
 ## show branch details while keeping its stock colour until its primary locks in.
-static func tower(ci: CanvasItem, type: String, tier: int, c: Vector2, aim: float, s := 1.0, t := 0.0, flash := 0.0, spec := "", tint_spec := "~") -> void:
+static func tower(ci: CanvasItem, type: String, tier: int, c: Vector2, aim: float, s := 1.0, t := 0.0, flash := 0.0, spec := "", tint_spec := "~", extra: Array = []) -> void:
+	_extra = extra
 	var acc := accent(type, spec if tint_spec == "~" else tint_spec)
 	if tier >= 4:
 		mastery_ring(ci, c, s, acc, t)
@@ -632,6 +637,8 @@ static func _turret(ci: CanvasItem, type: String, tier: int, c: Vector2, aim: fl
 			_drone_bay(ci, c, s, tier, t, spec, acc)
 		"scrap":
 			_scrapyard(ci, c, s, tier, t, spec, acc)
+		"gun_turret":
+			GunTurretArt.draw(ci, c, aim, s, t, flash, spec, acc, _extra)
 
 
 ## --- Shading helpers: light comes from the upper left. ------------------------------------

@@ -89,6 +89,8 @@ var dps_buckets: Array = []
 var _dps_mark := 0.0
 ## Drone Bay: its drones ({kind, pos, target, cd}). Not saved; rebuilt each round.
 var wing: Array = []
+## The enemies the last volley went at (gun 0 first); the view turns each extra gun toward its own.
+var shot_targets: Array = []
 
 ## Upgrade state. Change it through buy(), or call invalidate() after editing it directly.
 var trunk := 1:
@@ -112,7 +114,7 @@ var tier: int:
 var spec: String:
 	get:
 		if is_rework:
-			return ""
+			return look_key()
 		var p := primary()
 		return str(branch(p).id) if p != "" else ""
 
@@ -120,6 +122,8 @@ var spec: String:
 ## its third upgrade (the model still shows branch details from the first).
 var shown_spec: String:
 	get:
+		if is_rework:
+			return ""
 		return spec if locked_in() else ""
 
 var _cache := {}
@@ -311,6 +315,16 @@ func buy_retrofit(option: int) -> void:
 ## The Retrofit options as data nodes ({name, cost, blurb, set, add}).
 func retrofit_options() -> Array:
 	return rework_tree().retrofits if is_rework else []
+
+
+## What a reworked tower looks like, as one string for the drawing code: "retrofit|a|b|c", the Retrofit (-1 none) and each
+## path's depth, 5 on the path that took its mastery. A reworked tower's `spec` is this key.
+func look_key() -> String:
+	var p := primary()
+	var ds: Array = []
+	for key in BRANCHES:
+		ds.append(5 if (mastered and key == p) else int(depth[key]))
+	return "%d|%d|%d|%d" % [retrofit, ds[0], ds[1], ds[2]]
 
 
 ## Stat line of a reworked tower for an upgrade state: the base, the Retrofit if bought, then the secondary path's
