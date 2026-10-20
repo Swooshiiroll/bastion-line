@@ -393,6 +393,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 16 | Shockwave Generator | `design/tower_art_p2_16_shock.html` | **Confirmed** (owner, 2026-10-19: "Finished") |
 | 17 | Scrapyard | `design/tower_art_p2_17_scrap.html` | Base **confirmed** (owner, 2026-10-19: B Production Line, B Melt and Pour; base page `design/tower_art_p17_scrapyard.html`). New upgrade names confirmed. Second pass **confirmed** (owner, 2026-10-19, "Finished"; round 5) |
 | 18 | Magneto Tower | `design/tower_art_p2_18_magneto.html` | Second pass **confirmed** (owner, 2026-10-19, "finished"; round 3) |
+| 19 | Tractor Tower | `design/tower_art_p2_19_tractor.html` | Second pass round 1: pick one option per stage and Retrofit |
 
 ### Gun Turret (second pass)
 
@@ -1278,6 +1279,28 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
 
 **Confirmed (owner, 2026-10-19, "finished"):** the round 3 page is final.
 
+### Tractor Tower (second pass on the Claw Emitter)
+
+**Owner's choices (2026-10-19):** the names stay. Each path rebuilds one part: Pull Distance the **barrel**, Recharge the **turret body** (with capacitors), Grip the **claws** at the barrel's tip.
+
+**The page** (`design/tower_art_p2_19_tractor.html`, data `tools/tower_art/data_p2_tractor.js` on the base `data_towers4.js`, look C, animation C). Each step rebuilds its part in the style picked for that step, and the new design replaces the old one. Masteries are gold.
+- **Pull Distance (barrel, longer each step):** banded, lens or rail. From Rewind, a rewind coil turns backwards at the tip. Undo is gold, with two counter-turning coils.
+- **Recharge (turret body):** capacitor drums on its back, a ring of cells round it, or coil banks on its sides. They light up as it recharges. Glowing vents from Overclocked Emitter. Dual Beam is gold, with a second emitter that aims at its own target.
+- **Grip (claws):** clamp claws, pincers or a ring clamp. They close on a hold. Teeth from Crushing Grip, lift pads from Lift and Drop, a lock from Grip Lock. Gravity Hammer is gold.
+- **The agent (Spiral Lock plus the real rules):**
+  - The hold time: 1.5 s, 1.8 s from Stronger Beam, +0.5 s with Longer Hold.
+  - The pull or rewind. The rewind shows a trail of past positions and -3s, -4s or -5s; at Undo, every third grab is a gold UNDO. The preview keeps the held enemy on screen.
+  - The recharge, shortened for the preview in proportion.
+  - The extra beams: Twin Emitter at half the pull, Dual Beam at a third.
+  - Crushing Grip shows -15 and sparks.
+  - Lift and Drop lifts ground enemies, then slams them, with a 50 px stun ring (80 px, gold, with shards at Gravity Hammer).
+  - Grip Lock shows a padlock on the held enemy.
+- **Retrofits:**
+  - **Twin Emitter:** a side barrel, a rear dish, or twin claws. Its beam leaves from there.
+  - **Longer Hold:** a hold capacitor ring, a hold battery, or hold coils.
+  - **Faster Recharge:** cooling fins, radiator panels, or a fan vent.
+- **Carpet-rule overlaps (kept, stacking):** Twin Emitter with Dual Beam (three beams), Longer Hold's +0.5 s with Stronger Beam's hold, and Faster Recharge's -1 s with the Recharge path.
+
 ## Open questions
 
-1. **Second pass, Tractor Tower** (tower 19, next): then the Augmentation Tower.
+1. **Second pass, Tractor Tower** (tower 19, round 1): pick one option per stage and Retrofit. Then the Augmentation Tower.
