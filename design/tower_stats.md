@@ -218,3 +218,27 @@ air: yes · ground: yes · size: 1 · damage_kind: energy
 | c3 | rate 1.4 |
 | c4 | rate 1.6 |
 | cm | rate 2.1 |
+
+## drone_bay
+
+air: yes · ground: yes · size: 1 · damage_kind: physical
+
+| Node | Tokens |
+|---|---|
+| base | damage 16 · rate 3 · drones 1 |
+| r1 | drones 2 |
+| a1 | damage 20 |
+| a2 | damage 24 |
+| a3 | damage 30 |
+| a4 | damage 36 |
+| am | damage 42 |
+| b1 | lo_missiles |
+| b2 | lo_bombs |
+| b3 | lo_laser |
+| b4 | loadout_mult 1.25 |
+| bm | lo_full |
+| c1 | rate 3.5 |
+| c2 | rate 4 |
+| c3 | rate 5 |
+| c4 | rate 5.8 |
+| cm | rate 7 |

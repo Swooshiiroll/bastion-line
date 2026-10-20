@@ -11,7 +11,7 @@ extends RefCounted
 ##   command tree  "start_gold": +fraction, "lives": +fraction of the mode's shields, "sell_refund": +fraction,
 ##                 "ability_cd": -fraction, "bounty": +fraction
 
-const TREE_ORDER := ["command", "arrow", "cannon", "frost", "sniper", "tesla", "laser", "missile", "amp", "flak", "sensor", "gravity", "nullifier", "nova", "drones", "scrap", "gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon", "railgun", "tesla_tower"]
+const TREE_ORDER := ["command", "arrow", "cannon", "frost", "sniper", "tesla", "laser", "missile", "amp", "flak", "sensor", "gravity", "nullifier", "nova", "drones", "scrap", "gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon", "railgun", "tesla_tower", "drone_bay"]
 
 ## RP sources, all derived from profile records so they can't be farmed and are never lost.
 ## (Medals pay their mode's medal_rp, from data/difficulty.gd.)
@@ -541,6 +541,27 @@ const NODES := {
 	"tesla_tower_m": {
 		"tree": "tesla_tower", "slot": Vector2i(0, 2), "cost": 3, "requires": ["tesla_tower_2a", "tesla_tower_2b"], "icon": "mastery",
 		"name": "Tesla Tower Mastery", "blurb": "Unlocks the masteries: Lightning Rod, Tempest and Continuous Discharge.",
+		"effects": {"mastery": true},
+	},
+	# --- Drone Bay (the tower rework, issue #59: a minimal tree until the research pass) ----------
+	"drone_bay_1": {
+		"tree": "drone_bay", "slot": Vector2i(0, 0), "cost": 1, "requires": [], "icon": "damage",
+		"name": "Heavier Guns", "blurb": "Drone Bays deal +6% damage.",
+		"effects": {"mult": {"damage": 0.06}},
+	},
+	"drone_bay_2a": {
+		"tree": "drone_bay", "slot": Vector2i(-1, 1), "cost": 2, "requires": ["drone_bay_1"], "icon": "rate",
+		"name": "Fast Cycling", "blurb": "Drone Bays fire 7% faster.",
+		"effects": {"mult": {"rate": 0.07}},
+	},
+	"drone_bay_2b": {
+		"tree": "drone_bay", "slot": Vector2i(1, 1), "cost": 2, "requires": ["drone_bay_1"], "icon": "rate",
+		"name": "Spare Parts", "blurb": "Drone Bays fire 4% faster.",
+		"effects": {"mult": {"rate": 0.04}},
+	},
+	"drone_bay_m": {
+		"tree": "drone_bay", "slot": Vector2i(0, 2), "cost": 3, "requires": ["drone_bay_2a", "drone_bay_2b"], "icon": "mastery",
+		"name": "Drone Bay Mastery", "blurb": "Unlocks the masteries: Elite Drones, Full Kit and Storm Drones.",
 		"effects": {"mastery": true},
 	},
 }

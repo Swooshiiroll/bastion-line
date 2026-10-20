@@ -921,7 +921,7 @@ func _update_enemy(e, dt: float) -> void:
 			var er := float(d.emp_radius)
 			var hit := 0
 			for t in towers:
-				if t.pos.distance_squared_to(e.pos) <= er * er:
+				if t.pos.distance_squared_to(e.pos) <= er * er or (t.type == "drone_bay" and t.wing.any(func(dr): return dr.pos.distance_squared_to(e.pos) <= er * er)) or (t.type == "cas_gunship" and t.aim_point.distance_to(e.pos) <= er + float(t.stats().get("orbit", 90.0))):
 					t.disabled = maxf(t.disabled, float(d.emp_duration))
 					hit += 1
 			_emit({"type": "emp", "pos": e.pos, "radius": er, "hit": hit})
@@ -1005,6 +1005,9 @@ func _update_tower(t, dt: float) -> void:
 		return
 	if t.type == "drones":
 		_update_drones(t, s, dt)
+		return
+	if t.type == "drone_bay":
+		_update_drone_bay(t, s, dt)
 		return
 	if t.is_beam():
 		if t.is_rework:
@@ -1110,6 +1113,90 @@ func aim_artillery(t, pos: Vector2) -> void:
 
 
 ## Loads a shell type, if the cannon has unlocked it. Takes effect from the next shell.
+func set_loadout(t, kind: String) -> bool:
+	if not t.available_loadouts().has(kind):
+		return false
+	t.loadout = kind
+	return true
+
+
+## The weapons a Drone Bay's drones carry for a loadout: damage and rate as shares of the bay's gun, a blast, whether it only
+## hits the ground, whether it is energy (ignores armour). Loadout numbers are proposals the balance probe tunes. The Full Kit
+## fires all three of gun, missiles and laser at 70% each.
+const LOADOUTS := {
+	"gun": [{"name": "gun", "dmg": 1.0, "rate": 1.0, "splash": 0.0, "ground": false, "energy": false}],
+	"missiles": [{"name": "missiles", "dmg": 2.5, "rate": 0.4, "splash": 25.0, "ground": false, "energy": false}],
+	"bombs": [{"name": "bombs", "dmg": 4.0, "rate": 0.25, "splash": 40.0, "ground": true, "energy": false}],
+	"laser": [{"name": "laser", "dmg": 0.9, "rate": 1.0, "splash": 0.0, "ground": false, "energy": true}],
+	"full": [
+		{"name": "gun", "dmg": 0.7, "rate": 1.0, "splash": 0.0, "ground": false, "energy": false},
+		{"name": "missiles", "dmg": 1.75, "rate": 0.4, "splash": 25.0, "ground": false, "energy": false},
+		{"name": "laser", "dmg": 0.63, "rate": 1.0, "splash": 0.0, "ground": false, "energy": true},
+	],
+}
+
+
+func _loadout_weapons(t, s: Dictionary) -> Array:
+	var kind: String = t.loadout if t.available_loadouts().has(t.loadout) else "gun"
+	var out: Array = []
+	var boost := float(s.get("loadout_mult", 1.0))
+	for w in LOADOUTS[kind]:
+		var c: Dictionary = w.duplicate()
+		c["dmg"] = float(w.dmg) * boost
+		out.append(c)
+	return out
+
+
+## Drone Bay (reworked): one drone (two with the Second Hangar) hunts anywhere on the map, spread over different targets. Each
+## drone circles its target and fires the loadout's weapons from close range. Enemies can't hurt drones, but an EMP over one
+## switches the bay off for its duration (see the EMP code).
+func _update_drone_bay(t, s: Dictionary, dt: float) -> void:
+	var want := int(s.get("drones", 1))
+	while t.wing.size() < want:
+		t.wing.append({"kind": "gun", "pos": t.pos, "target": null, "cds": {}})
+	while t.wing.size() > want:
+		t.wing.pop_back()
+	var weapons := _loadout_weapons(t, s)
+	var ground_only: bool = weapons.all(func(w): return bool(w.ground))
+	var dmg: float = t.eff_damage()
+	var rate: float = t.eff_rate()
+	for i in t.wing.size():
+		var d: Dictionary = t.wing[i]
+		var tg = d.target
+		if tg == null or not tg.alive or tg.is_hidden() or (ground_only and tg.flying):
+			d["target"] = _drone_target(t, s, ground_only)
+			tg = d.target
+		var goal: Vector2
+		if tg == null:
+			goal = t.pos + Vector2.from_angle(time * 1.4 + float(i) * PI) * 34.0
+		else:
+			goal = tg.pos + Vector2.from_angle(time * 2.0 + float(i) * PI) * 44.0
+		var v := 170.0 * dt
+		var to: Vector2 = goal - d.pos
+		d["pos"] = goal if to.length() <= v else d.pos + to.normalized() * v
+		if tg == null:
+			continue
+		for w in weapons:
+			var cds: Dictionary = d.cds
+			cds[w.name] = float(cds.get(w.name, 0.0)) - dt
+			if float(cds[w.name]) > 0.0 or d.pos.distance_to(tg.pos) > 80.0 or (bool(w.ground) and tg.flying):
+				continue
+			cds[w.name] = 1.0 / (rate * float(w.rate))
+			var hit: float = dmg * float(w.dmg)
+			_drone_hit(t, d, tg, w, hit)
+
+
+func _drone_hit(t, d: Dictionary, tg, w: Dictionary, hit: float) -> void:
+	var energy := bool(w.energy)
+	if float(w.splash) > 0.0:
+		for e in _enemies_near(tg.pos, float(w.splash), not bool(w.ground), true):
+			damage_enemy(e, hit, energy, t)
+		_emit({"type": "drone_bomb" if bool(w.ground) else "drone_shot", "pos": tg.pos, "from": d.pos, "to": tg.pos, "radius": float(w.splash), "kind": w.name, "look": t.look_key()})
+		return
+	damage_enemy(tg, hit, energy, t)
+	_emit({"type": "drone_shot", "from": d.pos, "to": tg.pos, "kind": w.name, "look": t.look_key()})
+
+
 func set_shell(t, kind: String) -> bool:
 	if not t.available_shells().has(kind):
 		return false
@@ -2532,7 +2619,7 @@ func to_save() -> Dictionary:
 	for t in towers:
 		tl.append({
 			"type": t.type, "col": t.cell.x, "row": t.cell.y, "trunk": t.trunk, "depth": t.depth.duplicate(),
-			"aim_x": t.aim_point.x, "aim_y": t.aim_point.y, "shell": t.shell,
+			"aim_x": t.aim_point.x, "aim_y": t.aim_point.y, "shell": t.shell, "loadout": t.loadout,
 			"retrofit": t.retrofit, "started": t.started.duplicate(), "mastery": t.mastered, "mode": t.mode, "priority": t.priority, "kills": t.kills, "spent": t.spent,
 		})
 	return {
@@ -2563,6 +2650,7 @@ func to_save() -> Dictionary:
 
 ## Restores a saved tower's upgrade state after checking it follows the branch rules.
 func _restore_upgrades(t, entry: Dictionary) -> String:
+	t.loadout = str(entry.get("loadout", "gun"))
 	if t.type == "artillery_cannon" and entry.has("aim_x"):
 		t.aim_point = Vector2(float(entry.aim_x), float(entry.aim_y))
 		t.aim_set = true

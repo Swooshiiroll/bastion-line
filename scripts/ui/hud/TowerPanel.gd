@@ -75,6 +75,25 @@ func _shell_selector(t) -> void:
 	_content.add_child(UiKit.wrap_label("Click a spot on the track to aim. Re-aiming is free.", W - 40, 11, UiKit.DIM))
 
 
+const LOADOUT_NAMES := {"gun": "Guns", "missiles": "Missiles", "bombs": "Bombs", "laser": "Laser", "full": "Full kit"}
+
+
+func _loadout_selector(t) -> void:
+	shell_buttons.clear()
+	_content.add_child(UiKit.label("LOADOUT (next shot)", 11, UiKit.DIM))
+	var row := UiKit.hbox(4)
+	for kind in t.available_loadouts():
+		var b := UiKit.button(str(LOADOUT_NAMES[kind]), Callable(self, "_pick_loadout").bind(kind), Vector2(64, 28))
+		b.disabled = kind == t.loadout
+		shell_buttons[kind] = b
+		row.add_child(b)
+	_content.add_child(row)
+
+
+func _pick_loadout(kind: String) -> void:
+	screen.game.set_loadout(tower, kind)
+
+
 func _pick_shell(kind: String) -> void:
 	screen.game.set_shell(tower, kind)
 
@@ -102,7 +121,7 @@ func refresh(_delta: float) -> void:
 	# affordable or not), prices. Credits alone change with every kill; rebuilding then would swap
 	# the card under the mouse mid-hover.
 	var states := UpgradeRules.card_keys(t).map(func(k): return str(UpgradeRules.card(t, k, screen.game.gold).state))
-	var key := "%d:%d:%s:%s:%s:%s:%s:%.3f:%s" % [t.trunk, t.retrofit, str(t.depth), str(t.started), t.mastered, t.mastery_unlocked(), ",".join(PackedStringArray(states)), t.discount, t.shell]
+	var key := "%d:%d:%s:%s:%s:%s:%s:%.3f:%s" % [t.trunk, t.retrofit, str(t.depth), str(t.started), t.mastered, t.mastery_unlocked(), ",".join(PackedStringArray(states)), t.discount, t.shell + t.loadout]
 	if key != _key:
 		_key = key
 		_rebuild()
@@ -132,6 +151,8 @@ func _rebuild() -> void:
 	_content.add_child(TowerInfo.stats_grid(t.stats(), {}, t.is_beam(), 12, 10))
 	if t.type == "artillery_cannon":
 		_shell_selector(t)
+	if t.type == "drone_bay":
+		_loadout_selector(t)
 	_dps_label = null
 	if screen.game.sandbox:
 		_dps_label = UiKit.label("", 12, UiKit.GOLD)

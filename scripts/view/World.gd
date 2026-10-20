@@ -18,6 +18,7 @@ const Overlay = preload("res://scripts/view/Overlay.gd")
 const GunTurretArt = preload("res://scripts/view/towers/GunTurretArt.gd")
 const RailgunArt = preload("res://scripts/view/towers/RailgunArt.gd")
 const TeslaTowerArt = preload("res://scripts/view/towers/TeslaTowerArt.gd")
+const DroneBayArt = preload("res://scripts/view/towers/DroneBayArt.gd")
 const RocketSalvoArt = preload("res://scripts/view/towers/RocketSalvoArt.gd")
 const AntiAircraftArt = preload("res://scripts/view/towers/AntiAircraftArt.gd")
 const ArtilleryCannonArt = preload("res://scripts/view/towers/ArtilleryCannonArt.gd")
@@ -398,8 +399,24 @@ func _visual(ev: Dictionary) -> void:
 				fx.text(p[0] + Vector2(0, -24), "+%d" % int(p[1]), Color(1.0, 0.8, 0.3), 14, 1.4, 30.0)
 				fx.burst(p[0], Color(1.0, 0.8, 0.3), 10, 70.0, 2.0, 0.5)
 		"drone_shot":
-			fx.tracer(ev.from, ev.to, Color(Draw.ACCENT.drones, 0.9), 0.08, 1.4)
-			fx.flash(ev.to, 5.0, Draw.ACCENT.drones, 0.06)
+			if str(ev.get("look", "")) != "":
+				# A Drone Bay drone (confirmed art): gun tracers thicken and heat with Power, missiles and the laser have their own looks.
+				var ds := DroneBayArt.tracer_style(str(ev.look), Draw.ACCENT.drone_bay)
+				match str(ev.get("kind", "gun")):
+					"missiles":
+						fx.tracer(ev.from, ev.to, Color(0.85, 0.85, 0.88, 0.8), 0.35, 1.6)
+						fx.ring(ev.to, 3.0, float(ev.get("radius", 25.0)), Color(1.0, 0.6, 0.25), 0.25, 1.6)
+						fx.burst(ev.to, Color(1.0, 0.6, 0.25), 5, 70.0, 1.6, 0.25)
+					"laser":
+						fx.tracer(ev.from, ev.to, Color(DroneBayArt.CYAN, 0.9), 0.1, 1.6)
+					_:
+						fx.tracer(ev.from, ev.to, Color(ds.col, 0.9), 0.08, ds.w)
+						if ds.core:
+							fx.tracer(ev.from, ev.to, Color(1, 1, 1, 0.8), 0.06, ds.w * 0.4)
+				fx.flash(ev.to, 5.0, ds.col, 0.06)
+			else:
+				fx.tracer(ev.from, ev.to, Color(Draw.ACCENT.drones, 0.9), 0.08, 1.4)
+				fx.flash(ev.to, 5.0, Draw.ACCENT.drones, 0.06)
 		"drone_bomb", "bomblet":
 			fx.flash(ev.pos, 12.0, Color(1.0, 0.65, 0.3), 0.1)
 			fx.ring(ev.pos, 4.0, float(ev.radius), Color(1.0, 0.6, 0.25), 0.28, 2.0, true)

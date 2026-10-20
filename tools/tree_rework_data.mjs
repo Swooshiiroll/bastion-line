@@ -20,8 +20,9 @@ const KEYS = new Set([
   "ramp", "ramp_time", "melt", "beams", "beam_power", "ramp_keep", "burst", "barrels", "turn_fast",
   "flight", "scatter", "heavy_every", "incendiary", "shrapnel", "concussion", "combined", "burn_dps", "burn_time", "shrap_radius", "shrap_mult", "barrage",
   "falloff", "boss_mult", "rails", "shatter", "trail_dps", "trail_time", "jumps", "jump_range", "overload", "storm_radius", "storm_dps", "storm_time",
+  "lo_missiles", "lo_bombs", "lo_laser", "lo_full", "loadout_mult", "drones",
 ]);
-const FLAGS = new Set(["tracers", "swivel", "weakest_extra", "homing", "retarget", "never_miss", "ripple", "turn_fast", "incendiary", "shrapnel", "concussion", "combined", "overload"]);
+const FLAGS = new Set(["tracers", "swivel", "weakest_extra", "homing", "retarget", "never_miss", "ripple", "turn_fast", "incendiary", "shrapnel", "concussion", "combined", "overload", "lo_missiles", "lo_bombs", "lo_laser", "lo_full"]);
 
 const errors = [];
 const fail = (m) => errors.push(m);

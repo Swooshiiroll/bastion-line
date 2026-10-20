@@ -9,6 +9,7 @@ const MortarTowerArt = preload("res://scripts/view/towers/MortarTowerArt.gd")
 const RocketSalvoArt = preload("res://scripts/view/towers/RocketSalvoArt.gd")
 const AntiAircraftArt = preload("res://scripts/view/towers/AntiAircraftArt.gd")
 const ArtilleryCannonArt = preload("res://scripts/view/towers/ArtilleryCannonArt.gd")
+const DroneBayArt = preload("res://scripts/view/towers/DroneBayArt.gd")
 
 var world
 ## Microseconds spent per section of _draw, summed; tools/PerfProbe.gd reads and resets it.
@@ -46,6 +47,8 @@ func _draw() -> void:
 		var extra: Array = []
 		if tw.is_rework and tw.type == "gun_turret":
 			extra = _extra_aims(tw, key, cur)
+		elif tw.is_rework and tw.type == "drone_bay":
+			extra = [tw.available_loadouts().find(tw.loadout), tw.wing.is_empty()]
 		elif tw.is_rework and tw.type == "tesla_tower":
 			extra = [clampf(1.0 - tw.cooldown * tw.eff_rate(), 0.0, 1.0)]
 		elif tw.is_rework and tw.type == "railgun":
@@ -128,6 +131,19 @@ func _enemy(e, t: float) -> void:
 ## A Drone Bay's drones in flight, with a faint shadow below each.
 func _wing(tw, t: float) -> void:
 	var acc := Draw.accent(tw.type, tw.spec)
+	if tw.is_rework:
+		if tw.disabled > 0.0:
+			return
+		for i in tw.wing.size():
+			var dr: Dictionary = tw.wing[i]
+			var tg = dr.target
+			var face := -PI / 2.0
+			if tg != null and tg.alive and tg.pos.distance_squared_to(dr.pos) > 1.0:
+				face = (tg.pos - dr.pos).angle()
+			var lift := sin(t * 5.0 + float(i)) * 1.5
+			Draw.ellipse(self, dr.pos + Vector2(0, 9), 4.0, 1.6, Color(0, 0, 0, 0.22))
+			DroneBayArt.drone(self, dr.pos + Vector2(0, lift), face, 1.25, t + float(i), tw.spec, acc)
+		return
 	for i in tw.wing.size():
 		var d: Dictionary = tw.wing[i]
 		var p: Vector2 = d.pos

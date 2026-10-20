@@ -3568,3 +3568,87 @@ func test_rework_tesla_tower() -> void:
 	sp.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
 	buy_steps(g, sp, "c", 5)
 	check(sp.mastered and near(sp.stats().rate, 2.1), "Continuous Discharge: 2.1 arcs/s")
+
+
+func test_rework_drone_bay() -> void:
+	var g = new_game()
+	g.gold = 90000
+	g.emit_events = true
+	var t = g.place_tower("drone_bay", spot(g, "drone_bay", 0))
+	check(t != null and t.is_rework and g.tower_cost("drone_bay") == 300, "the Drone Bay builds for 300")
+	var s: Dictionary = t.stats()
+	check(near(s.damage, 16.0) and near(s.rate, 3.0) and int(s.drones) == 1, "stock: one drone, 16 damage, 3 shots/s")
+	check(t.hits_air() and t.hits_ground() and not t.stats().has("range"), "air and ground, anywhere on the map")
+	check(t.retrofit_options().size() == 1 and t.retrofit_cost(0) == 3200, "its one Retrofit is the Second Hangar at 3,200")
+	check(g.buy_retrofit(t, 0) and int(t.stats().drones) == 2, "the Second Hangar launches a second drone")
+	# One drone hunts a far enemy and shoots from close range.
+	var one = g.place_tower("drone_bay", spot(g, "drone_bay", 20))
+	var far = put(g, "grunt", 300.0, 0, 50.0)
+	var hp: float = far.hp
+	for i in 400:
+		g._update_drone_bay(one, one.stats(), 0.05)
+		g.time += 0.05
+	check(one.wing.size() == 1 and far.hp < hp, "the drone flew to a far-off enemy and shot it")
+	# Two drones pick different targets.
+	g.enemies.clear()
+	var e1 = put(g, "grunt", 100.0, 0, 500.0)
+	var e2 = put(g, "grunt", 160.0, 0, 500.0)
+	var two = g.place_tower("drone_bay", spot(g, "drone_bay", 40))
+	g.buy_retrofit(two, 0)
+	g._update_drone_bay(two, two.stats(), 0.05)
+	check(two.wing.size() == 2 and two.wing[0].target != two.wing[1].target, "two drones take different targets")
+	# Loadouts.
+	var lo = g.place_tower("drone_bay", spot(g, "drone_bay", 60))
+	check(lo.available_loadouts() == ["gun"] and not g.set_loadout(lo, "missiles"), "only the gun at first")
+	buy_steps(g, lo, "b", 3)
+	check(lo.available_loadouts() == ["gun", "missiles", "bombs", "laser"], "three steps unlock missiles, bombs and the laser")
+	g.enemies.clear()
+	var tgt = put(g, "grunt", 100.0, 0, 500.0)
+	var near_t = put(g, "grunt", 100.0, 0, 500.0)
+	near_t.pos = tgt.pos + Vector2(20, 0)
+	var weapons := g._loadout_weapons(lo, lo.stats())
+	check(weapons.size() == 1 and weapons[0].name == "gun", "gun loadout by default")
+	g.set_loadout(lo, "missiles")
+	var h1: float = near_t.hp
+	var d0 = {"pos": tgt.pos, "cds": {}}
+	g._drone_hit(lo, d0, tgt, g._loadout_weapons(lo, lo.stats())[0], 40.0)
+	check(near_t.hp < h1, "missiles blast the enemy beside the target")
+	g.set_loadout(lo, "bombs")
+	var air = put(g, "bat", 100.0, 0, 50.0)
+	air.pos = tgt.pos
+	var ah: float = air.hp
+	g._drone_hit(lo, d0, tgt, g._loadout_weapons(lo, lo.stats())[0], 40.0)
+	check(near(air.hp, ah), "bombs never hit flyers")
+	var brute = put(g, "brute", 100.0, 0, 50.0)
+	g.set_loadout(lo, "laser")
+	var bh: float = brute.hp
+	var lw: Dictionary = g._loadout_weapons(lo, lo.stats())[0]
+	g._drone_hit(lo, d0, brute, lw, 20.0)
+	check(near(bh - brute.hp, 20.0), "the laser ignores armour (%.1f)" % (bh - brute.hp))
+	check(brute.last_hit_kind in ["physical", "energy"], "hit kind recorded")
+	buy_steps(g, lo, "b", 1)
+	check(near(lo.stats().loadout_mult, 1.25) and near(float(g._loadout_weapons(lo, lo.stats())[0].dmg), 0.9 * 1.25), "Upgraded Loadouts: 25% stronger")
+	var fk = g.place_tower("drone_bay", spot(g, "drone_bay", 80))
+	fk.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, fk, "b", 5)
+	g.set_loadout(fk, "full")
+	check(fk.mastered and g._loadout_weapons(fk, fk.stats()).size() == 3, "Full Kit: guns, missiles and laser together")
+	# Power and Speed.
+	var pw = g.place_tower("drone_bay", spot(g, "drone_bay", 100))
+	pw.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, pw, "a", 5)
+	check(pw.mastered and near(pw.stats().damage, 42.0), "Elite Drones: 42 damage")
+	var sp = g.place_tower("drone_bay", spot(g, "drone_bay", 120))
+	sp.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, sp, "c", 5)
+	check(sp.mastered and near(sp.stats().rate, 7.0), "Storm Drones: 7 shots/s")
+	# An EMP over a drone switches the bay off.
+	g.enemies.clear()
+	var jam = put(g, "jammer", 100.0, 0, 50.0)
+	var dd = g.place_tower("drone_bay", spot(g, "drone_bay", 140))
+	dd.wing.append({"kind": "gun", "pos": jam.pos + Vector2(10, 0), "target": null, "cds": {}})
+	check(dd.disabled == 0.0, "online before the EMP")
+	g._update_enemy(jam, 0.0)
+	jam.ability_timer = 0.0
+	g._update_enemy(jam, 0.05)
+	check(dd.disabled > 0.0, "an EMP over a drone knocks the bay offline")

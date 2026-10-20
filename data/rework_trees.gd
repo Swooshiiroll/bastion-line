@@ -6,7 +6,7 @@ extends RefCounted
 ## (a, b, c), each with four `nodes` and a `mastery`. A node's `set` values replace the stat and its `add` values add to it;
 ## nodes apply in order on top of the base (the Retrofit, then each path's steps).
 
-const ORDER := ["gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon", "railgun", "tesla_tower"]
+const ORDER := ["gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon", "railgun", "tesla_tower", "drone_bay"]
 
 const TREES := {
 	"gun_turret": {
@@ -1771,6 +1771,195 @@ const TREES := {
 					"blurb": "2.1 arcs/s: near-constant lightning",
 					"set": {
 						"rate": 2.1,
+					},
+					"add": {},
+				},
+			},
+		],
+	},
+	"drone_bay": {
+		"name": "Drone Bay",
+		"class": "Assault",
+		"weapon": "Deployable",
+		"blurb": "Houses combat drones that hunt after enemies. \"The military really took the idea of same-day delivery and ran with it.\"",
+		"air": true,
+		"ground": true,
+		"size": 1,
+		"damage_kind": "physical",
+		"beam": false,
+		"cost": 300,
+		"base": {
+			"name": "Drone Bay",
+			"cost": 300,
+			"blurb": "300 credits; 1 combat drone with a gun: 16 damage, 3 shots/s, hunting the nearest enemy to the core, anywhere on the map; air and ground. The drone flies to its target, so far-off enemies take a moment to reach.",
+			"set": {
+				"damage": 16.0,
+				"rate": 3.0,
+				"drones": 1.0,
+			},
+			"add": {},
+		},
+		"retrofits": [
+			{
+				"name": "Second Hangar",
+				"cost": 3200,
+				"blurb": "The owner kept it single when every other tower got a choice of three (2026-10-15). It launches the second drone, doubling the bay's firepower. The formula said 600; the owner set 3,200, since doubling the firepower is worth more than a step 1.",
+				"set": {
+					"drones": 2.0,
+				},
+				"add": {},
+			},
+		],
+		"paths": [
+			{
+				"key": "a",
+				"name": "Power",
+				"nodes": [
+					{
+						"name": "Heavier Guns",
+						"cost": 150,
+						"blurb": "20 damage",
+						"set": {
+							"damage": 20.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Hot Loads",
+						"cost": 300,
+						"blurb": "24 damage",
+						"set": {
+							"damage": 24.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Combat Firmware",
+						"cost": 900,
+						"blurb": "30 damage",
+						"set": {
+							"damage": 30.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Assault Frames",
+						"cost": 1800,
+						"blurb": "36 damage",
+						"set": {
+							"damage": 36.0,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Elite Drones",
+					"cost": 3600,
+					"blurb": "42 damage",
+					"set": {
+						"damage": 42.0,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "b",
+				"name": "Weaponry",
+				"nodes": [
+					{
+						"name": "Micro-Missiles",
+						"cost": 60,
+						"blurb": "Unlocks missiles: slower shots with a 25 px blast",
+						"set": {
+							"lo_missiles": true,
+						},
+						"add": {},
+					},
+					{
+						"name": "Bomb Racks",
+						"cost": 120,
+						"blurb": "Unlocks bombs: heavy ground-only drops with a 40 px blast",
+						"set": {
+							"lo_bombs": true,
+						},
+						"add": {},
+					},
+					{
+						"name": "Drone Laser",
+						"cost": 290,
+						"blurb": "Unlocks laser: energy damage that ignores armour (a Wraith counter once it's revealed)",
+						"set": {
+							"lo_laser": true,
+						},
+						"add": {},
+					},
+					{
+						"name": "Upgraded Loadouts",
+						"cost": 865,
+						"blurb": "Every loadout 25% stronger",
+						"set": {
+							"loadout_mult": 1.25,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Full Kit",
+					"cost": 3360,
+					"blurb": "A combined loadout: guns, missiles and laser together",
+					"set": {
+						"lo_full": true,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "c",
+				"name": "Speed",
+				"nodes": [
+					{
+						"name": "Fast Cycling",
+						"cost": 100,
+						"blurb": "3.5 shots/s",
+						"set": {
+							"rate": 3.5,
+						},
+						"add": {},
+					},
+					{
+						"name": "Twin Feed",
+						"cost": 200,
+						"blurb": "4 shots/s",
+						"set": {
+							"rate": 4.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Rotary Guns",
+						"cost": 800,
+						"blurb": "5 shots/s",
+						"set": {
+							"rate": 5.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Overclocked Feed",
+						"cost": 1280,
+						"blurb": "5.8 shots/s",
+						"set": {
+							"rate": 5.8,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Storm Drones",
+					"cost": 3840,
+					"blurb": "7 shots/s",
+					"set": {
+						"rate": 7.0,
 					},
 					"add": {},
 				},

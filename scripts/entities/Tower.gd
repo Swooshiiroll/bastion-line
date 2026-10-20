@@ -79,6 +79,8 @@ var beam_ramps: Array = []
 var aim_point := Vector2.ZERO
 var aim_set := false
 var shell := "he"
+## Drone Bay (reworked): the loadout its drones fly ("gun", "missiles", "bombs", "laser", "full").
+var loadout := "gun"
 ## Seconds left knocked offline by a Jammer's EMP.
 var disabled := 0.0
 ## The special tile under the tower: "H" (high ground), "P" (power node) or "".
@@ -546,6 +548,16 @@ func available_shells() -> Array:
 	for k in ["incendiary", "shrapnel", "concussion", "combined"]:
 		if bool(s.get(k, false)):
 			out.append(k)
+	return out
+
+
+## The loadouts a Drone Bay has unlocked, the gun first.
+func available_loadouts() -> Array:
+	var s := stats()
+	var out: Array = ["gun"]
+	for pr in [["lo_missiles", "missiles"], ["lo_bombs", "bombs"], ["lo_laser", "laser"], ["lo_full", "full"]]:
+		if bool(s.get(pr[0], false)):
+			out.append(pr[1])
 	return out
 
 
