@@ -349,7 +349,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 16 | Shockwave Generator | amber | B Ring Reactor | B Mushroom Pulse |
 | 17 | Scrapyard | copper | C Magnet Yard | B Sparks and Sale |
 | 18 | Magneto Tower | violet | F Stacked Coil Tower | F Drag Trails |
-| 19 | Tractor Tower | `design/tower_art_p2_19_tractor.html` | Base redesign **confirmed** (owner, 2026-10-19: B Armoured Dish, B Focus Beam; base page `design/tower_art_p19_tractor.html`). Second pass round 6: every stage picked; Undo coil size, two side-by-side beams at Dual Beam, a gold nib at Gravity Hammer; waiting for "Tractor Tower finished" |
+| 19 | Tractor Tower | `design/tower_art_p2_19_tractor.html` | Base redesign **confirmed** (owner, 2026-10-19: B Armoured Dish, B Focus Beam; base page `design/tower_art_p19_tractor.html`). Second pass round 7: every stage picked; twin dishes at Dual Beam; waiting for "Tractor Tower finished" |
 | 20 | Augmentation Tower | lavender | F Nanite Hive | D Nanite Swarm |
 
 ## Second pass: per-path and Retrofit looks (owner, 2026-10-16)
@@ -1337,6 +1337,8 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
 - **"Make two (smaller beams) side by side" (Dual Beam):** the separate small dish is gone. The antenna ends in two nibs side by side, each firing a smaller beam; the second holds another enemy at a third of the pull.
 - **"make the antenna nib gold" (Grip):** at Gravity Hammer the antenna's nib (or both nibs) turns gold.
 
+**Round 7 (owner's note, "I meant two dishes"):** at Dual Beam the dish is rebuilt as two smaller dishes side by side (0.58 scale, 6.4 units either side). Each has its own antenna, its own Grip energy and nib, and fires a smaller beam; the second holds another enemy at a third of the pull. The two-nib antenna from round 6 is gone, and each dish fires at the target on its own side, so the beams don't cross.
+
 ## Open questions
 
-1. **Second pass, Tractor Tower** (tower 19, round 6): every stage is picked. Confirm with "Tractor Tower finished". Then the Augmentation Tower.
+1. **Second pass, Tractor Tower** (tower 19, round 7, twin dishes at Dual Beam): every stage is picked. Confirm with "Tractor Tower finished". Then the Augmentation Tower.
