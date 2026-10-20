@@ -2,7 +2,7 @@
 // Scope (owner): the art and the upgrade art start over; the mechanic, the paths, their effects and their names stay. Direction (owner): a dish on a mast,
 // as two dish looks plus one wildcard, and three new animations to pick. The tower grabs one enemy, holds it 1.5 s while hauling it back 80 px, lets go and
 // recharges (6 s; the preview shortens it). The preview can't move enemies, so the held one is hidden and redrawn where the beam drags it.
-const PAGE = { title: "Tractor Tower base look (redesign)", store: "bl-tower-art-tractor-looks-4" };
+const PAGE = { title: "Tractor Tower base look (redesign)", store: "bl-tower-art-tractor-looks-5" };
 const distTo = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 const enemyR = (s) => Math.max(4, Math.min(11, s * 0.12));
 const nearestTo = (p, list) => { let best = null, bd = 1e9; for (const e of list) { const d = distTo(e.p, p); if (d < bd) { bd = d; best = e; } } return best; };
@@ -29,6 +29,8 @@ function dishFace(dc, aim, k, rx, ry, rim, face, ribs) { oval(dc, rx * k, ry * k
 // The dish seen from straight above (owner, 2026-10-19: the tilted dish looked out of place): a thick armoured band curved round its focus F, cupped toward
 // the aim, with crisp outlines, segment lines and rivets, like the other towers' flat top-down parts
 const DF = 10, DR = 10, DSPAN = 1.45, DW = 2;   // round 3 (owner): "Widen the dish and make it thinner"
+const SB = DF - DR + DW / 2 - 0.2;   // round 4 (owner): the spike starts on the dish's inner face, on a mounting hub
+function spikeHub(c, aim, k, col) { const q = P(c, aim, k, SB + 0.9, 0); plate(q, rectPts(1.1, 2.6), col, aim, k, 1.1); for (const sg of [-1, 1]) disc(P(c, aim, k, SB + 0.9, sg * 1.8), 0.45 * k, METAL_L); }
 function dishArc(c, aim, k, armour, face, rivetCol) { const F = P(c, aim, k, DF, 0), a0 = aim + Math.PI - DSPAN, a1 = aim + Math.PI + DSPAN;
   arc(F, DR * k, a0, a1, OUTLINE, (DW + 1.6) * k); arc(F, DR * k, a0, a1, armour, DW * k); arc(F, (DR - DW * 0.28) * k, a0 + 0.04, a1 - 0.04, face, DW * 0.38 * k);
   for (let i = 0; i <= 6; i++) { const a = a0 + i * (a1 - a0) / 6; line(add(F, mul(fa(a), (DR - DW / 2) * k)), add(F, mul(fa(a), (DR + DW / 2) * k)), A(OUTLINE, 0.7), 0.8 * k); }
@@ -53,7 +55,7 @@ const TOWERS = [
           plate(c, ngon(10, 1, 0), METAL, aim, 9.4 * k, 1.3); rivets(c, ngon(10, 1, 0), aim, 9.4 * k, 0.84, 0.7 * k);
           for (const sg of [-1, 1]) { bar(Q(-6.5, sg * 3.6), Q(1, sg * 4.4), 2.6 * k, METAL_D); bar(Q(-2.5, sg * 4), Q(1, sg * 4.4), 1.3 * k, METAL_L); }                   // twin hydraulic rams
           const F = dishArc(c, aim, k, ARMOUR, lt(ARMOUR, 0.14), METAL_L); rimLine(F, aim, k, A(col, 0.45 + 0.5 * on + 0.1 * Math.sin(t * 4)), 1.2);   // the flat dish (round 3); its rim glows on a lock
-          fill(c, [[4, -1.7], [13.4, 0], [4, 1.7]], METAL_L, aim, k); outline(c, [[4, -1.7], [13.4, 0], [4, 1.7]], OUTLINE, 1, aim, k); glowDot(Q(13, 0), (0.7 + 0.9 * on) * k, col); } },
+          spikeHub(c, aim, k, METAL_D); fill(c, [[SB, -1.9], [13.4, 0], [SB, 1.9]], METAL_L, aim, k); outline(c, [[SB, -1.9], [13.4, 0], [SB, 1.9]], OUTLINE, 1, aim, k); glowDot(Q(13, 0), (0.7 + 0.9 * on) * k, col); } },
       { key: "C", name: "Gravity Ring Projector", muzzle: 6 / 48, theme: "Wildcard: no dish. Three nested gimbal rings float over a pedestal, tilting and turning round a glowing emitter crystal that points at the target.",
         draw(c, aim, s, fx, t, col) { const k = G(s), on = fx.mem?.state === "hold" ? 1 : 0; deck(c, k, col, t); orb(c, 5 * k, METAL);
           for (let j = 0; j < 3; j++) { const rr = 14 - j * 3.4, tilt = 0.25 + 0.7 * Math.abs(Math.cos(t * (0.7 + 0.25 * j) + j * 1.3)), a = aim + Math.PI / 2 + j * 0.5 + t * 0.2 * (j % 2 ? -1 : 1);

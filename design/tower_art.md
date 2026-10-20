@@ -349,7 +349,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 16 | Shockwave Generator | amber | B Ring Reactor | B Mushroom Pulse |
 | 17 | Scrapyard | copper | C Magnet Yard | B Sparks and Sale |
 | 18 | Magneto Tower | violet | F Stacked Coil Tower | F Drag Trails |
-| 19 | Tractor Tower | `design/tower_art_p2_19_tractor.html` | Base redesign **confirmed** (owner, 2026-10-19: B Armoured Dish, B Focus Beam; base page `design/tower_art_p19_tractor.html`). Second pass round 3: every stage picked; Beam Sweep replaces Twin Emitter; the dish wider and thinner; waiting for "Tractor Tower finished" |
+| 19 | Tractor Tower | `design/tower_art_p2_19_tractor.html` | Base redesign **confirmed** (owner, 2026-10-19: B Armoured Dish, B Focus Beam; base page `design/tower_art_p19_tractor.html`). Second pass round 4: every stage picked; the spike attached to the dish; waiting for "Tractor Tower finished" |
 | 20 | Augmentation Tower | lavender | F Nanite Hive | D Nanite Swarm |
 
 ## Second pass: per-path and Retrofit looks (owner, 2026-10-16)
@@ -1328,6 +1328,8 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
 - **Beam Sweep replaces Twin Emitter** (the owner's pick of three). It is in `design/tower_roster.md` and the regenerated trees at 175 credits (proposed: the formula's step-1 price for about a 15% gain on the stock effect; the balance probe checks it).
 - **"Widen the dish and make it thinner":** the dish band is thinner (2 units, was 3.2) and spans wider (radius 10, ±83° round its focus, was 9 and ±66°), on both pages. Beam Sweep's vanes moved to its new ends.
 
+**Round 4 (owner's note, "Make sure the dish antenna is attched to the dish"):** after the dish got thinner, the spike started in front of it and floated. It now starts on the dish's inner face, bolted to a mounting hub, on both pages. The collars, coils, rewind coil and hold coils moved with it.
+
 ## Open questions
 
-1. **Second pass, Tractor Tower** (tower 19, round 3): every stage is picked. Confirm with "Tractor Tower finished". Then the Augmentation Tower.
+1. **Second pass, Tractor Tower** (tower 19, round 4; the spike attached to the dish): every stage is picked. Confirm with "Tractor Tower finished". Then the Augmentation Tower.
