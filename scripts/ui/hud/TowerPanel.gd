@@ -80,7 +80,7 @@ func refresh(_delta: float) -> void:
 	# affordable or not), prices. Credits alone change with every kill; rebuilding then would swap
 	# the card under the mouse mid-hover.
 	var states := UpgradeRules.card_keys(t).map(func(k): return str(UpgradeRules.card(t, k, screen.game.gold).state))
-	var key := "%d:%s:%s:%s:%s:%s:%.3f" % [t.trunk, str(t.depth), str(t.started), t.mastered, t.mastery_unlocked(), ",".join(PackedStringArray(states)), t.discount]
+	var key := "%d:%d:%s:%s:%s:%s:%s:%.3f" % [t.trunk, t.retrofit, str(t.depth), str(t.started), t.mastered, t.mastery_unlocked(), ",".join(PackedStringArray(states)), t.discount]
 	if key != _key:
 		_key = key
 		_rebuild()
@@ -99,6 +99,8 @@ func _rebuild() -> void:
 	title_label.add_theme_color_override("font_color", Draw.accent(t.type, t.shown_spec) if t.shown_spec != "" else UiKit.TEXT)
 	# Where it is in its tree, then what it does now.
 	var level := Tower.trunk_name(t.trunk)
+	if t.is_rework:
+		level = str(t.retrofit_options()[t.retrofit].name) if t.retrofit >= 0 else "Stock"
 	if not t.started.is_empty():
 		level = " + ".join(PackedStringArray(t.started.map(func(b): return "%s · T%d" % [b.to_upper(), t.depth[b]])))
 	if t.mastered:
@@ -117,7 +119,7 @@ func _rebuild() -> void:
 		var btn := _card(c)
 		cards[k] = btn
 		_content.add_child(btn)
-		if screen.game.sandbox and k != "trunk" and c.state == "buy":
+		if screen.game.sandbox and not (k in ["trunk", "retrofit"]) and c.state == "buy":
 			var mx := UiKit.button("Max this branch", Callable(screen, "max_branch").bind(k), Vector2(W - 34, 26))
 			mx.tooltip_text = "Sandbox: buy this branch as far as the rules allow."
 			_content.add_child(mx)
@@ -128,7 +130,7 @@ func _card(c: Dictionary) -> Button:
 	var t = tower
 	var key: String = c.key
 	var state: String = c.state
-	var mastery: bool = key != "trunk" and c.node == t.branch(key).mastery
+	var mastery: bool = not (key in ["trunk", "retrofit"]) and c.node == t.branch(key).mastery
 	var col: Color = UiKit.GOLD if mastery else BRANCH_COLORS.get(key, UiKit.ACCENT)
 	var live := state == "buy"
 	var btn := Button.new()
@@ -148,17 +150,17 @@ func _card(c: Dictionary) -> Button:
 	# Name, then cost and hotkey.
 	var head := UiKit.hbox(6)
 	head.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var tag := "RETROFIT" if key == "trunk" else ("%s · MASTERY" % key.to_upper() if mastery else "%s · T%d" % [key.to_upper(), mini(int(t.depth[key]) + 1, Tower.BRANCH_STEPS)])
+	var tag := "RETROFIT" if key in ["trunk", "retrofit"] else ("%s · MASTERY" % key.to_upper() if mastery else "%s · T%d" % [key.to_upper(), mini(int(t.depth[key]) + 1, Tower.BRANCH_STEPS)])
 	var name_l := UiKit.label(str(c.node.get("name", "")), 15, Color(col, dim))
 	name_l.clip_text = true
 	name_l.custom_minimum_size = Vector2(140, 0)
 	name_l.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	head.add_child(name_l)
 	if state in ["buy", "short", "research"]:
-		head.add_child(UiKit.label("%d cr  [%s]" % [int(c.cost), c.hotkey], 13, UiKit.GOLD if state == "buy" else (UiKit.BAD if state == "short" else UiKit.DIM)))
+		head.add_child(UiKit.label(("from %d cr  [%s]" if key == "retrofit" else "%d cr  [%s]") % [int(c.cost), c.hotkey], 13, UiKit.GOLD if state == "buy" else (UiKit.BAD if state == "short" else UiKit.DIM)))
 	box.add_child(head)
 	box.add_child(UiKit.label(tag, 10, Color(UiKit.DIM, dim)))
-	if state in ["buy", "short", "research"]:
+	if state in ["buy", "short", "research"] and key != "retrofit":
 		var nxt: Dictionary = t.next_stats("" if key == "trunk" else key) if state != "research" else {}
 		if not nxt.is_empty():
 			var grid := TowerInfo.stats_grid(t.stats(), nxt, t.is_beam(), 11, 8)
@@ -198,6 +200,9 @@ func _buy(c: Dictionary) -> void:
 		hud.toast(str(c.reason) if c.reason != "" else "Can't buy that", UiKit.BAD if c.state == "short" else UiKit.DIM)
 		Sfx.play("error", -6.0, 0.0)
 		return
+	if c.key == "retrofit":
+		screen.open_retrofit()
+		return
 	screen.upgrade_selected(0 if c.key == "trunk" else Tower.BRANCHES.find(c.key))
 	_key = ""
 
@@ -205,7 +210,7 @@ func _buy(c: Dictionary) -> void:
 ## Lights up the card's node in the upgrade tree, if it's open.
 func _highlight(c: Dictionary) -> void:
 	var tree = hud.popout("tree")
-	if tree == null:
+	if tree == null or tower.is_rework:
 		return
 	if c.is_empty():
 		tree.highlight("")

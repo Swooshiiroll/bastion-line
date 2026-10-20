@@ -37,6 +37,8 @@ static func node_for(type: String, id: String) -> Dictionary:
 
 ## The tower panel's cards for `t`: the Retrofit alone before it's bought, then one per branch.
 static func card_keys(t) -> Array:
+	if t.is_rework:
+		return ["retrofit"] + Tower.BRANCHES
 	return ["trunk"] if t.trunk < 2 else Tower.BRANCHES.duplicate()
 
 
@@ -45,7 +47,9 @@ static func card_keys(t) -> Array:
 ## "capped" (secondary at its cap), "locked" (two other branches started), "done" (mastered or
 ## fully upgraded). `node` is the upgrade the card is about (for "done", the last one owned).
 static func card(t, key: String, gold: int) -> Dictionary:
-	var c := {"key": key, "hotkey": KEYS[key], "state": "", "node": {}, "cost": 0, "reason": ""}
+	var c := {"key": key, "hotkey": KEYS.get(key, "Y"), "state": "", "node": {}, "cost": 0, "reason": ""}
+	if key == "retrofit":
+		return _retrofit_card(t, c, gold)
 	if key == "trunk":
 		c.node = Tower.tree(t.type).tiers[1]
 		c.cost = t.upgrade_cost()
@@ -80,6 +84,28 @@ static func card(t, key: String, gold: int) -> Dictionary:
 		c.node = br.mastery if t.mastered and t.primary() == key else br.nodes[maxi(0, mini(d, Tower.BRANCH_STEPS) - 1)]
 		c.state = "done"
 		c.reason = "Mastered" if t.mastered and t.primary() == key else "Fully upgraded"
+	return c
+
+
+## The reworked towers' Retrofit card: the chosen option once bought; before that, one card for the three options ("from" the
+## cheapest price), which opens the pop-out.
+static func _retrofit_card(t, c: Dictionary, gold: int) -> Dictionary:
+	var opts: Array = t.retrofit_options()
+	if t.retrofit >= 0:
+		c.node = opts[t.retrofit]
+		c.state = "done"
+		c.reason = "Retrofit installed"
+		return c
+	var cheapest := 1 << 30
+	var names: Array = []
+	for i in opts.size():
+		cheapest = mini(cheapest, t.retrofit_cost(i))
+		names.append(str(opts[i].name))
+	c.cost = cheapest
+	c.node = {"name": "Retrofit", "blurb": "Pick one of %d: %s. The choice is locked." % [opts.size(), ", ".join(PackedStringArray(names))]}
+	c.state = "buy" if gold >= cheapest else "short"
+	if c.state == "short":
+		c.reason = "Cannot afford"
 	return c
 
 

@@ -27,6 +27,8 @@ const STAT_ROWS := [
 	["Credits per round", "income", "%d"], ["Kill credits in field", "bounty_bonus", "+pct"], ["Boss credits", "boss_bounty", "x%.0f"],
 	["Upgrade discount in field", "discount", "pct"], ["Sell refund in field", "sell_field", "pct"],
 	["Interest on banked credits", "interest", "pct"], ["Interest cap", "interest_cap", "%d"],
+	["Crit chance", "crit", "pct"], ["Armour ignored", "armor_pct", "pct"], ["Armour ignored (flat)", "armor_flat", "%d"],
+	["Stun chance", "stun_chance", "pct"], ["Ignite dps", "ignite_dps", "%d"], ["Side gun damage", "side_gun", "pct"],
 ]
 ## Mechanic flags shown as a "yes" row: [label, stat key].
 const FLAG_ROWS := [
@@ -34,6 +36,7 @@ const FLAG_ROWS := [
 	["Stops burrowing and blinking", "disrupt"], ["Stops repairs", "block_repair"], ["Stops barrier recharge", "block_barrier"],
 	["Blocks Bulwark barriers", "block_grants"], ["Ignores barriers", "bypass_shield"], ["Hunts specialists", "hunt"],
 	["Suppresses targets", "suppress_hit"], ["Jams support", "jam"],
+	["Tracer rounds", "tracers"], ["Instant retarget, no overkill", "swivel"], ["Extra barrels hit the weakest", "weakest_extra"],
 ]
 ## Short keys for the one-line summary.
 const SHORT := {
@@ -45,7 +48,10 @@ const SHORT := {
 	"suppress": "silence", "pull": "pull", "drones": "drones", "bombers": "bombers", "aura_dps": "aura",
 	"ground_mult": "vs ground", "armor_break": "armor break", "armor_field": "armor break",
 	"income": "cr/round", "bounty_bonus": "kill cr", "discount": "off upgrades", "interest": "interest",
+	"crit": "crit", "armor_pct": "armour ignored", "stun_chance": "stun", "ignite_dps": "ignite",
 }
+## The tower classes' colours: the shop's tiles are tinted by class (decided with the rework).
+const CLASS_COLORS := {"Assault": Color(1.0, 0.45, 0.38), "Support": Color(0.5, 0.82, 1.0), "Defense": Color(0.5, 1.0, 0.62), "Utility": Color(1.0, 0.82, 0.4)}
 
 
 static func fmt(v, f: String) -> String:
@@ -129,7 +135,7 @@ static func summary(cur: Dictionary, beam: bool) -> String:
 
 
 static func reach_tag(type: String) -> Array:
-	var d: Dictionary = Towers.TOWERS[type]
+	var d: Dictionary = Towers.def(type)
 	if d.get("economy", false):
 		return ["ECONOMY", UiKit.GOLD]
 	if d.get("support", false):
@@ -142,7 +148,7 @@ static func reach_tag(type: String) -> Array:
 
 
 static func reach_text(type: String) -> String:
-	var d: Dictionary = Towers.TOWERS[type]
+	var d: Dictionary = Towers.def(type)
 	if d.get("economy", false):
 		return "economy"
 	if d.get("support", false):

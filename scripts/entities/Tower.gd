@@ -136,6 +136,8 @@ func setup(tower_type: String, at_cell: Vector2i, at_pos: Vector2, research_mods
 	type = tower_type
 	def = Towers.def(tower_type)
 	is_rework = Towers.is_rework(tower_type)
+	if is_rework:
+		trunk = 2   # no gating trunk: the old upgrade rules read trunk >= 2 as "paths open"
 	size = int(def.get("size", 1))
 	cell = at_cell
 	pos = at_pos
@@ -319,12 +321,12 @@ func retrofit_options() -> Array:
 
 ## What a reworked tower looks like, as one string for the drawing code: "retrofit|a|b|c", the Retrofit (-1 none) and each
 ## path's depth, 5 on the path that took its mastery. A reworked tower's `spec` is this key.
-func look_key() -> String:
+func look_key(retro_override := -2) -> String:
 	var p := primary()
 	var ds: Array = []
 	for key in BRANCHES:
 		ds.append(5 if (mastered and key == p) else int(depth[key]))
-	return "%d|%d|%d|%d" % [retrofit, ds[0], ds[1], ds[2]]
+	return "%d|%d|%d|%d" % [retrofit if retro_override == -2 else retro_override, ds[0], ds[1], ds[2]]
 
 
 ## Stat line of a reworked tower for an upgrade state: the base, the Retrofit if bought, then the secondary path's
@@ -357,6 +359,11 @@ func compose_rework(t_retro: int, t_depth: Dictionary, t_started: Array, t_maste
 		if t_mastered:
 			s = _apply_node(s, path.mastery)
 	return s
+
+
+## A reworked tower type's stock stats (before research), for the shop and the build card.
+static func rework_base(tower_type: String) -> Dictionary:
+	return _apply_node({}, Rework.TREES[tower_type].base)
 
 
 static func _path(rt: Dictionary, key: String) -> Dictionary:

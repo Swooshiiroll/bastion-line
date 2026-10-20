@@ -319,7 +319,8 @@ func _tower_card(t) -> void:
 	id_box.position = Vector2(64, 4)
 	id_box.size = Vector2(250, 86)
 	id_box.add_child(UiKit.label(t.display_name().to_upper(), 20, acc if shown != "" else UiKit.TEXT))
-	var sub := "%s  ·  %s" % [Tower.trunk_name(t.trunk), d.name] if t.started.is_empty() else "%s  ·  %s" % [" + ".join(PackedStringArray(t.started.map(func(b): return "%s·T%d" % [b.to_upper(), t.depth[b]]))), d.name]
+	var stock_name: String = (str(t.retrofit_options()[t.retrofit].name) if t.retrofit >= 0 else "Stock") if t.is_rework else Tower.trunk_name(t.trunk)
+	var sub := "%s  ·  %s" % [stock_name, d.name] if t.started.is_empty() else "%s  ·  %s" % [" + ".join(PackedStringArray(t.started.map(func(b): return "%s·T%d" % [b.to_upper(), t.depth[b]]))), d.name]
 	if tier >= Tower.MASTERY_TIER:
 		sub = "MASTERY  ·  %s" % d.name
 	id_box.add_child(UiKit.label(sub, 12, UiKit.GOLD if tier >= 3 else UiKit.DIM))
@@ -401,7 +402,7 @@ func _tower_card(t) -> void:
 
 func _build_card(type: String) -> void:
 	var g = screen.game
-	var d: Dictionary = Towers.TOWERS[type]
+	var d: Dictionary = Towers.def(type)
 	var icon := DrawControl.new(func(ci): Draw.tower(ci, type, 1, ci.size / 2.0, -PI / 2.0, 1.15, Time.get_ticks_msec() / 1000.0, 0.0), Vector2(58, 58), true)
 	icon.position = Vector2(0, 18)
 	ctx.add_child(icon)
@@ -409,7 +410,7 @@ func _build_card(type: String) -> void:
 	id_box.position = Vector2(64, 6)
 	id_box.add_child(UiKit.label(str(d.name).to_upper(), 20, Draw.accent(type)))
 	var idx := Towers.ORDER.find(type)
-	id_box.add_child(UiKit.label("%d cr  ·  %s  ·  key %s" % [g.tower_cost(type), TowerInfo.reach_text(type), TowerInfo.build_key(idx)], 12, UiKit.GOLD))
+	id_box.add_child(UiKit.label("%d cr  ·  %s%s" % [g.tower_cost(type), TowerInfo.reach_text(type), "  ·  key %s" % TowerInfo.build_key(idx) if idx >= 0 else "  ·  %s" % d["class"]], 12, UiKit.GOLD))
 	var research := TowerInfo.research_line(g.tower_mods[type])
 	if research != "":
 		id_box.add_child(UiKit.label(research, 12, UiKit.GOOD))
@@ -423,8 +424,8 @@ func _build_card(type: String) -> void:
 	bl.tooltip_text = d.blurb
 	bl.mouse_filter = Control.MOUSE_FILTER_PASS
 	right.add_child(bl)
-	var specs: Array = Tower.tree(type).branches.map(func(b): return str(b.nodes[0].name))
-	right.add_child(UiKit.label("Branches: %s%s" % [" / ".join(PackedStringArray(specs)), "   ·   masteries unlocked" if g.mastery_unlocked(type) else ""], 12, UiKit.GOLD))
+	var specs: Array = Towers.Rework.TREES[type].paths.map(func(p): return str(p.name)) if Towers.is_rework(type) else Tower.tree(type).branches.map(func(b): return str(b.nodes[0].name))
+	right.add_child(UiKit.label("%s: %s%s" % ["Paths" if Towers.is_rework(type) else "Branches", " / ".join(PackedStringArray(specs)), "   ·   masteries unlocked" if g.mastery_unlocked(type) else ""], 12, UiKit.GOLD))
 	_status_label = UiKit.label("", 12, UiKit.GOOD)
 	right.add_child(_status_label)
 	ctx.add_child(right)

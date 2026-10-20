@@ -252,6 +252,8 @@ func sell_value(t) -> int:
 ## A tower level's stats as they'd be in this run (research applied). Tier 1-2 is the trunk; tier 3
 ## is the branch of `spec` (a specialization id or branch key) at `depth` upgrades; tier 4 is its mastery.
 func level_stats(type: String, tier: int, spec := "", depth := 1) -> Dictionary:
+	if Towers.is_rework(type):
+		return Research.apply(Tower.rework_base(type), tower_mods[type])
 	var ln := Tower.lines(type)
 	var base: Dictionary = ln.t1 if tier <= 1 else ln.t2
 	if tier >= Tower.SPEC_TIER:

@@ -555,7 +555,8 @@ func _popout_checks() -> void:
 	fails += _expect(hud.is_open("shop"), "B opens the shop")
 	await _wait(0.3)
 	await _shot("16c_shop")
-	fails += _expect(hud.popout("shop").cards.size() == Towers.ORDER.size(), "the shop lists all %d towers" % Towers.ORDER.size())
+	fails += _expect(hud.popout("shop").cards.size() == Towers.all_types().size(), "the shop lists all %d towers" % Towers.all_types().size())
+	await _rework_checks(g)
 	var card: Button = hud.popout("shop").cards["arrow"]
 	await _click(card.get_global_rect().get_center())
 	fails += _expect(screen.world.build_type == "arrow" and not hud.is_open("shop"), "picking a card closes the shop and starts building")
@@ -911,6 +912,64 @@ func _card(key: String) -> void:
 		return
 	await _click(panel.cards[key].get_global_rect().get_center())
 	await get_tree().process_frame
+
+
+## The reworked towers (issue #59): build the Gun Turret from the shop, read its panel, fit a Retrofit by click and by key.
+func _rework_checks(g) -> void:
+	var screen = app.current
+	var hud = screen.hud
+	var fails := 0
+	g.gold += 20000
+	fails += _expect(hud.popout("shop").cards.has("gun_turret"), "the shop lists the reworked Gun Turret")
+	await _click(hud.popout("shop").cards["gun_turret"].get_global_rect().get_center())
+	fails += _expect(screen.world.build_type == "gun_turret", "picking the Gun Turret starts building it")
+	var free: Array = []
+	for y in 14:
+		for x in 12:
+			if g.placement_error("gun_turret", Vector2i(x + 12, y)) == "":
+				free.append(Vector2i(x + 12, y))
+	var cell: Vector2i = free[0]
+	var cell2: Vector2i = free[free.size() / 2]
+	await _click(screen.world.base_pos + Vector2((cell.x + 0.5) * 48.0, (cell.y + 0.5) * 48.0))
+	fails += _expect(g.tower_at.has(cell) and g.tower_at[cell].is_rework, "the Gun Turret is placed")
+	await _key(KEY_ESCAPE)
+	var t = g.tower_at[cell]
+	screen.world.selected_tower = t
+	await _wait(0.4)
+	var panel = hud.popout("tower")
+	fails += _expect(panel != null and panel.cards.keys() == ["retrofit", "a", "b", "c"], "its panel offers the Retrofit and three open paths")
+	await _shot("rework_a_gun_panel")
+	await _card("a")
+	await _card("b")
+	await _card("a")
+	await _card("a")
+	fails += _expect(int(t.depth.a) == 3 and t.locked_in() and int(t.depth.b) == 1, "path cards buy upgrades with no Retrofit needed")
+	await _card("retrofit")
+	await _wait(0.4)
+	fails += _expect(hud.is_open("retrofit") and hud.popout("retrofit").buttons.size() == 3, "the Retrofit card opens a pop-out of three options")
+	await _shot("rework_b_retrofit_popout")
+	await _click(hud.popout("retrofit").buttons[1].get_global_rect().get_center())
+	await _wait(0.3)
+	fails += _expect(t.retrofit == 1 and not hud.is_open("retrofit"), "clicking an option fits it and closes the pop-out")
+	await _key(KEY_Y)
+	fails += _expect(not hud.is_open("retrofit"), "Y does nothing once the Retrofit is fitted")
+	var u = g.place_tower("gun_turret", cell2)
+	screen.world.selected_tower = u
+	await _wait(0.4)
+	await _key(KEY_Y)
+	await _wait(0.3)
+	fails += _expect(hud.is_open("retrofit"), "Y opens the Retrofit pop-out")
+	await _key(KEY_3)
+	await _wait(0.3)
+	fails += _expect(u.retrofit == 2 and not hud.is_open("retrofit"), "key 3 fits the third option")
+	await _wait(0.3)
+	await _shot("rework_c_gun_fitted")
+	screen.world.selected_tower = null
+	await _wait(0.2)
+	if not hud.is_open("shop"):
+		await _key(KEY_B)
+		await _wait(0.3)
+	print("REWORK CHECKS: %s" % ("ALL PASSED" if fails == 0 else "%d FAILED" % fails))
 
 
 ## Every failed expectation in the run; the tour exits with code 1 if there are any.

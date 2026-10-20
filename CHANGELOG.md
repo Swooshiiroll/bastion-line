@@ -6,6 +6,9 @@ so write for players.
 
 ## [Unreleased]
 
+### Added
+- **Tower rework, first piece (in progress, #59):** the new Gun Turret joins the shop beside today's towers. Its three paths (Power, Range/Visibility, Multi-Target) open from the start, and its Retrofit is a choice of three (press Y, then 1-3) that is locked once fitted. It crits, pierces armour, and can stun or ignite; the Multi-Target path adds flank guns that turn on their own. Every enemy now has a role, and every hit is tagged physical or energy, ready for the rest of the rework.
+
 ## [3.6.0] - 2026-10-04
 
 ### Added

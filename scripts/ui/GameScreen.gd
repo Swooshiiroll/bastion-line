@@ -241,6 +241,9 @@ func toggle_shop() -> void:
 
 
 func open_tree() -> void:
+	if world.selected_tower != null and world.selected_tower.is_rework:
+		hud.toast("The upgrade tree for the reworked towers comes later", UiKit.DIM)
+		return
 	if hud.is_open("tree"):
 		hud.close("tree")
 	elif world.selected_tower != null:
@@ -448,6 +451,33 @@ func _on_field_clicked(cell: Vector2i, button: int, shift: bool, pos: Vector2) -
 
 ## U, I and O: at tier 1, U upgrades to tier 2. After that they buy the next upgrade on branch A, B or
 ## C (the branch's specialization first, its mastery last).
+## Opens the Retrofit pop-out for the selected reworked tower (Y, or its card).
+func open_retrofit() -> void:
+	var t = world.selected_tower
+	if t == null or not t.is_rework:
+		return
+	if t.retrofit >= 0:
+		hud.toast("%s is already fitted" % str(t.retrofit_options()[t.retrofit].name), UiKit.DIM)
+		return
+	if hud.is_open("retrofit"):
+		hud.close("retrofit")
+	else:
+		hud.open("retrofit")
+
+
+## Buys Retrofit option `option` on the selected tower and closes the pop-out.
+func buy_retrofit(option: int) -> void:
+	var t = world.selected_tower
+	if t == null or not t.is_rework:
+		return
+	if not game.buy_retrofit(t, option):
+		hud.toast("Not enough credits for that Retrofit", UiKit.BAD)
+		Sfx.play("error", -6.0, 0.0)
+		return
+	hud.toast("%s fitted" % str(t.retrofit_options()[option].name), UiKit.GOLD)
+	hud.close("retrofit")
+
+
 func upgrade_selected(choice := 0) -> void:
 	var t = world.selected_tower
 	if t == null:
@@ -662,6 +692,10 @@ func _unhandled_input(event: InputEvent) -> void:
 				close_popout("codex")
 			get_viewport().set_input_as_handled()
 		return
+	if hud.is_open("retrofit") and event.keycode in [KEY_1, KEY_2, KEY_3]:
+		buy_retrofit(event.keycode - KEY_1)
+		get_viewport().set_input_as_handled()
+		return
 	if hud.is_open("research"):
 		# The battle is paused behind the lab: only closing keys work.
 		if event.keycode in [KEY_ESCAPE, KEY_R]:
@@ -706,6 +740,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			use_ability("meteor")
 		KEY_W:
 			use_ability("warp")
+		KEY_Y:
+			open_retrofit()
 		KEY_U:
 			upgrade_selected(0)
 		KEY_I:

@@ -25,15 +25,16 @@ func _init(owner_hud) -> void:
 
 
 func _build() -> void:
-	for i in Towers.ORDER.size():
-		var type: String = Towers.ORDER[i]
-		var b := _card(type, TowerInfo.build_key(i))
+	var all: Array = Towers.all_types()
+	for i in all.size():
+		var type: String = all[i]
+		var b := _card(type, TowerInfo.build_key(i) if Towers.TOWERS.has(type) else "")
 		b.position = Vector2(10 + (i % 2) * (CARD.x + 8), 8 + (i / 2) * (CARD.y + 6))
 		body.add_child(b)
 		cards[type] = b
 	var sep := ColorRect.new()
 	sep.color = UiKit.BORDER
-	sep.position = Vector2(12, 8 + ceili(Towers.ORDER.size() / 2.0) * (CARD.y + 6) + 2)
+	sep.position = Vector2(12, 8 + ceili(all.size() / 2.0) * (CARD.y + 6) + 2)
 	sep.size = Vector2(rect.size.x - 24, 1)
 	body.add_child(sep)
 	_detail = UiKit.vbox(4)
@@ -43,10 +44,18 @@ func _build() -> void:
 
 
 func _card(type: String, key: String) -> Button:
-	var d: Dictionary = Towers.TOWERS[type]
+	var d: Dictionary = Towers.def(type)
 	var b := UiKit.button("", Callable(screen, "shop_pick").bind(type), CARD)
 	b.size = CARD
-	b.tooltip_text = "%s  [%s]\n%s" % [d.name, key, d.blurb]
+	b.tooltip_text = "%s%s
+%s" % [d.name, "  [%s]" % key if key != "" else "  (%s)" % d["class"], d.blurb]
+	if d.has("class"):
+		# Reworked towers: the tile is tinted by class (Assault, Support, Defense, Utility).
+		var cc: Color = TowerInfo.CLASS_COLORS.get(d["class"], UiKit.ACCENT)
+		for s in ["normal", "hover", "pressed", "focus", "disabled"]:
+			var sb := UiKit.box(Color(cc, 0.16 if s != "hover" else 0.28), Color(cc, 0.8 if s == "hover" else 0.5), 6, 1, 0.0)
+			sb.border_width_left = 4
+			b.add_theme_stylebox_override(s, sb)
 	var icon := DrawControl.new(func(ci): Draw.tower(ci, type, 1, ci.size / 2.0, -PI / 2.0, 0.68, Time.get_ticks_msec() / 1000.0, 0.0), Vector2(34, 40), true)
 	icon.position = Vector2(2, 6)
 	b.add_child(icon)
@@ -96,10 +105,14 @@ func _show(type: String) -> void:
 		_detail.add_child(UiKit.wrap_label("Keys 1-9, 0, -, =, [, ] and \\ build directly.", rect.size.x - 28, 12, UiKit.DIM))
 		return
 	var g = screen.game
-	var d: Dictionary = Towers.TOWERS[type]
+	var d: Dictionary = Towers.def(type)
 	_detail.add_child(UiKit.label(d.name, 17, Draw.accent(type)))
 	_detail.add_child(UiKit.label("%d cr  ·  %s" % [g.tower_cost(type), TowerInfo.reach_text(type)], 12, UiKit.GOLD))
 	_detail.add_child(UiKit.wrap_label(d.blurb, rect.size.x - 28, 11, UiKit.DIM))
 	_detail.add_child(TowerInfo.stats_grid(g.level_stats(type, 1), {}, bool(d.get("beam", false)), 11, 8))
-	var specs: Array = Tower.tree(type).branches.map(func(b): return str(b.nodes[0].name))
-	_detail.add_child(UiKit.label("Branches: %s" % ", ".join(PackedStringArray(specs)), 11, UiKit.GOLD))
+	var specs: Array = []
+	if Towers.is_rework(type):
+		specs = Towers.Rework.TREES[type].paths.map(func(p): return str(p.name))
+	else:
+		specs = Tower.tree(type).branches.map(func(b): return str(b.nodes[0].name))
+	_detail.add_child(UiKit.label("%s: %s" % ["Paths" if Towers.is_rework(type) else "Branches", ", ".join(PackedStringArray(specs))], 11, UiKit.GOLD))

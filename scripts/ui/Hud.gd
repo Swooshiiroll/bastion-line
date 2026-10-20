@@ -13,6 +13,7 @@ const IntelPanel = preload("res://scripts/ui/hud/IntelPanel.gd")
 const ResearchPopOut = preload("res://scripts/ui/hud/ResearchPopOut.gd")
 const KnowledgePopOut = preload("res://scripts/ui/hud/KnowledgePopOut.gd")
 const SpawnerPanel = preload("res://scripts/ui/hud/SpawnerPanel.gd")
+const RetrofitPanel = preload("res://scripts/ui/hud/RetrofitPanel.gd")
 ## Pop-outs that pause the battle while open.
 const PAUSING := ["research", "codex"]
 ## The tower panel follows the selection (GameScreen._sync_side_panel), so "close everything" and
@@ -113,6 +114,11 @@ func open(kind: String, arg := "") -> void:
 			if t == null:
 				return
 			p = UpgradeTreePanel.new(self, t)
+		"retrofit":
+			var rt = screen.world.selected_tower
+			if rt == null or not rt.is_rework or rt.retrofit >= 0:
+				return
+			p = RetrofitPanel.new(self, rt)
 		"intel":
 			p = IntelPanel.new(self)
 		"research":
@@ -198,6 +204,10 @@ func refresh(delta: float) -> void:
 	# Toasts sit top-left over the field; a tower panel on the left pushes them to its right.
 	var side_panel = popouts.get("tower")
 	toasts.position.x = (TowerPanel.LEFT_X + TowerPanel.W + 16.0) if side_panel != null and side_panel.side == "left" else FIELD.position.x + 12.0
+	if is_open("retrofit"):
+		var rp = popouts.retrofit
+		if screen.world.selected_tower != rp.tower or not screen.game.towers.has(rp.tower):
+			screen.close_popout("retrofit")
 	if is_open("tree"):
 		var tp = popouts.tree
 		if screen.world.selected_tower != tp.tower or not screen.game.towers.has(tp.tower):
