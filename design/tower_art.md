@@ -349,7 +349,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 16 | Shockwave Generator | amber | B Ring Reactor | B Mushroom Pulse |
 | 17 | Scrapyard | copper | C Magnet Yard | B Sparks and Sale |
 | 18 | Magneto Tower | violet | F Stacked Coil Tower | F Drag Trails |
-| 19 | Tractor Tower | `design/tower_art_p2_19_tractor.html` | Base redesign **confirmed** (owner, 2026-10-19: B Armoured Dish, B Focus Beam; base page `design/tower_art_p19_tractor.html`). Second pass round 7: every stage picked; twin dishes at Dual Beam; waiting for "Tractor Tower finished" |
+| 19 | Tractor Tower | `design/tower_art_p2_19_tractor.html` | Base redesign **confirmed** (owner, 2026-10-19: B Armoured Dish, B Focus Beam; base page `design/tower_art_p19_tractor.html`). Second pass round 8: every stage picked; twin dishes at Dual Beam that turn independently; waiting for "Tractor Tower finished" |
 | 20 | Augmentation Tower | lavender | F Nanite Hive | D Nanite Swarm |
 
 ## Second pass: per-path and Retrofit looks (owner, 2026-10-16)
@@ -1339,6 +1339,8 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
 
 **Round 7 (owner's note, "I meant two dishes"):** at Dual Beam the dish is rebuilt as two smaller dishes side by side (0.58 scale, 6.4 units either side). Each has its own antenna, its own Grip energy and nib, and fires a smaller beam; the second holds another enemy at a third of the pull. The two-nib antenna from round 6 is gone, and each dish fires at the target on its own side, so the beams don't cross.
 
+**Round 8 (owner's note, "that can independently rotate"):** each twin dish now turns on its own pivot to face its own beam's target, and faces forward with the base when idle. The model records the angle it drew each dish at, and the beam leaves that dish's antenna at the same angle (the Radar's lesson), so the beams stay on the antennas.
+
 ## Open questions
 
-1. **Second pass, Tractor Tower** (tower 19, round 7, twin dishes at Dual Beam): every stage is picked. Confirm with "Tractor Tower finished". Then the Augmentation Tower.
+1. **Second pass, Tractor Tower** (tower 19, round 8, twin dishes that turn independently): every stage is picked. Confirm with "Tractor Tower finished". Then the Augmentation Tower.
