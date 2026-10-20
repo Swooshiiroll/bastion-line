@@ -2,14 +2,14 @@
 // Base: look F Nanite Hive, animation D Nanite Swarm (tools/tower_art/data_towers4.js). The owner kept the names and chose the parts (2026-10-19):
 //  - Path 1, Energy Conversion, rebuilds the DOME: its hex cells charge cyan, a quarter more each step (charged cells, plasma veins, or big capacitor panels);
 //    gold-rimmed with crackling arcs at Overcharge.
-//  - Path 2, Critical Hits: round 3 (owner): the dome's cells flicker red, on solid cells too (random, bursts or a sweep), more each step; Energy's charged cells
-//    flicker blue and Ricochet's flicker green, hopping like a bounce.
+//  - The cells (round 4, owner's design): at stock some flicker lavender; each path recolours flickering cells in its colour (Energy blue, Critical Hits red,
+//    Ricochet green), more of the array each tier; paths overlap; a mastery fills the array solid in its colour.
 //  - Path 3, Ricochet, builds green deflectors ORBITING the dome (plates, orbs, or a mirror ring), more each step; gold-trimmed and wobbling at Pinball.
 // Each step rebuilds its part in the style picked for that step; masteries are gold; the agent runs the real rules (energy shots, crits and their multiplier,
 // ricochet bounces, the aura's reach, Remote Link's half-strength reach).
 // Overlaps kept and stacking (the carpet rule): Amplified Bonus's +5% crit chance with the Critical Hits path.
-const PAGE = { title: "Augmentation Tower: paths and Retrofits (second pass)", store: "bl-tower-art-p2-augment-r3" };
-const GOLD = [1, 0.78, 0.3, 1], ENC = [0.3, 0.9, 1, 1], RICOC = [0.4, 1, 0.5, 1], COPPER = [0.78, 0.5, 0.28, 1];
+const PAGE = { title: "Augmentation Tower: paths and Retrofits (second pass)", store: "bl-tower-art-p2-augment-r4" };
+const GOLD = [1, 0.78, 0.3, 1], ENC = [0.32, 0.62, 1, 1], CRITC = [1, 0.25, 0.22, 1], RICOC = [0.4, 1, 0.5, 1], COPPER = [0.78, 0.5, 0.28, 1];
 const rnd = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
 const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 const nearestTo = (p, list) => { let best = null, bd = 1e9; for (const e of list) { const d = dist(e.p, p); if (d < bd) { bd = d; best = e; } } return best; };
@@ -20,17 +20,12 @@ const critCh = (B) => CRIT[B.lv[1]] + (B.r === 1 ? 5 : 0), critX = (B) => (B.lv[
 
 // ---- Path 1, Energy Conversion: the dome; a growing share of its cells charge cyan (charged cells, plasma veins, or big capacitor panels) --------------------------
 function hexCells(R, size) { const out = [], step = size * 2; for (let q = -5; q <= 5; q++) for (let r = -5; r <= 5; r++) { const x = (q + r * 0.5) * step, y = r * step * 0.866; if (x * x + y * y > (R - size * 0.8) ** 2) continue; out.push([x, y]); } return out.sort((a, b) => a[0] ** 2 + a[1] ** 2 - b[0] ** 2 - b[1] ** 2); }
-function dome(c, k, B, t, col) { const L = B.lv[0], st = pk(B, 0, L), g = L >= 5, frac = ENERGY[L] / 100, R = 12 + 0.25 * L, big = st === "C", cs = hexCells(R, big ? 3.3 : 2.2), nOn = Math.round(frac * cs.length);
-  orb(c, R * k, g ? mix(METAL_L, GOLD, 0.3) : METAL_L);
-  cs.forEach(([x, y], i) => { const q = add(c, [x * k, y * k]), on = i < nOn, sz = (big ? 3.3 : 2.2) * k;
-    if (!st) { const lit = rnd(Math.round(x * 7 + y * 13) + Math.floor(t * 3)) > 0.75; outline(q, ngon(6, 1, Math.PI / 6), A(lit ? col : METAL, lit ? 0.95 : 0.7), 0.8 * k, 0, sz); return; }   // the base's cells
-    if (on && st !== "B") { fill(q, ngon(6, 1, Math.PI / 6), A(ENC, 0.45 + 0.25 * Math.sin(t * 3 + i)), 0, sz * 0.9); if (big) fill(q, [[0, -1.2], [1, 0], [0, 1.2], [-1, 0]], A([1, 1, 1, 0.7], 0.8), 0, sz * 0.5); }
-    outline(q, ngon(6, 1, Math.PI / 6), on ? ENC : A(METAL, 0.7), (on ? 1 : 0.8) * k, 0, sz); });
-  if (st === "B") for (let i = 1; i < nOn; i++) { const [x, y] = cs[i]; let best = cs[0]; for (let j = 0; j < i; j++) { const [x2, y2] = cs[j]; if ((x2 * x2 + y2 * y2) < (x * x + y * y) && (x - x2) ** 2 + (y - y2) ** 2 < (best[0] - x) ** 2 + (best[1] - y) ** 2) best = cs[j]; }   // plasma veins out from the centre
-      const a = add(c, [best[0] * k, best[1] * k]), b = add(c, [x * k, y * k]); line(a, b, A(ENC, 0.35), 2.2 * k); line(a, b, ENC, 0.8 * k); if (fmod(t * 1.5 + i * 0.17, 1) < 0.5) glowDot(lerp(a, b, fmod(t * 3 + i * 0.3, 1)), 0.5 * k, [0.8, 1, 1, 1]); }
+function dome(c, k, B, t, col) { const L = B.lv[0], g = L >= 5, R = 12 + 0.25 * L, cs = hexCells(R, 2.2);
+  orb(c, R * k, METAL_L);
+  for (const [x, y] of cs) outline(add(c, [x * k, y * k]), ngon(6, 1, Math.PI / 6), A(METAL, 0.7), 0.8 * k, 0, 2.2 * k);
   if (g) { ring(c, R * k, GOLD, 1.4 * k); for (let i = 0; i < 2; i++) { const a = cs[Math.floor(rnd(Math.floor(t * 8) + i) * cs.length)], b = cs[Math.floor(rnd(Math.floor(t * 8) + i + 9) * cs.length)], pa = add(c, [a[0] * k, a[1] * k]), pb = add(c, [b[0] * k, b[1] * k]), pts = [pa];
-      for (let j = 1; j < 5; j++) pts.push(add(lerp(pa, pb, j / 5), mul(orth(norm(sub(pb, pa))), (rnd(j + i * 7 + Math.floor(t * 14)) - 0.5) * 2.4 * k))); pts.push(pb); polyline(pts, A(i ? GOLD : ENC, 0.9), 0.8 * k); } }   // Overcharge: arcs over the dome
-  if (!st || L < 5) for (let i = 0; i < 6; i++) glowDot(add(c, mul(fa(t * 1.5 + i), (6 + 6 * fmod(t * 0.5 + i / 6, 1)) * k)), 0.5 * k, col); }   // the nanites (base)
+      for (let j = 1; j < 5; j++) pts.push(add(lerp(pa, pb, j / 5), mul(orth(norm(sub(pb, pa))), (rnd(j + i * 7 + Math.floor(t * 14)) - 0.5) * 2.4 * k))); pts.push(pb); polyline(pts, A(i ? GOLD : ENC, 0.9), 0.8 * k); } }   // Overcharge: a gold rim and arcs
+  for (let i = 0; i < 6; i++) glowDot(add(c, mul(fa(t * 1.5 + i), (6 + 6 * fmod(t * 0.5 + i / 6, 1)) * k)), 0.5 * k, col); }   // the nanites (base)
 
 // ---- Path 2, Critical Hits: a gold core crowning the dome (a targeting lens, a tracking eye, or a crystal star), bigger each step; all gold at the mastery --------
 function core(c, k, B, t, col, look) { const L = B.lv[1], st = pk(B, 1, L), g = L >= 5; if (!st) return; const r = 2.2 + 0.45 * L;
@@ -53,19 +48,24 @@ function critTop(c, k, B, t, col) { const L = B.lv[1], st = pk(B, 1, L); if (st 
   for (let i = 0; i < n; i++) { const u = fmod(i / n + t * 0.15, 1), a = i * 2.39996 + t * (1.2 + (L >= 3 ? 1.5 * (1 - u) : 0)), r = (2 + vr * (L >= 3 ? u : rnd(i))) * k; const q = add(c, mul(fa(a), r)), sr = (0.7 + (g ? 0.15 : 0)) * k; disc(q, sr + 0.5 * k, A(OUTLINE, 0.8)); disc(q, sr, GOLD); }
   glowDot(c, (0.6 + 0.2 * L) * k, GOLD); }
 
-// ---- The cell flickers (round 3, the owner's notes) -----------------------------------------------------------------------------------------------------------
-function domeCells(B) { const L = B.lv[0], big = pk(B, 0, L) === "C", R = 12 + 0.25 * L, sz = big ? 3.3 : 2.2, cs = hexCells(R, sz); return { sz, cs, nOn: Math.round(ENERGY[L] / 100 * cs.length) }; }
-function flickers(c, k, B, t, col) { const { sz, cs, nOn } = domeCells(B), L1 = B.lv[0], L2 = B.lv[1], L3 = B.lv[2], N = cs.length, Pc = (i) => add(c, [cs[i][0] * k, cs[i][1] * k]), hex = ngon(6, 1, Math.PI / 6);
-  if (L1) for (let i = 0; i < nOn; i++) { const fl = rnd(i * 7.31 + Math.floor(t * 14)); if (fl > (L1 >= 5 ? 0.7 : 0.8)) { fill(Pc(i), hex, A(fl > 0.93 ? [0.85, 0.95, 1, 1] : [0.25, 0.5, 1, 1], 0.9), 0, sz * 0.9 * k); glowDot(Pc(i), 0.5 * k, [0.4, 0.7, 1, 1]); } }   // Energy: the charged cells flicker blue
-  const st2 = pk(B, 1, L2);
-  if (L2) { const lit = new Set(), n = 1 + L2;   // Critical Hits: cells flicker red, on solid cells too (random flickers, bursts, or a sweep), gold-edged at Executioner Link
-    if (st2 === "A") for (let j = 0; j < n; j++) lit.add(Math.floor(rnd(Math.floor(t * 9) * 3.7 + j * 11.3) * N));
-    if (st2 === "B") { const c0 = Math.floor(rnd(Math.floor(t * 3) * 5.1) * N), near = cs.map((p, i) => [i, (p[0] - cs[c0][0]) ** 2 + (p[1] - cs[c0][1]) ** 2]).sort((a, b) => a[1] - b[1]); for (let j = 0; j < Math.min(N, 1 + Math.round(n * 1.5 * fmod(t * 3, 1))); j++) lit.add(near[j][0]); }
-    if (st2 === "C") { const sx = (fmod(t * 0.8, 1) * 2 - 1) * 13, w = 1 + 0.4 * L2; cs.forEach((p, i) => { if (Math.abs(p[0] - sx) < w && rnd(i + Math.floor(t * 10)) > 0.3) lit.add(i); }); }
-    for (const i of lit) { fill(Pc(i), hex, A([1, 0.22, 0.2, 1], 0.85), 0, sz * 0.9 * k); outline(Pc(i), hex, L2 >= 5 ? GOLD : [1, 0.55, 0.5, 1], 1 * k, 0, sz * k); } }
-  if (L3) { const hops = 1 + L3, seed = Math.floor(t * 1.6), start = Math.floor(rnd(seed * 9.7) * N), path = [start], used = new Set([start]);   // Ricochet: a green flicker hops from cell to cell
-    for (let h = 0; h < hops; h++) { const cur = path[path.length - 1]; let best = -1, bd = 1e9; cs.forEach((p, i) => { if (used.has(i)) return; const d2 = (p[0] - cs[cur][0]) ** 2 + (p[1] - cs[cur][1]) ** 2 + rnd(i + seed) * 30; if (d2 < bd) { bd = d2; best = i; } }); if (best < 0) break; path.push(best); used.add(best); }
-    const shown = Math.floor(fmod(t * 1.6, 1) * (path.length + 1)); for (let j = 0; j < Math.min(shown, path.length); j++) { fill(Pc(path[j]), hex, A(RICOC, j === shown - 1 ? 0.85 : 0.35), 0, sz * 0.9 * k); if (j > 0) line(Pc(path[j - 1]), Pc(path[j]), A(RICOC, 0.7), 0.8 * k); } } }
+// ---- The cell lights (round 4, the owner's design): at stock some cells flicker lavender; each path recolours the flickering cells in its colour (Energy
+// blue, Critical Hits red, Ricochet green), more of the array each tier; different paths overlap (the later one shows as an inner hex); a mastery fills it solid
+const FILL = [0, 0.15, 0.3, 0.45, 0.6, 1];
+function cellLights(c, k, B, t, col) { const R = 12 + 0.25 * B.lv[0], cs = hexCells(R, 2.2), N = cs.length, hex = ngon(6, 1, Math.PI / 6), Pc = (i) => add(c, [cs[i][0] * k, cs[i][1] * k]), bk = Math.floor(t * 8), layer = new Array(N).fill(0);
+  const L1 = B.lv[0], L2 = B.lv[1], L3 = B.lv[2], st1 = pk(B, 0, L1), st2 = pk(B, 1, L2);
+  if (!L1 && !L2 && !L3) { cs.forEach(([x, y], i) => { if (rnd(Math.round(x * 7 + y * 13) + Math.floor(t * 3)) > 0.75) outline(Pc(i), hex, A(col, 0.95), 0.8 * k, 0, 2.2 * k); }); return; }   // stock: the base's lavender flicker
+  const paths = [];
+  if (L1) paths.push({ L: L1, col: ENC, pick: (i, f) => { const reg = Math.max(1, Math.ceil(f * N * 1.6)); return i < reg && rnd(i * 7.31 + bk) < f * N / reg; } });   // Energy: a growing patch round the centre
+  if (L2) paths.push({ L: L2, col: CRITC, pick: (i, f) => { if (st2 === "B") { const c0 = Math.floor(rnd(Math.floor(t * 3) * 5.1) * N), r2 = (cs[i][0] - cs[c0][0]) ** 2 + (cs[i][1] - cs[c0][1]) ** 2; return r2 < (f * 220) * (0.4 + 0.6 * fmod(t * 3, 1)); }
+      if (st2 === "C") { const sx = (fmod(t * 0.8, 1) * 2 - 1) * 14; return Math.abs(cs[i][0] - sx) < 1 + f * 12 && rnd(i + bk * 1.3) > 0.25; }
+      return rnd(i * 3.1 + bk * 1.7 + 50) < f; } });   // Critical Hits: scattered, bursts, or a sweep
+  if (L3) paths.push({ L: L3, col: RICOC, pick: (i, f) => rnd(i * 5.7 + bk * 2.3 + 99) < f });   // Ricochet: scattered
+  paths.sort((a, b) => b.L - a.L);   // a solid (mastery) path first, so the others' flickers overlap it
+  for (const p of paths) { const f = FILL[p.L], solid = p.L >= 5;
+    for (let i = 0; i < N; i++) { if (!solid && !p.pick(i, f)) continue;
+      if (layer[i] === 0) { fill(Pc(i), hex, A(p.col, solid ? 0.8 : 0.85), 0, 2.0 * k); outline(Pc(i), hex, solid ? GOLD : lt(p.col, 0.35), 0.9 * k, 0, 2.2 * k); }
+      else { fill(Pc(i), hex, A(p.col, 0.95), 0, 1.15 * k); outline(Pc(i), hex, OUTLINE, 0.6, 0, 1.15 * k); }   // an overlap: the second colour as an inner hex
+      layer[i]++; } } }
 
 // ---- Path 3, Ricochet: green deflectors orbiting the dome (plates, orbs, or a mirror ring), more each step; gold-trimmed and wobbling at Pinball -----------------
 function orbit(c, k, B, t, col) { const L = B.lv[2], st = pk(B, 2, L), g = L >= 5; if (!st) return; const n = [0, 2, 3, 4, 5, 6][L], R = 15.4 + 0.3 * L, sp = t * (0.6 + 0.1 * L), trim = g ? GOLD : lt(RICOC, 0.3);
@@ -114,14 +114,14 @@ function augAgent(B) { return (m, t, info, s, col) => { if (!m.shots) { m.shots 
 // ---- The model ----------------------------------------------------------------------------------------------------------------------------------------------------
 const P2 = {
   tower: "augment", look: "F", anim: "D",
-  intro: "Round 3, your notes: Energy's charged cells flicker blue; Critical Hits is now the dome's cells flickering red (on solid cells too), more each step, in three ways (random flickers, bursts spreading from a cell, or a sweep across the dome), gold-edged at Executioner Link; Ricochet's cells flicker green, a flash hopping from cell to cell like a bounce, beside the deflector plates; Amplified Bonus's parts (the gold halo too) now draw over the dome, where they show. Round 2, your picks and note: Energy Conversion (charged cells), Ricochet (deflector plates) and Wide Aura (the aura ring) are picked. Critical Hits gets a new idea, four ways at every step: a swirling gold nanite swarm over the dome (a vortex from Precision Matrix), a crown of gold needles round its rim, gold reticle brackets framing it, or gold strike tendrils curling out of it, more each step and brightest at Executioner Link. Amplified Bonus and Remote Link are open. Round 1 on the confirmed Nanite Hive, with the names kept (your choice). Each path rebuilds one part, in the style you pick for each step: Energy Conversion rebuilds the dome, a quarter more of its cells charging cyan each step (charged cells, plasma veins spreading from the centre, or big capacitor panels; gold-rimmed with crackling arcs at Overcharge); Critical Hits crowns the dome with a gold core (a targeting lens with a turning precision ring from Precision Matrix, a tracking eye, or a turning crystal star), bigger each step, all gold at Executioner Link; Ricochet builds green deflectors orbiting the dome (plates, orbs, or a segmented mirror ring), more each step, gold-trimmed and wobbling at Pinball. The preview runs the real rules: the nanites drifting to each tower are tinted by the effects it gets; shots turn cyan as Energy Conversion grows (+10% at Overcharge); crits land gold with their multiplier (×2, ×2.5, ×3) and come more often as the chance grows; ricochets bounce green to a nearby enemy (twice at Pinball); Wide Aura widens the ring; Remote Link adds a tower at twice the reach that gets half strength. Overlapping Retrofits are kept and stack (the carpet rule).",
+  intro: "Round 4, your design for the cells: at stock some flicker lavender; each path recolours the flickering cells in its own colour (Energy blue, Critical Hits red, Ricochet green), lighting more of the array each tier; different paths overlap (the second colour shows as an inner hex); a path's mastery fills the whole array solid in its colour, with the other path still flickering over it. Critical Hits picks how its red spreads (scattered, bursts, or a sweep). The deflector plates and the rest stay as picked. Round 3, your notes: Energy's charged cells flicker blue; Critical Hits is now the dome's cells flickering red (on solid cells too), more each step, in three ways (random flickers, bursts spreading from a cell, or a sweep across the dome), gold-edged at Executioner Link; Ricochet's cells flicker green, a flash hopping from cell to cell like a bounce, beside the deflector plates; Amplified Bonus's parts (the gold halo too) now draw over the dome, where they show. Round 2, your picks and note: Energy Conversion (charged cells), Ricochet (deflector plates) and Wide Aura (the aura ring) are picked. Critical Hits gets a new idea, four ways at every step: a swirling gold nanite swarm over the dome (a vortex from Precision Matrix), a crown of gold needles round its rim, gold reticle brackets framing it, or gold strike tendrils curling out of it, more each step and brightest at Executioner Link. Amplified Bonus and Remote Link are open. Round 1 on the confirmed Nanite Hive, with the names kept (your choice). Each path rebuilds one part, in the style you pick for each step: Energy Conversion rebuilds the dome, a quarter more of its cells charging cyan each step (charged cells, plasma veins spreading from the centre, or big capacitor panels; gold-rimmed with crackling arcs at Overcharge); Critical Hits crowns the dome with a gold core (a targeting lens with a turning precision ring from Precision Matrix, a tracking eye, or a turning crystal star), bigger each step, all gold at Executioner Link; Ricochet builds green deflectors orbiting the dome (plates, orbs, or a segmented mirror ring), more each step, gold-trimmed and wobbling at Pinball. The preview runs the real rules: the nanites drifting to each tower are tinted by the effects it gets; shots turn cyan as Energy Conversion grows (+10% at Overcharge); crits land gold with their multiplier (×2, ×2.5, ×3) and come more often as the chance grows; ricochets bounce green to a nearby enemy (twice at Pinball); Wide Aura widens the ring; Remote Link adds a tower at twice the reach that gets half strength. Overlapping Retrofits are kept and stack (the carpet rule).",
   mods(B) { return { period: 1, flight: 1, multi: false, persist: augAgent(B) }; },
   muzzleAt(B, m, kk, c) { return c; },
   model(c, aim, s, fx, t, col, info, B) { const k = G(s), foe = nearestTo(c, info?.all || []), look = foe ? Math.atan2(foe.p[1] - c[1], foe.p[0] - c[0]) : 0;
     deck(c, k, col, t);
     retro(c, k, B, t, col, false);
     dome(c, k, B, t, col);
-    flickers(c, k, B, t, col);
+    cellLights(c, k, B, t, col);
     orbit(c, k, B, t, col);
     retro(c, k, B, t, col, true); },
   paths: [], retrofits: [],
@@ -131,21 +131,21 @@ const P2 = {
 const T = (a, b, c) => [["A", ...a], ["B", ...b], ["C", ...c]].map(([key, name, desc]) => ({ key, name, desc }));
 const TK = (...o) => o.map(([key, name, desc]) => ({ key, name, desc }));
 P2.paths = [
-  { name: "Energy Conversion", theme: "the dome: a quarter more of its cells charge cyan each step, the charged cells flickering blue (round 3, your note), in the style you pick (charged cells, plasma veins, or big capacitor panels); gold-rimmed with arcs at Overcharge", steps: [
-    { name: "Charged Rounds", cost: 105, effect: "25% of nearby towers' damage counts as energy", options: T(["Charged Cells", "A quarter of the dome's cells, round its centre, glow cyan; a quarter of the shots fly cyan."], ["Plasma Veins", "Cyan plasma veins spread from the dome's centre through a quarter of its cells."], ["Capacitor Panels", "The dome is rebuilt with big hex panels, a quarter of them charged cyan."]) },
+  { name: "Energy Conversion", theme: "the dome's cells flicker blue, a growing patch round the centre, more each tier (round 4, your design); Overcharge fills every cell solid blue, in the style you pick (charged cells, plasma veins, or big capacitor panels); gold-rimmed with arcs at Overcharge", steps: [
+    { name: "Charged Rounds", cost: 105, effect: "25% of nearby towers' damage counts as energy", options: T(["Charged Cells", "The flickering cells round the dome's centre turn blue, more each tier; a share of the shots fly blue."], ["Plasma Veins", "Cyan plasma veins spread from the dome's centre through a quarter of its cells."], ["Capacitor Panels", "The dome is rebuilt with big hex panels, a quarter of them charged cyan."]) },
     { name: "Plasma Coating", cost: 205, effect: "50%", options: T(["Half-Charged Dome", "Half the cells glow cyan; half the shots fly cyan."], ["Spreading Veins", "The veins reach half the cells."], ["Half-Charged Panels", "Half the panels charge."]) },
     { name: "Energy Weave", cost: 410, effect: "75% (primary)", options: T(["Woven Dome", "Three quarters of the cells glow."], ["Woven Veins", "The veins reach three quarters of the cells."], ["Woven Panels", "Three quarters of the panels charge."]) },
     { name: "Full Conversion", cost: 820, effect: "100%: every nearby tower's damage is energy, so even Ballistic and Explosive towers can hurt the Wraith", options: T(["Full Dome", "Every cell glows cyan; every shot flies cyan."], ["Full Veins", "The veins reach every cell."], ["Full Panels", "Every panel is charged."]) },
-    { name: "Overcharge", cost: 4375, effect: "100% energy, plus +10% bonus energy damage (mastery)", options: T(["Gold Charged Dome", "A gold-rimmed dome, every cell charged, with arcs crackling over it; hits show +10%."], ["Gold Veins", "Gold-rimmed, the veins everywhere, with arcs; +10%."], ["Gold Panels", "Gold-rimmed charged panels with arcs; +10%."]) },
+    { name: "Overcharge", cost: 4375, effect: "100% energy, plus +10% bonus energy damage (mastery)", options: T(["Gold Charged Dome", "Every cell is solid blue, under a gold rim with arcs crackling over it; hits show +10%."], ["Gold Veins", "Gold-rimmed, the veins everywhere, with arcs; +10%."], ["Gold Panels", "Gold-rimmed charged panels with arcs; +10%."]) },
   ] },
-  { name: "Critical Hits", theme: "round 3 (your note): the dome's cells flicker red, on solid cells too, more each step, in the style you pick (random flickers, bursts spreading from a cell, or a sweep across the dome); gold-edged at Executioner Link", steps: [
-    { name: "Targeting Assist", cost: 80, effect: "8% crit chance", options: T(["Red Flicker", "Two dome cells at a time flicker red, on charged cells too."], ["Red Bursts", "Red flickers burst outward from one cell to its neighbours."], ["Red Sweep", "A red sweep runs across the dome, flickering the cells it passes."]) },
-    { name: "Weak-Point Scan", cost: 165, effect: "11%", options: T(["Three Flickers", "Three cells at a time."], ["Bigger Bursts", "Bigger bursts."], ["Wider Sweep", "A wider sweep."]) },
-    { name: "Precision Matrix", cost: 1260, effect: "15%; crits do ×2.5 (primary)", options: T(["Four Flickers", "Four cells at a time; crits show ×2.5."], ["Wide Bursts", "Wide bursts; crits show ×2.5."], ["Broad Sweep", "A broad sweep; crits show ×2.5."]) },
-    { name: "Lethal Matrix", cost: 985, effect: "18%", options: T(["Five Flickers", "Five cells at a time."], ["Wider Bursts", "Wider bursts."], ["Broader Sweep", "A broader sweep."]) },
-    { name: "Executioner Link", cost: 7440, effect: "22%; crits do ×3 (mastery)", options: T(["Gold-Edged Flicker", "Six red cells at a time, edged in gold; crits show ×3."], ["Gold-Edged Bursts", "The widest bursts, edged in gold; crits show ×3."], ["Gold-Edged Sweep", "The broadest sweep, edged in gold; crits show ×3."]) },
+  { name: "Critical Hits", theme: "the dome's cells flicker red, more of the array each tier, in the style you pick (scattered, bursts spreading from a cell, or a sweep across the dome), overlapping other paths' colours (round 4, your design); Executioner Link fills every cell solid red", steps: [
+    { name: "Targeting Assist", cost: 80, effect: "8% crit chance", options: T(["Scattered Red", "Scattered cells flicker red."], ["Red Bursts", "Red flickers burst outward from one cell to its neighbours."], ["Red Sweep", "A red band sweeps across the dome, flickering the cells it passes."]) },
+    { name: "Weak-Point Scan", cost: 165, effect: "11%", options: T(["More Red", "More cells flicker red."], ["Bigger Bursts", "Bigger bursts."], ["Wider Sweep", "A wider band."]) },
+    { name: "Precision Matrix", cost: 1260, effect: "15%; crits do ×2.5 (primary)", options: T(["Red Array", "Nearly half the array flickers red; crits show ×2.5."], ["Wide Bursts", "Wide bursts; crits show ×2.5."], ["Broad Sweep", "A broad band; crits show ×2.5."]) },
+    { name: "Lethal Matrix", cost: 985, effect: "18%", options: T(["Dense Red", "Most of the array flickers red."], ["Wider Bursts", "Wider bursts."], ["Broader Sweep", "A broader band."]) },
+    { name: "Executioner Link", cost: 7440, effect: "22%; crits do ×3 (mastery)", options: T(["Solid Red", "Every cell is solid red, edged in gold; crits show ×3."], ["Solid Red", "Every cell is solid red, edged in gold; crits show ×3."], ["Solid Red", "Every cell is solid red, edged in gold; crits show ×3."]) },
   ] },
-  { name: "Ricochet", theme: "green deflectors orbiting the dome, and a green flicker hopping from cell to cell like a bounce (round 3, your note), in the style you pick (plates, orbs, or a mirror ring), more each step; gold-trimmed and wobbling at Pinball", steps: [
+  { name: "Ricochet", theme: "green deflectors orbiting the dome, and the dome's cells flickering green, more each tier (round 4, your design); Pinball fills every cell solid green; in the style you pick (plates, orbs, or a mirror ring), more each step; gold-trimmed and wobbling at Pinball", steps: [
     { name: "Deflector Rounds", cost: 135, effect: "10% of hits bounce to another enemy within 60 px at 50% damage", options: T(["Deflector Plates", "Two curved green deflector plates orbit the dome; one hit in ten bounces green."], ["Bounce Orbs", "Two green orbs orbit the dome."], ["Mirror Ring", "A segmented mirror ring turns round the dome, glinting."]) },
     { name: "Bounce Coating", cost: 275, effect: "20%", options: T(["Three Plates", "Three plates; two hits in ten bounce."], ["Three Orbs", "Three orbs."], ["Finer Mirror Ring", "More mirror segments."]) },
     { name: "Ricochet Field", cost: 1205, effect: "30%; bounces at 70% (primary)", options: T(["Four Plates", "Four plates, orbiting faster."], ["Ringed Orbs", "Four orbs on a green ring."], ["Fast Mirror Ring", "More segments, turning faster."]) },

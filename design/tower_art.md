@@ -350,7 +350,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 17 | Scrapyard | copper | C Magnet Yard | B Sparks and Sale |
 | 18 | Magneto Tower | violet | F Stacked Coil Tower | F Drag Trails |
 | 19 | Tractor Tower | `design/tower_art_p2_19_tractor.html` | Base redesign **confirmed** (owner, 2026-10-19: B Armoured Dish, B Focus Beam; base page `design/tower_art_p19_tractor.html`). Second pass **confirmed** (owner, 2026-10-19, "finished"; round 12) |
-| 20 | Augmentation Tower | `design/tower_art_p2_20_augment.html` | Second pass round 3: cell flickers (blue energy, red crits, green ricochet); pick Critical Hits (the red flicker's style), Amplified Bonus and Remote Link |
+| 20 | Augmentation Tower | `design/tower_art_p2_20_augment.html` | Second pass round 4: the owner's cell design (path colours light the flickering cells, solid at a mastery); pick Critical Hits (how its red spreads), Amplified Bonus and Remote Link |
 | 20 | Augmentation Tower | lavender | F Nanite Hive | D Nanite Swarm |
 
 ## Second pass: per-path and Retrofit looks (owner, 2026-10-16)
@@ -1383,6 +1383,13 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
 - **Ricochet:** the note said red. The owner chose green to tell the paths apart: a green flash hops from cell to cell like a bounce, one more hop each step, beside the deflector plates.
 - **"Some effects dont appear" (the owner named the gold halo):** Amplified Bonus's parts (the coils, the gold halo, the fins) were drawn under the dome. They now draw over it.
 
+**Round 4 (owner's design, "I mean have the cells that are flickering at stock, change the color to the respective path color. higher tiers fill up the array more. different paths can overlap colors. Mastry fills the array solid"):**
+- **Stock:** some cells flicker lavender (the base).
+- **Each path recolours the flickering cells in its colour,** lighting more of the array each tier (15%, 30%, 45% and 60%). Energy is blue, a growing patch round the centre. Critical Hits is red, in the style the owner picks: scattered, bursts, or a sweep. Ricochet is green, scattered.
+- **Overlap:** when two paths light the same cell, the second colour shows as an inner hex.
+- **Mastery:** it fills the whole array solid in its colour, with gold edges, and the other path still flickers over it.
+- This replaces round 3's fills and flickers. The deflector plates, the gold rim and arcs at Overcharge, and the Retrofits stay.
+
 ## Open questions
 
-1. **Second pass, Augmentation Tower** (tower 20, round 3; the last tower): pick Critical Hits (the red flicker's style), Amplified Bonus and Remote Link.
+1. **Second pass, Augmentation Tower** (tower 20, round 4; the last tower): pick Critical Hits (how its red spreads), Amplified Bonus and Remote Link.
