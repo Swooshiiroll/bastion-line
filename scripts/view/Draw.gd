@@ -6,6 +6,7 @@ const Towers = preload("res://data/towers.gd")
 const GunTurretArt = preload("res://scripts/view/towers/GunTurretArt.gd")
 const MortarTowerArt = preload("res://scripts/view/towers/MortarTowerArt.gd")
 const RocketSalvoArt = preload("res://scripts/view/towers/RocketSalvoArt.gd")
+const LaserTowerArt = preload("res://scripts/view/towers/LaserTowerArt.gd")
 const Difficulty = preload("res://data/difficulty.gd")
 
 const OUTLINE := Color(0.03, 0.04, 0.06, 0.95)
@@ -35,6 +36,7 @@ const ACCENT := {
 	"gun_turret": Color(0.30, 0.90, 1.00),
 	"mortar_tower": Color(1.00, 0.55, 0.20),
 	"rocket_salvo": Color(1.00, 0.85, 0.30),
+	"laser_tower": Color(1.00, 0.30, 0.35),
 }
 const SPEC_ALT := {
 	"mint": Color(1.00, 0.84, 0.30),
@@ -441,7 +443,7 @@ static var _bake_seg := 0
 static var _seg_used := {}
 static var _turrets := {}
 static var _live := {}
-const AIMED := ["arrow", "cannon", "sniper", "laser", "missile", "flak", "gun_turret", "mortar_tower", "rocket_salvo"]
+const AIMED := ["arrow", "cannon", "sniper", "laser", "missile", "flak", "gun_turret", "mortar_tower", "rocket_salvo", "laser_tower"]
 ## The aim of each extra gun of the tower being drawn (gun 0 is the main one); set by tower().
 static var _extra: Array = []
 const TURRET_BUCKETS := 8
@@ -647,6 +649,8 @@ static func _turret(ci: CanvasItem, type: String, tier: int, c: Vector2, aim: fl
 			MortarTowerArt.draw(ci, c, aim, s, t, flash, spec, acc)
 		"rocket_salvo":
 			RocketSalvoArt.draw(ci, c, aim, s, t, flash, spec, acc)
+		"laser_tower":
+			LaserTowerArt.draw(ci, c, aim, s, t, flash, spec, acc, _extra)
 
 
 ## --- Shading helpers: light comes from the upper left. ------------------------------------

@@ -41,6 +41,8 @@ func _draw() -> void:
 		var extra: Array = []
 		if tw.is_rework and tw.type == "gun_turret":
 			extra = _extra_aims(tw, key, cur)
+		elif tw.is_rework and tw.type == "laser_tower":
+			extra = [clampf(tw.ramp / float(tw.stats().ramp_time), 0.0, 1.0) if tw.target != null else 0.0]
 		Draw.tower(self, tw.type, tw.tier, tw.pos, cur, 1.0 if tw.size <= 1 else 1.8, t + float(tw.cell.x) * 0.3, tw.fire_flash, tw.spec, tw.shown_spec, extra)
 		if tw.disabled > 0.0:
 			Draw.tower_offline(self, tw.pos, t)

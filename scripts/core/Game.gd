@@ -984,6 +984,7 @@ func _update_tower(t, dt: float) -> void:
 		t.disabled = maxf(0.0, t.disabled - dt)
 		t.target = null
 		t.beam_targets.clear()
+		t.beam_ramps.clear()
 		t.sweep_angles = []
 		t.ramp = 0.0
 		t.ramp_mult = 1.0
@@ -1001,7 +1002,9 @@ func _update_tower(t, dt: float) -> void:
 		_update_drones(t, s, dt)
 		return
 	if t.is_beam():
-		if t.spec == "sweeper":
+		if t.is_rework:
+			_update_laser_rework(t, s, dt)
+		elif t.spec == "sweeper":
 			_update_sweeper(t, s, dt)
 		else:
 			_update_laser(t, dt)
@@ -1727,6 +1730,58 @@ func _fire_salvo(t, s: Dictionary) -> void:
 		p.source = t
 		projectiles.append(p)
 	_emit({"type": "fire", "tower": "rocket_salvo", "pos": t.pos, "tier": t.tier, "spec": t.spec, "count": n})
+
+
+## Laser Tower: up to `beams` beams, each on its own target and ramping on its own (damage grows from x1 to the ceiling over the
+## ramp time); the extra beams carry `beam_power` of the main beam. A beam that picks up a new target keeps `ramp_keep` of the
+## ramp it just lost (Ramp Memory). The beam melts the target's armour for good, which every other tower then enjoys.
+func _update_laser_rework(t, s: Dictionary, dt: float) -> void:
+	var beams := int(s.get("beams", 1))
+	var keep: Array = []
+	var ramps: Array = []
+	var lost: Array = []
+	for i in t.beam_targets.size():
+		var e = t.beam_targets[i]
+		var held: float = t.beam_ramps[i] if i < t.beam_ramps.size() else 0.0
+		if keep.size() < beams and t.can_target(e):
+			keep.append(e)
+			ramps.append(held)
+		else:
+			lost.append(held)
+	var carry := float(s.get("ramp_keep", 0.0))
+	while keep.size() < beams:
+		var nt = pick_target(t, keep)
+		if nt == null:
+			break
+		keep.append(nt)
+		ramps.append((lost.pop_back() if not lost.is_empty() else 0.0) * carry)
+	t.beam_targets = keep
+	if keep.is_empty():
+		t.beam_ramps.clear()
+		t.target = null
+		t.ramp = 0.0
+		t.ramp_mult = 1.0
+		return
+	if keep[0] != t.target:
+		t.target = keep[0]
+		_emit({"type": "laser_lock", "pos": t.pos})
+	var ramp_max := float(s.ramp)
+	var ramp_time := float(s.ramp_time)
+	var power := float(s.get("beam_power", 0.4))
+	var melt := float(s.get("melt", 0.0))
+	var dps: float = t.eff_damage()
+	for i in keep.size():
+		ramps[i] = float(ramps[i]) + dt
+		var mult := 1.0 + (ramp_max - 1.0) * clampf(float(ramps[i]) / ramp_time, 0.0, 1.0)
+		damage_enemy(keep[i], dps * mult * dt * (1.0 if i == 0 else power), true, t, false)
+		if melt > 0.0:
+			keep[i].shred(melt * dt, 999.0)
+		if i == 0:
+			t.ramp = ramps[0]
+			t.ramp_mult = mult
+	t.beam_ramps = ramps
+	t.aim = (keep[0].pos - t.pos).angle()
+	t.fire_flash = 0.05
 
 
 func _update_laser(t, dt: float) -> void:

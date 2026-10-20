@@ -3135,3 +3135,83 @@ func test_rework_rocket_salvo() -> void:
 	for i in 20:
 		g._update_rocket(tr, 0.05)
 	check(g.smokes.size() >= 5 and g.smokes[0].air, "a smoke-trail rocket leaves a line of clouds")
+
+
+func test_rework_laser_tower() -> void:
+	var g = new_game()
+	g.gold = 60000
+	var t = g.place_tower("laser_tower", spot(g, "laser_tower", 0))
+	check(t != null and t.is_rework and g.tower_cost("laser_tower") == 250, "the Laser Tower builds for 250")
+	var s: Dictionary = t.stats()
+	check(near(s.damage, 25.0) and near(s.range, 150.0) and near(s.ramp, 3.0) and near(s.ramp_time, 3.0) and int(s.beams) == 1, "stock: 25 dps, x3 over 3 s, 150 range")
+	check(t.is_beam() and t.hits_air() and t.hits_ground() and t.def.damage_kind == "energy", "an energy beam that hits air and ground")
+	check(g.buy_retrofit(t, 0) and near(t.stats().damage, 33.0), "Capacitor Bank: +8 dps")
+	var hs = g.place_tower("laser_tower", spot(g, "laser_tower", 20))
+	check(g.buy_retrofit(hs, 1) and near(hs.stats().ramp, 3.5), "Heat Sinks: ceiling x3.5")
+	var rm = g.place_tower("laser_tower", spot(g, "laser_tower", 40))
+	check(g.buy_retrofit(rm, 2) and near(rm.stats().ramp_keep, 0.5), "Ramp Memory")
+	# The ramp, and the armour melting for good.
+	var bt = g.place_tower("laser_tower", spot(g, "laser_tower", 60))
+	var brute = put(g, "brute", 100.0, 0, 50.0)
+	bt.pos = brute.pos + Vector2(30, 0)
+	var armor0: float = brute.armor_now() if brute.has_method("armor_now") else brute.armor
+	for i in 60:
+		g._update_laser_rework(bt, bt.stats(), 0.05)
+	check(near(bt.ramp, 3.0, 0.01) and near(bt.ramp_mult, 3.0, 0.01), "after 3 s the beam is at x3")
+	check(near(brute.armor_shred, 3.0, 0.01), "three seconds of melt take 3 armour")
+	var shred_before: float = brute.armor_shred
+	bt.beam_targets.clear()
+	bt.beam_ramps.clear()
+	check(near(brute.armor_shred, shred_before), "the melted armour stays gone")
+	# Power path.
+	var pw = g.place_tower("laser_tower", spot(g, "laser_tower", 80))
+	pw.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, pw, "a", 2)
+	check(near(pw.stats().ramp, 3.5) and near(pw.stats().ramp_time, 2.2), "Power 2: x3.5 in 2.2 s")
+	buy_steps(g, pw, "a", 3)
+	check(pw.mastered and near(pw.stats().ramp, 8.0) and near(pw.stats().ramp_time, 1.5), "Annihilator: x8 in 1.5 s")
+	# Multi-target: extra beams on their own targets, at a share of the power, each ramping alone.
+	var mt = g.place_tower("laser_tower", spot(g, "laser_tower", 100))
+	mt.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, mt, "b", 1)
+	check(int(mt.stats().beams) == 2 and near(mt.stats().beam_power, 0.4), "Beam Splitter: 2 beams, the second at 40%")
+	buy_steps(g, mt, "b", 4)
+	check(mt.mastered and int(mt.stats().beams) == 4 and near(mt.stats().beam_power, 0.75), "Prism Array: 4 beams at 75%")
+	g.enemies.clear()
+	var e1 = put(g, "grunt", 100.0, 0, 500.0)
+	var e2 = put(g, "grunt", 104.0, 0, 500.0)
+	var e3 = put(g, "grunt", 108.0, 0, 500.0)
+	mt.pos = e1.pos + Vector2(30, 0)
+	for i in 10:
+		g._update_laser_rework(mt, mt.stats(), 0.05)
+	check(mt.beam_targets.size() == 3 and mt.beam_ramps.size() == 3, "three enemies, three beams")
+	check(near(mt.beam_ramps[0], 0.5, 0.01) and near(mt.beam_ramps[2], 0.5, 0.01), "each beam ramps on its own")
+	var hp1: float = mt.beam_targets[0].max_hp - mt.beam_targets[0].hp
+	var hp3: float = mt.beam_targets[2].max_hp - mt.beam_targets[2].hp
+	check(hp3 > 0.0 and hp3 < hp1, "an extra beam hits for less (%.1f vs %.1f)" % [hp3, hp1])
+	# Ramp Memory: a new target inherits half the ramp of the one it replaces.
+	var rmem = g.place_tower("laser_tower", spot(g, "laser_tower", 120))
+	g.buy_retrofit(rmem, 2)
+	g.enemies.clear()
+	var a = put(g, "grunt", 100.0, 0, 500.0)
+	rmem.pos = a.pos + Vector2(30, 0)
+	for i in 40:
+		g._update_laser_rework(rmem, rmem.stats(), 0.05)
+	check(near(rmem.ramp, 2.0, 0.01), "two seconds on the target")
+	a.alive = false
+	var b = put(g, "grunt", 100.0, 0, 500.0)
+	g._update_laser_rework(rmem, rmem.stats(), 0.05)
+	check(rmem.target == b and near(rmem.ramp, 1.05, 0.02), "Ramp Memory: the new target starts at half (%.2f)" % rmem.ramp)
+	var plain = g.place_tower("laser_tower", spot(g, "laser_tower", 140))
+	plain.pos = b.pos + Vector2(30, 0)
+	for i in 40:
+		g._update_laser_rework(plain, plain.stats(), 0.05)
+	b.alive = false
+	var c2 = put(g, "grunt", 100.0, 0, 500.0)
+	g._update_laser_rework(plain, plain.stats(), 0.05)
+	check(near(plain.ramp, 0.05, 0.01), "without it the ramp starts over")
+	# Range path.
+	var rg = g.place_tower("laser_tower", spot(g, "laser_tower", 160))
+	rg.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, rg, "c", 5)
+	check(rg.mastered and near(rg.stats().range, 280.0), "Deep Lance: 280 range")

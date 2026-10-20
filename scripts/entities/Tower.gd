@@ -73,6 +73,8 @@ var refund_field := 0.0
 var ramp := 0.0
 var ramp_mult := 1.0
 var beam_targets: Array = []
+## Laser Tower (reworked): seconds each beam has held its target, parallel to beam_targets.
+var beam_ramps: Array = []
 ## Seconds left knocked offline by a Jammer's EMP.
 var disabled := 0.0
 ## The special tile under the tower: "H" (high ground), "P" (power node) or "".

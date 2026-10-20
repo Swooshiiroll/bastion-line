@@ -3,6 +3,7 @@ extends Node2D
 ## laser beams (thicker as they ramp up) and the energy links from pylons to boosted towers.
 
 const Draw = preload("res://scripts/view/Draw.gd")
+const LaserTowerArt = preload("res://scripts/view/towers/LaserTowerArt.gd")
 
 var world
 
@@ -27,10 +28,40 @@ func _draw() -> void:
 			_pylon(tw, g, t)
 		elif tw.is_beam() and not tw.sweep_angles.is_empty():
 			_sweeps(tw, t)
+		elif tw.is_beam() and tw.is_rework and not tw.beam_targets.is_empty():
+			_laser_beams(tw, t)
 		elif tw.is_beam() and not tw.beam_targets.is_empty():
 			_beams(tw, t)
 	for z in g.storms:
 		_storm(z, t)
+
+
+## The Laser Tower's beams (the confirmed art): each ramps on its own target, widening and whitening with the Power path, wrapped
+## in gold at the mastery's full ramp; the extra beams are thinner by their share of the power.
+func _laser_beams(tw, t: float) -> void:
+	var acc := Draw.accent(tw.type, tw.spec)
+	var s: Dictionary = tw.stats()
+	var k := 1.0 if tw.size <= 1 else 1.8
+	for i in tw.beam_targets.size():
+		var e = tw.beam_targets[i]
+		if e == null or not e.alive:
+			continue
+		var held: float = tw.beam_ramps[i] if i < tw.beam_ramps.size() else 0.0
+		var g := clampf(held / float(s.ramp_time), 0.0, 1.0)
+		var frac: float = 1.0 if i == 0 else float(s.get("beam_power", 0.4))
+		var st := LaserTowerArt.beam_style(tw.spec, g, float(s.ramp), frac, acc)
+		var src := LaserTowerArt.beam_origin(tw.pos, tw.aim, k, tw.spec, i)
+		var col: Color = st.col
+		var w: float = st.w
+		var flick := 0.85 + 0.15 * sin(t * 50.0 + float(i))
+		if st.gold:
+			draw_line(src, e.pos, Color(Draw.GOLD, 0.35), w * 3.2, true)
+		draw_line(src, e.pos, Color(col, 0.18 * flick), w * 4.0, true)
+		draw_line(src, e.pos, Color(col, float(st.alpha) * flick), w * 1.6, true)
+		draw_line(src, e.pos, Color(1, 1, 1, 0.8 * flick), maxf(1.0, w * 0.45), true)
+		Draw.disc(self, e.pos, w * 2.2, Color(col, 0.35))
+		Draw.disc(self, e.pos, w * 0.9, Color(1, 1, 1, 0.7))
+	Draw.disc(self, LaserTowerArt.beam_origin(tw.pos, tw.aim, k, tw.spec, 0), 3.0 + tw.ramp_mult * 0.5, Color(acc, 0.4))
 
 
 func _beams(tw, t: float) -> void:

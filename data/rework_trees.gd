@@ -18,6 +18,7 @@ const TREES := {
 		"ground": true,
 		"size": 1,
 		"damage_kind": "physical",
+		"beam": false,
 		"cost": 75,
 		"base": {
 			"name": "Gun Turret",
@@ -242,6 +243,7 @@ const TREES := {
 		"ground": true,
 		"size": 1,
 		"damage_kind": "physical",
+		"beam": false,
 		"cost": 150,
 		"base": {
 			"name": "Mortar Tower",
@@ -475,6 +477,7 @@ const TREES := {
 		"ground": true,
 		"size": 1,
 		"damage_kind": "physical",
+		"beam": false,
 		"cost": 200,
 		"base": {
 			"name": "Rocket Salvo",
@@ -692,6 +695,7 @@ const TREES := {
 		"ground": true,
 		"size": 1,
 		"damage_kind": "energy",
+		"beam": true,
 		"cost": 250,
 		"base": {
 			"name": "Laser Tower",
@@ -907,6 +911,7 @@ const TREES := {
 		"ground": false,
 		"size": 1,
 		"damage_kind": "physical",
+		"beam": false,
 		"cost": 150,
 		"base": {
 			"name": "Anti-Aircraft Turret",
