@@ -2,7 +2,7 @@
 // Scope (owner): the art and the upgrade art start over; the mechanic, the paths, their effects and their names stay. Direction (owner): a dish on a mast,
 // as two dish looks plus one wildcard, and three new animations to pick. The tower grabs one enemy, holds it 1.5 s while hauling it back 80 px, lets go and
 // recharges (6 s; the preview shortens it). The preview can't move enemies, so the held one is hidden and redrawn where the beam drags it.
-const PAGE = { title: "Tractor Tower base look (redesign)", store: "bl-tower-art-tractor-looks-1" };
+const PAGE = { title: "Tractor Tower base look (redesign)", store: "bl-tower-art-tractor-looks-2" };
 const distTo = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 const enemyR = (s) => Math.max(4, Math.min(11, s * 0.12));
 const nearestTo = (p, list) => { let best = null, bd = 1e9; for (const e of list) { const d = distTo(e.p, p); if (d < bd) { bd = d; best = e; } } return best; };
@@ -67,4 +67,6 @@ const TOWERS = [
           held: (p, s, col, t) => { for (let i = 0; i < 3; i++) { const q = fmod(t * 1.3 + i / 3, 1); ring(p, enemyR(s) + 3 + q * 9, A(col, 0.7 * (1 - q)), 1.2); } } }) },
     ] },
 ];
-const DEFAULTS = { tractor: { look: "A", anim: "A" } };
+// Round 2 (owner, 2026-10-19): look B Armoured Dish, animation B Focus Beam; the page shows only the picks.
+TOWERS[0].looks = TOWERS[0].looks.filter((l) => l.key === "B"); TOWERS[0].anims = TOWERS[0].anims.filter((a) => a.key === "B");
+const DEFAULTS = { tractor: { look: "B", anim: "B" } };

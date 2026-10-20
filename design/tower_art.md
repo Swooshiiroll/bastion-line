@@ -349,7 +349,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 16 | Shockwave Generator | amber | B Ring Reactor | B Mushroom Pulse |
 | 17 | Scrapyard | copper | C Magnet Yard | B Sparks and Sale |
 | 18 | Magneto Tower | violet | F Stacked Coil Tower | F Drag Trails |
-| 19 | Tractor Tower | `design/tower_art_p19_tractor.html` | **Redesign** (owner, 2026-10-19): new base-look page (two dish-on-a-mast looks and a wildcard, three animations); pick a look and an animation |
+| 19 | Tractor Tower | `design/tower_art_p19_tractor.html` | **Redesign** (owner, 2026-10-19): base round 2: picks B Armoured Dish, B Focus Beam; waiting for "Tractor Tower base finished" |
 | 20 | Augmentation Tower | lavender | F Nanite Hive | D Nanite Swarm |
 
 ## Second pass: per-path and Retrofit looks (owner, 2026-10-16)
@@ -1299,6 +1299,8 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
   - **Focus Beam:** a tight bright beam with rings sliding down it toward the tower; the enemy shakes.
   - **Tractor Waves:** wave fronts ripple out to the enemy, chevrons run back along the beam, and the enemy sits in rippling rings.
 
+**Round 2 (owner's picks, no notes, 2026-10-19):** look **B Armoured Dish**, animation **B Focus Beam**. The page shows only the picks.
+
 ## Open questions
 
-1. **Tractor Tower base look, redesign** (tower 19): pick a look and an animation, then say "Tractor Tower base finished". Then the second pass (with the Twin Emitter replacement), then the Augmentation Tower.
+1. **Tractor Tower base look, redesign** (tower 19, round 2: B Armoured Dish, B Focus Beam): confirm, then say "Tractor Tower base finished". Then the second pass (with the Twin Emitter replacement), then the Augmentation Tower.
