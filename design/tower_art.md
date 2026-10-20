@@ -349,7 +349,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 16 | Shockwave Generator | amber | B Ring Reactor | B Mushroom Pulse |
 | 17 | Scrapyard | copper | C Magnet Yard | B Sparks and Sale |
 | 18 | Magneto Tower | violet | F Stacked Coil Tower | F Drag Trails |
-| 19 | Tractor Tower | `design/tower_art_p2_19_tractor.html` | Base redesign **confirmed** (owner, 2026-10-19: B Armoured Dish, B Focus Beam; base page `design/tower_art_p19_tractor.html`). Second pass round 9: every stage picked; at Dual Beam a stationary platform with two independently turning dishes; waiting for "Tractor Tower finished" |
+| 19 | Tractor Tower | `design/tower_art_p2_19_tractor.html` | Base redesign **confirmed** (owner, 2026-10-19: B Armoured Dish, B Focus Beam; base page `design/tower_art_p19_tractor.html`). Second pass round 10: every stage picked; back to the single dish; the Recharge mastery is now Supercapacitor (2 s recharge); waiting for "Tractor Tower finished" |
 | 20 | Augmentation Tower | lavender | F Nanite Hive | D Nanite Swarm |
 
 ## Second pass: per-path and Retrofit looks (owner, 2026-10-16)
@@ -1343,6 +1343,8 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
 
 **Round 9 (owner's note, "Keep the platform stationary"):** at Dual Beam the platform, its rams, capacitors and Retrofit parts no longer turn. Only the two dishes turn, each toward its own target. Below Dual Beam the single dish turns with its platform, as a turret.
 
+**Round 10 (owner's notes, "Change it back to just the single dish. Change the upgrade to just recharge at 2s"):** the twin dishes and the stationary platform are gone, so it is a single dish at every level. The Recharge mastery is now **Supercapacitor**: recharge 2 s instead of Dual Beam's second beam. The owner picked the name, and the price is the formula's 21,745 credits (the 3.3 s to 2 s rise in grab rate, ×32); it is in `design/tower_roster.md` and the regenerated trees. Its gold cells refill in 2 s. Faster Recharge's -1 s still stacks (the carpet rule). The Railgun has a step named "Supercapacitors", a near-duplicate name.
+
 ## Open questions
 
-1. **Second pass, Tractor Tower** (tower 19, round 9, a stationary platform at Dual Beam): every stage is picked. Confirm with "Tractor Tower finished". Then the Augmentation Tower.
+1. **Second pass, Tractor Tower** (tower 19, round 10, single dish; Supercapacitor): every stage is picked. Confirm with "Tractor Tower finished". Then the Augmentation Tower.

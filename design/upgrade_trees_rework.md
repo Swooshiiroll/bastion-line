@@ -496,7 +496,7 @@ A dish-mounted emitter that locks a tractor beam onto a single enemy and hauls i
 | 4 | b | Capacitor Bank | 345 |  | 4.6 s | new |
 | 5 | b | Rapid Lock | 1265 |  | 3.8 s | new |
 | 6 | b | Overclocked Emitter | 2200 |  | 3.3 s | new |
-| M | b | Dual Beam | 10035 |  | A second beam on another enemy, at a third of the pull | new |
+| M | b | Supercapacitor | 21745 |  | Recharge 2 s. It replaced Dual Beam (a second beam at a third of the pull, 10,035) on 2026-10-19, by the owner's choice; priced by the formula (the 3.3 s to 2 s rise in grab rate, ×32) | new |
 | 3 | c | Firm Grip | 190 |  | Heavy roles resist half as much | new |
 | 4 | c | Crushing Grip | 270 |  | The held enemy takes 15 energy damage/s | new |
 | 5 | c | Lift and Drop | 1075 |  | Ground enemies are lifted, then slammed down, stunning everything within 50 px for 0.4 s | new |

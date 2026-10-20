@@ -1774,7 +1774,7 @@ Magneto (Swarm full, Tank half, Boss a quarter).
 | 2 | Capacitor Bank | 345 | 4.6 s |
 | 3 (primary) | Rapid Lock | 1,265 | 3.8 s |
 | 4 | Overclocked Emitter | 2,200 | 3.3 s |
-| Mastery | Dual Beam | 10,035 | A second beam on another enemy, at a third of the pull |
+| Mastery | Supercapacitor | 21,745 | Recharge 2 s. It replaced Dual Beam (a second beam at a third of the pull, 10,035) on 2026-10-19, by the owner's choice; priced by the formula (the 3.3 s to 2 s rise in grab rate, ×32) |
 
 **Path 3, Grip:**
 
