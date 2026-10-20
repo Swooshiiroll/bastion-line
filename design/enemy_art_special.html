@@ -1,0 +1,1157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Enemy Art: Special</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    color-scheme: dark;
+    --ground: #06090e; --field: #0b1016; --panel: #08111a; --panel-2: #0d1a25; --rule: #1d3a4b; --wire: #2a5a70;
+    --text: #dcedf7; --dim: #86a0b1; --faint: #4f6a7b; --accent: #4de1ff; --gold: #ffc85a;
+    --display: "Chakra Petch", "Bahnschrift", "Segoe UI", sans-serif;
+    --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--text); font: 14px/1.5 var(--body); padding: 28px 16px 48px; }
+  .wrap { max-width: 1340px; margin: 0 auto; display: grid; gap: 22px; }
+  .eyebrow { font: 600 12px var(--display); letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
+  h1 { font: 700 30px/1.1 var(--display); margin: 4px 0 0; }
+  h2 { font: 700 20px/1.2 var(--display); margin: 0; letter-spacing: .04em; }
+  h3 { font: 700 16px var(--display); margin: 0; letter-spacing: .03em; }
+  p.note { margin: 6px 0 0; color: var(--dim); max-width: 90ch; }
+  ul.rules { margin: 8px 0 0; padding-left: 18px; color: var(--dim); max-width: 95ch; }
+  ul.rules b { color: var(--text); font-weight: 500; }
+  .controls { position: sticky; top: 0; z-index: 5; display: flex; flex-wrap: wrap; gap: 8px 14px; align-items: center;
+    padding: 10px 12px; background: rgba(8,17,26,.94); border: 1px solid var(--rule); border-radius: 10px 2px 10px 2px; }
+  .controls .lbl { font: 600 11px var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--faint); }
+  .seg { display: inline-flex; border: 1px solid var(--wire); border-radius: 6px; overflow: hidden; }
+  button { font: 600 12px var(--display); letter-spacing: .06em; color: var(--text); background: var(--panel-2); border: 0; padding: 6px 11px; cursor: pointer; }
+  .seg button + button { border-left: 1px solid var(--wire); }
+  button.on { background: var(--accent); color: #031018; }
+  button.solo { border: 1px solid var(--wire); border-radius: 6px; }
+  button.pick.on { background: var(--gold); color: #1a1000; }
+  button:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
+  .batch { display: grid; gap: 14px; }
+  .batch-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid var(--rule); padding-bottom: 6px; }
+  .batch-head .job { color: var(--dim); font-size: 13px; }
+  .enemy { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px 2px 12px 2px; padding: 10px 12px 12px; display: grid; gap: 8px; }
+  .enemy-head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+  .enemy-head .sub { color: var(--dim); font: 12px var(--mono); }
+  .panels { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 10px; }
+  .panel { border: 1px solid var(--rule); border-radius: 8px; padding: 8px; display: grid; gap: 6px; align-content: start; background: #071019; }
+  .panel.today { border-style: dashed; }
+  .panel.picked { border-color: var(--gold); box-shadow: 0 0 14px rgba(255,200,90,.15); }
+  .ptitle { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font: 700 13px var(--display); }
+  .key { font: 700 11px var(--display); color: #031018; background: var(--accent); border-radius: 4px; padding: 0 6px; }
+  .panel.today .key { background: var(--faint); color: var(--text); }
+  .views { display: flex; gap: 8px; align-items: flex-end; flex-wrap: wrap; }
+  .view { display: grid; gap: 2px; justify-items: start; }
+  .view small { font: 500 10px var(--mono); color: var(--faint); }
+  canvas { display: block; background: var(--field); border: 1px solid var(--rule); border-radius: 4px; max-width: 100%; }
+  .meta { font: 12px var(--mono); color: var(--dim); }
+  .meta b { color: var(--text); font-weight: 500; }
+  .desc { color: var(--dim); font-size: 13px; margin: 0; }
+  .lineup { background: var(--panel); border: 1px solid var(--wire); border-radius: 12px 2px 12px 2px; padding: 10px 12px; display: grid; gap: 8px; }
+  .lineup .rowlbl { font: 600 11px var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
+  .picks { display: grid; gap: 6px; }
+  .picks textarea { width: 100%; min-height: 54px; background: #071019; color: var(--text); border: 1px solid var(--rule); border-radius: 6px; font: 12px var(--mono); padding: 8px; resize: vertical; }
+  .combo { display: grid; gap: 4px; border: 1px solid var(--gold); border-radius: 8px; padding: 8px; background: rgba(255,200,90,.04); }
+  .combo .rowlbl, .lineup .rowlbl { font: 600 11px var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--gold); }
+  .dim { display: grid; gap: 8px; }
+  .dim h4 { font: 700 14px var(--display); letter-spacing: .06em; margin: 6px 0 0; color: var(--accent); text-transform: uppercase; }
+  .dim h4 .hint { font: 400 12px var(--body); color: var(--faint); text-transform: none; letter-spacing: 0; margin-left: 6px; }
+  .panels.small { grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr)); }
+  label.notes { display: grid; gap: 4px; }
+  label.notes .lbl { font: 600 11px var(--display); letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
+  label.notes textarea { width: 100%; min-height: 44px; background: #071019; color: var(--text); border: 1px solid var(--rule); border-radius: 6px; font: 13px var(--body); padding: 6px 8px; resize: vertical; }
+  .picks button + button { margin-left: 8px; }
+  .frames { display: none; gap: 8px; flex-wrap: wrap; }
+  .frames figure { margin: 0; display: grid; gap: 2px; }
+  .frames img { width: 216px; height: 144px; border: 1px solid var(--rule); border-radius: 4px; background: var(--field); }
+  .frames figcaption { font: 500 10px var(--mono); color: var(--faint); }
+  body.grey canvas, body.grey .frames img { filter: grayscale(1); }
+  body.print .controls, body.print .live, body.print button.pick { display: none !important; }
+  body.print .frames { display: flex; }
+  @media print {
+    body { background: #fff; color: #000; padding: 0; }
+    .controls { display: none; }
+    .enemy, .lineup, .panel { break-inside: avoid; background: #fff; border-color: #999; box-shadow: none; }
+    .live { display: none !important; }
+    .frames { display: flex !important; }
+    .desc, .meta, p.note, ul.rules { color: #333; }
+  }
+  .family { color: var(--text); background: var(--panel); border: 1px solid var(--wire); border-left: 3px solid var(--accent); border-radius: 6px; padding: 8px 12px; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Bastion Line · Enemy visual redesign · Enemy art · role 7 of 8: Special (confirmed)</div>
+    <h1>Enemy art: Special</h1>
+    <p class="note">A fresh start from the names: the machine army's <b>Special</b> role. For each enemy, pick its <b>look</b>, <b>animation</b> and
+      <b>movement</b> separately from three proposals each (A to C), and add notes. Mix freely. The <b>Your combination</b> preview shows your
+      mix (option A until you pick). <b>Special is confirmed:</b> your final picks are preselected (Phantom E/F/D, Aegis Walker E/B/A, Hydra Frame H/A/A, Masquerade J/D/I, Decoy Beacon B/F/A, Mirage C/B/C). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back.
+      Spec: <code>design/enemy_art.md</code>.</p>
+    <ul class="rules">
+      <li><b>Machine army;</b> each <b>name inspires a trait</b> (not a literal picture).</li>
+      <li><b>Tone:</b> gritty military mixed with sleek sci-fi. <b>Tiers evolve</b> within a role: bigger, more armour and parts, sleeker.</li>
+      <li><b>Colour per enemy.</b> Flyers stay flyers, ground stays ground; movement keeps the same average speed.</li>
+    </ul>
+  </header>
+
+  <div class="controls" role="toolbar" aria-label="Playback">
+    <button class="solo" id="play" aria-pressed="true">Pause</button>
+    <span class="lbl">Speed</span>
+    <span class="seg" id="speed"><button data-v="0.5">0.5x</button><button data-v="1" class="on">1x</button><button data-v="2">2x</button></span>
+    <button class="solo" id="grey" aria-pressed="false">Greyscale</button>
+    <button class="solo" id="printview" aria-pressed="false">Print view</button>
+  </div>
+
+  <div id="batches"></div>
+</div>
+
+<script>
+"use strict";
+// Shared with design/new_enemies_mockup.html (canvas port of Draw.gd primitives and today's enemies).
+// ---- Colours and vectors (mirrors Draw.gd) -------------------------------------------------
+const OUTLINE = [0.03, 0.04, 0.06, 0.95], METAL_D = [0.10, 0.115, 0.14, 1], METAL = [0.18, 0.20, 0.24, 1], METAL_L = [0.30, 0.33, 0.38, 1];
+const LIGHT = [-0.6, -0.8];
+const WHITE = [1, 1, 1, 1];
+const A = (c, a) => [c[0], c[1], c[2], a];
+const dk = (c, k) => [c[0] * (1 - k), c[1] * (1 - k), c[2] * (1 - k), c[3] ?? 1];
+const lt = (c, k) => [c[0] + (1 - c[0]) * k, c[1] + (1 - c[1]) * k, c[2] + (1 - c[2]) * k, c[3] ?? 1];
+const mix = (a, b, k) => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k, (a[3] ?? 1) + ((b[3] ?? 1) - (a[3] ?? 1)) * k];
+const css = c => `rgba(${Math.round(c[0] * 255)},${Math.round(c[1] * 255)},${Math.round(c[2] * 255)},${c[3] ?? 1})`;
+const add = (a, b) => [a[0] + b[0], a[1] + b[1]];
+const sub = (a, b) => [a[0] - b[0], a[1] - b[1]];
+const mul = (a, k) => [a[0] * k, a[1] * k];
+const fa = a => [Math.cos(a), Math.sin(a)];
+const orth = v => [v[1], -v[0]];
+const dot = (a, b) => a[0] * b[0] + a[1] * b[1];
+const norm = v => { const l = Math.hypot(v[0], v[1]) || 1; return [v[0] / l, v[1] / l]; };
+const rot = (p, r) => [p[0] * Math.cos(r) - p[1] * Math.sin(r), p[0] * Math.sin(r) + p[1] * Math.cos(r)];
+const TAU = Math.PI * 2;
+const clamp01 = x => Math.max(0, Math.min(1, x));
+const ease = x => { x = clamp01(x); return x * x * (3 - 2 * x); };
+const fmod = (a, b) => ((a % b) + b) % b;
+
+// ---- Drawing primitives (one-to-one with Draw.gd) ------------------------------------------
+let X = null; // current 2D context
+function disc(c, r, col) { if (r <= 0) return; X.fillStyle = css(col); X.beginPath(); X.arc(c[0], c[1], r, 0, TAU); X.fill(); }
+function arc(c, r, a0, a1, col, w) { X.strokeStyle = css(col); X.lineWidth = w > 0 ? w : 1; X.beginPath(); X.arc(c[0], c[1], Math.max(0.01, r), a0, a1); X.stroke(); }
+function ring(c, r, col, w = 1.5) { arc(c, r, 0, TAU, col, w); }
+function line(a, b, col, w = 1) { X.strokeStyle = css(col); X.lineWidth = w > 0 ? w : 1; X.beginPath(); X.moveTo(a[0], a[1]); X.lineTo(b[0], b[1]); X.stroke(); }
+function polyline(pts, col, w = 1) { if (pts.length < 2) return; X.strokeStyle = css(col); X.lineWidth = w > 0 ? w : 1; X.beginPath(); X.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) X.lineTo(pts[i][0], pts[i][1]); X.stroke(); }
+function poly(pts, col) { X.fillStyle = css(col); X.beginPath(); X.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) X.lineTo(pts[i][0], pts[i][1]); X.closePath(); X.fill(); }
+function xform(c, pts, r, s) { return pts.map(p => add(c, rot(mul(p, s), r))); }
+function fill(c, pts, col, r = 0, s = 1) { poly(xform(c, pts, r, s), col); }
+function outline(c, pts, col, w, r = 0, s = 1) { const p = xform(c, pts, r, s); p.push(p[0]); polyline(p, col, w); }
+function solid(c, pts, col, r = 0, s = 1, lw = 1.2) { fill(c, pts, col, r, s); outline(c, pts, OUTLINE, lw, r, s); }
+function ellipse(c, rx, ry, col) { X.fillStyle = css(col); X.beginPath(); X.ellipse(c[0], c[1], Math.max(0.01, rx), Math.max(0.01, ry), 0, 0, TAU); X.fill(); }
+function rect(x, y, w, h, col) { X.fillStyle = css(col); X.fillRect(x, y, w, h); }
+function ngon(n, r, ph = 0) { const o = []; for (let i = 0; i < n; i++) { const a = ph + TAU * i / n; o.push([Math.cos(a) * r, Math.sin(a) * r]); } return o; }
+function rectPts(hw, hh) { return [[-hw, -hh], [hw, -hh], [hw, hh], [-hw, hh]]; }
+function glowDot(c, r, col) { disc(c, r * 2.2, A(col, 0.18 * (col[3] ?? 1))); disc(c, r * 1.4, A(col, 0.35 * (col[3] ?? 1))); disc(c, r, col); disc(c, r * 0.45, [1, 1, 1, 0.9 * (col[3] ?? 1)]); }
+function arcSegments(c, r, count, gap, rt, col, w) { const span = TAU / count; for (let i = 0; i < count; i++) { const a0 = rt + span * i + gap * 0.5; arc(c, r, a0, a0 + span - gap, col, w); } }
+function orb(p, r, col) {
+  disc(p, r + 1.1, OUTLINE); disc(p, r, dk(col, 0.3)); disc(add(p, mul(LIGHT, r * 0.12)), r * 0.8, col);
+  arc(p, r * 0.72, Math.PI * 1.05, Math.PI * 1.6, lt(col, 0.35), Math.max(0.8, r * 0.16));
+  disc(add(p, mul(LIGHT, r * 0.45)), Math.max(0.6, r * 0.13), [1, 1, 1, 0.55]);
+}
+function plate(c, pts, col, r = 0, s = 1, lw = 1.2) {
+  const p = xform(c, pts, r, s);
+  poly(p, dk(col, 0.22));
+  let ce = [0, 0]; for (const q of p) ce = add(ce, q); ce = mul(ce, 1 / p.length);
+  poly(p.map(q => add(ce, mul(sub(q, ce), 0.8))), col);
+  for (let i = 0; i < p.length; i++) {
+    const a = p[i], b = p[(i + 1) % p.length];
+    const m = norm(sub(mul(add(a, b), 0.5), ce));
+    const d = dot(m, LIGHT);
+    const a1 = add(a, mul(sub(ce, a), 0.1)), b1 = add(b, mul(sub(ce, b), 0.1));
+    if (d > 0.15) line(a1, b1, lt(col, 0.45), Math.max(0.8, lw * 0.8));
+    else if (d < -0.15) line(a1, b1, dk(col, 0.5), Math.max(0.8, lw * 0.8));
+  }
+  const cl = p.slice(); cl.push(p[0]); polyline(cl, OUTLINE, lw);
+}
+function rivets(c, pts, r, s, inset = 0.72, rr = 0.9) { for (const q of xform(c, pts, r, s)) { const p = add(c, mul(sub(q, c), inset)); disc(p, rr + 0.3, OUTLINE); disc(p, rr, lt(METAL_L, 0.15)); } }
+function bar(a, b, w, col) {
+  const d = norm(sub(b, a)); let n = orth(d); if (dot(n, LIGHT) < 0) n = mul(n, -1);
+  line(a, b, OUTLINE, w + 1.6); line(a, b, dk(col, 0.25), w);
+  line(add(a, mul(n, w * 0.18)), add(b, mul(n, w * 0.18)), col, w * 0.55);
+  line(add(a, mul(n, w * 0.3)), add(b, mul(n, w * 0.3)), lt(col, 0.4), Math.max(0.6, w * 0.16));
+}
+function strip(a, b, w, col) { line(a, b, A(col, 0.25 * (col[3] ?? 1)), w * 2.6); line(a, b, col, w); line(a, b, [1, 1, 1, 0.6 * (col[3] ?? 1)], Math.max(0.5, w * 0.35)); }
+function oval(c, rx, ry, r, col, ow = 0) {
+  const pts = []; for (let i = 0; i < 20; i++) { const a = TAU * i / 20; pts.push(add(c, rot([Math.cos(a) * rx, Math.sin(a) * ry], r))); }
+  if (ow > 0) poly(pts.map(p => add(c, mul(sub(p, c), 1 + ow / Math.max(rx, ry)))), OUTLINE);
+  poly(pts, col);
+}
+function shadedOval(c, rx, ry, r, col) {
+  const m = Math.min(rx, ry);
+  oval(c, rx, ry, r, dk(col, 0.3), 1.3); oval(add(c, mul(LIGHT, m * 0.12)), rx * 0.8, ry * 0.78, r, col);
+  disc(add(c, mul(LIGHT, m * 0.5)), Math.max(0.6, m * 0.14), [1, 1, 1, 0.45]);
+}
+function limb(pts, w, col) { polyline(pts, OUTLINE, w + 1.4); polyline(pts, col, w); for (let i = 1; i < pts.length - 1; i++) { disc(pts[i], w * 0.75 + 0.4, OUTLINE); disc(pts[i], w * 0.75, lt(col, 0.25)); } }
+
+// ---- Palettes (existing from Draw.gd ENEMY_BODY / ENEMY_COLOR; new ones are drafts) ----------
+const PAL = {
+  grunt: [[0.40, 0.42, 0.48, 1], [1.00, 0.28, 0.22, 1]], runner: [[0.30, 0.30, 0.32, 1], [1.00, 0.80, 0.20, 1]],
+  brute: [[0.40, 0.37, 0.33, 1], [1.00, 0.55, 0.15, 1]], swarmling: [[0.12, 0.30, 0.16, 1], [0.40, 1.00, 0.50, 1]],
+  bat: [[0.30, 0.32, 0.38, 1], [1.00, 0.35, 0.25, 1]], phantom: [[0.16, 0.20, 0.26, 1], [0.55, 0.95, 1.00, 1]],
+  aegis: [[0.30, 0.36, 0.46, 1], [0.40, 0.70, 1.00, 1]], hydra: [[0.36, 0.30, 0.22, 1], [1.00, 0.65, 0.25, 1]],
+  jammer: [[0.26, 0.28, 0.24, 1], [0.90, 1.00, 0.30, 1]], locust: [[0.30, 0.36, 0.22, 1], [0.75, 1.00, 0.35, 1]],
+  gunship: [[0.30, 0.33, 0.30, 1], [1.00, 0.45, 0.30, 1]], burrower: [[0.40, 0.33, 0.24, 1], [1.00, 0.70, 0.35, 1]],
+  stalker: [[0.22, 0.20, 0.30, 1], [0.75, 0.55, 1.00, 1]], rampart: [[0.36, 0.34, 0.30, 1], [1.00, 0.45, 0.35, 1]],
+  // new (draft)
+  needle: [[0.22, 0.24, 0.28, 1], [0.94, 0.95, 0.97, 1]], fury: [[0.25, 0.17, 0.24, 1], [1.00, 0.25, 0.75, 1]],
+  shrike: [[0.34, 0.36, 0.40, 1], [0.20, 0.90, 0.80, 1]], titan: [[0.28, 0.29, 0.32, 1], [1.00, 0.45, 0.10, 1]],
+  siphon: [[0.26, 0.28, 0.24, 1], [0.90, 1.00, 0.30, 1]], blackout: [[0.24, 0.26, 0.22, 1], [0.95, 1.00, 0.45, 1]],
+  capacitor: [[0.22, 0.24, 0.22, 1], [0.85, 1.00, 0.35, 1]], shifter: [[0.27, 0.25, 0.20, 1], [1.00, 0.88, 0.55, 1]],
+  wraith: [[0.12, 0.11, 0.24, 1], [0.86, 0.88, 1.00, 1]], masq: [[0.30, 0.20, 0.32, 1], [1.00, 0.40, 0.55, 1]],
+  decoy: [[0.30, 0.31, 0.33, 1], [1.00, 0.75, 0.30, 1]], mirage: [[0.20, 0.24, 0.30, 1], [0.80, 0.70, 1.00, 1]],
+};
+const FLYERS = new Set(["bat", "locust", "gunship", "shrike"]);
+const SELF_SHADOW = new Set(["siphon"]); // hovers: draws its own offset shadow
+let TELL = "dots";
+
+// ---- Existing enemies, ported from Draw.enemy ------------------------------------------------
+const DRAW = {};
+DRAW.grunt = (c, f, n, ang, rr, t, b, g) => {
+  disc(c, rr * 1.2, A(g, 0.07));
+  for (const side of [-1, 1]) { const pod = add(c, mul(n, side * rr * 0.95)); plate(pod, rectPts(0.5, 0.24), lt(METAL_D, 0.1), ang, rr, 1.0); strip(sub(sub(pod, mul(f, rr * 0.55)), mul(n, rr * 0.12)), add(sub(pod, mul(f, rr * 0.55)), mul(n, rr * 0.12)), 0.8, [0.4, 0.8, 1.0, 1]); }
+  bar(add(c, mul(f, rr * 0.3)), add(c, mul(f, rr * 1.3)), 2.0, METAL_L); disc(add(c, mul(f, rr * 1.3)), 1.1, [0.05, 0.05, 0.05, 1]);
+  orb(c, rr * 0.86, b); arcSegments(c, rr * 0.64, 6, 0.35, ang, dk(b, 0.35), 1.4);
+  const e = add(c, mul(f, rr * 0.12)); disc(e, rr * 0.4, OUTLINE); disc(e, rr * 0.33, [0.15, 0.03, 0.03, 1]); glowDot(e, rr * 0.2, g); disc(add(e, mul(LIGHT, rr * 0.15)), rr * 0.07, [1, 1, 1, 0.8]);
+};
+DRAW.runner = (c, f, n, ang, rr, t, b, g) => {
+  for (let i = 0; i < 3; i++) for (const side of [-1, 1]) {
+    const ph = t * 20 + i * 2.1 + (side > 0 ? Math.PI : 0);
+    const root = add(add(c, mul(f, (1 - i) * rr * 0.35)), mul(n, side * rr * 0.28));
+    const knee = add(add(root, mul(n, side * rr * 0.7)), mul(f, ((1 - i) * 0.35 + 0.22 * Math.sin(ph)) * rr));
+    const foot = add(add(knee, mul(n, side * rr * 0.3)), mul(f, (1 - i) * 0.45 * rr));
+    limb([root, knee, foot], 1.0, METAL_L);
+  }
+  shadedOval(sub(c, mul(f, rr * 0.35)), rr * 0.56, rr * 0.43, ang, b);
+  for (let k = 0; k < 2; k++) { const sp = sub(c, mul(f, rr * (0.2 + 0.25 * k))); line(sub(sp, mul(n, rr * 0.35)), add(sp, mul(n, rr * 0.35)), [0, 0, 0, 0.45], 1.0); }
+  strip(sub(c, mul(f, rr * 0.65)), sub(c, mul(f, rr * 0.1)), 0.8, g);
+  orb(add(c, mul(f, rr * 0.35)), rr * 0.35, lt(b, 0.15));
+  for (const side of [-1, 1]) { line(add(add(c, mul(f, rr * 0.6)), mul(n, side * rr * 0.12)), add(add(c, mul(f, rr * 0.85)), mul(n, side * rr * 0.04)), METAL_L, 1.0); glowDot(add(add(c, mul(f, rr * 0.5)), mul(n, side * rr * 0.14)), rr * 0.08, g); }
+};
+DRAW.brute = (c, f, n, ang, rr, t, b, g) => {
+  for (const side of [-1, 1]) {
+    const step = Math.sin(t * 5 + (side > 0 ? Math.PI : 0)) * rr * 0.35;
+    const hip = add(c, mul(n, side * rr * 0.45)), knee = add(add(hip, mul(n, side * rr * 0.2)), mul(f, step * 0.5)), foot = add(add(hip, mul(n, side * rr * 0.15)), mul(f, step));
+    limb([hip, knee, foot], 3.0, lt(METAL_D, 0.1)); plate(foot, rectPts(0.32, 0.2), METAL_L, ang, rr, 1.0);
+  }
+  const hull = ngon(6, 1.0); plate(c, hull, b, ang, rr * 0.84, 1.6); rivets(c, hull, ang, rr * 0.84, 0.78, 0.6);
+  fill(c, rectPts(0.3, 0.42), dk(b, 0.15), ang, rr);
+  for (const side of [-1, 1]) { const sh = add(c, mul(n, side * rr * 0.78)); plate(sh, rectPts(0.34, 0.3), METAL_L, ang, rr, 1.2); bar(add(sh, mul(f, rr * 0.2)), add(sh, mul(f, rr * 1.15)), 2.4, METAL_L); disc(add(sh, mul(f, rr * 1.15)), 1.4, [0.05, 0.05, 0.05, 1]); disc(add(sh, mul(f, rr * 1.15)), 0.8, A(g, 0.9)); }
+  const v = add(c, mul(f, rr * 0.42)); strip(sub(v, mul(n, rr * 0.28)), add(v, mul(n, rr * 0.28)), 1.6, g);
+};
+DRAW.swarmling = (c, f, n, ang, rr, t, b, g) => {
+  disc(c, rr * 1.7, A(g, 0.13));
+  for (let k = 0; k < 4; k++) { const p = add(c, mul(fa(t * 7 + TAU * k / 4), rr * 0.78)); solid(p, [[0.5, 0], [0, 0.35], [-0.5, 0], [0, -0.35]], lt(b, 0.35), t * 7, rr, 0.8); disc(p, rr * 0.11, g); }
+  orb(c, rr * 0.34, lt(b, 0.2)); glowDot(c, rr * 0.18, g);
+};
+DRAW.bat = (c, f, n, ang, rr, t, b, g) => {
+  ellipse(add(c, [0, rr * 2.4]), rr * 1.3, rr * 0.4, [0, 0, 0, 0.2]);
+  for (let k = 0; k < 4; k++) {
+    const a = ang + Math.PI / 4 + TAU * k / 4, tip = add(c, mul(fa(a), rr * 1.2));
+    bar(c, tip, 1.8, lt(METAL_D, 0.15)); disc(tip, rr * 0.62, [0.8, 0.86, 0.95, 0.12]); ring(tip, rr * 0.62, [0.8, 0.86, 0.95, 0.35], 0.8);
+    const spin = t * 38 * (k % 2 === 0 ? 1 : -1);
+    for (let q = 0; q < 2; q++) line(tip, add(tip, mul(fa(spin + q * Math.PI), rr * 0.58)), [0.85, 0.9, 1.0, 0.55], 1.2);
+    orb(tip, rr * 0.17, METAL_L);
+    const nav = k < 2 ? [1, 0.25, 0.25, 1] : [0.3, 1, 0.45, 1];
+    if (fmod(t * 1.5 + k * 0.25, 1) < 0.35) glowDot(add(c, mul(fa(a), rr * 0.72)), rr * 0.08, nav);
+  }
+  plate(c, [[0.62, 0], [0.35, 0.36], [-0.5, 0.3], [-0.62, 0], [-0.5, -0.3], [0.35, -0.36]], b, ang, rr, 1.2);
+  for (const side of [-1, 1]) { const pod = add(add(c, mul(n, side * rr * 0.34)), mul(f, rr * 0.1)); bar(pod, add(pod, mul(f, rr * 0.45)), 1.6, METAL_L); }
+  const cam = add(c, mul(f, rr * 0.42)); orb(cam, rr * 0.2, METAL); glowDot(add(cam, mul(f, rr * 0.06)), rr * 0.09, g);
+  strip(sub(sub(c, mul(f, rr * 0.35)), mul(n, rr * 0.12)), add(sub(c, mul(f, rr * 0.35)), mul(n, rr * 0.12)), 0.7, g);
+};
+DRAW.locust = (c, f, n, ang, rr, t, b, g) => {
+  ellipse(add(c, [0, rr * 2.6]), rr * 0.9, rr * 0.3, [0, 0, 0, 0.18]);
+  const flap = 0.55 + 0.45 * Math.sin(t * 60);
+  for (const side of [-1, 1]) for (let k = 0; k < 2; k++) { const root = add(c, mul(f, rr * (0.25 - 0.45 * k))); const tip = sub(add(root, mul(n, side * rr * (1.5 * flap + 0.3))), mul(f, rr * 0.35)); line(root, tip, [0.85, 0.95, 0.8, 0.45], 1.6); }
+  shadedOval(sub(c, mul(f, rr * 0.1)), rr * 0.9, rr * 0.42, ang, b); glowDot(add(c, mul(f, rr * 0.6)), rr * 0.3, g);
+};
+DRAW.gunship = (c, f, n, ang, rr, t, b, g) => {
+  ellipse(add(c, [0, rr * 2.0]), rr * 1.4, rr * 0.4, [0, 0, 0, 0.22]);
+  bar(sub(c, mul(f, rr * 0.4)), sub(c, mul(f, rr * 1.35)), 2.4, lt(METAL_D, 0.12)); plate(sub(c, mul(f, rr * 1.35)), rectPts(0.1, 0.42), METAL, ang, rr, 1.0);
+  for (const side of [-1, 1]) {
+    const fan = sub(add(c, mul(n, side * rr * 0.95)), mul(f, rr * 0.1));
+    disc(fan, rr * 0.5, OUTLINE); disc(fan, rr * 0.44, METAL_D);
+    for (let q = 0; q < 3; q++) line(fan, add(fan, mul(fa(t * 30 * side + TAU * q / 3), rr * 0.4)), [0.8, 0.85, 0.95, 0.5], 1.4);
+    ring(fan, rr * 0.47, METAL_L, 1.6); glowDot(sub(fan, mul(f, rr * 0.5)), rr * 0.08, side < 0 ? [1, 0.25, 0.25, 1] : [0.3, 1, 0.45, 1]);
+  }
+  const hull = [[0.95, 0], [0.55, 0.5], [-0.6, 0.55], [-0.85, 0.2], [-0.85, -0.2], [-0.6, -0.55], [0.55, -0.5]];
+  plate(c, hull, b, ang, rr * 0.8, 1.6); rivets(c, hull, ang, rr * 0.8, 0.72, 0.6);
+  line(sub(c, mul(f, rr * 0.4)), add(c, mul(f, rr * 0.45)), [0, 0, 0, 0.35], 1.0);
+  const tur = add(c, mul(f, rr * 0.55));
+  for (const side of [-1, 1]) bar(add(tur, mul(n, side * rr * 0.1)), add(add(tur, mul(n, side * rr * 0.1)), mul(f, rr * 0.6)), 1.8, METAL_L);
+  orb(tur, rr * 0.22, METAL); glowDot(add(c, mul(f, rr * 0.2)), rr * 0.1, g);
+};
+DRAW.rampart = (c, f, n, ang, rr, t, b, g) => {
+  const roll = fmod(t * 14, 5);
+  for (const side of [-1, 1]) { const tread = add(c, mul(n, side * rr * 0.82)); plate(tread, rectPts(1.05, 0.26), lt(METAL_D, 0.05), ang, rr, 1.3); for (let k = 0; k < 5; k++) { const lp = add(tread, mul(f, -rr * 0.95 + fmod(k * rr * 0.42 + roll, rr * 2.0))); line(sub(lp, mul(n, rr * 0.22)), add(lp, mul(n, rr * 0.22)), METAL_L, 1.0); } }
+  const hull = rectPts(0.78, 0.66); plate(c, hull, b, ang, rr, 1.8);
+  for (const cx of [-1, 1]) for (const cy of [-1, 1]) plate(add(add(c, mul(f, cx * rr * 0.62)), mul(n, cy * rr * 0.5)), rectPts(0.16, 0.16), lt(b, 0.12), ang, rr, 1.1);
+  rivets(c, hull, ang, rr, 0.7, 0.7);
+  bar(add(c, mul(f, rr * 0.7)), add(c, mul(f, rr * 1.25)), 4.0, METAL_L); plate(add(c, mul(f, rr * 1.2)), [[0.2, 0], [-0.05, 0.3], [-0.05, -0.3]], lt(METAL_L, 0.1), ang, rr, 1.0);
+  orb(c, rr * 0.28, dk(b, 0.2)); glowDot(c, rr * 0.13, g);
+};
+DRAW.jammer = (c, f, n, ang, rr, t, b, g) => {
+  const ping = fmod(t * 0.9, 1); arc(c, rr * (1.2 + 1.4 * ping), 0, TAU, A(g, 0.35 * (1 - ping)), 1.5);
+  for (const side of [-1, 1]) { const tr = add(c, mul(n, side * rr * 0.72)); plate(tr, rectPts(0.8, 0.22), lt(METAL_D, 0.08), ang, rr, 1.0); for (let k = 0; k < 3; k++) { const lp = add(tr, mul(f, (fmod(t * 6 + k * 0.5, 1.5) - 0.75) * rr)); line(sub(lp, mul(n, rr * 0.16)), add(lp, mul(n, rr * 0.16)), [0, 0, 0, 0.45], 0.9); } }
+  orb(c, rr * 0.72, b); const dir = fa(t * 2.5);
+  arc(c, rr * 0.55, t * 2.5 - 0.9, t * 2.5 + 0.9, OUTLINE, 3.6); arc(c, rr * 0.55, t * 2.5 - 0.9, t * 2.5 + 0.9, METAL_L, 2.2);
+  bar(c, add(c, mul(dir, rr * 0.9)), 1.2, METAL_L); glowDot(add(c, mul(dir, rr * 0.9)), rr * 0.14, g); glowDot(c, rr * 0.18, g);
+};
+DRAW.stalker = (c, f, n, ang, rr, t, b, g) => {
+  const echo = fmod(t * 1.1, 1);
+  const ghost = [[1.1, 0], [0.2, 0.45], [-0.7, 0.3], [-0.7, -0.3], [0.2, -0.45]];
+  outline(sub(c, mul(f, rr * (0.6 + 1.2 * echo))), ghost, A(g, 0.45 * (1 - echo)), 1.0, ang, rr);
+  for (const side of [-1, 1]) {
+    const ph = t * 12 + (side > 0 ? Math.PI : 0);
+    const hip = add(c, mul(n, side * rr * 0.3)), knee = add(add(hip, mul(n, side * rr * 0.45)), mul(f, rr * (0.45 + 0.25 * Math.sin(ph)))), foot = sub(add(knee, mul(n, side * rr * 0.1)), mul(f, rr * (0.55 - 0.3 * Math.sin(ph))));
+    limb([hip, knee, foot], 1.3, METAL_L);
+  }
+  plate(c, ghost, b, ang, rr * 0.8, 1.1); strip(sub(c, mul(f, rr * 0.45)), add(c, mul(f, rr * 0.55)), 0.8, g); glowDot(add(c, mul(f, rr * 0.6)), rr * 0.16, g);
+};
+DRAW.burrower = (c, f, n, ang, rr, t, b, g, o) => {
+  if (o.hidden) {
+    const dirt = [0.42, 0.33, 0.24, 1]; shadedOval(c, rr * 1.15, rr * 0.8, ang, dirt);
+    for (let k = 0; k < 5; k++) { const a = ang + TAU * k / 5 + t * 0.5; disc(add(c, mul(fa(a), rr * (0.85 + 0.15 * Math.sin(t * 9 + k)))), 1.4, lt(dirt, 0.2)); }
+    line(add(c, mul(f, rr * 0.6)), add(c, mul(f, rr * 1.05)), METAL_L, 2.0); glowDot(add(c, mul(f, rr * 0.2)), rr * 0.12, A(g, 0.6)); return;
+  }
+  for (const side of [-1, 1]) { const tr = add(c, mul(n, side * rr * 0.72)); plate(tr, rectPts(0.7, 0.2), lt(METAL_D, 0.08), ang, rr, 1.0); for (let k = 0; k < 3; k++) { const lp = add(tr, mul(f, (fmod(t * 7 + k * 0.45, 1.35) - 0.68) * rr)); line(sub(lp, mul(n, rr * 0.15)), add(lp, mul(n, rr * 0.15)), [0, 0, 0, 0.45], 0.9); } }
+  shadedOval(sub(c, mul(f, rr * 0.15)), rr * 0.7, rr * 0.58, ang, b);
+  for (let k = 0; k < 2; k++) { const sp = sub(c, mul(f, rr * (0.05 + 0.3 * k))); line(sub(sp, mul(n, rr * 0.5)), add(sp, mul(n, rr * 0.5)), [0, 0, 0, 0.35], 1.0); }
+  plate(c, [[1.45, 0], [0.5, 0.42], [0.5, -0.42]], METAL_L, ang, rr, 1.2);
+  for (let k = 0; k < 3; k++) { const fr = fmod(t * 5 + k / 3, 1), x = 0.55 + 0.8 * fr, hw = 0.42 * (1.45 - x) / 0.95; line(sub(add(c, mul(f, rr * x)), mul(n, rr * hw)), add(add(c, mul(f, rr * (x + 0.12))), mul(n, rr * hw)), [0, 0, 0, 0.45], 1.0); }
+  glowDot(sub(c, mul(f, rr * 0.2)), rr * 0.14, g);
+};
+DRAW.phantom = (c, f, n, ang, rr, t, b, g, o) => {
+  const blade = [[1.4, 0], [0.1, 0.55], [-0.9, 1.0], [-0.5, 0], [-0.9, -1.0], [0.1, -0.55]];
+  if (o.hidden) {
+    const a = 0.2 + 0.08 * Math.sin(t * 7), rp = fmod(t * 1.3, 1);
+    arc(c, rr * (1 + 0.8 * rp), 0, TAU, [0.8, 0.95, 1.0, 0.22 * (1 - rp)], 1.0);
+    outline(c, blade, A(g, a), 1.2, ang, rr); outline(add(c, mul(n, Math.sin(t * 11) * 1.5)), blade, A(g, a * 0.5), 1.0, ang, rr * 1.08); return;
+  }
+  plate(c, blade, b, ang, rr, 1.2); line(sub(c, mul(f, rr * 0.4)), add(c, mul(f, rr * 1.1)), A(g, 0.5), 1.0);
+  for (const side of [-1, 1]) { glowDot(add(add(c, mul(f, rr * 0.35)), mul(n, side * rr * 0.28)), rr * 0.13, g); strip(add(sub(c, mul(f, rr * 0.75)), mul(n, side * rr * 0.55)), add(sub(c, mul(f, rr * 0.55)), mul(n, side * rr * 0.4)), 0.8, g); }
+  ring(c, rr * 1.3, A(g, 0.35 + 0.2 * Math.sin(t * 5)), 1.0);
+};
+DRAW.aegis = (c, f, n, ang, rr, t, b, g) => {
+  for (let k = 0; k < 4; k++) { const ld = fa(ang + Math.PI / 4 + k * Math.PI / 2), step = Math.sin(t * 6 + k * Math.PI / 2) * rr * 0.18; const knee = add(add(c, mul(ld, rr * 0.75)), mul(f, step)); limb([add(c, mul(ld, rr * 0.3)), knee, add(knee, mul(ld, rr * 0.35))], 2.0, METAL_L); }
+  const hull = ngon(6, 1.0, Math.PI / 6); plate(c, hull, b, ang, rr * 0.74, 1.4); rivets(c, hull, ang, rr * 0.74, 0.75, 0.55);
+  orb(sub(c, mul(f, rr * 0.25)), rr * 0.2, dk(g, 0.3)); glowDot(sub(c, mul(f, rr * 0.25)), rr * 0.12, g);
+  const sc = add(c, mul(f, rr * 0.2));
+  arc(sc, rr * 0.95, ang - 0.95, ang + 0.95, OUTLINE, 5.6); arc(sc, rr * 0.95, ang - 0.95, ang + 0.95, METAL_L, 3.8); arc(sc, rr * 0.88, ang - 0.8, ang + 0.1, lt(METAL_L, 0.35), 1.0);
+  for (let k = 0; k < 3; k++) disc(add(sc, mul(fa(ang + (k - 1) * 0.55), rr * 0.95)), 0.9, A(g, 0.9));
+  arc(sc, rr * 1.04, ang - 0.9, ang + 0.9, A(g, 0.8), 1.2);
+  const hex = ngon(6, 1.0, t * 0.6); fill(c, hex, [0.4, 0.7, 1.0, 0.15], 0, rr + 6); outline(c, hex, [0.55, 0.8, 1.0, 0.75], 1.4, 0, rr + 6); // barrier (enemy_status)
+};
+DRAW.hydra = (c, f, n, ang, rr, t, b, g) => {
+  shadedOval(sub(c, mul(f, rr * 0.3)), rr * 0.52, rr * 0.48, ang, b); ring(sub(c, mul(f, rr * 0.3)), rr * 0.3, dk(b, 0.35), 1.3); glowDot(sub(c, mul(f, rr * 0.3)), rr * 0.1, g);
+  for (let k = 0; k < 3; k++) {
+    const ba = ang + (k - 1) * 0.7, pts = [];
+    for (let i = 0; i < 5; i++) { const q = i / 4, sway = Math.sin(t * 4 + k * 1.7 - q * 2) * rr * 0.22 * q; pts.push(add(add(c, mul(fa(ba), rr * (0.05 + 1.05 * q))), mul(fa(ba + Math.PI / 2), sway))); }
+    polyline(pts, OUTLINE, 5.0); polyline(pts, lt(b, 0.15), 3.2); for (let i = 1; i < 4; i++) disc(pts[i], 1.0, dk(b, 0.25));
+    const hd = norm(sub(pts[4], pts[3])), hp = add(pts[4], mul(hd, rr * 0.12));
+    plate(hp, [[0.6, 0], [0.05, 0.38], [-0.4, 0.3], [-0.4, -0.3], [0.05, -0.38]], lt(b, 0.1), Math.atan2(hd[1], hd[0]), rr * 0.5, 1.0);
+    const jaw = mul(orth(hd), rr * 0.1 * (1 + Math.sin(t * 8 + k))); line(add(add(hp, mul(hd, rr * 0.28)), jaw), add(hp, mul(hd, rr * 0.1)), METAL_L, 1.0); glowDot(add(hp, mul(hd, rr * 0.06)), rr * 0.1, g);
+  }
+};
+
+
+// Today's looks of the new enemies as drafted in design/new_enemies_mockup.html.
+const CHEV = [[1.6, 0], [-0.55, 0.5], [-0.2, 0], [-0.55, -0.5]];
+DRAW.needle = (c, f, n, ang, rr, t, b, g) => {
+  for (let i = 0; i < 2; i++) for (const side of [-1, 1]) { const ph = t * 28 + i * 1.6 + (side > 0 ? Math.PI : 0); const root = add(add(c, mul(f, rr * (0.25 - 0.5 * i))), mul(n, side * rr * 0.2)); limb([root, add(add(root, mul(n, side * rr * 0.55)), mul(f, rr * 0.35 * Math.sin(ph)))], 0.8, METAL_L); }
+  plate(c, CHEV, b, ang, rr, 1.0); strip(sub(c, mul(f, rr * 0.15)), add(c, mul(f, rr * 1.15)), 0.7, g);
+  glowDot(sub(c, mul(f, rr * 0.45)), rr * 0.16, g); glowDot(add(c, mul(f, rr * 0.9)), rr * 0.1, g);
+};
+const FURY_HULL = [[1.25, 0], [0.35, 0.5], [-0.35, 0.42], [-0.9, 0.78], [-0.6, 0], [-0.9, -0.78], [-0.35, -0.42], [0.35, -0.5]];
+DRAW.fury = (c, f, n, ang, rr, t, b, g0, o) => {
+  const ad = o.adren || 0, g = mix(g0, [1, 0.92, 0.97, 1], ad * 0.7);
+  if (ad > 0) {
+    for (let k = 1; k <= 3; k++) outline(sub(c, mul(f, rr * 0.6 * k)), FURY_HULL, A(g, 0.35 * (1 - k / 4) * ad), 1.0, ang, rr * 0.95);
+    for (let k = 0; k < 3; k++) line(add(sub(c, mul(f, rr * (1.0 + 0.2 * k))), mul(n, rr * (k - 1) * 0.35)), add(sub(c, mul(f, rr * (1.8 + 0.3 * k))), mul(n, rr * (k - 1) * 0.35)), A(g, 0.45 * ad), 1.0);
+  }
+  for (const side of [-1, 1]) { const ph = t * 14 * (1 + 0.3 * ad) + (side > 0 ? Math.PI : 0); const hip = add(c, mul(n, side * rr * 0.32)); const knee = add(add(hip, mul(n, side * rr * 0.45)), mul(f, rr * (0.35 + 0.3 * Math.sin(ph)))); limb([hip, knee, sub(add(knee, mul(n, side * rr * 0.12)), mul(f, rr * (0.5 - 0.3 * Math.sin(ph))))], 1.2, METAL_L); }
+  plate(c, FURY_HULL, b, ang, rr * 0.95, 1.1);
+  for (const side of [-1, 1]) bar(add(add(c, mul(f, rr * 0.2)), mul(n, side * rr * 0.22)), add(add(c, mul(f, rr * 0.95)), mul(n, side * rr * 0.14)), 1.1, METAL_L);
+  strip(sub(sub(c, mul(f, rr * 0.55)), mul(n, rr * 0.18)), add(sub(c, mul(f, rr * 0.55)), mul(n, rr * 0.18)), 0.9, g);
+  glowDot(add(c, mul(f, rr * 0.35)), rr * (0.16 + 0.06 * ad), g);
+};
+DRAW.shrike = (c, f, n, ang, rr, t, b, g, o) => {
+  ellipse(add(c, [0, rr * 2.4]), rr * 1.0, rr * 0.32, [0, 0, 0, 0.18]);
+  const flap = 0.6 + 0.4 * Math.sin(t * 22 + (o.phase || 0));
+  for (const side of [-1, 1]) {
+    const wing = [[0.3, 0], [-0.2, side * (1.6 * flap + 0.2)], [-0.75, side * (1.35 * flap + 0.15)], [-0.45, 0]];
+    plate(c, wing, lt(b, 0.08), ang, rr, 0.9);
+    const w = xform(c, wing, ang, rr); strip(w[0], w[1], 0.6, g);
+  }
+  plate(c, [[1.1, 0], [0, 0.32], [-0.8, 0], [0, -0.32]], b, ang, rr, 1.0); glowDot(add(c, mul(f, rr * 0.5)), rr * 0.2, g);
+};
+
+// ---- Redesign page: looks, animation layer, movement diagrams, pickers ---------------------------
+const F = [1, 0], N = orth(F);
+function groundShadow(c, r, k = 1) { ellipse(add(c, [0, r * 0.75]), r * 1.1 * k, r * 0.45 * k, [0, 0, 0, 0.3]); }
+function airShadow(c, r, d = 2.4, k = 1) { ellipse(add(c, [0, r * d]), r * 1.0 * k, r * 0.32 * k, [0, 0, 0, 0.18]); }
+function ovalLine(c, rx, ry, r, col, w) { const pts = []; for (let i = 0; i <= 20; i++) { const a = TAU * i / 20; pts.push(add(c, rot([Math.cos(a) * rx, Math.sin(a) * ry], r))); } polyline(pts, col, w); }
+const iri = (t, a = 0.9) => [0.5 + 0.5 * Math.sin(t), 0.5 + 0.5 * Math.sin(t + 2.1), 0.5 + 0.5 * Math.sin(t + 4.2), a];
+const hash = n => { const s = Math.sin(n * 127.1 + 311.7) * 43758.5453; return s - Math.floor(s); };
+function gearPts(teeth, ro, ri) { const o = []; for (let i = 0; i < teeth * 2; i++) { const a = Math.PI * i / teeth, rr = i % 2 ? ri : ro; o.push([Math.cos(a - 0.12) * rr, Math.sin(a - 0.12) * rr], [Math.cos(a + 0.12) * rr, Math.sin(a + 0.12) * rr]); } return o; }
+
+const V = 34; // diagram px per second
+const steady = t => [V * t, 0];
+
+// ---- Special family traits: one-off prototypes, each breaking one rule. A violet-white X prototype mark (on the
+//      disguised units it is the tell), an exposed core cell, and a looped effect that shows the rule it breaks.
+const INK = [0.08, 0.08, 0.09, 1];
+const PROTO = [0.8, 0.55, 1, 1];
+function foot(p, col, r, w = 0.2, h = 0.12) { plate(p, rectPts(w, h), col, 0, r, 0.6); }
+function slitS(p, w, col) { line(add(p, [0, -w]), add(p, [0, w]), OUTLINE, 2.2); line(add(p, [0, -w]), add(p, [0, w]), col, 1.1); }
+function withAlpha(a, fn) { if (a <= 0.01) return; X.save(); X.globalAlpha *= Math.min(1, a); fn(); X.restore(); }
+function blink(t, rate, ph = 0) { return fmod(t * rate + ph, 1) < 0.5 ? 1 : 0.35; }
+function at(p, ang, fn) { X.save(); X.translate(p[0], p[1]); X.rotate(ang); fn([0, 0]); X.restore(); }
+function tread(p, len, wid, t) {
+  plate(p, rectPts(len, wid), [0.11, 0.11, 0.12, 1], 0, 1, 0.7); const n = Math.max(3, Math.round(len / 2));
+  for (let k = 0; k < n; k++) { const x = (fmod(t * 0.9 + k / n, 1) * 2 - 1) * len * 0.88; line(add(p, [x, -wid * 0.8]), add(p, [x, wid * 0.8]), [0.34, 0.34, 0.37, 1], 0.7); }
+}
+function wheel(p, rr, t) { plate(p, rectPts(rr, rr * 0.55), [0.1, 0.1, 0.11, 1], 0, 1, 0.6); const x = (fmod(t * 4, 1) - 0.5) * rr * 1.6; line(add(p, [x, -rr * 0.45]), add(p, [x, rr * 0.45]), [0.36, 0.36, 0.38, 1], 0.5); }
+function rrPts(hw, hh, rad, n = 3) { const o = []; for (const [cx, cy, a0] of [[hw - rad, hh - rad, 0], [-(hw - rad), hh - rad, Math.PI / 2], [-(hw - rad), -(hh - rad), Math.PI], [hw - rad, -(hh - rad), 1.5 * Math.PI]]) for (let i = 0; i <= n; i++) { const a = a0 + (Math.PI / 2) * i / n; o.push([cx + Math.cos(a) * rad, cy + Math.sin(a) * rad]); } return o; }
+function protoMark(p, s, t, a = 1) { disc(p, s + 0.6, A(OUTLINE, a)); disc(p, s, A([0.92, 0.9, 0.96, 1], a)); const w = Math.max(0.6, s * 0.35);
+  line(add(p, [-s * 0.55, -s * 0.55]), add(p, [s * 0.55, s * 0.55]), A(PROTO, a), w); line(add(p, [-s * 0.55, s * 0.55]), add(p, [s * 0.55, -s * 0.55]), A(PROTO, a), w); if (fmod(t * 0.7, 1) < 0.12) glowDot(p, s * 0.6, A(PROTO, a)); }
+const burst = (p, wait) => t => { const k = Math.floor(t / p), u = fmod(t, p) / p; return [V * p * (k + Math.min(1, Math.max(0, (u - wait) / (1 - wait)))), 0]; };
+
+// The confirmed Nanite (Swarm A, Assembly hub): the Masquerade's disguise
+const NAN = { hull: [0.68, 0.48, 0.32, 1], dark: [0.46, 0.32, 0.22, 1], eye: [1, 0.72, 0.25, 1] };
+function eyeN(p, rr, col) { disc(p, rr + 0.7, OUTLINE); disc(p, rr, [0.07, 0.07, 0.09, 1]); glowDot(p, rr * 0.55, col); }
+function finN(p, ang, len, t, col) { const tip = add(p, mul(fa(ang), len)); poly([add(p, mul(fa(ang + 1.57), len * 0.28)), tip, add(p, mul(fa(ang - 1.57), len * 0.28))], [0.72, 0.74, 0.78, 1]); line(p, tip, OUTLINE, 0.4); if (fmod(t * 1.5, 1) < 0.3) glowDot(tip, Math.max(0.5, len * 0.18), col); }
+function naniteHub(c, t, r, eyeCol = NAN.eye, lock = false) { const C = NAN, dock = 0.5 + 0.5 * Math.sin(t * 1.2);
+  for (let k = 0; k < 4; k++) { const a = (lock ? Math.floor(t * 2) * 0.5 : t * 2) + k * TAU / 4, p = add(c, mul(fa(a), r * (0.6 + 0.55 * dock))); plate(p, rectPts(0.5, 0.5), C.hull, a, r * 0.4, 0.6); disc(p, r * 0.08, eyeCol); }
+  plate(c, ngon(6, 1.0, Math.PI / 6), C.dark, 0, r * 0.68, 0.9); rivets(c, ngon(6, 1.0, Math.PI / 6), 0, r * 0.68, 0.75, 0.45);
+  line(add(c, [-r * 0.3, 0]), add(c, [r * 0.3, 0]), [0.6, 0.45, 0.32, 1], 0.5); eyeN(add(c, [r * 0.15, 0]), r * 0.2, eyeCol); finN(add(c, [-r * 0.4, 0]), Math.PI, r * 0.45, t, eyeCol); }
+// The confirmed Skitter (Rusher A, Six-leg scuttler): the Hydra Frame's cargo
+const SKT = { hull: [0.78, 0.72, 0.58, 1], dark: [0.5, 0.45, 0.35, 1], stripe: [0.9, 0.2, 0.18, 1], glow: [1, 0.6, 0.3, 1] };
+function skitter(c, t, r, legs = true) { const C = SKT;
+  if (legs) for (let i = 0; i < 3; i++) for (const s of [-1, 1]) { const ph = t * 26 + i * 2.1 + (s > 0 ? Math.PI : 0), root = add(c, [r * (0.35 - i * 0.35), s * r * 0.25]); limb([root, add(root, [r * 0.18 * Math.sin(ph), s * r * 0.45]), add(root, [r * 0.3 * Math.sin(ph), s * r * 0.7])], 0.7, C.dark); }
+  plate(c, [[0.85, 0], [0.45, 0.3], [-0.65, 0.28], [-0.65, -0.28], [0.45, -0.3]], C.hull, 0, r, 0.7);
+  line(add(c, [r * 0.6, 0]), add(c, [-r * 0.55, 0]), OUTLINE, 2.0); line(add(c, [r * 0.6, 0]), add(c, [-r * 0.55, 0]), C.stripe, 1.1); disc(add(c, [-r * 0.68, 0]), r * 0.12, C.glow); }
+
+// ---- Effects, each on a loop in the previews ---------------------------------------------------------------
+// Phantom: cloaked (active camouflage); a blast reveals it for a moment (loop 5 s: cloaked 3.6 s, hit, revealed)
+const camoK = t => { const u = fmod(t, 5); return u < 3.6 ? 0 : u < 3.75 ? (u - 3.6) / 0.15 : u < 4.8 ? 1 : Math.max(0, 1 - (u - 4.8) / 0.2); };
+function camoFx(B, c, t, r, col) { const k = camoK(t), u = fmod(t, 5);
+  if (u >= 3.6 && u < 4.1) { const q = (u - 3.6) / 0.5, h = add(c, [-r * 0.3, r * 0.4]); ring(h, r * (0.3 + 1.6 * q), A([1, 0.6, 0.25, 1], 0.8 * (1 - q)), 1.4); disc(h, r * 0.4 * (1 - q), A([1, 0.75, 0.4, 1], 0.6 * (1 - q))); }
+  if (k < 1) { const un = 1 - k; withAlpha(0.14 * un, () => B(add(c, [r * 0.05, 0]))); withAlpha(0.14 * un, () => B(add(c, [-r * 0.05, r * 0.03]))); }
+  withAlpha(0.1 + 0.9 * k, () => B(c));
+  if (k > 0) for (const s of [-1, 1]) for (const q of [-1, 1]) { const p = add(c, [s * r * 1.05, q * r * 1.05]); polyline([add(p, [-s * r * 0.3, 0]), p, add(p, [0, -q * r * 0.3])], A([0.4, 0.9, 1, 1], 0.8 * k), 1.0); } }
+// Aegis Walker: barrier (loop 8 s: full 3 s, takes hits and cracks 1.5 s, shatters, down 2 s, rebuilds 1 s)
+const aegisB = t => { const u = fmod(t, 8); return u < 3 ? { lvl: 1, crack: 0, shat: -1 } : u < 4.5 ? { lvl: 1 - 0.75 * (u - 3) / 1.5, crack: (u - 3) / 1.5, shat: -1 } : u < 5.1 ? { lvl: 0, crack: 0, shat: (u - 4.5) / 0.6 } : u < 7 ? { lvl: 0, crack: 0, shat: -1 } : { lvl: u - 7, crack: 0, shat: -1 }; };
+function barrierFx(c, t, r, col) { const s = aegisB(t), R = r * 1.25, u = fmod(t, 8);
+  if (s.lvl > 0.01) { disc(c, R, A(col, 0.08 * s.lvl)); const n = u >= 7 ? Math.max(1, Math.round(12 * s.lvl)) : 12;
+    for (let i = 0; i < n; i++) { const a = i * TAU / 12 + t * 0.2, p = add(c, mul(fa(a), R * 0.9)); outline(p, ngon(6, 1, 0), A(col, 0.55 * s.lvl), 0.7, a, R * 0.15); }
+    ring(c, R, A(col, 0.75 * s.lvl), 1.1);
+    if (u >= 3 && u < 4.5) { if (fmod(t, 0.35) < 0.08) ring(c, R, A([1, 1, 1, 1], 0.6), 1.6); for (let i = 0; i < Math.ceil(5 * s.crack); i++) { const a = hash(i * 9) * TAU; polyline([add(c, mul(fa(a), R)), add(c, mul(fa(a + 0.15), R * 0.65)), add(c, mul(fa(a - 0.1), R * 0.4))], A([1, 1, 1, 1], 0.7), 0.6); } } }
+  if (s.shat >= 0) for (let i = 0; i < 10; i++) { const a = i * TAU / 10 + hash(i) * 0.5, p = add(c, mul(fa(a), R * (1 + 0.8 * s.shat))); fill(p, [[0.5, 0], [-0.3, 0.35], [-0.3, -0.35]], A(col, 0.8 * (1 - s.shat)), a + s.shat * 3, R * 0.12); } }
+// Hydra Frame: splits into 3 Skitters when destroyed (loop 7 s: whole 5 s, bursts apart, reforms)
+const hydraK = t => { const u = fmod(t, 7); return u < 5 ? 0 : Math.min(1, (u - 5) / 0.8); };
+function hydraSplit(c, t, r, docks, frame, col, opt = {}) { const k = hydraK(t), sc = opt.scale || 0.42;
+  withAlpha(1 - k, () => frame(c));
+  if (k > 0 && k < 1) { ring(c, r * (0.4 + 1.2 * k), A(col, 0.7 * (1 - k)), 1.2); for (let i = 0; i < 6; i++) { const a = hash(i * 3) * TAU, p = add(c, mul(fa(a), r * (0.3 + 0.9 * k))); fill(p, rectPts(0.5, 0.3), A(COL.hydra.hull, 1 - k), a + k * 4, r * 0.18); } }
+  docks.forEach(([x, y, dx, dy], i) => { const p = add(add(c, mul([x, y], r)), mul([dx, dy], r * 0.9 * k)); withAlpha(opt.hidden ? Math.min(1, k * 3) : 1, () => at(p, Math.atan2(dy, dx) * k * 0.5, q => skitter(q, t + i, r * sc, k > 0))); }); }
+// Masquerade: disguised as a Nanite until below half health (loop 8 s: disguised 5 s, drops the disguise, true form)
+const masqK = t => { const u = fmod(t, 8); return u < 5 ? 0 : Math.min(1, (u - 5) / 0.6); };
+function masqFx(D, T, c, t, r, col) { const k = masqK(t), u = fmod(t, 8);
+  withAlpha(1 - k, () => droneSentry(c, t, r * 11 / 12));
+  if (u >= 5 && u < 5.7) { const q = (u - 5) / 0.7; ring(c, r * (0.4 + 1.2 * q), A(col, 0.8 * (1 - q)), 1.3); for (let i = 0; i < 8; i++) { const a = i * TAU / 8, p = add(c, mul(fa(a), r * (0.5 + q))); fill(p, [[0.4, 0], [-0.3, 0.3], [-0.3, -0.3]], A(DRN.hull, 1 - q), a + q * 5, r * 0.14); } }
+  withAlpha(k, () => T(c)); }
+// Decoy Beacon: advertises a false high rank (a pulsing rank badge)
+function rankBadge(p, t, col) { const pulse = 0.6 + 0.4 * Math.sin(t * 4); for (let i = 0; i < 3; i++) { const q = add(p, [i * 2.4, 0]); polyline([add(q, [-1.5, -2.2]), add(q, [0.6, 0]), add(q, [-1.5, 2.2])], OUTLINE, 2.0); polyline([add(q, [-1.5, -2.2]), add(q, [0.6, 0]), add(q, [-1.5, 2.2])], A(col, pulse), 1.0); } }
+// Mirage: every 6 s it throws 2 hologram copies of itself that walk ahead and fade
+// Mirage copies shimmer like the Phantom's active camouflage (owner): a faint doubled image and the Phantom's rapid
+// Camo flicker (the sweeping scan line was removed at the owner's request). One in front and one behind, in step; they shimmer in and out.
+function mirageFx(B, c, t, r, col) { const u = fmod(t, 6), a = u < 0.5 ? u / 0.5 : u > 5.3 ? (6 - u) / 0.7 : 1;
+  for (const sg of [1, -1]) { const p = add(c, [sg * r * 1.7, 0]), k = Math.floor(t * 24) + (sg > 0 ? 0 : 7), fl = hash(k) < 0.3 ? 0.45 : 1;
+    withAlpha(0.16 * a * fl, () => B(add(p, [r * 0.06, 0]))); withAlpha(0.16 * a * fl, () => B(add(p, [-r * 0.06, r * 0.04])));
+    withAlpha(0.3 * a * fl, () => B(p)); }
+  B(c); }
+
+// The confirmed Jammer (Disruptor A, Antenna walker): a Masquerade disguise; as a fake its antennas never crackle
+const JAM = { hull: [0.15, 0.16, 0.18, 1], panel: [0.3, 0.32, 0.36, 1], dark: [0.07, 0.07, 0.08, 1], glow: [0.35, 0.65, 1, 1] };
+function jammerA(c, t, r) { const C = JAM;
+  for (const [x, y, ph] of [[1, 1, 0], [1, -1, Math.PI], [-1, 1, Math.PI], [-1, -1, 0]]) { const sw = Math.sin(t * 5 + ph), hip = add(c, [x * r * 0.3, y * r * 0.3]), ft = add(c, [x * r * 0.5 + sw * r * 0.12, y * r * 0.62]); limb([hip, ft], 1.3, C.panel); disc(ft, 1.1, OUTLINE); }
+  plate(c, ngon(8, 0.48, Math.PI / 8), C.hull, 0, r, 0.9); plate(c, rectPts(0.2, 0.2), C.panel, 0, r, 0.6);
+  for (let i = 0; i < 5; i++) { const a = Math.PI + (i - 2) * 0.55 + 0.08 * Math.sin(t * 4 + i), root = add(c, mul(fa(a), r * 0.2)), tip = add(c, mul(fa(a), r * (0.95 + 0.12 * (i % 2)))); line(root, tip, INK, 1.3); line(root, tip, C.panel, 0.6); glowDot(tip, 0.7, A(C.glow, 0.5)); }
+  slitS(add(c, [r * 0.38, 0]), r * 0.14, C.glow); }
+function fanS(p, rr, t, spd, col) { disc(p, rr, [0.92, 0.94, 0.97, 0.12]); for (let b = 0; b < 3; b++) line(p, add(p, mul(fa(t * spd + b * TAU / 3), rr * 0.9)), [0.92, 0.94, 0.97, 0.5], 0.6); ring(p, rr, OUTLINE, 2.0); ring(p, rr, col, 1.0); }
+const tri = x => 2 * Math.abs(2 * (x - Math.floor(x + 0.5))) - 1;
+
+// The confirmed Drone (Swarm B, Sentry walker) with a purple eye (owner): the Masquerade's disguise on every look.
+// Until uncovered it also animates (March) and moves (Steady march) like the Drone.
+const DRN = { hull: [0.3, 0.38, 0.52, 1], dark: [0.18, 0.23, 0.33, 1], eye: [0.8, 0.5, 1, 1] };
+function stencilN(p, ang, sz, col = [0.95, 0.92, 0.8, 0.85]) { for (const k of [-1, 1]) line(add(p, rot([k * sz * 0.25, -sz * 0.3], ang)), add(p, rot([k * sz * 0.25, sz * 0.3], ang)), col, 0.5); }
+function droneSentry(c, t, r) { const C = DRN;
+  for (let k = 0; k < 4; k++) { const d = fa(Math.PI / 4 + k * Math.PI / 2), step = Math.sin(t * 7 + k * Math.PI / 2) * r * 0.12; const knee = add(add(c, mul(d, r * 0.65)), [step, 0]); limb([add(c, mul(d, r * 0.3)), knee, add(knee, mul(d, r * 0.3))], 1.8, C.dark); }
+  plate(c, rectPts(0.5, 0.5), C.hull, 0, r, 1.0); rivets(c, rectPts(0.5, 0.5), 0, r, 0.78, 0.5); stencilN(add(c, [-r * 0.3, r * 0.3]), 0, r * 0.18);
+  const aim = 0.35 * Math.sin(t * 0.9); orb(c, r * 0.28, C.dark); bar(c, add(c, mul(fa(aim), r * 0.85)), 1.6, METAL_L); eyeN(add(c, mul(fa(aim), r * 0.15)), r * 0.1, C.eye); }
+const marchFx = t => ({ rot: 0.06 * Math.sin(t * 6), dy: -0.03 * Math.abs(Math.sin(t * 6)) });
+function blendFx(a, b, k) { const o = {}; for (const key of ["dx", "dy", "rot", "lift"]) o[key] = (a[key] || 0) * (1 - k) + (b[key] || 0) * k;
+  for (const key of ["sx", "sy", "alpha"]) o[key] = (a[key] ?? 1) * (1 - k) + (b[key] ?? 1) * k; return o; }
+
+const COL = {
+  phantom: { hull: [0.32, 0.46, 0.47, 1], panel: [0.5, 0.64, 0.64, 1], dark: [0.16, 0.24, 0.25, 1], glow: [0.55, 1, 0.92, 1] },          // teal-grey active camo, pale teal shimmer
+  aegis:   { hull: [0.9, 0.86, 0.74, 1], trim: [0.85, 0.64, 0.24, 1], dark: [0.42, 0.37, 0.28, 1], glow: [1, 0.78, 0.35, 1] },          // white-gold hull, amber hex barrier
+  hydra:   { hull: [0.55, 0.22, 0.18, 1], dark: [0.3, 0.12, 0.1, 1], glow: [1, 0.55, 0.3, 1] },                                          // oxide-red frame, sand Skitters
+  masq:    { hull: [0.42, 0.2, 0.4, 1], panel: [0.6, 0.36, 0.58, 1], dark: [0.22, 0.1, 0.21, 1], glow: [0.85, 0.5, 1, 1] },             // plum true form, violet glow
+  decoy:   { hull: [0.33, 0.35, 0.37, 1], panel: [0.47, 0.5, 0.53, 1], frame: [0.62, 0.55, 0.4, 1], dark: [0.17, 0.18, 0.19, 1], glow: [1, 0.3, 0.7, 1] }, // fake gunmetal heavy, tan frame, magenta beacon
+  mirage:  { hull: [0.8, 0.82, 0.87, 1], dark: [0.4, 0.42, 0.48, 1], glow: [0.4, 0.95, 1, 1] },                                         // mirror chrome, cyan holograms
+};
+
+const LOOKS = {
+  phantom: [
+    { key: "A", name: "Camo stalker", theme: "A slim biped infiltrator in shimmering active camouflage; a blast reveals it for a moment (looped)", palette: "teal-grey camo, pale teal shimmer", r: 10, draw(c, t, r) {
+      const C = COL.phantom, B = p => { const st = Math.sin(t * 7);
+        for (const s of [-1, 1]) { const hip = add(p, [-r * 0.15, s * r * 0.25]), ft = add(p, [r * (0.05 + 0.3 * st * s), s * r * 0.45]); limb([hip, add(p, [-r * 0.45, s * r * 0.4]), ft], 1.0, C.dark); }
+        plate(p, [[0.8, 0], [0.35, 0.28], [-0.45, 0.26], [-0.6, 0], [-0.45, -0.26], [0.35, -0.28]], C.hull, 0, r, 0.8);
+        for (let i = -1; i <= 1; i++) line(add(p, [-r * 0.35, i * r * 0.12]), add(p, [r * 0.3, i * r * 0.12]), A(C.panel, 0.8), 0.5);
+        protoMark(add(p, [-r * 0.3, 0]), r * 0.1, t); slitS(add(p, [r * 0.55, 0]), r * 0.12, C.glow); };
+      camoFx(B, c, t, r, C.glow); } },
+    { key: "B", name: "Cloak sled", theme: "A low skid sled under a humming cloak-field emitter; a blast reveals it for a moment (looped)", palette: "teal-grey hull, teal emitter", r: 10, draw(c, t, r) {
+      const C = COL.phantom, B = p => { for (const s of [-1, 1]) plate(add(p, [0, s * r * 0.45]), rectPts(0.7, 0.06), C.dark, 0, r, 0.5);
+        plate(p, [[0.85, 0], [0.55, 0.38], [-0.65, 0.38], [-0.75, 0], [-0.65, -0.38], [0.55, -0.38]], C.hull, 0, r, 0.8);
+        const e = add(p, [-r * 0.1, 0]); disc(e, r * 0.26, OUTLINE); disc(e, r * 0.23, C.panel); ring(e, r * 0.15, A(C.glow, 0.6 + 0.3 * Math.sin(t * 5)), 0.8); glowDot(e, r * 0.06, C.glow);
+        protoMark(add(p, [-r * 0.55, r * 0.2]), r * 0.09, t); slitS(add(p, [r * 0.6, 0]), r * 0.12, C.glow); };
+      camoFx(B, c, t, r, C.glow); } },
+    { key: "C", name: "Mirror quad", theme: "A four-legged diamond of mirror panels that bend the light around it; a blast reveals it for a moment (looped)", palette: "mirrored teal facets, pale teal shimmer", r: 10, draw(c, t, r) {
+      const C = COL.phantom, B = p => {
+        for (const [x, y, ph] of [[1, 1, 0], [1, -1, Math.PI], [-1, 1, Math.PI], [-1, -1, 0]]) { const sw = Math.sin(t * 7 + ph), hip = add(p, [x * r * 0.2, y * r * 0.25]), ft = add(p, [x * r * 0.45 + sw * r * 0.12, y * r * 0.6]); limb([hip, ft], 0.9, C.dark); }
+        const d = [[0.7, 0], [0, 0.42], [-0.6, 0], [0, -0.42]]; plate(p, d, C.hull, 0, r, 0.8);
+        for (let i = 0; i < 4; i++) fill(p, [[0, 0], d[i], d[(i + 1) % 4]], A(i % 2 ? C.panel : C.dark, 0.5 + 0.3 * Math.sin(t * 3 + i)), 0, r);
+        protoMark(add(p, [-r * 0.25, 0]), r * 0.09, t); slitS(add(p, [r * 0.45, 0]), r * 0.1, C.glow); };
+      camoFx(B, c, t, r, C.glow); } },
+    { key: "D", name: "Stealth drone", theme: "A flat diamond drone with its fans hidden inside the hull, in shimmering active camouflage; flies (owner); a blast reveals it for a moment (looped)", palette: "teal-grey camo panels, pale teal shimmer", r: 10, draw(c, t, r) {
+      const C = COL.phantom, B = p => { const d = [[0.85, 0], [0, 0.62], [-0.7, 0], [0, -0.62]]; plate(p, d, C.hull, 0, r, 0.8);
+        for (const sg of [-1, 1]) { const f = add(p, [-r * 0.05, sg * r * 0.3]); disc(f, r * 0.2, C.dark); for (let b = 0; b < 3; b++) line(f, add(f, mul(fa(t * 40 * sg + b * 2.1), r * 0.18)), A(C.panel, 0.7), 0.5); }
+        for (let i = 0; i < 4; i++) fill(p, [[0, 0], d[i], d[(i + 1) % 4]], A(i % 2 ? C.panel : C.dark, 0.3), 0, r);
+        protoMark(add(p, [-r * 0.4, 0]), r * 0.08, t); slitS(add(p, [r * 0.55, 0]), r * 0.1, C.glow); };
+      camoFx(B, c, t, r, C.glow); } },
+    { key: "E", name: "Camo glider", theme: "A slim glider on long swept wings whose camouflage ripples across them; flies (owner); a blast reveals it for a moment (looped)", palette: "teal-grey camo wings, pale teal shimmer", r: 10, draw(c, t, r) {
+      const C = COL.phantom, B = p => { for (const sg of [-1, 1]) { const w = [[0.15, sg * 0.1], [-0.4, sg * 0.95], [-0.55, sg * 0.9], [-0.3, sg * 0.1]]; fill(p, w, C.hull, 0, r); outline(p, w, A(OUTLINE, 0.9), 0.7, 0, r);
+          for (let k = 0; k < 3; k++) { const u = fmod(t * 0.8 + k / 3, 1); line(add(p, [r * (0.1 - 0.5 * u), sg * r * (0.15 + 0.7 * u)]), add(p, [r * (0.0 - 0.5 * u), sg * r * (0.2 + 0.7 * u)]), A(C.glow, 0.4), 0.6); } }
+        plate(p, [[0.85, 0], [0.4, 0.1], [-0.65, 0.08], [-0.75, 0], [-0.65, -0.08], [0.4, -0.1]], C.panel, 0, r, 0.7); protoMark(add(p, [-r * 0.3, 0]), r * 0.07, t); slitS(add(p, [r * 0.55, 0]), r * 0.08, C.glow); };
+      camoFx(B, c, t, r, C.glow); } },
+    { key: "F", name: "Chameleon rotor", theme: "A small rotor scout with a tail boom, its skin shifting to match the ground below; flies (owner); a blast reveals it for a moment (looped)", palette: "teal-grey camo skin, pale teal shimmer", r: 10, draw(c, t, r) {
+      const C = COL.phantom, B = p => { bar(p, add(p, [-r * 0.95, 0]), 1.2, C.dark); const tr = add(p, [-r * 0.95, 0]); line(add(tr, [0, -r * 0.2]), add(tr, [0, r * 0.2]), A(C.panel, 0.7), 0.8);
+        plate(p, [[0.55, 0], [0.35, 0.28], [-0.35, 0.26], [-0.5, 0], [-0.35, -0.26], [0.35, -0.28]], C.hull, 0, r, 0.8);
+        disc(p, r * 0.85, [0.92, 0.94, 0.97, 0.08]); for (let b = 0; b < 2; b++) line(add(p, mul(fa(t * 30 + b * Math.PI), r * 0.85)), add(p, mul(fa(t * 30 + b * Math.PI + Math.PI), r * 0.85)), [0.92, 0.94, 0.97, 0.35], 0.7);
+        disc(p, r * 0.1, INK); protoMark(add(p, [-r * 0.2, r * 0.12]), r * 0.07, t); slitS(add(p, [r * 0.42, 0]), r * 0.1, C.glow); };
+      camoFx(B, c, t, r, C.glow); } },
+  ],
+  aegis: [
+    { key: "A", name: "Aegis strider", theme: "A biped with a barrier emitter on its back; its hex barrier cracks under fire, shatters, and rebuilds (looped)", palette: "white-gold hull, gold trim, amber barrier", r: 13, draw(c, t, r) {
+      const C = COL.aegis, st = Math.sin(t * 4);
+      for (const s of [-1, 1]) foot(add(c, [r * 0.3 * st * s, s * r * 0.32]), C.dark, r, 0.22, 0.13);
+      const body = [[0.5, 0], [0.3, 0.36], [-0.3, 0.36], [-0.45, 0], [-0.3, -0.36], [0.3, -0.36]]; plate(c, body, C.hull, 0, r, 0.9); outline(c, body, C.trim, 0.7, 0, r * 0.8);
+      const e = add(c, [-r * 0.4, 0]); disc(e, r * 0.22, OUTLINE); disc(e, r * 0.19, C.trim); glowDot(e, r * 0.08, C.glow);
+      protoMark(add(c, [r * 0.05, r * 0.2]), r * 0.08, t); slitS(add(c, [r * 0.38, 0]), r * 0.13, C.glow); barrierFx(c, t, r, C.glow); } },
+    { key: "B", name: "Emitter tripod", theme: "A tripod under a domed barrier emitter; its hex barrier cracks under fire, shatters, and rebuilds (looped)", palette: "white-gold dome, gold legs, amber barrier", r: 13, draw(c, t, r) {
+      const C = COL.aegis;
+      for (let i = 0; i < 3; i++) { const a = [0.9, -0.9, Math.PI][i], sw = Math.sin(t * 4 + i * 2.1), hip = add(c, mul(fa(a), r * 0.3)), knee = add(c, mul(fa(a + 0.12 * sw), r * 0.62)), ft = add(c, mul(fa(a + 0.25 * sw), r * 0.82)); limb([hip, knee, ft], 1.6, C.trim); disc(ft, 1.4, OUTLINE); }
+      disc(c, r * 0.44, OUTLINE); disc(c, r * 0.41, C.hull); ring(c, r * 0.3, C.trim, 0.9); disc(c, r * 0.2, C.trim); glowDot(c, r * 0.09, C.glow);
+      protoMark(add(c, [-r * 0.22, r * 0.18]), r * 0.08, t); slitS(add(c, [r * 0.36, 0]), r * 0.12, C.glow); barrierFx(c, t, r, C.glow); } },
+    { key: "C", name: "Shield-arm walker", theme: "A four-legged walker projecting its barrier from two forward emitter arms; the barrier cracks, shatters and rebuilds (looped)", palette: "white-gold hull, gold arms, amber barrier", r: 13, draw(c, t, r) {
+      const C = COL.aegis;
+      for (const [x, y, ph] of [[1, 1, 0], [1, -1, Math.PI], [-1, 1, Math.PI], [-1, -1, 0]]) { const sw = Math.sin(t * 4 + ph), hip = add(c, [x * r * 0.3, y * r * 0.3]), ft = add(c, [x * r * 0.48 + sw * r * 0.1, y * r * 0.6]); limb([hip, ft], 1.4, C.dark); }
+      for (const s of [-1, 1]) { const sh = add(c, [r * 0.2, s * r * 0.28]), pad = add(c, [r * 0.72, s * r * 0.36]); bar(sh, pad, 1.8, C.trim); disc(pad, r * 0.1, OUTLINE); disc(pad, r * 0.08, C.hull); glowDot(pad, r * 0.05, C.glow); }
+      const body = rrPts(0.42, 0.32, 0.1); plate(c, body, C.hull, 0, r, 0.9); outline(c, body, C.trim, 0.7, 0, r * 0.8);
+      protoMark(add(c, [-r * 0.2, 0]), r * 0.08, t); slitS(add(c, [r * 0.32, 0]), r * 0.12, C.glow); barrierFx(c, t, r, C.glow); } },
+    { key: "D", name: "Bulwark mech", theme: "A massive two-legged mech with huge gold-trimmed shoulder armour and a chest barrier emitter (owner: bulkier, heavy-duty); its barrier cracks, shatters and rebuilds (looped)", palette: "white-gold armour, gold trim, amber barrier", r: 13, draw(c, t, r) {
+      const C = COL.aegis, st = Math.sin(t * 3);
+      for (const sg of [-1, 1]) { const hip = add(c, [-r * 0.15, sg * r * 0.3]), ft = add(c, [r * (-0.1 + 0.28 * st * sg), sg * r * 0.55]); limb([hip, ft], 3.4, C.dark); foot(ft, C.dark, r, 0.28, 0.17); }
+      const body = [[0.45, 0], [0.32, 0.36], [-0.4, 0.38], [-0.55, 0], [-0.4, -0.38], [0.32, -0.36]]; plate(c, body, C.hull, 0, r, 1.1); rivets(c, body, 0, r, 0.8, 0.7);
+      for (const sg of [-1, 1]) { const pa = [[0.25, sg * 0.3], [0.2, sg * 0.75], [-0.35, sg * 0.78], [-0.45, sg * 0.32]]; plate(c, pa, C.hull, 0, r, 1.0); outline(c, pa, C.trim, 0.9, 0, r * 0.88); rivets(c, pa, 0, r, 0.75, 0.6); }
+      const e = add(c, [r * 0.12, 0]); disc(e, r * 0.18, OUTLINE); disc(e, r * 0.15, C.trim); glowDot(e, r * 0.07, C.glow);
+      protoMark(add(c, [-r * 0.35, 0]), r * 0.08, t); slitS(add(c, [r * 0.38, 0]), r * 0.12, C.glow); barrierFx(c, t, r, C.glow); } },
+    { key: "E", name: "Siege hexapod", theme: "A heavy six-legged walker on thick armoured legs, a barrier dome on its back (owner: bulkier, heavy-duty); its barrier cracks, shatters and rebuilds (looped)", palette: "white-gold shell, dark legs, amber barrier", r: 13, draw(c, t, r) {
+      const C = COL.aegis;
+      for (let i = 0; i < 3; i++) for (const sg of [-1, 1]) { const sw = Math.sin(t * 3 + i * 2.1 + (sg > 0 ? Math.PI : 0)), root = add(c, [r * (0.3 - i * 0.32), sg * r * 0.38]), knee = add(root, [r * (0.14 + 0.06 * sw), sg * r * 0.32]), ft = add(root, [r * (-0.04 + 0.12 * sw), sg * r * 0.55]); limb([root, knee, ft], 2.4, C.dark); disc(ft, 2.0, OUTLINE); disc(ft, 1.6, C.trim); }
+      const sh = rrPts(0.6, 0.42, 0.14); plate(c, sh, C.hull, 0, r, 1.1); rivets(c, sh, 0, r, 0.82, 0.7); for (const x of [-0.2, 0.2]) line(add(c, [x * r, -r * 0.4]), add(c, [x * r, r * 0.4]), C.trim, 0.8);
+      const dm = add(c, [-r * 0.15, 0]); disc(dm, r * 0.26, OUTLINE); disc(dm, r * 0.23, C.trim); glowDot(dm, r * 0.1, C.glow);
+      protoMark(add(c, [r * 0.3, r * 0.22]), r * 0.08, t); slitS(add(c, [r * 0.52, 0]), r * 0.13, C.glow); barrierFx(c, t, r, C.glow); } },
+    { key: "F", name: "Rhino walker", theme: "A low, heavy four-legged walker on stumpy armoured legs, a gold ram plate in front and two barrier horns (owner: bulkier, heavy-duty); its barrier cracks, shatters and rebuilds (looped)", palette: "white-gold body, gold ram and horns, amber barrier", r: 13, draw(c, t, r) {
+      const C = COL.aegis;
+      for (const [x, y, ph] of [[1, 1, 0], [1, -1, Math.PI], [-1, 1, Math.PI], [-1, -1, 0]]) { const sw = Math.sin(t * 3.5 + ph), hip = add(c, [x * r * 0.35, y * r * 0.3]), ft = add(c, [x * r * 0.42 + sw * r * 0.1, y * r * 0.55]); limb([hip, ft], 3.0, C.dark); foot(ft, C.dark, r, 0.16, 0.13); }
+      const body = rrPts(0.62, 0.36, 0.12); plate(c, body, C.hull, 0, r, 1.1); rivets(c, body, 0, r, 0.82, 0.7);
+      const ram = [[0.95, 0], [0.62, 0.42], [0.5, 0.36], [0.5, -0.36], [0.62, -0.42]]; plate(c, ram, C.trim, 0, r, 1.0);
+      for (const sg of [-1, 1]) { const h = add(c, [r * 0.85, sg * r * 0.28]); bar(add(c, [r * 0.55, sg * r * 0.22]), h, 1.6, C.dark); glowDot(h, r * 0.05, C.glow); }
+      protoMark(add(c, [-r * 0.35, 0]), r * 0.08, t); slitS(add(c, [r * 0.42, 0]), r * 0.14, C.glow); barrierFx(c, t, r, C.glow); } },
+  ],
+  hydra: [
+    { key: "A", name: "Carrier frame", theme: "A triangular carrier frame with three of your Skitters clamped to its arms; destroyed, it bursts and the Skitters scatter (looped)", palette: "oxide-red frame, sand Skitters", r: 14, draw(c, t, r) {
+      const C = COL.hydra, docks = [[0.62, 0, 1, 0], [-0.35, 0.55, -0.5, 0.87], [-0.35, -0.55, -0.5, -0.87]];
+      const frame = p => { for (const [x, y] of docks) bar(p, add(p, [x * r * 0.8, y * r * 0.8]), 2.4, C.dark); for (const [x, y] of docks) { const q = add(p, [x * r, y * r]); disc(q, r * 0.2, OUTLINE); disc(q, r * 0.17, C.hull); }
+        plate(p, ngon(6, 0.36, 0), C.hull, 0, r, 0.9); glowDot(p, r * 0.08, C.glow); protoMark(add(p, [-r * 0.12, 0]), r * 0.07, t); };
+      hydraSplit(c, t, r, docks, frame, C.glow); } },
+    { key: "B", name: "Stack walker", theme: "A caged four-legged frame carrying three Skitters nose to tail; destroyed, the cage bursts and the Skitters scatter (looped)", palette: "oxide-red cage, sand Skitters", r: 14, draw(c, t, r) {
+      const C = COL.hydra, docks = [[0.55, 0, 0.7, -0.7], [0, 0, 0, 1], [-0.55, 0, -0.7, -0.7]];
+      const frame = p => { for (const [x, y, ph] of [[1, 1, 0], [1, -1, Math.PI], [-1, 1, Math.PI], [-1, -1, 0]]) { const sw = Math.sin(t * 4 + ph), hip = add(p, [x * r * 0.45, y * r * 0.3]), ft = add(p, [x * r * 0.6 + sw * r * 0.12, y * r * 0.62]); limb([hip, ft], 1.6, C.dark); }
+        plate(p, rectPts(0.9, 0.3), C.dark, 0, r, 0.9); outline(p, rectPts(0.9, 0.3), C.hull, 1.4, 0, r); for (const x of [-0.3, 0.3]) line(add(p, [x * r, -r * 0.3]), add(p, [x * r, r * 0.3]), C.hull, 1.0); protoMark(add(p, [-r * 0.85, r * 0.22]), r * 0.07, t); };
+      hydraSplit(c, t, r, docks, frame, C.glow); } },
+    { key: "C", name: "Hive pod", theme: "A rounded pod with three bays, a Skitter peeking from each; destroyed, the pod splits and the Skitters scatter (looped)", palette: "oxide-red pod, dark bays, sand Skitters", r: 14, draw(c, t, r) {
+      const C = COL.hydra, docks = [[0.3, 0.32, 0.6, 0.8], [0.3, -0.32, 0.6, -0.8], [-0.42, 0, -1, 0]];
+      const frame = p => { plate(p, [[0.85, 0], [0.6, 0.58], [-0.6, 0.62], [-0.85, 0], [-0.6, -0.62], [0.6, -0.58]], C.hull, 0, r, 1.0);
+        for (const [x, y] of docks) { const q = add(p, [x * r, y * r]); ellipse(q, r * 0.3, r * 0.2, INK); arc(q, r * 0.3, -2.4, -0.7, C.dark, 1.2); }
+        slitS(add(p, [r * 0.72, 0]), r * 0.16, C.glow); protoMark(add(p, [-r * 0.05, 0]), r * 0.08, t); };
+      hydraSplit(c, t, r, docks, frame, C.glow); } },
+    { key: "D", name: "Three-headed crawler", theme: "A true hydra: a heavy crawler with three long necks, a Skitter for each head; destroyed, the heads break free and scatter (looped)", palette: "oxide-red body and necks, sand Skitter heads", r: 14, draw(c, t, r) {
+      const C = COL.hydra, docks = [[0.95, 0, 1, 0], [0.7, 0.58, 0.6, 0.8], [0.7, -0.58, 0.6, -0.8]];
+      const frame = p => { for (let i = 0; i < 3; i++) for (const sg of [-1, 1]) { const ph = t * 5 + i * 2.1 + (sg > 0 ? Math.PI : 0), root = add(p, [r * (-0.05 - i * 0.25), sg * r * 0.32]); limb([root, add(root, [r * 0.1 * Math.sin(ph), sg * r * 0.25]), add(root, [r * 0.16 * Math.sin(ph), sg * r * 0.42])], 1.3, C.dark); }
+        docks.forEach(([x, y], i) => { const sw = 0.06 * Math.sin(t * 2 + i * 2); limb([add(p, [r * 0.1, y * r * 0.3]), add(p, [r * 0.45, (y * 0.55 + sw) * r]), add(p, [x * r * 0.85, y * r * 0.95])], 2.2, C.hull); });
+        plate(p, [[0.3, 0], [0.15, 0.36], [-0.65, 0.36], [-0.8, 0], [-0.65, -0.36], [0.15, -0.36]], C.hull, 0, r, 1.0); glowDot(add(p, [-r * 0.2, 0]), r * 0.07, C.glow); protoMark(add(p, [-r * 0.5, 0]), r * 0.07, t); };
+      hydraSplit(c, t, r, docks, frame, C.glow); } },
+    { key: "E", name: "Skitter shell", theme: "A giant Skitter-shaped shell, three real Skitters hidden inside; destroyed, the shell splits along its seams and they spill out (looped)", palette: "oxide-red giant shell, sand seams; sand Skitters inside", r: 14, draw(c, t, r) {
+      const C = COL.hydra, docks = [[0.35, 0, 0.8, 0.6], [-0.2, 0.22, -0.4, 0.9], [-0.2, -0.22, -0.4, -0.9]];
+      const frame = p => { for (let i = 0; i < 3; i++) for (const sg of [-1, 1]) { const ph = t * 9 + i * 2.1 + (sg > 0 ? Math.PI : 0), root = add(p, [r * (0.3 - i * 0.35), sg * r * 0.25]); limb([root, add(root, [r * 0.15 * Math.sin(ph), sg * r * 0.42]), add(root, [r * 0.25 * Math.sin(ph), sg * r * 0.66])], 1.4, C.dark); }
+        const sh = [[0.9, 0], [0.48, 0.32], [-0.7, 0.3], [-0.7, -0.3], [0.48, -0.32]]; plate(p, sh, C.hull, 0, r, 1.0);
+        for (const q of [[0.1, -0.31, 0.1, 0.31], [-0.35, -0.3, -0.35, 0.3], [0.48, 0, -0.7, 0]]) line(add(p, [q[0] * r, q[1] * r]), add(p, [q[2] * r, q[3] * r]), A(SKT.hull, 0.8), 0.6);
+        slitS(add(p, [r * 0.62, 0]), r * 0.16, C.glow); protoMark(add(p, [-r * 0.5, r * 0.15]), r * 0.07, t); };
+      hydraSplit(c, t, r, docks, frame, C.glow, { hidden: true }); } },
+    { key: "F", name: "Skitter train", theme: "Three Skitters coupled nose to tail on an armoured spine, scuttling as one; destroyed, the couplings blow and they scatter (looped)", palette: "oxide-red spine and couplers, sand Skitters", r: 14, draw(c, t, r) {
+      const C = COL.hydra, docks = [[0.62, 0, 0.7, -0.7], [0, 0, 0, 1], [-0.62, 0, -0.7, 0.7]];
+      const frame = p => { bar(add(p, [r * 0.85, 0]), add(p, [-r * 0.9, 0]), 2.2, C.dark); for (const x of [0.31, -0.31]) { const q = add(p, [x * r, 0]); plate(q, rectPts(0.08, 0.16), C.hull, 0, r, 0.6); disc(q, r * 0.05, C.glow); }
+        plate(add(p, [r * 0.95, 0]), [[0.12, 0], [0, 0.14], [-0.06, 0], [0, -0.14]], C.hull, 0, r, 0.6); protoMark(add(p, [-r * 0.95, 0]), r * 0.06, t); };
+      hydraSplit(c, t, r, docks, frame, C.glow); } },
+    { key: "G", name: "Carousel carrier", theme: "A round platform where three Skitters ride a slowly turning carousel around a glowing hub; destroyed, they fly off the rim (looped)", palette: "oxide-red platform, glowing hub, sand Skitters", r: 14, draw(c, t, r) {
+      const C = COL.hydra, a0 = t * 0.6, docks = [0, 1, 2].map(i => { const a = a0 + i * TAU / 3; return [Math.cos(a) * 0.55, Math.sin(a) * 0.55, Math.cos(a), Math.sin(a)]; });
+      const frame = p => { for (const [x, y, ph] of [[1, 1, 0], [1, -1, Math.PI], [-1, 1, Math.PI], [-1, -1, 0]]) { const sw = Math.sin(t * 4 + ph), ft = add(p, [x * r * 0.62 + sw * r * 0.1, y * r * 0.82]); limb([add(p, [x * r * 0.45, y * r * 0.5]), ft], 1.5, C.dark); }
+        disc(p, r * 0.85, OUTLINE); disc(p, r * 0.81, C.hull); ring(p, r * 0.62, C.dark, 1.0); arcSegments(p, r * 0.75, 12, 0.2, a0, A(C.glow, 0.5), 0.8);
+        disc(p, r * 0.18, OUTLINE); disc(p, r * 0.15, C.dark); glowDot(p, r * 0.08, C.glow); protoMark(add(p, [r * 0.3, r * 0.3]), r * 0.06, t); };
+      hydraSplit(c, t, r, docks, frame, C.glow); } },
+    { key: "H", name: "Cluster pod", theme: "An armoured egg of a pod with three hatch seams and tail fins, its cargo hidden; destroyed, the hatches blow and three Skitters burst out (looped)", palette: "oxide-red pod, dark seams, hidden sand Skitters", r: 14, draw(c, t, r) {
+      const C = COL.hydra, docks = [[0.25, 0.2, 0.6, 0.8], [0.25, -0.2, 0.6, -0.8], [-0.35, 0, -1, 0]];
+      const frame = p => { for (const sg of [-1, 1]) fill(p, [[-0.6, sg * 0.25], [-0.95, sg * 0.5], [-0.95, sg * 0.25]], C.dark, 0, r);
+        const pod = rrPts(0.75, 0.5, 0.42); plate(p, pod, C.hull, 0, r, 1.1); for (const a of [0.9, -0.9, Math.PI]) line(p, add(p, mul(fa(a), r * 0.55)), A(INK, 0.7), 0.8);
+        ring(p, r * 0.18, C.dark, 1.0); for (const sg of [-1, 1]) glowDot(add(p, [r * 0.55, sg * r * 0.18]), 0.9, A(C.glow, blink(t, 1.2, sg > 0 ? 0.5 : 0))); protoMark(add(p, [-r * 0.2, r * 0.32]), r * 0.07, t); };
+      hydraSplit(c, t, r, docks, frame, C.glow, { hidden: true }); } },
+    { key: "I", name: "Mother scuttler", theme: "A huge six-legged scuttler carrying three small Skitters on its back; destroyed, the riders leap off and scatter (looped)", palette: "oxide-red mother, sand riders", r: 14, draw(c, t, r) {
+      const C = COL.hydra, docks = [[0.05, 0, 0.8, 0.6], [-0.4, 0.22, -0.5, 0.85], [-0.4, -0.22, -0.5, -0.85]];
+      const frame = p => { for (let i = 0; i < 3; i++) for (const sg of [-1, 1]) { const ph = t * 8 + i * 2.1 + (sg > 0 ? Math.PI : 0), root = add(p, [r * (0.3 - i * 0.32), sg * r * 0.32]); limb([root, add(root, [r * 0.18 * Math.sin(ph), sg * r * 0.42]), add(root, [r * 0.28 * Math.sin(ph), sg * r * 0.72])], 2.0, C.dark); }
+        plate(p, [[0.85, 0], [0.5, 0.4], [-0.7, 0.38], [-0.82, 0], [-0.7, -0.38], [0.5, -0.4]], C.hull, 0, r, 1.1); slitS(add(p, [r * 0.65, 0]), r * 0.18, C.glow); protoMark(add(p, [r * 0.35, r * 0.22]), r * 0.07, t); };
+      hydraSplit(c, t, r, docks, frame, C.glow, { scale: 0.32 }); } },
+  ],
+  masq: [
+    { key: "A", name: "Blade infiltrator", theme: "Disguised as the Drone (purple eye). Below half health the Drone shell shatters to show a bladed infiltrator (looped)", palette: "Drone shell, purple eye; plum true form, violet glow", r: 12, draw(c, t, r) {
+      const C = COL.masq, D = p => { naniteHub(p, t, r * 0.62); protoMark(add(p, [-r * 0.18, r * 0.22]), r * 0.07, t); },
+        T = p => { const st = Math.sin(t * 6); for (const s of [-1, 1]) foot(add(p, [r * 0.3 * st * s, s * r * 0.3]), C.dark, r, 0.2, 0.12);
+          for (const s of [-1, 1]) { const sh = add(p, [r * 0.1, s * r * 0.35]), tip = add(p, [r * 0.85, s * r * 0.3]); bar(sh, tip, 1.2, C.dark); polyline([tip, add(tip, [r * 0.25, -s * r * 0.1])], [0.85, 0.85, 0.9, 1], 1.0); }
+          const b = [[0.55, 0], [0.3, 0.32], [-0.4, 0.3], [-0.55, 0], [-0.4, -0.3], [0.3, -0.32]]; plate(p, b, C.hull, 0, r, 0.9); outline(p, b, A(C.glow, 0.5), 0.6, 0, r * 0.8); protoMark(add(p, [-r * 0.2, 0]), r * 0.09, t); slitS(add(p, [r * 0.4, 0]), r * 0.12, C.glow); };
+      masqFx(D, T, c, t, r, C.glow); } },
+    { key: "B", name: "Four-legged hunter", theme: "Disguised as the Drone (purple eye). Below half health the shell shatters to show a four-legged hunter with a violet core (looped)", palette: "Drone shell, purple eye; plum hunter, violet core", r: 12, draw(c, t, r) {
+      const C = COL.masq, T = p => { for (const [x, y, ph] of [[1, 1, 0], [1, -1, Math.PI], [-1, 1, Math.PI], [-1, -1, 0]]) { const sw = Math.sin(t * 6 + ph), hip = add(p, [x * r * 0.25, y * r * 0.22]), ft = add(p, [x * r * 0.5 + sw * r * 0.12, y * r * 0.55]); limb([hip, ft], 1.1, C.dark); }
+          plate(p, rrPts(0.55, 0.3, 0.14), C.hull, 0, r, 0.9); glowDot(p, r * 0.1, C.glow); protoMark(add(p, [-r * 0.3, 0]), r * 0.08, t); slitS(add(p, [r * 0.45, 0]), r * 0.1, C.glow); },
+        D = p => { naniteHub(p, t, r * 0.62); if (fmod(t, 2.2) < 0.14) { withAlpha(0.55, () => T(p)); for (let i = -2; i <= 2; i++) line(add(p, [-r * 0.6, i * r * 0.15]), add(p, [r * 0.6, i * r * 0.15]), A(C.glow, 0.4), 0.5); } };
+      masqFx(D, T, c, t, r, C.glow); } },
+    { key: "C", name: "Hover wedge", theme: "Disguised as the Drone (purple eye). Below half health the shell shatters to show a finned hover wedge (looped)", palette: "Drone shell, purple eye; plum wedge", r: 12, draw(c, t, r) {
+      const C = COL.masq, D = p => naniteHub(p, t, r * 0.62, C.glow, true),
+        T = p => { disc(p, r * 0.6, A(C.glow, 0.12)); for (const s of [-1, 1]) fill(p, [[-0.1, s * 0.25], [-0.6, s * 0.6], [-0.55, s * 0.22]], C.dark, 0, r);
+          const w = [[0.8, 0], [-0.4, 0.42], [-0.25, 0], [-0.4, -0.42]]; plate(p, w, C.hull, 0, r, 0.9); outline(p, w, A(C.glow, 0.5), 0.6, 0, r * 0.85); protoMark(add(p, [-r * 0.05, 0]), r * 0.08, t); slitS(add(p, [r * 0.42, 0]), r * 0.1, C.glow); };
+      masqFx(D, T, c, t, r, C.glow); } },
+    { key: "D", name: "Blade assassin", theme: "Disguised as the Drone (purple eye). Below half health the shell shatters to show a slim blade assassin (looped)", palette: "Drone shell, purple eye; plum assassin, violet glow", r: 12, draw(c, t, r) {
+      const C = COL.masq, D = p => { disc(p, r * 0.25, A(NAN.dark, 0.9)); for (let i = 0; i < 10; i++) { const a = i * TAU / 10 + t * 1.2, q = add(p, mul(fa(a), r * 0.55)); plate(q, rectPts(0.5, 0.5), NAN.hull, a, r * 0.2, 0.5); disc(q, r * 0.04, NAN.eye); } eyeN(p, r * 0.12, NAN.eye); },
+        T = p => { const st = Math.sin(t * 7); for (const sg of [-1, 1]) foot(add(p, [r * 0.3 * st * sg, sg * r * 0.25]), C.dark, r, 0.18, 0.1);
+          for (const sg of [-1, 1]) { const tip = add(p, [r * 1.0, sg * r * 0.18]); bar(add(p, [r * 0.15, sg * r * 0.22]), tip, 0.9, [0.85, 0.85, 0.9, 1]); }
+          const b = [[0.6, 0], [0.25, 0.2], [-0.45, 0.18], [-0.55, 0], [-0.45, -0.18], [0.25, -0.2]]; plate(p, b, C.hull, 0, r, 0.8); protoMark(add(p, [-r * 0.2, 0]), r * 0.08, t); slitS(add(p, [r * 0.4, 0]), r * 0.1, C.glow); };
+      masqFx(D, T, c, t, r, C.glow); } },
+    { key: "E", name: "Heavy brute", theme: "Disguised as the Drone (purple eye). Below half health the shell shatters to show a heavy brute with big fists (looped)", palette: "Drone shell, purple eye; plum brute, violet glow", r: 12, draw(c, t, r) {
+      const C = COL.masq, D = p => { skitter(p, t * 0.3, r * 0.72); protoMark(add(p, [-r * 0.15, r * 0.12]), r * 0.06, t); },
+        T = p => { for (const sg of [-1, 1]) { const sh = add(p, [r * 0.05, sg * r * 0.5]), fist = add(p, [r * 0.6, sg * r * 0.55]); bar(sh, fist, 3.0, C.dark); disc(fist, r * 0.15, OUTLINE); disc(fist, r * 0.12, C.panel); }
+          const b = rrPts(0.5, 0.45, 0.14); plate(p, b, C.hull, 0, r, 1.0); rivets(p, b, 0, r, 0.8, 0.6); protoMark(add(p, [-r * 0.2, 0]), r * 0.09, t); slitS(add(p, [r * 0.38, 0]), r * 0.14, C.glow); };
+      masqFx(D, T, c, t, r, C.glow); } },
+    { key: "F", name: "Pincer mauler", theme: "Disguised as the Drone (purple eye). Below half health the shell shatters to show a six-legged pincered mauler (looped)", palette: "Drone shell, purple eye; plum mauler, violet glow", r: 12, draw(c, t, r) {
+      const C = COL.masq, D = p => jammerA(p, t, r * 0.75),
+        T = p => { for (let i = 0; i < 3; i++) for (const sg of [-1, 1]) { const ph = t * 6 + i * 2.1 + (sg > 0 ? Math.PI : 0), root = add(p, [r * (0.1 - i * 0.28), sg * r * 0.32]); limb([root, add(root, [r * 0.1 * Math.sin(ph), sg * r * 0.28]), add(root, [r * 0.18 * Math.sin(ph), sg * r * 0.45])], 1.0, C.dark); }
+          for (const sg of [-1, 1]) { const cl = add(p, [r * 0.62, sg * r * 0.35]), op = 0.2 + 0.12 * Math.sin(t * 4); bar(add(p, [r * 0.2, sg * r * 0.25]), cl, 1.8, C.dark); for (const q of [-1, 1]) polyline([cl, add(cl, [r * 0.22, (sg * 0.1 + q * op) * r])], C.panel, 1.4); }
+          const b = [[0.4, 0], [0.25, 0.35], [-0.45, 0.32], [-0.55, 0], [-0.45, -0.32], [0.25, -0.35]]; plate(p, b, C.hull, 0, r, 0.9); protoMark(add(p, [-r * 0.15, 0]), r * 0.08, t); slitS(add(p, [r * 0.3, 0]), r * 0.12, C.glow); };
+      masqFx(D, T, c, t, r, C.glow); } },
+    { key: "G", name: "Petal-armour core", theme: "Disguised as the Drone (purple eye). Below half health the shell opens into six armour petals around a violet core (looped)", palette: "Drone shell, purple eye; plum core, violet glow", r: 12, draw(c, t, r) {
+      const C = COL.masq, D = p => { for (let i = 0; i < 6; i++) { const a = i * TAU / 6; fill(p, [[0, 0], mul(fa(a - 0.5), 0.46), mul(fa(a + 0.5), 0.46)], NAN.hull, 0, r); line(p, add(p, mul(fa(a + 0.52), r * 0.46)), A(INK, 0.6), 0.5); } eyeN(add(p, [r * 0.12, 0]), r * 0.12, NAN.eye); },
+        T = p => { glowDot(p, r * 0.16, C.glow); disc(p, r * 0.24, A(C.hull, 0.9)); for (let i = 0; i < 6; i++) { const a = i * TAU / 6 + Math.PI / 6, q = add(p, mul(fa(a), r * 0.62)); fill(q, [[0.3, 0], [-0.1, 0.22], [-0.25, 0], [-0.1, -0.22]], NAN.hull, a, r); outline(q, [[0.3, 0], [-0.1, 0.22], [-0.25, 0], [-0.1, -0.22]], A(C.glow, 0.6), 0.6, a, r); } protoMark(add(p, [-r * 0.05, 0]), r * 0.07, t); };
+      masqFx(D, T, c, t, r, C.glow); } },
+    { key: "H", name: "Puppeteer drone", theme: "Disguised as the Drone (purple eye). Below half health the shell shatters to show the four-rotor puppeteer inside (looped)", palette: "Drone shell, purple eye; plum drone, violet glow", r: 12, draw(c, t, r) {
+      const C = COL.masq, frame = add(c, [-r * 0.6, -r * 0.55]),
+        D = p => { naniteHub(p, t, r * 0.62); for (const q of [[-0.3, -0.2], [0.1, -0.35], [-0.35, 0.15]]) line(add(p, [q[0] * r * 0.6, q[1] * r * 0.6]), add(frame, [q[0] * r * 0.2, q[1] * r * 0.2]), A([0.9, 0.9, 1, 1], 0.42), 0.55); withAlpha(0.18, () => disc(frame, r * 0.25, C.dark)); },
+        T = p => { for (const [x, y] of [[0.42, 0.42], [0.42, -0.42], [-0.42, 0.42], [-0.42, -0.42]]) { const rp = add(p, [x * r, y * r]); bar(p, rp, 1.0, C.dark); fanS(rp, r * 0.22, t, 45 * Math.sign(x * y), C.panel); }
+          plate(p, rrPts(0.32, 0.28, 0.1), C.hull, 0, r, 0.8); for (const k of [-0.15, 0, 0.15]) line(add(p, [-r * 0.1, k * r]), add(p, [-r * 0.1 - r * 0.3, k * r + r * 0.25]), A([0.9, 0.9, 1, 1], 0.3), 0.4); protoMark(add(p, [-r * 0.05, 0]), r * 0.07, t); slitS(add(p, [r * 0.22, 0]), r * 0.1, C.glow); };
+      masqFx(D, T, c, t, r, C.glow); } },
+    { key: "I", name: "Split-shell lancer", theme: "Disguised as the Drone (purple eye). Below half health the shell splits in two and a long plum lancer slides out between the halves (looped)", palette: "Drone shell, purple eye; plum lancer, violet glow", r: 12, draw(c, t, r) {
+      const C = COL.masq, D = p => { naniteHub(p, t, r * 0.62); line(add(p, [-r * 0.32, -r * 0.08]), add(p, [r * 0.32, r * 0.08]), A(C.glow, 0.35 + 0.25 * Math.sin(t * 3)), 0.7); },
+        T = p => { for (const sg of [-1, 1]) { const h = add(p, [0, sg * r * 0.62]); fill(h, ngon(6, 0.3, Math.PI / 6).filter((q, i) => sg > 0 ? q[1] >= -0.01 : q[1] <= 0.01), NAN.hull, 0, r); outline(h, [[0.3, 0], [-0.3, 0]], A(C.glow, 0.6), 0.6, 0, r); }
+          const b = [[1.0, 0], [0.4, 0.1], [-0.6, 0.12], [-0.7, 0], [-0.6, -0.12], [0.4, -0.1]]; plate(p, b, C.hull, 0, r, 0.8); outline(p, b, A(C.glow, 0.5), 0.6, 0, r * 0.85); protoMark(add(p, [-r * 0.2, 0]), r * 0.07, t); slitS(add(p, [r * 0.5, 0]), r * 0.08, C.glow); };
+      masqFx(D, T, c, t, r, C.glow); } },
+    { key: "J", name: "Unfolding stilt-walker", theme: "Disguised as the Drone (purple eye). Below half health its four short legs unfold into tall stilts and it rises into a towering four-legged predator (looped)", palette: "Drone shell, purple eye; plum stilt-walker, violet glow", r: 12, draw(c, t, r) {
+      const C = COL.masq, T = p => { for (let k = 0; k < 4; k++) { const d = fa(Math.PI / 4 + k * Math.PI / 2), sw = Math.sin(t * 4 + k * Math.PI / 2) * r * 0.1, knee = add(add(p, mul(d, r * 0.75)), [sw, 0]); limb([add(p, mul(d, r * 0.25)), knee, add(knee, mul(d, r * 0.45))], 1.4, C.dark); disc(add(knee, mul(d, r * 0.45)), 1.4, OUTLINE); }
+        plate(p, rrPts(0.36, 0.32, 0.1), C.hull, 0, r, 0.9); glowDot(p, r * 0.09, C.glow); protoMark(add(p, [-r * 0.2, 0]), r * 0.07, t); slitS(add(p, [r * 0.3, 0]), r * 0.1, C.glow); };
+      masqFx(null, T, c, t, r, C.glow); } },
+    { key: "K", name: "Uncoiling serpent", theme: "Disguised as the Drone (purple eye). Below half health a segmented serpent machine uncoils out of the shell and slithers on (looped)", palette: "Drone shell, purple eye; plum serpent segments, violet glow", r: 12, draw(c, t, r) {
+      const C = COL.masq, T = p => { for (let i = 5; i >= 1; i--) { const q = add(p, [-r * 0.32 * i, r * 0.18 * Math.sin(t * 5 - i * 0.9)]); plate(q, ngon(6, 0.26 - 0.025 * i, 0), i % 2 ? C.hull : C.panel, 0, r, 0.7); }
+        const hd = [[0.55, 0], [0.25, 0.26], [-0.2, 0.24], [-0.3, 0], [-0.2, -0.24], [0.25, -0.26]]; plate(p, hd, C.hull, 0, r, 0.9); for (const sg of [-1, 1]) glowDot(add(p, [r * 0.3, sg * r * 0.1]), 0.8, C.glow); protoMark(add(p, [-r * 0.05, 0]), r * 0.07, t); };
+      masqFx(null, T, c, t, r, C.glow); } },
+    { key: "L", name: "Shield knight", theme: "Disguised as the Drone (purple eye). Below half health the shell shatters to show a heavy plum knight-mech behind a tall shield, with a long blade (looped)", palette: "Drone shell, purple eye; plum knight, violet edge glow", r: 12, draw(c, t, r) {
+      const C = COL.masq, T = p => { const st = Math.sin(t * 4); for (const sg of [-1, 1]) foot(add(p, [r * 0.25 * st * sg, sg * r * 0.32]), C.dark, r, 0.22, 0.13);
+        bar(add(p, [r * 0.05, r * 0.4]), add(p, [r * 1.05, r * 0.32]), 1.3, [0.85, 0.85, 0.92, 1]);
+        const b = rrPts(0.4, 0.36, 0.12); plate(p, b, C.hull, 0, r, 1.0); rivets(p, b, 0, r, 0.8, 0.6);
+        const sh = [[0.62, -0.75], [0.62, 0.15], [0.42, 0.2], [0.32, -0.75]]; plate(p, sh, C.panel, 0, r, 1.0); outline(p, sh, A(C.glow, 0.6), 0.6, 0, r * 0.9);
+        protoMark(add(p, [-r * 0.15, 0]), r * 0.08, t); slitS(add(p, [r * 0.25, r * 0.15]), r * 0.1, C.glow); };
+      masqFx(null, T, c, t, r, C.glow); } },
+  ],
+  decoy: [
+    { key: "A", name: "Inflatable heavy", theme: "An inflatable fake heavy tank with a pulsing rank badge. Tells: the hull breathes, the gun barrel droops, the treads never turn, and a prototype X shows on the hull", palette: "gunmetal fake hull, magenta beacon and badge", r: 15, draw(c, t, r) {
+      const C = COL.decoy, w = Math.sin(t * 3);
+      for (const s of [-1, 1]) plate(add(c, [0, s * r * 0.62]), rectPts(0.8, 0.17), C.dark, 0, r, 0.7);
+      plate(c, rrPts(0.78 * (1 + 0.02 * w), 0.5 * (1 - 0.02 * w), 0.22), C.hull, 0, r, 1.0); for (const y of [-0.25, 0.25]) line(add(c, [-r * 0.7, y * r]), add(c, [r * 0.7, y * r]), A(C.dark, 0.5), 0.6);
+      const br = [add(c, [r * 0.25, 0]), add(c, [r * 0.7, r * 0.04 * (1 + w)]), add(c, [r * 1.05, r * 0.1 * (1 + w)])]; polyline(br, OUTLINE, 3.8); polyline(br, C.panel, 2.6);
+      const tu = add(c, [-r * 0.05, 0]); disc(tu, r * 0.33 * (1 + 0.03 * w), OUTLINE); disc(tu, r * 0.3 * (1 + 0.03 * w), C.panel); disc(add(tu, [-r * 0.08, -r * 0.08]), r * 0.08, A([1, 1, 1, 1], 0.25));
+      disc(add(c, [-r * 0.6, r * 0.35]), r * 0.05, C.dark); glowDot(add(c, [-r * 0.45, -r * 0.3]), r * 0.06, A(C.glow, blink(t, 1.3)));
+      protoMark(add(c, [r * 0.45, -r * 0.32]), r * 0.08, t); rankBadge(add(c, [-r * 0.25, -r * 1.1]), t, C.glow); } },
+    { key: "B", name: "Hologram heavy", theme: "A small wheeled projector throwing a flickering, scanlined heavy-tank hologram around itself, with a pulsing rank badge. Tell: the projector shows through", palette: "pale tank hologram, tan projector, magenta lens", r: 15, draw(c, t, r) {
+      const C = COL.decoy, H = [0.72, 0.82, 0.95, 1], a = hash(Math.floor(t * 10)) > 0.08 ? 1 : 0.3;
+      for (const [x, y] of [[0.22, 0.2], [0.22, -0.2], [-0.22, 0.2], [-0.22, -0.2]]) wheel(add(c, [x * r, y * r]), r * 0.09, t);
+      plate(c, rectPts(0.32, 0.18), C.frame, 0, r, 0.7); disc(add(c, [r * 0.3, 0]), r * 0.09, OUTLINE); glowDot(add(c, [r * 0.3, 0]), r * 0.05, C.glow); protoMark(add(c, [-r * 0.15, 0]), r * 0.07, t);
+      fill(c, rrPts(0.85, 0.55, 0.12), A(H, 0.14 * a), 0, r); outline(c, rrPts(0.85, 0.55, 0.12), A(H, 0.6 * a), 0.7, 0, r);
+      for (const s of [-1, 1]) outline(add(c, [0, s * r * 0.62]), rectPts(0.8, 0.16), A(H, 0.45 * a), 0.6, 0, r);
+      ring(add(c, [-r * 0.05, 0]), r * 0.32, A(H, 0.6 * a), 0.7); line(add(c, [r * 0.25, 0]), add(c, [r * 1.05, 0]), A(H, 0.6 * a), 1.2);
+      const off = fmod(t * 5, 1) * r * 0.16; for (let i = -3; i <= 3; i++) line(add(c, [-r * 0.85, i * r * 0.16 + off]), add(c, [r * 0.85, i * r * 0.16 + off]), A(H, 0.12 * a), 0.5);
+      rankBadge(add(c, [-r * 0.25, -r * 1.1]), t, C.glow); } },
+    { key: "C", name: "Hung-plate frame", theme: "A light walking frame dressed in heavy armour plates hung on chains, with a beacon and a pulsing rank badge. Tells: the plates swing loose and there are gaps between them", palette: "gunmetal plates, tan frame, magenta beacon", r: 15, draw(c, t, r) {
+      const C = COL.decoy;
+      for (const [x, y, ph] of [[1, 1, 0], [1, -1, Math.PI], [-1, 1, Math.PI], [-1, -1, 0]]) { const sw = Math.sin(t * 3 + ph), hip = add(c, [x * r * 0.45, y * r * 0.3]), ft = add(c, [x * r * 0.6 + sw * r * 0.1, y * r * 0.72]); limb([hip, ft], 1.1, C.frame); }
+      outline(c, rectPts(0.65, 0.42), C.frame, 1.2, 0, r); line(add(c, [-r * 0.65, 0]), add(c, [r * 0.65, 0]), C.frame, 1.0);
+      const pl = [[[0, 0.58], [0.6, 0.12]], [[0, -0.58], [0.6, 0.12]], [[0.75, 0], [0.1, 0.45]], [[-0.74, 0], [0.1, 0.42]]];
+      pl.forEach(([[x, y], [hw, hh]], i) => { const p = add(c, [x * r, y * r]), a = 0.08 * Math.sin(t * 2 + i * 1.7); plate(p, rectPts(hw, hh), C.hull, a, r, 0.8); line(add(c, [x * r * 0.85, y * r * 0.8]), p, A(INK, 0.8), 0.5); });
+      disc(c, r * 0.16, OUTLINE); disc(c, r * 0.13, C.dark); glowDot(c, r * 0.07, A(C.glow, blink(t, 1.3)));
+      protoMark(add(c, [r * 0.35, r * 0.2]), r * 0.08, t); rankBadge(add(c, [-r * 0.25, -r * 1.1]), t, C.glow); } },
+  ],
+  mirage: [
+    { key: "A", name: "Projector walker", theme: "A chrome biped with a three-lens projector head; every 6 s it throws two hologram copies of itself that walk ahead (looped)", palette: "mirror chrome, cyan lenses and holograms", r: 12, draw(c, t, r) {
+      const C = COL.mirage, B = p => { const st = Math.sin(t * 6);
+        for (const s of [-1, 1]) foot(add(p, [r * 0.3 * st * s, s * r * 0.32]), C.dark, r);
+        plate(p, [[0.45, 0], [0.25, 0.32], [-0.4, 0.3], [-0.52, 0], [-0.4, -0.3], [0.25, -0.32]], C.hull, 0, r, 0.8);
+        for (const y of [-0.15, 0, 0.15]) { const l = add(p, [r * 0.42, y * r]); disc(l, r * 0.08, OUTLINE); glowDot(l, r * 0.05, C.glow); } protoMark(add(p, [-r * 0.25, 0]), r * 0.08, t); };
+      mirageFx(B, c, t, r, C.glow); } },
+    { key: "B", name: "Prism rover", theme: "A four-wheeled rover under a big turning prism that sparkles; every 6 s it throws two hologram copies of itself that roll ahead (looped)", palette: "chrome rover, cyan prism and holograms", r: 12, draw(c, t, r) {
+      const C = COL.mirage, B = p => { for (const [x, y] of [[0.42, 0.45], [0.42, -0.45], [-0.42, 0.45], [-0.42, -0.45]]) wheel(add(p, [x * r, y * r]), r * 0.16, t);
+        plate(p, rrPts(0.6, 0.4, 0.1), C.dark, 0, r, 0.8); const tri = ngon(3, 0.38, t * 1.2); plate(p, tri, C.hull, 0, r, 0.8); for (let i = 0; i < 3; i++) fill(p, [[0, 0], tri[i], tri[(i + 1) % 3]], A(C.glow, 0.15 + 0.15 * Math.sin(t * 4 + i * 2)), 0, r);
+        if (fmod(t, 1.1) < 0.15) glowDot(add(p, mul(fa(t * 1.2), r * 0.3)), 1.0, C.glow); protoMark(add(p, [-r * 0.45, 0]), r * 0.07, t); slitS(add(p, [r * 0.52, 0]), r * 0.1, C.glow); };
+      mirageFx(B, c, t, r, C.glow); } },
+    { key: "C", name: "Mirror-fan hover", theme: "A hover unit fanning five angled mirror panels behind it; every 6 s it throws two hologram copies of itself that glide ahead (looped)", palette: "chrome mirrors, cyan edges and holograms", r: 12, draw(c, t, r) {
+      const C = COL.mirage, B = p => { disc(p, r * 0.6, A(C.glow, 0.1));
+        for (let i = 0; i < 5; i++) { const a = Math.PI + (i - 2) * 0.32, q = add(p, mul(fa(a), r * 0.55)); fill(q, [[0.3, -0.07], [0.3, 0.07], [-0.3, 0.1], [-0.3, -0.1]], C.hull, a, r); outline(q, [[0.3, -0.07], [0.3, 0.07], [-0.3, 0.1], [-0.3, -0.1]], A(C.glow, 0.4 + 0.4 * Math.sin(t * 4 + i)), 0.6, a, r); }
+        disc(p, r * 0.32, OUTLINE); disc(p, r * 0.29, C.hull); ring(p, r * 0.18, C.dark, 0.7); protoMark(add(p, [-r * 0.08, 0]), r * 0.07, t); slitS(add(p, [r * 0.24, 0]), r * 0.1, C.glow); };
+      mirageFx(B, c, t, r, C.glow); } },
+    { key: "D", name: "Holo-drone carrier", theme: "A hovering chrome pod with two small projector drones circling it; every 6 s they throw two hologram copies of it that walk ahead (looped)", palette: "chrome pod, cyan drone lenses and holograms", r: 12, draw(c, t, r) {
+      const C = COL.mirage, B = p => { disc(p, r * 0.55, A(C.glow, 0.1)); plate(p, rrPts(0.5, 0.32, 0.16), C.hull, 0, r, 0.8);
+        for (let i = 0; i < 2; i++) { const q = add(p, mul(fa(t * 1.6 + i * Math.PI), r * 0.78)); disc(q, r * 0.13, OUTLINE); disc(q, r * 0.1, C.dark); glowDot(q, r * 0.05, C.glow); }
+        protoMark(add(p, [-r * 0.22, 0]), r * 0.07, t); slitS(add(p, [r * 0.38, 0]), r * 0.1, C.glow); };
+      mirageFx(B, c, t, r, C.glow); } },
+    { key: "E", name: "Kaleidoscope orb", theme: "A low mirrored orb whose kaleidoscope facets turn and flash; every 6 s it throws two hologram copies of itself (looped)", palette: "mirror chrome facets, cyan and white flashes", r: 12, draw(c, t, r) {
+      const C = COL.mirage, B = p => { disc(p, r * 0.5, OUTLINE); disc(p, r * 0.47, C.hull);
+        for (let i = 0; i < 6; i++) { const a = i * TAU / 6 + t * 0.9; fill(p, [[0, 0], mul(fa(a), 0.46), mul(fa(a + TAU / 6), 0.46)], A(i % 2 ? C.glow : [1, 1, 1, 1], 0.12 + 0.15 * (0.5 + 0.5 * Math.sin(t * 5 + i))), 0, r); }
+        ring(p, r * 0.3, A(C.dark, 0.6), 0.6); protoMark(add(p, [-r * 0.15, 0]), r * 0.07, t); slitS(add(p, [r * 0.38, 0]), r * 0.1, C.glow); };
+      mirageFx(B, c, t, r, C.glow); } },
+    { key: "F", name: "Twin-lens tank", theme: "A small tracked unit with two big projector lenses side by side, one for each hologram; every 6 s it throws two copies of itself (looped)", palette: "chrome hull, dark treads, cyan lenses", r: 12, draw(c, t, r) {
+      const C = COL.mirage, B = p => { for (const sg of [-1, 1]) tread(add(p, [0, sg * r * 0.5]), r * 0.62, r * 0.16, t);
+        plate(p, rrPts(0.58, 0.38, 0.1), C.hull, 0, r, 0.9); for (const sg of [-1, 1]) { const l = add(p, [r * 0.3, sg * r * 0.18]); disc(l, r * 0.15, OUTLINE); disc(l, r * 0.12, C.dark); glowDot(l, r * 0.06, C.glow); }
+        protoMark(add(p, [-r * 0.3, 0]), r * 0.07, t); };
+      mirageFx(B, c, t, r, C.glow); } },
+    { key: "G", name: "Light-sail walker", theme: "A walker carrying a big translucent light sail on its back that flickers with images; every 6 s it throws two hologram copies of itself (looped)", palette: "chrome walker, pale flickering sail, cyan glow", r: 12, draw(c, t, r) {
+      const C = COL.mirage, B = p => { const st = Math.sin(t * 6); for (const sg of [-1, 1]) foot(add(p, [r * 0.3 * st * sg, sg * r * 0.3]), C.dark, r);
+        const sail = add(p, [-r * 0.5, 0]); fill(sail, rectPts(0.12, 0.8), A(C.glow, 0.15), 0, r); outline(sail, rectPts(0.12, 0.8), A(C.glow, 0.7), 0.6, 0, r); for (let i = -3; i <= 3; i++) line(add(sail, [-r * 0.1, i * r * 0.2]), add(sail, [r * 0.1, i * r * 0.2 + r * 0.05 * Math.sin(t * 7 + i)]), A(C.glow, 0.4), 0.5);
+        plate(p, [[0.45, 0], [0.25, 0.28], [-0.35, 0.26], [-0.45, 0], [-0.35, -0.26], [0.25, -0.28]], C.hull, 0, r, 0.8); protoMark(add(p, [-r * 0.15, 0]), r * 0.07, t); slitS(add(p, [r * 0.33, 0]), r * 0.1, C.glow); };
+      mirageFx(B, c, t, r, C.glow); } },
+    { key: "H", name: "Crystal spider", theme: "An eight-legged walker with a big crystal abdomen that splits light into colours; every 6 s it throws two hologram copies of itself (looped)", palette: "chrome legs, prismatic crystal, cyan glow", r: 12, draw(c, t, r) {
+      const C = COL.mirage, B = p => { for (let i = 0; i < 4; i++) for (const sg of [-1, 1]) { const ph = t * 7 + i * 1.6 + (sg > 0 ? Math.PI : 0), root = add(p, [r * (0.3 - i * 0.18), sg * r * 0.15]); limb([root, add(root, [r * 0.12 * Math.sin(ph), sg * r * 0.35]), add(root, [r * (0.2 * Math.sin(ph) - 0.05), sg * r * 0.58])], 0.7, C.dark); }
+        const cr = [[0.1, 0], [-0.25, 0.3], [-0.75, 0.22], [-0.9, 0], [-0.75, -0.22], [-0.25, -0.3]]; plate(p, cr, [0.85, 0.9, 1, 0.9], 0, r, 0.7);
+        const cols = [[1, 0.5, 0.6, 1], [1, 0.9, 0.4, 1], [0.5, 1, 0.6, 1], [0.4, 0.8, 1, 1], [0.8, 0.5, 1, 1]]; for (let i = 0; i < 5; i++) fill(p, [[-0.3, 0], cr[(i + 1) % 6], cr[(i + 2) % 6]], A(cols[i], 0.2 + 0.15 * Math.sin(t * 3 + i)), 0, r);
+        disc(add(p, [r * 0.3, 0]), r * 0.18, OUTLINE); disc(add(p, [r * 0.3, 0]), r * 0.15, C.hull); glowDot(add(p, [r * 0.38, 0]), 0.8, C.glow); protoMark(add(p, [-r * 0.45, 0]), r * 0.06, t); };
+      mirageFx(B, c, t, r, C.glow); } },
+    { key: "I", name: "Strobe sentinel", theme: "A slim tripod sentinel whose head spins a strobing beam; the copies appear in its flashes, every 6 s (looped)", palette: "chrome tripod, cyan strobe and holograms", r: 12, draw(c, t, r) {
+      const C = COL.mirage, B = p => { for (let i = 0; i < 3; i++) { const a = [0.9, -0.9, Math.PI][i], sw = Math.sin(t * 5 + i * 2.1), ft = add(p, mul(fa(a + 0.25 * sw), r * 0.75)); limb([add(p, mul(fa(a), r * 0.2)), add(p, mul(fa(a + 0.12 * sw), r * 0.5)), ft], 1.0, C.dark); }
+        const a = t * 5, b0 = add(p, mul(fa(a - 0.22), r * 1.3)), b1 = add(p, mul(fa(a + 0.22), r * 1.3)); poly([p, b0, b1], A(C.glow, fmod(t * 5, 1) < 0.5 ? 0.25 : 0.08));
+        disc(p, r * 0.24, OUTLINE); disc(p, r * 0.21, C.hull); glowDot(p, r * 0.09, C.glow); protoMark(add(p, [-r * 0.12, r * 0.1]), r * 0.06, t); };
+      mirageFx(B, c, t, r, C.glow); } },
+    { key: "J", name: "Hologram drum", theme: "A drum-shaped projector on short legs, its lens ring spinning; every 6 s it throws one copy ahead of it and one behind (looped)", palette: "chrome drum, cyan lens ring and holograms", r: 12, draw(c, t, r) {
+      const C = COL.mirage, B = p => { for (const [x, y, ph] of [[1, 1, 0], [1, -1, Math.PI], [-1, 1, Math.PI], [-1, -1, 0]]) { const sw = Math.sin(t * 6 + ph), ft = add(p, [x * r * 0.42 + sw * r * 0.08, y * r * 0.5]); limb([add(p, [x * r * 0.25, y * r * 0.25]), ft], 1.1, C.dark); }
+        disc(p, r * 0.45, OUTLINE); disc(p, r * 0.42, C.hull); for (let i = 0; i < 8; i++) { const q = add(p, mul(fa(t * 2 + i * TAU / 8), r * 0.32)); disc(q, r * 0.06, A(C.glow, 0.5 + 0.5 * Math.sin(t * 6 + i))); }
+        disc(p, r * 0.16, C.dark); protoMark(add(p, [-r * 0.05, 0]), r * 0.06, t); };
+      mirageFx(B, c, t, r, C.glow); } },
+    { key: "K", name: "Two-way lantern", theme: "A hovering lantern projector with one lens facing forward and one facing back, which is where its copies appear; every 6 s (looped)", palette: "chrome lantern, cyan front and rear lenses", r: 12, draw(c, t, r) {
+      const C = COL.mirage, B = p => { disc(p, r * 0.55, A(C.glow, 0.1)); plate(p, rrPts(0.42, 0.3, 0.14), C.hull, 0, r, 0.8);
+        for (const sg of [-1, 1]) { const l = add(p, [sg * r * 0.45, 0]); disc(l, r * 0.14, OUTLINE); disc(l, r * 0.11, C.dark); glowDot(l, r * 0.06, C.glow); }
+        for (let i = -1; i <= 1; i++) line(add(p, [-r * 0.2, i * r * 0.1]), add(p, [r * 0.2, i * r * 0.1]), A(C.dark, 0.6), 0.5); protoMark(add(p, [0, r * 0.18]), r * 0.06, t); };
+      mirageFx(B, c, t, r, C.glow); } },
+    { key: "L", name: "Bow-and-stern projector", theme: "A long low vehicle with a projector dish at each end, bow and stern; every 6 s it throws a copy from each (looped)", palette: "chrome hull, cyan dishes and holograms", r: 12, draw(c, t, r) {
+      const C = COL.mirage, B = p => { for (const sg of [-1, 1]) tread(add(p, [0, sg * r * 0.42]), r * 0.62, r * 0.13, t);
+        plate(p, rrPts(0.7, 0.32, 0.12), C.hull, 0, r, 0.9);
+        for (const sg of [-1, 1]) { const d = add(p, [sg * r * 0.62, 0]), dish = []; for (let i = 0; i <= 8; i++) dish.push(mul(fa((sg > 0 ? 0 : Math.PI) - 1.0 + 2.0 * i / 8), 0.3)); for (let i = 8; i >= 0; i--) dish.push(mul(fa((sg > 0 ? 0 : Math.PI) - 1.0 + 2.0 * i / 8), 0.2)); plate(d, dish, C.dark, 0, r, 0.6); glowDot(d, r * 0.06, C.glow); }
+        protoMark(p, r * 0.07, t); };
+      mirageFx(B, c, t, r, C.glow); } },
+    { key: "M", name: "Veiled monolith", theme: "A floating slab of black glass, faint cyan glyphs crawling across it; every 6 s two copies of it appear in step, one in front and one behind (looped)", palette: "obsidian slab, faint cyan glyphs", r: 12, draw(c, t, r) {
+      const C = COL.mirage, B = p => { disc(p, r * 0.6, A(C.glow, 0.07)); const sl = rectPts(0.36, 0.55); plate(p, sl, [0.06, 0.07, 0.1, 1], 0.08 * Math.sin(t * 0.7), r, 0.9);
+        for (let i = 0; i < 6; i++) { const y = -0.42 + 0.17 * i, k = hash(i * 5 + Math.floor(t * 2)); if (k > 0.35) line(add(p, [-r * 0.22, y * r]), add(p, [r * (-0.22 + 0.4 * k), y * r]), A(C.glow, 0.25 + 0.3 * Math.sin(t * 3 + i)), 0.6); }
+        outline(p, sl, A(C.glow, 0.25), 0.5, 0.08 * Math.sin(t * 0.7), r * 0.92); protoMark(add(p, [r * 0.18, r * 0.4]), r * 0.05, t, 0.6); };
+      mirageFx(B, c, t, r, C.glow); } },
+    { key: "N", name: "Hooded lens", theme: "A cowled machine, its face hidden under a dark hood except for one cold cyan lens, a tattered hem trailing; every 6 s two copies of it appear in step, in front and behind (looped)", palette: "dark cowl, single cyan lens, tattered hem", r: 12, draw(c, t, r) {
+      const C = COL.mirage, B = p => {
+        for (let i = -2; i <= 2; i++) { const pts = []; for (let k = 0; k <= 4; k++) pts.push(add(p, [-r * (0.3 + 0.18 * k), r * (i * 0.14 * (1 + 0.15 * k) + 0.04 * Math.sin(t * 4 - k + i))])); polyline(pts, A([0.12, 0.13, 0.17, 1], 0.9), 1.6); }
+        const hood = [[0.5, 0], [0.25, 0.42], [-0.35, 0.45], [-0.45, 0], [-0.35, -0.45], [0.25, -0.42]]; plate(p, hood, [0.1, 0.11, 0.15, 1], 0, r, 0.9);
+        fill(add(p, [r * 0.15, 0]), [[0.3, 0], [0, 0.22], [-0.12, 0], [0, -0.22]], [0.02, 0.02, 0.03, 1], 0, r); glowDot(add(p, [r * 0.25, 0]), r * 0.07, C.glow); protoMark(add(p, [-r * 0.25, r * 0.25]), r * 0.05, t, 0.6); };
+      mirageFx(B, c, t, r, C.glow); } },
+    { key: "O", name: "Shard halo", theme: "No body you can see: a ring of floating mirror shards turning around one faint point of light; every 6 s two copies of it appear in step, in front and behind (looped)", palette: "mirror shards, a faint cyan point of light", r: 12, draw(c, t, r) {
+      const C = COL.mirage, B = p => { glowDot(p, r * 0.07, A(C.glow, 0.7 + 0.3 * Math.sin(t * 3)));
+        for (let i = 0; i < 7; i++) { const a = t * 0.9 + i * TAU / 7, d = r * (0.5 + 0.08 * Math.sin(t * 2 + i)), q = add(p, mul(fa(a), d)); fill(q, [[0.18, 0], [0, 0.07], [-0.14, 0], [0, -0.07]], C.hull, a + t, r); outline(q, [[0.18, 0], [0, 0.07], [-0.14, 0], [0, -0.07]], A(C.glow, 0.5), 0.5, a + t, r); }
+        protoMark(add(p, [0, r * 0.18]), r * 0.04, t, 0.5); };
+      mirageFx(B, c, t, r, C.glow); } },
+  ],
+};
+
+// Phantom flies (owner, 2026-10-08): a close air shadow on every look, faint while cloaked
+for (const l of LOOKS.phantom) { l.shadowD = l.shadowD || 1.8; l.shadowK = l.shadowK || (t => 0.25 + 0.75 * camoK(t)); }
+
+// ---- Animations (per enemy) ---------------------------------------------------------------------------------
+const ANIMS = {
+  phantom: [
+    { key: "A", name: "Sneak", desc: "A low, careful sneak.", fx: (t) => ({ rot: 0.08 * Math.sin(t * 2), dy: 0.03 * Math.sin(t * 4) }) },
+    { key: "B", name: "Freeze and dart", desc: "Freezes still, then darts.", fx: (t) => { const u = fmod(t, 1.8); return u < 1.3 ? {} : { dx: 0.2 * Math.sin((u - 1.3) / 0.5 * Math.PI) }; } },
+    { key: "C", name: "Shimmer", desc: "Its outline shimmers like heat haze.", fx: (t) => ({ sx: 1 + 0.03 * Math.sin(t * 23), sy: 1 + 0.03 * Math.sin(t * 19) }) },
+    { key: "D", name: "Hover bob", desc: "A light, floating bob (now that it flies).", fx: (t) => ({ dy: 0.05 * Math.sin(t * 2.2), lift: 0.3 + 0.3 * Math.sin(t * 2.2) }) },
+    { key: "E", name: "Bank", desc: "Banks smoothly from side to side.", fx: (t) => ({ rot: 0.25 * Math.sin(t * 1.4), sy: 1 - 0.2 * Math.abs(Math.sin(t * 1.4)) }) },
+    { key: "F", name: "Camo flicker", desc: "Its camouflage flickers rapidly in and out (made faster at the owner's request).", fx: (t) => { const k = Math.floor(t * 24); return { alpha: hash(k) < 0.45 ? 0.25 + 0.25 * hash(k + 7) : 1 }; } },
+  ],
+  aegis: [
+    { key: "A", name: "Steady march", desc: "An even, measured stride.", fx: (t) => { const p = Math.abs(Math.sin(t * 4)); return { dy: 0.04 * (1 - p) }; } },
+    { key: "B", name: "Brace for hits", desc: "Braces and jolts while its barrier takes fire.", fx: (t) => { const u = fmod(t, 8); return u >= 3 && u < 4.5 ? { sx: 0.95, sy: 1.04, dx: -0.03 * Math.abs(Math.sin(t * 20)) } : {}; } },
+    { key: "C", name: "Hum", desc: "A steady power hum.", fx: (t) => ({ dx: 0.012 * Math.sin(t * 41), dy: 0.012 * Math.sin(t * 37) }) },
+  ],
+  hydra: [
+    { key: "A", name: "Clatter", desc: "Rattles as its passengers shift.", fx: (t) => { const s = Math.floor(t * 10); return { dx: (hash(s) - 0.5) * 0.06, dy: (hash(s + 3) - 0.5) * 0.06 }; } },
+    { key: "B", name: "Lumber", desc: "A heavy side-to-side lumber.", fx: (t) => ({ rot: 0.06 * Math.sin(t * 1.6), dy: 0.04 * Math.sin(t * 3.2) }) },
+    { key: "C", name: "Strain", desc: "Bulges now and then, as if its passengers push to get out.", fx: (t) => { const p = Math.pow(Math.max(0, Math.sin(t * 3)), 3); return { sx: 1 + 0.06 * p, sy: 1 + 0.06 * p }; } },
+    { key: "D", name: "Heave", desc: "Heaves in slow, heavy breaths as its passengers shift.", fx: (t) => { const p = 0.5 + 0.5 * Math.sin(t * 1.8); return { sx: 1 + 0.04 * p, sy: 1 + 0.05 * p, dy: -0.02 * p }; } },
+    { key: "E", name: "Scuttle shimmy", desc: "A fast, tiny shimmy, like the Skitters inside.", fx: (t) => ({ dy: 0.03 * Math.sin(t * 26), rot: 0.03 * Math.sin(t * 13) }) },
+    { key: "F", name: "Restless rock", desc: "Rocks unevenly from side to side, never quite settled.", fx: (t) => ({ rot: 0.07 * Math.sin(t * 1.7) + 0.03 * Math.sin(t * 4.3), dx: 0.02 * Math.sin(t * 3.1) }) },
+  ],
+  masq: [
+    { key: "A", name: "Copycat bob", desc: "Bobs just like a Nanite.", fx: (t) => ({ dy: 0.06 * Math.sin(t * 8) }) },
+    { key: "B", name: "Odd twitch", desc: "Bobs like a Nanite, but now and then twitches in a way no Nanite does.", fx: (t) => { const u = fmod(t, 2.5); return { dy: 0.06 * Math.sin(t * 8), rot: u < 0.1 ? 0.35 * Math.sin(u / 0.1 * Math.PI) : 0 }; } },
+    { key: "C", name: "Glide", desc: "A smooth, unhurried glide.", fx: (t) => ({ dy: 0.03 * Math.sin(t * 2), rot: 0.04 * Math.sin(t * 1.5) }) },
+    { key: "D", name: "Nervous jitter", desc: "Tiny, nervous jitters, as if trying not to be noticed.", fx: (t) => { const s = Math.floor(t * 9); return { dx: (hash(s) - 0.5) * 0.06, dy: (hash(s + 5) - 0.5) * 0.06 }; } },
+    { key: "E", name: "Shell rattle", desc: "Now and then its shell rattles, as if something shifts inside.", fx: (t) => { const u = fmod(t, 2.2); return u < 0.3 ? { dx: 0.04 * Math.sin(u * 90), sx: 1 + 0.04 * Math.sin(u * 60) } : {}; } },
+    { key: "F", name: "Predator crouch", desc: "A low, menacing crouch and lean.", fx: (t) => ({ sx: 1.05, sy: 0.95, rot: 0.05 * Math.sin(t * 1.2), dx: 0.03 * Math.sin(t * 1.2) }) },
+  ],
+  decoy: [
+    { key: "A", name: "Wobble", desc: "Wobbles a little too much for real armour.", fx: (t) => ({ sx: 1 + 0.04 * Math.sin(t * 3), sy: 1 - 0.04 * Math.sin(t * 3) }) },
+    { key: "B", name: "Trundle", desc: "A heavy-looking trundle.", fx: (t) => { const p = Math.abs(Math.sin(t * 3)); return { dy: 0.03 * (1 - p) }; } },
+    { key: "C", name: "Sway", desc: "A slow sway.", fx: (t) => ({ rot: 0.05 * Math.sin(t * 1.2) }) },
+    { key: "D", name: "Pivot steer", desc: "Pivots slowly on its tracks, steering like a heavy tank.", fx: (t) => ({ rot: 0.1 * Math.sin(t * 0.8) }) },
+    { key: "E", name: "Cannon recoil", desc: "Jolts back now and then as if firing its main gun.", fx: (t) => { const u = fmod(t, 3), j = u < 0.3 ? 1 - u / 0.3 : 0; return { dx: -0.12 * j, sx: 1 - 0.05 * j }; } },
+    { key: "F", name: "Track rumble", desc: "A low, constant engine and track rumble.", fx: (t) => ({ dy: 0.015 * Math.sin(t * 33), dx: 0.01 * Math.sin(t * 27) }) },
+  ],
+  mirage: [
+    { key: "A", name: "Shimmer", desc: "Its chrome shimmers.", fx: (t) => ({ sx: 1 + 0.03 * Math.sin(t * 17), sy: 1 + 0.03 * Math.sin(t * 13) }) },
+    { key: "B", name: "Glide", desc: "A smooth glide.", fx: (t) => ({ dy: 0.05 * Math.sin(t * 1.6) }) },
+    { key: "C", name: "Flicker step", desc: "Now and then it flickers a step to one side.", fx: (t) => { const k = Math.floor(t / 1.5), u = fmod(t, 1.5); return u < 0.1 ? { dy: (hash(k) - 0.5) * 0.4 } : {}; } },
+    { key: "D", name: "Phase shimmer", desc: "Its image wavers and dims, never quite solid.", fx: (t) => ({ alpha: 0.72 + 0.28 * Math.sin(t * 2.3), sx: 1 + 0.02 * Math.sin(t * 19) }) },
+    { key: "E", name: "Silent float", desc: "Floats slowly, turning a little, without a sound.", fx: (t) => ({ dy: 0.05 * Math.sin(t * 1.1), rot: 0.06 * Math.sin(t * 0.7), lift: 0.3 + 0.2 * Math.sin(t * 1.1) }) },
+    { key: "F", name: "Space fold", desc: "Every few seconds it folds thin, as if stepping sideways out of the world, and unfolds.", fx: (t) => { const u = fmod(t, 3.2), f = u < 0.25 ? u / 0.25 : u < 0.5 ? 1 - (u - 0.25) / 0.25 : 0; return { sy: 1 - 0.65 * f, sx: 1 + 0.1 * f, alpha: 1 - 0.3 * f }; } },
+    { key: "G", name: "Projection flare", desc: "Swells and brightens each time it throws its copies (every 6 s), then settles into a slow bob.", fx: (t) => { const u = fmod(t, 6), f = u < 0.45 ? Math.sin(u / 0.45 * Math.PI) : 0; return { sx: 1 + 0.15 * f, sy: 1 + 0.15 * f, dy: 0.03 * Math.sin(t * 1.6), alpha: 1 }; } },
+    { key: "H", name: "Echo stutter", desc: "Stutters back and forth in quick bursts, as if its image repeats.", fx: (t) => { const u = fmod(t, 1.6); return u < 0.32 ? { dx: 0.1 * Math.sign(Math.sin(u * 60)), alpha: 0.7 } : { dy: 0.02 * Math.sin(t * 2) }; } },
+    { key: "I", name: "Mirror sweep", desc: "Slow, deliberate sweeps that fan its mirrors across the lane.", fx: (t) => { const w = Math.sin(t * 0.9); return { rot: 0.3 * w * w * w, dy: 0.03 * Math.sin(t * 1.8) }; } },
+  ],
+};
+
+// ---- Movements (same average speed) -----------------------------------------------------------------------------
+const MOVES = {
+  phantom: [
+    { key: "A", name: "Infiltrate line", desc: "Dead straight at a constant speed.", f: t => [V * t, 0] },
+    { key: "B", name: "Shadow weave", desc: "Weaves across the lane.", f: t => [V * t, 8 * Math.sin(t * 1.3)] },
+    { key: "C", name: "Dart and freeze", desc: "Freezes, then darts ahead.", f: burst(1.8, 0.55) },
+    { key: "D", name: "Infiltration flight", desc: "A straight, quiet flight with a slight drift.", f: t => [V * t, 1.5 * Math.sin(t * 0.9)] },
+    { key: "E", name: "Slipstream weave", desc: "Wide, slow weaves across the lane.", f: t => [V * t, 12 * Math.sin(t * 0.8)] },
+    { key: "F", name: "Hover and dash", desc: "Hovers, then dashes ahead.", f: burst(2.0, 0.5) },
+  ],
+  aegis: [
+    { key: "A", name: "Steady advance", desc: "Dead straight at a constant speed.", f: t => [V * t, 0] },
+    { key: "B", name: "Shield-wall drift", desc: "Drifts slowly across the lane.", f: t => [V * t, 8 * Math.sin(t * 0.6)] },
+    { key: "C", name: "Escort weave", desc: "Weaves wide to cover the units around it.", f: t => [V * t, 10 * Math.sin(t * 1.0)] },
+  ],
+  hydra: [
+    { key: "A", name: "Trundle", desc: "Straight ahead with a small step rhythm.", f: t => [V * t - V * 0.15 / 5 * Math.cos(t * 5), 0] },
+    { key: "B", name: "Scuttle sway", desc: "A quick sway, like its Skitters.", f: t => [V * t, 6 * Math.sin(t * 2.2)] },
+    { key: "C", name: "Lurch", desc: "Lurches forward, then slows.", f: t => [V * t - V * 0.45 / 2 * Math.cos(t * 2), 0] },
+    { key: "D", name: "Skitter rush", desc: "Quick rushes like a Skitter, but heavier.", f: burst(1.1, 0.35) },
+    { key: "E", name: "Weaving column", desc: "A gentle S down the lane.", f: t => [V * t, 6 * Math.sin(t * 1.2)] },
+    { key: "F", name: "Stutter crawl", desc: "Short stop-start steps.", f: t => [V * t - V * 0.35 / 7 * Math.cos(t * 7), 1.5 * Math.sin(t * 7)] },
+  ],
+  masq: [
+    { key: "A", name: "Mimic trickle", desc: "Wobbles along like a Nanite.", f: t => [V * t, 3 * Math.sin(t * 3) + 2 * Math.sin(t * 7.3)] },
+    { key: "B", name: "Blend-in weave", desc: "Weaves to blend in with the crowd.", f: t => [V * t, 7 * Math.sin(t * 1.4)] },
+    { key: "C", name: "Straight", desc: "Dead straight at a constant speed.", f: t => [V * t, 0] },
+    { key: "D", name: "Herd follower", desc: "Bobs along like one of the crowd, keeping up and falling back.", f: t => [V * t - V * 0.2 / 1.7 * Math.cos(t * 1.7), 4 * Math.sin(t * 2.3)] },
+    { key: "E", name: "Stalk and slip", desc: "Hangs back, then slips forward.", f: burst(1.6, 0.45) },
+    { key: "F", name: "Edge creep", desc: "Keeps to the edge of the lane, out of the way.", f: t => [V * t, 10 + 1.5 * Math.sin(t * 2)] },
+    { key: "G", name: "Frantic flee", desc: "Bolts in jagged, panicked surges, as if trying to flee.", f: t => [V * t - V * 0.6 / 4.5 * Math.cos(t * 4.5), 9 * tri(t * 2.6) + 3 * Math.sin(t * 11)] },
+    { key: "H", name: "Panic zigzag", desc: "Wide, sharp zigzags across the whole lane.", f: t => [V * t, 11 * tri(t * 3.2)] },
+    { key: "I", name: "Scramble and dash", desc: "Scrambles from side to side, then dashes.", f: t => { const k = Math.floor(t / 0.7), x = burst(0.7, 0.3)(t)[0]; return [x, 8 * (hash(k) - 0.5) * 2]; } },
+  ],
+  decoy: [
+    { key: "A", name: "Lumbering line", desc: "Dead straight, slow and heavy-looking.", f: t => [V * t, 0] },
+    { key: "B", name: "Slow sway", desc: "A slow sway across the lane.", f: t => [V * t, 6 * Math.sin(t * 0.7)] },
+    { key: "C", name: "Stop and go", desc: "Stops now and then, as if to draw fire.", f: burst(2.2, 0.4) },
+  ],
+  mirage: [
+    { key: "A", name: "Glide", desc: "A smooth glide with a slight drift.", f: t => [V * t, 2 * Math.sin(t * 0.8)] },
+    { key: "B", name: "Weave", desc: "Weaves across the lane.", f: t => [V * t, 9 * Math.sin(t * 1.2)] },
+    { key: "C", name: "Side-step", desc: "Steps from side to side.", f: t => [V * t, 7 * (Math.floor(t / 1.5) % 2 ? 1 : -1)] },
+    { key: "D", name: "Split weave", desc: "A tight weave with a quick double-step.", f: t => [V * t, 6 * Math.sin(t * 1.8) + 3 * Math.sin(t * 4.1)] },
+    { key: "E", name: "Jink", desc: "Quick, sharp jinks from side to side.", f: t => [V * t, 8 * tri(t * 1.4)] },
+    { key: "F", name: "Stop and project", desc: "Pauses each time it projects, then moves up (every 6 s, shown faster here).", f: burst(3.0, 0.3) },
+  ],
+};
+
+// Masquerade (owner): animates and moves exactly like the Drone (March, Steady march) until uncovered, then its own
+for (const an of ANIMS.masq) { const f = an.fx; an.fx = t => blendFx(marchFx(t), f(t), masqK(t)); an.desc = "Marches like the Drone until uncovered, then: " + an.desc.charAt(0).toLowerCase() + an.desc.slice(1); }
+for (const mv of MOVES.masq) { const f = mv.f; mv.f = t => { const p = f(t), k = masqK(t); return [V * t + k * (p[0] - V * t), k * p[1]]; }; mv.desc = "Marches straight like the Drone until uncovered, then: " + mv.desc.charAt(0).toLowerCase() + mv.desc.slice(1); }
+
+const BATCHES = [
+  { n: 7, role: "Special", job: "Break a rule. Counter: barrier strip, area.",
+    family: `<b>Special family (draft):</b> one-off <b>prototypes</b>, each breaking one rule: a violet-white <b>X prototype mark</b> (on the
+      disguised units it is the <b>tell</b>), an exposed core cell, and a <b>looped effect</b> showing the rule it breaks: the Phantom's active
+      camouflage (a blast reveals it), the Aegis Walker's barrier (cracks, shatters, rebuilds), the Hydra Frame bursting into the three Skitters it
+      carries, the Masquerade's Nanite disguise dropping below half health, the Decoy Beacon's fake heavy hull and false rank badge, and the Mirage's
+      hologram copies every 6 s. <b>No tiers:</b> every Special is its own thing. <b>Colour per enemy:</b> Phantom teal-grey camo, Aegis Walker
+      white-gold with an amber barrier, Hydra Frame oxide red with sand Skitters, Masquerade a rust Nanite shell over plum, Decoy Beacon gunmetal fake
+      hull on a tan frame with a magenta beacon, Mirage mirror chrome with cyan holograms.`,
+    enemies: [
+      { id: "phantom", name: "Phantom", tier: "-", air: true, anims: "phantom", trait: "flies (owner); cloaked; a Sensor Array field or a blast reveals it", today: { r: 10 } },
+      { id: "aegis", name: "Aegis Walker", tier: "-", air: false, anims: "aegis", trait: "carries a 130 barrier that rebuilds; Arc Coils hit it double", today: { r: 13 } },
+      { id: "hydra", name: "Hydra Frame", tier: "-", air: false, anims: "hydra", trait: "bursts into 3 Skitters when destroyed", today: { r: 14 } },
+      { id: "masq", name: "Masquerade", tier: "-", air: false, anims: "masq", trait: "looks, ranks, animates and moves like the Drone until below half health (owner); new, 12 px", today: { r: 12 } },
+      { id: "decoy", name: "Decoy Beacon", tier: "-", air: false, anims: "decoy", trait: "fakes a high rank so Strongest towers aim at it; does nothing else; new, 15 px", today: { r: 15 } },
+      { id: "mirage", name: "Mirage", tier: "-", air: false, anims: "mirage", trait: "every 6 s throws 2 hologram copies that soak shots, one in front and one behind (owner); new, 12 px", today: { r: 12 } },
+    ] },
+];
+const STORE_KEY = "bl-enemy-art-special-v8";
+// Final picks (owner, 2026-10-08): preselected.
+const DEFAULTS = {
+  phantom: { look: "E", anim: "F", move: "D" },
+  aegis: { look: "E", anim: "B", move: "A" },
+  hydra: { look: "H", anim: "A", move: "A" },
+  masq: { look: "J", anim: "D", move: "I" },
+  decoy: { look: "B", anim: "F", move: "A" },
+  mirage: { look: "C", anim: "B", move: "C" },
+};
+
+// ---- State (picks and notes, kept in this browser) -------------------------------------------------
+const STORE = STORE_KEY;
+const animSet = en => ANIMS[en.anims || (en.air ? "air" : "ground")];
+let state = {};
+try { state = JSON.parse(localStorage.getItem(STORE) || "{}") || {}; } catch (e) { state = {}; }
+const DEF = typeof DEFAULTS === "undefined" ? {} : DEFAULTS;
+function st(id) { if (!state[id]) { const d = DEF[id] || {}; state[id] = { look: d.look || null, anim: d.anim || null, move: d.move || null, notes: { look: "", anim: "", move: "" } }; } return state[id]; }
+function save() { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) { /* storage unavailable */ } }
+const lookOf = en => LOOKS[en.id].find(l => l.key === st(en.id).look) || LOOKS[en.id][0];
+const animOf = en => animSet(en).find(a => a.key === st(en.id).anim) || animSet(en)[0];
+const moveOf = en => MOVES[en.id].find(m => m.key === st(en.id).move) || MOVES[en.id][0];
+
+// ---- Drawing a subject: look + animation, with shadows outside the animation transform -------------
+const CLUSTER = [[0, 0], [-1.7, 1.4], [-1.7, -1.4], [-3.4, 2.8], [-3.4, -2.8]];
+function drawBody(en, look, c, t, ph) {
+  if (look) { if (look.unit) look.unit(c, t, look.r, ph); else look.draw(c, t, look.r); return; }
+  const td = en.today, pal = PAL[td.type]; DRAW[td.type](c, F, N, 0, td.r, t, pal[0], pal[1], { phase: ph });
+}
+function drawUnit(en, look, anim, c, t, ph) {
+  const r = look ? look.r : en.today.r, a = anim ? anim.fx(t + ph * 0.37) : {};
+  const lift = a.lift || 0;
+  if (en.air) { if (look) { const sk = look.shadowK ? look.shadowK(t) : 1; if (sk > 0.01) { X.save(); X.globalAlpha *= sk; airShadow(c, r, (look.shadowD || 2.4) + lift, 1 - 0.2 * lift); X.restore(); } } }
+  else { const sk = look && look.shadowK ? look.shadowK(t) : 1; if (sk > 0.01) { X.save(); X.globalAlpha *= sk; groundShadow(c, r, 1 - 0.35 * lift); X.restore(); } }
+  X.save(); if (a.alpha !== undefined) X.globalAlpha *= Math.max(0, Math.min(1, a.alpha)); X.translate(c[0] + (a.dx || 0) * r, c[1] + (a.dy || 0) * r); X.rotate(a.rot || 0); X.scale(a.sx || 1, a.sy || 1); X.translate(-c[0], -c[1]);
+  drawBody(en, look, c, t, ph); X.restore();
+}
+const PAIR = [[1.0, -0.55], [-1.3, 0.55]];
+function drawSubject(en, look, anim, c, t) {
+  const cl = en.cluster, r = look ? look.r : en.today.r;
+  if (en.formation === "pair") { PAIR.forEach((q, i) => drawUnit(en, look, anim, add(c, [q[0] * r, q[1] * r]), t, i * 0.3)); return; }
+  if (cl) CLUSTER.forEach((q, i) => drawUnit(en, look, anim, add(add(c, [r * 1.6, 0]), [q[0] * r, q[1] * r]), t, i * 1.3));
+  else drawUnit(en, look, anim, c, t, 0);
+}
+function laneBg(W, H) {
+  rect(0, 0, W, H, [0.043, 0.063, 0.086, 1]);
+  const y0 = H / 2 - 24; rect(0, y0, W, 48, [0.075, 0.1, 0.13, 1]);
+  for (let x = 0; x <= W; x += 48) line([x, y0], [x, y0 + 48], [0.16, 0.24, 0.3, 0.45], 0.6);
+  line([0, y0], [W, y0], [0.2, 0.32, 0.4, 0.6], 0.8); line([0, y0 + 48], [W, y0 + 48], [0.2, 0.32, 0.4, 0.6], 0.8);
+}
+const MW = 160, MH = 52;
+function drawMove(en, mv, t) {
+  rect(0, 0, MW, MH, [0.043, 0.063, 0.086, 1]); rect(0, MH / 2 - 18, MW, 36, [0.075, 0.1, 0.13, 1]);
+  line([0, MH / 2], [MW, MH / 2], [0.2, 0.32, 0.4, 0.35], 0.6);
+  const f = mv ? mv.f : steady, span = MW + 30, col = [0.3, 0.88, 1, 1];
+  const pos = tt => { const p = f(tt); return [fmod(p[0], span) - 15, MH / 2 + p[1]]; };
+  const lap = span / V, tb = Math.floor(t / lap) * lap; let tp = null;
+  for (let k = 0; k <= 160; k++) { const q = pos(tb + k * lap / 160); if (tp && Math.abs(q[0] - tp[0]) < 20) line(tp, q, A(col, 0.22), 1.0); tp = q; }
+  for (let k = 0; k < 48; k++) disc(pos(tb + k * lap / 48), 0.9, A(col, 0.5)); // equal time steps: bunched = slow, spread = fast
+  let prev = null;
+  for (let k = 14; k >= 0; k--) { const tt = t - k * 0.08, p = pos(tt); if (prev && Math.abs(p[0] - prev[0]) < 20) line(prev, p, A(col, 0.6 * (1 - k / 15)), 1.4); prev = p; }
+  const p = pos(t);
+  if (en.cluster) {
+    const sp = mv && mv.spread ? mv.spread(t) : 1;
+    CLUSTER.forEach((q, i) => { let o = [q[0] * 3.2 * sp, q[1] * 3.2 * sp]; if (mv && mv.swirl) o = rot(o, t * 1.6); disc(add(p, o), 2.2, i ? A(col, 0.8) : col); });
+  } else if (en.formation === "pair" || (mv && mv.pair)) {
+    const os = mv && mv.pair ? mv.pair(t) : [[5, -4], [-6, 4]];
+    os.forEach((o, i) => { disc(add(p, o), 4.2, A(col, 0.2)); disc(add(p, o), 2.6, i ? A(col, 0.85) : col); });
+  } else { disc(p, 5.5, A(col, 0.2)); disc(p, 3.4, col); }
+  if (mv && mv.blink && fmod(t, 0.4) < 0.08) ring(p, 6, A(col, 0.7), 1);
+}
+
+// ---- Build UI ------------------------------------------------------------------------------------------
+const DPR = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
+const W1 = 96, H1 = 64;
+const jobs = []; // { kind, cv, ctx, scale, fn, visible }
+const io = typeof IntersectionObserver === "undefined" ? null : new IntersectionObserver(es => es.forEach(e => { const j = jobs.find(x => x.cv === e.target); if (j) j.visible = e.isIntersecting; }), { rootMargin: "200px" });
+function mkCanvas(w, h) { const cv = document.createElement("canvas"); cv.width = Math.round(w * DPR); cv.height = Math.round(h * DPR); cv.style.width = w + "px"; cv.style.height = h + "px"; return cv; }
+function job(cv, w, h, scale, fn, frames) { const j = { cv, w, h, ctx: cv.getContext("2d"), scale, fn, visible: !io, frames }; jobs.push(j); if (io) io.observe(cv); return j; }
+function paint(ctx, scale, w, h, fn, t) { X = ctx; ctx.setTransform(DPR * scale, 0, 0, DPR * scale, 0, 0); ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.save(); ctx.beginPath(); ctx.rect(0, 0, w, h); ctx.clip(); fn(t); ctx.restore(); }
+function view(label, cv) { const v = document.createElement("div"); v.className = "view"; const s = document.createElement("small"); s.textContent = label; v.append(cv, s); return v; }
+function el(tag, cls, html) { const e = document.createElement(tag); if (cls) e.className = cls; if (html !== undefined) e.innerHTML = html; return e; }
+const pickButtons = [];
+function lookLabel(en) { const k = st(en.id).look; return k === "T" ? "Today" : k ? `${k} ${LOOKS[en.id].find(l => l.key === k).name}` : "-"; }
+function animLabel(en) { const k = st(en.id).anim; return k === "T" ? "Today" : k ? `${k} ${animSet(en).find(a => a.key === k).name}` : "-"; }
+function moveLabel(en) { const k = st(en.id).move; return k === "T" ? "Today" : k ? `${k} ${MOVES[en.id].find(m => m.key === k).name}` : "-"; }
+function enemyLine(en) {
+  const s = st(en.id), notes = ["look", "anim", "move"].map(d => s.notes[d] ? `${d === "anim" ? "animation" : d === "move" ? "movement" : "look"}: ${s.notes[d].replace(/\s+/g, " ").trim()}` : "").filter(Boolean);
+  return `${en.name}: look ${lookLabel(en)}, animation ${animLabel(en)}, movement ${moveLabel(en)}` + (notes.length ? `; notes: ${notes.join(" | ")}` : "");
+}
+const summaries = [];
+function refresh() {
+  for (const b of pickButtons) { const on = st(b.id)[b.dim] === b.key; b.btn.classList.toggle("on", on); b.btn.setAttribute("aria-pressed", String(on)); b.pan.classList.toggle("picked", on); }
+  for (const s of summaries) s.ta.value = `Batch ${s.batch.n} (${s.batch.role})\n` + s.batch.enemies.map(enemyLine).join("\n");
+  for (const c of combos) c.txt.textContent = enemyLine(c.en).replace(/^[^:]+: /, "");
+}
+const combos = [], notesFields = [];
+function pickPanel(en, dim, key, title, pan) {
+  const b = el("button", "solo pick", key === "T" ? "Keep today" : "Pick " + key); b.setAttribute("aria-pressed", "false");
+  b.addEventListener("click", () => { const s = st(en.id); s[dim] = s[dim] === key ? null : key; save(); refresh(); });
+  pickButtons.push({ id: en.id, dim, key, btn: b, pan }); pan.append(b);
+}
+function notesBox(en, dim, label) {
+  const wrap = el("label", "notes"); wrap.append(el("span", "lbl", label));
+  const ta = document.createElement("textarea"); ta.placeholder = "Anything else? (e.g. mix B's colours with D's shape, faster, bigger...)";
+  ta.value = st(en.id).notes[dim] || ""; ta.addEventListener("input", () => { st(en.id).notes[dim] = ta.value; save(); refresh(); });
+  notesFields.push({ en, ta }); wrap.append(ta); return wrap;
+}
+function build() {
+  const root = document.getElementById("batches");
+  for (const batch of BATCHES) {
+    const sec = el("section", "batch", `<div class="batch-head"><h2>Batch ${batch.n}: ${batch.role}</h2><span class="job">${batch.job}</span></div><div class="family">${batch.family || ""}</div>`);
+    for (const en of batch.enemies) {
+      const box = el("article", "enemy", `<div class="enemy-head"><h3>${en.name}</h3><span class="sub">${en.tier} · ${en.air ? "flyer" : "ground"} (stays ${en.air ? "a flyer" : "on the ground"}) · trait from the name: ${en.trait} · today's radius ${en.today.r} px</span></div>`);
+      // combination preview
+      const combo = el("div", "combo");
+      const cc1 = mkCanvas(W1, H1), cc3 = mkCanvas(W1 * 3, H1 * 3), cm = mkCanvas(MW * 1.5, MH * 1.5);
+      const fr = el("div", "frames");
+      job(cc1, W1, H1, 1, t => { laneBg(W1, H1); drawSubject(en, lookOf(en), animOf(en), [W1 / 2, H1 / 2], t); }, fr);
+      job(cc3, W1, H1, 3, t => { laneBg(W1, H1); drawSubject(en, lookOf(en), animOf(en), [W1 / 2, H1 / 2], t); }, fr);
+      job(cm, MW, MH, 1.5, t => drawMove(en, moveOf(en), t), fr);
+      const cv = el("div", "views live"); cv.append(view("1x", cc1), view("3x", cc3), view("movement", cm));
+      const txt = el("p", "desc"); combos.push({ en, txt });
+      combo.append(el("div", "rowlbl", "Your combination"), cv, txt, fr); box.append(combo);
+      // look
+      const ls = el("div", "dim", `<h4>Look</h4>`); const lg = el("div", "panels");
+      for (const lk of LOOKS[en.id]) {
+        const key = lk ? lk.key : "T", pan = el("div", "panel" + (lk ? "" : " today"), `<div class="ptitle"><span class="key">${lk ? key : "Today"}</span> ${lk ? lk.name : "current look"}</div>`);
+        const c1 = mkCanvas(W1, H1), c3 = mkCanvas(W1 * 3, H1 * 3), frames = el("div", "frames");
+        job(c1, W1, H1, 1, t => { laneBg(W1, H1); drawSubject(en, lk, null, [W1 / 2, H1 / 2], t); }, frames);
+        job(c3, W1, H1, 3, t => { laneBg(W1, H1); drawSubject(en, lk, null, [W1 / 2, H1 / 2], t); }, frames);
+        const vw = el("div", "views live"); vw.append(view("1x", c1), view("3x", c3)); pan.append(vw);
+        if (lk) { const d = lk.r - en.today.r; pan.append(el("div", "meta", `${lk.theme} · radius <b>${lk.r} px</b>${d ? ` (${d > 0 ? "+" : ""}${d})` : ""}`), el("p", "desc", "Palette: " + lk.palette)); }
+        else pan.append(el("div", "meta", "today's drawing, ported from Draw.gd"));
+        pickPanel(en, "look", key, lk ? lk.name : "Today", pan); pan.append(frames); lg.append(pan);
+      }
+      ls.append(lg, notesBox(en, "look", "Look notes")); box.append(ls);
+      // animation
+      const as = el("div", "dim", `<h4>Animation <span class="hint">shown on your selected look (option A until you pick one)</span></h4>`); const ag = el("div", "panels small");
+      for (const an of animSet(en)) {
+        const key = an ? an.key : "T", pan = el("div", "panel" + (an ? "" : " today"), `<div class="ptitle"><span class="key">${an ? key : "Today"}</span> ${an ? an.name : en.today.anim}</div>`);
+        const c2 = mkCanvas(W1 * 2, H1 * 2), frames = el("div", "frames");
+        job(c2, W1, H1, 2, t => { laneBg(W1, H1); drawSubject(en, lookOf(en), an, [W1 / 2, H1 / 2], t); }, frames);
+        const vw = el("div", "views live"); vw.append(view("2x", c2)); pan.append(vw, el("p", "desc", an ? an.desc : "The look's own idle animation, no extra locomotion."));
+        pickPanel(en, "anim", key, "", pan); pan.append(frames); ag.append(pan);
+      }
+      as.append(ag, notesBox(en, "anim", "Animation notes")); box.append(as);
+      // movement
+      const ms = el("div", "dim", `<h4>Movement <span class="hint">path pattern on the lane, same average speed (diagram)</span></h4>`); const mg = el("div", "panels small");
+      for (const mv of MOVES[en.id]) {
+        const key = mv ? mv.key : "T", pan = el("div", "panel" + (mv ? "" : " today"), `<div class="ptitle"><span class="key">${mv ? key : "Today"}</span> ${mv ? mv.name : "Steady"}</div>`);
+        const c = mkCanvas(MW * 1.5, MH * 1.5), frames = el("div", "frames");
+        job(c, MW, MH, 1.5, t => drawMove(en, mv, t), frames);
+        const vw = el("div", "views live"); vw.append(view("diagram", c)); pan.append(vw, el("p", "desc", mv ? mv.desc : "Moves at a steady speed (today)."));
+        pickPanel(en, "move", key, "", pan); pan.append(frames); mg.append(pan);
+      }
+      ms.append(mg, notesBox(en, "move", "Movement notes")); box.append(ms);
+      sec.append(box);
+    }
+    // lineup and summary
+    const lu = el("div", "lineup", `<h3>Lineup: ${batch.role}</h3><p class="desc">The role side by side on the lane, as you have it picked (option A until you pick). Check that each reads as its own unit and that the tiers visibly evolve.</p>`);
+    const LW = Math.max(260, 64 * batch.enemies.length + 4), LH = 64;
+    for (const mode of ["picked"]) {
+      const c1 = mkCanvas(LW, LH), c2 = mkCanvas(LW * 2, LH * 2), frames = el("div", "frames");
+      const fn = t => { laneBg(LW, LH); batch.enemies.forEach((en, i) => drawSubject(en, mode === "today" ? null : lookOf(en), mode === "today" ? null : animOf(en), [32 + i * 64, LH / 2], t)); };
+      job(c1, LW, LH, 1, fn, frames); job(c2, LW, LH, 2, fn, frames);
+      const vw = el("div", "views live"); vw.append(view("1x", c1), view("2x", c2));
+      lu.append(el("div", "rowlbl", mode === "today" ? "Today" : "Your combinations"), vw, frames);
+    }
+    const pk = el("div", "picks"); const ta = document.createElement("textarea"); ta.readOnly = true; ta.rows = 6; ta.setAttribute("aria-label", "Picks summary");
+    const cp = el("button", "solo", "Copy picks and notes");
+    cp.addEventListener("click", () => { try { navigator.clipboard.writeText(ta.value); cp.textContent = "Copied"; } catch (e) { ta.select(); } setTimeout(() => { cp.textContent = "Copy picks and notes"; }, 1500); });
+    const rs = el("button", "solo", "Clear batch picks");
+    rs.addEventListener("click", () => { batch.enemies.forEach(en => { delete state[en.id]; }); save(); notesFields.filter(f => batch.enemies.includes(f.en)).forEach(f => { f.ta.value = ""; }); refresh(); });
+    summaries.push({ batch, ta }); pk.append(ta, cp, rs); lu.append(pk); sec.append(lu); root.append(sec);
+  }
+  refresh();
+}
+
+// ---- Loop, print view, controls ---------------------------------------------------------------------
+let T = 0, playing = true, speed = 1, last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.1, (now - last) / 1000); last = now; if (playing) T += dt * speed;
+  for (const j of jobs) if (j.visible) paint(j.ctx, j.scale, j.w, j.h, j.fn, T);
+  requestAnimationFrame(frame);
+}
+function buildPrint() {
+  const seen = new Set();
+  for (const j of jobs) {
+    if (!seen.has(j.frames)) { j.frames.innerHTML = ""; seen.add(j.frames); }
+    if (j.scale === 1 && j.w === W1) continue; // skip 1x look thumbnails in print
+    const cv = document.createElement("canvas"); cv.width = j.w * j.scale * DPR; cv.height = j.h * j.scale * DPR;
+    paint(cv.getContext("2d"), j.scale, j.w, j.h, j.fn, 1.0);
+    const fg = document.createElement("figure"), im = new Image(); im.src = cv.toDataURL("image/png"); im.alt = "frame"; im.style.width = Math.min(260, j.w * j.scale) + "px"; fg.append(im); j.frames.append(fg);
+  }
+}
+function setPrint(on) { document.body.classList.toggle("print", on); const b = document.getElementById("printview"); b.classList.toggle("on", on); b.setAttribute("aria-pressed", String(on)); b.textContent = on ? "Live view" : "Print view"; if (on) buildPrint(); }
+document.getElementById("play").addEventListener("click", e => { playing = !playing; e.target.textContent = playing ? "Pause" : "Play"; e.target.setAttribute("aria-pressed", String(playing)); });
+for (const b of document.querySelectorAll("#speed button")) b.addEventListener("click", () => { speed = Number(b.dataset.v); document.querySelectorAll("#speed button").forEach(x => x.classList.toggle("on", x === b)); });
+document.getElementById("grey").addEventListener("click", e => { const on = !document.body.classList.contains("grey"); document.body.classList.toggle("grey", on); e.target.classList.toggle("on", on); e.target.setAttribute("aria-pressed", String(on)); });
+document.getElementById("printview").addEventListener("click", () => setPrint(!document.body.classList.contains("print")));
+window.addEventListener("beforeprint", () => buildPrint());
+build(); requestAnimationFrame(frame);
+
+</script>
+</body>
+</html>
