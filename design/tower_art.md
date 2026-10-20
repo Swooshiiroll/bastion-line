@@ -347,10 +347,9 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 14 | Radar Tower | teal | A Dish Mast | B Sweep Beam (follows the dish) |
 | 15 | Cryo Tower | ice blue | B Compressor Block | C Creeping Mist |
 | 16 | Shockwave Generator | amber | B Ring Reactor | B Mushroom Pulse |
-| 17 | Scrapyard | copper | C Magnet Yard | B Sparks and Sale |
+| 17 | Scrapyard | copper | B Production Line (third restart, confirmed 2026-10-19; was C Magnet Yard) | B Melt and Pour (was B Sparks and Sale) |
 | 18 | Magneto Tower | violet | F Stacked Coil Tower | F Drag Trails |
-| 19 | Tractor Tower | `design/tower_art_p2_19_tractor.html` | Base redesign **confirmed** (owner, 2026-10-19: B Armoured Dish, B Focus Beam; base page `design/tower_art_p19_tractor.html`). Second pass **confirmed** (owner, 2026-10-19, "finished"; round 12) |
-| 20 | Augmentation Tower | `design/tower_art_p2_20_augment.html` | Second pass **confirmed** (owner, 2026-10-20, "finished"; round 5) |
+| 19 | Tractor Tower | cyan | B Armoured Dish (redesign, confirmed 2026-10-19; was C Claw Emitter) | B Focus Beam (was C Spiral Lock) |
 | 20 | Augmentation Tower | lavender | F Nanite Hive | D Nanite Swarm |
 
 ## Second pass: per-path and Retrofit looks (owner, 2026-10-16)
@@ -394,7 +393,8 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 16 | Shockwave Generator | `design/tower_art_p2_16_shock.html` | **Confirmed** (owner, 2026-10-19: "Finished") |
 | 17 | Scrapyard | `design/tower_art_p2_17_scrap.html` | Base **confirmed** (owner, 2026-10-19: B Production Line, B Melt and Pour; base page `design/tower_art_p17_scrapyard.html`). New upgrade names confirmed. Second pass **confirmed** (owner, 2026-10-19, "Finished"; round 5) |
 | 18 | Magneto Tower | `design/tower_art_p2_18_magneto.html` | Second pass **confirmed** (owner, 2026-10-19, "finished"; round 3) |
-| 19 | Tractor Tower | `design/tower_art_p2_19_tractor.html` | Second pass round 2: Recharge and two Retrofits picked; pick Pull Distance (new ideas), Grip (now the effect's strength) and the replacement for Twin Emitter |
+| 19 | Tractor Tower | `design/tower_art_p2_19_tractor.html` | Base redesign **confirmed** (owner, 2026-10-19: B Armoured Dish, B Focus Beam; base page `design/tower_art_p19_tractor.html`). Second pass **confirmed** (owner, 2026-10-19, "finished"; round 12) |
+| 20 | Augmentation Tower | `design/tower_art_p2_20_augment.html` | Second pass **confirmed** (owner, 2026-10-20, "finished"; round 5) |
 
 ### Gun Turret (second pass)
 
