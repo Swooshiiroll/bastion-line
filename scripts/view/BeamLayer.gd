@@ -124,7 +124,11 @@ func _trail(z: Dictionary, t: float) -> void:
 
 ## A short-lived storm zone (an Ion Storm secondary).
 func _storm(z: Dictionary, t: float) -> void:
-	var col := Draw.SPEC_ALT.ionstorm
+	var col: Color = Draw.SPEC_ALT.ionstorm
+	if z.get("pierce", false):
+		col = Draw.ACCENT.tesla_tower
+		if z.source != null and z.source.is_rework and z.source.mastered and z.source.primary() == "b":
+			col = Draw.GOLD
 	var r := float(z.r)
 	var k := clampf(float(z.t) / 0.5, 0.0, 1.0)
 	Draw.disc(self, z.pos, r, Color(col, 0.07 * k))

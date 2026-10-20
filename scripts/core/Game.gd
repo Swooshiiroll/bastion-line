@@ -766,7 +766,7 @@ func damage_enemy(e, amount: float, pierce: bool, source, flash := true, bypass_
 	if e.shield > 0.0 and not bypass_shield:
 		var mult := 1.0
 		if source is Tower:
-			mult = (SHIELD_EMP_MULT if source.type == "tesla" else 1.0) * float(source.stats().get("shield_mult", 1.0))
+			mult = (SHIELD_EMP_MULT if source.type == "tesla" or source.type == "tesla_tower" else 1.0) * float(source.stats().get("shield_mult", 1.0))
 		absorbed = minf(e.shield, amt * mult)
 		e.shield -= absorbed
 		e.shield_timer = float(e.def.get("shield_delay", 0.0))
@@ -1067,6 +1067,8 @@ func _update_tower(t, dt: float) -> void:
 			_fire_mortar(t, target, s)
 		"railgun":
 			_fire_railgun(t, target, s)
+		"tesla_tower":
+			_chain_rework(t, target, s)
 		"anti_aircraft_turret":
 			t.pulse_count += 1
 			_fire_projectile(t, target, s)
@@ -1158,6 +1160,49 @@ func _fire_artillery(t, s: Dictionary) -> void:
 		p.hold = float(i) * 0.2
 		projectiles.append(p)
 	_emit({"type": "fire", "tower": t.type, "pos": t.pos, "tier": t.tier, "spec": t.spec, "count": n})
+
+
+## Tesla Tower: an arc at the target that jumps to the nearest unhit enemy in reach, up to `jumps` times, losing `falloff` of its
+## damage with each. It's energy (armour doesn't count). Arc Stun stuns each enemy it hits; Overload doubles it against
+## Disruptors; the Storm Field leaves a crackling zone where the arc started.
+func _chain_rework(t, first, s: Dictionary) -> void:
+	var hit: Array = [first]
+	var points: Array = [t.pos + Vector2(0, -6), first.pos]
+	var dmg: float = t.eff_damage()
+	var cur = first
+	var jump_r := float(s.get("jump_range", 70.0))
+	var keep := 1.0 - float(s.get("falloff", 0.15))
+	var stun := float(s.get("stun_time", 0.0))
+	var overload := bool(s.get("overload", false))
+	var n := 1 + int(s.get("jumps", 3))
+	if float(s.get("storm_dps", 0.0)) > 0.0:
+		storms.append({"pos": first.pos, "r": float(s.storm_radius), "dps": float(s.storm_dps), "t": float(s.get("storm_time", 2.0)), "source": t, "pierce": true})
+		_emit({"type": "storm_zone", "pos": first.pos, "radius": float(s.storm_radius), "time": float(s.get("storm_time", 2.0)), "look": t.look_key()})
+	for k in n:
+		var hit_dmg: float = dmg * (2.0 if overload and cur.role() == "disruptor" else 1.0)
+		var dealt := damage_enemy(cur, hit_dmg, true, t)
+		if stun > 0.0 and cur.alive:
+			cur.apply_stun(stun * _boss_factor(cur))
+			_emit({"type": "stun_hit", "pos": cur.pos})
+		_emit({"type": "hit", "pos": cur.pos, "amount": dealt, "kind": "tesla"})
+		if k == n - 1:
+			break
+		var nxt = null
+		var nd := jump_r * jump_r
+		for e in enemies:
+			if not e.alive or hit.has(e) or e.is_hidden() or (e.flying and not t.hits_air()) or (not e.flying and not t.hits_ground()):
+				continue
+			var d2: float = e.pos.distance_squared_to(cur.pos)
+			if d2 <= nd:
+				nd = d2
+				nxt = e
+		if nxt == null:
+			break
+		hit.append(nxt)
+		points.append(nxt.pos)
+		cur = nxt
+		dmg *= keep
+	_emit({"type": "chain", "points": points, "tier": t.tier, "spec": t.spec, "look": t.look_key()})
 
 
 ## Railgun: a slug along the line through the target out to the end of its range. It passes through every enemy on the line,
@@ -1520,8 +1565,9 @@ func _update_storms(dt: float) -> void:
 	var keep: Array = []
 	for z in storms:
 		z["t"] = float(z.t) - dt
-		for e in _enemies_near(z.pos, float(z.r)):
-			damage_enemy(e, float(z.dps) * dt, false, z.source, false)
+		var energy: bool = bool(z.get("pierce", false))
+		for e in _enemies_near(z.pos, float(z.r), true, true, energy):
+			damage_enemy(e, float(z.dps) * dt, energy, z.source, false)
 		if z.t > 0.0:
 			keep.append(z)
 	storms = keep

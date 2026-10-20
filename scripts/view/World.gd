@@ -17,6 +17,7 @@ const FxLayer = preload("res://scripts/view/FxLayer.gd")
 const Overlay = preload("res://scripts/view/Overlay.gd")
 const GunTurretArt = preload("res://scripts/view/towers/GunTurretArt.gd")
 const RailgunArt = preload("res://scripts/view/towers/RailgunArt.gd")
+const TeslaTowerArt = preload("res://scripts/view/towers/TeslaTowerArt.gd")
 const RocketSalvoArt = preload("res://scripts/view/towers/RocketSalvoArt.gd")
 const AntiAircraftArt = preload("res://scripts/view/towers/AntiAircraftArt.gd")
 const ArtilleryCannonArt = preload("res://scripts/view/towers/ArtilleryCannonArt.gd")
@@ -308,9 +309,21 @@ func _visual(ev: Dictionary) -> void:
 				_salvo_hit(ev)
 		"chain":
 			var ccol := Draw.ACCENT.tesla if str(ev.get("spec", "")) != "overload" else Draw.SPEC_ALT.overload
-			fx.bolt(ev.points, ccol, 2.0 + float(ev.tier) * 0.5, 0.2)
+			var cwidth := 2.0 + float(ev.tier) * 0.5
+			var tl: Dictionary = {}
+			if str(ev.get("look", "")) != "":
+				# The Tesla Tower's arc (confirmed art): thicker with each Power step, yellow EMP crackles from Overload, a halo
+				# round every enemy it stuns, gold at the mastery.
+				tl = TeslaTowerArt.levels(str(ev.look))
+				ccol = TeslaTowerArt.arc_color(tl, Draw.ACCENT.tesla_tower)
+				cwidth = 3.2 + 0.3 * float(tl.P)
+			fx.bolt(ev.points, ccol, cwidth, 0.2)
 			for p in ev.points:
 				fx.flash(p, 7.0, ccol, 0.12)
+				if not tl.is_empty() and tl.P >= 2:
+					fx.burst(p, TeslaTowerArt.YEL, 3, 40.0, 1.2, 0.2)
+				if not tl.is_empty() and tl.P >= 3:
+					fx.ring(p, 4.0, 12.0, ccol, 0.3, 1.4)
 		"tracer":
 			var rcol := Draw.SPEC_ALT.lance if str(ev.get("spec", "")) == "lance" else Draw.ACCENT.sniper
 			var tw := 3.0 + maxf(0.0, float(ev.get("width", 10.0)) - 10.0) * 0.45
@@ -371,8 +384,13 @@ func _visual(ev: Dictionary) -> void:
 		"storm_tick":
 			fx.ring(ev.pos, float(ev.radius) * 0.85, float(ev.radius), Color(Draw.SPEC_ALT.ionstorm, 0.5), 0.25, 1.4)
 		"storm_zone":
-			fx.flash(ev.pos, 18.0, Draw.SPEC_ALT.ionstorm, 0.15)
-			fx.ring(ev.pos, 6.0, float(ev.radius), Draw.SPEC_ALT.ionstorm, 0.3, 2.0)
+			var scol: Color = Draw.SPEC_ALT.ionstorm
+			if str(ev.get("look", "")) != "":
+				scol = Draw.ACCENT.tesla_tower
+				if TeslaTowerArt.levels(str(ev.look)).C >= 5:
+					scol = TeslaTowerArt.GOLD
+			fx.flash(ev.pos, 18.0, scol, 0.15)
+			fx.ring(ev.pos, 6.0, float(ev.radius), scol, 0.3, 2.0)
 		"income":
 			for p in ev.paid:
 				if p[0].x < 0.0:

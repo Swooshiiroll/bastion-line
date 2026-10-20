@@ -9,6 +9,7 @@ so write for players.
 ### Added
 - **Tower rework, first piece (in progress, #59):** the new Gun Turret joins the shop beside today's towers. Its three paths (Power, Range/Visibility, Multi-Target) open from the start, and its Retrofit is a choice of three (press Y, then 1-3) that is locked once fitted. It crits, pierces armour, and can stun or ignite; the Multi-Target path adds flank guns that turn on their own. Every enemy now has a role, and every hit is tagged physical or energy, ready for the rest of the rework.
 - **Tower rework, batch 1 (in progress, #59):** the new Mortar Tower, Rocket Salvo, Laser Tower and Anti-Aircraft Turret join the shop beside today’s towers, each with a Retrofit of three and three open paths. Mortar shells ignore armour and scatter cluster bomblets; the Rocket Salvo sends each rocket at a different enemy; the Laser ramps on every beam separately and melts armour for good; the Anti-Aircraft Turret fires flak that bursts on every flyer nearby.
+- **Tower rework, batch 2 (in progress, #59):** the new Artillery Cannon, Railgun and Tesla Tower join the shop. Click the track to aim the Artillery Cannon and pick its shell from the panel; the Railgun pierces everything on its line, shatters armour and leaves a burning ion trail; the Tesla Tower chains arcs that stun, overload Disruptors and leave storms.
 
 ## [3.6.0] - 2026-10-04
 

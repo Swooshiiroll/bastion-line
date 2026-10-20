@@ -3480,3 +3480,91 @@ func test_rework_railgun() -> void:
 	ic.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
 	buy_steps(g, ic, "c", 5)
 	check(ic.mastered and near(ic.stats().shatter, 6.0) and near(ic.stats().falloff, 0.0) and near(ic.stats().trail_dps, 50.0), "Ion Cannon: shatter 6, 50/s, no falloff")
+
+
+func test_rework_tesla_tower() -> void:
+	var g = new_game()
+	g.gold = 90000
+	g.emit_events = true
+	var t = g.place_tower("tesla_tower", spot(g, "tesla_tower", 0))
+	check(t != null and t.is_rework and g.tower_cost("tesla_tower") == 250, "the Tesla Tower builds for 250")
+	var s: Dictionary = t.stats()
+	check(near(s.damage, 32.0) and near(s.range, 140.0) and near(s.rate, 0.8) and int(s.jumps) == 3 and near(s.falloff, 0.15), "stock: 32 damage, 140 range, 0.8 arcs/s, 3 jumps, 15% lost per jump")
+	check(t.hits_air() and t.hits_ground() and t.def.damage_kind == "energy", "an energy tower that hits air and ground")
+	check(g.buy_retrofit(t, 0) and near(t.stats().damage, 36.0) and near(t.stats().range, 155.0), "Bigger Disk: +4 damage, +15 range")
+	var gr = g.place_tower("tesla_tower", spot(g, "tesla_tower", 20))
+	check(g.buy_retrofit(gr, 1) and int(gr.stats().jumps) == 4, "Grounding Rods: +1 jump")
+	var ic = g.place_tower("tesla_tower", spot(g, "tesla_tower", 40))
+	check(g.buy_retrofit(ic, 2) and near(ic.stats().rate, 0.909), "Insulated Coils: an arc every 1.1 s")
+	# The chain: four enemies in a row, each hit for less; armour doesn't count.
+	g.enemies.clear()
+	var es: Array = []
+	for i in 5:
+		var e = put(g, "brute", 100.0 + float(i) * 2.0, 0, 500.0)
+		es.append(e)
+	var shooter = g.place_tower("tesla_tower", spot(g, "tesla_tower", 60))
+	shooter.pos = es[0].pos + Vector2(40, 0)
+	for e in es:
+		e.pos = es[0].pos + Vector2(0, 30.0 * float(es.find(e)))
+	var before: Array = es.map(func(e): return e.hp)
+	g._chain_rework(shooter, es[0], shooter.stats())
+	var lost: Array = []
+	for i in 5:
+		lost.append(before[i] - es[i].hp)
+	check(near(lost[0], 32.0, 0.1) and near(lost[1], 27.2, 0.1) and near(lost[2], 23.12, 0.1) and near(lost[3], 19.65, 0.1) and near(lost[4], 0.0), "four enemies hit, each 15%% weaker (%s)" % str(lost.map(func(v): return snappedf(v, 0.1))))
+	# A lone arc with nothing in reach just hits once.
+	g.enemies.clear()
+	var lone = put(g, "grunt", 100.0, 0, 50.0)
+	var hp0: float = lone.hp
+	shooter.pos = lone.pos + Vector2(40, 0)
+	g._chain_rework(shooter, lone, shooter.stats())
+	check(near(hp0 - lone.hp, 32.0, 0.1), "an isolated enemy takes one hit")
+	# Power path: stun, overload, less falloff.
+	var pw = g.place_tower("tesla_tower", spot(g, "tesla_tower", 80))
+	pw.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, pw, "a", 3)
+	check(near(pw.stats().damage, 48.0) and near(pw.stats().stun_time, 0.3) and pw.stats().overload, "Arc Stun: 48 damage, 0.3 s stun, with Overload")
+	g.enemies.clear()
+	var st = put(g, "grunt", 100.0, 0, 500.0)
+	pw.pos = st.pos + Vector2(40, 0)
+	g._chain_rework(pw, st, pw.stats())
+	check(st.stun_timer > 0.25, "an arc stuns what it hits (%.2f s)" % st.stun_timer)
+	var jam = put(g, "jammer", 100.0, 0, 500.0)
+	jam.pos = st.pos + Vector2(0, 200)
+	var plain = put(g, "jammer", 100.0, 0, 500.0)
+	plain.pos = jam.pos + Vector2(400, 0)
+	var jhp: float = jam.hp
+	g._chain_rework(pw, jam, pw.stats())
+	var ohp: float = plain.hp
+	var other = g.place_tower("tesla_tower", spot(g, "tesla_tower", 100))
+	g._chain_rework(other, plain, other.stats())
+	check(near(jhp - jam.hp, 96.0, 0.5) and near(ohp - plain.hp, 32.0, 0.5), "Overload: double damage to a Disruptor (%.0f vs %.0f)" % [jhp - jam.hp, ohp - plain.hp])
+	buy_steps(g, pw, "a", 1)
+	check(pw.mastered == false and near(pw.stats().falloff, 0.08), "Clean Conduction: 8% lost per jump")
+	buy_steps(g, pw, "a", 1)
+	check(pw.mastered and near(pw.stats().damage, 60.0) and near(pw.stats().falloff, 0.03) and near(pw.stats().stun_time, 0.5), "Lightning Rod: 60 damage, 3% lost, 0.5 s stun")
+	# Chaining path: jumps and storms; the storm hurts a cloaked enemy standing in it.
+	var ch = g.place_tower("tesla_tower", spot(g, "tesla_tower", 120))
+	ch.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, ch, "b", 3)
+	check(int(ch.stats().jumps) == 5 and near(ch.stats().storm_radius, 25.0) and near(ch.stats().storm_dps, 10.0), "Storm Field: 5 jumps, a 25 px storm of 10/s")
+	buy_steps(g, ch, "b", 2)
+	check(ch.mastered and int(ch.stats().jumps) == 7 and near(ch.stats().storm_dps, 14.0) and near(ch.stats().storm_radius, 30.0) and near(ch.stats().range, 180.0), "Tempest: 7 jumps, storms of 14/s and 30 px")
+	g.enemies.clear()
+	g.storms.clear()
+	var foe = put(g, "grunt", 100.0, 0, 5000.0)
+	var ghost = put(g, "grunt", 100.0, 0, 5000.0)
+	ghost.pos = foe.pos + Vector2(10, 0)
+	ghost.cloaked = true
+	ch.pos = foe.pos + Vector2(40, 0)
+	g._chain_rework(ch, foe, ch.stats())
+	check(g.storms.size() == 1, "an arc leaves a storm where it starts")
+	var gh: float = ghost.hp
+	for i in 20:
+		g._update_storms(0.05)
+	check(ghost.hp < gh, "the storm burns a cloaked enemy inside it (%.1f)" % (gh - ghost.hp))
+	# Speed path.
+	var sp = g.place_tower("tesla_tower", spot(g, "tesla_tower", 140))
+	sp.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, sp, "c", 5)
+	check(sp.mastered and near(sp.stats().rate, 2.1), "Continuous Discharge: 2.1 arcs/s")
