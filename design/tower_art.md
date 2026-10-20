@@ -391,7 +391,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 15 | Cryo Tower | `design/tower_art_p2_15_cryo.html` | **Confirmed** (owner, 2026-10-19: "Finished"; Deep Cold C Frost Collar) |
 | 16 | Shockwave Generator | `design/tower_art_p2_16_shock.html` | **Confirmed** (owner, 2026-10-19: "Finished") |
-| 17 | Scrapyard | `design/tower_art_p2_17_scrap.html` | Base **confirmed** (owner, 2026-10-19: B Production Line, B Melt and Pour; base page `design/tower_art_p17_scrapyard.html`). New upgrade names confirmed. Second pass round 3: everything picked except the Laser Cutter (was Sorting Line); pick its option |
+| 17 | Scrapyard | `design/tower_art_p2_17_scrap.html` | Base **confirmed** (owner, 2026-10-19: B Production Line, B Melt and Pour; base page `design/tower_art_p17_scrapyard.html`). New upgrade names confirmed. Second pass round 4: every stage picked (Laser Cutter A, the Laser Gantry); waiting for "Scrapyard finished" |
 
 ### Gun Turret (second pass)
 
@@ -1230,8 +1230,9 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
   - a laser gantry whose head sweeps across, with a glowing cut line and sparks;
   - a laser cutting table beside the belt, where a head traces a glowing cut through a plate;
   - a laser turret on a post, tracking the scrap riding up with a red beam.
+- **Round 4 (owner's paste, no notes):** the Laser Cutter is the **Laser Gantry** (A). Every stage is now picked.
 - **"Move the additional crates to the left of the preexisting boxes":** Surplus's two crates now stand to the left of the crate stack (one design, preselected). The tow truck moved down 2 units to clear them.
 
 ## Open questions
 
-1. **Second pass, Scrapyard** (tower 17, round 3): pick the Laser Cutter option. Everything else is picked. Then the new upgrade names, the second pass, and towers 18-20 (next: Magneto Tower).
+1. **Second pass, Scrapyard** (tower 17, round 4): every stage is picked (the Laser Cutter is the Laser Gantry). Confirm with "Scrapyard finished". Then towers 18-20 (next: Magneto Tower). Then the new upgrade names, the second pass, and towers 18-20 (next: Magneto Tower).
