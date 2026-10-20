@@ -4,6 +4,7 @@ extends Node2D
 
 const Draw = preload("res://scripts/view/Draw.gd")
 const Grid = preload("res://scripts/core/Grid.gd")
+const GunTurretArt = preload("res://scripts/view/towers/GunTurretArt.gd")
 
 var world
 ## Microseconds spent per section of _draw, summed; tools/PerfProbe.gd reads and resets it.
@@ -175,6 +176,8 @@ func _projectile(p) -> void:
 			draw_line(p.pos - d * 5.0, p.pos + d * 3.5, Draw.OUTLINE, 3.6, true)
 			draw_line(p.pos - d * 5.0, p.pos + d * 3.5, Color(0.85, 0.88, 0.92), 2.4, true)
 			Draw.disc(self, p.pos + d * 4.2, 1.5, Color(1.0, 0.3, 0.25))
+		"gun_turret":
+			_gun_round(p)
 		_:
 			var d: Vector2 = (p.target_pos - p.pos).normalized()
 			if d == Vector2.ZERO:
@@ -185,6 +188,40 @@ func _projectile(p) -> void:
 			draw_line(p.pos - d * 8.0, p.pos, col, 1.8, true)
 			Draw.disc(self, p.pos, 2.4, Color(col, 0.6))
 			Draw.disc(self, p.pos, 1.5, Color(1, 1, 1))
+
+
+## The Gun Turret's round (the confirmed art): a tracer (long from Range 2, orange with Incendiary Rounds, a gold streak at the
+## Power mastery) and a bullet that hardens with each Power step: brass, a steel tip, a dark AP round with a yellow band, a
+## white-hot tungsten core, and at the mastery a slim sabot dart.
+func _gun_round(p) -> void:
+	var lv := GunTurretArt.levels(str(p.look))
+	var d: Vector2 = (p.target_pos - p.pos).normalized()
+	if d == Vector2.ZERO:
+		d = Vector2.RIGHT
+	var col: Color = Color(1.0, 0.55, 0.2) if lv.r == 2 else Draw.ACCENT.gun_turret
+	if p.crit:
+		col = Draw.GOLD
+	var back: float = clampf(p.traveled, 0.0, 6.0 if lv.R < 2 else 36.0)
+	draw_line(p.pos - d * back, p.pos, Color(col, 0.3), 3.4, true)
+	draw_line(p.pos - d * back, p.pos, Color(col, 0.95), 1.4, true)
+	draw_line(p.pos - d * back * 0.9, p.pos, Color(1, 1, 1, 0.7), 0.5, true)
+	if lv.P >= 5:
+		draw_line(p.pos - d * minf(back, 12.0), p.pos, Color(Draw.GOLD, 0.8), 1.1, true)
+	if lv.P < 1:
+		return
+	var a := d.angle()
+	var o := d.orthogonal()
+	if lv.P >= 5:
+		Draw.poly(self, PackedVector2Array([p.pos + d * 3.0, p.pos - d * 2.6 + o * 0.35, p.pos - d * 2.6 - o * 0.35]), Color(0.88, 0.89, 0.92))
+		return
+	var body := Color(0.16, 0.15, 0.15) if lv.P >= 3 else Color(0.86, 0.68, 0.32)
+	Draw.solid(self, p.pos, PackedVector2Array([Vector2(2.2, 0), Vector2(1.3, 0.6), Vector2(-1.8, 0.6), Vector2(-1.8, -0.6), Vector2(1.3, -0.6)]), body, a, 1.0, 0.6)
+	if lv.P >= 2:
+		Draw.poly(self, PackedVector2Array([p.pos + d * 2.2, p.pos + d * 1.1 + o * 0.6, p.pos + d * 1.1 - o * 0.6]), Color(0.66, 0.69, 0.74))
+	if lv.P >= 3:
+		draw_line(p.pos - d * 0.9 + o * 0.6, p.pos - d * 0.9 - o * 0.6, Color(1, 0.85, 0.2), 0.7, true)
+	if lv.P >= 4:
+		Draw.glow_dot(self, p.pos - d * 1.8, 0.45, Color(1, 0.95, 0.85))
 
 
 func _hp_bar(e) -> void:

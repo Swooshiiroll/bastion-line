@@ -914,6 +914,14 @@ func _card(key: String) -> void:
 	await get_tree().process_frame
 
 
+## Pixels from a tile to the nearest lane tile.
+func _lane_gap(g, c: Vector2i) -> float:
+	var best := 1e9
+	for pc in g.grid.path_cells:
+		best = minf(best, Vector2(c).distance_to(Vector2(pc)))
+	return best
+
+
 ## The reworked towers (issue #59): build the Gun Turret from the shop, read its panel, fit a Retrofit by click and by key.
 func _rework_checks(g) -> void:
 	var screen = app.current
@@ -928,6 +936,8 @@ func _rework_checks(g) -> void:
 		for x in 12:
 			if g.placement_error("gun_turret", Vector2i(x + 12, y)) == "":
 				free.append(Vector2i(x + 12, y))
+	# The tile nearest the lane, so its enemy test below has something in range.
+	free.sort_custom(func(p, q): return _lane_gap(g, p) < _lane_gap(g, q))
 	var cell: Vector2i = free[0]
 	var cell2: Vector2i = free[free.size() / 2]
 	await _click(screen.world.base_pos + Vector2((cell.x + 0.5) * 48.0, (cell.y + 0.5) * 48.0))
@@ -964,6 +974,30 @@ func _rework_checks(g) -> void:
 	fails += _expect(u.retrofit == 2 and not hud.is_open("retrofit"), "key 3 fits the third option")
 	await _wait(0.3)
 	await _shot("rework_c_gun_fitted")
+	# A built-up Gun Turret under fire: its rounds, tracers and hit effects draw without errors.
+	g.gold += 20000
+	for k in 4:
+		g.upgrade_tower(t, "a")
+	g.upgrade_tower(t, "b")
+	g.upgrade_tower(t, "b")
+	var foe = null
+	for dist in range(0, 3000, 30):
+		var cand = g.spawn_enemy("brute", 0, float(dist), 60.0, -1)
+		if cand.pos.distance_to(t.pos) < 100.0:
+			foe = cand
+			break
+	if foe != null:
+		g.enemies.append(foe)
+		g.state = Game.State.WAVE
+		await _wait(1.2)
+		await _shot("rework_d_gun_firing")
+		fails += _expect(t.damage_dealt > 0.0, "the Gun Turret fires at an enemy in range")
+		foe.alive = false
+		g.enemies.clear()
+		g.projectiles.clear()
+		g.state = Game.State.BUILD
+	else:
+		fails += _expect(false, "an enemy could be put in the Gun Turret's range")
 	screen.world.selected_tower = null
 	await _wait(0.2)
 	if not hud.is_open("shop"):

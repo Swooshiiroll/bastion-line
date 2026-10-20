@@ -24,3 +24,5 @@ var burn_time := 0.0
 var stun := 0.0
 ## A critical hit: its damage is already multiplied; the hit effect marks it.
 var crit := false
+## The firing tower's look key (a reworked tower), so the round is drawn to match: its Power step, its Retrofit.
+var look := ""

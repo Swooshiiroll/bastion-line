@@ -15,6 +15,7 @@ const EntityLayer = preload("res://scripts/view/EntityLayer.gd")
 const BeamLayer = preload("res://scripts/view/BeamLayer.gd")
 const FxLayer = preload("res://scripts/view/FxLayer.gd")
 const Overlay = preload("res://scripts/view/Overlay.gd")
+const GunTurretArt = preload("res://scripts/view/towers/GunTurretArt.gd")
 
 const MAX_STEPS_PER_FRAME := 40
 const SMOKE := Color(0.35, 0.36, 0.4, 0.7)
@@ -226,6 +227,16 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 
+## The Gun Turret's hit: a crit bursts gold; Incendiary Rounds leave flames.
+func _gun_hit(ev: Dictionary) -> void:
+	var lv := GunTurretArt.levels(str(ev.look))
+	if ev.get("crit", false):
+		fx.flash(ev.pos, 14.0, Draw.GOLD, 0.16)
+		fx.burst(ev.pos, Draw.GOLD, 9, 110.0, 1.8, 0.35)
+	if lv.r == 2:
+		fx.burst(ev.pos + Vector2(0, -2), Color(1.0, 0.55, 0.2), 5, 30.0, 2.0, 0.4)
+
+
 func _visual(ev: Dictionary) -> void:
 	var acc := Draw.accent(str(ev.get("tower", "")), str(ev.get("spec", "")))
 	match ev.type:
@@ -241,6 +252,12 @@ func _visual(ev: Dictionary) -> void:
 					fx.flash(ev.pos, 6.0, acc, 0.06)
 		"arrow_hit":
 			fx.burst(ev.pos, Color(1.0, 0.35, 0.35) if ev.get("shred", false) else Draw.ACCENT.arrow, 4, 60.0, 1.6, 0.25)
+			if ev.get("look", "") != "":
+				_gun_hit(ev)
+		"stun_hit":
+			# Shock Rounds: a stunning hit crackles.
+			fx.burst(ev.pos, Color(0.6, 0.85, 1.0), 7, 90.0, 1.4, 0.3)
+			fx.flash(ev.pos, 8.0, Color(0.7, 0.9, 1.0), 0.1)
 		"splash":
 			var col := Color(0.55, 1.0, 0.3) if ev.get("burn", false) else Color(1.0, 0.55, 0.2)
 			fx.ring(ev.pos, 6.0, ev.radius, col, 0.35, 3.0, true)

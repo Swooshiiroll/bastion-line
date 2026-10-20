@@ -1543,6 +1543,8 @@ func _fire_projectile(t, target, s: Dictionary, dmg_mult := 1.0) -> void:
 	if float(s.get("crit", 0.0)) > 0.0 and _roll(float(s.crit)):
 		p.damage *= CRIT_MULT
 		p.crit = true
+	if t.is_rework:
+		p.look = t.look_key()
 	p.splash = float(s.get("splash", 0.0))
 	p.shred = float(s.get("shred", 0.0))
 	p.shred_max = float(s.get("shred_max", 0.0))
@@ -1765,7 +1767,7 @@ func _projectile_hit(p) -> void:
 				damage_enemy(p.target, p.damage, false, p.source)
 				if p.source != null and p.source.is_rework:
 					_rework_hit_effects(p, s)
-				_emit({"type": "arrow_hit", "pos": p.pos, "shred": p.shred > 0.0, "crit": p.crit})
+				_emit({"type": "arrow_hit", "pos": p.pos, "shred": p.shred > 0.0, "crit": p.crit, "look": p.look})
 
 
 
@@ -1777,6 +1779,7 @@ func _rework_hit_effects(p, s: Dictionary) -> void:
 	var chance := float(s.get("stun_chance", 0.0))
 	if chance > 0.0 and _roll(chance):
 		e.apply_stun(float(s.get("stun_time", 0.3)) * _boss_factor(e))
+		_emit({"type": "stun_hit", "pos": e.pos})
 	var ignite := float(s.get("ignite_dps", 0.0))
 	if ignite > 0.0:
 		e.apply_burn(ignite, float(s.get("ignite_time", 2.0)))
