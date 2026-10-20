@@ -390,7 +390,7 @@ func _tower_card(t) -> void:
 		row.add_child(tb)
 	if screen.has_priority(t):
 		var pb := UiKit.button("Priority: %s  [G]" % Tower.PRIORITY_NAMES[t.priority], Callable(screen, "cycle_priority"), Vector2(0, 34))
-		pb.tooltip_text = "Prefer flyers or ground enemies when both are in range (it still shoots the other kind when that's all there is)"
+		pb.tooltip_text = "Prefer flyers, ground enemies or Support enemies (it still shoots the rest when none of those are in range)"
 		row.add_child(pb)
 	_sell_btn = UiKit.button("Sell +%d  [X]" % g.sell_value(t), Callable(screen, "sell_selected"), Vector2(0, 34))
 	row.add_child(_sell_btn)

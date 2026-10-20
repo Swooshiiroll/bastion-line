@@ -18,8 +18,8 @@ const Rework = preload("res://data/rework_trees.gd")
 
 enum Mode { FIRST, LAST, STRONG, CLOSE }
 const MODE_NAMES := ["First", "Last", "Strongest", "Closest"]
-## Which kind of enemy a tower that hits both air and ground prefers (it falls back to the other).
-const PRIORITY_NAMES := ["Any", "Air", "Ground"]
+## Which enemies a tower prefers (it falls back to the rest): Air and Ground for towers that hit both, Support for the Support role.
+const PRIORITY_NAMES := ["Any", "Air", "Ground", "Support"]
 const BRANCHES := ["a", "b", "c"]
 const BRANCH_STEPS := 4
 const SECONDARY_CAP := 2

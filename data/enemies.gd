@@ -34,7 +34,7 @@ const ENEMIES := {
 	},
 	"bat": {
 		"role": "rusher", "tier": 3,
-		"name": "Strike Drone", "hp": 64.0, "speed": 82.0, "armor": 0.0, "bounty": 5, "lives": 1, "radius": 9.0, "flying": true,
+		"name": "Strike Drone", "hp": 100.0, "speed": 82.0, "armor": 0.0, "bounty": 5, "lives": 1, "radius": 9.0, "flying": true,
 		"blurb": "Quad-rotor strike drone. Flies straight at the core, ignoring the lane. Mortars can't hit it.",
 	},
 	"shaman": {
@@ -69,12 +69,12 @@ const ENEMIES := {
 	},
 	"locust": {
 		"role": "swarm", "tier": 2,
-		"name": "Locust", "hp": 18.0, "speed": 115.0, "armor": 0.0, "bounty": 1, "lives": 1, "radius": 5.0, "flying": true,
+		"name": "Locust", "hp": 15.0, "speed": 115.0, "armor": 0.0, "bounty": 1, "lives": 1, "radius": 5.0, "flying": true,
 		"blurb": "Tiny winged micro-drones that fly straight at the core in dense swarms. Flak shreds them.",
 	},
 	"gunship": {
 		"role": "tank", "tier": 3,
-		"name": "Gunship", "hp": 420.0, "speed": 42.0, "armor": 5.0, "bounty": 18, "lives": 3, "radius": 16.0, "flying": true,
+		"name": "Gunship", "hp": 600.0, "speed": 42.0, "armor": 5.0, "bounty": 18, "lives": 3, "radius": 16.0, "flying": true,
 		"blurb": "Armored heavy flyer: every hit loses 5 damage. Railguns, lasers and Hellfire missiles punch through.",
 	},
 	"burrower": {

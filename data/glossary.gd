@@ -89,7 +89,7 @@ const ENTRIES := {
 	"mastery": {"title": "Masteries", "category": "rules", "see": ["research"],
 		"text": "A branch's Mastery needs that tower's Mastery research in the Research Lab, which in turn needs the rest of that tower's research tree. One Mastery research unlocks all three of the tower's masteries."},
 	"targeting": {"title": "Targeting and priority", "category": "rules", "see": [],
-		"text": "T cycles a tower's target: First (furthest along), Last, Strongest or Closest. Towers that hit both air and ground can also prefer one with G (Any, Air, Ground); they still shoot the other kind when it's all that's in range."},
+		"text": "T cycles a tower's target: First (furthest along), Last, Strongest or Closest. Strongest goes by an enemy's strength (its speed, armour and health; every boss is stronger than any other enemy), then by its health left, then by how far along it is. G sets a priority: Any, Support (Support enemies first: Repair Bots, Rally Beacons, Bulwarks, Mender Hulks), and for towers that hit both air and ground, Air or Ground. Among the enemies it prefers, a tower still uses its target mode, and it shoots the rest when none of those are in range."},
 	"footprint": {"title": "Big towers", "category": "rules", "see": ["high_ground", "power_node"],
 		"text": "The Scrapyard and Drone Bay take a 2x2 block of tiles. The build preview centres the block on the cursor, and the tower gets a high-ground or power-node bonus if any of its tiles has one."},
 	"selling": {"title": "Selling", "category": "rules", "see": ["economy"],

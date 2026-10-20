@@ -25,6 +25,8 @@ var speed := 0.0
 var armor := 0.0
 var flying := false
 var boss := false
+## Its strength rank score (Enemies.rank_score): what Strongest targeting compares first.
+var rank := 0.0
 ## The kind ("physical" or "energy") of the last hit it took.
 var last_hit_kind := ""
 var radius := 10.0
@@ -132,6 +134,7 @@ func setup(enemy_type: String, route: Curve2D, hp_mult: float, wave: int, path_i
 	armor = float(def.get("armor", 0.0))
 	flying = bool(def.get("flying", false))
 	boss = bool(def.get("boss", false))
+	rank = Enemies.rank_score(enemy_type)
 	radius = float(def.radius)
 	bounty = int(def.bounty)
 	lives_cost = int(def.lives)

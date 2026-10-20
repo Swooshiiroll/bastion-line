@@ -519,6 +519,9 @@ func cycle_mode(t) -> void:
 ## Any -> Air -> Ground. Only matters for towers that hit both.
 func cycle_priority(t) -> void:
 	t.priority = (t.priority + 1) % Tower.PRIORITY_NAMES.size()
+	# Air and Ground only mean something to a tower that hits both.
+	while (t.priority == 1 or t.priority == 2) and not (t.hits_air() and t.hits_ground()):
+		t.priority = (t.priority + 1) % Tower.PRIORITY_NAMES.size()
 
 
 func start_wave() -> bool:
@@ -844,23 +847,48 @@ func _incoming(e) -> float:
 func pick_target(t, exclude: Array = []):
 	var air: bool = t.hits_air()
 	var ground: bool = t.hits_ground()
-	# A tower that hits both can prefer one kind; with none of that kind in range it takes the other.
-	if air and ground and t.priority != 0:
-		var want_air: bool = t.priority == 1
-		var pick = _pick_target(t, exclude, want_air, not want_air)
+	# A tower can prefer flyers or walkers (if it hits both) or Support enemies; with none of those in range it takes the rest.
+	if t.priority == 3 or (air and ground and t.priority != 0):
+		var pick = _pick_target(t, exclude, air, ground, true)
 		if pick != null:
 			return pick
 	return _pick_target(t, exclude, air, ground)
 
 
-func _pick_target(t, exclude: Array, air: bool, ground: bool):
+## Whether `e` is what the tower's priority asks for: Air flyers, Ground walkers, Support the Support role (Any takes all).
+func _prefers(t, e) -> bool:
+	match t.priority:
+		1:
+			return e.flying
+		2:
+			return not e.flying
+		3:
+			return e.role() == "support"
+	return true
+
+
+## Sorts `cands` best first: the tower's priority first, then its targeting mode (distances measured from `from`).
+func _rank_targets(t, cands: Array, from: Vector2) -> void:
+	var scores := {}
+	for e in cands:
+		scores[e] = _score(t, e, from.distance_squared_to(e.pos))
+	var pref := {}
+	if t.priority != 0:
+		for e in cands:
+			pref[e] = _prefers(t, e)
+	cands.sort_custom(func(a, b): return pref.get(a, false) and not pref.get(b, false) or (pref.get(a, false) == pref.get(b, false) and scores[a] > scores[b]))
+
+
+func _pick_target(t, exclude: Array, air: bool, ground: bool, preferred := false):
 	var r: float = t.get_range()
 	var r2 := r * r
 	var best = null
-	var best_score := -INF
+	var best_score := Vector3(-INF, -INF, -INF)
 	var swivel: bool = t.is_rework and bool(t.stats().get("swivel", false))
 	for e in enemies:
 		if not e.alive or (e.flying and not air) or (not e.flying and not ground) or (e.is_hidden() and not _burrow_visible(t, e)) or exclude.has(e):
+			continue
+		if preferred and not _prefers(t, e):
 			continue
 		var d2: float = t.pos.distance_squared_to(e.pos)
 		if d2 > r2:
@@ -874,14 +902,21 @@ func _pick_target(t, exclude: Array, air: bool, ground: bool):
 	return best
 
 
-func _score(t, e, d2: float) -> float:
+## How good a target `e` is for the tower's mode (higher is better; Vector3s compare x, then y, then z). Strongest goes by
+## strength rank, then current HP, then progress.
+func _score(t, e, d2: float) -> Vector3:
 	if t.mode == Tower.Mode.FIRST:
-		return e.progress()
+		return Vector3(e.progress(), 0.0, 0.0)
 	if t.mode == Tower.Mode.LAST:
-		return -e.progress()
+		return Vector3(-e.progress(), 0.0, 0.0)
 	if t.mode == Tower.Mode.STRONG:
-		return e.hp
-	return -d2
+		return strength_key(e)
+	return Vector3(-d2, 0.0, 0.0)
+
+
+## Orders enemies for Strongest: strength rank (bosses above all), then current HP, then progress along the route.
+static func strength_key(e) -> Vector3:
+	return Vector3(e.rank, e.hp, e.progress())
 
 
 func _update_enemy(e, dt: float) -> void:
@@ -1495,10 +1530,7 @@ func _spray(t, s: Dictionary) -> void:
 		t.target = null
 		t.cooldown = RETARGET_DELAY
 		return
-	var scores := {}
-	for e in cands:
-		scores[e] = _score(t, e, t.pos.distance_squared_to(e.pos))
-	cands.sort_custom(func(a, b): return scores[a] > scores[b])
+	_rank_targets(t, cands, t.pos)
 	t.target = cands[0]
 	t.cooldown = 1.0 / t.eff_rate()
 	t.fire_flash = 0.15
@@ -1644,14 +1676,9 @@ func _cas_targets(t, radius: float, plane: Vector2) -> Array:
 	for e in enemies:
 		if e.alive and not e.is_hidden() and e.pos.distance_squared_to(t.aim_point) <= radius * radius:
 			out.append(e)
-	if t.priority == 1 and out.any(func(e): return e.flying):
-		out = out.filter(func(e): return e.flying)
-	elif t.priority == 2 and out.any(func(e): return not e.flying):
-		out = out.filter(func(e): return not e.flying)
-	var scores := {}
-	for e in out:
-		scores[e] = _score(t, e, plane.distance_squared_to(e.pos))
-	out.sort_custom(func(a, b): return scores[a] > scores[b])
+	if t.priority != 0 and out.any(func(e): return _prefers(t, e)):
+		out = out.filter(func(e): return _prefers(t, e))
+	_rank_targets(t, out, plane)
 	return out
 
 
@@ -2316,7 +2343,7 @@ func _drone_target(t, s: Dictionary, bomber: bool):
 			score += 10.0
 		if interceptor and e.flying:
 			score += 5.0
-		if t.priority != 0 and e.flying == (t.priority == 1):
+		if t.priority != 0 and _prefers(t, e):
 			score += 8.0
 		score -= float(taken.get(e, 0)) * 3.0
 		if score > best_score:
@@ -2464,10 +2491,7 @@ func _fire_missiles(t, s: Dictionary) -> void:
 		t.target = null
 		t.cooldown = RETARGET_DELAY
 		return
-	var scores := {}
-	for e in cands:
-		scores[e] = _score(t, e, t.pos.distance_squared_to(e.pos))
-	cands.sort_custom(func(a, b): return scores[a] > scores[b])
+	_rank_targets(t, cands, t.pos)
 	t.target = cands[0]
 	t.cooldown = 1.0 / t.eff_rate()
 	t.fire_flash = 0.15
@@ -2505,13 +2529,10 @@ func _fire_salvo(t, s: Dictionary) -> void:
 		t.target = null
 		t.cooldown = RETARGET_DELAY
 		return
-	var scores := {}
-	for e in cands:
-		scores[e] = _score(t, e, t.pos.distance_squared_to(e.pos))
-	cands.sort_custom(func(a, b): return scores[a] > scores[b])
+	_rank_targets(t, cands, t.pos)
 	var strongest = cands[0]
 	for e in cands:
-		if e.hp > strongest.hp:
+		if strength_key(e) > strength_key(strongest):
 			strongest = e
 	t.target = cands[0]
 	t.cooldown = 1.0 / t.eff_rate()

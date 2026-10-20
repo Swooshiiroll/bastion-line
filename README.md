@@ -80,8 +80,8 @@ Workflow).
 | `U` | Retrofit the selected tower, then buy the next upgrade on branch A (the mastery after its T4) |
 | `I` / `O` | Buy the next upgrade on branch B / branch C |
 | `X` | Sell the selected tower (refunds 70% of everything spent on it) |
-| `T` | Cycle the selected tower's targeting: First, Last, Strongest, Closest |
-| `G` | Target priority for towers that hit air and ground: Any, Air or Ground (it still shoots the other kind when that's all that's in range) |
+| `T` | Cycle the selected tower's targeting: First, Last, Strongest (by strength, then health left), Closest |
+| `G` | Target priority: Any, Air, Ground (towers that hit both) or Support (Support enemies first); it still shoots the rest when none of those are in range |
 | Mouse wheel, middle-drag, arrow keys, `Home` | Zoom the battlefield (up to 2.5×), pan it, reset the view |
 | `F3` | Show or hide the FPS counter |
 | `K` or `F1`, or the Codex button | The Codex: every tower, enemy, effect and rule. In battle it pauses and opens on the selected tower (or the enemy under the cursor) |

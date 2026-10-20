@@ -14,6 +14,7 @@ const Glossary = preload("res://data/glossary.gd")
 const Grid = preload("res://scripts/core/Grid.gd")
 const Enemy = preload("res://scripts/entities/Enemy.gd")
 const EnemyTraits = preload("res://scripts/core/EnemyTraits.gd")
+const GameScreen = preload("res://scripts/ui/GameScreen.gd")
 const Tower = preload("res://scripts/entities/Tower.gd")
 const Projectile = preload("res://scripts/entities/Projectile.gd")
 const Towers = preload("res://data/towers.gd")
@@ -960,6 +961,61 @@ func test_targeting_modes() -> void:
 	check(g.pick_target(t) != out_e, "out-of-range enemy ignored")
 	g.cycle_mode(t)
 	check(t.mode == Tower.Mode.LAST, "cycle_mode advances")
+
+
+func test_strongest_by_strength_rank() -> void:
+	var g = new_game()
+	var t = g.place_tower("arrow", Vector2i(2, 3))
+	t.mode = Tower.Mode.STRONG
+	var mech = put(g, "brute", 150.0)
+	var bot = put(g, "shaman", 160.0, 0, 5.0)
+	check(bot.hp > mech.hp and g.pick_target(t) == mech, "a Siege Mech outranks a Repair Bot with more health (strength, not HP)")
+	var mech2 = put(g, "brute", 140.0)
+	mech.hp -= 50.0
+	check(g.pick_target(t) == mech2, "same strength: the one with more health left")
+	mech2.hp = mech.hp
+	check(g.pick_target(t) == mech, "same strength and health: the one further along")
+	var boss = put(g, "juggernaut", 130.0, 0, 0.01)
+	check(g.pick_target(t) == boss, "a boss outranks everything, even nearly dead")
+	var order: Array = Enemies.ORDER.duplicate()
+	order.sort_custom(func(a, b): return Enemies.rank_score(a) < Enemies.rank_score(b))
+	var by_rank := ["swarmling", "locust", "grunt", "shaman", "jammer", "phantom", "runner", "stalker", "aegis", "bat", "rally", "bulwark", "hydra",
+		"burrower", "mender", "brute", "rampart", "gunship", "juggernaut", "warlord", "leviathan", "colossus"]
+	check(order == by_rank, "the roster's weakest-to-strongest order (%s)" % [order])
+
+
+func test_support_priority() -> void:
+	var g = new_game()
+	g.gold = 5000
+	var t = g.place_tower("cannon", Vector2i(2, 3))
+	t.mode = Tower.Mode.FIRST
+	var front = put(g, "brute", 200.0)
+	var helper = put(g, "rally", 150.0)
+	var other = put(g, "aegis", 170.0)
+	check(g.pick_target(t) == front, "Any: First takes the front enemy")
+	check(GameScreen.has_priority(t), "a ground-only tower now has a priority")
+	g.cycle_priority(t)
+	check(t.priority == 3, "a ground-only tower skips Air and Ground, straight to Support")
+	check(g.pick_target(t) == helper, "Support: the Rally Beacon first, though it is behind")
+	var helper2 = put(g, "shaman", 180.0)
+	check(g.pick_target(t) == helper2, "among Support enemies it uses its mode (First)")
+	t.mode = Tower.Mode.LAST
+	check(g.pick_target(t) == helper, "Last among Support enemies")
+	check(other.role() == "special" and g.pick_target(t) != other, "Specials aren't Support")
+	g.damage_enemy(helper, 1e9, true, null)
+	g.damage_enemy(helper2, 1e9, true, null)
+	t.mode = Tower.Mode.FIRST
+	check(g.pick_target(t) == front, "with no Support enemy in range it falls back to everyone")
+	g.cycle_priority(t)
+	check(t.priority == 0, "Support cycles back to Any")
+	var coil = g.place_tower("tesla", spot(g, "tesla", 80))
+	check(coil.hits_air() and coil.hits_ground(), "a Tesla Coil hits both")
+	var seen := []
+	for i in 4:
+		g.cycle_priority(coil)
+		seen.append(coil.priority)
+	check(seen == [1, 2, 3, 0], "a tower that hits both cycles Any, Air, Ground, Support")
+	check(Enemies.ENEMIES.locust.hp == 15.0 and Enemies.ENEMIES.bat.hp == 100.0 and Enemies.ENEMIES.gunship.hp == 600.0, "the roster's stat adjustments")
 
 
 func test_flyer_rules() -> void:
@@ -2105,6 +2161,8 @@ func test_target_priority() -> void:
 	check(t.priority == 2 and g.pick_target(t) == walker, "Ground picks the walker")
 	walker.alive = false
 	check(g.pick_target(t) == flyer, "with no walker in range, a Ground tower still shoots the flyer")
+	g.cycle_priority(t)
+	check(t.priority == 3, "then Support")
 	g.cycle_priority(t)
 	check(t.priority == 0, "the priority cycles back to Any")
 	t.priority = 1
