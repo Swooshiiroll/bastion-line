@@ -349,7 +349,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 16 | Shockwave Generator | amber | B Ring Reactor | B Mushroom Pulse |
 | 17 | Scrapyard | copper | C Magnet Yard | B Sparks and Sale |
 | 18 | Magneto Tower | violet | F Stacked Coil Tower | F Drag Trails |
-| 19 | Tractor Tower | `design/tower_art_p2_19_tractor.html` | Base redesign **confirmed** (owner, 2026-10-19: B Armoured Dish, B Focus Beam; base page `design/tower_art_p19_tractor.html`). Second pass round 8: every stage picked; twin dishes at Dual Beam that turn independently; waiting for "Tractor Tower finished" |
+| 19 | Tractor Tower | `design/tower_art_p2_19_tractor.html` | Base redesign **confirmed** (owner, 2026-10-19: B Armoured Dish, B Focus Beam; base page `design/tower_art_p19_tractor.html`). Second pass round 9: every stage picked; at Dual Beam a stationary platform with two independently turning dishes; waiting for "Tractor Tower finished" |
 | 20 | Augmentation Tower | lavender | F Nanite Hive | D Nanite Swarm |
 
 ## Second pass: per-path and Retrofit looks (owner, 2026-10-16)
@@ -1341,6 +1341,8 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
 
 **Round 8 (owner's note, "that can independently rotate"):** each twin dish now turns on its own pivot to face its own beam's target, and faces forward with the base when idle. The model records the angle it drew each dish at, and the beam leaves that dish's antenna at the same angle (the Radar's lesson), so the beams stay on the antennas.
 
+**Round 9 (owner's note, "Keep the platform stationary"):** at Dual Beam the platform, its rams, capacitors and Retrofit parts no longer turn. Only the two dishes turn, each toward its own target. Below Dual Beam the single dish turns with its platform, as a turret.
+
 ## Open questions
 
-1. **Second pass, Tractor Tower** (tower 19, round 8, twin dishes that turn independently): every stage is picked. Confirm with "Tractor Tower finished". Then the Augmentation Tower.
+1. **Second pass, Tractor Tower** (tower 19, round 9, a stationary platform at Dual Beam): every stage is picked. Confirm with "Tractor Tower finished". Then the Augmentation Tower.
