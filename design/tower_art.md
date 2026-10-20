@@ -350,6 +350,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 17 | Scrapyard | copper | C Magnet Yard | B Sparks and Sale |
 | 18 | Magneto Tower | violet | F Stacked Coil Tower | F Drag Trails |
 | 19 | Tractor Tower | `design/tower_art_p2_19_tractor.html` | Base redesign **confirmed** (owner, 2026-10-19: B Armoured Dish, B Focus Beam; base page `design/tower_art_p19_tractor.html`). Second pass **confirmed** (owner, 2026-10-19, "finished"; round 12) |
+| 20 | Augmentation Tower | `design/tower_art_p2_20_augment.html` | Second pass round 1: pick one option per stage and Retrofit |
 | 20 | Augmentation Tower | lavender | F Nanite Hive | D Nanite Swarm |
 
 ## Second pass: per-path and Retrofit looks (owner, 2026-10-16)
@@ -1351,6 +1352,26 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
 
 **Confirmed (owner, 2026-10-19, "finished"):** the round 12 page is final.
 
+### Augmentation Tower (second pass on the Nanite Hive)
+
+**Owner's choices (2026-10-19):** the names stay. Each path rebuilds one part: Energy Conversion the **dome**, Critical Hits a **core** crowning it, Ricochet **deflectors orbiting** it.
+
+**The page** (`design/tower_art_p2_20_augment.html`, data `tools/tower_art/data_p2_augment.js` on the base `data_towers4.js`, look F, animation D). Each step rebuilds its part in the style picked for that step. Masteries are gold.
+- **Energy Conversion (the dome):** a quarter more of its hex cells charge cyan each step: charged cells round the centre, plasma veins spreading from the centre, or big capacitor panels. Overcharge is gold-rimmed, with arcs crackling over the dome.
+- **Critical Hits (the core, bigger each step):** a targeting lens (a turning precision ring from Precision Matrix), a gold-irised eye that tracks the nearest enemy, or a turning crystal star. Executioner Link is all gold.
+- **Ricochet (orbiting deflectors, more each step):** curved plates, orbs (on a ring from Ricochet Field), or a segmented mirror ring. Pinball is gold-trimmed and wobbling.
+- **The agent (Nanite Swarm plus the real rules):**
+  - The nanites drifting to each tower are tinted by the effects it gets.
+  - Shots turn cyan in proportion to Energy Conversion, with +10% at Overcharge.
+  - Crits land gold with their multiplier (×2, ×2.5, ×3), more often as the chance grows.
+  - Ricochets bounce green to a nearby enemy, twice at Pinball.
+  - Wide Aura widens the aura ring. Remote Link adds a tower at twice the reach, marked "half".
+- **Retrofits:**
+  - **Wide Aura:** an aura ring, pylons, or vents.
+  - **Amplified Bonus:** amplifier coils, a gold halo, or booster fins.
+  - **Remote Link:** a relay dish, antennae, or a beacon.
+- **Carpet-rule overlap (kept, stacking):** Amplified Bonus's +5% crit chance with Critical Hits.
+
 ## Open questions
 
-1. **Second pass, Augmentation Tower** (tower 20, next; the last tower). Then the Augmentation Tower.
+1. **Second pass, Augmentation Tower** (tower 20, round 1; the last tower): pick one option per stage and Retrofit.
