@@ -817,7 +817,7 @@ func damage_enemy(e, amount: float, pierce: bool, source, flash := true, bypass_
 		source.damage_dealt += dealt
 	if e.hp <= 0.0:
 		_kill(e, source)
-	elif e.def.has("phases"):
+	elif e.has_trait("phases"):
 		_check_phase(e)
 	return dealt + absorbed
 
@@ -887,19 +887,8 @@ func _score(t, e, d2: float) -> float:
 func _update_enemy(e, dt: float) -> void:
 	e.step(dt)
 	var d: Dictionary = e.def
-	if d.has("burrow_interval"):
-		# Burrower: dives for burrow_time, then surfaces for the rest of the interval.
-		var grounded: bool = e.silenced() or e.no_dig > 0.0 or e.disrupt_timer > 0.0
-		if grounded and e.burrowed:
-			e.burrowed = false
-			e.burrow_timer = float(d.burrow_interval) - float(d.burrow_time)
-			_emit({"type": "burrow", "pos": e.pos, "down": false})
-		if not grounded:
-			e.burrow_timer -= dt
-		if not grounded and e.burrow_timer <= 0.0:
-			e.burrowed = not e.burrowed
-			e.burrow_timer = float(d.burrow_time) if e.burrowed else float(d.burrow_interval) - float(d.burrow_time)
-			_emit({"type": "burrow", "pos": e.pos, "down": e.burrowed})
+	if e.has_trait("burrow"):
+		_trait_burrow(e, d, dt)
 	if not e.flying and not e.burrowed and not grid.hazards.is_empty():
 		match grid.hazards.get(Grid.world_to_cell(e.pos), ""):
 			"sludge":
@@ -912,61 +901,87 @@ func _update_enemy(e, dt: float) -> void:
 		damage_enemy(e, e.dot_dps * dt, true, null, false)
 		if not e.alive:
 			return
-	if d.has("blink_interval") and e.stun_timer <= 0.0 and not e.silenced() and e.disrupt_timer <= 0.0:
-		# Blink Stalker: jumps ahead along its route (a slow or stun resets the charge, in Enemy).
-		e.blink_timer -= dt
-		if e.blink_timer <= 0.0:
-			e.blink_timer = float(d.blink_interval)
-			var from: Vector2 = e.pos
-			e.distance = minf(e.distance + float(d.blink_distance), e.path_len)
-			e.pos = e.curve.sample_baked(e.distance)
-			_emit({"type": "blink", "from": from, "pos": e.pos})
-	if d.has("heal_pct") and not e.silenced():
-		e.ability_timer -= dt
-		if e.ability_timer <= 0.0:
-			e.ability_timer = float(d.heal_interval)
-			var heal_r: float = d.heal_radius
-			var healed := false
-			for o in enemies:
-				if o.alive and not o.boss and o.hp < o.max_hp and o.repair_block <= 0.0 and o.jam_timer <= 0.0 and o.pos.distance_squared_to(e.pos) <= heal_r * heal_r:
-					o.hp = minf(o.max_hp, o.hp + o.max_hp * float(d.heal_pct))
-					healed = true
-			_emit({"type": "heal", "pos": e.pos, "radius": heal_r, "active": healed})
-	if d.has("spawn_type") and not e.silenced(2):
-		e.ability_timer -= dt
-		if e.ability_timer <= 0.0:
-			e.ability_timer = float(d.spawn_interval)
-			_spawn_minions(e, str(d.spawn_type), int(d.spawn_count))
-			_emit({"type": "minions", "pos": e.pos, "enemy": e.type})
-	if d.has("emp_interval") and not e.silenced(2):
-		e.ability_timer -= dt
-		if e.ability_timer <= 0.0:
-			e.ability_timer = float(d.emp_interval)
-			var er := float(d.emp_radius)
-			var hit := 0
-			for t in towers:
-				if t.pos.distance_squared_to(e.pos) <= er * er or (t.type == "drone_bay" and t.wing.any(func(dr): return dr.pos.distance_squared_to(e.pos) <= er * er)) or (t.type == "cas_gunship" and t.aim_point.distance_to(e.pos) <= er + float(t.stats().get("orbit", 90.0))):
-					t.disabled = maxf(t.disabled, float(d.emp_duration))
-					hit += 1
-			_emit({"type": "emp", "pos": e.pos, "radius": er, "hit": hit})
-	if d.has("grant_interval") and not e.silenced():
-		# Bulwark: projects a barrier onto nearby non-boss enemies (not itself).
-		e.ability_timer -= dt
-		if e.ability_timer <= 0.0:
-			e.ability_timer = float(d.grant_interval)
-			var gr := float(d.grant_radius)
-			var n := 0
-			for o in enemies:
-				if o == e or not o.alive or o.boss or o.grant_block > 0.0 or o.jam_timer > 0.0 or o.pos.distance_squared_to(e.pos) > gr * gr:
-					continue
-				var b: float = o.max_hp * float(d.grant_pct)
-				if o.shield < b:
-					o.shield = b
-					o.max_shield = maxf(o.max_shield, b)
-					n += 1
-			_emit({"type": "bulwark", "pos": e.pos, "radius": gr, "count": n})
+	# Timed traits (EnemyTraits), each on its own timer. A silenced trait's timer holds.
+	for tr in e.traits:
+		match tr:
+			"blink":
+				if e.stun_timer <= 0.0 and not e.silenced() and e.disrupt_timer <= 0.0 and e.tick_trait("blink", dt):
+					_trait_blink(e, d)
+			"heal":
+				if not e.silenced() and e.tick_trait("heal", dt):
+					_trait_heal(e, d)
+			"summon":
+				if not e.silenced(2) and e.tick_trait("summon", dt):
+					_spawn_minions(e, str(d.spawn_type), int(d.spawn_count))
+					_emit({"type": "minions", "pos": e.pos, "enemy": e.type})
+			"emp":
+				if not e.silenced(2) and e.tick_trait("emp", dt):
+					_trait_emp(e, d)
+			"grant":
+				if not e.silenced() and e.tick_trait("grant", dt):
+					_trait_grant(e, d)
 	if e.reached_end():
 		_leak(e)
+
+
+## Burrower: dives for burrow_time, then surfaces for the rest of the interval.
+func _trait_burrow(e, d: Dictionary, dt: float) -> void:
+	var grounded: bool = e.silenced() or e.no_dig > 0.0 or e.disrupt_timer > 0.0
+	if grounded and e.burrowed:
+		e.burrowed = false
+		e.burrow_timer = float(d.burrow_interval) - float(d.burrow_time)
+		_emit({"type": "burrow", "pos": e.pos, "down": false})
+	if not grounded:
+		e.burrow_timer -= dt
+	if not grounded and e.burrow_timer <= 0.0:
+		e.burrowed = not e.burrowed
+		e.burrow_timer = float(d.burrow_time) if e.burrowed else float(d.burrow_interval) - float(d.burrow_time)
+		_emit({"type": "burrow", "pos": e.pos, "down": e.burrowed})
+
+
+## Blink Stalker: jumps ahead along its route (a slow or stun resets the charge, in Enemy).
+func _trait_blink(e, d: Dictionary) -> void:
+	var from: Vector2 = e.pos
+	e.distance = minf(e.distance + float(d.blink_distance), e.path_len)
+	e.pos = e.curve.sample_baked(e.distance)
+	_emit({"type": "blink", "from": from, "pos": e.pos})
+
+
+## Repair Bot: repairs every damaged non-boss enemy nearby.
+func _trait_heal(e, d: Dictionary) -> void:
+	var heal_r: float = d.heal_radius
+	var healed := false
+	for o in enemies:
+		if o.alive and not o.boss and o.hp < o.max_hp and o.repair_block <= 0.0 and o.jam_timer <= 0.0 and o.pos.distance_squared_to(e.pos) <= heal_r * heal_r:
+			o.hp = minf(o.max_hp, o.hp + o.max_hp * float(d.heal_pct))
+			healed = true
+	_emit({"type": "heal", "pos": e.pos, "radius": heal_r, "active": healed})
+
+
+## Jammer: an EMP that knocks nearby towers offline (a Drone Bay's wing and a CAS Gunship's orbit count as nearby).
+func _trait_emp(e, d: Dictionary) -> void:
+	var er := float(d.emp_radius)
+	var hit := 0
+	for t in towers:
+		if t.pos.distance_squared_to(e.pos) <= er * er or (t.type == "drone_bay" and t.wing.any(func(dr): return dr.pos.distance_squared_to(e.pos) <= er * er)) or (t.type == "cas_gunship" and t.aim_point.distance_to(e.pos) <= er + float(t.stats().get("orbit", 90.0))):
+			t.disabled = maxf(t.disabled, float(d.emp_duration))
+			hit += 1
+	_emit({"type": "emp", "pos": e.pos, "radius": er, "hit": hit})
+
+
+## Bulwark: projects a barrier onto nearby non-boss enemies (not itself).
+func _trait_grant(e, d: Dictionary) -> void:
+	var gr := float(d.grant_radius)
+	var n := 0
+	for o in enemies:
+		if o == e or not o.alive or o.boss or o.grant_block > 0.0 or o.jam_timer > 0.0 or o.pos.distance_squared_to(e.pos) > gr * gr:
+			continue
+		var b: float = o.max_hp * float(d.grant_pct)
+		if o.shield < b:
+			o.shield = b
+			o.max_shield = maxf(o.max_shield, b)
+			n += 1
+	_emit({"type": "bulwark", "pos": e.pos, "radius": gr, "count": n})
 
 
 ## Rally Beacons: every other non-boss enemy near one moves faster. Recomputed each tick.
@@ -974,7 +989,7 @@ func _update_auras() -> void:
 	var beacons: Array = []
 	for e in enemies:
 		e.haste = 0.0
-		if e.alive and e.def.has("aura_radius") and not e.silenced():
+		if e.alive and e.has_trait("aura") and not e.silenced():
 			beacons.append(e)
 	for b in beacons:
 		var r := float(b.def.aura_radius)
@@ -3065,7 +3080,7 @@ func _kill(e, source) -> void:
 					damage_enemy(o, source.eff_damage() * 0.5, false, source, false)
 			_nova_depth -= 1
 			_emit({"type": "mini_nova", "pos": e.pos, "radius": mn})
-	if e.def.has("split_type"):
+	if e.has_trait("split"):
 		# Hydra Frame: the pieces keep walking from where it fell. Added after this tick's loops.
 		var n := int(e.def.split_count)
 		var hp_mult := hp_mult_for(e.wave_id) if e.wave_id > 0 else 1.0

@@ -13,6 +13,7 @@ const UpgradePreview = preload("res://scripts/ui/hud/UpgradePreview.gd")
 const Glossary = preload("res://data/glossary.gd")
 const Grid = preload("res://scripts/core/Grid.gd")
 const Enemy = preload("res://scripts/entities/Enemy.gd")
+const EnemyTraits = preload("res://scripts/core/EnemyTraits.gd")
 const Tower = preload("res://scripts/entities/Tower.gd")
 const Projectile = preload("res://scripts/entities/Projectile.gd")
 const Towers = preload("res://data/towers.gd")
@@ -2905,6 +2906,57 @@ func test_rework_data_and_unlocks() -> void:
 	var g = research_game(["gun_turret_1"])
 	var t = g.place_tower("gun_turret", Vector2i(2, 3))
 	check(near(t.stats().damage, 16.0 * 1.06), "research applies to a reworked tower")
+
+
+func test_enemy_tiers_and_strength() -> void:
+	var grid := {"swarm": ["swarmling", "locust", "grunt"], "rusher": ["runner", "", "bat"], "tank": ["brute", "rampart", "gunship"],
+		"support": ["shaman", "rally", "bulwark", "mender"], "disruptor": ["jammer"], "evader": ["stalker", "burrower"]}
+	for role in grid:
+		for i in grid[role].size():
+			var id: String = grid[role][i]
+			if id != "":
+				check(Enemies.ENEMIES[id].role == role and int(Enemies.ENEMIES[id].tier) == i + 1, "%s is %s T%d" % [id, role, i + 1])
+	for id in ["phantom", "aegis", "hydra"]:
+		check(Enemies.ENEMIES[id].role == "special" and int(Enemies.ENEMIES[id].tier) == 0, "%s is a special, untiered" % id)
+	for id in ["juggernaut", "warlord", "leviathan", "colossus"]:
+		check(Enemies.ENEMIES[id].role == "boss" and int(Enemies.ENEMIES[id].tier) == 0, "%s is a boss, untiered" % id)
+	check(near(Enemies.strength("swarmling"), 13.38, 0.01) and near(Enemies.strength("brute"), 254.40, 0.01), "strength = spd² × max(1, armor) × hp")
+	check(near(Enemies.strength("shaman"), 31.25, 0.01), "armor 1 counts as unarmored")
+	check(Enemies.rank_score("juggernaut") > Enemies.rank_score("rampart"), "a boss ranks above every non-boss (Dreadnought over Rampart)")
+	var g = new_game()
+	check(put(g, "bulwark", 50.0).tier() == 3, "an enemy knows its tier")
+
+
+func test_enemy_traits() -> void:
+	check(EnemyTraits.of("shaman") == ["heal"] and EnemyTraits.of("jammer") == ["emp"] and EnemyTraits.of("warlord") == ["summon"], "timed abilities read from the data")
+	check(EnemyTraits.of("burrower") == ["burrow"] and EnemyTraits.of("stalker") == ["blink"] and EnemyTraits.of("bulwark") == ["grant"], "burrow, blink, grant")
+	check(EnemyTraits.of("rally") == ["aura"] and EnemyTraits.of("hydra") == ["split"] and EnemyTraits.of("mender") == ["regen"], "aura, split, regen")
+	check(EnemyTraits.of("aegis") == ["barrier"] and EnemyTraits.of("phantom") == ["cloak"] and EnemyTraits.of("colossus") == ["phases"], "barrier, cloak, phases")
+	check(EnemyTraits.of("grunt").is_empty(), "a Drone has none")
+	# Two timed traits on one enemy keep their own clocks: a Repair Bot carrying a Jammer's EMP too.
+	var g = new_game()
+	g.gold = 5000
+	var t = g.place_tower("arrow", Vector2i(2, 3))
+	g.state = Game.State.WAVE
+	var e = put(g, "shaman", 100.0, 0, 1e4)
+	var mate = put(g, "grunt", 110.0, 0, 1e4)
+	e.speed = 0.0
+	mate.speed = 0.0
+	var def: Dictionary = e.def.duplicate()
+	def.merge(Enemies.ENEMIES.jammer)
+	e.def = def
+	e.set_traits(EnemyTraits.of_def(def))
+	check(e.traits == ["heal", "emp"] and near(e.trait_timers.heal, 2.0) and near(e.trait_timers.emp, 5.0), "each timed trait starts its own interval")
+	mate.hp = mate.max_hp * 0.5
+	run_until(g, func(): return false, 2.05)
+	check(mate.hp > mate.max_hp * 0.5 and t.disabled == 0.0, "the heal fires at 2 s, the EMP hasn't yet")
+	run_until(g, func(): return t.disabled > 0.0, 3.1)
+	check(t.disabled > 1.9, "the EMP fires at 5 s on its own clock")
+	check(near(e.trait_timers.heal, 1.0, 0.05), "the heal kept its 2 s rhythm (%.2f)" % e.trait_timers.heal)
+	e.suppress_timer = 1.0
+	var held: float = e.trait_timers.emp
+	g.tick(SIM_DT)
+	check(near(e.trait_timers.emp, held), "a silenced trait's timer holds")
 
 
 func test_rework_roles_and_damage_kinds() -> void:

@@ -5,6 +5,7 @@ extends RefCounted
 ## burrowing, auras, boss phases) run in Game._update_enemy; this class only keeps their state.
 
 const Enemies = preload("res://data/enemies.gd")
+const EnemyTraits = preload("res://scripts/core/EnemyTraits.gd")
 
 const MIN_DAMAGE_FRACTION := 0.2
 const SLOW_CAP := 0.7
@@ -38,7 +39,20 @@ var pos := Vector2.ZERO
 var facing := Vector2.RIGHT
 var slow_amount := 0.0
 var slow_timer := 0.0
-var ability_timer := 0.0
+## Its traits (EnemyTraits), and a countdown per timed trait to its next firing.
+var traits: Array = []
+var trait_timers := {}
+## The old shared ability timer: setting it sets every timed ability's timer (heal, summon, EMP, barrier grant).
+var ability_timer: float:
+	get:
+		for n in EnemyTraits.ABILITIES:
+			if trait_timers.has(n):
+				return float(trait_timers[n])
+		return 0.0
+	set(v):
+		for n in EnemyTraits.ABILITIES:
+			if trait_timers.has(n):
+				trait_timers[n] = v
 var alive := true
 var wave_id := 0
 var hit_flash := 0.0
@@ -65,9 +79,17 @@ var reveal_timer := 0.0
 ## Burrower: under the lane (untargetable, can't be hurt) while `burrowed`; `burrow_timer` counts
 ## down to the next change.
 var burrowed := false
-var burrow_timer := 0.0
+var burrow_timer: float:
+	get:
+		return float(trait_timers.get("burrow", 0.0))
+	set(v):
+		trait_timers["burrow"] = v
 ## Blink Stalker: counts down to the next teleport; a slow or stun resets it.
-var blink_timer := 0.0
+var blink_timer: float:
+	get:
+		return float(trait_timers.get("blink", 0.0))
+	set(v):
+		trait_timers["blink"] = v
 ## Mender Hulk: seconds since it last took damage.
 var since_hit := 0.0
 ## Rally Beacon overdrive on this enemy (fraction of extra speed), refreshed every tick.
@@ -126,9 +148,35 @@ func setup(enemy_type: String, route: Curve2D, hp_mult: float, wave: int, path_i
 	if ahead.distance_squared_to(pos) > 0.0001:
 		facing = (ahead - pos).normalized()
 	wave_id = wave
-	ability_timer = float(def.get("heal_interval", def.get("spawn_interval", def.get("emp_interval", def.get("grant_interval", 0.0)))))
-	burrow_timer = float(def.get("burrow_interval", 0.0))
-	blink_timer = float(def.get("blink_interval", 0.0))
+	set_traits(EnemyTraits.of(enemy_type))
+
+
+## Gives it the traits `list` (read from `def`), each timed one starting a full interval from now.
+func set_traits(list: Array) -> void:
+	traits = list
+	trait_timers = {}
+	for n in traits:
+		if EnemyTraits.timed(n):
+			trait_timers[n] = EnemyTraits.interval(def, n)
+
+
+## Its tier in its role (1 to 4; 0 for special and boss).
+func tier() -> int:
+	return int(def.get("tier", 0))
+
+
+func has_trait(name: String) -> bool:
+	return traits.has(name)
+
+
+## Counts timed trait `name` down by `dt`; when it runs out, restarts it and returns true (fire now).
+func tick_trait(name: String, dt: float) -> bool:
+	var left: float = float(trait_timers.get(name, 0.0)) - dt
+	if left <= 0.0:
+		trait_timers[name] = EnemyTraits.interval(def, name)
+		return true
+	trait_timers[name] = left
+	return false
 
 
 static func mitigate(amount: float, armor_value: float, pierce: bool) -> float:
@@ -244,7 +292,7 @@ func apply_stun(duration: float) -> void:
 
 
 func _reset_blink() -> void:
-	if def.has("blink_interval"):
+	if has_trait("blink"):
 		blink_timer = float(def.blink_interval)
 
 
@@ -271,7 +319,7 @@ func step(dt: float) -> void:
 		dot_timer = maxf(0.0, dot_timer - dt)
 		if dot_timer <= 0.0:
 			dot_dps = 0.0
-	if def.has("regen_pct") and since_hit >= float(def.regen_delay) and hp < max_hp and repair_block <= 0.0 and not silenced():
+	if has_trait("regen") and since_hit >= float(def.regen_delay) and hp < max_hp and repair_block <= 0.0 and not silenced():
 		hp = minf(max_hp, hp + max_hp * float(def.regen_pct) * dt)
 	if max_shield > 0.0 and shield < max_shield and def.has("shield_regen") and barrier_block <= 0.0:
 		shield_timer -= dt
