@@ -424,10 +424,13 @@ func _interaction_checks() -> void:
 	fails += _expect(screen.modal == null and not screen.paused, "Esc again resumes")
 	await _click(cell_pos)
 	var before_sell: int = g.gold
+	var earned: int = g.stats.gold_earned
 	var spent: int = g.towers[0].spent if not g.towers.is_empty() else 0
 	await _key(KEY_X)
 	fails += _expect(g.towers.is_empty(), "X sells the selected tower")
-	fails += _expect(g.gold == before_sell + int(floor(spent * 0.7)), "sell refunds 70%% of spend (%d)" % g.gold)
+	# Wave 1 is running, so a kill can pay a bounty in the same frames: leave that out.
+	var refund: int = g.gold - before_sell - (int(g.stats.gold_earned) - earned)
+	fails += _expect(refund == int(floor(spent * 0.7)), "sell refunds 70%% of spend (%d of %d)" % [refund, spent])
 	print("INTERACTION CHECKS: %s" % ("ALL PASSED" if fails == 0 else "%d FAILED" % fails))
 
 
