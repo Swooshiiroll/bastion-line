@@ -11,7 +11,7 @@ extends RefCounted
 ##   command tree  "start_gold": +fraction, "lives": +fraction of the mode's shields, "sell_refund": +fraction,
 ##                 "ability_cd": -fraction, "bounty": +fraction
 
-const TREE_ORDER := ["command", "arrow", "cannon", "frost", "sniper", "tesla", "laser", "missile", "amp", "flak", "sensor", "gravity", "nullifier", "nova", "drones", "scrap"]
+const TREE_ORDER := ["command", "arrow", "cannon", "frost", "sniper", "tesla", "laser", "missile", "amp", "flak", "sensor", "gravity", "nullifier", "nova", "drones", "scrap", "gun_turret"]
 
 ## RP sources, all derived from profile records so they can't be farmed and are never lost.
 ## (Medals pay their mode's medal_rp, from data/difficulty.gd.)
@@ -366,6 +366,28 @@ const NODES := {
 	"scrap_m": {
 		"tree": "scrap", "slot": Vector2i(0, 2), "cost": 3, "requires": ["scrap_2a", "scrap_2b"], "icon": "mastery",
 		"name": "Scrapyard Mastery", "blurb": "Unlocks the masteries: Reserve Bank, Reclamation Plant and Forward Command.",
+		"effects": {"mastery": true},
+	},
+
+	# --- Gun Turret (the tower rework, issue #59: a minimal tree until the research pass) ----------
+	"gun_turret_1": {
+		"tree": "gun_turret", "slot": Vector2i(0, 0), "cost": 1, "requires": [], "icon": "damage",
+		"name": "Hardened Barrels", "blurb": "Gun Turrets deal +6% damage.",
+		"effects": {"mult": {"damage": 0.06}},
+	},
+	"gun_turret_2a": {
+		"tree": "gun_turret", "slot": Vector2i(-1, 1), "cost": 2, "requires": ["gun_turret_1"], "icon": "range",
+		"name": "Ranging Optics", "blurb": "Gun Turrets get +7% range.",
+		"effects": {"mult": {"range": 0.07}},
+	},
+	"gun_turret_2b": {
+		"tree": "gun_turret", "slot": Vector2i(1, 1), "cost": 2, "requires": ["gun_turret_1"], "icon": "rate",
+		"name": "Quick Feed", "blurb": "Gun Turrets fire 7% faster.",
+		"effects": {"mult": {"rate": 0.07}},
+	},
+	"gun_turret_m": {
+		"tree": "gun_turret", "slot": Vector2i(0, 2), "cost": 3, "requires": ["gun_turret_2a", "gun_turret_2b"], "icon": "mastery",
+		"name": "Gun Turret Mastery", "blurb": "Unlocks the masteries: Sabot Rounds, Targeting Computer and Triple Mount.",
 		"effects": {"mastery": true},
 	},
 }

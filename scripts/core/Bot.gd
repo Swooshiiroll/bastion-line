@@ -172,7 +172,7 @@ func choose_spec(t) -> String:
 
 ## Amplifier-style support (boosts neighbours) rather than a sensor, which is placed for coverage.
 static func is_pylon(type: String) -> bool:
-	var d: Dictionary = Towers.TOWERS[type]
+	var d: Dictionary = Towers.def(type)
 	return bool(d.get("support", false)) and not bool(d.get("sensor", false)) and not bool(d.get("economy", false))
 
 
@@ -190,7 +190,7 @@ func best_cell(type: String):
 	# 2x2 towers need their whole footprint free (the cell is the top-left tile).
 	var big: bool = Game.size_of(type) > 1
 	# Scrapyards go among the towers, where Supply Depots and Scrap Collectors have the most to work on.
-	if Towers.TOWERS[type].get("economy", false):
+	if Towers.def(type).get("economy", false):
 		var best_e = null
 		var best_en := -1
 		for y in Grid.ROWS:
@@ -287,7 +287,7 @@ func use_abilities_now() -> void:
 
 ## Score per buildable tile: how many route sample points a tier-1 tower of this type would reach.
 func coverage(type: String) -> Dictionary:
-	var d: Dictionary = Towers.TOWERS[type]
+	var d: Dictionary = Towers.def(type)
 	# Drones fly anywhere, so where the bay sits barely matters; score it like a long-range tower.
 	var r: float = float(Tower.lines(type).t1.get("range", 320.0))
 	var air: bool = d.air

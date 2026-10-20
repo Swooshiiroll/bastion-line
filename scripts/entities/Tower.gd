@@ -14,6 +14,7 @@ extends RefCounted
 const Towers = preload("res://data/towers.gd")
 const Trees = preload("res://data/tower_trees.gd")
 const Research = preload("res://scripts/core/Research.gd")
+const Rework = preload("res://data/rework_trees.gd")
 
 enum Mode { FIRST, LAST, STRONG, CLOSE }
 const MODE_NAMES := ["First", "Last", "Strongest", "Closest"]
@@ -42,6 +43,13 @@ const NON_STATS := ["name", "cost", "blurb", "mastery", "specs", "spec_order"]
 
 var type := ""
 var def: Dictionary
+## The reworked towers (issue #59): no gating trunk; an optional Retrofit (one of up to three options, chosen when
+## bought, -1 until then) and three paths from the start. Old towers keep the trunk.
+var is_rework := false
+var retrofit := -1:
+	set(v):
+		retrofit = v
+		_dirty = true
 ## Tiles along each side of the footprint: 1, or 2 for the Scrapyard and Drone Bay. `cell` is the
 ## top-left tile and `pos` the footprint's centre.
 var size := 1
@@ -96,11 +104,15 @@ var tier: int:
 	get:
 		if mastered:
 			return MASTERY_TIER
+		if is_rework:
+			return SPEC_TIER if not started.is_empty() else (2 if retrofit >= 0 else 1)
 		return SPEC_TIER if not started.is_empty() else trunk
 
 ## The primary branch's specialization id ("" before any branch is started).
 var spec: String:
 	get:
+		if is_rework:
+			return ""
 		var p := primary()
 		return str(branch(p).id) if p != "" else ""
 
@@ -118,7 +130,8 @@ static var _lines := {}
 
 func setup(tower_type: String, at_cell: Vector2i, at_pos: Vector2, research_mods := {}) -> void:
 	type = tower_type
-	def = Towers.TOWERS[tower_type]
+	def = Towers.def(tower_type)
+	is_rework = Towers.is_rework(tower_type)
 	size = int(def.get("size", 1))
 	cell = at_cell
 	pos = at_pos
@@ -134,10 +147,20 @@ static func tree(tower_type: String) -> Dictionary:
 
 
 func branch(key: String) -> Dictionary:
+	if is_rework:
+		for p in rework_tree().paths:
+			if p.key == key:
+				return p
+		return {}
 	for b in tree(type).branches:
 		if b.key == key:
 			return b
 	return {}
+
+
+## The reworked tower's data (base, retrofits, paths).
+func rework_tree() -> Dictionary:
+	return Rework.TREES[type]
 
 
 ## The branch key whose specialization id (or key) is `id_or_key`, or "".
@@ -149,7 +172,7 @@ func branch_key(id_or_key: String) -> String:
 
 
 func is_attack_style(key: String) -> bool:
-	return bool(branch(key).get("attack", false))
+	return not is_rework and bool(branch(key).get("attack", false))
 
 
 static func _clean(d: Dictionary) -> Dictionary:
@@ -236,7 +259,7 @@ func locked_in() -> bool:
 
 ## Why branch `key` can't take its next upgrade right now ("" if it can).
 func block_reason(key: String) -> String:
-	if trunk < 2:
+	if not is_rework and trunk < 2:
 		return "Retrofit it first"
 	if not depth.has(key):
 		return "No such branch"
@@ -267,6 +290,66 @@ func next_node(key: String) -> Dictionary:
 	var d: int = depth[key]
 	var b := branch(key)
 	return b.mastery if d >= BRANCH_STEPS else b.nodes[d]
+
+
+# --- The reworked towers' Retrofit and stats --------------------------------------------------------
+
+## Why the Retrofit can't be bought right now ("" if it can).
+func retrofit_block_reason() -> String:
+	if not is_rework:
+		return "No Retrofit"
+	if retrofit >= 0:
+		return "Already retrofitted"
+	return ""
+
+
+## Buys Retrofit option `option` (the caller has checked and charged for it). The choice is locked.
+func buy_retrofit(option: int) -> void:
+	retrofit = option
+
+
+## The Retrofit options as data nodes ({name, cost, blurb, set, add}).
+func retrofit_options() -> Array:
+	return rework_tree().retrofits if is_rework else []
+
+
+## Stat line of a reworked tower for an upgrade state: the base, the Retrofit if bought, then the secondary path's
+## steps (at most its first two), then the primary path's steps and mastery. Every node adds or sets on the line.
+func compose_rework(t_retro: int, t_depth: Dictionary, t_started: Array, t_mastered: bool) -> Dictionary:
+	var rt := rework_tree()
+	var s := _apply_node({}, rt.base)
+	if t_retro >= 0:
+		s = _apply_node(s, rt.retrofits[t_retro])
+	var p := ""
+	var best_d := 0
+	for b in t_started:
+		var dd: int = t_depth[b]
+		if dd >= 3:
+			p = b
+			break
+		if dd > best_d:
+			p = b
+			best_d = dd
+	for b in t_started:
+		if b == p:
+			continue
+		var path := _path(rt, b)
+		for i in mini(int(t_depth[b]), SECONDARY_CAP):
+			s = _apply_node(s, path.nodes[i])
+	if p != "":
+		var path := _path(rt, p)
+		for i in mini(int(t_depth[p]), BRANCH_STEPS):
+			s = _apply_node(s, path.nodes[i])
+		if t_mastered:
+			s = _apply_node(s, path.mastery)
+	return s
+
+
+static func _path(rt: Dictionary, key: String) -> Dictionary:
+	for p in rt.paths:
+		if p.key == key:
+			return p
+	return {}
 
 
 ## Applies the next upgrade on `key` (the caller has checked and charged for it).
@@ -344,6 +427,8 @@ func compose(t_trunk: int, t_depth: Dictionary, t_started: Array, t_mastered: bo
 
 ## Stats of the current upgrade state, before research.
 func base_stats() -> Dictionary:
+	if is_rework:
+		return compose_rework(retrofit, depth, started, mastered)
 	return compose(trunk, depth, started, mastered)
 
 
@@ -357,6 +442,20 @@ func stats() -> Dictionary:
 
 ## Stats after the next upgrade on `id_or_key` ({} if there is none). At tier 1 it's Tier 2.
 func next_stats(id_or_key := "") -> Dictionary:
+	if is_rework:
+		var rk := id_or_key if id_or_key != "" else primary()
+		if rk == "" or not can_buy(rk):
+			return {}
+		var rd := depth.duplicate()
+		var rs := started.duplicate()
+		var rm := mastered
+		if int(rd[rk]) >= BRANCH_STEPS:
+			rm = true
+		else:
+			if int(rd[rk]) == 0:
+				rs.append(rk)
+			rd[rk] = int(rd[rk]) + 1
+		return Research.apply(compose_rework(retrofit, rd, rs, rm), mods)
 	if trunk == 1:
 		return Research.apply(lines(type).t2, mods)
 	var k := resolve_key(id_or_key)
@@ -380,6 +479,9 @@ static func trunk_name(trunk_tier: int) -> String:
 
 
 func display_name() -> String:
+	if is_rework:
+		var pm := primary()
+		return str(branch(pm).mastery.name) if (mastered and pm != "") else str(def.name)
 	var p := primary()
 	if p == "" or not locked_in():
 		return str(def.name)
@@ -388,6 +490,8 @@ func display_name() -> String:
 
 
 func spec_ids() -> Array:
+	if is_rework:
+		return []
 	return tree(type).branches.map(func(b): return str(b.id))
 
 
@@ -439,16 +543,22 @@ func max_tier() -> int:
 
 ## True at tier 2 before any branch is started (the next upgrade needs a branch choice).
 func needs_spec() -> bool:
-	return trunk == 2 and started.is_empty()
+	return not is_rework and trunk == 2 and started.is_empty()
 
 
 func build_cost() -> int:
+	if is_rework:
+		return Research.discounted(int(rework_tree().cost), mods)
 	return Research.discounted(int(tree(type).tiers[0].cost), mods)
 
 
 ## Price of the next upgrade on `id_or_key` (0 when there is none). At tier 1 it's Tier 2's price;
 ## at tier 2 with nothing started and no key, the cheapest specialization.
 func upgrade_cost(id_or_key := "") -> int:
+	if is_rework:
+		var rk := id_or_key if id_or_key != "" else primary()
+		var rn := next_node(rk) if rk != "" else {}
+		return _price(int(rn.cost)) if not rn.is_empty() else 0
 	if trunk == 1:
 		return _price(int(tree(type).tiers[1].cost))
 	var k := resolve_key(id_or_key)
@@ -459,6 +569,13 @@ func upgrade_cost(id_or_key := "") -> int:
 		return _price(best)
 	var n := next_node(k)
 	return _price(int(n.cost)) if not n.is_empty() else 0
+
+
+## Price of Retrofit option `option` (0 when it can't be bought).
+func retrofit_cost(option: int) -> int:
+	if retrofit_block_reason() != "" or option < 0 or option >= retrofit_options().size():
+		return 0
+	return _price(int(retrofit_options()[option].cost))
 
 
 ## An upgrade price after research, the mode's price and any Supply Depot discount.

@@ -31,6 +31,8 @@ const AUTO_START_DELAY := 5.0
 const RETARGET_DELAY := 0.1
 const STAT_KEYS := ["kills", "gold_earned", "towers_built", "leaked", "waves_cleared"]
 const BOSS_STUN_FACTOR := 0.3
+## A critical hit does double damage (the Gun Turret's Range path; the Augmentation Tower's Precision Matrix raises it).
+const CRIT_MULT := 2.0
 const LASER_SECONDARY := 0.6
 const MISSILE_TURN := 7.0
 const MISSILE_MAX_LIFE := 3.0
@@ -106,6 +108,7 @@ var emit_events := true
 var stats := {}
 
 var _next_enemy_id := 1
+var _roll_count := 0
 var _spawn_counter := 0
 var _new_enemies: Array = []
 
@@ -124,7 +127,7 @@ func _init(id: String = "meadow", seed_in: int = 0, diff: String = "medium", res
 		route_counters.append(0)
 	research = Research.sanitize(research_in)
 	run_mods = Research.run_mods(research)
-	for type in Towers.ORDER:
+	for type in Towers.all_types():
 		tower_mods[type] = Research.tower_mods(research, type)
 		tower_mods[type]["price"] = Difficulty.price(difficulty)
 	sell_refund = SELL_REFUND + float(run_mods.sell_refund)
@@ -151,7 +154,7 @@ func apply_research(owned: Array) -> void:
 	var old_mods := run_mods
 	research = Research.sanitize(owned)
 	run_mods = Research.run_mods(research)
-	for type in Towers.ORDER:
+	for type in Towers.all_types():
 		var price = tower_mods[type].get("price", Difficulty.price(difficulty))
 		tower_mods[type] = Research.tower_mods(research, type)
 		tower_mods[type]["price"] = price
@@ -235,6 +238,8 @@ func is_boss_round(n: int) -> bool:
 
 
 func tower_cost(type: String) -> int:
+	if Towers.is_rework(type):
+		return Research.discounted(int(Towers.Rework.TREES[type].cost), tower_mods[type])
 	return Research.discounted(int(Tower.tree(type).tiers[0].cost), tower_mods[type])
 
 
@@ -307,7 +312,7 @@ static func site_of(tile: String) -> String:
 
 ## Tiles along each side a tower type takes (1, or 2 for the Scrapyard and Drone Bay).
 static func size_of(type: String) -> int:
-	return int(Towers.TOWERS[type].get("size", 1))
+	return int(Towers.def(type).get("size", 1))
 
 
 ## The tiles a tower of `type` with its top-left tile at `anchor` covers.
@@ -423,6 +428,8 @@ func place_tower(type: String, cell: Vector2i):
 func upgrade_tower(t, key := "") -> bool:
 	if is_over():
 		return false
+	if t.is_rework:
+		return _upgrade_path(t, key)
 	var branch := ""
 	if t.trunk >= 2:
 		branch = t.resolve_key(key)
@@ -441,6 +448,38 @@ func upgrade_tower(t, key := "") -> bool:
 	_recompute_buffs()
 	# "mastery" is only for the purchase that reaches the mastery, not later secondary upgrades.
 	_emit({"type": "upgrade", "pos": t.pos, "tier": t.tier, "spec": t.spec, "branch": branch, "depth": int(t.depth.get(branch, 0)) if branch != "" else 0, "mastery": not was_mastered and t.tier >= 4})
+	return true
+
+
+## Reworked towers: buys the next step on path `key` (the primary when empty).
+func _upgrade_path(t, key: String) -> bool:
+	var path: String = key if key != "" else t.primary()
+	if path == "" or not t.can_buy(path):
+		return false
+	var cost: int = t.upgrade_cost(path)
+	if cost <= 0 or gold < cost:
+		return false
+	var was_mastered: bool = t.mastered
+	gold -= cost
+	t.spent += cost
+	t.buy(path)
+	_recompute_buffs()
+	_emit({"type": "upgrade", "pos": t.pos, "tier": t.tier, "spec": "", "branch": path, "depth": int(t.depth.get(path, 0)), "mastery": not was_mastered and t.mastered})
+	return true
+
+
+## Reworked towers: buys Retrofit option `option`; the choice is locked.
+func buy_retrofit(t, option: int) -> bool:
+	if is_over() or not t.is_rework:
+		return false
+	var cost: int = t.retrofit_cost(option)
+	if cost <= 0 or gold < cost:
+		return false
+	gold -= cost
+	t.spent += cost
+	t.buy_retrofit(option)
+	_recompute_buffs()
+	_emit({"type": "upgrade", "pos": t.pos, "tier": t.tier, "spec": "", "branch": "retrofit", "depth": option, "mastery": false})
 	return true
 
 
@@ -733,7 +772,7 @@ func damage_enemy(e, amount: float, pierce: bool, source, flash := true, bypass_
 		# A blast, field or arc landing on a hidden enemy makes its cloak flicker, so other towers
 		# can follow up. Hits while already visible do not extend it.
 		e.reveal_timer = maxf(e.reveal_timer, HIT_REVEAL_TIME)
-	var dealt := Enemy.mitigate(amt, e.effective_armor(), pierce)
+	var dealt := Enemy.mitigate(amt, _armor_vs(e, source), pierce)
 	if source != null:
 		source.damage_dealt += absorbed
 	e.hp -= dealt
@@ -746,6 +785,24 @@ func damage_enemy(e, amount: float, pierce: bool, source, flash := true, bypass_
 	elif e.def.has("phases"):
 		_check_phase(e)
 	return dealt + absorbed
+
+
+## An enemy's armour as a source sees it: a tower with armour piercing ignores a flat amount and a share of it.
+func _armor_vs(e, source) -> float:
+	var a: float = e.effective_armor()
+	if source is Tower and source.is_rework:
+		var s: Dictionary = source.stats()
+		a = maxf(0.0, a - float(s.get("armor_flat", 0.0))) * (1.0 - clampf(float(s.get("armor_pct", 0.0)), 0.0, 1.0))
+	return a
+
+
+## Damage already on its way to `e` from shots in flight (Swivel Mount doesn't waste rounds on enemies about to die).
+func _incoming(e) -> float:
+	var sum := 0.0
+	for p in projectiles:
+		if p.alive and p.target == e:
+			sum += p.damage
+	return sum
 
 
 ## Best target in range for the tower's targeting mode, skipping anything in `exclude`.
@@ -766,11 +823,14 @@ func _pick_target(t, exclude: Array, air: bool, ground: bool):
 	var r2 := r * r
 	var best = null
 	var best_score := -INF
+	var swivel: bool = t.is_rework and bool(t.stats().get("swivel", false))
 	for e in enemies:
 		if not e.alive or (e.flying and not air) or (not e.flying and not ground) or e.is_hidden() or exclude.has(e):
 			continue
 		var d2: float = t.pos.distance_squared_to(e.pos)
 		if d2 > r2:
+			continue
+		if swivel and _incoming(e) >= e.hp:
 			continue
 		var score := _score(t, e, d2)
 		if score > best_score:
@@ -981,6 +1041,8 @@ func _update_tower(t, dt: float) -> void:
 	t.fire_flash = 0.12
 	t.aim = (target.pos - t.pos).angle()
 	match t.type:
+		"gun_turret":
+			_fire_gun(t, target, s)
 		"arrow":
 			if t.spec == "flechette":
 				_flechette(t, float(s.get("pellets", 6.0)), float(s.get("cone", 45.0)), bool(s.get("bypass_shield", false)))
@@ -996,6 +1058,37 @@ func _update_tower(t, dt: float) -> void:
 			_fire_rail(t, target, s)
 		"tesla":
 			_chain(t, target, s)
+
+
+## Gun Turret: a round at the target; Multi-Target adds a side gun (a second target at part damage) or extra barrels
+## (more targets at full damage, the weakest enemies in range at the mastery). Crits, armour piercing, stun and
+## ignite ride on the round (see _fire_projectile and _projectile_hit).
+func _fire_gun(t, target, s: Dictionary) -> void:
+	_fire_projectile(t, target, s)
+	var shots: Array = [target]
+	var extra := int(s.get("multishot", 1)) - 1
+	var side := float(s.get("side_gun", 0.0))
+	if extra <= 0 and side > 0.0:
+		extra = 1
+	for k in extra:
+		var other = _weakest_target(t, shots) if bool(s.get("weakest_extra", false)) else pick_target(t, shots)
+		if other == null:
+			break
+		shots.append(other)
+		_fire_projectile(t, other, s, side if (side > 0.0 and int(s.get("multishot", 1)) <= 1) else 1.0)
+
+
+## The enemy with the least health in the tower's range (Triple Mount's extra barrels), skipping `exclude`.
+func _weakest_target(t, exclude: Array):
+	var best = null
+	var best_hp := INF
+	for e in enemies:
+		if e in exclude or not t.can_target(e):
+			continue
+		if e.hp < best_hp:
+			best_hp = e.hp
+			best = e
+	return best
 
 
 ## One volley of projectiles, plus Multishot's extra targets (Storm Gatling).
@@ -1434,7 +1527,7 @@ func _gravity_pulse(t, s: Dictionary) -> void:
 		t.cooldown = RETARGET_DELAY
 
 
-func _fire_projectile(t, target, s: Dictionary) -> void:
+func _fire_projectile(t, target, s: Dictionary, dmg_mult := 1.0) -> void:
 	var p = Projectile.new()
 	p.kind = t.type
 	p.pos = t.pos + Vector2.from_angle(t.aim) * 16.0
@@ -1442,7 +1535,10 @@ func _fire_projectile(t, target, s: Dictionary) -> void:
 	p.target = target
 	p.target_pos = target.pos
 	p.speed = float(s.proj_speed)
-	p.damage = t.eff_damage()
+	p.damage = t.eff_damage() * dmg_mult
+	if float(s.get("crit", 0.0)) > 0.0 and _roll(float(s.crit)):
+		p.damage *= CRIT_MULT
+		p.crit = true
 	p.splash = float(s.get("splash", 0.0))
 	p.shred = float(s.get("shred", 0.0))
 	p.shred_max = float(s.get("shred_max", 0.0))
@@ -1453,7 +1549,7 @@ func _fire_projectile(t, target, s: Dictionary) -> void:
 	p.source = t
 	p.total = maxf(1.0, p.pos.distance_to(target.pos))
 	projectiles.append(p)
-	_emit({"type": "fire", "tower": t.type, "pos": p.pos, "tier": t.tier, "spec": t.spec})
+	_emit({"type": "fire", "tower": t.type, "pos": p.pos, "tier": t.tier, "spec": t.spec, "crit": p.crit, "tracers": bool(s.get("tracers", false))})
 
 
 func _fire_rail(t, target, s: Dictionary) -> void:
@@ -1663,8 +1759,30 @@ func _projectile_hit(p) -> void:
 				if p.shred > 0.0:
 					p.target.shred(p.shred, p.shred_max)
 				damage_enemy(p.target, p.damage, false, p.source)
-				_emit({"type": "arrow_hit", "pos": p.pos, "shred": p.shred > 0.0})
+				if p.source != null and p.source.is_rework:
+					_rework_hit_effects(p, s)
+				_emit({"type": "arrow_hit", "pos": p.pos, "shred": p.shred > 0.0, "crit": p.crit})
 
+
+
+## On-hit effects of the reworked towers' rounds: a stun chance (Shock Rounds) and a burn (Incendiary Rounds).
+func _rework_hit_effects(p, s: Dictionary) -> void:
+	var e = p.target
+	if e == null or not e.alive:
+		return
+	var chance := float(s.get("stun_chance", 0.0))
+	if chance > 0.0 and _roll(chance):
+		e.apply_stun(float(s.get("stun_time", 0.3)) * _boss_factor(e))
+	var ignite := float(s.get("ignite_dps", 0.0))
+	if ignite > 0.0:
+		e.apply_burn(ignite, float(s.get("ignite_time", 2.0)))
+
+
+## A deterministic chance roll (crits, stun chances) from the run's seed and a counter.
+func _roll(chance: float) -> bool:
+	_roll_count += 1
+	var h := sin(float(seed_value % 100003) * 12.9898 + float(_roll_count) * 78.233) * 43758.5453
+	return (h - floor(h)) < chance
 
 
 func _update_pools(dt: float) -> void:
@@ -1839,6 +1957,8 @@ func _kill(e, source) -> void:
 	stats["kills"] += 1
 	if source != null:
 		source.kills += 1
+		if source is Tower and source.is_rework and bool(source.stats().get("swivel", false)):
+			source.cooldown = 0.0   # Swivel Mount: a new target at once after a kill
 	_emit({"type": "kill", "pos": e.pos, "enemy": e.type, "bounty": gain, "boss": e.boss})
 	# Chain Reactor: a Nova kill sets off a small shockwave (limited depth so chains stay finite).
 	if source is Tower and source.type == "nova" and _nova_depth < 2:
@@ -2056,7 +2176,7 @@ func apply_save(data: Dictionary) -> String:
 		if not (entry is Dictionary):
 			return "A tower entry is malformed."
 		var type := str(entry.get("type", ""))
-		if not Towers.TOWERS.has(type):
+		if not Towers.has(type):
 			return "Unknown tower type '%s'." % type
 		var cell := Vector2i(int(entry.get("col", -1)), int(entry.get("row", -1)))
 		var tiles := footprint(type, cell)

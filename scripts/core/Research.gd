@@ -32,7 +32,7 @@ static func tree_nodes(tree: String) -> Array:
 static func tree_name(tree: String) -> String:
 	if Data.TREE_NAMES.has(tree):
 		return str(Data.TREE_NAMES[tree])
-	return str(Towers.TOWERS[tree].name)
+	return str(Towers.def(tree).name)
 
 
 static func mastery_node(tower_type: String) -> String:

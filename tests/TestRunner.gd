@@ -2685,3 +2685,217 @@ func test_range_map() -> void:
 	var grid = Grid.new("range")
 	check(grid.ground_paths.size() == 1 and grid.air_paths.size() == 1, "the test range has one lane")
 	check(not Maps.ORDER.has("range"), "the test range isn't a playable sector")
+
+
+# --- The tower rework (issue #59): the framework, through the Gun Turret ---------------------------
+
+## The nth free buildable tile for a tower type (so tests don't depend on hand-picked cells).
+func spot(g, type: String, n: int) -> Vector2i:
+	var found := 0
+	for y in 14:
+		for x in 24:
+			var c := Vector2i(x, y)
+			if g.placement_error(type, c) == "":
+				if found == n:
+					return c
+				found += 1
+	return Vector2i(-1, -1)
+
+
+## Buys `n` steps on path `key` of a reworked tower (money is no object).
+func buy_steps(g, t, key: String, n: int) -> void:
+	for i in n:
+		g.gold += 10000
+		g.upgrade_tower(t, key)
+
+
+func test_rework_gun_turret_stock() -> void:
+	var g = new_game()
+	g.gold = 1000
+	check(Towers.is_rework("gun_turret") and Towers.has("gun_turret"), "the Gun Turret is a reworked tower")
+	check(g.tower_cost("gun_turret") == 75, "it costs 75")
+	var t = g.place_tower("gun_turret", Vector2i(2, 3))
+	check(t != null and t.is_rework and g.gold == 925, "it builds for 75")
+	var s: Dictionary = t.stats()
+	check(near(s.damage, 16.0) and near(s.range, 130.0) and near(s.rate, 1.2), "stock: 16 damage, 130 range, 1.2 shots/s")
+	check(t.hits_air() and t.hits_ground(), "it hits air and ground")
+	check(t.tier == 1 and t.display_name() == "Gun Turret", "stock tier and name")
+	check(t.def["class"] == "Assault" and t.def.damage_kind == "physical", "an Assault tower with physical damage")
+
+
+func test_rework_retrofit() -> void:
+	var g = new_game()
+	g.gold = 5000
+	var t = g.place_tower("gun_turret", Vector2i(2, 3))
+	check(t.retrofit_options().size() == 3, "three Retrofit options")
+	check(t.retrofit_cost(0) == 40 and t.retrofit_cost(1) == 5 and t.retrofit_cost(2) == 25, "priced 40 / 5 / 25")
+	var before: int = g.gold
+	check(g.buy_retrofit(t, 0) and g.gold == before - 40 and t.retrofit == 0, "Water-Cooled Barrel bought")
+	check(near(t.stats().rate, 1.5) and t.tier == 2, "its fire rate rises to 1.5")
+	check(not g.buy_retrofit(t, 1) and t.retrofit == 0 and t.retrofit_cost(1) == 0, "the choice is locked")
+	var u = g.place_tower("gun_turret", spot(g, "gun_turret", 30))
+	check(g.buy_retrofit(u, 1) and near(u.stats().stun_chance, 0.05) and near(u.stats().stun_time, 0.3), "Shock Rounds adds a stun chance")
+	var v = g.place_tower("gun_turret", spot(g, "gun_turret", 60))
+	check(g.buy_retrofit(v, 2) and near(v.stats().ignite_dps, 3.0), "Incendiary Rounds adds a burn")
+	var broke = new_game()
+	broke.gold = 75
+	var w = broke.place_tower("gun_turret", Vector2i(2, 3))
+	check(not broke.buy_retrofit(w, 0) and w.retrofit == -1, "the Retrofit needs the credits")
+
+
+func test_rework_paths() -> void:
+	var g = new_game()
+	g.gold = 10000
+	var t = g.place_tower("gun_turret", Vector2i(2, 3))
+	check(t.can_buy("a") and t.can_buy("b") and t.can_buy("c"), "the paths open from stock, no Retrofit needed")
+	check(t.upgrade_cost("a") == 55 and t.upgrade_cost("b") == 25 and t.upgrade_cost("c") == 15, "step 1 prices 55 / 25 / 15")
+	buy_steps(g, t, "a", 1)
+	check(near(t.stats().damage, 22.0), "Heavier Rounds: +6 damage")
+	buy_steps(g, t, "a", 1)
+	check(near(t.stats().armor_flat, 2.0), "Hardened Tips: ignore 2 armour")
+	check(t.upgrade_cost("a") == 405, "step 3 costs 405")
+	buy_steps(g, t, "a", 1)
+	check(t.primary() == "a" and near(t.stats().armor_pct, 0.5) and near(t.stats().damage, 28.0), "AP Rounds: the primary locks in")
+	buy_steps(g, t, "b", 3)
+	check(t.depth.b == 2 and not t.can_buy("b") and t.block_reason("b").contains("secondary"), "the secondary stops at 2")
+	check(near(t.stats().crit, 0.10) and near(t.stats().range, 160.0), "its two steps still count (crit 10%, range +30)")
+	check(not t.can_buy("c") and t.block_reason("c").contains("two"), "the third path is locked")
+	buy_steps(g, t, "a", 1)
+	check(near(t.stats().armor_pct, 0.75) and near(t.stats().damage, 36.0), "Tungsten Core: 75% and +8")
+	check(t.block_reason("a").contains("Mastery"), "the mastery needs the tower's research (%s)" % t.block_reason("a"))
+	t.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	t.invalidate()
+	check(t.can_buy("a") and t.upgrade_cost("a") == 2475, "with the research the mastery opens at 2,475")
+	buy_steps(g, t, "a", 1)
+	check(t.mastered and near(t.stats().armor_pct, 1.0) and near(t.stats().damage, 44.0), "Sabot Rounds: full armour piercing, 44 damage")
+	check(t.display_name() == "Sabot Rounds" and t.tier == 4, "it takes the mastery's name")
+
+
+func test_rework_range_path_and_multi_path() -> void:
+	var g = new_game()
+	g.gold = 20000
+	var t = g.place_tower("gun_turret", Vector2i(2, 3))
+	t.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, t, "b", 5)
+	check(t.mastered and near(t.stats().range, 230.0) and near(t.stats().crit, 0.30), "Targeting Computer: 230 range, 30% crit")
+	var m = g.place_tower("gun_turret", spot(g, "gun_turret", 30))
+	m.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, m, "c", 3)
+	check(int(m.stats().multishot) == 2, "Twin Mount: 2 targets")
+	buy_steps(g, m, "c", 2)
+	check(int(m.stats().multishot) == 3 and bool(m.stats().weakest_extra) and near(m.stats().rate, 1.5), "Triple Mount: 3 targets (+0.3 shots/s from Belt Feed)")
+
+
+func test_rework_armour_piercing() -> void:
+	var g = new_game()
+	g.gold = 10000
+	var t = g.place_tower("gun_turret", Vector2i(2, 3))
+	var brute = put(g, "brute", 100.0, 0, 20.0)
+	var plain: float = g.damage_enemy(brute, 20.0, false, t)
+	check(near(plain, 14.0), "a stock hit loses the brute's 6 armour (%.1f)" % plain)
+	buy_steps(g, t, "a", 2)
+	var hardened: float = g.damage_enemy(brute, 20.0, false, t)
+	check(near(hardened, 16.0), "Hardened Tips ignores 2 of it (%.1f)" % hardened)
+	buy_steps(g, t, "a", 1)
+	var ap: float = g.damage_enemy(brute, 20.0, false, t)
+	check(near(ap, 18.0), "AP Rounds ignores half of what's left (%.1f)" % ap)
+	var other = g.place_tower("gun_turret", spot(g, "gun_turret", 30))
+	check(near(g.damage_enemy(brute, 20.0, false, other), 14.0), "another tower is unaffected")
+
+
+func test_rework_crit_and_hit_effects() -> void:
+	var g = new_game()
+	g.gold = 10000
+	var t = g.place_tower("gun_turret", Vector2i(2, 3))
+	var e = put(g, "grunt", 100.0, 0, 50.0)
+	g._fire_projectile(t, e, {"proj_speed": 800.0, "crit": 1.0})
+	var p = g.projectiles[g.projectiles.size() - 1]
+	check(p.crit and near(p.damage, t.eff_damage() * 2.0), "a sure crit does double damage")
+	g.projectiles.clear()
+	g._fire_projectile(t, e, {"proj_speed": 800.0, "crit": 0.0})
+	check(not g.projectiles[0].crit and near(g.projectiles[0].damage, t.eff_damage()), "no crit chance, no crit")
+	g.projectiles.clear()
+	var rolls := 0
+	for i in 400:
+		if g._roll(0.25):
+			rolls += 1
+	check(rolls > 60 and rolls < 140, "chance rolls come out near their odds (%d / 400)" % rolls)
+	var u = g.place_tower("gun_turret", spot(g, "gun_turret", 30))
+	g.buy_retrofit(u, 1)
+	var stunned := 0
+	for i in 60:
+		var f = put(g, "grunt", 120.0 + float(i), 0, 50.0)
+		var pr = Projectile.new()
+		pr.kind = "arrow"
+		pr.target = f
+		pr.target_pos = f.pos
+		pr.pos = f.pos
+		pr.damage = 1.0
+		pr.source = u
+		g._projectile_hit(pr)
+		if f.stun_timer > 0.0:
+			stunned += 1
+	check(stunned > 0 and stunned < 18, "Shock Rounds stuns only some hits (%d / 60)" % stunned)
+	var v = g.place_tower("gun_turret", spot(g, "gun_turret", 60))
+	g.buy_retrofit(v, 2)
+	var burn = put(g, "grunt", 200.0, 0, 50.0)
+	var bp = Projectile.new()
+	bp.kind = "arrow"
+	bp.target = burn
+	bp.pos = burn.pos
+	bp.damage = 1.0
+	bp.source = v
+	g._projectile_hit(bp)
+	check(near(burn.dot_dps, 3.0) and near(burn.dot_timer, 2.0), "Incendiary Rounds set the target burning for 3 dps, 2 s")
+
+
+func test_rework_multi_target() -> void:
+	var g = new_game()
+	g.gold = 20000
+	var t = g.place_tower("gun_turret", Vector2i(2, 3))
+	var a = put(g, "grunt", 60.0, 0, 100.0)
+	var b = put(g, "grunt", 70.0, 0, 100.0)
+	a.pos = t.pos + Vector2(40, 0)
+	b.pos = t.pos + Vector2(60, 0)
+	g._fire_gun(t, a, t.stats())
+	check(g.projectiles.size() == 1, "stock: one round")
+	g.projectiles.clear()
+	buy_steps(g, t, "c", 2)
+	g._fire_gun(t, a, t.stats())
+	check(g.projectiles.size() == 2 and near(g.projectiles[1].damage, t.eff_damage() * 0.5), "Side Gun: a second target at 50% damage")
+	g.projectiles.clear()
+	buy_steps(g, t, "c", 1)
+	g._fire_gun(t, a, t.stats())
+	check(g.projectiles.size() == 2 and near(g.projectiles[1].damage, t.eff_damage()), "Twin Mount: two targets at full damage")
+
+
+func test_rework_swivel_mount() -> void:
+	var g = new_game()
+	g.gold = 20000
+	var t = g.place_tower("gun_turret", Vector2i(2, 3))
+	buy_steps(g, t, "c", 1)
+	var weak = put(g, "grunt", 60.0, 0, 0.1)
+	weak.pos = t.pos + Vector2(40, 0)
+	var strong = put(g, "grunt", 70.0, 0, 50.0)
+	strong.pos = t.pos + Vector2(60, 0)
+	check(g.pick_target(t) != null, "a target in range")
+	var p = Projectile.new()
+	p.target = weak
+	p.damage = weak.hp + 5.0
+	g.projectiles.append(p)
+	check(g.pick_target(t) == strong, "Swivel Mount skips an enemy that shots in flight will already kill")
+	t.cooldown = 1.0
+	g._kill(weak, t)
+	check(near(t.cooldown, 0.0), "and a kill frees the gun to fire at once")
+
+
+func test_rework_data_and_unlocks() -> void:
+	var tr: Dictionary = Towers.Rework.TREES["gun_turret"]
+	check(tr.paths.size() == 3 and tr.retrofits.size() == 3, "three paths and three Retrofits")
+	for p in tr.paths:
+		check(p.nodes.size() == 4 and not p.mastery.is_empty(), "path %s has 4 steps and a mastery" % p.key)
+	check(Research.mastery_node("gun_turret") == "gun_turret_m", "the Gun Turret has a Mastery research node")
+	check(Research.tower_mods(["gun_turret_1", "gun_turret_2a", "gun_turret_2b", "gun_turret_m"], "gun_turret").mastery, "its research unlocks the masteries")
+	var g = research_game(["gun_turret_1"])
+	var t = g.place_tower("gun_turret", Vector2i(2, 3))
+	check(near(t.stats().damage, 16.0 * 1.06), "research applies to a reworked tower")

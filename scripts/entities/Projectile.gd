@@ -22,3 +22,5 @@ var shred_max := 0.0
 var burn_dps := 0.0
 var burn_time := 0.0
 var stun := 0.0
+## A critical hit: its damage is already multiplied; the hit effect marks it.
+var crit := false

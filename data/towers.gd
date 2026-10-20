@@ -7,6 +7,8 @@ extends RefCounted
 ## Ranges are pixels (one tile = 48 px); `rate` is attacks per second; laser `damage` is per second.
 ## Internal ids (arrow, cannon, ...) predate the sci-fi theme and are kept so old saves stay valid.
 
+const Rework = preload("res://data/rework_trees.gd")
+
 const ORDER := ["arrow", "cannon", "frost", "sniper", "tesla", "laser", "missile", "amp", "flak", "sensor", "gravity", "nullifier", "nova", "drones", "scrap"]
 
 const TOWERS := {
@@ -371,3 +373,26 @@ const TOWERS := {
 		"tiers": [{}, {}],
 	},
 }
+
+
+## The reworked towers (issue #59) live in data/rework_trees.gd. During the integration they run beside the old
+## roster; `def` gives either kind of tower the same definition shape, and the old ones are removed at the final swap.
+## Every tower type: the old roster, then the reworked towers.
+static func all_types() -> Array:
+	return ORDER + Rework.ORDER
+
+
+static func has(type: String) -> bool:
+	return TOWERS.has(type) or Rework.TREES.has(type)
+
+
+static func is_rework(type: String) -> bool:
+	return Rework.TREES.has(type)
+
+
+static func def(type: String) -> Dictionary:
+	if TOWERS.has(type):
+		return TOWERS[type]
+	var r: Dictionary = Rework.TREES[type]
+	return {"name": r.name, "blurb": r.blurb, "air": r.air, "ground": r.ground, "size": r.size,
+		"class": r["class"], "weapon": r.weapon, "damage_kind": r.damage_kind, "rework": true, "tiers": [{}, {}]}
