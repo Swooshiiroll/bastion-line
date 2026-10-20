@@ -10,14 +10,14 @@ func _draw() -> void:
 	if done:
 		return
 	done = true
-	var types := ["arrow", "cannon", "frost", "sniper", "tesla", "laser", "missile", "flak", "sensor", "gravity", "amp", "nullifier", "nova", "drones", "scrap"]
+	var types: Array = load("res://data/towers.gd").ORDER
 	var line := "PERF draw.tower µs per call (tier 1 / 3 / 6):"
 	for ty in types:
 		var cells := []
 		for tier in [1, 3, 6]:
 			var t0 := Time.get_ticks_usec()
 			for i in REPS:
-				Draw.tower(self, ty, tier, Vector2(100, 100), 0.3, 1.0, float(i) * 0.1, 0.0, "", "")
+				Draw.tower(self, ty, tier, Vector2(100, 100), 0.3, 1.0, float(i) * 0.1, 0.0, "-1|0|0|0", "")
 			cells.append(str((Time.get_ticks_usec() - t0) / REPS))
 		line += "  %s %s" % [ty, "/".join(cells)]
 	print(line)

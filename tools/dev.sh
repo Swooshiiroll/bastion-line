@@ -63,9 +63,9 @@ case "$cmd" in
       fail=1
     else echo "ok"; fi
     echo "== design data in sync with design/*.md"
-    node tools/tree_data.mjs > /dev/null && node tools/tree_page.mjs > /dev/null && node tools/super_page.mjs > /dev/null
-    if ! git diff --quiet -- data/tower_trees.gd design/upgrade_trees.html design/super_structures.html; then
-      git diff --stat -- data/tower_trees.gd design/upgrade_trees.html design/super_structures.html
+    node tools/super_page.mjs > /dev/null
+    if ! git diff --quiet -- design/super_structures.html; then
+      git diff --stat -- design/super_structures.html
       echo "Regenerated files differ: run the generators and commit their output with the .md change."
       fail=1
     else echo "ok"; fi

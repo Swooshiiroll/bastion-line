@@ -10,10 +10,10 @@ const UiKit = preload("res://scripts/ui/UiKit.gd")
 const PLANET_C := Vector2(800, 2400)
 const PLANET_R := 1740.0
 const CREST_Y := PLANET_C.y - PLANET_R
-## Towers along the ridge: [type, spec, x]. The core sits at the crest between them.
+## Towers along the ridge, each at a mastery: [type, look ("retrofit|a|b|c"), x]. The core sits at the crest between them.
 const LINE := [
-	["drones", "interceptors", 150.0], ["missile", "hellfire", 320.0], ["tesla", "storm", 480.0], ["arrow", "gatling", 640.0],
-	["laser", "prism", 960.0], ["sniper", "lance", 1120.0], ["nova", "supernova", 1280.0], ["flak", "skyshred", 1450.0],
+	["drone_bay", "0|2|5|0", 150.0], ["rocket_salvo", "0|5|2|0", 320.0], ["tesla_tower", "1|5|0|2", 480.0], ["gun_turret", "2|5|2|0", 640.0],
+	["laser_tower", "0|5|0|2", 960.0], ["railgun", "1|5|2|0", 1120.0], ["shockwave_generator", "0|5|2|0", 1280.0], ["anti_aircraft_turret", "1|5|0|2", 1450.0],
 ]
 const SHOT_LIFE := 0.22
 

@@ -15,6 +15,9 @@ so write for players.
 - **Tower rework, batch 5 (in progress, #59):** the new Radar Tower, Shockwave Generator and Scrapyard join the shop. The Radar pings to reveal cloaked and burrowed enemies and burns the ones it reveals; the Shockwave Generator hits everything around it, cloaked or not, with barriers breaking faster on its Effect path; the Scrapyard pays at each round clear and fields boost kills, discounts and sell-backs.
 - **Tower rework, batch 6 (in progress, #59):** the last three new towers, the Magneto Tower, Tractor Tower and Augmentation Tower, join the shop. The Magneto slows and strips armour in a field, with heavier roles resisting more; the Tractor Tower grabs one enemy and hauls it back along the track; the Augmentation Tower gives nearby towers crits, energy damage and ricochets.
 
+### Changed
+- **The tower swap (#59):** the fifteen old towers are gone; the shop holds the twenty new ones, and there are no build hotkeys any more (pick towers in the shop; 1 to 3 pick a Retrofit). Their Research Lab trees are gone too (research bought in them is refunded), the title screen shows the new towers at their masteries, and the Codex describes each new tower's Retrofits and paths. Saves from before the swap can't be loaded. The upgrade tree view (E) and its live preview only worked for the old towers and are gone until a version for the new towers is designed. The bot that plays the balance tests now builds the new towers.
+
 ## [3.6.0] - 2026-10-04
 
 ### Added

@@ -166,9 +166,9 @@ static func reach_tag(type: String) -> Array:
 	if d.get("economy", false):
 		return ["ECONOMY", UiKit.GOLD]
 	if d.get("support", false):
-		return ["SUPPORT", Draw.ACCENT.amp]
+		return ["SUPPORT", Draw.ACCENT.boost_tower]
 	if not d.get("ground", true):
-		return ["AIR ONLY", Draw.ACCENT.flak]
+		return ["AIR ONLY", Draw.ACCENT.anti_aircraft_turret]
 	if d.air:
 		return ["AIR+GND", UiKit.BLUE]
 	return ["GROUND", UiKit.DIM]
@@ -191,10 +191,6 @@ static func research_line(mods: Dictionary) -> String:
 	if parts.is_empty():
 		return ""
 	return "Research: " + ", ".join(PackedStringArray(parts))
-
-
-static func build_key(i: int) -> String:
-	return ["1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=", "[", "]", "\\"][i] if i < 15 else ""
 
 
 ## A two-line blurb inside a button. Autowrap must be on before sizing, or the label keeps its

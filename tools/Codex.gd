@@ -6,7 +6,7 @@ extends Node
 
 const Draw = preload("res://scripts/view/Draw.gd")
 const Towers = preload("res://data/towers.gd")
-const TowerTrees = preload("res://data/tower_trees.gd")
+const TowerInfo = preload("res://scripts/ui/TowerInfo.gd")
 const Enemies = preload("res://data/enemies.gd")
 const Waves = preload("res://data/waves.gd")
 const Difficulty = preload("res://data/difficulty.gd")
@@ -58,13 +58,14 @@ func _write_data() -> void:
 		d["speed_120"] = snappedf(float(d.speed) * Waves.speed_scale(120, bool(d.get("boss", false))), 0.1)
 		enemies.append(d)
 	var towers: Array = []
-	for type in TowerTrees.ORDER:
-		var td: Dictionary = Towers.TOWERS[type]
+	for i in Towers.ORDER.size():
+		var type: String = Towers.ORDER[i]
+		var td: Dictionary = Towers.def(type)
 		var branches: Array = []
-		for b in TowerTrees.TREES[type].branches:
-			branches.append({"id": b.id, "color": Draw.accent(type, str(b.id)).to_html(false)})
+		for p in Towers.Rework.TREES[type].paths:
+			branches.append({"id": p.key, "color": Draw.accent(type).to_html(false)})
 		towers.append({
-			"id": type, "name": TowerTrees.TREES[type].name, "key": TowerTrees.TREES[type].key,
+			"id": type, "name": td.name, "key": "",
 			"color": Draw.accent(type).to_html(false), "air": bool(td.get("air", false)),
 			"ground": bool(td.get("ground", true)), "support": bool(td.get("support", false)), "economy": bool(td.get("economy", false)), "size": int(td.get("size", 1)), "branches": branches,
 		})
@@ -84,12 +85,14 @@ func _write_data() -> void:
 
 func _render() -> void:
 	var queue: Array = []
-	for type in TowerTrees.ORDER:
-		queue.append({"kind": "t", "type": type, "tier": 1, "spec": "", "file": "t_%s_1" % type})
-		queue.append({"kind": "t", "type": type, "tier": 2, "spec": "", "file": "t_%s_2" % type})
-		for b in TowerTrees.TREES[type].branches:
-			queue.append({"kind": "t", "type": type, "tier": 3, "spec": str(b.id), "file": "t_%s_%s" % [type, b.id]})
-			queue.append({"kind": "t", "type": type, "tier": 4, "spec": str(b.id), "file": "t_%s_%s_m" % [type, b.id]})
+	# Each tower stock, retrofitted, and at the end of each path and its mastery (looks are "retrofit|a|b|c").
+	for type in Towers.ORDER:
+		queue.append({"kind": "t", "type": type, "tier": 1, "spec": "-1|0|0|0", "file": "t_%s_1" % type})
+		queue.append({"kind": "t", "type": type, "tier": 2, "spec": "0|0|0|0", "file": "t_%s_2" % type})
+		for k in ["a", "b", "c"]:
+			for m in [4, 5]:
+				var look := "-1|%d|%d|%d" % [m if k == "a" else 0, m if k == "b" else 0, m if k == "c" else 0]
+				queue.append({"kind": "t", "type": type, "tier": m - 1, "spec": look, "file": "t_%s_%s%s" % [type, k, "_m" if m == 5 else ""]})
 	for type in Enemies.ORDER:
 		queue.append({"kind": "e", "type": type, "file": "e_%s" % type})
 	for it in queue:

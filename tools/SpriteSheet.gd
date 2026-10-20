@@ -6,7 +6,6 @@ extends Node2D
 
 const Draw = preload("res://scripts/view/Draw.gd")
 const Towers = preload("res://data/towers.gd")
-const TowerTrees = preload("res://data/tower_trees.gd")
 const Enemies = preload("res://data/enemies.gd")
 const UiKit = preload("res://scripts/ui/UiKit.gd")
 
@@ -48,17 +47,17 @@ func _save() -> void:
 
 func _draw() -> void:
 	draw_rect(Rect2(Vector2.ZERO, UiKit.SCREEN), Color(0.08, 0.1, 0.13))
-	var heads := ["T1", "T2", "Spec A", "Mast. A", "Spec B", "Mast. B", "Spec C", "Mast. C"]
+	var heads := ["Stock", "Retrofit", "A T4", "Mast. A", "B T4", "Mast. B", "C T4", "Mast. C"]
 	for i in heads.size():
 		_text(ORIGIN + Vector2(i * CELL.x, -18), heads[i], 11, Color(0.6, 0.7, 0.8), CELL.x)
 	for row in Towers.ORDER.size():
 		var type: String = Towers.ORDER[row]
 		var y := ORIGIN.y + row * CELL.y + CELL.y / 2.0
-		_text(Vector2(8, y - 8), str(TowerTrees.TREES[type].name), 12, Draw.accent(type), 128, HORIZONTAL_ALIGNMENT_LEFT)
-		var cols := [[1, ""], [2, ""]]
-		for br in TowerTrees.TREES[type].branches:
-			cols.append([3, str(br.id)])
-			cols.append([4, str(br.id)])
+		_text(Vector2(8, y - 8), str(Towers.def(type).name), 12, Draw.accent(type), 128, HORIZONTAL_ALIGNMENT_LEFT)
+		var cols := [[1, "-1|0|0|0"], [2, "0|0|0|0"]]
+		for k in ["a", "b", "c"]:
+			for m in [4, 5]:
+				cols.append([m - 1, "-1|%d|%d|%d" % [m if k == "a" else 0, m if k == "b" else 0, m if k == "c" else 0]])
 		for i in cols.size():
 			var c := Vector2(ORIGIN.x + i * CELL.x + CELL.x / 2.0, y)
 			draw_rect(Rect2(c - CELL / 2.0 + Vector2(2, 2), CELL - Vector2(4, 4)), Color(0.12, 0.15, 0.19))

@@ -13,7 +13,6 @@ const TowerInfo = preload("res://scripts/ui/TowerInfo.gd")
 const Lore = preload("res://scripts/core/Lore.gd")
 const Glossary = preload("res://data/glossary.gd")
 const Towers = preload("res://data/towers.gd")
-const Trees = preload("res://data/tower_trees.gd")
 const Enemies = preload("res://data/enemies.gd")
 const Waves = preload("res://data/waves.gd")
 
@@ -90,13 +89,15 @@ func _ready() -> void:
 func _build_index() -> void:
 	_entries.clear()
 	for t in Towers.ORDER:
-		var tr: Dictionary = Trees.TREES[t]
-		var words: Array = [str(Towers.TOWERS[t].blurb)]
-		for b in tr.branches:
-			for nd in b.nodes:
+		var tr: Dictionary = Towers.Rework.TREES[t]
+		var words: Array = [str(tr.blurb)]
+		for r in tr.retrofits:
+			words.append(str(r.name))
+		for p in tr.paths:
+			for nd in p.nodes:
 				words.append(str(nd.name))
-			words.append(str(b.mastery.name))
-		_entries.append({"id": "tower:" + t, "title": str(Towers.TOWERS[t].name), "category": "towers", "search": " ".join(PackedStringArray(words))})
+			words.append(str(p.mastery.name))
+		_entries.append({"id": "tower:" + t, "title": str(tr.name), "category": "towers", "search": " ".join(PackedStringArray(words))})
 	for e in Enemies.ORDER:
 		var d: Dictionary = Enemies.ENEMIES[e]
 		_entries.append({"id": "enemy:" + e, "title": str(d.name), "category": "enemies", "search": str(d.blurb) + " " + " ".join(PackedStringArray(Lore.enemy_abilities(d)))})
@@ -262,14 +263,13 @@ func _links(title: String, ids: Array) -> void:
 
 
 func _show_tower(type: String) -> void:
-	var d: Dictionary = Towers.TOWERS[type]
-	var tr: Dictionary = Trees.TREES[type]
+	var d: Dictionary = Towers.def(type)
+	var tr: Dictionary = Towers.Rework.TREES[type]
 	var beam := bool(d.get("beam", false))
 	var icon := DrawControl.new(func(ci): Draw.tower(ci, type, 2, ci.size / 2.0, -PI / 3.0, 3.0, Time.get_ticks_msec() / 1000.0, 0.0), Vector2(110, 110), true)
-	var idx := Towers.ORDER.find(type)
 	var size_note := "  ·  takes 2×2 tiles" if int(d.get("size", 1)) > 1 else ""
-	_header(icon, str(d.name), Draw.accent(type), "Key %s  ·  %d cr  ·  %s%s" % [TowerInfo.build_key(idx), int(tr.tiers[0].cost), TowerInfo.reach_text(type), size_note], str(d.blurb))
-	_section("Upgrade path")
+	_header(icon, str(d.name), Draw.accent(type), "%s  ·  %d cr  ·  %s%s" % [str(d["class"]), int(tr.cost), TowerInfo.reach_text(type), size_note], str(d.blurb))
+	_section("Retrofit and paths")
 	var rows := Lore.tower_rows(type)
 	var cur_branch := "?"
 	for r in rows:
@@ -278,16 +278,12 @@ func _show_tower(type: String) -> void:
 			if cur_branch != "":
 				var bc := Draw.accent(type, cur_branch)
 				var bh := UiKit.hbox(8)
-				var spec: String = cur_branch
+				# The tower with this path at its last step, for the little picture.
+				var spec := "-1|%d|%d|%d" % [4 if cur_branch == "a" else 0, 4 if cur_branch == "b" else 0, 4 if cur_branch == "c" else 0]
 				bh.add_child(DrawControl.new(func(ci): Draw.tower(ci, type, 3, ci.size / 2.0, -PI / 3.0, 1.1, Time.get_ticks_msec() / 1000.0, 0.0, spec), Vector2(36, 36), true))
 				var bl := UiKit.label("%s  ·  %s" % [str(r.label).substr(0, 1), str(r.name).to_upper()], 15, bc)
 				bl.size_flags_vertical = Control.SIZE_SHRINK_CENTER
 				bh.add_child(bl)
-				for b in tr.branches:
-					if str(b.id) == cur_branch and bool(b.get("attack", false)):
-						var note := UiKit.label("changes the attack: as a secondary it adds its attack alongside the primary's", 11, UiKit.DIM)
-						note.size_flags_vertical = Control.SIZE_SHRINK_CENTER
-						bh.add_child(note)
 				_detail.add_child(bh)
 		_detail.add_child(_upgrade_row(r, beam, type))
 	var see: Array = ["g:trees", "g:primary", "g:mastery", "g:targeting", "g:selling"]
