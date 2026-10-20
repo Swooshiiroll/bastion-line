@@ -2070,7 +2070,7 @@ func to_save() -> Dictionary:
 	for t in towers:
 		tl.append({
 			"type": t.type, "col": t.cell.x, "row": t.cell.y, "trunk": t.trunk, "depth": t.depth.duplicate(),
-			"started": t.started.duplicate(), "mastery": t.mastered, "mode": t.mode, "priority": t.priority, "kills": t.kills, "spent": t.spent,
+			"retrofit": t.retrofit, "started": t.started.duplicate(), "mastery": t.mastered, "mode": t.mode, "priority": t.priority, "kills": t.kills, "spent": t.spent,
 		})
 	return {
 		"version": SAVE_VERSION,
@@ -2101,7 +2101,14 @@ func to_save() -> Dictionary:
 ## Restores a saved tower's upgrade state after checking it follows the branch rules.
 func _restore_upgrades(t, entry: Dictionary) -> String:
 	var trunk := int(entry.get("trunk", 1))
-	if trunk < 1 or trunk > 2:
+	if t.is_rework:
+		# The reworked towers have no trunk: an optional Retrofit (one of its options, -1 for none) and three open paths.
+		var ro := int(entry.get("retrofit", -1))
+		if ro < -1 or ro >= t.retrofit_options().size():
+			return "invalid Retrofit option %d." % ro
+		t.retrofit = ro
+		trunk = 2
+	elif trunk < 1 or trunk > 2:
 		return "invalid trunk tier %d." % trunk
 	t.trunk = trunk
 	var dep = entry.get("depth", {})

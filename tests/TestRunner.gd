@@ -2919,3 +2919,30 @@ func test_rework_roles_and_damage_kinds() -> void:
 	check(arc != null and not arc.is_rework, "an old tower still builds beside the reworked ones")
 	g.damage_enemy(swarm, 1.0, false, null)
 	check(swarm.last_hit_kind == "physical", "a hit with no tower is physical")
+
+
+func test_rework_save_roundtrip() -> void:
+	var g = research_game(["gun_turret_1", "gun_turret_2a", "gun_turret_2b", "gun_turret_m"], "canyon", 99, "hard")
+	g.gold = 50000
+	var a = g.place_tower("gun_turret", spot(g, "gun_turret", 3))
+	g.buy_retrofit(a, 2)
+	buy_steps(g, a, "a", 3)
+	buy_steps(g, a, "c", 2)
+	var m = g.place_tower("gun_turret", spot(g, "gun_turret", 40))
+	buy_steps(g, m, "b", 5)
+	check(m.mastered, "the mastery is bought")
+	var data := SaveCodec.encode(g)
+	var dec := SaveCodec.decode(JSON.parse_string(JSON.stringify(data)))
+	check(dec.has("game"), "the save decodes (%s)" % dec.get("error", ""))
+	if not dec.has("game"):
+		return
+	var g2 = dec.game
+	check(g2.towers.size() == 2, "both towers come back")
+	var a2 = g2.tower_at[a.cell]
+	check(a2.is_rework and a2.retrofit == 2 and a2.depth.a == 3 and a2.depth.c == 2 and a2.primary() == "a", "the Retrofit and the paths are restored")
+	check(a2.look_key() == a.look_key() and near(a2.stats().ignite_dps, 3.0) and near(a2.stats().armor_pct, 0.5), "its stats are restored")
+	var m2 = g2.tower_at[m.cell]
+	check(m2.mastered and m2.look_key() == m.look_key() and near(m2.stats().range, m.stats().range) and near(m2.stats().range, 230.0 * 1.07), "the mastery is restored (research still applies)")
+	var bad = JSON.parse_string(JSON.stringify(data))
+	bad.towers[0]["retrofit"] = 7
+	check(SaveCodec.decode(bad).has("error"), "an invalid Retrofit option is refused")
