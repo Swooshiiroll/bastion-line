@@ -393,7 +393,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 16 | Shockwave Generator | `design/tower_art_p2_16_shock.html` | **Confirmed** (owner, 2026-10-19: "Finished") |
 | 17 | Scrapyard | `design/tower_art_p2_17_scrap.html` | Base **confirmed** (owner, 2026-10-19: B Production Line, B Melt and Pour; base page `design/tower_art_p17_scrapyard.html`). New upgrade names confirmed. Second pass **confirmed** (owner, 2026-10-19, "Finished"; round 5) |
 | 18 | Magneto Tower | `design/tower_art_p2_18_magneto.html` | Second pass **confirmed** (owner, 2026-10-19, "finished"; round 3) |
-| 19 | Tractor Tower | `design/tower_art_p2_19_tractor.html` | Second pass round 1: pick one option per stage and Retrofit |
+| 19 | Tractor Tower | `design/tower_art_p2_19_tractor.html` | Second pass round 2: Recharge and two Retrofits picked; pick Pull Distance (new ideas), Grip (now the effect's strength) and the replacement for Twin Emitter |
 
 ### Gun Turret (second pass)
 
@@ -1301,6 +1301,12 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
   - **Faster Recharge:** cooling fins, radiator panels, or a fan vent.
 - **Carpet-rule overlaps (kept, stacking):** Twin Emitter with Dual Beam (three beams), Longer Hold's +0.5 s with Stronger Beam's hold, and Faster Recharge's -1 s with the Recharge path.
 
+**Round 2 (owner's picks and notes, 2026-10-19):**
+- **Picked:** Recharge, all B (the cell ring); Longer Hold B (the hold battery); Faster Recharge C (the fan vent).
+- **Pull Distance, "Think of some more ideas":** the banded barrel (the round 1 pick) stays as option A. Four new ideas sit beside it at every step: D telescoping sleeves, E a dish emitter with a feed horn, F a coil barrel whose coils light toward the muzzle, and G forked prongs with a crackling arc. The rewind coil comes from Rewind, and Undo is gold.
+- **Grip, "Grip is in relation to how strong the effect is. Not a physical claw or clamp":** the base claws stay as they were. Grip now rebuilds the beam, the lock bubble round the held enemy and the emitter core between the claws, stronger each step, in three styles: a braided beam (more and thicker strands), gravity rings (rings reel in along the beam and close round the enemy), or a lattice cage (a sheath round the beam, a turning cage round the enemy). Gravity Hammer is gold. The crush, lift and slam, and grip lock effects stay.
+- **"Change twin emitter to something else":** the slot offers three replacement Retrofits, each with its own effect, for the owner to pick: **Stasis Wake** (after release the enemy stays slowed 40% for 2 s), **Beam Sweep** (while holding, the beam slows every other enemy it crosses by 30%) or **Shock Field** (the held enemy shocks enemies within 40 px for 10 damage/s). The pick goes into `design/tower_roster.md`, priced by the formula. Without Twin Emitter, its overlap with Dual Beam is gone.
+
 ## Open questions
 
-1. **Second pass, Tractor Tower** (tower 19, round 1): pick one option per stage and Retrofit. Then the Augmentation Tower.
+1. **Second pass, Tractor Tower** (tower 19, round 2): pick Pull Distance (from the five ideas), Grip (now the effect's strength) and the replacement for Twin Emitter. Then the Augmentation Tower.
