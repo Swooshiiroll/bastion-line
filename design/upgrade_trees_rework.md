@@ -432,9 +432,9 @@ Various collections of scrap metal sold at a profit. "One mans toxic waste is an
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
 | 1 | base | Scrapyard | 875 |  | 875 credits; pays 100 credits at each round's clear (× the round's income scale). A 150 px field (used by the Kill and Discount paths). Doesn't attack. | new |
-| 2 | r1 | Second Crusher | 525 |  | +30 income per round. | new |
-| 2 | r2 | Bigger Yard | 260 |  | +30 px to its fields. Its value depends on the paths, so the formula can't price it at stock; proposed at the Weighbridge's price. | new |
-| 2 | r3 | Weighbridge | 260 |  | Towers sold within its field refund 15% more (their scrap is weighed in at the gate). | new |
+| 2 | r1 | Hammer Mill | 525 |  | +30 income per round. | new |
+| 2 | r2 | Faster Loading | 260 |  | +30 px to its fields (a second conveyor and a second crane feed the furnace). Its value depends on the paths, so the formula can't price it at stock; proposed at Surplus's price. | new |
+| 2 | r3 | Surplus | 260 |  | Towers sold within its field refund 15% more (two extra crates of surplus stock). | new |
 | 3 | a | Firebrick Lining | 525 |  | 130 per round | new |
 | 4 | a | Forced Bellows | 1225 |  | 165 per round | new |
 | 5 | a | Blast Furnace | 3850 |  | 220 per round | new |
@@ -442,7 +442,7 @@ Various collections of scrap metal sold at a profit. "One mans toxic waste is an
 | M | a | Gold Foundry | 27440 |  | 320 per round, plus 3% interest on banked credits at each clear (up to 400) | new |
 | 3 | b | Tow Hook | 345 |  | Enemies destroyed within 140 px pay 15% more | new |
 | 4 | b | Magnet Crane | 625 |  | +25%; 150 px | new |
-| 5 | b | Hydraulic Shear | 2095 |  | +35%; 170 px | new |
+| 5 | b | Sorting Line | 2095 |  | +35%; 170 px | new |
 | 6 | b | Car Crusher | 5720 |  | +45%; 190 px | new |
 | M | b | Breaker's Yard | 28945 |  | +60%; 210 px; bosses pay double | new |
 | 3 | c | Parts Shelves | 190 |  | Towers within 140 px upgrade for 5% less | new |

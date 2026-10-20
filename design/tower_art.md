@@ -391,7 +391,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 15 | Cryo Tower | `design/tower_art_p2_15_cryo.html` | **Confirmed** (owner, 2026-10-19: "Finished"; Deep Cold C Frost Collar) |
 | 16 | Shockwave Generator | `design/tower_art_p2_16_shock.html` | **Confirmed** (owner, 2026-10-19: "Finished") |
-| 17 | Scrapyard | `design/tower_art_p2_17_scrap.html` | Base **confirmed** (owner, 2026-10-19: B Production Line, B Melt and Pour; base page `design/tower_art_p17_scrapyard.html`). New upgrade names confirmed. Second pass round 1: pick one option per stage and Retrofit |
+| 17 | Scrapyard | `design/tower_art_p2_17_scrap.html` | Base **confirmed** (owner, 2026-10-19: B Production Line, B Melt and Pour; base page `design/tower_art_p17_scrapyard.html`). New upgrade names confirmed. Second pass round 2: picks drawn; pick the Sorting Line, Faster Loading and Surplus options |
 
 ### Gun Turret (second pass)
 
@@ -1183,7 +1183,7 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
 | Path (part) | 1 | 2 | 3 (primary) | 4 | Mastery |
 |---|---|---|---|---|---|
 | Passive Income (furnace stack) | Firebrick Lining | Forced Bellows | Blast Furnace | Arc Furnace | Gold Foundry |
-| Kill Income (junkyard) | Tow Hook | Magnet Crane | Hydraulic Shear | Car Crusher | Breaker's Yard |
+| Kill Income (junkyard) | Tow Hook | Magnet Crane | Sorting Line (round 2; was Hydraulic Shear) | Car Crusher | Breaker's Yard |
 | Discounts (warehouse) | Parts Shelves | Pallet Racks | Forklift Bay | Loading Dock | Parts Exchange |
 
 **The page** (`design/tower_art_p2_17_scrap.html`, data `tools/tower_art/data_p2_scrap.js` on the base `data_scrap_parts.js`). Each path rebuilds one part around the machine its step names. Earlier picks carry as details, and masteries are gold. The agent runs the real rules: the payout with the real income, the kill ring, and the discount ring with the percentage off.
@@ -1211,6 +1211,19 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
   - Weighbridge: a truck scale with a readout, a dial scale, or a weigh hut with a barrier arm, below the yard.
 - **Carpet-rule overlaps (kept, stacking):** the Second Crusher's +30 income stacks with the Passive Income steps, and the Bigger Yard's +30 px stacks with both field radii.
 
+**Round 2 (owner's picks and notes, 2026-10-19):**
+- **Picks:** Passive Income 1 A, 2 B, 3 A, 4 C, M A (glowing firebrick, side blower, hot-blast stoves, plasma ring, gold shell); Kill Income 1 A, 2 C, 4 A, M A (tow truck, bridge magnet, flat press, gold crane); Discounts 1 A, 2 C, 3 A, 4 C, M C (open-roof shelves, stacker crane, forklift run, twin ramps, gold fleet); Retrofit Hammer Mill.
+- **Renames (owner's notes; effects unchanged, in `design/tower_roster.md` and the regenerated trees):**
+  - Kill Income step 3: Hydraulic Shear becomes **Sorting Line** (the owner chose it from three names).
+  - Second Crusher becomes **Hammer Mill** (+30 income).
+  - Bigger Yard becomes **Faster Loading** (+30 px to both fields). It now shows a second conveyor and a second crane, which feed the furnace from the top heap, taking turns with the main line.
+  - Weighbridge becomes **Surplus** (towers sold in its field refund 15% more). It now shows two extra crates.
+- **Open again, with new ideas:**
+  - Sorting Line: on the main belt, sorting scrap into three bins beside it. The options are a picking gantry with an arm, a turning drum magnet, or a shaking sorting screen.
+  - Faster Loading: the second line's crane is a grab crane, a magnet crane, or an overhead bridge magnet.
+  - Surplus: the two extra crates are a bigger stack, a pallet of crates, or crates tagged for sale.
+- **Carpet rule (the renamed Retrofits):** the Hammer Mill's +30 stacks with Passive Income, and Faster Loading's +30 px stacks with both field radii.
+
 ## Open questions
 
-1. **Second pass, Scrapyard** (tower 17, round 1, on the confirmed Production Line with the new names): pick one option per stage and Retrofit. Then the new upgrade names, the second pass, and towers 18-20 (next: Magneto Tower).
+1. **Second pass, Scrapyard** (tower 17, round 2): pick the Sorting Line, Faster Loading and Surplus options. The rest is picked. Then the new upgrade names, the second pass, and towers 18-20 (next: Magneto Tower).

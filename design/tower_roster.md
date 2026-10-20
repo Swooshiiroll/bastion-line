@@ -41,7 +41,7 @@ All 20 towers are designed and confirmed by the owner (2026-10-15). Costs are bu
 | 14 | Radar Tower | Utility | Energy | 575 | Power/Range / Speed/Frequency / Special Targeting | Bigger Dish / Signal Processor / Early Warning |
 | 15 | Cryo Tower | Support | Field | 150 | Slowing / Power/Range / Speed | Coolant Tank / Compressor / Deep Cold |
 | 16 | Shockwave Generator | Assault | Field | 450 | Power/Range / Speed / Effect | Wave Focus / Containment Coils / Reactor Venting |
-| 17 | Scrapyard | Utility | None | 875 | Passive Income / Kill Income / Discounts | Second Crusher / Bigger Yard / Weighbridge |
+| 17 | Scrapyard | Utility | None | 875 | Passive Income / Kill Income / Discounts | Hammer Mill / Faster Loading / Surplus |
 | 18 | Magneto Tower (Claude's proposal) | Defense | Field | 525 | Pull Strength / Field Size / Polarity | Superconducting Coil / Field Stabiliser / Pole Shoes |
 | 19 | Tractor Tower (Claude's proposal) | Defense | Energy | 575 | Pull Distance / Recharge / Grip | Twin Emitter / Longer Hold / Faster Recharge |
 | 20 | Augmentation Tower | Support | None | 650 | Energy Conversion / Critical Hits / Ricochet | Wide Aura / Amplified Bonus / Remote Link |
@@ -1551,16 +1551,17 @@ effects are Claude's proposals, confirmed as the design; the balance probe tunes
 - **Pricing:** the **non-damage rule** (stock value = build cost) with the **standard multipliers** (×2 to ×32), so
   the masteries are a pure late-game credit sink. The owner chose this over gentler economy multipliers that would let
   upgrades pay back.
-- **The Retrofit is chosen when you buy it**, from three: **Second Crusher**, **Bigger Yard** and **Weighbridge** (named Salvage Crane until 2026-10-19).
+- **The Retrofit is chosen when you buy it**, from three: **Hammer Mill**, **Faster Loading** and **Surplus** (named Second Crusher, Bigger Yard and Salvage Crane, then
+  Weighbridge, until 2026-10-19; the effects are unchanged).
 
 **Stock (proposed):** 875 credits; pays 100 credits at each round's clear (× the round's income scale). A 150 px field
 (used by the Kill and Discount paths). Doesn't attack.
 
 **Retrofit (pick one when buying it):**
-- **Second Crusher, 525:** +30 income per round.
-- **Bigger Yard, 260:** +30 px to its fields. Its value depends on the paths, so the formula can't price
-  it at stock; proposed at the Weighbridge's price.
-- **Weighbridge, 260:** towers sold within its field refund 15% more (their scrap is weighed in at the gate).
+- **Hammer Mill, 525:** +30 income per round.
+- **Faster Loading, 260:** +30 px to its fields (a second conveyor and a second crane feed the furnace). Its value depends on
+  the paths, so the formula can't price it at stock; proposed at Surplus's price.
+- **Surplus, 260:** towers sold within its field refund 15% more (two extra crates of surplus stock).
 
 **Path 1, Passive Income:**
 
@@ -1578,7 +1579,7 @@ effects are Claude's proposals, confirmed as the design; the balance probe tunes
 |---|---|---|---|
 | 1 | Tow Hook | 345 | Enemies destroyed within 140 px pay 15% more |
 | 2 | Magnet Crane | 625 | +25%; 150 px |
-| 3 (primary) | Hydraulic Shear | 2,095 | +35%; 170 px |
+| 3 (primary) | Sorting Line | 2,095 | +35%; 170 px |
 | 4 | Car Crusher | 5,720 | +45%; 190 px |
 | Mastery | Breaker's Yard | 28,945 | +60%; 210 px; bosses pay double |
 
@@ -1612,7 +1613,7 @@ vents coins at each round's clear. Each path rebuilds one part around the machin
 - **Kill:** the junkyard.
 - **Discount:** the warehouse.
 
-The Retrofit choice shows (a second crusher, a bigger yard, or a weighbridge). See `design/tower_art.md`.
+The Retrofit choice shows (a hammer mill, a second conveyor and crane, or two extra crates). See `design/tower_art.md`.
 
 ## 18. Magneto Tower
 
