@@ -349,7 +349,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 16 | Shockwave Generator | amber | B Ring Reactor | B Mushroom Pulse |
 | 17 | Scrapyard | copper | C Magnet Yard | B Sparks and Sale |
 | 18 | Magneto Tower | violet | F Stacked Coil Tower | F Drag Trails |
-| 19 | Tractor Tower | `design/tower_art_p2_19_tractor.html` | Base redesign **confirmed** (owner, 2026-10-19: B Armoured Dish, B Focus Beam; base page `design/tower_art_p19_tractor.html`). Second pass round 1: pick one option per stage and Retrofit, including the Twin Emitter replacement |
+| 19 | Tractor Tower | `design/tower_art_p2_19_tractor.html` | Base redesign **confirmed** (owner, 2026-10-19: B Armoured Dish, B Focus Beam; base page `design/tower_art_p19_tractor.html`). Second pass round 2: the dish redrawn flat (owner: it looked out of place); pick one option per stage and Retrofit, including the Twin Emitter replacement |
 | 20 | Augmentation Tower | lavender | F Nanite Hive | D Nanite Swarm |
 
 ## Second pass: per-path and Retrofit looks (owner, 2026-10-16)
@@ -1321,6 +1321,8 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
   - **Faster Recharge:** cooling fins, radiator panels, or a fan vent.
 - **Carpet-rule overlaps (kept, stacking):** Longer Hold's +0.5 s with Stronger Beam's hold, and Faster Recharge's -1 s with the Recharge path.
 
+**Round 2 (owner's note, "This design looks out of place compared to the rest of the towers"; the owner named the tilted dish perspective and chose a restyle):** the dish is redrawn flat, straight from above like the other towers (and like the Radar Tower's dish): a thick armoured band cupped toward the target round its focus, with crisp outlines, segment lines and rivets. The spike runs through the focus, and the rams sit behind the band. The base page shows the same flat dish. Grip's energy is drawn in crisp lines too: a brighter rim with emitter nodes, focus arcs closing on the focus, or hex cells along the band. Dual Beam's second dish and Beam Sweep's vanes match the flat dish. Nothing else changed.
+
 ## Open questions
 
-1. **Second pass, Tractor Tower** (tower 19, round 1, on the Armoured Dish): pick one option per stage and Retrofit, including the replacement for Twin Emitter. Then the Augmentation Tower.
+1. **Second pass, Tractor Tower** (tower 19, round 2, the dish drawn flat): pick one option per stage and Retrofit, including the replacement for Twin Emitter. Then the Augmentation Tower.

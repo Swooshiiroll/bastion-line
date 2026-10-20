@@ -1,4 +1,4 @@
-// ---- Tower art second pass: Tractor Tower (tower 19), round 1 on the redesigned base ---------------------------------------------------------------------------
+// ---- Tower art second pass: Tractor Tower (tower 19), round 2 on the redesigned base (the dish drawn flat, straight from above) ---------------------------------------------------------------------------
 // Base (owner, 2026-10-19, after "I want to completely redesign the tractor tower from scratch"): look B Armoured Dish, animation B Focus Beam
 // (tools/tower_art/data_tractor_looks.js). The mechanic, paths, effects and names stay. The owner chose the parts:
 //  - Path 1, Pull Distance, rebuilds the EMITTER SPIKE (a lance, a fork or a coil spike; longer each step; a rewind coil from Rewind; gold at Undo).
@@ -9,7 +9,7 @@
 // Each step rebuilds its part in the style picked for that step (the new design replaces the old one); masteries are gold; the agent runs the real rules.
 // The first Retrofit slot offers three replacements for Twin Emitter (the owner asked for something else): Stasis Wake, Beam Sweep or Shock Field.
 // Overlaps kept and stacking (the carpet rule): Longer Hold's +0.5 s with Stronger Beam's hold, Faster Recharge's -1 s with the Recharge path.
-const PAGE = { title: "Tractor Tower: paths and Retrofits (second pass)", store: "bl-tower-art-p2-tractor-d1" };
+const PAGE = { title: "Tractor Tower: paths and Retrofits (second pass)", store: "bl-tower-art-p2-tractor-d2" };
 const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], COPPER = [0.78, 0.5, 0.28, 1], LOCKC = [1, 0.85, 0.3, 1], ARMOUR = [0.36, 0.39, 0.44, 1], HOTG = [1, 0.92, 0.6, 1], STASIS = [0.6, 0.85, 1, 1];
 const rnd = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
 const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
@@ -22,10 +22,16 @@ const BACK = [80, 100, 120, 150, 190, 230], REW = [0, 0, 0, 3, 4, 5], RECH = [6,
 const holdOf = (B) => (B.lv[0] >= 2 ? 1.8 : 1.5) + (B.r === 1 ? 0.5 : 0), rechOf = (B) => RECH[B.lv[1]] - (B.r === 2 ? 1 : 0);
 // Where each beam leaves: 0 the spike's tip; 2 Dual Beam's small dish (aimed at its own target)
 function muzzleOf(B, m, c, aim, k, aim2) { if (m === 2) return add(P(c, aim, k, -4, -8.8), mul(fa(aim2 ?? aim), 4 * k)); return P(c, aim, k, SLEN[B.lv[0]] - 0.4, 0); }
-// A dish seen from above, tilted to face along the aim (the base's helper)
-function dishFace(dc, aim, k, rx, ry, rim, face, ribs) { oval(dc, rx * k, ry * k, aim, rim, 1.4); oval(add(dc, rot([0.8 * k, 0], aim)), (rx - 1) * k, (ry - 1.4) * k, aim, face, 0);
-  for (let i = 0; i < ribs; i++) { const th = i * TAU / ribs; line(dc, add(dc, rot([Math.cos(th) * (rx - 0.4) * k, Math.sin(th) * (ry - 0.6) * k], aim)), A(METAL_D, 0.45), 0.6 * k); }
-  oval(dc, rx * 0.5 * k, ry * 0.5 * k, aim, A(METAL_D, 0.18), 0); }
+// The dish seen from straight above (owner, 2026-10-19: the tilted dish looked out of place): a thick armoured band curved round its focus F, cupped toward
+// the aim, with crisp outlines, segment lines and rivets, like the other towers' flat top-down parts
+const DF = 10, DR = 9, DSPAN = 1.15, DW = 3.2;
+function dishArc(c, aim, k, armour, face, rivetCol) { const F = P(c, aim, k, DF, 0), a0 = aim + Math.PI - DSPAN, a1 = aim + Math.PI + DSPAN;
+  arc(F, DR * k, a0, a1, OUTLINE, (DW + 1.6) * k); arc(F, DR * k, a0, a1, armour, DW * k); arc(F, (DR - DW * 0.28) * k, a0 + 0.04, a1 - 0.04, face, DW * 0.38 * k);
+  for (let i = 0; i <= 6; i++) { const a = a0 + i * (a1 - a0) / 6; line(add(F, mul(fa(a), (DR - DW / 2) * k)), add(F, mul(fa(a), (DR + DW / 2) * k)), A(OUTLINE, 0.7), 0.8 * k); }
+  for (let i = 0; i < 6; i++) { const a = a0 + (i + 0.5) * (a1 - a0) / 6; disc(add(F, mul(fa(a), (DR + DW * 0.28) * k)), 0.55 * k, rivetCol); }
+  for (const a of [a0, a1]) { disc(add(F, mul(fa(a), DR * k)), (DW / 2 + 0.5) * k, OUTLINE); disc(add(F, mul(fa(a), DR * k)), DW / 2 * k, armour); }
+  return F; }
+const rimLine = (F, aim, k, col, w) => arc(F, (DR - DW / 2 - 0.3) * k, aim + Math.PI - DSPAN, aim + Math.PI + DSPAN, col, w * k);
 const ell = (p, rx, ry, a, col, w) => { X.save(); X.strokeStyle = css(col); X.lineWidth = w; X.beginPath(); X.ellipse(p[0], p[1], Math.max(0.1, rx), Math.max(0.1, ry), a, 0, TAU); X.stroke(); X.restore(); };
 
 // ---- Path 2, Recharge: the base and its rams, rebuilt each step with capacitors that light up as it recharges (a cell ring, capacitor rams, or battery banks) ------
@@ -38,17 +44,15 @@ function base(c, aim, k, B, t, col, ch) { const L = B.lv[1], st = pk(B, 1, L), g
   for (const v of ys) { const a0 = Q(-6.5, 3.6 * v), a1 = Q(1, 4.4 * v); bar(a0, a1, rw * k, gl(METAL_D, g, 0.5)); bar(Q(-2.5, 4 * v), a1, 1.3 * k, gl(METAL_L, g, 0.6));
     if (st === "B") for (let j = 0; j < 3; j++) plate(lerp(a0, a1, 0.2 + j * 0.22), rectPts(0.45, rw * 0.55), ch * 3 > j + 0.5 ? gc : METAL_D, aim, k, 0.7); } }
 function dualEmitter(c, aim, k, B, t, col, mm) { if (B.lv[1] < 5) return; const a2 = mm.aim2 ?? aim, q = P(c, aim, k, -4, -8.8), tip = add(q, mul(fa(a2), 4 * k));   // Dual Beam: a second small gold dish
-  bar(q, tip, 1.2 * k, GOLD); oval(add(q, mul(fa(a2), 1 * k)), 1.4 * k, 3.6 * k, a2, dk(GOLD, 0.2), 1); glowDot(tip, 0.7 * k, col); }
+  bar(q, tip, 1.2 * k, GOLD); const f2 = add(q, mul(fa(a2), 2.6 * k)); arc(f2, 2.6 * k, a2 + Math.PI - 1, a2 + Math.PI + 1, OUTLINE, 2.2 * k); arc(f2, 2.6 * k, a2 + Math.PI - 1, a2 + Math.PI + 1, dk(GOLD, 0.15), 1.4 * k); glowDot(tip, 0.7 * k, col); }   // a small flat gold dish
 
-// ---- Path 3, Grip: the dish's energy, stronger each step (a glowing rim, focus rings sliding in across the face, or a hex lattice field) ---------------------------
-function dish(c, aim, k, B, t, col, on) { const L = B.lv[2], st = pk(B, 2, L), g = L >= 5, Q = (x, y) => P(c, aim, k, x, y), dc = Q(4, 0), ec = g ? GOLD : col;
-  dishFace(dc, aim, k, 4.2, 11.6, gl(ARMOUR, g, 0.5), lt(gl(ARMOUR, g, 0.5), 0.12), 8); for (let i = 0; i < 10; i++) { const th = i * TAU / 10; disc(add(dc, rot([Math.cos(th) * 3.6 * k, Math.sin(th) * 10.8 * k], aim)), 0.6 * k, g ? GOLD : METAL_L); }
-  if (st === "C") { const cs = 3.2 - 0.25 * L; for (let y = -10; y <= 10; y += cs) for (let x = -3; x <= 3; x += cs * 0.87) { const xo = x + ((Math.round((y + 10) / cs) % 2) ? cs * 0.43 : 0); if ((xo / 4) ** 2 + (y / 11.2) ** 2 > 0.82) continue;
-      outline(add(dc, rot([xo * k, y * k], aim)), ngon(6, 1, aim), A(ec, 0.35 + 0.25 * Math.sin(t * 3 + x + y)), 0.6 * k, 0, cs * 0.5 * k); } }   // a hex lattice field
-  if (st === "B") { const n = 1 + Math.min(L, 3); for (let i = 0; i < n; i++) { const u = fmod(t * 0.8 + i / n, 1); ell(dc, 4.2 * (1 - 0.8 * u) * k, 11.6 * (1 - 0.8 * u) * k, aim, A(ec, 0.75 * u + 0.1), (0.9 + 0.12 * L) * k); } }   // focus rings closing in
-  const rw = 1.4 + (st === "A" ? 0.45 * L : st ? 0.15 * L : 0);
-  if (st === "A") ell(dc, 4.8 * k, 12.4 * k, aim, A(ec, 0.12 + 0.05 * L + 0.15 * on), (2 + 0.7 * L) * k);                                   // a glowing halo round the rim
-  ell(dc, 4.4 * k, 12 * k, aim, A(ec, 0.35 + 0.5 * on + 0.1 * Math.sin(t * 4)), rw * k); }
+// ---- Path 3, Grip: the dish's energy, stronger each step, in crisp lines (a bright rim with emitter nodes, focus arcs closing on the focus, or hex cells along the band)
+function dish(c, aim, k, B, t, col, on) { const L = B.lv[2], st = pk(B, 2, L), g = L >= 5, ec = g ? GOLD : col, arm = gl(ARMOUR, g, 0.5), a0 = aim + Math.PI - DSPAN, a1 = aim + Math.PI + DSPAN, ri = DR - DW / 2;
+  const F = dishArc(c, aim, k, arm, lt(arm, 0.14), g ? GOLD : METAL_L);
+  if (st === "C") { const n = 4 + 2 * L; for (let i = 0; i < n; i++) { const a = a0 + (i + 0.5) * (a1 - a0) / n; outline(add(F, mul(fa(a), DR * k)), ngon(6, 1, a), A(ec, 0.6 + 0.3 * Math.sin(t * 3 + i)), 0.7 * k, 0, Math.min(1.5, 10 / n) * k); } }   // hex cells along the band
+  if (st === "B") { const n = 1 + Math.min(L, 3); for (let i = 0; i < n; i++) { const u = fmod(t * 0.8 + i / n, 1), r = (ri - 0.8) * (1 - 0.75 * u), sp = DSPAN * (1 - 0.3 * u); arc(F, r * k, aim + Math.PI - sp, aim + Math.PI + sp, A(ec, 0.35 + 0.55 * u), (0.8 + 0.12 * L) * k); } }   // focus arcs closing on the focus
+  rimLine(F, aim, k, A(ec, 0.45 + 0.5 * on + 0.1 * Math.sin(t * 4)), 1.2 + (st === "A" ? 0.35 * L : st ? 0.12 * L : 0));
+  if (st === "A") { const n = 2 + L; for (let i = 0; i < n; i++) { const q = add(F, mul(fa(a0 + (i + 0.5) * (a1 - a0) / n), (ri - 0.3) * k)); disc(q, (0.6 + 0.08 * L) * k, OUTLINE); glowDot(q, (0.4 + 0.06 * L) * k, ec); } } }   // emitter nodes along a brighter rim
 
 // ---- Path 1, Pull Distance: the emitter spike, rebuilt each step (a lance, a fork, or a coil spike), longer each step; a rewind coil turns backwards from Rewind ------
 function spike(c, aim, k, B, t, col, on) { const L = B.lv[0], st = pk(B, 0, L), g = L >= 5, len = SLEN[L], sc = gl(METAL_L, g, 0.75), Q = (x, y) => P(c, aim, k, x, y), tri = [[4, -1.8], [len, 0], [4, 1.8]];
@@ -67,7 +71,7 @@ function retroUnder(c, aim, k, B, t, col) { if (B.r === 1 && B.key("r1") === "A"
 function retroOver(c, aim, k, B, t, col) { const r = BASER[B.lv[1]], Q = (x, y) => P(c, aim, k, x, y);
   if (B.r === 0) { const key = B.key("r0"), q = Q(-4, 8.6);
     if (key === "A") { disc(q, 3.2 * k, OUTLINE); disc(q, 2.7 * k, METAL_D); ring(q, 1.9 * k, A(STASIS, 0.6 + 0.3 * Math.sin(t * 3)), 1 * k); glowDot(q, 0.7 * k, STASIS); }   // a stasis coil
-    if (key === "B") for (const sg of [-1, 1]) { const pts = [[0, -1], [3.4, 0], [0, 1]]; fill(Q(4.6, sg * 12.2), pts, METAL_L, aim, k); outline(Q(4.6, sg * 12.2), pts, OUTLINE, 0.8, aim, k); }   // sweep vanes on the dish's rim
+    if (key === "B") for (const sg of [-1, 1]) { const pts = [[0, -1], [3.4, 0], [0, 1]]; fill(Q(7.4, sg * 9.8), pts, METAL_L, aim, k); outline(Q(7.4, sg * 9.8), pts, OUTLINE, 0.8, aim, k); }   // sweep vanes at the dish's ends
     if (key === "C") { bar(q, Q(-4, 11.2), 0.9 * k, METAL); orb(Q(-4, 11.2), 1.6 * k, [0.55, 0.6, 0.75, 1]); for (let j = 0; j < 2; j++) { const a = rnd(Math.floor(t * 12) + j) * TAU; line(Q(-4, 11.2), add(Q(-4, 11.2), mul(fa(a), 2.4 * k)), A([0.8, 0.9, 1, 1], 0.8), 0.7 * k); } } }   // a shock node on a post
   if (B.r === 1) { const key = B.key("r1");
     if (key === "B") { const q = Q(-r - 1.6, 0); plate(q, rectPts(1.6, 3.6), METAL_D, aim, k, 1); for (let j = -2; j <= 2; j++) line(Q(-r - 2.6, j * 1.2), Q(-r - 0.6, j * 1.2), A(col, 0.5 + 0.3 * Math.sin(t * 3 + j)), 0.6 * k); }   // a hold battery
@@ -124,7 +128,7 @@ function tractorAgent2(B) { return (m, t, info, s, col) => {
 // ---- The model ----------------------------------------------------------------------------------------------------------------------------------------------------
 const P2 = {
   tower: "tractor", look: "B", anim: "B",
-  intro: "Round 1 on the redesigned base, the Armoured Dish with the Focus Beam; the names and effects stay. Each path rebuilds one part, in the style you pick for each step, and the new design replaces the old one: Pull Distance rebuilds the emitter spike (a lance with steel collars, a fork with a crackling arc, or a coil spike lighting toward its tip; longer each step; a rewind coil turning backwards from Rewind; gold with two counter-turning coils at Undo); Recharge rebuilds the base and its rams with capacitors that light up as it recharges (a ring of cells, capacitor rams with charge bands, or battery banks; glowing vents from Overclocked Emitter; gold with a second small dish at Dual Beam); Grip is the effect's strength (your note): it rebuilds the dish's energy (a glowing rim, focus rings closing across the face, or a hex lattice field), matched in the beam (thicker, more rings, or a lattice sheath) and the hold round the enemy, stronger each step; gold at Gravity Hammer. The first Retrofit slot offers three replacements for Twin Emitter: Stasis Wake, Beam Sweep or Shock Field. The preview runs the real rules: the hold time, the pull (or the rewind with a trail of past positions and -3s, -4s, -5s; a gold UNDO every third grab at the mastery), the recharge, Dual Beam's second beam, -15 crush, the lift-and-slam stun ring, the padlock, and the new Retrofit's effect. Overlapping Retrofits are kept and stack (the carpet rule).",
+  intro: "Round 2, your note (the tilted dish looked out of place): the dish is redrawn flat, straight from above like the other towers: a thick armoured band cupped toward the target round its focus, with crisp outlines, segments and rivets; Grip's energy is drawn in crisp lines too (a brighter rim with emitter nodes, focus arcs closing on the focus, or hex cells along the band). Nothing else changed. Round 1 on the redesigned base, the Armoured Dish with the Focus Beam; the names and effects stay. Each path rebuilds one part, in the style you pick for each step, and the new design replaces the old one: Pull Distance rebuilds the emitter spike (a lance with steel collars, a fork with a crackling arc, or a coil spike lighting toward its tip; longer each step; a rewind coil turning backwards from Rewind; gold with two counter-turning coils at Undo); Recharge rebuilds the base and its rams with capacitors that light up as it recharges (a ring of cells, capacitor rams with charge bands, or battery banks; glowing vents from Overclocked Emitter; gold with a second small dish at Dual Beam); Grip is the effect's strength (your note): it rebuilds the dish's energy (a glowing rim, focus rings closing across the face, or a hex lattice field), matched in the beam (thicker, more rings, or a lattice sheath) and the hold round the enemy, stronger each step; gold at Gravity Hammer. The first Retrofit slot offers three replacements for Twin Emitter: Stasis Wake, Beam Sweep or Shock Field. The preview runs the real rules: the hold time, the pull (or the rewind with a trail of past positions and -3s, -4s, -5s; a gold UNDO every third grab at the mastery), the recharge, Dual Beam's second beam, -15 crush, the lift-and-slam stun ring, the padlock, and the new Retrofit's effect. Overlapping Retrofits are kept and stack (the carpet rule).",
   mods(B) { return { period: 1, flight: 1, multi: false, persist: tractorAgent2(B) }; },
   muzzleAt(B, m, kk, c, aim, s, info) { return muzzleOf(B, m, c, aim, G(s), info?.view?.mem?.aim2); },
   model(c, aim, s, fx, t, col, info, B) { const k = G(s), mm = fx.mem || {}, on = mm.state === "hold" ? 1 : 0, ch = mm.charge ?? 1;
