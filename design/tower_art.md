@@ -349,7 +349,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 16 | Shockwave Generator | amber | B Ring Reactor | B Mushroom Pulse |
 | 17 | Scrapyard | copper | C Magnet Yard | B Sparks and Sale |
 | 18 | Magneto Tower | violet | F Stacked Coil Tower | F Drag Trails |
-| 19 | Tractor Tower | cyan | C Claw Emitter | C Spiral Lock |
+| 19 | Tractor Tower | `design/tower_art_p19_tractor.html` | **Redesign** (owner, 2026-10-19): new base-look page (two dish-on-a-mast looks and a wildcard, three animations); pick a look and an animation |
 | 20 | Augmentation Tower | lavender | F Nanite Hive | D Nanite Swarm |
 
 ## Second pass: per-path and Retrofit looks (owner, 2026-10-16)
@@ -1279,34 +1279,26 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
 
 **Confirmed (owner, 2026-10-19, "finished"):** the round 3 page is final.
 
-### Tractor Tower (second pass on the Claw Emitter)
+### Tractor Tower (redesign: base look first)
 
-**Owner's choices (2026-10-19):** the names stay. Each path rebuilds one part: Pull Distance the **barrel**, Recharge the **turret body** (with capacitors), Grip the **claws** at the barrel's tip.
+**History.** The second pass on the confirmed Claw Emitter ran two rounds. In round 1 the owner picked Recharge B, Longer Hold B and Faster Recharge C, and noted that Grip is "in relation to how strong the effect is. Not a physical claw or clamp". They asked for more Pull Distance ideas and for Twin Emitter to be replaced. In round 2 the owner said "I want to completely redesign the tractor tower from scratch". `data_p2_tractor.js` and its page are deleted; git keeps them.
 
-**The page** (`design/tower_art_p2_19_tractor.html`, data `tools/tower_art/data_p2_tractor.js` on the base `data_towers4.js`, look C, animation C). Each step rebuilds its part in the style picked for that step, and the new design replaces the old one. Masteries are gold.
-- **Pull Distance (barrel, longer each step):** banded, lens or rail. From Rewind, a rewind coil turns backwards at the tip. Undo is gold, with two counter-turning coils.
-- **Recharge (turret body):** capacitor drums on its back, a ring of cells round it, or coil banks on its sides. They light up as it recharges. Glowing vents from Overclocked Emitter. Dual Beam is gold, with a second emitter that aims at its own target.
-- **Grip (claws):** clamp claws, pincers or a ring clamp. They close on a hold. Teeth from Crushing Grip, lift pads from Lift and Drop, a lock from Grip Lock. Gravity Hammer is gold.
-- **The agent (Spiral Lock plus the real rules):**
-  - The hold time: 1.5 s, 1.8 s from Stronger Beam, +0.5 s with Longer Hold.
-  - The pull or rewind. The rewind shows a trail of past positions and -3s, -4s or -5s; at Undo, every third grab is a gold UNDO. The preview keeps the held enemy on screen.
-  - The recharge, shortened for the preview in proportion.
-  - The extra beams: Twin Emitter at half the pull, Dual Beam at a third.
-  - Crushing Grip shows -15 and sparks.
-  - Lift and Drop lifts ground enemies, then slams them, with a 50 px stun ring (80 px, gold, with shards at Gravity Hammer).
-  - Grip Lock shows a padlock on the held enemy.
-- **Retrofits:**
-  - **Twin Emitter:** a side barrel, a rear dish, or twin claws. Its beam leaves from there.
-  - **Longer Hold:** a hold capacitor ring, a hold battery, or hold coils.
-  - **Faster Recharge:** cooling fins, radiator panels, or a fan vent.
-- **Carpet-rule overlaps (kept, stacking):** Twin Emitter with Dual Beam (three beams), Longer Hold's +0.5 s with Stronger Beam's hold, and Faster Recharge's -1 s with the Recharge path.
+**Scope and direction (owner's answers, 2026-10-19):**
+- **Scope:** the art and the upgrade art start over. The mechanic, the three paths, their effects and their names stay.
+- **Problem:** the owner didn't like the design or the upgrade designs.
+- **Direction:** a dish on a mast, as two dish looks plus one wildcard. Three new animations to pick.
+- **Twin Emitter:** its replacement (Stasis Wake, Beam Sweep or Shock Field were offered) is picked later, on the upgrade page.
+- **Grip carries forward:** it shows the effect's strength, not a physical part.
 
-**Round 2 (owner's picks and notes, 2026-10-19):**
-- **Picked:** Recharge, all B (the cell ring); Longer Hold B (the hold battery); Faster Recharge C (the fan vent).
-- **Pull Distance, "Think of some more ideas":** the banded barrel (the round 1 pick) stays as option A. Four new ideas sit beside it at every step: D telescoping sleeves, E a dish emitter with a feed horn, F a coil barrel whose coils light toward the muzzle, and G forked prongs with a crackling arc. The rewind coil comes from Rewind, and Undo is gold.
-- **Grip, "Grip is in relation to how strong the effect is. Not a physical claw or clamp":** the base claws stay as they were. Grip now rebuilds the beam, the lock bubble round the held enemy and the emitter core between the claws, stronger each step, in three styles: a braided beam (more and thicker strands), gravity rings (rings reel in along the beam and close round the enemy), or a lattice cage (a sheath round the beam, a turning cage round the enemy). Gravity Hammer is gold. The crush, lift and slam, and grip lock effects stay.
-- **"Change twin emitter to something else":** the slot offers three replacement Retrofits, each with its own effect, for the owner to pick: **Stasis Wake** (after release the enemy stays slowed 40% for 2 s), **Beam Sweep** (while holding, the beam slows every other enemy it crosses by 30%) or **Shock Field** (the held enemy shocks enemies within 40 px for 10 damage/s). The pick goes into `design/tower_roster.md`, priced by the formula. Without Twin Emitter, its overlap with Dual Beam is gone.
+**The page** (`design/tower_art_p19_tractor.html`, from `tools/tower_art/data_tractor_looks.js`):
+- **A. Radio Telescope:** a white mesh dish on a lattice mast, tilting to face its target. Three struts hold a feed horn at its focus, where the beam leaves, with a counterweight behind.
+- **B. Armoured Dish:** a riveted steel dish on twin hydraulic rams over a heavy round base. A long emitter spike sits at its centre, and its rim glows cyan on a lock.
+- **C. Gravity Ring Projector (wildcard):** no dish. Three nested gimbal rings float and turn round a glowing emitter crystal that points at the target.
+- **Animations (pick one):**
+  - **Light Cone:** a soft cyan cone from the dish, with scan lines running back up it.
+  - **Focus Beam:** a tight bright beam with rings sliding down it toward the tower; the enemy shakes.
+  - **Tractor Waves:** wave fronts ripple out to the enemy, chevrons run back along the beam, and the enemy sits in rippling rings.
 
 ## Open questions
 
-1. **Second pass, Tractor Tower** (tower 19, round 2): pick Pull Distance (from the five ideas), Grip (now the effect's strength) and the replacement for Twin Emitter. Then the Augmentation Tower.
+1. **Tractor Tower base look, redesign** (tower 19): pick a look and an animation, then say "Tractor Tower base finished". Then the second pass (with the Twin Emitter replacement), then the Augmentation Tower.
