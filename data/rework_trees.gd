@@ -6,7 +6,7 @@ extends RefCounted
 ## (a, b, c), each with four `nodes` and a `mastery`. A node's `set` values replace the stat and its `add` values add to it;
 ## nodes apply in order on top of the base (the Retrofit, then each path's steps).
 
-const ORDER := ["gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon", "railgun", "tesla_tower", "drone_bay", "cas_gunship"]
+const ORDER := ["gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon", "railgun", "tesla_tower", "drone_bay", "cas_gunship", "mine_layer", "chemical_plant", "cryo_tower", "boost_tower"]
 
 const TREES := {
 	"gun_turret": {
@@ -20,6 +20,7 @@ const TREES := {
 		"damage_kind": "physical",
 		"beam": false,
 		"uncapped": false,
+		"support": false,
 		"cost": 75,
 		"base": {
 			"name": "Gun Turret",
@@ -246,6 +247,7 @@ const TREES := {
 		"damage_kind": "physical",
 		"beam": false,
 		"uncapped": false,
+		"support": false,
 		"cost": 150,
 		"base": {
 			"name": "Mortar Tower",
@@ -481,6 +483,7 @@ const TREES := {
 		"damage_kind": "physical",
 		"beam": false,
 		"uncapped": false,
+		"support": false,
 		"cost": 200,
 		"base": {
 			"name": "Rocket Salvo",
@@ -700,6 +703,7 @@ const TREES := {
 		"damage_kind": "energy",
 		"beam": true,
 		"uncapped": false,
+		"support": false,
 		"cost": 250,
 		"base": {
 			"name": "Laser Tower",
@@ -917,6 +921,7 @@ const TREES := {
 		"damage_kind": "physical",
 		"beam": false,
 		"uncapped": false,
+		"support": false,
 		"cost": 150,
 		"base": {
 			"name": "Anti-Aircraft Turret",
@@ -1132,6 +1137,7 @@ const TREES := {
 		"damage_kind": "physical",
 		"beam": false,
 		"uncapped": false,
+		"support": false,
 		"cost": 300,
 		"base": {
 			"name": "Artillery Cannon",
@@ -1353,6 +1359,7 @@ const TREES := {
 		"damage_kind": "physical",
 		"beam": false,
 		"uncapped": false,
+		"support": false,
 		"cost": 500,
 		"base": {
 			"name": "Railgun",
@@ -1573,6 +1580,7 @@ const TREES := {
 		"damage_kind": "energy",
 		"beam": false,
 		"uncapped": false,
+		"support": false,
 		"cost": 250,
 		"base": {
 			"name": "Tesla Tower",
@@ -1796,6 +1804,7 @@ const TREES := {
 		"damage_kind": "physical",
 		"beam": false,
 		"uncapped": false,
+		"support": false,
 		"cost": 300,
 		"base": {
 			"name": "Drone Bay",
@@ -1986,6 +1995,7 @@ const TREES := {
 		"damage_kind": "physical",
 		"beam": false,
 		"uncapped": true,
+		"support": false,
 		"cost": 650,
 		"base": {
 			"name": "CAS Gunship",
@@ -2182,6 +2192,873 @@ const TREES := {
 					"blurb": "Every third volley fires two missiles",
 					"set": {
 						"ms_volley": 2.0,
+					},
+					"add": {},
+				},
+			},
+		],
+	},
+	"mine_layer": {
+		"name": "Mine Layer",
+		"class": "Defense",
+		"weapon": "Explosive",
+		"blurb": "Manufactures and tosses explosive mines onto the track that explode when an enemy passes over them. \"You know it's a party when the high-speed confetti start flying in every direction.\"",
+		"air": false,
+		"ground": true,
+		"size": 1,
+		"damage_kind": "physical",
+		"beam": false,
+		"uncapped": false,
+		"support": false,
+		"cost": 450,
+		"base": {
+			"name": "Mine Layer",
+			"cost": 450,
+			"blurb": "450 credits; tosses a mine onto the track within 120 px every 1.5 s, up to 20 at once. Each mine blasts 85 damage in 40 px when a ground or burrowed enemy passes over. Mines spread along the track in range, nearest the entrance end first.",
+			"set": {
+				"damage": 85.0,
+				"splash": 40.0,
+				"range": 120.0,
+				"rate": 0.667,
+				"cap": 20.0,
+			},
+			"add": {},
+		},
+		"retrofits": [
+			{
+				"name": "Adhesive Mines",
+				"cost": 40,
+				"blurb": "Each mine's blast leaves sticky gel on the track that slows enemies 20% for 2 s.",
+				"set": {
+					"gel_slow": 0.2,
+					"gel_time": 2.0,
+				},
+				"add": {},
+			},
+			{
+				"name": "Shaped Charges",
+				"cost": 160,
+				"blurb": "+15 damage per mine (100).",
+				"set": {},
+				"add": {
+					"damage": 15.0,
+				},
+			},
+			{
+				"name": "Long Arm",
+				"cost": 150,
+				"blurb": "+20 toss range (140).",
+				"set": {},
+				"add": {
+					"range": 20.0,
+				},
+			},
+		],
+		"paths": [
+			{
+				"key": "a",
+				"name": "Power/Damage",
+				"nodes": [
+					{
+						"name": "Heavier Charge",
+						"cost": 160,
+						"blurb": "100 damage",
+						"set": {
+							"damage": 100.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Wider Charge",
+						"cost": 265,
+						"blurb": "50 px blast",
+						"set": {
+							"splash": 50.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "HE Mines",
+						"cost": 1190,
+						"blurb": "125 damage",
+						"set": {
+							"damage": 125.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Fragmentation Casing",
+						"cost": 1325,
+						"blurb": "60 px blast",
+						"set": {
+							"splash": 60.0,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Anti-Tank Mines",
+					"cost": 6880,
+					"blurb": "150 damage, 65 px blast",
+					"set": {
+						"damage": 150.0,
+						"splash": 65.0,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "b",
+				"name": "Production Speed",
+				"nodes": [
+					{
+						"name": "Quick Assembly",
+						"cost": 110,
+						"blurb": "A mine every 1.33 s; cap 24",
+						"set": {
+							"rate": 0.752,
+							"cap": 24.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Twin Press",
+						"cost": 270,
+						"blurb": "Every 1.2 s; cap 28",
+						"set": {
+							"rate": 0.833,
+							"cap": 28.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Assembly Line",
+						"cost": 1080,
+						"blurb": "Every 0.95 s; cap 32",
+						"set": {
+							"rate": 1.053,
+							"cap": 32.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Rapid Line",
+						"cost": 1620,
+						"blurb": "Every 0.85 s; cap 36",
+						"set": {
+							"rate": 1.176,
+							"cap": 36.0,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Mine Factory",
+					"cost": 5395,
+					"blurb": "Every 0.7 s; cap 45",
+					"set": {
+						"rate": 1.4286,
+						"cap": 45.0,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "c",
+				"name": "Range",
+				"nodes": [
+					{
+						"name": "Longer Arm",
+						"cost": 150,
+						"blurb": "140 px",
+						"set": {
+							"range": 140.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Spring Launcher",
+						"cost": 300,
+						"blurb": "160 px",
+						"set": {
+							"range": 160.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Mine Mortar",
+						"cost": 900,
+						"blurb": "190 px",
+						"set": {
+							"range": 190.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Long Mortar",
+						"cost": 1800,
+						"blurb": "220 px",
+						"set": {
+							"range": 220.0,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Minefield Launcher",
+					"cost": 4795,
+					"blurb": "260 px: covers a long stretch of track",
+					"set": {
+						"range": 260.0,
+					},
+					"add": {},
+				},
+			},
+		],
+	},
+	"chemical_plant": {
+		"name": "Chemical Plant",
+		"class": "Support",
+		"weapon": "Chemical",
+		"blurb": "A chemical manufacturing facility that produces and sprays chemicals on nearby enemies. \"Known to cause cancer in the state of California.\"",
+		"air": true,
+		"ground": true,
+		"size": 1,
+		"damage_kind": "energy",
+		"beam": false,
+		"uncapped": false,
+		"support": false,
+		"cost": 250,
+		"base": {
+			"name": "Chemical Plant",
+			"cost": 250,
+			"blurb": "250 credits; sprays one enemy every 1.5 s within 130 px, air and ground. The soak lasts 4 s, and the enemy loses 3 armour while soaked (it comes back when the soak ends). The plant always picks an unsoaked enemy.",
+			"set": {
+				"range": 130.0,
+				"rate": 0.667,
+				"soak_time": 4.0,
+				"armor_strip": 3.0,
+				"nozzles": 1.0,
+			},
+			"add": {},
+		},
+		"retrofits": [
+			{
+				"name": "Pressure Pump",
+				"cost": 150,
+				"blurb": "A spray every 1.33 s, and +20 range (150).",
+				"set": {
+					"rate": 0.75,
+				},
+				"add": {
+					"range": 20.0,
+				},
+			},
+			{
+				"name": "Mist Nozzle",
+				"cost": 300,
+				"blurb": "Each spray also soaks one more unsoaked enemy next to the target.",
+				"set": {
+					"mist": true,
+				},
+				"add": {},
+			},
+			{
+				"name": "Bigger Tanks",
+				"cost": 60,
+				"blurb": "Soaks last 5 s.",
+				"set": {
+					"soak_time": 5.0,
+				},
+				"add": {},
+			},
+		],
+		"paths": [
+			{
+				"key": "a",
+				"name": "Damage/Armor stripping",
+				"nodes": [
+					{
+						"name": "Corrosive Acid",
+						"cost": 250,
+						"blurb": "Stripped armour stays gone permanently, so every tower benefits for the rest of the enemy's life",
+						"set": {
+							"acid_perm": true,
+						},
+						"add": {},
+					},
+					{
+						"name": "Etching Acid",
+						"cost": 665,
+						"blurb": "4 armour per soak; acid burns 5 damage/s",
+						"set": {
+							"armor_strip": 4.0,
+							"acid_dps": 5.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Fast-Acting Acid",
+						"cost": 1335,
+						"blurb": "5 armour, stripped faster; 10 damage/s",
+						"set": {
+							"armor_strip": 5.0,
+							"acid_dps": 10.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Concentrated Acid",
+						"cost": 2665,
+						"blurb": "6 armour; 15 damage/s",
+						"set": {
+							"armor_strip": 6.0,
+							"acid_dps": 15.0,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Dissolver",
+					"cost": 5335,
+					"blurb": "7 armour per soak; 20 damage/s",
+					"set": {
+						"armor_strip": 7.0,
+						"acid_dps": 20.0,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "b",
+				"name": "Speed",
+				"nodes": [
+					{
+						"name": "Quick Valve",
+						"cost": 100,
+						"blurb": "A spray every 1.25 s",
+						"set": {
+							"rate": 0.8,
+						},
+						"add": {},
+					},
+					{
+						"name": "Long-Lasting Mix",
+						"cost": 140,
+						"blurb": "The soak lasts 5 s",
+						"set": {
+							"soak_time": 5.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Twin Valves",
+						"cost": 990,
+						"blurb": "A spray every second; the soak lasts 6 s",
+						"set": {
+							"rate": 1.0,
+							"soak_time": 6.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "High-Flow Pump",
+						"cost": 1470,
+						"blurb": "A spray every 0.83 s",
+						"set": {
+							"rate": 1.2,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Twin Nozzles",
+					"cost": 7760,
+					"blurb": "Sprays two enemies at once (about 1.6 a second); the soak lasts 7 s",
+					"set": {
+						"rate": 0.8,
+						"nozzles": 2.0,
+						"soak_time": 7.0,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "c",
+				"name": "Slowing",
+				"nodes": [
+					{
+						"name": "Sticky Gel",
+						"cost": 250,
+						"blurb": "Soaked enemies are slowed 15%",
+						"set": {
+							"gel_slow": 0.15,
+						},
+						"add": {},
+					},
+					{
+						"name": "Thick Gel",
+						"cost": 335,
+						"blurb": "25%",
+						"set": {
+							"gel_slow": 0.25,
+						},
+						"add": {},
+					},
+					{
+						"name": "Glue",
+						"cost": 665,
+						"blurb": "35%",
+						"set": {
+							"gel_slow": 0.35,
+						},
+						"add": {},
+					},
+					{
+						"name": "Setting Glue",
+						"cost": 1335,
+						"blurb": "45%",
+						"set": {
+							"gel_slow": 0.45,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Quick-Set Foam",
+					"cost": 2665,
+					"blurb": "55%: nearly frozen",
+					"set": {
+						"gel_slow": 0.55,
+					},
+					"add": {},
+				},
+			},
+		],
+	},
+	"cryo_tower": {
+		"name": "Cryo Tower",
+		"class": "Support",
+		"weapon": "Field",
+		"blurb": "Produces a wave of sub-zero temperature gasses that stunt the mobility of enemies within range. \"The military had to put restrictions on these machines after a group of soldiers got caught having a snowball fight in the middle of a heatwave.\"",
+		"air": true,
+		"ground": true,
+		"size": 1,
+		"damage_kind": "energy",
+		"beam": false,
+		"uncapped": false,
+		"support": false,
+		"cost": 150,
+		"base": {
+			"name": "Cryo Tower",
+			"cost": 150,
+			"blurb": "A deeper slow, then permanent slowing; the mastery freezes. - Path 2 (Power/Range): frostbite damage and range. - Path 3 (Speed): faster waves and faster travel (the gas spreads faster). - Retrofit: a coolant tank (a longer slow).",
+			"set": {
+				"range": 110.0,
+				"rate": 0.5,
+				"slow": 0.2,
+				"slow_time": 1.5,
+			},
+			"add": {},
+		},
+		"retrofits": [
+			{
+				"name": "Coolant Tank",
+				"cost": 80,
+				"blurb": "The slow lasts 2.2 s.",
+				"set": {
+					"slow_time": 2.2,
+				},
+				"add": {},
+			},
+			{
+				"name": "Compressor",
+				"cost": 35,
+				"blurb": "A wave every 1.7 s.",
+				"set": {
+					"rate": 0.588,
+				},
+				"add": {},
+			},
+			{
+				"name": "Deep Cold",
+				"cost": 75,
+				"blurb": "Slow 20% to 25%.",
+				"set": {
+					"slow": 0.25,
+				},
+				"add": {},
+			},
+		],
+		"paths": [
+			{
+				"key": "a",
+				"name": "Slowing",
+				"nodes": [
+					{
+						"name": "Colder Gas",
+						"cost": 120,
+						"blurb": "Slow 28%",
+						"set": {
+							"slow": 0.28,
+						},
+						"add": {},
+					},
+					{
+						"name": "Sub-Zero Gas",
+						"cost": 210,
+						"blurb": "Slow 35%",
+						"set": {
+							"slow": 0.35,
+						},
+						"add": {},
+					},
+					{
+						"name": "Permafrost",
+						"cost": 1705,
+						"blurb": "Enemies chilled by it keep a permanent 10% slow for the rest of their life, even outside its range",
+						"set": {
+							"perm_slow": 0.1,
+						},
+						"add": {},
+					},
+					{
+						"name": "Deep Chill",
+						"cost": 2905,
+						"blurb": "Slow 45%; permanent 15%",
+						"set": {
+							"slow": 0.45,
+							"perm_slow": 0.15,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Deep Freeze",
+					"cost": 8460,
+					"blurb": "Slow 50%; permanent 20%; every 4th wave freezes enemies solid for 1 s (bosses 0.3 s)",
+					"set": {
+						"slow": 0.5,
+						"perm_slow": 0.2,
+						"freeze_every": 4.0,
+						"freeze_time": 1.0,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "b",
+				"name": "Power/Range",
+				"nodes": [
+					{
+						"name": "Frostbite",
+						"cost": 105,
+						"blurb": "Each wave does 5 damage; 120 px radius",
+						"set": {
+							"damage": 5.0,
+							"range": 120.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Hard Frost",
+						"cost": 230,
+						"blurb": "10 damage; 130 px",
+						"set": {
+							"damage": 10.0,
+							"range": 130.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Ice Storm",
+						"cost": 790,
+						"blurb": "18 damage; 145 px",
+						"set": {
+							"damage": 18.0,
+							"range": 145.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Biting Cold",
+						"cost": 695,
+						"blurb": "26 damage",
+						"set": {
+							"damage": 26.0,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Blizzard",
+					"cost": 4870,
+					"blurb": "36 damage; 165 px",
+					"set": {
+						"damage": 36.0,
+						"range": 165.0,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "c",
+				"name": "Speed",
+				"nodes": [
+					{
+						"name": "Faster Vents",
+						"cost": 25,
+						"blurb": "A wave every 1.75 s; the gas spreads faster",
+						"set": {
+							"rate": 0.571,
+						},
+						"add": {},
+					},
+					{
+						"name": "Pressurised Gas",
+						"cost": 65,
+						"blurb": "Every 1.5 s",
+						"set": {
+							"rate": 0.667,
+						},
+						"add": {},
+					},
+					{
+						"name": "Rapid Vents",
+						"cost": 185,
+						"blurb": "Every 1.2 s",
+						"set": {
+							"rate": 0.833,
+						},
+						"add": {},
+					},
+					{
+						"name": "Turbo Vents",
+						"cost": 290,
+						"blurb": "Every second",
+						"set": {
+							"rate": 1.0,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Cold Front",
+					"cost": 1575,
+					"blurb": "A constant cold field: everything inside stays slowed",
+					"set": {
+						"cold_front": true,
+					},
+					"add": {},
+				},
+			},
+		],
+	},
+	"boost_tower": {
+		"name": "Boost Tower",
+		"class": "Support",
+		"weapon": "None",
+		"blurb": "Towers in range of the Rally Beacon are amped up and given stat boosts. \"Are you feeling it now Mr. Krabs?\"",
+		"air": true,
+		"ground": true,
+		"size": 1,
+		"damage_kind": "physical",
+		"beam": false,
+		"uncapped": false,
+		"support": true,
+		"cost": 400,
+		"base": {
+			"name": "Boost Tower",
+			"cost": 400,
+			"blurb": "400 credits; towers within 144 px (3 tiles) get +5% damage, +5% fire rate and +5% range (confirmed by the owner). Doesn't attack.",
+			"set": {
+				"range": 144.0,
+				"buff_dmg": 0.05,
+				"buff_rate": 0.05,
+				"buff_range": 0.05,
+			},
+			"add": {},
+		},
+		"retrofits": [
+			{
+				"name": "Signal Booster",
+				"cost": 1380,
+				"blurb": "The radius grows to 168 px, and +5% to all three boosts, stacking on top (+10% each).",
+				"set": {
+					"range": 168.0,
+					"buff_extra": 0.05,
+				},
+				"add": {},
+			},
+			{
+				"name": "Crit Link",
+				"cost": 185,
+				"blurb": "Boosted towers gain a 3% crit chance (it adds to the Augmentation Tower's crits).",
+				"set": {
+					"crit_link": 0.03,
+				},
+				"add": {},
+			},
+			{
+				"name": "Wide Mast",
+				"cost": 625,
+				"blurb": "The radius grows to 192 px (a 4-tile aura), with no boost change.",
+				"set": {
+					"range": 192.0,
+				},
+				"add": {},
+			},
+		],
+		"paths": [
+			{
+				"key": "a",
+				"name": "Damage boost",
+				"nodes": [
+					{
+						"name": "Amplifier",
+						"cost": 615,
+						"blurb": "Damage boost +15%",
+						"set": {
+							"buff_dmg": 0.15,
+						},
+						"add": {},
+					},
+					{
+						"name": "Power Relay",
+						"cost": 860,
+						"blurb": "+22%",
+						"set": {
+							"buff_dmg": 0.22,
+						},
+						"add": {},
+					},
+					{
+						"name": "Overcharge Link",
+						"cost": 2460,
+						"blurb": "+32%",
+						"set": {
+							"buff_dmg": 0.32,
+						},
+						"add": {},
+					},
+					{
+						"name": "Surge Link",
+						"cost": 3940,
+						"blurb": "+40%",
+						"set": {
+							"buff_dmg": 0.4,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Battle Network",
+					"cost": 9845,
+					"blurb": "+50% damage",
+					"set": {
+						"buff_dmg": 0.5,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "b",
+				"name": "Speed boost",
+				"nodes": [
+					{
+						"name": "Clock Sync",
+						"cost": 615,
+						"blurb": "Fire-rate boost +15%",
+						"set": {
+							"buff_rate": 0.15,
+						},
+						"add": {},
+					},
+					{
+						"name": "Fast Sync",
+						"cost": 860,
+						"blurb": "+22%",
+						"set": {
+							"buff_rate": 0.22,
+						},
+						"add": {},
+					},
+					{
+						"name": "Overclock Link",
+						"cost": 2460,
+						"blurb": "+32%",
+						"set": {
+							"buff_rate": 0.32,
+						},
+						"add": {},
+					},
+					{
+						"name": "Turbo Link",
+						"cost": 3940,
+						"blurb": "+40%",
+						"set": {
+							"buff_rate": 0.4,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Rapid Network",
+					"cost": 9845,
+					"blurb": "+50% fire rate",
+					"set": {
+						"buff_rate": 0.5,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "c",
+				"name": "Range boost",
+				"nodes": [
+					{
+						"name": "Spotting Relay",
+						"cost": 370,
+						"blurb": "Range boost +15%",
+						"set": {
+							"buff_range": 0.15,
+						},
+						"add": {},
+					},
+					{
+						"name": "Wide Relay",
+						"cost": 515,
+						"blurb": "+22%",
+						"set": {
+							"buff_range": 0.22,
+						},
+						"add": {},
+					},
+					{
+						"name": "Targeting Link",
+						"cost": 1475,
+						"blurb": "+32%",
+						"set": {
+							"buff_range": 0.32,
+						},
+						"add": {},
+					},
+					{
+						"name": "Long Link",
+						"cost": 2365,
+						"blurb": "+40%",
+						"set": {
+							"buff_range": 0.4,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Overwatch Network",
+					"cost": 5910,
+					"blurb": "+50% range",
+					"set": {
+						"buff_range": 0.5,
 					},
 					"add": {},
 				},

@@ -13,6 +13,10 @@ const RailgunArt = preload("res://scripts/view/towers/RailgunArt.gd")
 const TeslaTowerArt = preload("res://scripts/view/towers/TeslaTowerArt.gd")
 const DroneBayArt = preload("res://scripts/view/towers/DroneBayArt.gd")
 const CasGunshipArt = preload("res://scripts/view/towers/CasGunshipArt.gd")
+const MineLayerArt = preload("res://scripts/view/towers/MineLayerArt.gd")
+const ChemicalPlantArt = preload("res://scripts/view/towers/ChemicalPlantArt.gd")
+const CryoTowerArt = preload("res://scripts/view/towers/CryoTowerArt.gd")
+const BoostTowerArt = preload("res://scripts/view/towers/BoostTowerArt.gd")
 const Difficulty = preload("res://data/difficulty.gd")
 
 const OUTLINE := Color(0.03, 0.04, 0.06, 0.95)
@@ -49,6 +53,10 @@ const ACCENT := {
 	"tesla_tower": Color(0.75, 0.50, 1.00),
 	"drone_bay": Color(0.62, 0.91, 0.44),
 	"cas_gunship": Color(0.62, 0.85, 1.00),
+	"mine_layer": Color(1.00, 0.35, 0.40),
+	"chemical_plant": Color(0.55, 1.00, 0.30),
+	"cryo_tower": Color(0.55, 0.85, 1.00),
+	"boost_tower": Color(1.00, 0.40, 0.85),
 }
 const SPEC_ALT := {
 	"mint": Color(1.00, 0.84, 0.30),
@@ -455,7 +463,7 @@ static var _bake_seg := 0
 static var _seg_used := {}
 static var _turrets := {}
 static var _live := {}
-const AIMED := ["arrow", "cannon", "sniper", "laser", "missile", "flak", "gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "railgun"]
+const AIMED := ["arrow", "cannon", "sniper", "laser", "missile", "flak", "gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "railgun", "mine_layer"]
 ## The aim of each extra gun of the tower being drawn (gun 0 is the main one); set by tower().
 static var _extra: Array = []
 const TURRET_BUCKETS := 8
@@ -675,6 +683,14 @@ static func _turret(ci: CanvasItem, type: String, tier: int, c: Vector2, aim: fl
 			DroneBayArt.draw(ci, c, aim, s, t, flash, spec, acc, _extra)
 		"cas_gunship":
 			CasGunshipArt.draw(ci, c, aim, s, t, flash, spec, acc, _extra)
+		"mine_layer":
+			MineLayerArt.draw(ci, c, aim, s, t, flash, spec, acc, _extra)
+		"chemical_plant":
+			ChemicalPlantArt.draw(ci, c, aim, s, t, flash, spec, acc, _extra)
+		"cryo_tower":
+			CryoTowerArt.draw(ci, c, aim, s, t, flash, spec, acc, _extra)
+		"boost_tower":
+			BoostTowerArt.draw(ci, c, aim, s, t, flash, spec, acc, _extra)
 
 
 ## --- Shading helpers: light comes from the upper left. ------------------------------------

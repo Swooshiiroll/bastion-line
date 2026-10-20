@@ -43,6 +43,12 @@ var alive := true
 var wave_id := 0
 var hit_flash := 0.0
 var armor_shred := 0.0
+## Chemical Plant soak: time left, acid damage per second, gel slow, and the plant that soaked it. Cryo Tower permanent chill.
+var soak_timer := 0.0
+var soak_dps := 0.0
+var soak_slow := 0.0
+var soak_source = null
+var perm_slow := 0.0
 var vuln_amount := 0.0
 var vuln_timer := 0.0
 var stun_timer := 0.0
@@ -229,6 +235,12 @@ func step(dt: float) -> void:
 	hit_flash = maxf(0.0, hit_flash - dt)
 	reveal_timer = maxf(0.0, reveal_timer - dt)
 	since_hit += dt
+	if soak_timer > 0.0:
+		soak_timer = maxf(0.0, soak_timer - dt)
+		if soak_timer <= 0.0:
+			soak_dps = 0.0
+			soak_slow = 0.0
+			soak_source = null
 	for f in ["suppress_timer", "jam_timer", "repair_block", "barrier_block", "grant_block", "expose_timer", "no_dig", "disrupt_timer", "armor_break_timer"]:
 		if float(get(f)) > 0.0:
 			set(f, maxf(0.0, float(get(f)) - dt))

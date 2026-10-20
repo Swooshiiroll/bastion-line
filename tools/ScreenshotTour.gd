@@ -1007,10 +1007,12 @@ func _rework_checks(g) -> void:
 		foe.alive = false
 		g.enemies.clear()
 		g.projectiles.clear()
+		g.mines.clear()
+		g.smokes.clear()
 		g.state = Game.State.BUILD
 	else:
 		fails += _expect(false, "an enemy could be put in the Gun Turret's range")
-	for type in ["mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon", "railgun", "tesla_tower", "drone_bay", "cas_gunship"]:
+	for type in ["mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon", "railgun", "tesla_tower", "drone_bay", "cas_gunship", "mine_layer", "chemical_plant", "cryo_tower", "boost_tower"]:
 		fails += await _rework_fire_check(g, type)
 	screen.world.selected_tower = null
 	await _wait(0.2)
@@ -1041,6 +1043,11 @@ func _rework_fire_check(g, type: String) -> int:
 	for k in 3:
 		g.upgrade_tower(t, "a")
 	g.upgrade_tower(t, "b")
+	if type == "boost_tower":
+		var mate = g.place_tower("gun_turret", free[mini(2, free.size() - 1)])
+		if mate != null:
+			mate.pos = t.pos + Vector2(30, 0)
+		g._recompute_buffs()
 	screen.world.selected_tower = t
 	await _wait(0.4)
 	var foe = null
@@ -1055,7 +1062,20 @@ func _rework_fire_check(g, type: String) -> int:
 		g.state = Game.State.WAVE
 		await _wait(3.2)
 		await _shot("rework_e_" + type)
-		fails += _expect(t.damage_dealt > 0.0, "%s fires at an enemy in range" % type)
+		var worked: bool = t.damage_dealt > 0.0
+		match type:
+			"mine_layer":
+				worked = not g.mines.is_empty()
+			"chemical_plant":
+				worked = foe.soak_timer > 0.0 or foe.armor_shred > 0.0 or foe.armor_break_timer > 0.0
+			"cryo_tower":
+				worked = foe.slow_amount > 0.0 or foe.perm_slow > 0.0
+			"boost_tower":
+				worked = false
+				for o in g.towers:
+					if o != t and o.buff_dmg > 0.0:
+						worked = true
+		fails += _expect(worked, "%s works on an enemy in range" % type)
 		foe.alive = false
 		g.enemies.clear()
 		g.projectiles.clear()

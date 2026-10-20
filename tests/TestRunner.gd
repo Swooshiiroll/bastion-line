@@ -3775,3 +3775,329 @@ func test_rework_cas_gunship() -> void:
 		var sv2 = dec.game.tower_at[sv.cell]
 		check(sv2.depth.a == 4 and sv2.depth.b == 3 and sv2.depth.c == 1 and sv2.mastered_paths == ["a"] and sv2.aim_point.distance_to(Vector2(700, 400)) < 0.01, "depths, the mastery and the orbit point are restored (%s %s %s)" % [str(sv2.depth), str(sv2.mastered_paths), str(sv2.aim_point)])
 		check(near(sv2.stats().rate, sv.stats().rate) and near(sv2.stats().ac_damage, sv.stats().ac_damage), "its stats are restored")
+
+
+func test_rework_mine_layer() -> void:
+	var g = new_game()
+	g.gold = 90000
+	g.emit_events = true
+	var t = g.place_tower("mine_layer", spot(g, "mine_layer", 0))
+	check(t != null and t.is_rework and g.tower_cost("mine_layer") == 450, "the Mine Layer builds for 450")
+	var s: Dictionary = t.stats()
+	check(near(s.damage, 85.0) and near(s.splash, 40.0) and near(s.range, 120.0) and int(s.cap) == 20, "stock: 85 damage, 40 px, 120 toss range, cap 20")
+	check(t.hits_ground() and not t.hits_air(), "ground only")
+	check(g.buy_retrofit(t, 0) and near(t.stats().gel_slow, 0.2), "Adhesive Mines: a 20% gel")
+	var sc = g.place_tower("mine_layer", spot(g, "mine_layer", 20))
+	check(g.buy_retrofit(sc, 1) and near(sc.stats().damage, 100.0), "Shaped Charges: +15 damage")
+	var la = g.place_tower("mine_layer", spot(g, "mine_layer", 40))
+	check(g.buy_retrofit(la, 2) and near(la.stats().range, 140.0), "Long Arm: +20 range")
+	# It lays mines on the track within reach, one at a time, never within 18 px of another.
+	var cell := Vector2i(-1, -1)
+	var best := INF
+	for y in 14:
+		for x in 24:
+			var c := Vector2i(x, y)
+			if g.placement_error("mine_layer", c) == "":
+				var d: float = g.nearest_track_point(Game.footprint_center("mine_layer", c)).distance_to(Game.footprint_center("mine_layer", c))
+				if d < best:
+					best = d
+					cell = c
+	var m = g.place_tower("mine_layer", cell)
+	check(m != null, "a Mine Layer beside the lane")
+	g.mines.clear()
+	m.cooldown = 0.0
+	g._update_mine_layer(m, m.stats(), 0.0)
+	check(g.mines.size() == 1 and g.mines[0].pos.distance_to(m.pos) <= 120.0 + 1.0, "it tosses a mine onto the track within reach")
+	for i in 40:
+		m.cooldown = 0.0
+		g._update_mine_layer(m, m.stats(), 0.0)
+	var ok := true
+	for i in g.mines.size():
+		for j in range(i + 1, g.mines.size()):
+			if g.mines[i].pos.distance_to(g.mines[j].pos) < 17.9:
+				ok = false
+	check(ok and g.mines.size() > 3 and g.mines.size() <= 20, "mines keep their distance and respect the cap (%d)" % g.mines.size())
+	# A mine goes off under a ground enemy (and a burrowed one), not under a flyer.
+	g.mines.clear()
+	g.enemies.clear()
+	var foe = put(g, "brute", 100.0, 0, 50.0)
+	var fly = put(g, "bat", 100.0, 0, 50.0)
+	fly.pos = foe.pos
+	g.mines.append({"pos": foe.pos, "source": m})
+	var fhp: float = fly.hp
+	var hp: float = foe.hp
+	g._update_mines(0.05)
+	check(g.mines.is_empty() and foe.hp < hp and fly.hp < fhp + 0.01 and near(fly.hp, fhp), "the mine blasts the walker and not the flyer")
+	var bur = put(g, "burrower", 100.0, 0, 50.0)
+	bur.burrowed = true
+	g.mines.append({"pos": bur.pos, "source": m})
+	var bh: float = bur.hp
+	g._update_mines(0.05)
+	check(bur.hp < bh, "a burrowed enemy sets a mine off and takes the blast")
+	g.enemies.clear()
+	var sky = put(g, "bat", 100.0, 0, 50.0)
+	g.mines.append({"pos": sky.pos, "source": m})
+	g._update_mines(0.05)
+	check(g.mines.size() == 1, "a flyer alone doesn't trigger it")
+	# Gel puddle, round end, early start.
+	g.mines.clear()
+	g.smokes.clear()
+	var gm = g.place_tower("mine_layer", spot(g, "mine_layer", 60))
+	g.buy_retrofit(gm, 0)
+	var gfoe = put(g, "grunt", 100.0, 0, 50.0)
+	g.mines.append({"pos": gfoe.pos, "source": gm})
+	g._update_mines(0.05)
+	check(g.smokes.size() == 1 and near(g.smokes[0].slow, 0.2), "Adhesive Mines leave a gel that slows")
+	g.mines.append({"pos": Vector2(500, 500), "source": m})
+	g._on_field_clear()
+	check(g.mines.is_empty(), "mines clear when the round ends")
+	# Paths.
+	var pw = g.place_tower("mine_layer", spot(g, "mine_layer", 80))
+	pw.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, pw, "a", 5)
+	check(pw.mastered and near(pw.stats().damage, 150.0) and near(pw.stats().splash, 65.0), "Anti-Tank Mines: 150 damage, 65 px")
+	var pr = g.place_tower("mine_layer", spot(g, "mine_layer", 100))
+	pr.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, pr, "b", 5)
+	check(pr.mastered and int(pr.stats().cap) == 45 and near(pr.stats().rate, 1.4286), "Mine Factory: a mine every 0.7 s, cap 45")
+	var rg = g.place_tower("mine_layer", spot(g, "mine_layer", 120))
+	rg.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, rg, "c", 5)
+	check(rg.mastered and near(rg.stats().range, 260.0), "Minefield Launcher: 260 px")
+
+
+func test_rework_chemical_plant() -> void:
+	var g = new_game()
+	g.gold = 90000
+	g.emit_events = true
+	var t = g.place_tower("chemical_plant", spot(g, "chemical_plant", 0))
+	check(t != null and t.is_rework and g.tower_cost("chemical_plant") == 250, "the Chemical Plant builds for 250")
+	var s: Dictionary = t.stats()
+	check(near(s.range, 130.0) and near(s.rate, 0.667) and near(s.soak_time, 4.0) and near(s.armor_strip, 3.0), "stock: 130 range, a spray every 1.5 s, a 4 s soak, 3 armour stripped")
+	check(t.hits_air() and t.hits_ground(), "air and ground")
+	check(g.buy_retrofit(t, 0) and near(t.stats().rate, 0.75) and near(t.stats().range, 150.0), "Pressure Pump: 1.33 s, +20 range")
+	var mn = g.place_tower("chemical_plant", spot(g, "chemical_plant", 20))
+	check(g.buy_retrofit(mn, 1) and mn.stats().mist, "Mist Nozzle")
+	var bt = g.place_tower("chemical_plant", spot(g, "chemical_plant", 40))
+	check(g.buy_retrofit(bt, 2) and near(bt.stats().soak_time, 5.0), "Bigger Tanks: a 5 s soak")
+	# Spray: one enemy at a time, soaked enemies ignored, armour stripped for the soak.
+	g.enemies.clear()
+	var sp = g.place_tower("chemical_plant", spot(g, "chemical_plant", 60))
+	var a = put(g, "brute", 100.0, 0, 500.0)
+	var b = put(g, "brute", 110.0, 0, 500.0)
+	sp.pos = a.pos + Vector2(40, 0)
+	var armor0: float = a.effective_armor()
+	sp.cooldown = 0.0
+	g._spray(sp, sp.stats())
+	var soaked: Array = [a, b].filter(func(e): return e.soak_timer > 0.0)
+	check(soaked.size() == 1, "one enemy at a time (%d)" % soaked.size())
+	check(near(soaked[0].effective_armor(), maxf(0.0, armor0 - 3.0)), "the soak strips 3 armour (%.1f -> %.1f)" % [armor0, soaked[0].effective_armor()])
+	sp.cooldown = 0.0
+	g._spray(sp, sp.stats())
+	check([a, b].all(func(e): return e.soak_timer > 0.0), "the next spray goes to the other, unsoaked enemy")
+	sp.cooldown = 0.0
+	g._spray(sp, sp.stats())
+	check(sp.target == null, "everyone soaked: nothing to spray")
+	for i in 100:
+		a.step(0.05)
+	check(a.soak_timer <= 0.0 and near(a.effective_armor(), armor0), "when the soak ends the armour comes back")
+	# Acid: permanent strip, damage over time. Gel: slow.
+	var ac = g.place_tower("chemical_plant", spot(g, "chemical_plant", 80))
+	ac.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, ac, "a", 1)
+	g.enemies.clear()
+	var d = put(g, "brute", 100.0, 0, 500.0)
+	ac.pos = d.pos + Vector2(40, 0)
+	ac.cooldown = 0.0
+	var dar: float = d.effective_armor()
+	g._spray(ac, ac.stats())
+	for i in 100:
+		d.step(0.05)
+	check(near(d.armor_shred, 3.0) and near(d.effective_armor(), maxf(0.0, dar - 3.0)), "Corrosive Acid: the stripped armour stays gone (%.1f %.1f %.1f)" % [d.armor_shred, d.effective_armor(), dar])
+	buy_steps(g, ac, "a", 4)
+	check(ac.mastered and near(ac.stats().armor_strip, 7.0) and near(ac.stats().acid_dps, 20.0), "Dissolver: 7 armour, 20/s")
+	var e2 = put(g, "grunt", 100.0, 0, 5000.0)
+	e2.soak_timer = 3.0
+	e2.soak_dps = 20.0
+	e2.soak_source = ac
+	var h2: float = e2.hp
+	for i in 20:
+		g._update_soaks(0.05)
+	check(h2 - e2.hp > 15.0, "acid burns a soaked enemy (%.1f)" % (h2 - e2.hp))
+	var gl = g.place_tower("chemical_plant", spot(g, "chemical_plant", 100))
+	gl.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, gl, "c", 5)
+	check(gl.mastered and near(gl.stats().gel_slow, 0.55), "Quick-Set Foam: 55% slow")
+	var slowed = put(g, "grunt", 100.0, 0, 500.0)
+	slowed.soak_timer = 3.0
+	slowed.soak_slow = 0.55
+	g._update_soaks(0.05)
+	check(slowed.slow_amount > 0.4, "a soaked enemy is slowed (%.2f)" % slowed.slow_amount)
+	# Speed path: twin nozzles soak two at once and the soak is longer.
+	var tw = g.place_tower("chemical_plant", spot(g, "chemical_plant", 120))
+	tw.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, tw, "b", 5)
+	check(tw.mastered and int(tw.stats().nozzles) == 2 and near(tw.stats().soak_time, 7.0) and near(tw.stats().rate, 0.8), "Twin Nozzles: two at once, a 7 s soak")
+	g.enemies.clear()
+	var x1 = put(g, "grunt", 100.0, 0, 500.0)
+	var x2 = put(g, "grunt", 130.0, 0, 500.0)
+	var x3 = put(g, "grunt", 160.0, 0, 500.0)
+	tw.pos = x2.pos + Vector2(40, 0)
+	tw.cooldown = 0.0
+	g._spray(tw, tw.stats())
+	check([x1, x2, x3].filter(func(e): return e.soak_timer > 0.0).size() == 2, "two enemies soaked by one spray")
+	# Mist soaks a neighbour too.
+	g.enemies.clear()
+	var m1 = put(g, "grunt", 100.0, 0, 500.0)
+	var m2 = put(g, "grunt", 100.0, 0, 500.0)
+	m2.pos = m1.pos + Vector2(20, 0)
+	mn.pos = m1.pos + Vector2(40, 0)
+	mn.cooldown = 0.0
+	g._spray(mn, mn.stats())
+	check(m1.soak_timer > 0.0 and m2.soak_timer > 0.0, "Mist Nozzle soaks the one next to it")
+
+
+func test_rework_cryo_tower() -> void:
+	var g = new_game()
+	g.gold = 90000
+	g.emit_events = true
+	var t = g.place_tower("cryo_tower", spot(g, "cryo_tower", 0))
+	check(t != null and t.is_rework and g.tower_cost("cryo_tower") == 150, "the Cryo Tower builds for 150")
+	var s: Dictionary = t.stats()
+	check(near(s.range, 110.0) and near(s.rate, 0.5) and near(s.slow, 0.2) and near(s.slow_time, 1.5) and not s.has("damage"), "stock: a 110 px wave every 2 s, 20% slow for 1.5 s, no damage")
+	check(g.buy_retrofit(t, 0) and near(t.stats().slow_time, 2.2), "Coolant Tank: 2.2 s")
+	var cp = g.place_tower("cryo_tower", spot(g, "cryo_tower", 20))
+	check(g.buy_retrofit(cp, 1) and near(cp.stats().rate, 0.588), "Compressor: a wave every 1.7 s")
+	var dc = g.place_tower("cryo_tower", spot(g, "cryo_tower", 40))
+	check(g.buy_retrofit(dc, 2) and near(dc.stats().slow, 0.25), "Deep Cold: 25%")
+	# A wave slows ground and air, bosses half.
+	g.enemies.clear()
+	var w = g.place_tower("cryo_tower", spot(g, "cryo_tower", 60))
+	var e1 = put(g, "grunt", 100.0, 0, 500.0)
+	var e2 = put(g, "bat", 100.0, 0, 500.0)
+	e2.pos = e1.pos + Vector2(10, 0)
+	var far = put(g, "grunt", 300.0, 0, 500.0)
+	w.pos = e1.pos + Vector2(30, 0)
+	w.cooldown = 0.0
+	g._cryo_wave(w, w.stats())
+	check(near(e1.slow_amount, 0.2) and near(e2.slow_amount, 0.2) and far.slow_amount == 0.0, "air and ground in the radius are slowed 20%; the far one isn't")
+	var boss = put(g, "colossus", 100.0, 0, 1.0)
+	boss.pos = e1.pos
+	w.cooldown = 0.0
+	g._cryo_wave(w, w.stats())
+	check(boss.slow_amount < 0.11 and boss.slow_amount > 0.0, "a boss is slowed less (%.2f)" % boss.slow_amount)
+	# Slowing path: permanent chill, freeze every 4th wave.
+	var sl = g.place_tower("cryo_tower", spot(g, "cryo_tower", 80))
+	sl.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, sl, "a", 3)
+	check(near(sl.stats().perm_slow, 0.1), "Permafrost: a permanent 10% chill")
+	g.enemies.clear()
+	var ch = put(g, "grunt", 100.0, 0, 5000.0)
+	sl.pos = ch.pos + Vector2(30, 0)
+	sl.cooldown = 0.0
+	g._cryo_wave(sl, sl.stats())
+	check(near(ch.perm_slow, 0.1), "a chilled enemy keeps a permanent slow")
+	ch.pos += Vector2(300, 0)
+	ch.slow_timer = 0.0
+	ch.slow_amount = 0.0
+	g._update_soaks(0.05)
+	check(ch.slow_amount >= 0.09, "even outside its range (%.2f)" % ch.slow_amount)
+	buy_steps(g, sl, "a", 2)
+	check(sl.mastered and near(sl.stats().slow, 0.5) and near(sl.stats().perm_slow, 0.2) and int(sl.stats().freeze_every) == 4, "Deep Freeze: 50%, permanent 20%, a freeze every 4th wave")
+	sl.pos = ch.pos + Vector2(30, 0)
+	sl.pulse_count = 0
+	var froze := 0
+	for i in 8:
+		ch.stun_timer = 0.0
+		ch.stun_guard = 0.0
+		sl.cooldown = 0.0
+		g._cryo_wave(sl, sl.stats())
+		if ch.stun_timer > 0.9:
+			froze += 1
+	check(froze == 2, "every 4th wave freezes it solid (%d of 8)" % froze)
+	# Power/Range path: frostbite damage and radius.
+	var pw = g.place_tower("cryo_tower", spot(g, "cryo_tower", 100))
+	pw.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, pw, "b", 5)
+	check(pw.mastered and near(pw.stats().damage, 36.0) and near(pw.stats().range, 165.0), "Blizzard: 36 damage, 165 px")
+	var fb = put(g, "brute", 100.0, 0, 500.0)
+	pw.pos = fb.pos + Vector2(30, 0)
+	var fh: float = fb.hp
+	pw.cooldown = 0.0
+	g._cryo_wave(pw, pw.stats())
+	check(near(fh - fb.hp, 36.0, 0.1), "frostbite ignores armour (%.1f)" % (fh - fb.hp))
+	# Speed path: Cold Front keeps the slow on, always.
+	var cf = g.place_tower("cryo_tower", spot(g, "cryo_tower", 120))
+	cf.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, cf, "c", 5)
+	check(cf.mastered and cf.stats().cold_front, "Cold Front unlocked")
+	g.enemies.clear()
+	var in_f = put(g, "grunt", 100.0, 0, 500.0)
+	cf.pos = in_f.pos + Vector2(30, 0)
+	g._update_soaks(0.05)
+	check(in_f.slow_amount > 0.15, "everything inside a Cold Front stays slowed (%.2f)" % in_f.slow_amount)
+
+
+func test_rework_boost_tower() -> void:
+	var g = new_game()
+	g.gold = 90000
+	g.emit_events = true
+	var b = g.place_tower("boost_tower", spot(g, "boost_tower", 0))
+	check(b != null and b.is_rework and b.is_support() and g.tower_cost("boost_tower") == 400, "the Boost Tower builds for 400")
+	var s: Dictionary = b.stats()
+	check(near(s.range, 144.0) and near(s.buff_dmg, 0.05) and near(s.buff_rate, 0.05) and near(s.buff_range, 0.05), "stock: 144 px, +5% damage, fire rate and range")
+	# A tower inside the field is boosted; outside isn't.
+	var inside = g.place_tower("gun_turret", spot(g, "gun_turret", 5))
+	var outside = g.place_tower("gun_turret", spot(g, "gun_turret", 200))
+	b.pos = inside.pos + Vector2(40, 0)
+	g._recompute_buffs()
+	check(near(inside.buff_dmg, 0.05) and near(inside.buff_rate, 0.05) and near(inside.buff_range, 0.05), "a tower in the field gets +5% of each")
+	check(outside.pos.distance_to(b.pos) <= 144.0 or outside.buff_dmg == 0.0, "a tower out of the field doesn't")
+	# Retrofits.
+	check(g.buy_retrofit(b, 0) and near(b.stats().range, 168.0) and near(b.stats().buff_extra, 0.05), "Signal Booster: 168 px and +5% on top")
+	g._recompute_buffs()
+	check(near(inside.buff_dmg, 0.10) and near(inside.buff_rate, 0.10) and near(inside.buff_range, 0.10), "stock plus the Retrofit: +10% each")
+	var cl = g.place_tower("boost_tower", spot(g, "boost_tower", 20))
+	check(g.buy_retrofit(cl, 1) and near(cl.stats().crit_link, 0.03), "Crit Link")
+	var wm = g.place_tower("boost_tower", spot(g, "boost_tower", 40))
+	check(g.buy_retrofit(wm, 2) and near(wm.stats().range, 192.0), "Wide Mast: 192 px")
+	# A path replaces the stock 5% for that stat; the Retrofit's extra stacks.
+	buy_steps(g, b, "a", 1)
+	g._recompute_buffs()
+	check(near(inside.buff_dmg, 0.20) and near(inside.buff_rate, 0.10), "Damage path: +15%% plus the Retrofit's +5%% (%.2f)" % inside.buff_dmg)
+	# Overlapping Boost Towers don't stack: the strongest of each kind applies.
+	var second = g.place_tower("boost_tower", spot(g, "boost_tower", 60))
+	second.pos = inside.pos + Vector2(-40, 0)
+	g._recompute_buffs()
+	check(near(inside.buff_dmg, 0.20), "two Boost Towers don't stack (%.2f)" % inside.buff_dmg)
+	# Boosts apply to damage, rate and range.
+	var base_dmg: float = inside.stats().damage
+	check(near(inside.eff_damage(), base_dmg * (1.0 + inside.buff_dmg)), "the damage boost reaches the tower's shots")
+	# Crit link adds crit chance.
+	cl.pos = inside.pos + Vector2(20, 0)
+	g._recompute_buffs()
+	check(near(inside.buff_crit, 0.03), "Crit Link: +3% crit chance")
+	# An EMP switches the boost off.
+	b.disabled = 3.0
+	cl.disabled = 3.0
+	second.disabled = 3.0
+	g._update_boost_state()
+	check(near(inside.buff_dmg, 0.0) and near(inside.buff_crit, 0.0), "an offline Boost Tower boosts nothing")
+	b.disabled = 0.0
+	cl.disabled = 0.0
+	second.disabled = 0.0
+	g._update_boost_state()
+	check(inside.buff_dmg > 0.0, "and it comes back when it's online again")
+	# Masteries.
+	var m = g.place_tower("boost_tower", spot(g, "boost_tower", 80))
+	m.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, m, "a", 5)
+	check(m.mastered and near(m.stats().buff_dmg, 0.50), "Battle Network: +50% damage")
+	var r = g.place_tower("boost_tower", spot(g, "boost_tower", 100))
+	r.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, r, "b", 5)
+	check(r.mastered and near(r.stats().buff_rate, 0.50), "Rapid Network: +50% fire rate")
+	var rg = g.place_tower("boost_tower", spot(g, "boost_tower", 120))
+	rg.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, rg, "c", 5)
+	check(rg.mastered and near(rg.stats().buff_range, 0.50), "Overwatch Network: +50% range")

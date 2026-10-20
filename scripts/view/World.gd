@@ -20,6 +20,9 @@ const RailgunArt = preload("res://scripts/view/towers/RailgunArt.gd")
 const TeslaTowerArt = preload("res://scripts/view/towers/TeslaTowerArt.gd")
 const DroneBayArt = preload("res://scripts/view/towers/DroneBayArt.gd")
 const CasGunshipArt = preload("res://scripts/view/towers/CasGunshipArt.gd")
+const MineLayerArt = preload("res://scripts/view/towers/MineLayerArt.gd")
+const ChemicalPlantArt = preload("res://scripts/view/towers/ChemicalPlantArt.gd")
+const CryoTowerArt = preload("res://scripts/view/towers/CryoTowerArt.gd")
 const RocketSalvoArt = preload("res://scripts/view/towers/RocketSalvoArt.gd")
 const AntiAircraftArt = preload("res://scripts/view/towers/AntiAircraftArt.gd")
 const ArtilleryCannonArt = preload("res://scripts/view/towers/ArtilleryCannonArt.gd")
@@ -339,6 +342,11 @@ func _visual(ev: Dictionary) -> void:
 			fx.flash(ev.from, 8.0, Color(1, 1, 1), 0.06)
 		"frost":
 			var fcol := Draw.SPEC_ALT.shatter if str(ev.get("spec", "")) == "shatter" else Draw.ACCENT.frost
+			if str(ev.get("look", "")) != "":
+				# The Cryo Tower's wave of creeping mist (confirmed art): pale ice, gold at a mastery, a white shock when a wave freezes.
+				fcol = CryoTowerArt.tint(CryoTowerArt.levels(str(ev.look)))
+				if ev.get("freeze", false):
+					fx.ring(ev.pos, 8.0, float(ev.radius) * 1.05, Color(1, 1, 1), 0.5, 3.0, true)
 			fx.ring(ev.pos, 12.0, ev.radius, fcol, 0.45, 2.0, true)
 			fx.burst(ev.pos, fcol, 6, 70.0, 2.0, 0.5)
 		"rubble_cleared":
@@ -399,6 +407,32 @@ func _visual(ev: Dictionary) -> void:
 					continue
 				fx.text(p[0] + Vector2(0, -24), "+%d" % int(p[1]), Color(1.0, 0.8, 0.3), 14, 1.4, 30.0)
 				fx.burst(p[0], Color(1.0, 0.8, 0.3), 10, 70.0, 2.0, 0.5)
+		"spray":
+			# The acid spray: a lobbed stream of drops in the plant's acid colour, bigger with each Acid step (white glints from Slowing's gel).
+			var cl := ChemicalPlantArt.levels(str(ev.look))
+			var scol := ChemicalPlantArt.acid_color(cl, Draw.ACCENT.chemical_plant)
+			fx.tracer(ev.from, ev.to, Color(scol, 0.8), 0.3, 2.0 + 0.3 * float(cl.A))
+			fx.burst(ev.to, scol, 5, 45.0, 1.8 + 0.2 * float(cl.A), 0.4)
+		"mine_toss":
+			# A mine lobbed from the launcher to its spot: a short arc of light and a ring where it lands.
+			fx.tracer(ev.pos, ev.to, Color(1, 1, 1, 0.5), 0.25, 1.0)
+			fx.ring(ev.to, 2.0, 10.0, Color(1, 1, 1, 0.6), 0.25, 1.0)
+		"mine_blast":
+			# The confetti charge: coloured scraps fly from the blast (gold for the anti-tank mine), a shock ring at Wider Charge, a gel puddle with Adhesive Mines.
+			var ml := MineLayerArt.levels(str(ev.look))
+			var cs: Array = [Color(1.0, 0.3, 0.35), Color(0.3, 0.9, 1.0), Color(1.0, 0.85, 0.3), Color(0.6, 1.0, 0.4), Color(1.0, 0.45, 0.85)]
+			if ml.P >= 5:
+				cs = [Draw.GOLD, Color(1, 0.9, 0.5), Color(1, 0.7, 0.2)]
+			fx.flash(ev.pos, float(ev.radius) * 0.6, cs[0], 0.12)
+			fx.ring(ev.pos, 6.0, float(ev.radius), cs[0], 0.3, 2.0, true)
+			if ml.P >= 2:
+				fx.ring(ev.pos, float(ev.radius) * 0.5, float(ev.radius) * 1.3, Color(cs[0], 0.5), 0.35, 1.0)
+			for c in cs:
+				fx.burst(ev.pos, c, 6 + (4 if ml.P >= 4 else 0), float(ev.radius) * 3.0, 1.8, 0.5)
+			ground_fx.scorch(ev.pos, float(ev.radius) * 0.4)
+			if ev.get("gel", false):
+				ground_fx.burst(ev.pos, Color(0.65, 0.9, 0.2, 0.5), 10, 30.0, 5.0, 1.6)
+			shake = maxf(shake, 0.04)
 		"cas_shot":
 			# The CAS Gunship's guns: the gatling's tracer thickens with its path (gold at the mastery); the autocannon throws a heavy shell
 			# and a blast; missiles fly as their own projectiles.

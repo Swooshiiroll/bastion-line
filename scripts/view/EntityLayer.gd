@@ -11,6 +11,10 @@ const AntiAircraftArt = preload("res://scripts/view/towers/AntiAircraftArt.gd")
 const ArtilleryCannonArt = preload("res://scripts/view/towers/ArtilleryCannonArt.gd")
 const DroneBayArt = preload("res://scripts/view/towers/DroneBayArt.gd")
 const CasGunshipArt = preload("res://scripts/view/towers/CasGunshipArt.gd")
+const MineLayerArt = preload("res://scripts/view/towers/MineLayerArt.gd")
+const ChemicalPlantArt = preload("res://scripts/view/towers/ChemicalPlantArt.gd")
+const CryoTowerArt = preload("res://scripts/view/towers/CryoTowerArt.gd")
+const BoostTowerArt = preload("res://scripts/view/towers/BoostTowerArt.gd")
 
 var world
 ## Microseconds spent per section of _draw, summed; tools/PerfProbe.gd reads and resets it.
@@ -48,6 +52,15 @@ func _draw() -> void:
 		var extra: Array = []
 		if tw.is_rework and tw.type == "gun_turret":
 			extra = _extra_aims(tw, key, cur)
+		elif tw.is_rework and tw.type == "cryo_tower":
+			extra = [clampf(tw.fire_flash / 0.3, 0.0, 1.0)]
+		elif tw.is_rework and tw.type == "chemical_plant":
+			var second: float = cur
+			if tw.shot_targets.size() > 1 and tw.shot_targets[1] != null and tw.shot_targets[1].alive:
+				second = (tw.shot_targets[1].pos - tw.pos).angle()
+			extra = [second]
+		elif tw.is_rework and tw.type == "mine_layer":
+			extra = [tw.pulse_count]
 		elif tw.is_rework and tw.type == "drone_bay":
 			extra = [tw.available_loadouts().find(tw.loadout), tw.wing.is_empty()]
 		elif tw.is_rework and tw.type == "tesla_tower":
@@ -63,6 +76,8 @@ func _draw() -> void:
 		Draw.tower(self, tw.type, tw.tier, tw.pos, cur, 1.0 if tw.size <= 1 else 1.8, t + float(tw.cell.x) * 0.3, tw.fire_flash, tw.spec, tw.shown_spec, extra)
 		if tw.disabled > 0.0:
 			Draw.tower_offline(self, tw.pos, t)
+		if tw.buff_dmg > 0.0 or tw.buff_rate > 0.0 or tw.buff_range > 0.0:
+			BoostTowerArt.chevrons(self, tw.pos, [tw.buff_dmg, tw.buff_rate, tw.buff_range])
 		if tw.buff_dmg > 0.0:
 			Draw.disc(self, tw.pos + Vector2(14, -14), 3.0, Draw.OUTLINE)
 			Draw.disc(self, tw.pos + Vector2(14, -14), 2.2, Draw.ACCENT.amp)
@@ -77,8 +92,15 @@ func _draw() -> void:
 		if e.alive:
 			(air if e.flying else ground).append(e)
 	ground.sort_custom(func(a, b): return a.pos.y < b.pos.y)
+	for i in g.mines.size():
+		var m: Dictionary = g.mines[i]
+		MineLayerArt.mine(self, m.pos, 1.0, t, m.source.spec, Draw.ACCENT.mine_layer, fmod(t * 1.6 + float(i) * 0.37, 1.0) < 0.25)
 	for e in ground:
 		_enemy(e, t)
+		if e.soak_timer > 0.0:
+			_soak_fx(e, t)
+		if e.perm_slow > 0.0:
+			Draw.ring(self, e.pos, e.radius + 3.0, Color(0.75, 0.92, 1.0, 0.35), 1.0)
 	for p in g.projectiles:
 		if p.alive:
 			_projectile(p)
@@ -377,6 +399,25 @@ func _salvo_rocket(p) -> void:
 
 ## The Mortar Tower's shell (the confirmed art): a lobbed shell that changes with each Power step (red-banded, pointed, dark
 ## yellow-banded AP, blinking fuse, gold at the mastery), bigger with Fat Shells, banded grey with Smoke Shells.
+## A soaked enemy (Chemical Plant): a pool of the plant's acid under it, dripping and fizzing; armour flakes fall from it (Corrosive Acid),
+## gel coats it with the Slowing path.
+func _soak_fx(e, t: float) -> void:
+	var src = e.soak_source
+	var lv := ChemicalPlantArt.levels(str(src.spec)) if src != null else {"r": -1, "A": 0, "S": 0, "G": 0}
+	var ac := ChemicalPlantArt.acid_color(lv, Draw.ACCENT.chemical_plant)
+	var a := minf(1.0, e.soak_timer * 3.0)
+	var p: Vector2 = e.pos
+	Draw.disc(self, p, 14.0, Color(ac, 0.3 * a))
+	for i in 2:
+		var d := fmod(t * 1.5 + float(i) * 0.5 + float(e.id) * 0.3, 1.0)
+		Draw.disc(self, p + Vector2((float(i) - 0.5) * 10.0, d * 18.0), 1.2, Color(ac, (1.0 - d) * a))
+	for i in 3 + (2 if lv.A >= 2 else 0):
+		var b := fmod(t * 2.0 + float(i) * 0.33 + float(e.id), 1.0)
+		Draw.ring(self, p + Vector2((sin(float(i) * 2.1 + float(e.id)) * 9.0), -b * 15.0), 1.0 + b * 1.5, Color(ac.lightened(0.4), (1.0 - b) * a), 0.8)
+	if lv.G >= 1:
+		Draw.arc(self, p, e.radius + 1.0, PI * 1.1, PI * 1.9, 8, Color(ChemicalPlantArt.GELC, (0.5 + 0.1 * float(lv.G)) * a), 2.0 + float(lv.G) * 0.8)
+
+
 func _mortar_shell(p) -> void:
 	var lv := MortarTowerArt.levels(str(p.look))
 	var frac := clampf(p.traveled / maxf(p.total, 1.0), 0.0, 1.0)

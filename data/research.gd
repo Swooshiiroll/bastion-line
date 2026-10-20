@@ -11,7 +11,7 @@ extends RefCounted
 ##   command tree  "start_gold": +fraction, "lives": +fraction of the mode's shields, "sell_refund": +fraction,
 ##                 "ability_cd": -fraction, "bounty": +fraction
 
-const TREE_ORDER := ["command", "arrow", "cannon", "frost", "sniper", "tesla", "laser", "missile", "amp", "flak", "sensor", "gravity", "nullifier", "nova", "drones", "scrap", "gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon", "railgun", "tesla_tower", "drone_bay", "cas_gunship"]
+const TREE_ORDER := ["command", "arrow", "cannon", "frost", "sniper", "tesla", "laser", "missile", "amp", "flak", "sensor", "gravity", "nullifier", "nova", "drones", "scrap", "gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon", "railgun", "tesla_tower", "drone_bay", "cas_gunship", "mine_layer", "chemical_plant", "cryo_tower", "boost_tower"]
 
 ## RP sources, all derived from profile records so they can't be farmed and are never lost.
 ## (Medals pay their mode's medal_rp, from data/difficulty.gd.)
@@ -583,6 +583,90 @@ const NODES := {
 	"cas_gunship_m": {
 		"tree": "cas_gunship", "slot": Vector2i(0, 2), "cost": 3, "requires": ["cas_gunship_2a", "cas_gunship_2b"], "icon": "mastery",
 		"name": "CAS Gunship Mastery", "blurb": "Unlocks the masteries: Twin Gatlings, Autocannon Battery and Hellfire Volley.",
+		"effects": {"mastery": true},
+	},
+	# --- Mine Layer (the tower rework, issue #59: a minimal tree until the research pass) ----------
+	"mine_layer_1": {
+		"tree": "mine_layer", "slot": Vector2i(0, 0), "cost": 1, "requires": [], "icon": "damage",
+		"name": "Heavier Charges", "blurb": "Mine Layers deal +6% damage.",
+		"effects": {"mult": {"damage": 0.06}},
+	},
+	"mine_layer_2a": {
+		"tree": "mine_layer", "slot": Vector2i(-1, 1), "cost": 2, "requires": ["mine_layer_1"], "icon": "range",
+		"name": "Longer Arms", "blurb": "Mine Layers toss 7% farther.",
+		"effects": {"mult": {"range": 0.07}},
+	},
+	"mine_layer_2b": {
+		"tree": "mine_layer", "slot": Vector2i(1, 1), "cost": 2, "requires": ["mine_layer_1"], "icon": "rate",
+		"name": "Faster Presses", "blurb": "Mine Layers lay mines 7% faster.",
+		"effects": {"mult": {"rate": 0.07}},
+	},
+	"mine_layer_m": {
+		"tree": "mine_layer", "slot": Vector2i(0, 2), "cost": 3, "requires": ["mine_layer_2a", "mine_layer_2b"], "icon": "mastery",
+		"name": "Mine Layer Mastery", "blurb": "Unlocks the masteries: Anti-Tank Mines, Mine Factory and Minefield Launcher.",
+		"effects": {"mastery": true},
+	},
+	# --- Chemical Plant (the tower rework, issue #59: a minimal tree until the research pass) ----------
+	"chemical_plant_1": {
+		"tree": "chemical_plant", "slot": Vector2i(0, 0), "cost": 1, "requires": [], "icon": "range",
+		"name": "Wider Spray", "blurb": "Chemical Plants reach 7% farther.",
+		"effects": {"mult": {"range": 0.07}},
+	},
+	"chemical_plant_2a": {
+		"tree": "chemical_plant", "slot": Vector2i(-1, 1), "cost": 2, "requires": ["chemical_plant_1"], "icon": "rate",
+		"name": "Quick Valves", "blurb": "Chemical Plants spray 7% faster.",
+		"effects": {"mult": {"rate": 0.07}},
+	},
+	"chemical_plant_2b": {
+		"tree": "chemical_plant", "slot": Vector2i(1, 1), "cost": 2, "requires": ["chemical_plant_1"], "icon": "rate",
+		"name": "Long-Lasting Mix", "blurb": "Soaks last 10% longer.",
+		"effects": {"mult": {"soak_time": 0.1}},
+	},
+	"chemical_plant_m": {
+		"tree": "chemical_plant", "slot": Vector2i(0, 2), "cost": 3, "requires": ["chemical_plant_2a", "chemical_plant_2b"], "icon": "mastery",
+		"name": "Chemical Plant Mastery", "blurb": "Unlocks the masteries: Dissolver, Twin Nozzles and Quick-Set Foam.",
+		"effects": {"mastery": true},
+	},
+	# --- Cryo Tower (the tower rework, issue #59: a minimal tree until the research pass) ----------
+	"cryo_tower_1": {
+		"tree": "cryo_tower", "slot": Vector2i(0, 0), "cost": 1, "requires": [], "icon": "range",
+		"name": "Wider Vents", "blurb": "Cryo Towers reach 7% farther.",
+		"effects": {"mult": {"range": 0.07}},
+	},
+	"cryo_tower_2a": {
+		"tree": "cryo_tower", "slot": Vector2i(-1, 1), "cost": 2, "requires": ["cryo_tower_1"], "icon": "rate",
+		"name": "Colder Gas", "blurb": "Cryo Towers slow 7% more.",
+		"effects": {"mult": {"slow": 0.07}},
+	},
+	"cryo_tower_2b": {
+		"tree": "cryo_tower", "slot": Vector2i(1, 1), "cost": 2, "requires": ["cryo_tower_1"], "icon": "rate",
+		"name": "Quick Vents", "blurb": "Cryo Towers pulse 7% faster.",
+		"effects": {"mult": {"rate": 0.07}},
+	},
+	"cryo_tower_m": {
+		"tree": "cryo_tower", "slot": Vector2i(0, 2), "cost": 3, "requires": ["cryo_tower_2a", "cryo_tower_2b"], "icon": "mastery",
+		"name": "Cryo Tower Mastery", "blurb": "Unlocks the masteries: Deep Freeze, Blizzard and Cold Front.",
+		"effects": {"mastery": true},
+	},
+	# --- Boost Tower (the tower rework, issue #59: a minimal tree until the research pass) ----------
+	"boost_tower_1": {
+		"tree": "boost_tower", "slot": Vector2i(0, 0), "cost": 1, "requires": [], "icon": "range",
+		"name": "Wider Field", "blurb": "Boost Towers reach 7% farther.",
+		"effects": {"mult": {"range": 0.07}},
+	},
+	"boost_tower_2a": {
+		"tree": "boost_tower", "slot": Vector2i(-1, 1), "cost": 2, "requires": ["boost_tower_1"], "icon": "damage",
+		"name": "Stronger Signal", "blurb": "Damage boosts are 10% stronger.",
+		"effects": {"mult": {"buff_dmg": 0.1}},
+	},
+	"boost_tower_2b": {
+		"tree": "boost_tower", "slot": Vector2i(1, 1), "cost": 2, "requires": ["boost_tower_1"], "icon": "rate",
+		"name": "Faster Sync", "blurb": "Fire-rate boosts are 10% stronger.",
+		"effects": {"mult": {"buff_rate": 0.1}},
+	},
+	"boost_tower_m": {
+		"tree": "boost_tower", "slot": Vector2i(0, 2), "cost": 3, "requires": ["boost_tower_2a", "boost_tower_2b"], "icon": "mastery",
+		"name": "Boost Tower Mastery", "blurb": "Unlocks the masteries: Battle Network, Rapid Network and Overwatch Network.",
 		"effects": {"mastery": true},
 	},
 }

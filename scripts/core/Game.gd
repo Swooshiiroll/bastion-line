@@ -64,6 +64,9 @@ var pools: Array = []
 var storms: Array = []
 ## Railgun ion trails: {a, b, w, dps, t, source}. Everything on the line burns while one lasts, targeted or not, cloaked included.
 var trails: Array = []
+## Mine Layer mines on the track: {pos, source}. They go off under ground and burrowed enemies and clear when the round ends.
+var mines: Array = []
+var _boost_sig := 0
 
 ## Nested mini-nova depth, so a chain of kills can't recurse forever.
 var _nova_depth := 0
@@ -713,7 +716,10 @@ func tick(dt: float) -> void:
 	_update_pools(dt)
 	_update_smokes(dt)
 	_update_storms(dt)
+	_update_boost_state()
 	_update_trails(dt)
+	_update_mines(dt)
+	_update_soaks(dt)
 
 	_update_auras()
 	for e in enemies:
@@ -1014,6 +1020,11 @@ func _update_tower(t, dt: float) -> void:
 	if t.type == "cas_gunship":
 		_update_cas(t, s, dt)
 		return
+	if t.type == "mine_layer":
+		_update_mine_layer(t, s, dt)
+		return
+	if t.type == "boost_tower":
+		return
 	if t.is_beam():
 		if t.is_rework:
 			_update_laser_rework(t, s, dt)
@@ -1031,6 +1042,12 @@ func _update_tower(t, dt: float) -> void:
 		return
 
 	match t.type:
+		"chemical_plant":
+			_spray(t, s)
+			return
+		"cryo_tower":
+			_cryo_wave(t, s)
+			return
 		"frost":
 			_frost_pulse(t, s)
 			return
@@ -1118,6 +1135,177 @@ func aim_artillery(t, pos: Vector2) -> void:
 
 
 ## Loads a shell type, if the cannon has unlocked it. Takes effect from the next shell.
+## Boost fields switch off while an EMP has the Boost Tower down: recompute when any support tower's offline state changes.
+func _update_boost_state() -> void:
+	var sig := 0
+	for i in towers.size():
+		if towers[i].is_support() and towers[i].disabled > 0.0:
+			sig += 1 << mini(i, 30)
+	if sig != _boost_sig:
+		_boost_sig = sig
+		_recompute_buffs()
+
+
+## Mine Layer: tosses a mine onto the track within range every 1/rate seconds, up to the cap, on the stretch nearest the entrance first,
+## never within 18 px of another mine.
+func _update_mine_layer(t, s: Dictionary, dt: float) -> void:
+	t.cooldown -= dt
+	if t.cooldown > 0.0:
+		return
+	var mine_count := 0
+	for m in mines:
+		if m.source == t:
+			mine_count += 1
+	if mine_count >= int(s.get("cap", 20)):
+		t.cooldown = 0.2
+		return
+	var spot = _mine_spot(t, float(s.get("range", 120.0)))
+	if spot == null:
+		t.cooldown = 0.3
+		return
+	mines.append({"pos": spot, "source": t})
+	t.pulse_count += 1
+	t.cooldown = 1.0 / t.eff_rate()
+	t.fire_flash = 0.12
+	t.aim = (spot - t.pos).angle()
+	_emit({"type": "mine_toss", "pos": t.pos, "to": spot, "look": t.look_key()})
+
+
+## The first free point along the lanes (nearest the entrance) inside reach of the tower; null if there is none.
+func _mine_spot(t, reach: float):
+	for curve in grid.ground_paths:
+		var length: float = curve.get_baked_length()
+		var off := 0.0
+		while off <= length:
+			var p: Vector2 = curve.sample_baked(off)
+			if p.distance_squared_to(t.pos) <= reach * reach:
+				var free := true
+				for m in mines:
+					if m.pos.distance_squared_to(p) < 18.0 * 18.0:
+						free = false
+						break
+				if free:
+					return p
+			off += 10.0
+	return null
+
+
+## A mine goes off under any ground or burrowed enemy (flyers pass over; holograms aren't solid): its blast hits every ground and
+## burrowed enemy in its radius; Adhesive Mines leave a gel puddle that slows.
+func _update_mines(_dt: float) -> void:
+	if mines.is_empty():
+		return
+	var keep: Array = []
+	for m in mines:
+		var trig = null
+		for e in enemies:
+			if e.alive and not e.flying and not bool(e.def.get("hologram", false)) and e.pos.distance_squared_to(m.pos) <= 14.0 * 14.0:
+				trig = e
+				break
+		if trig == null:
+			keep.append(m)
+			continue
+		var t = m.source
+		var s: Dictionary = t.stats()
+		var r := float(s.get("splash", 40.0))
+		for e in _enemies_near(m.pos, r, false, true, true):
+			var dealt := damage_enemy(e, t.eff_damage(), false, t, true, false, true)
+			_emit({"type": "hit", "pos": e.pos, "amount": dealt, "kind": "cannon"})
+		if float(s.get("gel_slow", 0.0)) > 0.0:
+			smokes.append({"pos": m.pos, "r": r, "t": float(s.get("gel_time", 2.0)), "slow": float(s.gel_slow)})
+		_emit({"type": "mine_blast", "pos": m.pos, "radius": r, "gel": float(s.get("gel_slow", 0.0)) > 0.0, "look": t.look_key()})
+	mines = keep
+
+
+## Chemical Plant: sprays the best unsoaked enemy in range (one, or two with the Twin Nozzles); a soaked enemy is ignored until the
+## soak wears off. The soak strips armour (back when it ends, or for good with Corrosive Acid), burns with acid and slows with gel.
+func _spray(t, s: Dictionary) -> void:
+	var cands: Array = []
+	for e in enemies:
+		if t.can_target(e) and e.soak_timer <= 0.0 and not bool(e.def.get("hologram", false)):
+			cands.append(e)
+	if cands.is_empty():
+		t.target = null
+		t.cooldown = RETARGET_DELAY
+		return
+	var scores := {}
+	for e in cands:
+		scores[e] = _score(t, e, t.pos.distance_squared_to(e.pos))
+	cands.sort_custom(func(a, b): return scores[a] > scores[b])
+	t.target = cands[0]
+	t.cooldown = 1.0 / t.eff_rate()
+	t.fire_flash = 0.15
+	t.aim = (cands[0].pos - t.pos).angle()
+	t.shot_targets = cands.slice(0, 2)
+	var hit_n := int(s.get("nozzles", 1))
+	var soaked: Array = []
+	for i in mini(hit_n, cands.size()):
+		soaked.append(cands[i])
+	if bool(s.get("mist", false)):
+		var extra = null
+		for e in cands:
+			if not soaked.has(e) and e.pos.distance_squared_to(soaked[0].pos) <= 40.0 * 40.0:
+				extra = e
+				break
+		if extra != null:
+			soaked.append(extra)
+	var strip := float(s.get("armor_strip", 3.0))
+	var time_s := float(s.get("soak_time", 4.0))
+	for e in soaked:
+		e.soak_timer = time_s
+		e.soak_dps = float(s.get("acid_dps", 0.0))
+		e.soak_slow = float(s.get("gel_slow", 0.0))
+		e.soak_source = t
+		if bool(s.get("acid_perm", false)):
+			e.armor_shred = maxf(e.armor_shred, strip)
+		else:
+			e.armor_break = maxf(e.armor_break, strip)
+			e.armor_break_timer = maxf(e.armor_break_timer, time_s)
+		_emit({"type": "spray", "from": t.pos, "to": e.pos, "look": t.look_key()})
+
+
+## Every tick: acid burns soaked enemies, gel and chill slow them.
+func _update_soaks(dt: float) -> void:
+	for t in towers:
+		if t.type == "cryo_tower" and t.disabled <= 0.0 and bool(t.stats().get("cold_front", false)):
+			var s: Dictionary = t.stats()
+			for e in _enemies_near(t.pos, t.get_range(), t.hits_air(), t.hits_ground()):
+				e.apply_slow(float(s.slow) * (0.5 if e.boss else 1.0), 0.25)
+	for e in enemies:
+		if not e.alive:
+			continue
+		if e.soak_timer > 0.0:
+			if e.soak_dps > 0.0 and e.soak_source != null:
+				damage_enemy(e, e.soak_dps * dt, true, e.soak_source, false)
+			if e.soak_slow > 0.0:
+				e.apply_slow(e.soak_slow, 0.25)
+		if e.perm_slow > 0.0:
+			e.apply_slow(e.perm_slow, 0.25)
+
+
+## Cryo Tower: a wave of cold gas slows every enemy in the radius (air and ground; bosses half), does frostbite damage, leaves a
+## permanent chill, and every few waves freezes them solid. The Cold Front keeps the slow on everything inside, always.
+func _cryo_wave(t, s: Dictionary) -> void:
+	var r: float = t.get_range()
+	var hit := false
+	t.pulse_count += 1
+	var freeze: bool = int(s.get("freeze_every", 0)) > 0 and t.pulse_count % int(s.freeze_every) == 0
+	for e in _enemies_near(t.pos, r, t.hits_air(), t.hits_ground()):
+		var half := 0.5 if e.boss else 1.0
+		e.apply_slow(float(s.slow) * half, float(s.slow_time))
+		if float(s.get("perm_slow", 0.0)) > 0.0:
+			e.perm_slow = maxf(e.perm_slow, float(s.perm_slow) * half)
+		if float(s.get("damage", 0.0)) > 0.0:
+			damage_enemy(e, t.eff_damage(), true, t)
+		if freeze and e.alive:
+			e.apply_stun(float(s.get("freeze_time", 1.0)) * (0.3 if e.boss else 1.0))
+		hit = true
+	t.cooldown = 1.0 / t.eff_rate() if hit else RETARGET_DELAY
+	if hit:
+		t.fire_flash = 0.3
+		_emit({"type": "frost", "pos": t.pos, "radius": r, "tier": t.tier, "spec": t.spec, "look": t.look_key(), "freeze": freeze})
+
+
 ## Designates the point a CAS Gunship orbits (free, any time, anywhere on the map).
 func designate_orbit(t, pos: Vector2) -> void:
 	t.aim_point = pos.clamp(Vector2.ZERO, Grid.field_size())
@@ -1947,7 +2135,7 @@ func _fire_projectile(t, target, s: Dictionary, dmg_mult := 1.0) -> void:
 	p.target_pos = target.pos
 	p.speed = float(s.proj_speed)
 	p.damage = t.eff_damage() * dmg_mult
-	if float(s.get("crit", 0.0)) > 0.0 and _roll(float(s.crit)):
+	if float(s.get("crit", 0.0)) + t.buff_crit > 0.0 and _roll(float(s.get("crit", 0.0)) + t.buff_crit):
 		p.damage *= CRIT_MULT
 		p.crit = true
 	if t.is_rework:
@@ -2506,17 +2694,21 @@ func _recompute_buffs() -> void:
 		t.buff_dmg = 0.0
 		t.buff_rate = 0.0
 		t.buff_range = 0.0
+		t.buff_crit = 0.0
 	for a in towers:
-		if not a.is_support() or a.is_sensor() or a.is_economy():
+		if not a.is_support() or a.is_sensor() or a.is_economy() or a.disabled > 0.0:
 			continue
 		var s: Dictionary = a.stats()
 		var r: float = a.get_range()
+		# The Boost Tower's Retrofit adds a flat share on top of whatever each boost is (the strongest of each kind still wins).
+		var extra := float(s.get("buff_extra", 0.0))
 		for t in towers:
 			if t.is_support() or a.pos.distance_squared_to(t.pos) > r * r:
 				continue
-			t.buff_dmg = maxf(t.buff_dmg, float(s.get("buff_dmg", 0.0)))
-			t.buff_rate = maxf(t.buff_rate, float(s.get("buff_rate", 0.0)))
-			t.buff_range = maxf(t.buff_range, float(s.get("buff_range", 0.0)))
+			t.buff_dmg = maxf(t.buff_dmg, float(s.get("buff_dmg", 0.0)) + (extra if s.has("buff_dmg") else 0.0))
+			t.buff_rate = maxf(t.buff_rate, float(s.get("buff_rate", 0.0)) + (extra if s.has("buff_rate") else 0.0))
+			t.buff_range = maxf(t.buff_range, float(s.get("buff_range", 0.0)) + (extra if s.has("buff_range") else 0.0))
+			t.buff_crit = maxf(t.buff_crit, float(s.get("crit_link", 0.0)))
 	_recompute_economy()
 
 
@@ -2661,6 +2853,9 @@ func _on_field_clear() -> void:
 	strikes.clear()
 	pools.clear()
 	storms.clear()
+	mines.clear()
+	smokes.clear()
+	trails.clear()
 	warp_timer = 0.0
 	for t in towers:
 		t.cooldown = 0.0

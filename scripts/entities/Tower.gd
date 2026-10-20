@@ -67,6 +67,8 @@ var damage_dealt := 0.0
 var buff_dmg := 0.0
 var buff_rate := 0.0
 var buff_range := 0.0
+## Boost Tower Crit Link: extra crit chance for towers in its field.
+var buff_crit := 0.0
 ## Set by a Supply Depot in range: upgrade discount and sell refund (0 = none).
 var discount := 0.0
 var refund_field := 0.0

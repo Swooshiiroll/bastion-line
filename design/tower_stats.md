@@ -268,3 +268,107 @@ air: yes · ground: yes · size: 1 · damage_kind: physical · uncapped: yes
 | c3 | ms_damage 190 |
 | c4 | ms_rate 0.5 |
 | cm | ms_volley 2 |
+
+## mine_layer
+
+air: no · ground: yes · size: 1 · damage_kind: physical
+
+| Node | Tokens |
+|---|---|
+| base | damage 85 · splash 40 · range 120 · rate 0.667 · cap 20 |
+| r1 | gel_slow 0.2 · gel_time 2 |
+| r2 | damage +15 |
+| r3 | range +20 |
+| a1 | damage 100 |
+| a2 | splash 50 |
+| a3 | damage 125 |
+| a4 | splash 60 |
+| am | damage 150 · splash 65 |
+| b1 | rate 0.752 · cap 24 |
+| b2 | rate 0.833 · cap 28 |
+| b3 | rate 1.053 · cap 32 |
+| b4 | rate 1.176 · cap 36 |
+| bm | rate 1.4286 · cap 45 |
+| c1 | range 140 |
+| c2 | range 160 |
+| c3 | range 190 |
+| c4 | range 220 |
+| cm | range 260 |
+
+## chemical_plant
+
+air: yes · ground: yes · size: 1 · damage_kind: energy
+
+| Node | Tokens |
+|---|---|
+| base | range 130 · rate 0.667 · soak_time 4 · armor_strip 3 · nozzles 1 |
+| r1 | rate 0.75 · range +20 |
+| r2 | mist |
+| r3 | soak_time 5 |
+| a1 | acid_perm |
+| a2 | armor_strip 4 · acid_dps 5 |
+| a3 | armor_strip 5 · acid_dps 10 |
+| a4 | armor_strip 6 · acid_dps 15 |
+| am | armor_strip 7 · acid_dps 20 |
+| b1 | rate 0.8 |
+| b2 | soak_time 5 |
+| b3 | rate 1.0 · soak_time 6 |
+| b4 | rate 1.2 |
+| bm | rate 0.8 · nozzles 2 · soak_time 7 |
+| c1 | gel_slow 0.15 |
+| c2 | gel_slow 0.25 |
+| c3 | gel_slow 0.35 |
+| c4 | gel_slow 0.45 |
+| cm | gel_slow 0.55 |
+
+## cryo_tower
+
+air: yes · ground: yes · size: 1 · damage_kind: energy
+
+| Node | Tokens |
+|---|---|
+| base | range 110 · rate 0.5 · slow 0.2 · slow_time 1.5 |
+| r1 | slow_time 2.2 |
+| r2 | rate 0.588 |
+| r3 | slow 0.25 |
+| a1 | slow 0.28 |
+| a2 | slow 0.35 |
+| a3 | perm_slow 0.1 |
+| a4 | slow 0.45 · perm_slow 0.15 |
+| am | slow 0.5 · perm_slow 0.2 · freeze_every 4 · freeze_time 1 |
+| b1 | damage 5 · range 120 |
+| b2 | damage 10 · range 130 |
+| b3 | damage 18 · range 145 |
+| b4 | damage 26 |
+| bm | damage 36 · range 165 |
+| c1 | rate 0.571 |
+| c2 | rate 0.667 |
+| c3 | rate 0.833 |
+| c4 | rate 1.0 |
+| cm | cold_front |
+
+## boost_tower
+
+air: yes · ground: yes · size: 1 · damage_kind: physical · support: yes
+
+| Node | Tokens |
+|---|---|
+| base | range 144 · buff_dmg 0.05 · buff_rate 0.05 · buff_range 0.05 |
+| r1 | range 168 · buff_extra 0.05 |
+| r2 | crit_link 0.03 |
+| r3 | range 192 |
+| a1 | buff_dmg 0.15 |
+| a2 | buff_dmg 0.22 |
+| a3 | buff_dmg 0.32 |
+| a4 | buff_dmg 0.40 |
+| am | buff_dmg 0.50 |
+| b1 | buff_rate 0.15 |
+| b2 | buff_rate 0.22 |
+| b3 | buff_rate 0.32 |
+| b4 | buff_rate 0.40 |
+| bm | buff_rate 0.50 |
+| c1 | buff_range 0.15 |
+| c2 | buff_range 0.22 |
+| c3 | buff_range 0.32 |
+| c4 | buff_range 0.40 |
+| cm | buff_range 0.50 |

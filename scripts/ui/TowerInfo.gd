@@ -39,6 +39,10 @@ const STAT_ROWS := [
 	["Autocannon blast", "ac_splash", "%d"], ["Missile damage", "ms_damage", "%d"], ["Missiles/s", "ms_rate", "%.2f"],
 	["Missile blast", "ms_splash", "%d"], ["Missiles per volley", "ms_volley", "%d"], ["Fire-rate bonus", "rate_mult", "x%.1f"],
 	["Loadout boost", "loadout_mult", "x%.2f"],
+	["Mines at once", "cap", "%d"], ["Soak lasts", "soak_time", "%.0fs"], ["Armour stripped", "armor_strip", "%d"], ["Acid damage/s", "acid_dps", "%d"],
+	["Gel slow", "gel_slow", "pct"], ["Slow lasts", "slow_time", "%.1fs"], ["Permanent chill", "perm_slow", "pct"], ["Freeze every", "freeze_every", "%d waves"],
+	["Spray targets", "nozzles", "%d"], ["Damage boost", "buff_dmg", "+pct"], ["Fire-rate boost", "buff_rate", "+pct"], ["Range boost", "buff_range", "+pct"],
+	["Extra boost, all stats", "buff_extra", "+pct"], ["Crit chance given", "crit_link", "pct"], ["Jump range", "jump_range", "%d"],
 ]
 ## Mechanic flags shown as a "yes" row: [label, stat key].
 const FLAG_ROWS := [
@@ -50,7 +54,7 @@ const FLAG_ROWS := [
 	["Homing", "homing"], ["Re-targets", "retarget"], ["Never misses", "never_miss"], ["Rippling salvo", "ripple"],
 	["Overloads disruptors", "overload"], ["Incendiary shells", "incendiary"], ["Shrapnel shells", "shrapnel"],
 	["Concussion shells", "concussion"], ["Combined shell", "combined"], ["Fast traverse", "turn_fast"],
-	["Radar: reveals cloaked", "radar"], ["Missiles loadout", "lo_missiles"], ["Bombs loadout", "lo_bombs"],
+	["Radar: reveals cloaked", "radar"], ["Mist soaks a neighbour", "mist"], ["Acid strips for good", "acid_perm"], ["Constant cold field", "cold_front"], ["Missiles loadout", "lo_missiles"], ["Bombs loadout", "lo_bombs"],
 	["Laser loadout", "lo_laser"], ["Full kit loadout", "lo_full"],
 ]
 ## Short keys for the one-line summary.
