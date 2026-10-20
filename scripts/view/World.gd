@@ -17,6 +17,7 @@ const FxLayer = preload("res://scripts/view/FxLayer.gd")
 const Overlay = preload("res://scripts/view/Overlay.gd")
 const GunTurretArt = preload("res://scripts/view/towers/GunTurretArt.gd")
 const RocketSalvoArt = preload("res://scripts/view/towers/RocketSalvoArt.gd")
+const AntiAircraftArt = preload("res://scripts/view/towers/AntiAircraftArt.gd")
 
 const MAX_STEPS_PER_FRAME := 40
 const SMOKE := Color(0.35, 0.36, 0.4, 0.7)
@@ -319,6 +320,8 @@ func _visual(ev: Dictionary) -> void:
 			fx.flash(ev.pos, 12.0, Color(1.0, 0.9, 0.6), 0.08)
 			fx.burst(ev.pos, Color(0.35, 0.36, 0.34, 0.9), 8, 60.0, 3.0, 0.5)
 			fx.ring(ev.pos, 4.0, float(ev.radius), Color(Draw.ACCENT.flak, 0.8), 0.22, 1.6)
+			if str(ev.get("look", "")) != "" and AntiAircraftArt.levels(str(ev.look)).P >= 4:
+				fx.burst(ev.pos, Color(0.9, 0.8, 0.6), 8, float(ev.radius) * 2.0, 1.0, 0.25)
 		"flechette":
 			# One trace per flechette, scattered across the cone at random lengths.
 			var fcone := deg_to_rad(float(ev.cone)) * 0.5

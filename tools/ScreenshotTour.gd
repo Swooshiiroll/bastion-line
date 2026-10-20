@@ -1010,12 +1010,60 @@ func _rework_checks(g) -> void:
 		g.state = Game.State.BUILD
 	else:
 		fails += _expect(false, "an enemy could be put in the Gun Turret's range")
+	for type in ["mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret"]:
+		fails += await _rework_fire_check(g, type)
 	screen.world.selected_tower = null
 	await _wait(0.2)
 	if not hud.is_open("shop"):
 		await _key(KEY_B)
 		await _wait(0.3)
 	print("REWORK CHECKS: %s" % ("ALL PASSED" if fails == 0 else "%d FAILED" % fails))
+
+
+## One reworked tower: build it near the lane, fit its first Retrofit and a few path steps, put an enemy in range and watch it fire.
+func _rework_fire_check(g, type: String) -> int:
+	var screen = app.current
+	var fails := 0
+	var free: Array = []
+	for y in 14:
+		for x in 24:
+			if g.placement_error(type, Vector2i(x, y)) == "":
+				free.append(Vector2i(x, y))
+	free.sort_custom(func(p, q): return _lane_gap(g, p) < _lane_gap(g, q))
+	if free.is_empty():
+		return _expect(false, "%s: a free cell exists" % type)
+	g.gold += 20000
+	var t = g.place_tower(type, free[0])
+	fails += _expect(t != null and t.is_rework, "%s is placed" % type)
+	if t == null:
+		return fails
+	fails += _expect(g.buy_retrofit(t, 0), "%s: the first Retrofit is fitted" % type)
+	for k in 3:
+		g.upgrade_tower(t, "a")
+	g.upgrade_tower(t, "b")
+	screen.world.selected_tower = t
+	await _wait(0.4)
+	var foe = null
+	var kind := "bat" if type == "anti_aircraft_turret" else "brute"
+	for dist in range(0, 3000, 30):
+		var cand = g.spawn_enemy(kind, 0, float(dist), 60.0, -1)
+		if cand.pos.distance_to(t.pos) < t.get_range() * 0.7:
+			foe = cand
+			break
+	if foe != null:
+		g.enemies.append(foe)
+		g.state = Game.State.WAVE
+		await _wait(3.2)
+		await _shot("rework_e_" + type)
+		fails += _expect(t.damage_dealt > 0.0, "%s fires at an enemy in range" % type)
+		foe.alive = false
+		g.enemies.clear()
+		g.projectiles.clear()
+		g.state = Game.State.BUILD
+	else:
+		fails += _expect(false, "an enemy could be put in %s's range" % type)
+	screen.world.selected_tower = null
+	return fails
 
 
 ## Every failed expectation in the run; the tour exits with code 1 if there are any.

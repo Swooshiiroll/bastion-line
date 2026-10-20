@@ -1057,6 +1057,9 @@ func _update_tower(t, dt: float) -> void:
 			_fire_gun(t, target, s)
 		"mortar_tower":
 			_fire_mortar(t, target, s)
+		"anti_aircraft_turret":
+			t.pulse_count += 1
+			_fire_projectile(t, target, s)
 		"arrow":
 			if t.spec == "flechette":
 				_flechette(t, float(s.get("pellets", 6.0)), float(s.get("cone", 45.0)), bool(s.get("bypass_shield", false)))
@@ -1928,6 +1931,21 @@ func _projectile_hit(p) -> void:
 			if p.burn_dps > 0.0:
 				pools.append({"pos": p.pos, "r": r * 0.8, "dps": p.burn_dps, "t": p.burn_time, "source": p.source})
 			_emit({"type": "splash", "pos": p.pos, "radius": r, "burn": p.burn_dps > 0.0, "stun": p.stun > 0.0})
+		"anti_aircraft_turret":
+			# Anti-Aircraft Turret: stock rounds are direct hits; from Flak Rounds each round also bursts, hurting every flyer in
+			# the burst radius around its target.
+			var burst := float(s.get("burst", 0.0))
+			if burst > 0.0:
+				var c: Vector2 = p.target.pos if (p.target != null and p.target.alive) else p.pos
+				for e in enemies:
+					if e.alive and e.flying and e.pos.distance_squared_to(c) <= burst * burst:
+						var dealt := damage_enemy(e, p.damage, false, p.source)
+						_emit({"type": "hit", "pos": e.pos, "amount": dealt, "kind": "flak"})
+				_emit({"type": "flak_hit", "pos": c, "radius": burst, "look": p.look})
+			elif p.target != null and p.target.alive:
+				var dealt2 := damage_enemy(p.target, p.damage, false, p.source)
+				_emit({"type": "hit", "pos": p.target.pos, "amount": dealt2, "kind": "flak"})
+				_rework_hit_effects(p, s)
 		"rocket_salvo":
 			# Rocket Salvo: a blast on flyers and ground alike (more against air with Proximity Fuses); Incendiary Warheads
 			# leave burning ground.

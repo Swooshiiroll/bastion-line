@@ -3215,3 +3215,72 @@ func test_rework_laser_tower() -> void:
 	rg.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
 	buy_steps(g, rg, "c", 5)
 	check(rg.mastered and near(rg.stats().range, 280.0), "Deep Lance: 280 range")
+
+
+func test_rework_anti_aircraft() -> void:
+	var g = new_game()
+	g.gold = 60000
+	g.emit_events = true
+	var t = g.place_tower("anti_aircraft_turret", spot(g, "anti_aircraft_turret", 0))
+	check(t != null and t.is_rework and g.tower_cost("anti_aircraft_turret") == 150, "the Anti-Aircraft Turret builds for 150")
+	var s: Dictionary = t.stats()
+	check(near(s.damage, 25.0) and near(s.range, 160.0) and near(s.rate, 2.5), "stock: 25 damage, 160 range, 2.5 rounds/s")
+	check(t.hits_air() and not t.hits_ground(), "air only")
+	check(g.buy_retrofit(t, 0) and near(t.stats().range, 175.0), "Fire-Control Radar: +15 range")
+	var dr = g.place_tower("anti_aircraft_turret", spot(g, "anti_aircraft_turret", 20))
+	check(g.buy_retrofit(dr, 1) and near(dr.stats().rate, 2.75), "Ammo Drum: +0.25 rounds/s")
+	var am = g.place_tower("anti_aircraft_turret", spot(g, "anti_aircraft_turret", 40))
+	check(g.buy_retrofit(am, 2) and near(am.stats().damage, 29.0), "Armoured Mount: +4 damage")
+	# It ignores ground enemies and shoots flyers.
+	var shooter = g.place_tower("anti_aircraft_turret", spot(g, "anti_aircraft_turret", 60))
+	var walker = put(g, "grunt", 100.0, 0, 50.0)
+	shooter.pos = walker.pos + Vector2(30, 0)
+	check(g.pick_target(shooter) == null, "a ground enemy is never a target")
+	var flyer = put(g, "bat", 100.0, 0, 50.0)
+	check(g.pick_target(shooter) == flyer, "a flyer is")
+	# Stock rounds are direct hits: a second flyer next to the target is untouched.
+	var other = put(g, "bat", 100.0, 0, 50.0)
+	other.pos = flyer.pos + Vector2(10, 0)
+	var hp_o: float = other.hp
+	g._fire_projectile(shooter, flyer, shooter.stats())
+	var rnd = g.projectiles[g.projectiles.size() - 1]
+	rnd.pos = flyer.pos
+	g._projectile_hit(rnd)
+	check(flyer.hp < flyer.max_hp and near(other.hp, hp_o), "a stock round hits only its target")
+	# Flak Rounds: the airburst hurts every flyer nearby, and only flyers.
+	var fk = g.place_tower("anti_aircraft_turret", spot(g, "anti_aircraft_turret", 80))
+	buy_steps(g, fk, "b", 2)
+	check(near(fk.stats().burst, 20.0), "Flak Rounds: a 20 px airburst")
+	fk.pos = flyer.pos + Vector2(30, 0)
+	hp_o = other.hp
+	var ground_hp: float = walker.hp
+	walker.pos = flyer.pos + Vector2(3, 0)
+	g._fire_projectile(fk, flyer, fk.stats())
+	var fr = g.projectiles[g.projectiles.size() - 1]
+	fr.pos = flyer.pos
+	g._projectile_hit(fr)
+	check(other.hp < hp_o, "the burst hit the flyer beside the target")
+	check(near(walker.hp, ground_hp), "the burst doesn't touch ground enemies")
+	var far_flyer = put(g, "bat", 100.0, 0, 50.0)
+	far_flyer.pos = flyer.pos + Vector2(40, 0)
+	var hp_far: float = far_flyer.hp
+	g._projectile_hit(fr)
+	check(near(far_flyer.hp, hp_far), "outside the burst radius is safe")
+	# Paths.
+	buy_steps(g, fk, "b", 1)
+	check(near(fk.stats().damage, 36.0), "Flak Shells: 36 damage (%.0f)" % fk.stats().damage)
+	check(near(fk.stats().burst, 30.0), "30 px airburst")
+	var rg = g.place_tower("anti_aircraft_turret", spot(g, "anti_aircraft_turret", 100))
+	rg.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, rg, "a", 5)
+	check(rg.mastered and near(rg.stats().range, 330.0), "Sky Wall: 330 range")
+	var sp = g.place_tower("anti_aircraft_turret", spot(g, "anti_aircraft_turret", 120))
+	sp.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, sp, "c", 2)
+	check(near(sp.stats().rate, 3.2) and bool(sp.stats().turn_fast), "Fast Traverse: 3.2 rounds/s, turns faster")
+	buy_steps(g, sp, "c", 3)
+	check(sp.mastered and near(sp.stats().rate, 7.0) and int(sp.stats().barrels) == 4, "Quad Mount: 7 rounds/s from 4 barrels")
+	var pm = g.place_tower("anti_aircraft_turret", spot(g, "anti_aircraft_turret", 140))
+	pm.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, pm, "b", 5)
+	check(pm.mastered and near(pm.stats().damage, 42.0) and near(pm.stats().burst, 50.0), "Flak Curtain: 42 damage, 50 px")

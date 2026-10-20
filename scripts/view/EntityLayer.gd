@@ -7,6 +7,7 @@ const Grid = preload("res://scripts/core/Grid.gd")
 const GunTurretArt = preload("res://scripts/view/towers/GunTurretArt.gd")
 const MortarTowerArt = preload("res://scripts/view/towers/MortarTowerArt.gd")
 const RocketSalvoArt = preload("res://scripts/view/towers/RocketSalvoArt.gd")
+const AntiAircraftArt = preload("res://scripts/view/towers/AntiAircraftArt.gd")
 
 var world
 ## Microseconds spent per section of _draw, summed; tools/PerfProbe.gd reads and resets it.
@@ -36,11 +37,13 @@ func _draw() -> void:
 		var key: int = tw.get_instance_id()
 		var cur: float = _aim.get(key, -PI / 2.0)
 		if tw.target != null and tw.target.alive:
-			cur = lerp_angle(cur, (tw.target.pos - tw.pos).angle(), 0.35)
+			cur = lerp_angle(cur, (tw.target.pos - tw.pos).angle(), 0.6 if (tw.is_rework and bool(tw.stats().get("turn_fast", false))) else 0.35)
 		_aim[key] = cur
 		var extra: Array = []
 		if tw.is_rework and tw.type == "gun_turret":
 			extra = _extra_aims(tw, key, cur)
+		elif tw.is_rework and tw.type == "anti_aircraft_turret":
+			extra = [tw.pulse_count]
 		elif tw.is_rework and tw.type == "laser_tower":
 			extra = [clampf(tw.ramp / float(tw.stats().ramp_time), 0.0, 1.0) if tw.target != null else 0.0]
 		Draw.tower(self, tw.type, tw.tier, tw.pos, cur, 1.0 if tw.size <= 1 else 1.8, t + float(tw.cell.x) * 0.3, tw.fire_flash, tw.spec, tw.shown_spec, extra)
@@ -186,6 +189,8 @@ func _projectile(p) -> void:
 			_mortar_shell(p)
 		"rocket_salvo":
 			_salvo_rocket(p)
+		"anti_aircraft_turret":
+			_aa_round(p)
 		_:
 			var d: Vector2 = (p.target_pos - p.pos).normalized()
 			if d == Vector2.ZERO:
@@ -230,6 +235,28 @@ func _gun_round(p) -> void:
 		draw_line(p.pos - d * 0.9 + o * 0.6, p.pos - d * 0.9 - o * 0.6, Color(1, 0.85, 0.2), 0.7, true)
 	if lv.P >= 4:
 		Draw.glow_dot(self, p.pos - d * 1.8, 0.45, Color(1, 0.95, 0.85))
+
+
+## The Anti-Aircraft Turret's round (the confirmed art): a tracer (thinner and longer with High-Velocity Rounds) and a brass bullet that
+## becomes a dark flak shell from Flak Rounds, bigger at Flak Shells, with an orange fuse ring.
+func _aa_round(p) -> void:
+	var lv := AntiAircraftArt.levels(str(p.look))
+	var d: Vector2 = (p.target_pos - p.pos).normalized()
+	if d == Vector2.ZERO:
+		d = Vector2.RIGHT
+	var col: Color = Draw.ACCENT.anti_aircraft_turret
+	var back: float = clampf(p.traveled, 0.0, 36.0 if lv.R >= 4 else 18.0)
+	var w := 1.4 if lv.R >= 4 else 1.8
+	draw_line(p.pos - d * back, p.pos, Color(col, 0.3), w * 2.0, true)
+	draw_line(p.pos - d * back, p.pos, Color(col, 0.95), w * 0.8, true)
+	draw_line(p.pos - d * back * 0.9, p.pos, Color(1, 1, 1, 0.7), 0.5, true)
+	if lv.P >= 2:
+		var r := 1.6 if lv.P >= 3 else 1.25
+		Draw.disc(self, p.pos, r + 0.4, Draw.OUTLINE)
+		Draw.disc(self, p.pos, r, AntiAircraftArt.DARKR)
+		Draw.ring(self, p.pos, r * 0.7, AntiAircraftArt.ORANGE, 0.5)
+	elif lv.R >= 1:
+		Draw.solid(self, p.pos, PackedVector2Array([Vector2(2.2, 0), Vector2(1.3, 0.6), Vector2(-1.8, 0.6), Vector2(-1.8, -0.6), Vector2(1.3, -0.6)]), AntiAircraftArt.BRASS, d.angle(), 1.0, 0.6)
 
 
 ## A Rocket Salvo rocket (the confirmed art): a finned rocket whose warhead changes with each Power step (red, orange-banded,
