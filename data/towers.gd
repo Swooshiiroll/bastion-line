@@ -395,4 +395,4 @@ static func def(type: String) -> Dictionary:
 		return TOWERS[type]
 	var r: Dictionary = Rework.TREES[type]
 	return {"name": r.name, "blurb": r.blurb, "air": r.air, "ground": r.ground, "size": r.size,
-		"class": r["class"], "weapon": r.weapon, "damage_kind": r.damage_kind, "rework": true, "beam": r.get("beam", false), "uncapped": r.get("uncapped", false), "support": r.get("support", false), "tiers": [{}, {}]}
+		"class": r["class"], "weapon": r.weapon, "damage_kind": r.damage_kind, "rework": true, "beam": r.get("beam", false), "uncapped": r.get("uncapped", false), "support": r.get("support", false), "economy": r.get("economy", false), "tiers": [{}, {}]}

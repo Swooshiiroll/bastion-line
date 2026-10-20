@@ -12,6 +12,7 @@ so write for players.
 - **Tower rework, batch 2 (in progress, #59):** the new Artillery Cannon, Railgun and Tesla Tower join the shop. Click the track to aim the Artillery Cannon and pick its shell from the panel; the Railgun pierces everything on its line, shatters armour and leaves a burning ion trail; the Tesla Tower chains arcs that stun, overload Disruptors and leave storms.
 - **Tower rework, batch 3 (in progress, #59):** the new Drone Bay and CAS Gunship join the shop. The Drone Bay sends one drone (two with the Second Hangar) hunting anywhere, with a loadout you switch on its panel. The CAS Gunship orbits a point you click and fires three guns, one per path; every path takes every upgrade and its own mastery.
 - **Tower rework, batch 4 (in progress, #59):** the new Mine Layer, Chemical Plant, Cryo Tower and Boost Tower join the shop. Mines lie on the track and go off under walkers and burrowers; the Chemical Plant soaks one enemy at a time, stripping armour (for good with Corrosive Acid); the Cryo Tower pulses slowing mist; the Boost Tower strengthens towers around it, the strongest boost of each kind winning.
+- **Tower rework, batch 5 (in progress, #59):** the new Radar Tower, Shockwave Generator and Scrapyard join the shop. The Radar pings to reveal cloaked and burrowed enemies and burns the ones it reveals; the Shockwave Generator hits everything around it, cloaked or not, with barriers breaking faster on its Effect path; the Scrapyard pays at each round clear and fields boost kills, discounts and sell-backs.
 
 ## [3.6.0] - 2026-10-04
 

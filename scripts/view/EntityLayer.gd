@@ -15,6 +15,8 @@ const MineLayerArt = preload("res://scripts/view/towers/MineLayerArt.gd")
 const ChemicalPlantArt = preload("res://scripts/view/towers/ChemicalPlantArt.gd")
 const CryoTowerArt = preload("res://scripts/view/towers/CryoTowerArt.gd")
 const BoostTowerArt = preload("res://scripts/view/towers/BoostTowerArt.gd")
+const RadarTowerArt = preload("res://scripts/view/towers/RadarTowerArt.gd")
+const ShockwaveGeneratorArt = preload("res://scripts/view/towers/ShockwaveGeneratorArt.gd")
 
 var world
 ## Microseconds spent per section of _draw, summed; tools/PerfProbe.gd reads and resets it.
@@ -52,6 +54,10 @@ func _draw() -> void:
 		var extra: Array = []
 		if tw.is_rework and tw.type == "gun_turret":
 			extra = _extra_aims(tw, key, cur)
+		elif tw.is_rework and tw.type == "shockwave_generator":
+			extra = [g.time - float(tw.gun_cds.get("wave_t", -9.0))]
+		elif tw.is_rework and tw.type == "radar_tower":
+			extra = [3.0 if tw.stats().get("constant", false) else float(tw.stats().get("ping_every", 3.0))]
 		elif tw.is_rework and tw.type == "cryo_tower":
 			extra = [clampf(tw.fire_flash / 0.3, 0.0, 1.0)]
 		elif tw.is_rework and tw.type == "chemical_plant":
@@ -97,6 +103,8 @@ func _draw() -> void:
 		MineLayerArt.mine(self, m.pos, 1.0, t, m.source.spec, Draw.ACCENT.mine_layer, fmod(t * 1.6 + float(i) * 0.37, 1.0) < 0.25)
 	for e in ground:
 		_enemy(e, t)
+		if e.cloaked and e.reveal_timer > 0.0:
+			RadarTowerArt.reveal_mark(self, e.pos, e.radius + 4.0, Draw.ACCENT.radar_tower, minf(1.0, e.reveal_timer * 2.0))
 		if e.soak_timer > 0.0:
 			_soak_fx(e, t)
 		if e.perm_slow > 0.0:

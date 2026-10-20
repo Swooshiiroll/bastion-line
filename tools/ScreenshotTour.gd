@@ -1012,7 +1012,7 @@ func _rework_checks(g) -> void:
 		g.state = Game.State.BUILD
 	else:
 		fails += _expect(false, "an enemy could be put in the Gun Turret's range")
-	for type in ["mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon", "railgun", "tesla_tower", "drone_bay", "cas_gunship", "mine_layer", "chemical_plant", "cryo_tower", "boost_tower"]:
+	for type in ["mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon", "railgun", "tesla_tower", "drone_bay", "cas_gunship", "mine_layer", "chemical_plant", "cryo_tower", "boost_tower", "radar_tower", "shockwave_generator", "scrapyard"]:
 		fails += await _rework_fire_check(g, type)
 	screen.world.selected_tower = null
 	await _wait(0.2)
@@ -1070,6 +1070,12 @@ func _rework_fire_check(g, type: String) -> int:
 				worked = foe.soak_timer > 0.0 or foe.armor_shred > 0.0 or foe.armor_break_timer > 0.0
 			"cryo_tower":
 				worked = foe.slow_amount > 0.0 or foe.perm_slow > 0.0
+			"scrapyard":
+				worked = not g._pay_income(1).is_empty()
+			"radar_tower":
+				worked = t.cooldown > 0.0 or t.pulse_count > 0
+			"shockwave_generator":
+				worked = t.damage_dealt > 0.0 or foe.hp < foe.max_hp
 			"boost_tower":
 				worked = false
 				for o in g.towers:

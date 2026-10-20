@@ -372,3 +372,81 @@ air: yes · ground: yes · size: 1 · damage_kind: physical · support: yes
 | c3 | buff_range 0.32 |
 | c4 | buff_range 0.40 |
 | cm | buff_range 0.50 |
+
+## radar_tower
+
+air: yes · ground: yes · size: 1 · damage_kind: energy
+
+| Node | Tokens |
+|---|---|
+| base | range 160 · ping_every 3 · reveal_time 1 |
+| r1 | range +20 |
+| r2 | reveal_time 1.5 |
+| r3 | early_warning |
+| a1 | range 180 |
+| a2 | range 200 |
+| a3 | rad_dps 15 · rad_range 60 |
+| a4 | range 220 · rad_dps 25 · rad_range 70 |
+| am | range 230 · rad_dps 40 · rad_range 80 |
+| b1 | ping_every 2.7 · reveal_time 1.1 |
+| b2 | ping_every 2.4 · reveal_time 1.2 |
+| b3 | ping_every 2 · reveal_time 1.3 |
+| b4 | ping_every 1.6 · reveal_time 1.3 |
+| bm | constant |
+| c1 | unmask_decoy |
+| c2 | unmask_mask |
+| c3 | reveal_time 1.3 |
+| c4 | unmask_mirage |
+| cm | exposure 5 |
+
+## shockwave_generator
+
+air: yes · ground: yes · size: 1 · damage_kind: physical
+
+| Node | Tokens |
+|---|---|
+| base | damage 75 · range 100 · rate 0.571 |
+| r1 | range +15 |
+| r2 | damage +10 |
+| r3 | rate 0.667 |
+| a1 | damage 85 · range 105 |
+| a2 | damage 95 · range 110 |
+| a3 | damage 110 · range 120 |
+| a4 | damage 125 · range 125 |
+| am | damage 135 · range 132 |
+| b1 | rate 0.645 |
+| b2 | rate 0.714 |
+| b3 | rate 0.87 |
+| b4 | rate 1.0 |
+| bm | rate 1.25 |
+| c1 | shield_mult 1.5 |
+| c2 | shield_mult 2 |
+| c3 | shield_mult 2.5 |
+| c4 | shield_mult 3 |
+| cm | shatter_half · regen_block 5 |
+
+## scrapyard
+
+air: no · ground: no · size: 2 · damage_kind: physical · economy: yes
+
+| Node | Tokens |
+|---|---|
+| base | income 100 · range 150 |
+| r1 | income +30 |
+| r2 | range +30 |
+| r3 | sell_field 0.85 |
+| a1 | income 130 |
+| a2 | income 165 |
+| a3 | income 220 |
+| a4 | income 270 |
+| am | income 320 · interest 0.03 · interest_cap 400 |
+| b1 | bounty_bonus 0.15 · range 140 |
+| b2 | bounty_bonus 0.25 · range 150 |
+| b3 | bounty_bonus 0.35 · range 170 |
+| b4 | bounty_bonus 0.45 · range 190 |
+| bm | bounty_bonus 0.6 · range 210 · boss_bounty 2 |
+| c1 | discount 0.05 · range 140 |
+| c2 | discount 0.10 · range 150 |
+| c3 | discount 0.15 · build_discount 0.05 · range 160 |
+| c4 | discount 0.20 · range 175 |
+| cm | discount 0.25 · build_discount 0.10 · range 190 · sell_field 1.0 |

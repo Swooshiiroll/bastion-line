@@ -17,6 +17,9 @@ const MineLayerArt = preload("res://scripts/view/towers/MineLayerArt.gd")
 const ChemicalPlantArt = preload("res://scripts/view/towers/ChemicalPlantArt.gd")
 const CryoTowerArt = preload("res://scripts/view/towers/CryoTowerArt.gd")
 const BoostTowerArt = preload("res://scripts/view/towers/BoostTowerArt.gd")
+const RadarTowerArt = preload("res://scripts/view/towers/RadarTowerArt.gd")
+const ShockwaveGeneratorArt = preload("res://scripts/view/towers/ShockwaveGeneratorArt.gd")
+const ScrapyardArt = preload("res://scripts/view/towers/ScrapyardArt.gd")
 const Difficulty = preload("res://data/difficulty.gd")
 
 const OUTLINE := Color(0.03, 0.04, 0.06, 0.95)
@@ -57,6 +60,9 @@ const ACCENT := {
 	"chemical_plant": Color(0.55, 1.00, 0.30),
 	"cryo_tower": Color(0.55, 0.85, 1.00),
 	"boost_tower": Color(1.00, 0.40, 0.85),
+	"radar_tower": Color(0.35, 1.00, 0.85),
+	"shockwave_generator": Color(1.00, 0.70, 0.28),
+	"scrapyard": Color(0.95, 0.72, 0.42),
 }
 const SPEC_ALT := {
 	"mint": Color(1.00, 0.84, 0.30),
@@ -691,6 +697,12 @@ static func _turret(ci: CanvasItem, type: String, tier: int, c: Vector2, aim: fl
 			CryoTowerArt.draw(ci, c, aim, s, t, flash, spec, acc, _extra)
 		"boost_tower":
 			BoostTowerArt.draw(ci, c, aim, s, t, flash, spec, acc, _extra)
+		"radar_tower":
+			RadarTowerArt.draw(ci, c, aim, s, t, flash, spec, acc, _extra)
+		"shockwave_generator":
+			ShockwaveGeneratorArt.draw(ci, c, aim, s, t, flash, spec, acc, _extra)
+		"scrapyard":
+			ScrapyardArt.draw(ci, c, aim, s, t, flash, spec, acc, _extra)
 
 
 ## --- Shading helpers: light comes from the upper left. ------------------------------------

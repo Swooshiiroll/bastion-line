@@ -6,7 +6,7 @@ extends RefCounted
 ## (a, b, c), each with four `nodes` and a `mastery`. A node's `set` values replace the stat and its `add` values add to it;
 ## nodes apply in order on top of the base (the Retrofit, then each path's steps).
 
-const ORDER := ["gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon", "railgun", "tesla_tower", "drone_bay", "cas_gunship", "mine_layer", "chemical_plant", "cryo_tower", "boost_tower"]
+const ORDER := ["gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon", "railgun", "tesla_tower", "drone_bay", "cas_gunship", "mine_layer", "chemical_plant", "cryo_tower", "boost_tower", "radar_tower", "shockwave_generator", "scrapyard"]
 
 const TREES := {
 	"gun_turret": {
@@ -21,6 +21,7 @@ const TREES := {
 		"beam": false,
 		"uncapped": false,
 		"support": false,
+		"economy": false,
 		"cost": 75,
 		"base": {
 			"name": "Gun Turret",
@@ -248,6 +249,7 @@ const TREES := {
 		"beam": false,
 		"uncapped": false,
 		"support": false,
+		"economy": false,
 		"cost": 150,
 		"base": {
 			"name": "Mortar Tower",
@@ -484,6 +486,7 @@ const TREES := {
 		"beam": false,
 		"uncapped": false,
 		"support": false,
+		"economy": false,
 		"cost": 200,
 		"base": {
 			"name": "Rocket Salvo",
@@ -704,6 +707,7 @@ const TREES := {
 		"beam": true,
 		"uncapped": false,
 		"support": false,
+		"economy": false,
 		"cost": 250,
 		"base": {
 			"name": "Laser Tower",
@@ -922,6 +926,7 @@ const TREES := {
 		"beam": false,
 		"uncapped": false,
 		"support": false,
+		"economy": false,
 		"cost": 150,
 		"base": {
 			"name": "Anti-Aircraft Turret",
@@ -1138,6 +1143,7 @@ const TREES := {
 		"beam": false,
 		"uncapped": false,
 		"support": false,
+		"economy": false,
 		"cost": 300,
 		"base": {
 			"name": "Artillery Cannon",
@@ -1360,6 +1366,7 @@ const TREES := {
 		"beam": false,
 		"uncapped": false,
 		"support": false,
+		"economy": false,
 		"cost": 500,
 		"base": {
 			"name": "Railgun",
@@ -1581,6 +1588,7 @@ const TREES := {
 		"beam": false,
 		"uncapped": false,
 		"support": false,
+		"economy": false,
 		"cost": 250,
 		"base": {
 			"name": "Tesla Tower",
@@ -1805,6 +1813,7 @@ const TREES := {
 		"beam": false,
 		"uncapped": false,
 		"support": false,
+		"economy": false,
 		"cost": 300,
 		"base": {
 			"name": "Drone Bay",
@@ -1996,6 +2005,7 @@ const TREES := {
 		"beam": false,
 		"uncapped": true,
 		"support": false,
+		"economy": false,
 		"cost": 650,
 		"base": {
 			"name": "CAS Gunship",
@@ -2210,6 +2220,7 @@ const TREES := {
 		"beam": false,
 		"uncapped": false,
 		"support": false,
+		"economy": false,
 		"cost": 450,
 		"base": {
 			"name": "Mine Layer",
@@ -2428,6 +2439,7 @@ const TREES := {
 		"beam": false,
 		"uncapped": false,
 		"support": false,
+		"economy": false,
 		"cost": 250,
 		"base": {
 			"name": "Chemical Plant",
@@ -2648,6 +2660,7 @@ const TREES := {
 		"beam": false,
 		"uncapped": false,
 		"support": false,
+		"economy": false,
 		"cost": 150,
 		"base": {
 			"name": "Cryo Tower",
@@ -2866,6 +2879,7 @@ const TREES := {
 		"beam": false,
 		"uncapped": false,
 		"support": true,
+		"economy": false,
 		"cost": 400,
 		"base": {
 			"name": "Boost Tower",
@@ -3059,6 +3073,666 @@ const TREES := {
 					"blurb": "+50% range",
 					"set": {
 						"buff_range": 0.5,
+					},
+					"add": {},
+				},
+			},
+		],
+	},
+	"radar_tower": {
+		"name": "Radar Tower",
+		"class": "Utility",
+		"weapon": "Energy",
+		"blurb": "Radar is able to detect and alert nearby towers of stealthy or otherwise hidden enemies. \"I've lost the bleeps, I've lost the sweeps, and I've lost the creeps.\"",
+		"air": true,
+		"ground": true,
+		"size": 1,
+		"damage_kind": "energy",
+		"beam": false,
+		"uncapped": false,
+		"support": false,
+		"economy": false,
+		"cost": 575,
+		"base": {
+			"name": "Radar Tower",
+			"cost": 575,
+			"blurb": "575 credits; a 160 px radius. Every 3 s it pings: for 1 s, cloaked enemies inside are targetable, and burrowed enemies show, so towers that can hit underground (the Mortar's Bunker Buster, the Mine Layer) can target them. Only towers within the radar's 160 px benefit. Doesn't attack.",
+			"set": {
+				"range": 160.0,
+				"ping_every": 3.0,
+				"reveal_time": 1.0,
+			},
+			"add": {},
+		},
+		"retrofits": [
+			{
+				"name": "Bigger Dish",
+				"cost": 305,
+				"blurb": "+20 radius (180 px).",
+				"set": {},
+				"add": {
+					"range": 20.0,
+				},
+			},
+			{
+				"name": "Signal Processor",
+				"cost": 575,
+				"blurb": "Each reveal lasts 1.5 s.",
+				"set": {
+					"reveal_time": 1.5,
+				},
+				"add": {},
+			},
+			{
+				"name": "Early Warning",
+				"cost": 230,
+				"blurb": "Shows the next wave's hidden enemies (cloaked, burrowers, disguised) in the wave preview before it starts.",
+				"set": {
+					"early_warning": true,
+				},
+				"add": {},
+			},
+		],
+		"paths": [
+			{
+				"key": "a",
+				"name": "Power/Range",
+				"nodes": [
+					{
+						"name": "Bigger Array",
+						"cost": 305,
+						"blurb": "180 px radius",
+						"set": {
+							"range": 180.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Tall Mast",
+						"cost": 685,
+						"blurb": "200 px",
+						"set": {
+							"range": 200.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Radiation Emitter",
+						"cost": 585,
+						"blurb": "Radiation circle: enemies within 60 px take 15 energy damage/s while inside",
+						"set": {
+							"rad_dps": 15.0,
+							"rad_range": 60.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "High-Power Emitter",
+						"cost": 3995,
+						"blurb": "220 px radius; radiation 25/s within 70 px",
+						"set": {
+							"range": 220.0,
+							"rad_dps": 25.0,
+							"rad_range": 70.0,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Microwave Array",
+					"cost": 6440,
+					"blurb": "230 px radius; radiation 40/s within 80 px",
+					"set": {
+						"range": 230.0,
+						"rad_dps": 40.0,
+						"rad_range": 80.0,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "b",
+				"name": "Speed/Frequency",
+				"nodes": [
+					{
+						"name": "Faster Sweep",
+						"cost": 255,
+						"blurb": "A ping every 2.7 s, revealing for 1.1 s",
+						"set": {
+							"ping_every": 2.7,
+							"reveal_time": 1.1,
+						},
+						"add": {},
+					},
+					{
+						"name": "Pulse Compression",
+						"cost": 640,
+						"blurb": "Every 2.4 s, for 1.2 s",
+						"set": {
+							"ping_every": 2.4,
+							"reveal_time": 1.2,
+						},
+						"add": {},
+					},
+					{
+						"name": "Rapid Sweep",
+						"cost": 2070,
+						"blurb": "Every 2 s, for 1.3 s",
+						"set": {
+							"ping_every": 2.0,
+							"reveal_time": 1.3,
+						},
+						"add": {},
+					},
+					{
+						"name": "Phased Array",
+						"cost": 4485,
+						"blurb": "Every 1.6 s, for 1.3 s",
+						"set": {
+							"ping_every": 1.6,
+							"reveal_time": 1.3,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Constant Track",
+					"cost": 10350,
+					"blurb": "Constant: everything hidden in range stays revealed",
+					"set": {
+						"constant": true,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "c",
+				"name": "Special Targeting",
+				"nodes": [
+					{
+						"name": "Signal Analysis",
+						"cost": 230,
+						"blurb": "Pings expose the Decoy Beacon's fake rank: towers in range rank it correctly",
+						"set": {
+							"unmask_decoy": true,
+						},
+						"add": {},
+					},
+					{
+						"name": "Disguise Breaker",
+						"cost": 460,
+						"blurb": "Pings unmask the Masquerade early",
+						"set": {
+							"unmask_mask": true,
+						},
+						"add": {},
+					},
+					{
+						"name": "Track Lock",
+						"cost": 1930,
+						"blurb": "Reveals last 1.3 s",
+						"set": {
+							"reveal_time": 1.3,
+						},
+						"add": {},
+					},
+					{
+						"name": "Illusion Filter",
+						"cost": 2390,
+						"blurb": "Pings mark Mirage holograms as fakes: towers in range stop shooting them",
+						"set": {
+							"unmask_mirage": true,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Total Exposure",
+					"cost": 3590,
+					"blurb": "Revealed enemies can't re-cloak, re-disguise or re-burrow for 5 s after leaving the radar's range",
+					"set": {
+						"exposure": 5.0,
+					},
+					"add": {},
+				},
+			},
+		],
+	},
+	"shockwave_generator": {
+		"name": "Shockwave Generator",
+		"class": "Assault",
+		"weapon": "Field",
+		"blurb": "Generates powerful shockwaves by creating small nuclear explosion. \"Radioactive fallout? What radioactive fallout?\"",
+		"air": true,
+		"ground": true,
+		"size": 1,
+		"damage_kind": "physical",
+		"beam": false,
+		"uncapped": false,
+		"support": false,
+		"economy": false,
+		"cost": 450,
+		"base": {
+			"name": "Shockwave Generator",
+			"cost": 450,
+			"blurb": "450 credits; a shockwave every 1.75 s hits every enemy within 100 px for 75 damage; air and ground; no aiming. Armour applies (proposed: it's a blast).",
+			"set": {
+				"damage": 75.0,
+				"range": 100.0,
+				"rate": 0.571,
+			},
+			"add": {},
+		},
+		"retrofits": [
+			{
+				"name": "Wave Focus",
+				"cost": 245,
+				"blurb": "+15 px radius (115).",
+				"set": {},
+				"add": {
+					"range": 15.0,
+				},
+			},
+			{
+				"name": "Containment Coils",
+				"cost": 120,
+				"blurb": "+10 damage (85).",
+				"set": {},
+				"add": {
+					"damage": 10.0,
+				},
+			},
+			{
+				"name": "Reactor Venting",
+				"cost": 150,
+				"blurb": "A wave every 1.5 s.",
+				"set": {
+					"rate": 0.667,
+				},
+				"add": {},
+			},
+		],
+		"paths": [
+			{
+				"key": "a",
+				"name": "Power/Range",
+				"nodes": [
+					{
+						"name": "Hotter Core",
+						"cost": 210,
+						"blurb": "85 damage; 105 px",
+						"set": {
+							"damage": 85.0,
+							"range": 105.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Dense Core",
+						"cost": 470,
+						"blurb": "95 damage; 110 px",
+						"set": {
+							"damage": 95.0,
+							"range": 110.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Critical Mass",
+						"cost": 1870,
+						"blurb": "110 damage; 120 px",
+						"set": {
+							"damage": 110.0,
+							"range": 120.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Overpressure",
+						"cost": 3200,
+						"blurb": "125 damage; 125 px",
+						"set": {
+							"damage": 125.0,
+							"range": 125.0,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Megaton Wave",
+					"cost": 6690,
+					"blurb": "135 damage; 132 px",
+					"set": {
+						"damage": 135.0,
+						"range": 132.0,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "b",
+				"name": "Speed",
+				"nodes": [
+					{
+						"name": "Quick Cycle",
+						"cost": 115,
+						"blurb": "A wave every 1.55 s",
+						"set": {
+							"rate": 0.645,
+						},
+						"add": {},
+					},
+					{
+						"name": "Fast Cycle",
+						"cost": 220,
+						"blurb": "Every 1.4 s",
+						"set": {
+							"rate": 0.714,
+						},
+						"add": {},
+					},
+					{
+						"name": "Pulse Core",
+						"cost": 980,
+						"blurb": "Every 1.15 s",
+						"set": {
+							"rate": 0.87,
+						},
+						"add": {},
+					},
+					{
+						"name": "Rapid Core",
+						"cost": 1645,
+						"blurb": "Every second",
+						"set": {
+							"rate": 1.0,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Chain Pulse",
+					"cost": 6310,
+					"blurb": "Every 0.8 s",
+					"set": {
+						"rate": 1.25,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "c",
+				"name": "Effect",
+				"nodes": [
+					{
+						"name": "Disruptor Wave",
+						"cost": 45,
+						"blurb": "×1.5 damage to barriers",
+						"set": {
+							"shield_mult": 1.5,
+						},
+						"add": {},
+					},
+					{
+						"name": "Harmonic Wave",
+						"cost": 55,
+						"blurb": "×2 to barriers",
+						"set": {
+							"shield_mult": 2.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Resonance",
+						"cost": 145,
+						"blurb": "×2.5 to barriers",
+						"set": {
+							"shield_mult": 2.5,
+						},
+						"add": {},
+					},
+					{
+						"name": "Breaker Wave",
+						"cost": 290,
+						"blurb": "×3 to barriers",
+						"set": {
+							"shield_mult": 3.0,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Shatter Shock",
+					"cost": 1300,
+					"blurb": "Each wave shatters half of every barrier it hits, and barriers it hits can't regenerate for 5 s",
+					"set": {
+						"shatter_half": true,
+						"regen_block": 5.0,
+					},
+					"add": {},
+				},
+			},
+		],
+	},
+	"scrapyard": {
+		"name": "Scrapyard",
+		"class": "Utility",
+		"weapon": "None",
+		"blurb": "Various collections of scrap metal sold at a profit. \"One mans toxic waste is another mans potpourri\"",
+		"air": false,
+		"ground": false,
+		"size": 2,
+		"damage_kind": "physical",
+		"beam": false,
+		"uncapped": false,
+		"support": false,
+		"economy": true,
+		"cost": 875,
+		"base": {
+			"name": "Scrapyard",
+			"cost": 875,
+			"blurb": "875 credits; pays 100 credits at each round's clear (× the round's income scale). A 150 px field (used by the Kill and Discount paths). Doesn't attack.",
+			"set": {
+				"income": 100.0,
+				"range": 150.0,
+			},
+			"add": {},
+		},
+		"retrofits": [
+			{
+				"name": "Hammer Mill",
+				"cost": 525,
+				"blurb": "+30 income per round.",
+				"set": {},
+				"add": {
+					"income": 30.0,
+				},
+			},
+			{
+				"name": "Faster Loading",
+				"cost": 260,
+				"blurb": "+30 px to its fields (a second conveyor and a second crane feed the furnace). Its value depends on the paths, so the formula can't price it at stock; proposed at Surplus's price.",
+				"set": {},
+				"add": {
+					"range": 30.0,
+				},
+			},
+			{
+				"name": "Surplus",
+				"cost": 260,
+				"blurb": "Towers sold within its field refund 15% more (two extra crates of surplus stock).",
+				"set": {
+					"sell_field": 0.85,
+				},
+				"add": {},
+			},
+		],
+		"paths": [
+			{
+				"key": "a",
+				"name": "Passive Income",
+				"nodes": [
+					{
+						"name": "Firebrick Lining",
+						"cost": 525,
+						"blurb": "130 per round",
+						"set": {
+							"income": 130.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Forced Bellows",
+						"cost": 1225,
+						"blurb": "165 per round",
+						"set": {
+							"income": 165.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Blast Furnace",
+						"cost": 3850,
+						"blurb": "220 per round",
+						"set": {
+							"income": 220.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Arc Furnace",
+						"cost": 7000,
+						"blurb": "270 per round",
+						"set": {
+							"income": 270.0,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Gold Foundry",
+					"cost": 27440,
+					"blurb": "320 per round, plus 3% interest on banked credits at each clear (up to 400)",
+					"set": {
+						"income": 320.0,
+						"interest": 0.03,
+						"interest_cap": 400.0,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "b",
+				"name": "Kill Income",
+				"nodes": [
+					{
+						"name": "Tow Hook",
+						"cost": 345,
+						"blurb": "Enemies destroyed within 140 px pay 15% more",
+						"set": {
+							"bounty_bonus": 0.15,
+							"range": 140.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Magnet Crane",
+						"cost": 625,
+						"blurb": "+25%; 150 px",
+						"set": {
+							"bounty_bonus": 0.25,
+							"range": 150.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Laser Cutter",
+						"cost": 2095,
+						"blurb": "+35%; 170 px",
+						"set": {
+							"bounty_bonus": 0.35,
+							"range": 170.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Car Crusher",
+						"cost": 5720,
+						"blurb": "+45%; 190 px",
+						"set": {
+							"bounty_bonus": 0.45,
+							"range": 190.0,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Breaker's Yard",
+					"cost": 28945,
+					"blurb": "+60%; 210 px; bosses pay double",
+					"set": {
+						"bounty_bonus": 0.6,
+						"range": 210.0,
+						"boss_bounty": 2.0,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "c",
+				"name": "Discounts",
+				"nodes": [
+					{
+						"name": "Parts Shelves",
+						"cost": 190,
+						"blurb": "Towers within 140 px upgrade for 5% less",
+						"set": {
+							"discount": 0.05,
+							"range": 140.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Pallet Racks",
+						"cost": 495,
+						"blurb": "10% off upgrades; 150 px",
+						"set": {
+							"discount": 0.1,
+							"range": 150.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Forklift Bay",
+						"cost": 2035,
+						"blurb": "15% off upgrades, 5% off builds; 160 px",
+						"set": {
+							"discount": 0.15,
+							"build_discount": 0.05,
+							"range": 160.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Loading Dock",
+						"cost": 3865,
+						"blurb": "20% off upgrades; 175 px",
+						"set": {
+							"discount": 0.2,
+							"range": 175.0,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Parts Exchange",
+					"cost": 20935,
+					"blurb": "25% off upgrades, 10% off builds; 190 px; towers in the field sell back for everything spent on them",
+					"set": {
+						"discount": 0.25,
+						"build_discount": 0.1,
+						"range": 190.0,
+						"sell_field": 1.0,
 					},
 					"add": {},
 				},

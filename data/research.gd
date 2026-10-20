@@ -11,7 +11,7 @@ extends RefCounted
 ##   command tree  "start_gold": +fraction, "lives": +fraction of the mode's shields, "sell_refund": +fraction,
 ##                 "ability_cd": -fraction, "bounty": +fraction
 
-const TREE_ORDER := ["command", "arrow", "cannon", "frost", "sniper", "tesla", "laser", "missile", "amp", "flak", "sensor", "gravity", "nullifier", "nova", "drones", "scrap", "gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon", "railgun", "tesla_tower", "drone_bay", "cas_gunship", "mine_layer", "chemical_plant", "cryo_tower", "boost_tower"]
+const TREE_ORDER := ["command", "arrow", "cannon", "frost", "sniper", "tesla", "laser", "missile", "amp", "flak", "sensor", "gravity", "nullifier", "nova", "drones", "scrap", "gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon", "railgun", "tesla_tower", "drone_bay", "cas_gunship", "mine_layer", "chemical_plant", "cryo_tower", "boost_tower", "radar_tower", "shockwave_generator", "scrapyard"]
 
 ## RP sources, all derived from profile records so they can't be farmed and are never lost.
 ## (Medals pay their mode's medal_rp, from data/difficulty.gd.)
@@ -667,6 +667,69 @@ const NODES := {
 	"boost_tower_m": {
 		"tree": "boost_tower", "slot": Vector2i(0, 2), "cost": 3, "requires": ["boost_tower_2a", "boost_tower_2b"], "icon": "mastery",
 		"name": "Boost Tower Mastery", "blurb": "Unlocks the masteries: Battle Network, Rapid Network and Overwatch Network.",
+		"effects": {"mastery": true},
+	},
+	# --- Radar Tower (the tower rework, issue #59: a minimal tree until the research pass) ----------
+	"radar_tower_1": {
+		"tree": "radar_tower", "slot": Vector2i(0, 0), "cost": 1, "requires": [], "icon": "range",
+		"name": "Wider Dish", "blurb": "Radar Towers reach 7% farther.",
+		"effects": {"mult": {"range": 0.07}},
+	},
+	"radar_tower_2a": {
+		"tree": "radar_tower", "slot": Vector2i(-1, 1), "cost": 2, "requires": ["radar_tower_1"], "icon": "rate",
+		"name": "Fast Sweep", "blurb": "Radar Towers ping 8% more often.",
+		"effects": {"mult": {"ping_every": -0.08}},
+	},
+	"radar_tower_2b": {
+		"tree": "radar_tower", "slot": Vector2i(1, 1), "cost": 2, "requires": ["radar_tower_1"], "icon": "rate",
+		"name": "Long Hold", "blurb": "Reveals last 10% longer.",
+		"effects": {"mult": {"reveal_time": 0.1}},
+	},
+	"radar_tower_m": {
+		"tree": "radar_tower", "slot": Vector2i(0, 2), "cost": 3, "requires": ["radar_tower_2a", "radar_tower_2b"], "icon": "mastery",
+		"name": "Radar Tower Mastery", "blurb": "Unlocks the masteries: Microwave Array, Constant Track and Total Exposure.",
+		"effects": {"mastery": true},
+	},
+	# --- Shockwave Generator (the tower rework, issue #59: a minimal tree until the research pass) ----------
+	"shockwave_generator_1": {
+		"tree": "shockwave_generator", "slot": Vector2i(0, 0), "cost": 1, "requires": [], "icon": "damage",
+		"name": "Hotter Core", "blurb": "Shockwave Generators deal +6% damage.",
+		"effects": {"mult": {"damage": 0.06}},
+	},
+	"shockwave_generator_2a": {
+		"tree": "shockwave_generator", "slot": Vector2i(-1, 1), "cost": 2, "requires": ["shockwave_generator_1"], "icon": "range",
+		"name": "Wave Focus", "blurb": "Shockwave Generators reach 7% farther.",
+		"effects": {"mult": {"range": 0.07}},
+	},
+	"shockwave_generator_2b": {
+		"tree": "shockwave_generator", "slot": Vector2i(1, 1), "cost": 2, "requires": ["shockwave_generator_1"], "icon": "rate",
+		"name": "Fast Cycle", "blurb": "Shockwave Generators pulse 7% faster.",
+		"effects": {"mult": {"rate": 0.07}},
+	},
+	"shockwave_generator_m": {
+		"tree": "shockwave_generator", "slot": Vector2i(0, 2), "cost": 3, "requires": ["shockwave_generator_2a", "shockwave_generator_2b"], "icon": "mastery",
+		"name": "Shockwave Generator Mastery", "blurb": "Unlocks the masteries: Megaton Wave, Chain Pulse and Shatter Shock.",
+		"effects": {"mastery": true},
+	},
+	# --- Scrapyard (the tower rework, issue #59: a minimal tree until the research pass) ----------
+	"scrapyard_1": {
+		"tree": "scrapyard", "slot": Vector2i(0, 0), "cost": 1, "requires": [], "icon": "damage",
+		"name": "Better Linings", "blurb": "Scrapyards pay 6% more per round.",
+		"effects": {"mult": {"income": 0.06}},
+	},
+	"scrapyard_2a": {
+		"tree": "scrapyard", "slot": Vector2i(-1, 1), "cost": 2, "requires": ["scrapyard_1"], "icon": "range",
+		"name": "Wider Yard", "blurb": "Scrapyard fields reach 7% farther.",
+		"effects": {"mult": {"range": 0.07}},
+	},
+	"scrapyard_2b": {
+		"tree": "scrapyard", "slot": Vector2i(1, 1), "cost": 2, "requires": ["scrapyard_1"], "icon": "rate",
+		"name": "Hard Bargains", "blurb": "Scrapyard kill bonuses are 10% stronger.",
+		"effects": {"mult": {"bounty_bonus": 0.1}},
+	},
+	"scrapyard_m": {
+		"tree": "scrapyard", "slot": Vector2i(0, 2), "cost": 3, "requires": ["scrapyard_2a", "scrapyard_2b"], "icon": "mastery",
+		"name": "Scrapyard Mastery", "blurb": "Unlocks the masteries: Gold Foundry, Breaker's Yard and Parts Exchange.",
 		"effects": {"mastery": true},
 	},
 }

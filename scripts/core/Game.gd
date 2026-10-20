@@ -420,6 +420,9 @@ func place_tower(type: String, cell: Vector2i):
 	var t = Tower.new()
 	t.setup(type, cell, footprint_center(type, cell), tower_mods[type])
 	t.site = footprint_site(type, cell)
+	var bd := build_discount_at(t.pos) if not t.is_economy() else 0.0
+	if bd > 0.0:
+		t.spent = int(round(float(t.spent) * (1.0 - bd)))
 	gold -= t.spent
 	towers.append(t)
 	if type == "artillery_cannon":
@@ -1025,6 +1028,12 @@ func _update_tower(t, dt: float) -> void:
 		return
 	if t.type == "boost_tower":
 		return
+	if t.type == "radar_tower":
+		_update_radar(t, s, dt)
+		return
+	if t.type == "shockwave_generator":
+		_update_shockwave(t, s, dt)
+		return
 	if t.is_beam():
 		if t.is_rework:
 			_update_laser_rework(t, s, dt)
@@ -1144,6 +1153,66 @@ func _update_boost_state() -> void:
 	if sig != _boost_sig:
 		_boost_sig = sig
 		_recompute_buffs()
+
+
+## Radar Tower: every ping_every seconds it pings, and for reveal_time seconds the cloaked enemies in range are revealed and the burrowed ones
+## show (towers that can hit underground may target them); the Constant Track keeps everything revealed. The radiation circle (Radiation
+## Emitter and on) burns every enemy inside it that is revealed, for as long as it is in the circle. Several radars don't stack.
+func _update_radar(t, s: Dictionary, dt: float) -> void:
+	var constant := bool(s.get("constant", false))
+	var left := float(t.gun_cds.get("ping", 0.0)) - dt
+	t.cooldown -= dt
+	if not constant and t.cooldown <= 0.0:
+		t.cooldown = float(s.get("ping_every", 3.0))
+		left = float(s.get("reveal_time", 1.0))
+		t.fire_flash = 0.5
+		t.pulse_count += 1
+		_emit({"type": "radar_ping", "pos": t.pos, "radius": t.get_range(), "look": t.look_key()})
+	t.gun_cds["ping"] = maxf(0.0, left)
+	var r: float = t.get_range()
+	var active: bool = constant or left > 0.0
+	if active:
+		var hold := 0.3 if constant else left
+		for e in _enemies_near(t.pos, r, true, true, true):
+			if e.cloaked:
+				e.reveal_timer = maxf(e.reveal_timer, hold)
+	var dps := float(s.get("rad_dps", 0.0))
+	if dps > 0.0:
+		for e in _enemies_near(t.pos, float(s.get("rad_range", 60.0)), true, true, false):
+			damage_enemy(e, dps * dt, true, t, false)
+
+
+## Shockwave Generator: a wave every 1/rate seconds hits every enemy in its radius, air and ground, cloaked ones too (it needs no
+## reveal; the hit reveals them briefly). Armour applies. Barriers take shield_mult times as much; the Shatter Shock halves what is
+## left of a barrier it hits and keeps it from regenerating for a while.
+func _update_shockwave(t, s: Dictionary, dt: float) -> void:
+	t.cooldown -= dt
+	if t.cooldown > 0.0:
+		return
+	var r: float = t.get_range()
+	var any := false
+	for e in _enemies_near(t.pos, r, true, true, true):
+		any = true
+		var dealt := damage_enemy(e, t.eff_damage(), false, t)
+		_emit({"type": "hit", "pos": e.pos, "amount": dealt, "kind": "cannon"})
+		if e.alive and bool(s.get("shatter_half", false)) and e.max_shield > 0.0 and e.shield > 0.0:
+			e.shield *= 0.5
+			e.barrier_block = maxf(e.barrier_block, float(s.get("regen_block", 5.0)))
+	t.cooldown = 1.0 / t.eff_rate() if any else RETARGET_DELAY
+	if any:
+		t.fire_flash = 0.3
+		t.pulse_count += 1
+		t.gun_cds["wave_t"] = time
+		_emit({"type": "shockwave", "pos": t.pos, "radius": r, "look": t.look_key()})
+
+
+## The build discount of the best Scrapyard field covering `pos` (0 if none).
+func build_discount_at(pos: Vector2) -> float:
+	var best := 0.0
+	for a in towers:
+		if a.is_economy() and a.pos.distance_squared_to(pos) <= a.get_range() * a.get_range():
+			best = maxf(best, float(a.stats().get("build_discount", 0.0)))
+	return best
 
 
 ## Mine Layer: tosses a mine onto the track within range every 1/rate seconds, up to the cap, on the stretch nearest the entrance first,
@@ -1648,6 +1717,8 @@ func _update_smokes(dt: float) -> void:
 ## tower with burrow sight may target it.
 func _radar_covers(pos: Vector2) -> bool:
 	for o in towers:
+		if o.type == "radar_tower" and o.disabled <= 0.0 and o.pos.distance_squared_to(pos) <= o.get_range() * o.get_range() and (float(o.gun_cds.get("ping", 0.0)) > 0.0 or bool(o.stats().get("constant", false))):
+			return true
 		if (o.is_sensor() or bool(o.def.get("radar", false))) and o.pos.distance_squared_to(pos) <= o.get_range() * o.get_range():
 			return true
 	return false

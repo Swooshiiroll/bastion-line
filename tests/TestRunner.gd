@@ -4101,3 +4101,217 @@ func test_rework_boost_tower() -> void:
 	rg.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
 	buy_steps(g, rg, "c", 5)
 	check(rg.mastered and near(rg.stats().buff_range, 0.50), "Overwatch Network: +50% range")
+
+
+func test_rework_radar_tower() -> void:
+	var g = new_game()
+	g.gold = 90000
+	g.emit_events = true
+	var t = g.place_tower("radar_tower", spot(g, "radar_tower", 0))
+	check(t != null and t.is_rework and g.tower_cost("radar_tower") == 575, "the Radar Tower builds for 575")
+	var s: Dictionary = t.stats()
+	check(near(s.range, 160.0) and near(s.ping_every, 3.0) and near(s.reveal_time, 1.0), "stock: 160 px, a ping every 3 s revealing for 1 s")
+	check(g.buy_retrofit(t, 0) and near(t.stats().range, 180.0), "Bigger Dish: 180 px")
+	var sp = g.place_tower("radar_tower", spot(g, "radar_tower", 20))
+	check(g.buy_retrofit(sp, 1) and near(sp.stats().reveal_time, 1.5), "Signal Processor: reveals last 1.5 s")
+	var ew = g.place_tower("radar_tower", spot(g, "radar_tower", 40))
+	check(g.buy_retrofit(ew, 2) and ew.stats().early_warning, "Early Warning")
+	# A ping reveals a cloaked enemy in range for its duration, and the reveal fades.
+	g.enemies.clear()
+	var ghost = put(g, "grunt", 100.0, 0, 500.0)
+	ghost.cloaked = true
+	var far = put(g, "grunt", 300.0, 0, 500.0)
+	far.cloaked = true
+	far.pos = Vector2(5000, 5000)
+	var r = g.place_tower("radar_tower", spot(g, "radar_tower", 60))
+	r.pos = ghost.pos + Vector2(40, 0)
+	r.cooldown = 0.0
+	check(ghost.is_hidden(), "hidden before the ping")
+	g._update_radar(r, r.stats(), 0.05)
+	check(not ghost.is_hidden() and far.is_hidden(), "a ping reveals the cloaked enemy in range, not the far one")
+	for i in 30:
+		g._update_radar(r, r.stats(), 0.05)
+		ghost.reveal_timer = maxf(0.0, ghost.reveal_timer - 0.05)
+	check(ghost.is_hidden(), "the reveal fades before the next ping")
+	# A burrowed enemy shows to towers that can hit underground only while a ping is on.
+	g.enemies.clear()
+	var bur = put(g, "burrower", 100.0, 0, 500.0)
+	bur.burrowed = true
+	var ms = g.place_tower("mortar_tower", spot(g, "mortar_tower", 80))
+	g.buy_retrofit(ms, 1)
+	r.pos = bur.pos + Vector2(40, 0)
+	r.gun_cds["ping"] = 0.0
+	check(not g._burrow_visible(ms, bur), "a burrowed enemy is unseen with no ping")
+	r.cooldown = 0.0
+	g._update_radar(r, r.stats(), 0.05)
+	check(g._burrow_visible(ms, bur), "a ping lets a Bunker Sight mortar see it")
+	# Radiation: needs a revealed enemy inside the inner circle.
+	var pw = g.place_tower("radar_tower", spot(g, "radar_tower", 100))
+	pw.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, pw, "a", 3)
+	check(near(pw.stats().rad_dps, 15.0) and near(pw.stats().rad_range, 60.0), "Radiation Emitter: 15/s within 60 px")
+	g.enemies.clear()
+	var in_c = put(g, "grunt", 100.0, 0, 5000.0)
+	var ghost2 = put(g, "grunt", 100.0, 0, 5000.0)
+	ghost2.pos = in_c.pos + Vector2(10, 0)
+	ghost2.cloaked = true
+	pw.pos = in_c.pos + Vector2(30, 0)
+	pw.cooldown = 99.0
+	var h1: float = in_c.hp
+	var h2: float = ghost2.hp
+	for i in 20:
+		g._update_radar(pw, pw.stats(), 0.05)
+	check(h1 - in_c.hp > 10.0, "radiation burns the revealed enemy inside (%.1f)" % (h1 - in_c.hp))
+	check(near(ghost2.hp, h2), "a cloaked enemy takes nothing until a ping lands")
+	pw.cooldown = 0.0
+	for i in 20:
+		g._update_radar(pw, pw.stats(), 0.05)
+	check(ghost2.hp < h2, "once a ping reveals it, it burns too")
+	buy_steps(g, pw, "a", 2)
+	check(pw.mastered and near(pw.stats().range, 230.0) and near(pw.stats().rad_dps, 40.0) and near(pw.stats().rad_range, 80.0), "Microwave Array: 230 px, 40/s within 80 px")
+	# Frequency: more often, constant at the mastery.
+	var fq = g.place_tower("radar_tower", spot(g, "radar_tower", 120))
+	fq.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, fq, "b", 4)
+	check(near(fq.stats().ping_every, 1.6) and near(fq.stats().reveal_time, 1.3), "Phased Array: every 1.6 s for 1.3 s")
+	buy_steps(g, fq, "b", 1)
+	check(fq.mastered and fq.stats().constant, "Constant Track")
+	g.enemies.clear()
+	var c1 = put(g, "grunt", 100.0, 0, 500.0)
+	c1.cloaked = true
+	fq.pos = c1.pos + Vector2(40, 0)
+	g._update_radar(fq, fq.stats(), 0.05)
+	check(not c1.is_hidden(), "a constant radar keeps everything revealed")
+	# Unmasking hooks.
+	var um = g.place_tower("radar_tower", spot(g, "radar_tower", 140))
+	um.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, um, "c", 5)
+	check(um.mastered and um.stats().unmask_decoy and um.stats().unmask_mask and um.stats().unmask_mirage and near(um.stats().exposure, 5.0) and near(um.stats().reveal_time, 1.3), "Total Exposure: the unmasking flags and a 5 s exposure")
+
+
+func test_rework_shockwave_generator() -> void:
+	var g = new_game()
+	g.gold = 90000
+	g.emit_events = true
+	var t = g.place_tower("shockwave_generator", spot(g, "shockwave_generator", 0))
+	check(t != null and t.is_rework and g.tower_cost("shockwave_generator") == 450, "the Shockwave Generator builds for 450")
+	var s: Dictionary = t.stats()
+	check(near(s.damage, 75.0) and near(s.range, 100.0) and near(s.rate, 0.571), "stock: 75 damage, 100 px, a wave every 1.75 s")
+	check(g.buy_retrofit(t, 0) and near(t.stats().range, 115.0), "Wave Focus: +15 px")
+	var cc = g.place_tower("shockwave_generator", spot(g, "shockwave_generator", 20))
+	check(g.buy_retrofit(cc, 1) and near(cc.stats().damage, 85.0), "Containment Coils: +10 damage")
+	var rv = g.place_tower("shockwave_generator", spot(g, "shockwave_generator", 40))
+	check(g.buy_retrofit(rv, 2) and near(rv.stats().rate, 0.667), "Reactor Venting: a wave every 1.5 s")
+	# One wave hits everything in the radius, air and ground, cloaked too; armour applies.
+	g.enemies.clear()
+	var w = g.place_tower("shockwave_generator", spot(g, "shockwave_generator", 60))
+	var e1 = put(g, "brute", 100.0, 0, 500.0)
+	var e2 = put(g, "bat", 100.0, 0, 500.0)
+	e2.pos = e1.pos + Vector2(10, 0)
+	var e3 = put(g, "grunt", 100.0, 0, 500.0)
+	e3.pos = e1.pos + Vector2(-10, 0)
+	e3.cloaked = true
+	var far = put(g, "grunt", 300.0, 0, 500.0)
+	w.pos = e1.pos + Vector2(40, 0)
+	var hs: Array = [e1.hp, e2.hp, e3.hp, far.hp]
+	w.cooldown = 0.0
+	g._update_shockwave(w, w.stats(), 0.0)
+	check(e1.hp < hs[0] and e2.hp < hs[1] and e3.hp < hs[2] and near(far.hp, hs[3]), "one wave hits the walker, the flyer and the cloaked enemy, not the far one")
+	check(near(hs[0] - e1.hp, 75.0 - e1.effective_armor(), 0.5), "armour applies to the wave (%.1f)" % (hs[0] - e1.hp))
+	check(not e3.is_hidden(), "the hit reveals the cloaked enemy briefly")
+	check(w.cooldown > 1.7 and w.cooldown < 1.8, "the next wave comes in 1.75 s (%.2f)" % w.cooldown)
+	# Power path.
+	var pw = g.place_tower("shockwave_generator", spot(g, "shockwave_generator", 80))
+	pw.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, pw, "a", 5)
+	check(pw.mastered and near(pw.stats().damage, 135.0) and near(pw.stats().range, 132.0), "Megaton Wave: 135 damage, 132 px")
+	var sp = g.place_tower("shockwave_generator", spot(g, "shockwave_generator", 100))
+	sp.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, sp, "b", 5)
+	check(sp.mastered and near(sp.stats().rate, 1.25), "Chain Pulse: a wave every 0.8 s")
+	# Effect path: barriers take more; the mastery halves and locks them.
+	var ef = g.place_tower("shockwave_generator", spot(g, "shockwave_generator", 120))
+	ef.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, ef, "c", 4)
+	check(near(ef.stats().shield_mult, 3.0), "Breaker Wave: x3 to barriers")
+	g.enemies.clear()
+	var aegis = put(g, "aegis", 100.0, 0, 50.0)
+	check(aegis.max_shield > 0.0, "an Aegis Walker carries a barrier")
+	ef.pos = aegis.pos + Vector2(40, 0)
+	var sh0: float = aegis.shield
+	ef.cooldown = 0.0
+	g._update_shockwave(ef, ef.stats(), 0.0)
+	var plain_w = g.place_tower("shockwave_generator", spot(g, "shockwave_generator", 140))
+	var aegis2 = put(g, "aegis", 100.0, 0, 50.0)
+	aegis2.pos = aegis.pos + Vector2(0, 5)
+	plain_w.pos = aegis2.pos + Vector2(40, 0)
+	var sh1: float = aegis2.shield
+	plain_w.cooldown = 0.0
+	g.enemies.erase(aegis)
+	g._update_shockwave(plain_w, plain_w.stats(), 0.0)
+	check((sh0 - aegis.shield) > (sh1 - aegis2.shield) * 2.0, "the barrier takes far more from the Effect path (%.1f vs %.1f)" % [sh0 - aegis.shield, sh1 - aegis2.shield])
+	buy_steps(g, ef, "c", 1)
+	check(ef.mastered and ef.stats().shatter_half, "Shatter Shock")
+	g.enemies.clear()
+	var ag3 = put(g, "aegis", 100.0, 0, 50.0)
+	ef.pos = ag3.pos + Vector2(40, 0)
+	ag3.shield = ag3.max_shield
+	ef.cooldown = 0.0
+	g._update_shockwave(ef, ef.stats(), 0.0)
+	check(ag3.shield < ag3.max_shield * 0.5 and ag3.barrier_block >= 4.9, "the wave halves the barrier and stops it regenerating (%.1f of %.1f, block %.1f)" % [ag3.shield, ag3.max_shield, ag3.barrier_block])
+
+
+func test_rework_scrapyard() -> void:
+	var g = new_game()
+	g.gold = 900000
+	g.emit_events = true
+	var t = g.place_tower("scrapyard", spot(g, "scrapyard", 0))
+	check(t != null and t.is_rework and t.is_economy() and t.size == 2 and g.tower_cost("scrapyard") == 875, "the Scrapyard builds for 875, 2x2")
+	var s: Dictionary = t.stats()
+	check(near(s.income, 100.0) and near(s.range, 150.0), "stock: 100 per round, a 150 px field")
+	check(g.buy_retrofit(t, 0) and near(t.stats().income, 130.0), "Hammer Mill: +30 per round")
+	var fl = g.place_tower("scrapyard", spot(g, "scrapyard", 30))
+	check(g.buy_retrofit(fl, 1) and near(fl.stats().range, 180.0), "Faster Loading: +30 px")
+	var su = g.place_tower("scrapyard", spot(g, "scrapyard", 60))
+	check(g.buy_retrofit(su, 2) and near(su.stats().sell_field, 0.85), "Surplus: towers sell back more")
+	# Income is paid at each round's clear, and several Scrapyards stack.
+	var before: int = g.gold
+	var paid: Array = g._pay_income(1)
+	check(g.gold - before == 130 + 100 + 100 and paid.size() == 3, "all three pay at a clear and stack (%d)" % (g.gold - before))
+	# Kill field: enemies destroyed inside pay more; the best field applies.
+	var kf = g.place_tower("scrapyard", spot(g, "scrapyard", 90))
+	kf.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, kf, "b", 3)
+	check(near(kf.stats().bounty_bonus, 0.35) and near(kf.stats().range, 170.0), "Laser Cutter: +35%, 170 px")
+	g.enemies.clear()
+	var foe = put(g, "grunt", 100.0, 0, 50.0)
+	foe.pos = kf.pos + Vector2(20, 0)
+	check(near(g._salvage_mult(foe), 1.35), "a kill inside the field pays 35% more (%.2f)" % g._salvage_mult(foe))
+	buy_steps(g, kf, "b", 2)
+	check(kf.mastered and near(kf.stats().bounty_bonus, 0.6) and near(kf.stats().boss_bounty, 2.0) and near(kf.stats().range, 210.0), "Breaker's Yard: +60%, bosses pay double, 210 px")
+	# Discounts: upgrades near it cost less; builds too from Forklift Bay.
+	var df = g.place_tower("scrapyard", spot(g, "scrapyard", 120))
+	df.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, df, "c", 3)
+	check(near(df.stats().discount, 0.15) and near(df.stats().build_discount, 0.05) and near(df.stats().range, 160.0), "Forklift Bay: 15% off upgrades, 5% off builds, 160 px")
+	var near_t = g.place_tower("gun_turret", spot(g, "gun_turret", 40))
+	near_t.pos = df.pos + Vector2(40, 0)
+	g._recompute_buffs()
+	check(near(near_t.discount, 0.15), "a tower in the field gets 15% off upgrades")
+	var cost_before: int = near_t.upgrade_cost("a")
+	var plain = g.place_tower("gun_turret", spot(g, "gun_turret", 80))
+	plain.pos = Vector2(5000, 5000)
+	check(cost_before < plain.upgrade_cost("a"), "so its upgrade is cheaper (%d vs %d)" % [cost_before, plain.upgrade_cost("a")])
+	check(near(g.build_discount_at(df.pos + Vector2(40, 0)), 0.05) and g.build_discount_at(Vector2(5000, 5000)) == 0.0, "builds inside the field are 5% cheaper")
+	buy_steps(g, df, "c", 2)
+	check(df.mastered and near(df.stats().discount, 0.25) and near(df.stats().sell_field, 1.0), "Parts Exchange: 25% off, towers sell back in full")
+	g._recompute_buffs()
+	near_t.spent = 1000
+	check(g.sell_value(near_t) == 1000, "a tower in the field sells for everything spent")
+	# Passive path.
+	var ps = g.place_tower("scrapyard", spot(g, "scrapyard", 150))
+	ps.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, ps, "a", 5)
+	check(ps.mastered and near(ps.stats().income, 320.0) and near(ps.stats().interest, 0.03) and near(ps.stats().interest_cap, 400.0), "Gold Foundry: 320 per round and 3% interest")
+	# Its own upgrades aren't discounted by itself.
+	check(near(ps.discount, 0.0), "a Scrapyard's own upgrades aren't discounted")

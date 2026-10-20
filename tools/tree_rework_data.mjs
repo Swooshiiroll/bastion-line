@@ -20,9 +20,9 @@ const KEYS = new Set([
   "ramp", "ramp_time", "melt", "beams", "beam_power", "ramp_keep", "burst", "barrels", "turn_fast",
   "flight", "scatter", "heavy_every", "incendiary", "shrapnel", "concussion", "combined", "burn_dps", "burn_time", "shrap_radius", "shrap_mult", "barrage",
   "falloff", "boss_mult", "rails", "shatter", "trail_dps", "trail_time", "jumps", "jump_range", "overload", "storm_radius", "storm_dps", "storm_time",
-  "lo_missiles", "lo_bombs", "lo_laser", "lo_full", "loadout_mult", "drones", "orbit", "radar", "rate_mult", "ac_damage", "ac_rate", "ac_splash", "ms_damage", "ms_rate", "ms_splash", "ms_volley", "cap", "gel_slow", "gel_time", "soak_time", "armor_strip", "nozzles", "mist", "acid_perm", "acid_dps", "slow", "slow_time", "perm_slow", "freeze_every", "freeze_time", "cold_front", "buff_dmg", "buff_rate", "buff_range", "buff_extra", "crit_link",
+  "lo_missiles", "lo_bombs", "lo_laser", "lo_full", "loadout_mult", "drones", "orbit", "radar", "rate_mult", "ac_damage", "ac_rate", "ac_splash", "ms_damage", "ms_rate", "ms_splash", "ms_volley", "cap", "gel_slow", "gel_time", "soak_time", "armor_strip", "nozzles", "mist", "acid_perm", "acid_dps", "slow", "slow_time", "perm_slow", "freeze_every", "freeze_time", "cold_front", "buff_dmg", "buff_rate", "buff_range", "buff_extra", "crit_link", "ping_every", "reveal_time", "early_warning", "rad_dps", "rad_range", "constant", "unmask_decoy", "unmask_mask", "unmask_mirage", "exposure", "shield_mult", "shatter_half", "regen_block", "income", "sell_field", "interest", "interest_cap", "bounty_bonus", "boss_bounty", "discount", "build_discount",
 ]);
-const FLAGS = new Set(["tracers", "swivel", "weakest_extra", "homing", "retarget", "never_miss", "ripple", "turn_fast", "incendiary", "shrapnel", "concussion", "combined", "overload", "lo_missiles", "lo_bombs", "lo_laser", "lo_full", "radar", "mist", "acid_perm", "cold_front"]);
+const FLAGS = new Set(["tracers", "swivel", "weakest_extra", "homing", "retarget", "never_miss", "ripple", "turn_fast", "incendiary", "shrapnel", "concussion", "combined", "overload", "lo_missiles", "lo_bombs", "lo_laser", "lo_full", "radar", "mist", "acid_perm", "cold_front", "early_warning", "constant", "unmask_decoy", "unmask_mask", "unmask_mirage", "shatter_half"]);
 
 const errors = [];
 const fail = (m) => errors.push(m);
@@ -99,7 +99,7 @@ for (const slug of Object.keys(statTowers)) {
   const retro = rows.filter((r) => /^r\d$/.test(r.id));
   const ind = "\t\t";
   body += `\t${q(slug)}: {\n\t\t"name": ${q(d.name)},\n\t\t"class": ${q(d.cls)},\n\t\t"weapon": ${q(d.weapon)},\n\t\t"blurb": ${q(d.blurb)},\n`;
-  body += `\t\t"air": ${st.meta.air === "yes"},\n\t\t"ground": ${st.meta.ground === "yes"},\n\t\t"size": ${parseInt(st.meta.size, 10)},\n\t\t"damage_kind": ${q(st.meta.damage_kind || "physical")},\n\t\t"beam": ${st.meta.beam === "yes"},\n\t\t"uncapped": ${st.meta.uncapped === "yes"},\n\t\t"support": ${st.meta.support === "yes"},\n`;
+  body += `\t\t"air": ${st.meta.air === "yes"},\n\t\t"ground": ${st.meta.ground === "yes"},\n\t\t"size": ${parseInt(st.meta.size, 10)},\n\t\t"damage_kind": ${q(st.meta.damage_kind || "physical")},\n\t\t"beam": ${st.meta.beam === "yes"},\n\t\t"uncapped": ${st.meta.uncapped === "yes"},\n\t\t"support": ${st.meta.support === "yes"},\n\t\t"economy": ${st.meta.economy === "yes"},\n`;
   body += `\t\t"cost": ${d.build},\n\t\t"base": ${node(byId.base, st, ind)},\n\t\t"retrofits": [\n${retro.map((r) => `\t\t\t${node(r, st, "\t\t\t")},`).join("\n")}\n\t\t],\n\t\t"paths": [\n`;
   "abc".split("").forEach((k, i) => {
     body += `\t\t\t{\n\t\t\t\t"key": ${q(k)},\n\t\t\t\t"name": ${q(d.branches[i])},\n\t\t\t\t"nodes": [\n`;

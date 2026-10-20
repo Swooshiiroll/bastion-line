@@ -22,6 +22,8 @@ const DroneBayArt = preload("res://scripts/view/towers/DroneBayArt.gd")
 const CasGunshipArt = preload("res://scripts/view/towers/CasGunshipArt.gd")
 const MineLayerArt = preload("res://scripts/view/towers/MineLayerArt.gd")
 const ChemicalPlantArt = preload("res://scripts/view/towers/ChemicalPlantArt.gd")
+const RadarTowerArt = preload("res://scripts/view/towers/RadarTowerArt.gd")
+const ShockwaveGeneratorArt = preload("res://scripts/view/towers/ShockwaveGeneratorArt.gd")
 const CryoTowerArt = preload("res://scripts/view/towers/CryoTowerArt.gd")
 const RocketSalvoArt = preload("res://scripts/view/towers/RocketSalvoArt.gd")
 const AntiAircraftArt = preload("res://scripts/view/towers/AntiAircraftArt.gd")
@@ -413,6 +415,20 @@ func _visual(ev: Dictionary) -> void:
 			var scol := ChemicalPlantArt.acid_color(cl, Draw.ACCENT.chemical_plant)
 			fx.tracer(ev.from, ev.to, Color(scol, 0.8), 0.3, 2.0 + 0.3 * float(cl.A))
 			fx.burst(ev.to, scol, 5, 45.0, 1.8 + 0.2 * float(cl.A), 0.4)
+		"radar_ping":
+			# The ping: a ring that sweeps out to the radar's reach (gold with the Frequency or Power mastery).
+			var rl2 := RadarTowerArt.levels(str(ev.look))
+			fx.ring(ev.pos, 6.0, float(ev.radius), Draw.GOLD if (rl2.P >= 5 or rl2.F >= 5) else Draw.ACCENT.radar_tower, 0.7, 2.0)
+		"shockwave":
+			# The nuclear shockwave: a bright ring tearing outward from the core, with a flash, a white heat (Power) or violet resonance (Effect).
+			var sl := ShockwaveGeneratorArt.levels(str(ev.look))
+			var wc: Color = Draw.GOLD if sl.P >= 5 else Color(1.0, 0.9, 0.55)
+			fx.flash(ev.pos, float(ev.radius) * 0.4, wc, 0.14)
+			fx.ring(ev.pos, 8.0, float(ev.radius), wc, 0.4, 3.5, true)
+			fx.ring(ev.pos, 4.0, float(ev.radius) * 0.7, Color(wc, 0.5), 0.3, 2.0)
+			if sl.E >= 1:
+				fx.ring(ev.pos, 6.0, float(ev.radius) * 0.9, Color(0.7, 0.4, 1.0, 0.8), 0.45, 2.0)
+			shake = maxf(shake, 0.05)
 		"mine_toss":
 			# A mine lobbed from the launcher to its spot: a short arc of light and a ring where it lands.
 			fx.tracer(ev.pos, ev.to, Color(1, 1, 1, 0.5), 0.25, 1.0)
