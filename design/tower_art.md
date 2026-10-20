@@ -350,7 +350,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 17 | Scrapyard | copper | C Magnet Yard | B Sparks and Sale |
 | 18 | Magneto Tower | violet | F Stacked Coil Tower | F Drag Trails |
 | 19 | Tractor Tower | `design/tower_art_p2_19_tractor.html` | Base redesign **confirmed** (owner, 2026-10-19: B Armoured Dish, B Focus Beam; base page `design/tower_art_p19_tractor.html`). Second pass **confirmed** (owner, 2026-10-19, "finished"; round 12) |
-| 20 | Augmentation Tower | `design/tower_art_p2_20_augment.html` | Second pass round 4: the owner's cell design (path colours light the flickering cells, solid at a mastery); pick Critical Hits (how its red spreads), Amplified Bonus and Remote Link |
+| 20 | Augmentation Tower | `design/tower_art_p2_20_augment.html` | Second pass round 5: every stage picked; no gold on the array; a plate ring per path; waiting for "Augmentation Tower finished" |
 | 20 | Augmentation Tower | lavender | F Nanite Hive | D Nanite Swarm |
 
 ## Second pass: per-path and Retrofit looks (owner, 2026-10-16)
@@ -1390,6 +1390,11 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
 - **Mastery:** it fills the whole array solid in its colour, with gold edges, and the other path still flickers over it.
 - This replaces round 3's fills and flickers. The deflector plates, the gold rim and arcs at Overcharge, and the Retrofits stay.
 
+**Round 5 (owner's picks and notes, 2026-10-20):**
+- **Picks:** every path all A (Energy's blue patch, Critical Hits' scattered red, Ricochet's plates); Wide Aura A (the aura ring), Amplified Bonus B (the gold halo), Remote Link C (the link beacon).
+- **"remove the gold array effect":** a solid (mastery) array now has a lighter edge in its own colour, not gold, and Overcharge's arcs over the cells are blue. The gold rim round the dome at Overcharge stays; the owner was asked whether to remove it too.
+- **"Add the ring affects to all other paths":** every path now has a ring of orbiting plates in its colour, like Ricochet's: Energy blue, Critical Hits red, Ricochet green. Each gets more plates each tier and is gold-trimmed at its mastery. The rings nest (14.4, 16.3, 18.2 units) and turn in alternating directions.
+
 ## Open questions
 
-1. **Second pass, Augmentation Tower** (tower 20, round 4; the last tower): pick Critical Hits (how its red spreads), Amplified Bonus and Remote Link.
+1. **Second pass, Augmentation Tower** (tower 20, round 5; the last tower): every stage is picked. Confirm with "Augmentation Tower finished".
