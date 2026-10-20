@@ -1,4 +1,4 @@
-// ---- Tower art second pass: Magneto Tower (tower 18), round 1 ------------------------------------------------------------------------------------------------
+// ---- Tower art second pass: Magneto Tower (tower 18), round 2 (every stage picked) ------------------------------------------------------------------------------------------------
 // Base: look F Stacked Coil Tower, animation F Drag Trails (tools/tower_art/data_towers4.js). The owner kept the names and chose the parts (2026-10-19):
 //  - Path 1, Pull Strength, rebuilds the COIL STACK (thick windings, a tiered stack, or an iron yoke; bigger each step; gold at Absolute Pull).
 //  - Path 2, Field Size, rebuilds the BASE into field emitters (emitter rings, pylons, or fold-out field plates; gold with an aurora at Magnetosphere).
@@ -8,7 +8,7 @@
 // (the slow, the radius, the armour stripping, the repel every 4 s).
 // Overlaps kept and stacking (the carpet rule): the Superconducting Coil's +5% slow with Pull Strength, the Field Stabiliser's +15 px with Field Size,
 // the Pole Shoes' 30% less resistance with Pull Strength's heavy-role steps.
-const PAGE = { title: "Magneto Tower: paths and Retrofits (second pass)", store: "bl-tower-art-p2-magneto-r1" };
+const PAGE = { title: "Magneto Tower: paths and Retrofits (second pass)", store: "bl-tower-art-p2-magneto-r2" };
 const GOLD = [1, 0.78, 0.3, 1], COPPER = [0.78, 0.5, 0.28, 1], STEEL = [0.42, 0.45, 0.5, 1], RED = [0.85, 0.2, 0.2, 1], BLUEP = [0.28, 0.48, 0.95, 1], GREYP = [0.62, 0.64, 0.68, 1], FROST = [0.86, 0.95, 1, 1];
 const rnd = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
 const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
@@ -101,7 +101,7 @@ function magAgent(B) { return (m, t, info, s, col) => { if (m.rep === undefined)
 // ---- The model ----------------------------------------------------------------------------------------------------------------------------------------------------
 const P2 = {
   tower: "magneto", look: "F", anim: "F",
-  intro: "Round 1 on the confirmed Stacked Coil Tower, with the names kept (your choice). Each path rebuilds one part, in the style you pick for each step, and the new design replaces the old one: Pull Strength rebuilds the coil stack (thick windings, a tiered stack, or an iron yoke; bigger each step; current runs round it at Dense Field; gold at Absolute Pull); Field Size rebuilds the base into field emitters (emitter rings, pylons, or fold-out field plates; gold with an aurora at Magnetosphere); Polarity rebuilds the pole cap (a split red/blue pole, claws, or spikes); from Torn Plates the stripped armour plates cling round it, and at Reverse Polarity it turns gold and flips red/blue at each repel. The preview runs the real rules: the slow tag and field radius grow, plates fly off enemies to the cap with -2, -4 or -5, stripped enemies stay cracked after leaving from Torn Plates, and the field flips to repel every 4 s at the mastery. Overlapping Retrofits are kept and stack (the carpet rule).",
+  intro: "Round 2: every stage is picked (all A: thick windings, emitter rings, the split pole; Retrofits Frost Rime, Ferrite Halo and Shoe Ring) and drawn as one build. Round 1 on the confirmed Stacked Coil Tower, with the names kept (your choice). Each path rebuilds one part, in the style you pick for each step, and the new design replaces the old one: Pull Strength rebuilds the coil stack (thick windings, a tiered stack, or an iron yoke; bigger each step; current runs round it at Dense Field; gold at Absolute Pull); Field Size rebuilds the base into field emitters (emitter rings, pylons, or fold-out field plates; gold with an aurora at Magnetosphere); Polarity rebuilds the pole cap (a split red/blue pole, claws, or spikes); from Torn Plates the stripped armour plates cling round it, and at Reverse Polarity it turns gold and flips red/blue at each repel. The preview runs the real rules: the slow tag and field radius grow, plates fly off enemies to the cap with -2, -4 or -5, stripped enemies stay cracked after leaving from Torn Plates, and the field flips to repel every 4 s at the mastery. Overlapping Retrofits are kept and stack (the carpet rule).",
   mods(B) { return { period: 1, flight: 1, multi: false, persist: magAgent(B) }; },
   muzzleAt(B, m, kk, c) { return c; },
   model(c, aim, s, fx, t, col, info, B) { const k = G(s), mm = fx.mem || {};
@@ -146,3 +146,8 @@ P2.retrofits = [
   { name: "Field Stabiliser", cost: 280, effect: "+15 px radius (stacks with Field Size)", options: T(["Gyro Ring", "A steel ring round the deck with three spinning gyros."], ["Ballast Blocks", "Three heavy striped ballast blocks on the deck's corners."], ["Ferrite Halo", "A broken ring of dark ferrite floats round the coils, turning slowly."]) },
   { name: "Pole Shoes", cost: 135, effect: "Heavy roles resist 30% less (stacks with Pull Strength)", options: T(["Iron Shoes", "Two iron pole shoes flank the cap."], ["Shoe Ring", "An iron ring with four lugs round the cap."], ["Shoe Plates", "Four iron shoe plates point in at the cap."]) },
 ];
+
+// ---- Round 2 picks (owner, 2026-10-19): every stage picked -------------------------------------------------------------------------------------------------------
+P2.picks = { p0s0: "A", p0s1: "A", p0s2: "A", p0s3: "A", p0s4: "A", p1s0: "A", p1s1: "A", p1s2: "A", p1s3: "A", p1s4: "A", p2s0: "A", p2s1: "A", p2s2: "A", p2s3: "A", p2s4: "A", r0: "A", r1: "C", r2: "B" };
+P2.paths.forEach((pa, pi) => pa.steps.forEach((st, k) => { const pk = P2.picks["p" + pi + "s" + k]; if (pk) st.options = st.options.filter((o) => o.key === pk); }));
+P2.retrofits.forEach((rf, ri) => { const pk = P2.picks["r" + ri]; if (pk) rf.options = rf.options.filter((o) => o.key === pk); });
