@@ -268,6 +268,13 @@ func _visual(ev: Dictionary) -> void:
 			if ev.get("stun", false):
 				fx.ring(ev.pos, float(ev.radius) * 0.5, float(ev.radius) * 1.15, Color(1.0, 0.92, 0.35), 0.4, 2.5)
 			shake = maxf(shake, 0.06)
+		"bomblet":
+			# A cluster bomblet bursting round a Mortar impact.
+			fx.ring(ev.pos, 3.0, float(ev.radius), Color(1.0, 0.6, 0.25), 0.22, 1.6)
+			fx.burst(ev.pos, Color(1.0, 0.6, 0.25), 5, 80.0, 1.8, 0.25)
+		"smoke":
+			# Smoke Shells: a grey cloud that hangs where the shell landed.
+			ground_fx.burst(ev.pos, SMOKE, 14, 36.0, 7.0, 2.4)
 		"missile_hit":
 			fx.flash(ev.pos, 14.0, Color(1.0, 0.7, 0.3), 0.1)
 			fx.burst(ev.pos, Color(1.0, 0.6, 0.25), 10, 110.0, 2.4, 0.35)

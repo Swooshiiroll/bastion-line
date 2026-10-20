@@ -26,3 +26,5 @@ var stun := 0.0
 var crit := false
 ## The firing tower's look key (a reworked tower), so the round is drawn to match: its Power step, its Retrofit.
 var look := ""
+## Mortar Tower: this shell leaves a smoke cloud where it lands (Smoke Shells).
+var smoke := false

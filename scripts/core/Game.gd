@@ -109,6 +109,8 @@ var stats := {}
 
 var _next_enemy_id := 1
 var _roll_count := 0
+## Smoke clouds left by Smoke Shells and Smoke Trails: {pos, r, t, slow}. They slow ground enemies inside while they last.
+var smokes: Array = []
 var _spawn_counter := 0
 var _new_enemies: Array = []
 
@@ -703,6 +705,7 @@ func tick(dt: float) -> void:
 
 	_update_abilities(dt)
 	_update_pools(dt)
+	_update_smokes(dt)
 	_update_storms(dt)
 
 	_update_auras()
@@ -828,7 +831,7 @@ func _pick_target(t, exclude: Array, air: bool, ground: bool):
 	var best_score := -INF
 	var swivel: bool = t.is_rework and bool(t.stats().get("swivel", false))
 	for e in enemies:
-		if not e.alive or (e.flying and not air) or (not e.flying and not ground) or e.is_hidden() or exclude.has(e):
+		if not e.alive or (e.flying and not air) or (not e.flying and not ground) or (e.is_hidden() and not _burrow_visible(t, e)) or exclude.has(e):
 			continue
 		var d2: float = t.pos.distance_squared_to(e.pos)
 		if d2 > r2:
@@ -1046,6 +1049,8 @@ func _update_tower(t, dt: float) -> void:
 	match t.type:
 		"gun_turret":
 			_fire_gun(t, target, s)
+		"mortar_tower":
+			_fire_mortar(t, target, s)
 		"arrow":
 			if t.spec == "flechette":
 				_flechette(t, float(s.get("pellets", 6.0)), float(s.get("cone", 45.0)), bool(s.get("bypass_shield", false)))
@@ -1061,6 +1066,42 @@ func _update_tower(t, dt: float) -> void:
 			_fire_rail(t, target, s)
 		"tesla":
 			_chain(t, target, s)
+
+
+## Mortar Tower: a shell at the target; every few shells (Smoke Shells) one leaves a cloud. The tube that fires cycles
+## (the art shows tubes firing in succession); the rate stat already is the total across the tubes.
+func _fire_mortar(t, target, s: Dictionary) -> void:
+	t.pulse_count += 1
+	_fire_projectile(t, target, s)
+	var every := int(s.get("smoke_every", 0))
+	if every > 0 and t.pulse_count % every == 0:
+		projectiles[projectiles.size() - 1].smoke = true
+
+
+## Slows ground enemies inside each smoke cloud, and retires the spent ones.
+func _update_smokes(dt: float) -> void:
+	if smokes.is_empty():
+		return
+	for c in smokes:
+		c.t -= dt
+		var r2: float = float(c.r) * float(c.r)
+		for e in enemies:
+			if e.alive and not e.flying and e.pos.distance_squared_to(c.pos) <= r2:
+				e.apply_slow(float(c.slow), 0.25)
+	smokes = smokes.filter(func(c): return c.t > 0.0)
+
+
+## True if a burrowed enemy at `pos` is inside a sensor's field (the stand-in for the Radar Tower until it exists), so a
+## tower with burrow sight may target it.
+func _radar_covers(pos: Vector2) -> bool:
+	for o in towers:
+		if (o.is_sensor() or bool(o.def.get("radar", false))) and o.pos.distance_squared_to(pos) <= o.get_range() * o.get_range():
+			return true
+	return false
+
+
+func _burrow_visible(t, e) -> bool:
+	return e.burrowed and t.is_rework and float(t.stats().get("burrow_sight", 0.0)) > 0.0 and _radar_covers(e.pos)
 
 
 ## Gun Turret: a round at the target; Multi-Target adds a side gun (a second target at part damage) or extra barrels
@@ -1728,6 +1769,31 @@ func _projectile_hit(p) -> void:
 			if p.burn_dps > 0.0:
 				pools.append({"pos": p.pos, "r": r * 0.8, "dps": p.burn_dps, "t": p.burn_time, "source": p.source})
 			_emit({"type": "splash", "pos": p.pos, "radius": r, "burn": p.burn_dps > 0.0, "stun": p.stun > 0.0})
+		"mortar_tower":
+			# Mortar Tower: a blast on every ground enemy in range; armour is cracked by the Power path (damage_enemy reads it),
+			# burrowed ones take it only with burrow sight (half damage, full at the mastery); cluster bomblets scatter round the impact.
+			var r: float = p.splash
+			var sight := float(s.get("burrow_sight", 0.0))
+			for e in enemies:
+				if e.alive and not e.flying and e.pos.distance_squared_to(p.pos) <= r * r:
+					if e.burrowed and sight <= 0.0:
+						continue
+					var dmg: float = p.damage * (sight if e.burrowed else 1.0)
+					var dealt := damage_enemy(e, dmg, false, p.source, true, false, sight > 0.0)
+					_emit({"type": "hit", "pos": e.pos, "amount": dealt, "kind": "cannon"})
+			var n := int(s.get("bomblets", 0))
+			if n > 0:
+				var br := float(s.get("bomblet_splash", 30.0))
+				var ring := 30.0 * (1.5 if float(s.get("bomblet_spread", 0.0)) > 0.0 else 1.0)
+				for k in n:
+					var bp: Vector2 = p.pos + Vector2.from_angle(TAU * float(k) / float(n) + float(k) * 0.7) * ring
+					for e in _enemies_near(bp, br, false, true):
+						damage_enemy(e, float(s.get("bomblet_damage", 10.0)) * (1.0 + (p.source.buff_dmg if p.source != null else 0.0)), false, p.source, false)
+					_emit({"type": "bomblet", "pos": bp, "radius": br})
+			if p.smoke:
+				smokes.append({"pos": p.pos, "r": r, "t": float(s.get("smoke_time", 3.0)), "slow": float(s.get("smoke_slow", 0.15))})
+				_emit({"type": "smoke", "pos": p.pos, "radius": r})
+			_emit({"type": "splash", "pos": p.pos, "radius": r, "burn": false, "stun": false})
 		"flak":
 			# Airburst: every flyer in the blast; with timed fuses (Dual Purpose) ground units too.
 			var r: float = p.splash

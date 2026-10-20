@@ -11,7 +11,7 @@ extends RefCounted
 ##   command tree  "start_gold": +fraction, "lives": +fraction of the mode's shields, "sell_refund": +fraction,
 ##                 "ability_cd": -fraction, "bounty": +fraction
 
-const TREE_ORDER := ["command", "arrow", "cannon", "frost", "sniper", "tesla", "laser", "missile", "amp", "flak", "sensor", "gravity", "nullifier", "nova", "drones", "scrap", "gun_turret"]
+const TREE_ORDER := ["command", "arrow", "cannon", "frost", "sniper", "tesla", "laser", "missile", "amp", "flak", "sensor", "gravity", "nullifier", "nova", "drones", "scrap", "gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret"]
 
 ## RP sources, all derived from profile records so they can't be farmed and are never lost.
 ## (Medals pay their mode's medal_rp, from data/difficulty.gd.)
@@ -388,6 +388,94 @@ const NODES := {
 	"gun_turret_m": {
 		"tree": "gun_turret", "slot": Vector2i(0, 2), "cost": 3, "requires": ["gun_turret_2a", "gun_turret_2b"], "icon": "mastery",
 		"name": "Gun Turret Mastery", "blurb": "Unlocks the masteries: Sabot Rounds, Targeting Computer and Triple Mount.",
+		"effects": {"mastery": true},
+	},
+
+	# --- Mortar Tower (the tower rework, issue #59: a minimal tree until the research pass) ----------
+	"mortar_tower_1": {
+		"tree": "mortar_tower", "slot": Vector2i(0, 0), "cost": 1, "requires": [], "icon": "damage",
+		"name": "Heavy Charges", "blurb": "Mortars deal +6% damage.",
+		"effects": {"mult": {"damage": 0.06}},
+	},
+	"mortar_tower_2a": {
+		"tree": "mortar_tower", "slot": Vector2i(-1, 1), "cost": 2, "requires": ["mortar_tower_1"], "icon": "range",
+		"name": "Long Tubes", "blurb": "Mortars get +7% range.",
+		"effects": {"mult": {"range": 0.07}},
+	},
+	"mortar_tower_2b": {
+		"tree": "mortar_tower", "slot": Vector2i(1, 1), "cost": 2, "requires": ["mortar_tower_1"], "icon": "rate",
+		"name": "Autoloaders", "blurb": "Mortars fire 7% faster.",
+		"effects": {"mult": {"rate": 0.07}},
+	},
+	"mortar_tower_m": {
+		"tree": "mortar_tower", "slot": Vector2i(0, 2), "cost": 3, "requires": ["mortar_tower_2a", "mortar_tower_2b"], "icon": "mastery",
+		"name": "Mortar Tower Mastery", "blurb": "Unlocks the masteries: Bunker Buster, Barrage Battery and Carpet Shells.",
+		"effects": {"mastery": true},
+	},
+
+	# --- Rocket Salvo (the tower rework, issue #59: a minimal tree until the research pass) ----------
+	"rocket_salvo_1": {
+		"tree": "rocket_salvo", "slot": Vector2i(0, 0), "cost": 1, "requires": [], "icon": "damage",
+		"name": "Warhead Casings", "blurb": "Rocket Salvos deal +6% damage.",
+		"effects": {"mult": {"damage": 0.06}},
+	},
+	"rocket_salvo_2a": {
+		"tree": "rocket_salvo", "slot": Vector2i(-1, 1), "cost": 2, "requires": ["rocket_salvo_1"], "icon": "range",
+		"name": "Booster Fuel", "blurb": "Rocket Salvos get +7% range.",
+		"effects": {"mult": {"range": 0.07}},
+	},
+	"rocket_salvo_2b": {
+		"tree": "rocket_salvo", "slot": Vector2i(1, 1), "cost": 2, "requires": ["rocket_salvo_1"], "icon": "rate",
+		"name": "Quick Racks", "blurb": "Rocket Salvos fire 7% faster.",
+		"effects": {"mult": {"rate": 0.07}},
+	},
+	"rocket_salvo_m": {
+		"tree": "rocket_salvo", "slot": Vector2i(0, 2), "cost": 3, "requires": ["rocket_salvo_2a", "rocket_salvo_2b"], "icon": "mastery",
+		"name": "Rocket Salvo Mastery", "blurb": "Unlocks the masteries: Thermobaric Rockets, Hunter Seekers and Ripple Salvo.",
+		"effects": {"mastery": true},
+	},
+
+	# --- Laser Tower (the tower rework, issue #59: a minimal tree until the research pass) ----------
+	"laser_tower_1": {
+		"tree": "laser_tower", "slot": Vector2i(0, 0), "cost": 1, "requires": [], "icon": "damage",
+		"name": "Cleaner Optics", "blurb": "Laser Towers deal +6% damage.",
+		"effects": {"mult": {"damage": 0.06}},
+	},
+	"laser_tower_2a": {
+		"tree": "laser_tower", "slot": Vector2i(-1, 1), "cost": 2, "requires": ["laser_tower_1"], "icon": "range",
+		"name": "Focusing Mirrors", "blurb": "Laser Towers get +7% range.",
+		"effects": {"mult": {"range": 0.07}},
+	},
+	"laser_tower_2b": {
+		"tree": "laser_tower", "slot": Vector2i(1, 1), "cost": 2, "requires": ["laser_tower_1"], "icon": "rate",
+		"name": "Capacitor Tuning", "blurb": "Laser Towers fire 7% faster.",
+		"effects": {"mult": {"rate": 0.07}},
+	},
+	"laser_tower_m": {
+		"tree": "laser_tower", "slot": Vector2i(0, 2), "cost": 3, "requires": ["laser_tower_2a", "laser_tower_2b"], "icon": "mastery",
+		"name": "Laser Tower Mastery", "blurb": "Unlocks the masteries: Annihilator, Prism Array and Deep Lance.",
+		"effects": {"mastery": true},
+	},
+
+	# --- Anti-Aircraft Turret (the tower rework, issue #59: a minimal tree until the research pass) ----------
+	"anti_aircraft_turret_1": {
+		"tree": "anti_aircraft_turret", "slot": Vector2i(0, 0), "cost": 1, "requires": [], "icon": "damage",
+		"name": "Heavy Rounds", "blurb": "Anti-Aircraft Turrets deal +6% damage.",
+		"effects": {"mult": {"damage": 0.06}},
+	},
+	"anti_aircraft_turret_2a": {
+		"tree": "anti_aircraft_turret", "slot": Vector2i(-1, 1), "cost": 2, "requires": ["anti_aircraft_turret_1"], "icon": "range",
+		"name": "Radar Sights", "blurb": "Anti-Aircraft Turrets get +7% range.",
+		"effects": {"mult": {"range": 0.07}},
+	},
+	"anti_aircraft_turret_2b": {
+		"tree": "anti_aircraft_turret", "slot": Vector2i(1, 1), "cost": 2, "requires": ["anti_aircraft_turret_1"], "icon": "rate",
+		"name": "Fast Feed", "blurb": "Anti-Aircraft Turrets fire 7% faster.",
+		"effects": {"mult": {"rate": 0.07}},
+	},
+	"anti_aircraft_turret_m": {
+		"tree": "anti_aircraft_turret", "slot": Vector2i(0, 2), "cost": 3, "requires": ["anti_aircraft_turret_2a", "anti_aircraft_turret_2b"], "icon": "mastery",
+		"name": "Anti-Aircraft Turret Mastery", "blurb": "Unlocks the masteries: Flak Curtain, Quad Mount and Sky Wall.",
 		"effects": {"mastery": true},
 	},
 }

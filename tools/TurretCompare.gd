@@ -15,7 +15,10 @@ const BRANCHES := {
 	"nova": ["supernova", "pulsereactor", "solarflare"], "drones": ["interceptors", "bombers", "hunters"], "scrap": ["mint", "collector", "depot"],
 }
 ## The reworked towers (issue #59) show their look as a key; four looks each: stock, then three mastered builds.
-const REWORK_LOOKS := {"gun_turret": [["", "-1|0|0|0"], ["", "0|5|2|0"], ["", "1|2|5|0"], ["", "2|0|2|5"]]}
+const REWORK_LOOKS := {
+	"gun_turret": [["", "-1|0|0|0"], ["", "0|5|2|0"], ["", "1|2|5|0"], ["", "2|0|2|5"]],
+	"mortar_tower": [["", "-1|0|0|0"], ["", "0|2|3|1"], ["", "1|5|2|3"], ["", "2|3|5|5"]],
+}
 const AIMS := [-0.5, 2.4]
 const SIZE := Vector2i(1700, 1700)
 const CELL := 100.0

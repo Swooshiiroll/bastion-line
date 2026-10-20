@@ -5,6 +5,7 @@ extends Node2D
 const Draw = preload("res://scripts/view/Draw.gd")
 const Grid = preload("res://scripts/core/Grid.gd")
 const GunTurretArt = preload("res://scripts/view/towers/GunTurretArt.gd")
+const MortarTowerArt = preload("res://scripts/view/towers/MortarTowerArt.gd")
 
 var world
 ## Microseconds spent per section of _draw, summed; tools/PerfProbe.gd reads and resets it.
@@ -178,6 +179,8 @@ func _projectile(p) -> void:
 			Draw.disc(self, p.pos + d * 4.2, 1.5, Color(1.0, 0.3, 0.25))
 		"gun_turret":
 			_gun_round(p)
+		"mortar_tower":
+			_mortar_shell(p)
 		_:
 			var d: Vector2 = (p.target_pos - p.pos).normalized()
 			if d == Vector2.ZERO:
@@ -222,6 +225,31 @@ func _gun_round(p) -> void:
 		draw_line(p.pos - d * 0.9 + o * 0.6, p.pos - d * 0.9 - o * 0.6, Color(1, 0.85, 0.2), 0.7, true)
 	if lv.P >= 4:
 		Draw.glow_dot(self, p.pos - d * 1.8, 0.45, Color(1, 0.95, 0.85))
+
+
+## The Mortar Tower's shell (the confirmed art): a lobbed shell that changes with each Power step (red-banded, pointed, dark
+## yellow-banded AP, blinking fuse, gold at the mastery), bigger with Fat Shells, banded grey with Smoke Shells.
+func _mortar_shell(p) -> void:
+	var lv := MortarTowerArt.levels(str(p.look))
+	var frac := clampf(p.traveled / maxf(p.total, 1.0), 0.0, 1.0)
+	var lift := sin(frac * PI) * minf(34.0, p.total * 0.22)
+	var z := 1.2 if lv.B >= 1 else 1.0
+	Draw.ellipse(self, p.pos + Vector2(0, 3), (4.0 + 2.0 * (1.0 - lift / 34.0)) * z, 2.0 * z, Color(0, 0, 0, 0.3))
+	var sp: Vector2 = p.pos - Vector2(0, lift)
+	var back: Vector2 = (p.start - p.pos).normalized() if p.start.distance_squared_to(p.pos) > 1.0 else Vector2.LEFT
+	for k in 4:
+		Draw.disc(self, sp + back * (4.0 + 3.5 * float(k)) + Vector2(0, float(k) * 1.5), 3.0 - 0.6 * float(k), Color(1.0, 0.55, 0.2, 0.3 - 0.07 * float(k)))
+	var body := Color(1.0, 0.8, 0.3) if lv.B >= 5 else (Color(0.6, 0.62, 0.64) if p.smoke else (Color(0.2, 0.2, 0.22) if lv.P >= 3 else Draw.METAL_L))
+	var r := 2.6 * z * (1.2 if lv.P >= 1 else 1.0)
+	Draw.orb(self, sp, r, body)
+	if lv.P >= 1:
+		Draw.ring(self, sp, r * 0.95, Color(0.9, 0.85, 0.3, 0.8) if lv.P >= 5 else Color(0.8, 0.8, 0.85, 0.7), 0.8)
+	if lv.P >= 3:
+		Draw.line(self, sp + Vector2(0, -r * 0.9), sp + Vector2(0, r * 0.9), Color(1, 0.85, 0.2), 0.9)
+	if p.smoke or lv.r == 2:
+		Draw.ring(self, sp, r * 0.85, Color(0.42, 0.42, 0.44), 0.9)
+	var blink := fmod(frac * 8.0, 1.0) < 0.5 if lv.P >= 4 else true
+	Draw.glow_dot(self, sp, 1.1, Color(1.0, 0.55, 0.2) if blink else Color(1.0, 0.55, 0.2, 0.3))
 
 
 func _hp_bar(e) -> void:

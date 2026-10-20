@@ -6,7 +6,7 @@ extends RefCounted
 ## (a, b, c), each with four `nodes` and a `mastery`. A node's `set` values replace the stat and its `add` values add to it;
 ## nodes apply in order on top of the base (the Retrofit, then each path's steps).
 
-const ORDER := ["gun_turret"]
+const ORDER := ["gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret"]
 
 const TREES := {
 	"gun_turret": {
@@ -227,6 +227,884 @@ const TREES := {
 					"set": {
 						"multishot": 3.0,
 						"weakest_extra": true,
+					},
+					"add": {},
+				},
+			},
+		],
+	},
+	"mortar_tower": {
+		"name": "Mortar Tower",
+		"class": "Assault",
+		"weapon": "Explosive",
+		"blurb": "Lobs high-explosive shells at nearby enemies. \"Toob.\"",
+		"air": false,
+		"ground": true,
+		"size": 1,
+		"damage_kind": "physical",
+		"cost": 150,
+		"base": {
+			"name": "Mortar Tower",
+			"cost": 150,
+			"blurb": "150 credits; 30 damage per shell, a 60 px blast, 110 range, 0.6 shells/s; ground only. Its value matches the Gun Turret's credits per point: the Mortar does a little less single-target damage but hits a whole pack.",
+			"set": {
+				"damage": 30.0,
+				"splash": 60.0,
+				"range": 110.0,
+				"rate": 0.6,
+				"proj_speed": 420.0,
+			},
+			"add": {},
+		},
+		"retrofits": [
+			{
+				"name": "Field Kit",
+				"cost": 120,
+				"blurb": "A reinforced baseplate (+4 damage), a ranging sight (+10 range) and an ammo rack (+0.05 shells/s, +5 px blast).",
+				"set": {},
+				"add": {
+					"damage": 4.0,
+					"range": 10.0,
+					"rate": 0.05,
+					"splash": 5.0,
+				},
+			},
+			{
+				"name": "Bunker Sight",
+				"cost": 15,
+				"blurb": "It can target burrowed enemies inside Radar Tower range, at half damage (the Bunker Buster mastery does it at full).",
+				"set": {
+					"burrow_sight": 0.5,
+				},
+				"add": {},
+			},
+			{
+				"name": "Smoke Shells",
+				"cost": 15,
+				"blurb": "Every 4th shell leaves a smoke cloud for 3 s that slows enemies inside it by 15%.",
+				"set": {
+					"smoke_every": 4.0,
+					"smoke_slow": 0.15,
+					"smoke_time": 3.0,
+				},
+				"add": {},
+			},
+		],
+		"paths": [
+			{
+				"key": "a",
+				"name": "Power/Penetration",
+				"nodes": [
+					{
+						"name": "HE Charge",
+						"cost": 80,
+						"blurb": "+8 damage",
+						"set": {},
+						"add": {
+							"damage": 8.0,
+						},
+					},
+					{
+						"name": "Shaped Charge",
+						"cost": 95,
+						"blurb": "Shells ignore 25% of armour",
+						"set": {
+							"armor_pct": 0.25,
+						},
+						"add": {},
+					},
+					{
+						"name": "AP Shells",
+						"cost": 685,
+						"blurb": "Ignore 50% of armour; +10 damage",
+						"set": {
+							"armor_pct": 0.5,
+						},
+						"add": {
+							"damage": 10.0,
+						},
+					},
+					{
+						"name": "Delayed Fuse",
+						"cost": 1350,
+						"blurb": "Ignore 75% of armour; +8 damage",
+						"set": {
+							"armor_pct": 0.75,
+						},
+						"add": {
+							"damage": 8.0,
+						},
+					},
+				],
+				"mastery": {
+					"name": "Bunker Buster",
+					"cost": 3140,
+					"blurb": "64 damage; ignores 75% of armour; shells dig in and hit burrowed enemies inside Radar Tower range",
+					"set": {
+						"damage": 64.0,
+						"armor_pct": 0.75,
+						"burrow_sight": 1.0,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "b",
+				"name": "Speed/Range",
+				"nodes": [
+					{
+						"name": "Quick Reload",
+						"cost": 50,
+						"blurb": "0.6 to 0.7 shells/s",
+						"set": {},
+						"add": {
+							"rate": 0.1,
+						},
+					},
+					{
+						"name": "Extended Tube",
+						"cost": 125,
+						"blurb": "+20 range (130)",
+						"set": {},
+						"add": {
+							"range": 20.0,
+						},
+					},
+					{
+						"name": "Twin Tubes",
+						"cost": 1170,
+						"blurb": "A second tube firing in succession: 1.2 shells/s",
+						"set": {
+							"tubes": 2.0,
+							"rate": 1.2,
+						},
+						"add": {},
+					},
+					{
+						"name": "Long Tubes",
+						"cost": 1405,
+						"blurb": "+20 range (150); 1.3 shells/s",
+						"set": {
+							"rate": 1.3,
+						},
+						"add": {
+							"range": 20.0,
+						},
+					},
+				],
+				"mastery": {
+					"name": "Barrage Battery",
+					"cost": 6165,
+					"blurb": "Three tubes firing in succession: 1.7 shells/s, 165 range",
+					"set": {
+						"tubes": 3.0,
+						"rate": 1.7,
+						"range": 165.0,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "c",
+				"name": "Blast Radius/Multi-Target",
+				"nodes": [
+					{
+						"name": "Bigger Charge",
+						"cost": 30,
+						"blurb": "Blast 60 to 70 px",
+						"set": {},
+						"add": {
+							"splash": 10.0,
+						},
+					},
+					{
+						"name": "Wide Burst",
+						"cost": 60,
+						"blurb": "Blast 80 px",
+						"set": {},
+						"add": {
+							"splash": 10.0,
+						},
+					},
+					{
+						"name": "Cluster Shells",
+						"cost": 1110,
+						"blurb": "Each shell also scatters 4 bomblets around the impact (10 damage, 30 px each)",
+						"set": {
+							"bomblets": 4.0,
+							"bomblet_damage": 10.0,
+							"bomblet_splash": 30.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Dense Cluster",
+						"cost": 1230,
+						"blurb": "6 bomblets; blast 85 px",
+						"set": {
+							"bomblets": 6.0,
+						},
+						"add": {
+							"splash": 5.0,
+						},
+					},
+				],
+				"mastery": {
+					"name": "Carpet Shells",
+					"cost": 5000,
+					"blurb": "8 bomblets of 12 damage, 35 px each, spread wider; blast 90 px",
+					"set": {
+						"bomblets": 8.0,
+						"bomblet_damage": 12.0,
+						"bomblet_splash": 35.0,
+						"bomblet_spread": 1.0,
+					},
+					"add": {
+						"splash": 5.0,
+					},
+				},
+			},
+		],
+	},
+	"rocket_salvo": {
+		"name": "Rocket Salvo",
+		"class": "Assault",
+		"weapon": "Explosive",
+		"blurb": "Launches a volley of rockets at oncoming enemies. \"Instead of shooting bullets, it shoots very angry telephone poles that hate absolutely everything.\"",
+		"air": true,
+		"ground": true,
+		"size": 1,
+		"damage_kind": "physical",
+		"cost": 200,
+		"base": {
+			"name": "Rocket Salvo",
+			"cost": 200,
+			"blurb": "200 credits; a salvo of 3 rockets every 2.5 s, each on a different enemy, 19 damage with a 25 px blast; 180 range; air and ground. Without homing, rockets fly at where the target was, so very fast or blinking enemies can dodge them.",
+			"set": {
+				"damage": 19.0,
+				"splash": 25.0,
+				"range": 180.0,
+				"rate": 0.4,
+				"missiles": 3.0,
+				"proj_speed": 330.0,
+			},
+			"add": {},
+		},
+		"retrofits": [
+			{
+				"name": "Proximity Fuses",
+				"cost": 40,
+				"blurb": "Rockets burst beside flyers for +40% damage against air. Replaces Guidance Fins, which partly overlapped Range step 2's homing.",
+				"set": {
+					"air_mult": 1.4,
+				},
+				"add": {},
+			},
+			{
+				"name": "Smoke Trails",
+				"cost": 20,
+				"blurb": "Rockets leave smoke along their path that slows enemies inside it by 10% for 2 s. Replaces the Autoloader, which duplicated the Payload path's reloads (Quick Loader, Auto-Loader).",
+				"set": {
+					"smoke_slow": 0.1,
+					"smoke_time": 2.0,
+				},
+				"add": {},
+			},
+			{
+				"name": "Incendiary Warheads",
+				"cost": 125,
+				"blurb": "Blasts leave burning ground, 3 damage per second for 2 s. Replaces the Long Booster, which duplicated Range step 1 (Booster Stage).",
+				"set": {
+					"ground_burn": 3.0,
+					"ground_burn_time": 2.0,
+				},
+				"add": {},
+			},
+		],
+		"paths": [
+			{
+				"key": "a",
+				"name": "Power",
+				"nodes": [
+					{
+						"name": "HE Warheads",
+						"cost": 105,
+						"blurb": "+5 damage per rocket (24)",
+						"set": {},
+						"add": {
+							"damage": 5.0,
+						},
+					},
+					{
+						"name": "Wider Burst",
+						"cost": 155,
+						"blurb": "Blast 25 to 35 px",
+						"set": {},
+						"add": {
+							"splash": 10.0,
+						},
+					},
+					{
+						"name": "Heavy Warheads",
+						"cost": 985,
+						"blurb": "32 damage, 40 px blast",
+						"set": {},
+						"add": {
+							"damage": 8.0,
+							"splash": 5.0,
+						},
+					},
+					{
+						"name": "Dense Payload",
+						"cost": 1245,
+						"blurb": "38 damage",
+						"set": {},
+						"add": {
+							"damage": 6.0,
+						},
+					},
+				],
+				"mastery": {
+					"name": "Thermobaric Rockets",
+					"cost": 5710,
+					"blurb": "46 damage, 50 px blast",
+					"set": {},
+					"add": {
+						"damage": 8.0,
+						"splash": 10.0,
+					},
+				},
+			},
+			{
+				"key": "b",
+				"name": "Range/Target Acquisition",
+				"nodes": [
+					{
+						"name": "Booster Stage",
+						"cost": 45,
+						"blurb": "+20 range (200)",
+						"set": {},
+						"add": {
+							"range": 20.0,
+						},
+					},
+					{
+						"name": "Seeker Heads",
+						"cost": 135,
+						"blurb": "Homing: rockets curve onto their target",
+						"set": {
+							"homing": true,
+						},
+						"add": {},
+					},
+					{
+						"name": "Smart Seekers",
+						"cost": 510,
+						"blurb": "Rockets re-target if their target dies; +30 range (230)",
+						"set": {
+							"retarget": true,
+						},
+						"add": {
+							"range": 30.0,
+						},
+					},
+					{
+						"name": "Long Burn",
+						"cost": 670,
+						"blurb": "+30 range (260)",
+						"set": {},
+						"add": {
+							"range": 30.0,
+						},
+					},
+				],
+				"mastery": {
+					"name": "Hunter Seekers",
+					"cost": 2315,
+					"blurb": "300 range; seekers never miss, catching fast and blinking enemies",
+					"set": {
+						"range": 300.0,
+						"never_miss": true,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "c",
+				"name": "Reload/Payload",
+				"nodes": [
+					{
+						"name": "Extra Tube",
+						"cost": 135,
+						"blurb": "4 rockets per salvo",
+						"set": {
+							"missiles": 4.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Quick Loader",
+						"cost": 265,
+						"blurb": "A salvo every 2 s",
+						"set": {
+							"rate": 0.5,
+						},
+						"add": {},
+					},
+					{
+						"name": "Six-Pack",
+						"cost": 1335,
+						"blurb": "6 rockets per salvo",
+						"set": {
+							"missiles": 6.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Auto-Loader",
+						"cost": 1605,
+						"blurb": "A salvo every 1.7 s",
+						"set": {
+							"rate": 0.588,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Ripple Salvo",
+					"cost": 6415,
+					"blurb": "8 rockets per salvo, rippling out one after another",
+					"set": {
+						"missiles": 8.0,
+						"ripple": true,
+					},
+					"add": {},
+				},
+			},
+		],
+	},
+	"laser_tower": {
+		"name": "Laser Tower",
+		"class": "Assault",
+		"weapon": "Energy",
+		"blurb": "A High-Energy Laser Emitter affixed to a rotating turret. \"It does more than just blind the enemy, that's for sure.\"",
+		"air": true,
+		"ground": true,
+		"size": 1,
+		"damage_kind": "energy",
+		"cost": 250,
+		"base": {
+			"name": "Laser Tower",
+			"cost": 250,
+			"blurb": "250 credits; 25 damage per second, ramping up to ×3 over 3 s on the same target; 150 range; air and ground. Armour melt: the locked target loses 1 armour per second, down to 0. The armour stays gone, so other towers benefit. Switching targets resets the ramp but not the melted armour.",
+			"set": {
+				"damage": 25.0,
+				"range": 150.0,
+				"ramp": 3.0,
+				"ramp_time": 3.0,
+				"melt": 1.0,
+				"beams": 1.0,
+				"beam_power": 0.4,
+			},
+			"add": {},
+		},
+		"retrofits": [
+			{
+				"name": "Capacitor Bank",
+				"cost": 160,
+				"blurb": "+8 damage per second (25 to 33).",
+				"set": {},
+				"add": {
+					"damage": 8.0,
+				},
+			},
+			{
+				"name": "Heat Sinks",
+				"cost": 60,
+				"blurb": "Ramp ceiling ×3 to ×3.5.",
+				"set": {
+					"ramp": 3.5,
+				},
+				"add": {},
+			},
+			{
+				"name": "Ramp Memory",
+				"cost": 55,
+				"blurb": "Switching targets keeps half the ramp instead of resetting it.",
+				"set": {
+					"ramp_keep": 0.5,
+				},
+				"add": {},
+			},
+		],
+		"paths": [
+			{
+				"key": "a",
+				"name": "Power",
+				"nodes": [
+					{
+						"name": "Hotter Emitter",
+						"cost": 60,
+						"blurb": "Ramp ceiling ×3.5",
+						"set": {
+							"ramp": 3.5,
+						},
+						"add": {},
+					},
+					{
+						"name": "Quick Focus",
+						"cost": 60,
+						"blurb": "Ramp time 3 to 2.2 s",
+						"set": {
+							"ramp_time": 2.2,
+						},
+						"add": {},
+					},
+					{
+						"name": "Overdrive",
+						"cost": 815,
+						"blurb": "Ramp ceiling ×5",
+						"set": {
+							"ramp": 5.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Thermal Lock",
+						"cost": 1425,
+						"blurb": "Ceiling ×6; ramp time 1.8 s",
+						"set": {
+							"ramp": 6.0,
+							"ramp_time": 1.8,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Annihilator",
+					"cost": 5535,
+					"blurb": "Ceiling ×8 in 1.5 s: the boss killer",
+					"set": {
+						"ramp": 8.0,
+						"ramp_time": 1.5,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "b",
+				"name": "Multi-Target",
+				"nodes": [
+					{
+						"name": "Beam Splitter",
+						"cost": 200,
+						"blurb": "A second beam on another target at 40% power",
+						"set": {
+							"beams": 2.0,
+							"beam_power": 0.4,
+						},
+						"add": {},
+					},
+					{
+						"name": "Tuned Splitter",
+						"cost": 200,
+						"blurb": "The second beam at 60%",
+						"set": {
+							"beam_power": 0.6,
+						},
+						"add": {},
+					},
+					{
+						"name": "Prism",
+						"cost": 1190,
+						"blurb": "3 beams (extras at 60%)",
+						"set": {
+							"beams": 3.0,
+							"beam_power": 0.6,
+						},
+						"add": {},
+					},
+					{
+						"name": "Clear Prism",
+						"cost": 1190,
+						"blurb": "Extra beams at 75%",
+						"set": {
+							"beam_power": 0.75,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Prism Array",
+					"cost": 5950,
+					"blurb": "4 beams (extras at 75%); each beam ramps on its own target",
+					"set": {
+						"beams": 4.0,
+						"beam_power": 0.75,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "c",
+				"name": "Range/Targeting",
+				"nodes": [
+					{
+						"name": "Extended Optics",
+						"cost": 50,
+						"blurb": "+15 range (165)",
+						"set": {},
+						"add": {
+							"range": 15.0,
+						},
+					},
+					{
+						"name": "Collimator",
+						"cost": 100,
+						"blurb": "+15 range (180)",
+						"set": {},
+						"add": {
+							"range": 15.0,
+						},
+					},
+					{
+						"name": "Lance",
+						"cost": 395,
+						"blurb": "+30 range (210)",
+						"set": {},
+						"add": {
+							"range": 30.0,
+						},
+					},
+					{
+						"name": "Long Lance",
+						"cost": 795,
+						"blurb": "+30 range (240)",
+						"set": {},
+						"add": {
+							"range": 30.0,
+						},
+					},
+				],
+				"mastery": {
+					"name": "Deep Lance",
+					"cost": 2115,
+					"blurb": "280 range: still a mid-range tower, but with a long reach",
+					"set": {
+						"range": 280.0,
+					},
+					"add": {},
+				},
+			},
+		],
+	},
+	"anti_aircraft_turret": {
+		"name": "Anti-Aircraft Turret",
+		"class": "Assault",
+		"weapon": "Ballistic",
+		"blurb": "A fully automatic anti-aircraft gun. \"We don't need a gun, or a nug!\"",
+		"air": true,
+		"ground": false,
+		"size": 1,
+		"damage_kind": "physical",
+		"cost": 150,
+		"base": {
+			"name": "Anti-Aircraft Turret",
+			"cost": 150,
+			"blurb": "150 credits; 25 damage per round, 2.5 rounds/s, 160 range; flyers only. That's about 62 damage per second against air: it shreds Locusts and Strike Drones and wears down Gunships.",
+			"set": {
+				"damage": 25.0,
+				"range": 160.0,
+				"rate": 2.5,
+				"proj_speed": 900.0,
+			},
+			"add": {},
+		},
+		"retrofits": [
+			{
+				"name": "Fire-Control Radar",
+				"cost": 45,
+				"blurb": "+15 range and steadier aim.",
+				"set": {},
+				"add": {
+					"range": 15.0,
+				},
+			},
+			{
+				"name": "Ammo Drum",
+				"cost": 30,
+				"blurb": "+10% fire rate (2.75 rounds/s).",
+				"set": {},
+				"add": {
+					"rate": 0.25,
+				},
+			},
+			{
+				"name": "Armoured Mount",
+				"cost": 50,
+				"blurb": "+4 damage (29).",
+				"set": {},
+				"add": {
+					"damage": 4.0,
+				},
+			},
+		],
+		"paths": [
+			{
+				"key": "a",
+				"name": "Range",
+				"nodes": [
+					{
+						"name": "Long Barrel",
+						"cost": 40,
+						"blurb": "+20 range (180)",
+						"set": {},
+						"add": {
+							"range": 20.0,
+						},
+					},
+					{
+						"name": "Higher Mount",
+						"cost": 75,
+						"blurb": "+20 range (200)",
+						"set": {},
+						"add": {
+							"range": 20.0,
+						},
+					},
+					{
+						"name": "Sky Watch",
+						"cost": 300,
+						"blurb": "+40 range (240)",
+						"set": {},
+						"add": {
+							"range": 40.0,
+						},
+					},
+					{
+						"name": "High-Velocity Rounds",
+						"cost": 600,
+						"blurb": "+40 range (280)",
+						"set": {},
+						"add": {
+							"range": 40.0,
+						},
+					},
+				],
+				"mastery": {
+					"name": "Sky Wall",
+					"cost": 1500,
+					"blurb": "330 range: covers a big circle of sky",
+					"set": {
+						"range": 330.0,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "b",
+				"name": "Power/Blast Radius",
+				"nodes": [
+					{
+						"name": "Heavier Rounds",
+						"cost": 70,
+						"blurb": "+6 damage (31)",
+						"set": {},
+						"add": {
+							"damage": 6.0,
+						},
+					},
+					{
+						"name": "Flak Rounds",
+						"cost": 375,
+						"blurb": "Rounds burst near their target: a 20 px airburst on every flyer nearby",
+						"set": {
+							"burst": 20.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Flak Shells",
+						"cost": 795,
+						"blurb": "36 damage; 30 px airburst",
+						"set": {
+							"burst": 30.0,
+						},
+						"add": {
+							"damage": 5.0,
+						},
+					},
+					{
+						"name": "Wide Burst",
+						"cost": 865,
+						"blurb": "40 px airburst",
+						"set": {
+							"burst": 40.0,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Flak Curtain",
+					"cost": 4325,
+					"blurb": "42 damage; 50 px airburst: whole flocks of Locusts and Shrikes go down together",
+					"set": {
+						"damage": 42.0,
+						"burst": 50.0,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "c",
+				"name": "Speed",
+				"nodes": [
+					{
+						"name": "Quick Cycle",
+						"cost": 35,
+						"blurb": "2.8 rounds/s",
+						"set": {
+							"rate": 2.8,
+						},
+						"add": {},
+					},
+					{
+						"name": "Fast Traverse",
+						"cost": 95,
+						"blurb": "3.2 rounds/s; turns faster onto new flyers",
+						"set": {
+							"rate": 3.2,
+							"turn_fast": true,
+						},
+						"add": {},
+					},
+					{
+						"name": "Twin Barrels",
+						"cost": 625,
+						"blurb": "4.5 rounds/s",
+						"set": {
+							"rate": 4.5,
+							"barrels": 2.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Belt Feed",
+						"cost": 675,
+						"blurb": "5.2 rounds/s",
+						"set": {
+							"rate": 5.2,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Quad Mount",
+					"cost": 3460,
+					"blurb": "7 rounds/s from four barrels: a wall of fire",
+					"set": {
+						"rate": 7.0,
+						"barrels": 4.0,
 					},
 					"add": {},
 				},

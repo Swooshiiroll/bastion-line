@@ -15,8 +15,11 @@ const trees = readFileSync(join(root, "design", "upgrade_trees_rework.md"), "utf
 const KEYS = new Set([
   "damage", "range", "rate", "proj_speed", "armor_flat", "armor_pct", "crit", "tracers", "stun_chance", "stun_time",
   "ignite_dps", "ignite_time", "swivel", "side_gun", "multishot", "weakest_extra",
+  "splash", "tubes", "burrow_sight", "smoke_every", "smoke_slow", "smoke_time", "bomblets", "bomblet_damage", "bomblet_splash", "bomblet_spread",
+  "missiles", "air_mult", "ground_burn", "ground_burn_time", "homing", "retarget", "never_miss", "ripple",
+  "ramp", "ramp_time", "melt", "beams", "beam_power", "ramp_keep", "burst", "barrels", "turn_fast",
 ]);
-const FLAGS = new Set(["tracers", "swivel", "weakest_extra"]);
+const FLAGS = new Set(["tracers", "swivel", "weakest_extra", "homing", "retarget", "never_miss", "ripple", "turn_fast"]);
 
 const errors = [];
 const fail = (m) => errors.push(m);

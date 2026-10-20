@@ -1771,7 +1771,12 @@ func test_research_data() -> void:
 		check(m != "" and ResearchData.NODES[m].slot.y == 2, "%s tree ends in a Mastery node" % type)
 	check(Research.tree_nodes("command").size() == 5, "command tree has 5 nodes")
 	check(Research.max_points() == 150, "records can yield 150 RP across 6 sectors (%d)" % Research.max_points())
-	check(Research.total_cost() <= Research.max_points(), "the whole lab is affordable (%d <= %d)" % [Research.total_cost(), Research.max_points()])
+	# While the old and reworked rosters coexist (issue #59), only the old trees count: the reworked ones replace them at the final swap.
+	var lab_cost := 0
+	for id in ResearchData.NODES:
+		if not Towers.is_rework(str(ResearchData.NODES[id].tree)):
+			lab_cost += int(ResearchData.NODES[id].cost)
+	check(lab_cost <= Research.max_points(), "the whole lab is affordable (%d <= %d)" % [lab_cost, Research.max_points()])
 	check(Research.node_ids().size() == ResearchData.NODES.size(), "node_ids lists every node once")
 
 	# Every branch ends in a mastery that is a real step up from its specialization.
@@ -1976,6 +1981,7 @@ func test_upgrade_event_mastery() -> void:
 	check(g.upgrade_tower(t, "a") and t.tier == 4, "the mastery is bought")
 	var ups: Array = g.events.filter(func(ev): return ev.type == "upgrade")
 	check(ups.size() == 1 and bool(ups[0].get("mastery", false)), "its upgrade event is marked as the mastery")
+	g.emit_events = true
 	g.events.clear()
 	check(g.upgrade_tower(t, "b"), "a secondary upgrade on the mastered tower")
 	ups = g.events.filter(func(ev): return ev.type == "upgrade")
@@ -2946,3 +2952,80 @@ func test_rework_save_roundtrip() -> void:
 	var bad = JSON.parse_string(JSON.stringify(data))
 	bad.towers[0]["retrofit"] = 7
 	check(SaveCodec.decode(bad).has("error"), "an invalid Retrofit option is refused")
+
+
+func test_rework_mortar() -> void:
+	var g = new_game()
+	g.gold = 20000
+	var t = g.place_tower("mortar_tower", spot(g, "mortar_tower", 0))
+	check(t != null and t.is_rework and g.tower_cost("mortar_tower") == 150, "the Mortar Tower builds for 150")
+	var s: Dictionary = t.stats()
+	check(near(s.damage, 30.0) and near(s.splash, 60.0) and near(s.range, 110.0) and near(s.rate, 0.6), "stock: 30 damage, 60 px blast, 110 range, 0.6/s")
+	check(t.hits_ground() and not t.hits_air(), "ground only")
+	# Retrofits.
+	check(g.buy_retrofit(t, 0) and near(t.stats().damage, 34.0) and near(t.stats().range, 120.0) and near(t.stats().splash, 65.0), "Field Kit: +4 damage, +10 range, +5 px")
+	var b = g.place_tower("mortar_tower", spot(g, "mortar_tower", 20))
+	check(g.buy_retrofit(b, 1) and near(b.stats().burrow_sight, 0.5), "Bunker Sight")
+	var sm = g.place_tower("mortar_tower", spot(g, "mortar_tower", 40))
+	check(g.buy_retrofit(sm, 2) and int(sm.stats().smoke_every) == 4, "Smoke Shells")
+	# Armour is cracked by the Power path.
+	var p = g.place_tower("mortar_tower", spot(g, "mortar_tower", 60))
+	buy_steps(g, p, "a", 3)
+	var brute = put(g, "brute", 100.0, 0, 20.0)
+	check(near(g.damage_enemy(brute, 20.0, false, p), 20.0 - 6.0 * 0.5), "AP shells ignore half the armour")
+	# Cluster bomblets scatter round the impact.
+	var c = g.place_tower("mortar_tower", spot(g, "mortar_tower", 80))
+	buy_steps(g, c, "c", 3)
+	check(int(c.stats().bomblets) == 4 and near(c.stats().splash, 80.0), "Cluster Shells: 4 bomblets, 80 px blast")
+	g.emit_events = true
+	g.events.clear()
+	var e = put(g, "grunt", 100.0, 0, 50.0)
+	g._fire_projectile(c, e, c.stats())
+	var sh = g.projectiles[g.projectiles.size() - 1]
+	sh.pos = e.pos
+	g._projectile_hit(sh)
+	var bombs := 0
+	for ev in g.events:
+		if ev.type == "bomblet":
+			bombs += 1
+	check(bombs == 4, "four bomblet bursts (%d)" % bombs)
+	# Twin then barrage tubes.
+	var tb = g.place_tower("mortar_tower", spot(g, "mortar_tower", 100))
+	tb.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, tb, "b", 5)
+	check(tb.mastered and int(tb.stats().tubes) == 3 and near(tb.stats().rate, 1.7) and near(tb.stats().range, 165.0), "Barrage Battery: 3 tubes, 1.7/s, 165 range")
+	# Smoke: every 4th shell, and the cloud slows ground enemies inside.
+	var tgt = put(g, "grunt", 100.0, 0, 50.0)
+	var flagged := 0
+	for i in 8:
+		g._fire_mortar(sm, tgt, sm.stats())
+		if g.projectiles[g.projectiles.size() - 1].smoke:
+			flagged += 1
+	check(flagged == 2, "every 4th shell is a smoke shell (%d / 8)" % flagged)
+	g.smokes.append({"pos": tgt.pos, "r": 60.0, "t": 3.0, "slow": 0.15})
+	g._update_smokes(0.1)
+	check(tgt.slow_amount > 0.1, "the cloud slows it")
+	g._update_smokes(3.5)
+	check(g.smokes.is_empty(), "the cloud fades")
+	# Burrowed enemies: a Bunker Sight only counts inside a sensor's field.
+	var bur = put(g, "grunt", 100.0, 0, 50.0)
+	bur.burrowed = true
+	check(not g._burrow_visible(b, bur), "burrowed and uncovered: unseen")
+	check(not g._burrow_visible(t, bur), "no sight, no targeting")
+	var hp: float = bur.hp
+	var ms = g.place_tower("mortar_tower", spot(g, "mortar_tower", 120))
+	buy_steps(g, ms, "a", 0)
+	ms.retrofit = 1
+	ms.invalidate()
+	g._fire_projectile(ms, bur, ms.stats())
+	var sh2 = g.projectiles[g.projectiles.size() - 1]
+	sh2.pos = bur.pos
+	g._projectile_hit(sh2)
+	check(bur.hp < hp and bur.hp > hp - ms.stats().damage * 0.6, "Bunker Sight hits a burrowed enemy at half damage")
+	var stock = g.place_tower("mortar_tower", spot(g, "mortar_tower", 140))
+	var hp2: float = bur.hp
+	g._fire_projectile(stock, bur, stock.stats())
+	var sh3 = g.projectiles[g.projectiles.size() - 1]
+	sh3.pos = bur.pos
+	g._projectile_hit(sh3)
+	check(near(bur.hp, hp2), "a stock Mortar can't hurt a burrowed enemy")
