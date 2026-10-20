@@ -238,21 +238,37 @@ Every enemy's health and speed scale with the round number, the same on every se
 | Siege Mech | 7 | 6 flat armor per hit (minimum 20% of damage gets through) |
 | Jammer | 9 | EMP every 5 s knocks towers within 95 px offline for 2 s |
 | Blink Stalker | 11 | Teleports 80 px down the lane every 4 s. A slow or stun resets the charge |
-| Phantom | 13 | Cloaked. Towers can only target it inside a Sensor Array field, or for 0.5 s after a blast, field or arc hits it while hidden |
+| Phantom | 13 | Cloaked flyer. Towers that hit air can only target it inside a Sensor Array field, or for 0.5 s after a blast, field or arc hits it while hidden |
 | Locust | 15 | Tiny, fast flyer in dense swarms. Flak's favourite target |
 | Aegis Walker | 17 | Energy barrier (scales with HP) soaks damage before armor applies and recharges after 2.5 s untouched. Arc Coils hit barriers twice as hard |
+| Needle | 19 | Very fast, light; always in pairs on one lane |
 | Rally Beacon | 21 | Other non-boss enemies within 100 px move 25% faster (doesn't stack). Kill it first |
+| Mirage | 23 | Every 6 s projects two 1-HP holograms that soak shots, never leak and vanish with it |
 | Strike Drone | 25 | Quad-rotor flyer; flies straight from the warp gate to the core, ignoring the lane |
+| Siphon | 27 | Towers within 100 px fire 20% slower and reach 15% less far (the strongest Siphon applies) |
 | Hydra Frame | 29 | Armored walker that splits into three Skitters when destroyed |
 | Burrower | 31 | Tunnels under the lane for 2.5 s every 5 s: untargetable, unhurt and immune to lane hazards while under |
 | Bulwark | 33 | Every 6 s gives nearby non-boss enemies (not itself) a barrier worth 25% of their health |
 | Rampart | 35 | Immune to slows, stuns and shoves; 8 armor |
+| Decoy Beacon | 37 | Ranks above every non-boss so Strongest towers aim at it; does nothing else |
+| Blackout Rig | 39 | A bigger Jammer: EMP radius 130, towers offline 2.5 s every 4 s |
+| Shifter | 41 | Blinks 60 px every 5 s; others where it lands get +20% speed for 2 s |
 | Gunship | 43 | Armored heavy flyer (5 armor) |
+| Masquerade | 45 | Looks, moves and ranks like a Drone (purple eye) until below half health, then flees |
+| Shrike | 47 | Flying clusters of five |
+| Fury Drone | 49 | +30% speed below half health (multiplies with other boosts) |
 | Mender Hulk | 51 | Regenerates 4% of its health per second after 1.5 s without taking damage |
-| **Dreadnought** (boss) | 20 | Boss of round 20, back in every later boss round. Armored, half-immune to slows, costs 6 shields if it leaks |
-| **Leviathan** (boss) | 60 | Flying carrier that launches 6 Locusts every 6 s. Boss of round 60. Costs 15 shields |
-| **Overmind** (boss) | 40 | Spawns Nanites as it advances. Boss of round 40. Costs 20 shields |
-| **Colossus** (boss) | 80 | Can't be stunned. At 66% and 33% health it sheds 5 armor, speeds up 20% and drops two Siege Mechs. Boss of round 80. Costs 25 shields |
+| Wraith | 53 | Cloaked flyer that only energy damage hurts (beams, chains, fields, burns, Tesla arcs) |
+| Capacitor | 55 | Charges 2 s, then blacks out towers within 160 px for 3 s, every 8 s; a stun, silence or Overload Circuits arc cancels the charge |
+| Titan | 57 | 9 armor, half resists slows; at half health sheds to 5 armor and speeds up 20% |
+| **Dreadnought** (boss) | 20 | Boss of round 20, back in every later boss round. Armored, half-immune to slows, costs 20 shields if it leaks |
+| **Leviathan** (boss) | 60 | Flying carrier that launches 6 Locusts every 6 s. Boss of round 60. Costs 60 shields |
+| **Overmind** (boss) | 40 | Spawns Nanites as it advances. Boss of round 40. Costs 40 shields |
+| **Colossus** (boss) | 80 | Can't be stunned. At 66% and 33% health it sheds 5 armor, speeds up 20% and drops two Siege Mechs. Boss of round 80. Costs 80 shields |
+
+A leak costs shields by the enemy's strength: 1 below 50, 2 below 150, 3 below 400, else 4 (one more for an
+elite); a boss costs its introduction round. After an EMP wears off a tower can't be knocked offline again for
+1 s.
 
 Bosses get half the round speed bonus and resist slows and shoves. After a stun wears off, an enemy
 can't be stunned again for 1 s, and Graviton shoves can push any one enemy back at most 320 px in

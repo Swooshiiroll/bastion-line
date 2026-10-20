@@ -152,6 +152,18 @@ const ENEMY_COLOR := {
 	"rampart": Color(1.00, 0.45, 0.35),
 	"leviathan": Color(0.40, 0.85, 1.00),
 	"colossus": Color(1.00, 0.50, 0.20),
+	"needle": Color(1.00, 0.85, 0.35),
+	"fury": Color(1.00, 0.40, 0.25),
+	"shrike": Color(0.60, 1.00, 0.40),
+	"titan": Color(1.00, 0.50, 0.20),
+	"siphon": Color(0.70, 0.45, 1.00),
+	"blackout": Color(0.85, 1.00, 0.25),
+	"capacitor": Color(1.00, 0.95, 0.35),
+	"shifter": Color(0.80, 0.55, 1.00),
+	"wraith": Color(0.55, 0.95, 1.00),
+	"masquerade": Color(0.75, 0.35, 1.00),
+	"decoy": Color(1.00, 0.55, 0.35),
+	"mirage": Color(0.55, 0.95, 1.00),
 }
 
 

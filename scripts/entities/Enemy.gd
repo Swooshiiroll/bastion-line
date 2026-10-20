@@ -33,6 +33,22 @@ var elite := false
 var mods: Array = []
 ## Its modifiers' names in capitals, for the label over an elite ("HASTY PLATED").
 var elite_label := ""
+## The round's speed multiplier it spawned with (a speed change from its data is scaled by it).
+var spd_mult := 1.0
+## Fury Drone: its adrenaline speed multiplier (1 until it drops below half health). Titan: whether its plates have shed.
+var rush := 1.0
+var shed := false
+## A Shifter's wake on this enemy: extra speed (multiplies with every other boost) and seconds left.
+var wake := 0.0
+var wake_timer := 0.0
+## Capacitor: seconds left in its telegraphed charge (0 when not charging).
+var charge_timer := 0.0
+## Masquerade: disguised as its `disguise` enemy (look, speed, rank and role) until below half health; then it flees.
+var disguised := false
+var flee_timer := 0.0
+## Mirage hologram: a 1-HP copy that never leaks or pays, and vanishes with the Mirage that projected it.
+var hologram := false
+var holo_owner = null
 ## The kind ("physical" or "energy") of the last hit it took.
 var last_hit_kind := ""
 var radius := 10.0
@@ -142,6 +158,7 @@ func setup(enemy_type: String, route: Curve2D, hp_mult: float, wave: int, path_i
 	max_hp = float(def.hp) * hp_mult
 	hp = max_hp
 	speed = float(def.speed) * speed_mult
+	spd_mult = speed_mult
 	armor = float(def.get("armor", 0.0))
 	flying = bool(def.get("flying", false))
 	boss = bool(def.get("boss", false))
@@ -163,6 +180,42 @@ func setup(enemy_type: String, route: Curve2D, hp_mult: float, wave: int, path_i
 		facing = (ahead - pos).normalized()
 	wave_id = wave
 	set_traits(EnemyTraits.of_def(def) if elite else EnemyTraits.of(enemy_type))
+	if def.has("disguise"):
+		var look: Dictionary = Enemies.ENEMIES[def.disguise]
+		disguised = true
+		speed = float(look.speed) * speed_mult
+		rank = Enemies.rank_of(look)
+	if def.has("fake_rank"):
+		# Decoy Beacon: ranks above every non-boss and below every boss, for good.
+		rank = Enemies.BOSS_RANK - 1.0
+
+
+## What it shows itself as: the Masquerade's disguise while disguised, otherwise itself.
+func look_type() -> String:
+	return str(def.disguise) if disguised else type
+
+
+## The Masquerade drops its disguise: its true rank and role, and a burst of speed before it settles at its own.
+func reveal_disguise() -> void:
+	disguised = false
+	rank = Enemies.rank_of(def)
+	speed = float(def.flee_speed) * spd_mult
+	flee_timer = float(def.flee_time)
+
+
+## Turns it into a Mirage's hologram: 1 HP, no armor, barrier or abilities, no bounty or leak cost, and its Mirage's rank.
+func make_hologram(owner) -> void:
+	hologram = true
+	holo_owner = owner
+	max_hp = 1.0
+	hp = 1.0
+	armor = 0.0
+	max_shield = 0.0
+	shield = 0.0
+	bounty = 0
+	lives_cost = 0
+	rank = owner.rank
+	set_traits([])
 
 
 ## Gives it the traits `list` (read from `def`), each timed one starting a full interval from now.
@@ -202,6 +255,18 @@ static func mitigate(amount: float, armor_value: float, pierce: bool) -> float:
 ## Its role (swarm, rusher, evader, support, disruptor, special, tank or boss), from its data.
 func role() -> String:
 	return str(def.get("role", "rusher"))
+
+
+## The role it shows (what the Support priority and labels read): a Masquerade's disguise, a Decoy Beacon's heavy hull.
+func shown_role() -> String:
+	if disguised:
+		return str(Enemies.ENEMIES[def.disguise].role)
+	return str(def.get("shown_role", role()))
+
+
+## The data it shows (name, blurb, role and tier): its disguise's while disguised.
+func shown_def() -> Dictionary:
+	return Enemies.ENEMIES[def.disguise] if disguised else def
 
 
 ## The share of a slow or pull it resists, by role.
@@ -349,13 +414,21 @@ func step(dt: float) -> void:
 		if vuln_timer <= 0.0:
 			vuln_timer = 0.0
 			vuln_amount = 0.0
+	if wake_timer > 0.0:
+		wake_timer = maxf(0.0, wake_timer - dt)
+		if wake_timer <= 0.0:
+			wake = 0.0
+	if flee_timer > 0.0:
+		flee_timer = maxf(0.0, flee_timer - dt)
+		if flee_timer <= 0.0:
+			speed = float(def.speed) * spd_mult
 	stun_guard = maxf(0.0, stun_guard - dt)
 	if stun_timer > 0.0:
 		stun_timer = maxf(0.0, stun_timer - dt)
 		if stun_timer <= 0.0:
 			stun_guard = STUN_GUARD
 		return
-	distance += speed * (1.0 - slow_amount) * (1.0 + haste) * dt
+	distance += speed * (1.0 - slow_amount) * (1.0 + haste) * rush * (1.0 + wake) * dt
 	var np := curve.sample_baked(minf(distance, path_len))
 	var d := np - pos
 	if d.length_squared() > 0.0001:

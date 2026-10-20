@@ -69,10 +69,10 @@ static func max_per_elite(wave: int) -> int:
 	return 3 if wave >= 80 else (2 if wave >= 40 else 1)
 
 
-## Whether enemy `etype` can take modifier `mod`: never a boss, and never a trait it already has.
+## Whether enemy `etype` can take modifier `mod`: never a boss or a trick (Masquerade, Decoy Beacon), and never a trait it already has.
 static func allowed(etype: String, mod: String) -> bool:
 	var d: Dictionary = Enemies.ENEMIES[etype]
-	if bool(d.get("boss", false)):
+	if bool(d.get("boss", false)) or d.has("disguise") or d.has("fake_rank"):
 		return false
 	var m: Dictionary = MODIFIERS[mod]
 	if mod == "resolute" and (bool(d.get("cc_immune", false)) or bool(d.get("stun_immune", false))):

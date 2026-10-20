@@ -14,7 +14,7 @@ const MAX_SPAWNS := 250
 const MAX_ELITES := 12
 
 ## Round each regular enemy is introduced (its own group leads that round): one every two rounds, by tier (every role's T1,
-## then the Specials and higher tiers). Ids not in the enemy table yet (the new enemies of phase 4) are skipped.
+## then the Specials and higher tiers).
 const INTRO := {
 	"grunt": 1, "swarmling": 2, "runner": 3, "shaman": 5, "brute": 7, "jammer": 9, "stalker": 11, "phantom": 13,
 	"locust": 15, "aegis": 17, "needle": 19, "rally": 21, "mirage": 23, "bat": 25, "siphon": 27, "hydra": 29,
@@ -32,25 +32,30 @@ const BOSS_ROUNDS := {
 	120: [["colossus", 2], ["leviathan", 1], ["warlord", 2], ["juggernaut", 3]],
 }
 
-## Threat each enemy costs the generator (roughly its round-1 toughness in Drones). Bosses only count when one recurs in a
-## regular round; their own rounds come from BOSS_ROUNDS.
+## Threat each enemy costs the generator (roughly its round-1 toughness in Drones), per enemy: a Needle pair or a Shrike cluster
+## costs its pack times this. Bosses only count when one recurs in a regular round; their own rounds come from BOSS_ROUNDS.
 const COST := {
 	"grunt": 1.0, "runner": 0.7, "brute": 3.8, "swarmling": 0.35, "bat": 1.4, "shaman": 1.8,
 	"phantom": 1.2, "aegis": 4.0, "hydra": 3.0, "jammer": 2.1, "locust": 0.25, "rally": 2.4,
 	"burrower": 2.3, "gunship": 8.6, "stalker": 1.6, "mender": 5.4, "bulwark": 2.9, "rampart": 7.4,
+	"needle": 0.6, "fury": 1.9, "shrike": 1.0, "titan": 12.0, "siphon": 3.0, "blackout": 4.5, "capacitor": 7.5,
+	"shifter": 3.8, "wraith": 6.0, "masquerade": 5.5, "decoy": 4.0, "mirage": 2.2,
 	"juggernaut": 20.0, "warlord": 45.0, "leviathan": 60.0, "colossus": 95.0,
 }
 
-## Seconds between spawns within a group.
+## Seconds between spawns within a group (between packs, for the Needle and the Shrike).
 const SPACING := {
 	"grunt": 0.35, "runner": 0.3, "brute": 0.9, "swarmling": 0.14, "bat": 0.45, "shaman": 1.8,
 	"phantom": 0.5, "aegis": 1.2, "hydra": 1.1, "jammer": 2.0, "locust": 0.1, "rally": 1.6,
 	"burrower": 0.8, "gunship": 1.5, "stalker": 0.6, "mender": 1.4, "bulwark": 1.6, "rampart": 1.8,
+	"needle": 0.6, "fury": 0.5, "shrike": 1.2, "titan": 2.2, "siphon": 2.0, "blackout": 2.4, "capacitor": 3.0,
+	"shifter": 1.0, "wraith": 1.0, "masquerade": 1.2, "decoy": 2.5, "mirage": 2.0,
 	"juggernaut": 6.0, "warlord": 6.0, "leviathan": 6.0, "colossus": 6.0,
 }
 
 ## Support enemies stop being fun in bulk, so groups of them are capped; a boss recurs alone.
-const MAX_COUNT := {"shaman": 8, "jammer": 5, "rally": 6, "bulwark": 6, "juggernaut": 1, "warlord": 1, "leviathan": 1, "colossus": 1}
+const MAX_COUNT := {"shaman": 8, "jammer": 5, "rally": 6, "bulwark": 6, "siphon": 5, "blackout": 4, "capacitor": 3, "decoy": 3, "mirage": 5,
+	"juggernaut": 1, "warlord": 1, "leviathan": 1, "colossus": 1}
 
 ## A recurring boss turns up less often than a regular enemy.
 const BOSS_WEIGHT := 0.4
@@ -118,9 +123,19 @@ static func round_rng(wave: int) -> RandomNumberGenerator:
 	return r
 
 
-## Whether `etype` is in the game yet (the new enemies arrive in phase 4).
+## Whether `etype` is in the enemy table.
 static func exists(etype: String) -> bool:
 	return Enemies.ENEMIES.has(etype)
+
+
+## How many enemies one spawn of `etype` sends (a Needle pair, a Shrike cluster).
+static func pack(etype: String) -> int:
+	return int(Enemies.ENEMIES[etype].get("pack", 1))
+
+
+## How many enemies a group sends (an elite comes alone, whatever its pack).
+static func units(grp: Dictionary) -> int:
+	return int(grp.n) * (1 if grp.has("m") else pack(str(grp.t)))
 
 
 ## First round enemy `etype` can appear in (999 if never): its introduction, or its first boss round.
@@ -228,21 +243,21 @@ static func generated_round(wave: int) -> Array:
 	# Cap the spawn count for performance; beyond it, rounds get tougher through HP, speed and elites.
 	var count := 0
 	for grp in groups:
-		count += int(grp.n)
+		count += units(grp)
 	if count > MAX_SPAWNS:
 		var f := float(MAX_SPAWNS) / float(count)
 		count = 0
 		for grp in groups:
 			grp["n"] = maxi(1, int(float(grp.n) * f))
-			count += int(grp.n)
+			count += units(grp)
 		# Single enemies (elites) can't shrink, so trim the biggest group for what they add.
 		while count > MAX_SPAWNS:
 			var big: Dictionary = groups[0]
 			for grp in groups:
-				if int(grp.n) > int(big.n):
+				if units(grp) > units(big):
 					big = grp
 			big["n"] = int(big.n) - 1
-			count -= 1
+			count -= pack(str(big.t)) if not big.has("m") else 1
 	groups.append_array(boss_groups(wave))
 	return groups
 
@@ -279,5 +294,5 @@ static func _elites(wave: int, rng: RandomNumberGenerator, budget: float, pool: 
 
 
 static func _group(etype: String, threat: float, delay: float) -> Dictionary:
-	var n := clampi(int(round(threat / float(COST[etype]))), 1, int(MAX_COUNT.get(etype, 999)))
+	var n := clampi(int(round(threat / (float(COST[etype]) * pack(etype)))), 1, int(MAX_COUNT.get(etype, 999)))
 	return {"t": etype, "n": n, "i": float(SPACING[etype]), "d": delay}

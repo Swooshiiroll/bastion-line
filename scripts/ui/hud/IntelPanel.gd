@@ -71,6 +71,26 @@ static func traits(ed: Dictionary) -> Array:
 		out.append(["UNSTOPPABLE" if ed.get("cc_immune", false) else "STUN IMMUNE", Color(1.0, 0.5, 0.4)])
 	if ed.has("phases"):
 		out.append(["PHASES", UiKit.BAD])
+	if ed.has("pack"):
+		out.append(["PACKS OF %d" % int(ed.pack), Color(1.0, 0.8, 0.3)])
+	if ed.has("adrenaline"):
+		out.append(["ADRENALINE", Color(1.0, 0.5, 0.3)])
+	if ed.has("shed_at"):
+		out.append(["SHEDS PLATES", Color(1.0, 0.65, 0.25)])
+	if ed.has("siphon_radius"):
+		out.append(["DRAINS TOWERS", Color(0.7, 0.45, 1.0)])
+	if ed.has("emp_charge"):
+		out.append(["CHARGES", Color(0.9, 1.0, 0.3)])
+	if ed.has("wake_radius"):
+		out.append(["SPEED WAKE", Color(1.0, 0.6, 0.3)])
+	if ed.has("energy_only"):
+		out.append(["ENERGY ONLY", Color(0.55, 0.95, 1.0)])
+	if ed.has("disguise"):
+		out.append(["DISGUISED", Color(0.75, 0.35, 1.0)])
+	if ed.has("fake_rank"):
+		out.append(["DECOY", Color(0.75, 0.35, 1.0)])
+	if ed.has("holo_interval"):
+		out.append(["HOLOGRAMS", Color(0.55, 0.95, 1.0)])
 	if float(ed.get("armor", 0.0)) >= 4.0:
 		out.append(["ARMOR %d" % int(ed.armor), UiKit.DIM])
 	return out

@@ -323,7 +323,7 @@ func test_data_integrity() -> void:
 		check(Enemies.ENEMIES.has(t), "%s is defined" % t)
 		check(Waves.COST.has(t), "%s has a threat cost" % t)
 		check(Waves.INTRO.has(t) or Enemies.ENEMIES[t].get("boss", false), "%s has an introduction round or is a boss" % t)
-	check(Enemies.ORDER.size() == 22 and Enemies.ENEMIES.size() == 22, "22 enemy types")
+	check(Enemies.ORDER.size() == 34 and Enemies.ENEMIES.size() == 34, "34 enemy types")
 	var cheapest := 1 << 30
 	for type in Towers.ORDER:
 		cheapest = mini(cheapest, int(Trees.TREES[type].tiers[0].cost))
@@ -978,8 +978,9 @@ func test_strongest_by_strength_rank() -> void:
 	check(g.pick_target(t) == boss, "a boss outranks everything, even nearly dead")
 	var order: Array = Enemies.ORDER.duplicate()
 	order.sort_custom(func(a, b): return Enemies.rank_score(a) < Enemies.rank_score(b))
-	var by_rank := ["swarmling", "locust", "grunt", "shaman", "jammer", "phantom", "runner", "stalker", "aegis", "bat", "rally", "bulwark", "hydra",
-		"burrower", "mender", "brute", "rampart", "gunship", "juggernaut", "warlord", "leviathan", "colossus"]
+	var by_rank := ["swarmling", "locust", "grunt", "shaman", "jammer", "mirage", "phantom", "shrike", "runner", "stalker", "aegis", "needle",
+		"bat", "rally", "siphon", "bulwark", "hydra", "burrower", "fury", "mender", "blackout", "shifter", "brute", "wraith", "decoy",
+		"capacitor", "masquerade", "rampart", "gunship", "titan", "juggernaut", "warlord", "leviathan", "colossus"]
 	check(order == by_rank, "the roster's weakest-to-strongest order (%s)" % [order])
 
 
@@ -1202,7 +1203,7 @@ func test_round_generation() -> void:
 		for x in groups:
 			check(Enemies.ENEMIES.has(x.t) and int(x.n) > 0 and float(x.i) > 0.0, "round %d group valid" % w)
 			if not Enemies.ENEMIES[x.t].get("boss", false):
-				regular += int(x.n)
+				regular += Waves.units(x)
 				check(Waves.first_round(x.t) <= w, "round %d only uses enemies met by then (%s)" % [w, x.t])
 			elif not Waves.boss_line(w).any(func(l): return l[0] == x.t):
 				check(Waves.first_boss_round(x.t) < w and int(x.n) == 1, "a boss recurs alone, after its own round (%s, %d)" % [x.t, w])
@@ -3088,6 +3089,223 @@ func test_elite_modifiers() -> void:
 		if seen_elite:
 			break
 	check(seen_elite, "round 10 sends its Shielded elite")
+
+
+func test_leak_bands() -> void:
+	for id in Enemies.ORDER:
+		var d: Dictionary = Enemies.ENEMIES[id]
+		if bool(d.get("boss", false)):
+			check(int(d.lives) == Waves.first_boss_round(id), "%s costs its introduction round (%d)" % [id, int(d.lives)])
+		else:
+			check(int(d.lives) == Enemies.leak_band(Enemies.strength(id)), "%s leaks by its strength band (%d)" % [id, int(d.lives)])
+	check(Enemies.leak_band(49.9) == 1 and Enemies.leak_band(50.0) == 2 and Enemies.leak_band(150.0) == 3 and Enemies.leak_band(400.0) == 4, "bands: <50, 50-150, 150-400, 400+")
+	var g = new_game()
+	g.lives = 100
+	var e = g.spawn_enemy("brute", 0, 0.0, 1.0, -1, 1.0, ["hasty"])
+	g.enemies.append(e)
+	e.distance = e.path_len
+	g.state = Game.State.WAVE
+	g.tick(SIM_DT)
+	check(g.lives == 100 - 4, "an elite Siege Mech leaks for its band (3) plus one")
+
+
+func test_packs_and_phantom_flight() -> void:
+	check(bool(Enemies.ENEMIES.phantom.flying), "the Phantom flies")
+	var g = new_game()
+	g.wave = 18
+	g.start_wave()
+	var needles: Array = g.spawn_queue.filter(func(s): return s.type == "needle")
+	check(needles.size() >= 2 and needles.size() % 2 == 0, "Needles come in pairs (%d)" % needles.size())
+	needles.sort_custom(func(a, b): return a.time < b.time)
+	check(int(needles[0].group) == int(needles[1].group) and near(float(needles[1].time) - float(needles[0].time), 0.25), "a pair shares a lane, 0.25 s apart")
+	var g2 = new_game()
+	g2.wave = 46
+	g2.start_wave()
+	var shrikes: Array = g2.spawn_queue.filter(func(s): return s.type == "shrike")
+	check(shrikes.size() >= 5 and shrikes.size() % 5 == 0, "Shrikes come in clusters of five (%d)" % shrikes.size())
+
+
+func test_fury_and_titan() -> void:
+	var g = new_game()
+	g.state = Game.State.WAVE
+	var f = put(g, "fury", 100.0)
+	g.damage_enemy(f, f.max_hp * 0.4, true, null)
+	check(near(f.rush, 1.0), "no adrenaline above half health")
+	g.damage_enemy(f, f.max_hp * 0.2, true, null)
+	check(near(f.rush, 1.3), "adrenaline below half health: +30%")
+	f.hp = f.max_hp
+	g.damage_enemy(f, 1.0, true, null)
+	check(near(f.rush, 1.3), "healing doesn't undo it")
+	f.haste = 0.25
+	var d0: float = f.distance
+	f.step(SIM_DT)
+	check(near(f.distance - d0, f.speed * 1.3 * 1.25 * SIM_DT, 0.01), "adrenaline and Rally haste multiply")
+	var t = put(g, "titan", 200.0)
+	var sp0: float = t.speed
+	check(near(t.armor, 9.0) and near(t.slow_resist, 0.5), "Titan: 9 armor, half resists slows")
+	g.damage_enemy(t, t.max_hp * 0.55, true, null)
+	check(t.shed and near(t.armor, 5.0) and near(t.speed, sp0 * 1.2), "at half health the plates shed: armor 5, +20% speed")
+	t.hp = t.max_hp
+	g.damage_enemy(t, 1.0, true, null)
+	check(near(t.armor, 5.0), "for good")
+
+
+func test_siphon_drain() -> void:
+	var g = new_game()
+	g.gold = 5000
+	var t = g.place_tower("arrow", Vector2i(2, 3))
+	var rate0: float = t.eff_rate()
+	var range0: float = t.get_range()
+	g.state = Game.State.WAVE
+	var s = put(g, "siphon", 100.0, 0, 1e4)
+	s.speed = 0.0
+	s.pos = t.pos + Vector2(60, 0)
+	g.tick(SIM_DT)
+	check(near(t.eff_rate(), rate0 * 0.8) and near(t.get_range(), range0 * 0.85), "inside the aura: -20% fire rate, -15% range")
+	var s2 = put(g, "siphon", 100.0, 0, 1e4)
+	s2.speed = 0.0
+	s2.pos = t.pos + Vector2(-60, 0)
+	g.tick(SIM_DT)
+	check(near(t.eff_rate(), rate0 * 0.8), "two Siphons don't stack")
+	s.suppress_timer = 5.0
+	s2.suppress_timer = 5.0
+	g.tick(SIM_DT)
+	check(near(t.eff_rate(), rate0), "a silenced Siphon drains nothing")
+
+
+func test_disruptors_and_disable_guard() -> void:
+	var g = new_game()
+	g.gold = 5000
+	var t = g.place_tower("arrow", Vector2i(2, 3))
+	g.state = Game.State.WAVE
+	var b = put(g, "blackout", 100.0, 0, 1e4)
+	b.speed = 0.0
+	b.pos = t.pos + Vector2(120, 0)
+	b.trait_timers.emp = 0.01
+	g.tick(SIM_DT)
+	check(near(t.disabled, 2.5, 0.05), "Blackout Rig: 130 px, offline 2.5 s")
+	b.pos = t.pos + Vector2(400, 0)
+	run_until(g, func(): return t.disabled <= 0.0, 3.0)
+	check(t.disable_guard > 0.9, "back online with a 1 s guard")
+	b.pos = t.pos + Vector2(60, 0)
+	b.trait_timers.emp = 0.01
+	g.tick(SIM_DT)
+	check(t.disabled == 0.0, "an EMP inside the guard does nothing")
+	run_until(g, func(): return t.disable_guard <= 0.0, 1.1)
+	b.trait_timers.emp = 0.01
+	g.tick(SIM_DT)
+	check(t.disabled > 2.0, "after the guard it can be knocked out again")
+	# Capacitor: a telegraphed 2 s charge, then a 3 s blackout; a stun during the charge cancels it.
+	var g2 = new_game()
+	g2.gold = 5000
+	var t2 = g2.place_tower("arrow", Vector2i(2, 3))
+	g2.state = Game.State.WAVE
+	var c = put(g2, "capacitor", 100.0, 0, 1e4)
+	c.speed = 0.0
+	c.pos = t2.pos + Vector2(150, 0)
+	c.trait_timers.emp = 0.01
+	g2.tick(SIM_DT)
+	check(c.charge_timer > 1.9 and t2.disabled == 0.0, "it charges first")
+	run_until(g2, func(): return t2.disabled > 0.0, 2.2)
+	check(near(t2.disabled, 3.0, 0.1), "then blacks out towers within 160 px for 3 s")
+	c.trait_timers.emp = 0.01
+	g2.tick(SIM_DT)
+	check(c.charge_timer > 0.0, "charging again")
+	c.apply_stun(0.5)
+	g2.tick(SIM_DT)
+	check(c.charge_timer == 0.0, "a stun cancels the charge")
+	c.trait_timers.emp = 0.01
+	g2.tick(SIM_DT)
+	c.suppress_timer = 1.0
+	g2.tick(SIM_DT)
+	check(c.charge_timer == 0.0, "so does a silence")
+
+
+func test_shifter_wake() -> void:
+	var g = new_game()
+	g.state = Game.State.WAVE
+	var s = put(g, "shifter", 100.0)
+	var mate = put(g, "grunt", 170.0)
+	var boss = put(g, "juggernaut", 165.0)
+	s.blink_timer = 0.001
+	g.tick(SIM_DT)
+	check(near(mate.wake, 0.2) and near(mate.wake_timer, 2.0, 0.05), "where it lands, others get +20% speed for 2 s")
+	check(boss.wake == 0.0 and s.wake == 0.0, "not bosses, not itself")
+	run_until(g, func(): return false, 2.1)
+	check(mate.wake == 0.0, "the wake wears off")
+
+
+func test_wraith_energy_only() -> void:
+	var g = new_game()
+	g.gold = 5000
+	var w = put(g, "wraith", 100.0)
+	check(w.flying and w.cloaked, "the Wraith flies, cloaked")
+	var gun = g.place_tower("gun_turret", Vector2i(2, 3))
+	var hp0: float = w.hp
+	check(g.damage_enemy(w, 50.0, true, gun) == 0.0 and w.hp == hp0, "physical hits do nothing")
+	check(g.damage_enemy(w, 50.0, true, null) == 0.0, "nor does untyped physical damage")
+	check(g.damage_enemy(w, 50.0, true, null, false, false, false, false, "energy") > 0.0, "energy hurts it")
+	w.apply_burn(20.0, 2.0)
+	var hp1: float = w.hp
+	g.state = Game.State.WAVE
+	g.tick(SIM_DT)
+	check(w.hp < hp1, "burning counts as energy")
+
+
+func test_masquerade_and_decoy() -> void:
+	var g = new_game()
+	g.gold = 5000
+	var t = g.place_tower("arrow", Vector2i(2, 3))
+	t.mode = Tower.Mode.STRONG
+	var m = put(g, "masquerade", 150.0)
+	var mech = put(g, "brute", 140.0)
+	check(m.disguised and m.look_type() == "grunt" and m.shown_role() == "swarm" and near(m.rank, Enemies.rank_score("grunt")), "disguised as a Drone: look, role and rank")
+	check(near(m.speed, 55.0), "at the Drone's speed")
+	check(g.pick_target(t) == mech, "Strongest ignores it while disguised")
+	g.damage_enemy(m, m.max_hp * 0.55, true, null)
+	check(not m.disguised and m.look_type() == "masquerade" and near(m.rank, Enemies.rank_score("masquerade")), "below half health it drops the disguise")
+	check(near(m.speed, 80.0), "and flees at 80")
+	check(g.pick_target(t) == m, "now Strongest goes for it")
+	g.state = Game.State.WAVE
+	run_until(g, func(): return false, 3.1)
+	check(near(m.speed, 60.0), "settling at 60 after 3 s")
+	var d = put(g, "decoy", 120.0)
+	var ti = put(g, "titan", 130.0)
+	var boss = put(g, "juggernaut", 160.0)
+	check(d.rank > ti.rank and d.rank > Enemies.rank_score("rampart") and d.rank < boss.rank, "a Decoy Beacon outranks every non-boss, never a boss")
+	check(d.shown_role() == "tank" and d.role() == "special", "it shows as a heavy hull")
+	g.damage_enemy(boss, 1e9, true, null)
+	check(g.pick_target(t) == d, "so Strongest towers shoot it")
+	check(not Modifiers.allowed("masquerade", "hasty") and not Modifiers.allowed("decoy", "plated"), "tricks are never elites")
+
+
+func test_mirage_holograms() -> void:
+	var g = new_game()
+	g.lives = 50
+	g.state = Game.State.WAVE
+	var m = put(g, "mirage", 300.0)
+	m.speed = 0.0
+	m.trait_timers.holo = 0.001
+	g.tick(SIM_DT)
+	g.tick(SIM_DT)
+	var holos: Array = g.enemies.filter(func(e): return e.alive and e.hologram)
+	check(holos.size() == 2, "projects two holograms (%d)" % holos.size())
+	check(holos.all(func(h): return h.max_hp == 1.0 and h.bounty == 0 and h.lives_cost == 0 and near(h.rank, m.rank) and h.traits.is_empty()), "1 HP, no bounty or leak cost, its Mirage's rank, no abilities")
+	var gold0: int = g.gold
+	g.damage_enemy(holos[0], 5.0, false, null)
+	check(not holos[0].alive and g.gold == gold0, "any hit pops one, for nothing")
+	holos[1].distance = holos[1].path_len
+	g.tick(SIM_DT)
+	check(not holos[1].alive and g.lives == 50, "at the core it vanishes without leaking")
+	m.trait_timers.holo = 0.001
+	g.tick(SIM_DT)
+	g.tick(SIM_DT)
+	var more: Array = g.enemies.filter(func(e): return e.alive and e.hologram)
+	check(more.size() == 2, "and again")
+	g.damage_enemy(m, 1e9, true, null)
+	g.tick(SIM_DT)
+	check(more.all(func(h): return not h.alive), "they vanish with their Mirage")
+	check(not g.enemies.any(func(e): return e.alive and e.hologram), "none left")
 
 
 func test_rework_roles_and_damage_kinds() -> void:

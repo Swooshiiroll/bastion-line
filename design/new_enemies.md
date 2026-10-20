@@ -328,6 +328,21 @@ trick is revealed.
 - **Saves:** enemies aren't saved, so there is no save bump.
 - **Codex:** entries and the Codex PDF are regenerated in phase 5.
 
+## Decided while building (owner, 2026-10-20)
+
+- **Shrike leak:** by the confirmed bands, 1 shield each (strength 44.6), so 5 for a whole cluster.
+- **Hologram rank:** the Mirage's own.
+- **Holograms and their Mirage:** they vanish when it dies.
+- **NEXT strip and Intel:** they name trick enemies truthfully; on the field the disguise holds until revealed.
+- **Masquerade uncovered:** a flee boost, 80 for 3 s, then its own 60 (owner, plan round).
+- **Leak bands:** strength < 50: 1, 50 to 150: 2, 150 to 400: 3, 400+: 4, +1 for an elite; a boss costs its
+  introduction round (Dreadnought 20, Overmind 40, Leviathan 60, Colossus 80). Applied to every enemy, so several
+  current enemies change (Repair Bot and Jammer 2 to 1; Blink Stalker and Strike Drone 1 to 2; Siege Mech and
+  Mender Hulk 2 to 3; Rampart and Gunship 3 to 4) and some drafts above (Needle 2, Shifter 3, Masquerade 3, Decoy
+  Beacon 3, Mirage 1).
+- **Introduction rounds:** in `Waves.INTRO` (design/enemies.md, Phase 3 numbers).
+- **Wraith:** built now, on the existing physical/energy tags; burns, acid and shock strips count as energy.
+
 ## Open questions
 
 1. **Shrike cluster leak.** At the draft band of 2 shields per unit a cluster that leaks costs 10. Keep it,

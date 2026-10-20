@@ -393,8 +393,8 @@ they exist.
    40th-round boss wave? **Recommendation:** Dreadnought at 20, then the finales as they are, adding Colossus
    and Overmind appearances so each boss round is bigger than the last; recurrence then draws from the bosses
    already met.
-2. **Leak-cost bands (non-boss).** The strength score sets leak cost, so its bands need a mapping (e.g.
-   score bands to 1, 2, 3 shields). Proposed with the balance probe in phase 4.
+2. **Leak-cost bands (non-boss).** Decided (owner, 2026-10-20): < 50: 1, 50 to 150: 2, 150 to 400: 3, 400+: 4,
+   +1 for an elite.
 3. **Burrower underground: which towers or upgrades can hit it** inside a Sensor Array's range (decided that
    some can; the list, and whether it is a tower trait or an upgrade, is open). Today, without any Sensor Array,
    the Plasma Mortar's C branch (Bunker Buster, Seismic Charge, Tectonic Lance) and the Drone Bay's Strike Wing

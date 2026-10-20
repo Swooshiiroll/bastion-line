@@ -96,6 +96,11 @@ var orbit_angle := 0.0
 var gun_cds := {}
 ## Seconds left knocked offline by a Jammer's EMP.
 var disabled := 0.0
+## After an EMP wears off the tower can't be knocked offline again for this long (the Disruptors' disable guard).
+var disable_guard := 0.0
+## A Siphon's drain on this tower (the strongest Siphon in range): the share of fire rate and of range it loses. Set every tick.
+var debuff_rate := 0.0
+var debuff_range := 0.0
 ## The special tile under the tower: "H" (high ground), "P" (power node) or "".
 var site := ""
 ## Research modifiers for this tower type (see Research.tower_mods). Replaced by Game.apply_research
@@ -607,11 +612,11 @@ func eff_damage() -> float:
 
 
 func eff_rate() -> float:
-	return float(stats().get("rate", 1.0)) * (1.0 + float(stats().get("rate_pct", 0.0))) * (1.0 + buff_rate)
+	return float(stats().get("rate", 1.0)) * (1.0 + float(stats().get("rate_pct", 0.0))) * (1.0 + buff_rate) * (1.0 - debuff_rate)
 
 
 func get_range() -> float:
-	return float(stats().get("range", 100.0)) * (1.0 + buff_range) * (1.0 + (SITE_RANGE if site == "H" else 0.0))
+	return float(stats().get("range", 100.0)) * (1.0 + buff_range) * (1.0 + (SITE_RANGE if site == "H" else 0.0)) * (1.0 - debuff_range)
 
 
 func is_sensor() -> bool:
