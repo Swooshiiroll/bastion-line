@@ -65,7 +65,7 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Tower rework · Tower art · Bastion Line · Tower rework · Tower art · second pass · tower 20 of 20 · round 1</div>
+    <div class="eyebrow">Bastion Line · Tower rework · Tower art · Bastion Line · Tower rework · Tower art · second pass · tower 20 of 20 · round 2</div>
     <h1>Tower art: Augmentation Tower paths and Retrofits</h1>
     <p class="note">Second pass for one tower: <b>every upgrade step and mastery</b> on each path, and each <b>Retrofit</b>, adds or changes a detail on the confirmed model. Each card shows the model with that path's earlier steps (your picks, or option A until you pick) plus the candidate. Pick one of three per step, add notes per path, then <b>Copy picks and notes</b>.</p>
     <ul class="rules">
@@ -669,12 +669,12 @@ const NO_BOOT = true;
 // Base: look F Nanite Hive, animation D Nanite Swarm (tools/tower_art/data_towers4.js). The owner kept the names and chose the parts (2026-10-19):
 //  - Path 1, Energy Conversion, rebuilds the DOME: its hex cells charge cyan, a quarter more each step (charged cells, plasma veins, or big capacitor panels);
 //    gold-rimmed with crackling arcs at Overcharge.
-//  - Path 2, Critical Hits, crowns the dome with a gold CORE (a targeting lens, a tracking eye, or a crystal star), bigger each step; all gold at Executioner Link.
+//  - Path 2, Critical Hits: round 2 (owner: change the design idea): gold round and over the dome (a swarm, needles, reticle brackets or tendrils), more each step.
 //  - Path 3, Ricochet, builds green deflectors ORBITING the dome (plates, orbs, or a mirror ring), more each step; gold-trimmed and wobbling at Pinball.
 // Each step rebuilds its part in the style picked for that step; masteries are gold; the agent runs the real rules (energy shots, crits and their multiplier,
 // ricochet bounces, the aura's reach, Remote Link's half-strength reach).
 // Overlaps kept and stacking (the carpet rule): Amplified Bonus's +5% crit chance with the Critical Hits path.
-const PAGE = { title: "Augmentation Tower: paths and Retrofits (second pass)", store: "bl-tower-art-p2-augment-r1" };
+const PAGE = { title: "Augmentation Tower: paths and Retrofits (second pass)", store: "bl-tower-art-p2-augment-r2" };
 const GOLD = [1, 0.78, 0.3, 1], ENC = [0.3, 0.9, 1, 1], RICOC = [0.4, 1, 0.5, 1], COPPER = [0.78, 0.5, 0.28, 1];
 const rnd = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
 const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
@@ -706,6 +706,18 @@ function core(c, k, B, t, col, look) { const L = B.lv[1], st = pk(B, 1, L), g = 
   if (st === "C") { const n = 4 + L, pts = []; for (let i = 0; i < n * 2; i++) { const a = t * 0.4 + i * Math.PI / n, rr = i % 2 ? r * 0.45 : r + 1; pts.push([Math.cos(a) * rr, Math.sin(a) * rr]); } fill(c, pts, g ? GOLD : lt(GOLD, 0.1), 0, k); outline(c, pts, OUTLINE, 1, 0, k);
     for (let i = 0; i < n; i++) line(c, add(c, mul(fa(t * 0.4 + i * 2 * Math.PI / n), (r + 1) * k)), A([1, 1, 1, 0.45], 0.6), 0.6 * k); }   // a crystal star
   glowDot(c, (0.6 + 0.25 * L) * k, GOLD); }
+
+// ---- Path 2, Critical Hits, round 2 (owner: "Change the design idea"): instead of a core, gold around and over the dome, more each step (a swirling gold swarm,
+// a crown of gold needles round its rim, gold reticle brackets framing it, or gold strike tendrils curling out of it); brighter and denser at Executioner Link
+function critOuter(c, k, B, t, col) { const L = B.lv[1], st = pk(B, 1, L), g = L >= 5; if (!st) return; const R = 12 + 0.25 * B.lv[0], gc = g ? lt(GOLD, 0.15) : GOLD;
+  if (st === "E") { const n = 2 + 2 * L; for (let i = 0; i < n; i++) { const a = i * TAU / n + 0.2, len = 3 + 0.45 * L, pts = [[R - 0.6, -0.9], [R + len, 0], [R - 0.6, 0.9]]; fill(c, pts, gc, a, k); outline(c, pts, OUTLINE, 0.8, a, k); if (g) glowDot(add(c, mul(fa(a), (R + len) * k)), 0.45 * k, GOLD); } }   // a crown of gold needles
+  if (st === "F") { const n = L >= 3 ? 6 : 4, rr = R + 2.4 - 0.15 * L + 0.4 * Math.sin(t * 3), w = (0.9 + 0.12 * L) * k; for (let i = 0; i < n; i++) { const a = t * 0.4 + i * TAU / n, span = 0.42;
+      arc(c, rr * k, a - span, a + span, OUTLINE, w + 1.2 * k); arc(c, rr * k, a - span, a + span, gc, w); for (const e of [a - span, a + span]) { const p0 = add(c, mul(fa(e), rr * k)); line(p0, add(c, mul(fa(e), (rr - 1.6) * k)), OUTLINE, w + 1 * k); line(p0, add(c, mul(fa(e), (rr - 1.6) * k)), gc, w); } } }   // reticle brackets
+  if (st === "G") { const n = 1 + L; for (let i = 0; i < n; i++) { const a0 = i * TAU / n + 0.4, pts = []; for (let j = 0; j <= 10; j++) { const u = j / 10, r = R - 1 + u * (4 + 0.5 * L), a = a0 + Math.sin(t * 2 + i + u * 3) * 0.35 * u + u * 0.6; pts.push(add(c, mul(fa(a), r * k))); }
+      polyline(pts, OUTLINE, 2 * k); polyline(pts, gc, 1.1 * k); glowDot(pts[pts.length - 1], (0.5 + 0.06 * L) * k, GOLD); } } }   // strike tendrils
+function critTop(c, k, B, t, col) { const L = B.lv[1], st = pk(B, 1, L); if (st !== "D") return; const g = L >= 5, n = 6 + 4 * L, vr = 3 + 1.3 * L;   // a swirling gold swarm (a vortex from Precision Matrix)
+  for (let i = 0; i < n; i++) { const u = fmod(i / n + t * 0.15, 1), a = i * 2.39996 + t * (1.2 + (L >= 3 ? 1.5 * (1 - u) : 0)), r = (2 + vr * (L >= 3 ? u : rnd(i))) * k; const q = add(c, mul(fa(a), r)), sr = (0.7 + (g ? 0.15 : 0)) * k; disc(q, sr + 0.5 * k, A(OUTLINE, 0.8)); disc(q, sr, GOLD); }
+  glowDot(c, (0.6 + 0.2 * L) * k, GOLD); }
 
 // ---- Path 3, Ricochet: green deflectors orbiting the dome (plates, orbs, or a mirror ring), more each step; gold-trimmed and wobbling at Pinball -----------------
 function orbit(c, k, B, t, col) { const L = B.lv[2], st = pk(B, 2, L), g = L >= 5; if (!st) return; const n = [0, 2, 3, 4, 5, 6][L], R = 15.4 + 0.3 * L, sp = t * (0.6 + 0.1 * L), trim = g ? GOLD : lt(RICOC, 0.3);
@@ -754,20 +766,23 @@ function augAgent(B) { return (m, t, info, s, col) => { if (!m.shots) { m.shots 
 // ---- The model ----------------------------------------------------------------------------------------------------------------------------------------------------
 const P2 = {
   tower: "augment", look: "F", anim: "D",
-  intro: "Round 1 on the confirmed Nanite Hive, with the names kept (your choice). Each path rebuilds one part, in the style you pick for each step: Energy Conversion rebuilds the dome, a quarter more of its cells charging cyan each step (charged cells, plasma veins spreading from the centre, or big capacitor panels; gold-rimmed with crackling arcs at Overcharge); Critical Hits crowns the dome with a gold core (a targeting lens with a turning precision ring from Precision Matrix, a tracking eye, or a turning crystal star), bigger each step, all gold at Executioner Link; Ricochet builds green deflectors orbiting the dome (plates, orbs, or a segmented mirror ring), more each step, gold-trimmed and wobbling at Pinball. The preview runs the real rules: the nanites drifting to each tower are tinted by the effects it gets; shots turn cyan as Energy Conversion grows (+10% at Overcharge); crits land gold with their multiplier (×2, ×2.5, ×3) and come more often as the chance grows; ricochets bounce green to a nearby enemy (twice at Pinball); Wide Aura widens the ring; Remote Link adds a tower at twice the reach that gets half strength. Overlapping Retrofits are kept and stack (the carpet rule).",
+  intro: "Round 2, your picks and note: Energy Conversion (charged cells), Ricochet (deflector plates) and Wide Aura (the aura ring) are picked. Critical Hits gets a new idea, four ways at every step: a swirling gold nanite swarm over the dome (a vortex from Precision Matrix), a crown of gold needles round its rim, gold reticle brackets framing it, or gold strike tendrils curling out of it, more each step and brightest at Executioner Link. Amplified Bonus and Remote Link are open. Round 1 on the confirmed Nanite Hive, with the names kept (your choice). Each path rebuilds one part, in the style you pick for each step: Energy Conversion rebuilds the dome, a quarter more of its cells charging cyan each step (charged cells, plasma veins spreading from the centre, or big capacitor panels; gold-rimmed with crackling arcs at Overcharge); Critical Hits crowns the dome with a gold core (a targeting lens with a turning precision ring from Precision Matrix, a tracking eye, or a turning crystal star), bigger each step, all gold at Executioner Link; Ricochet builds green deflectors orbiting the dome (plates, orbs, or a segmented mirror ring), more each step, gold-trimmed and wobbling at Pinball. The preview runs the real rules: the nanites drifting to each tower are tinted by the effects it gets; shots turn cyan as Energy Conversion grows (+10% at Overcharge); crits land gold with their multiplier (×2, ×2.5, ×3) and come more often as the chance grows; ricochets bounce green to a nearby enemy (twice at Pinball); Wide Aura widens the ring; Remote Link adds a tower at twice the reach that gets half strength. Overlapping Retrofits are kept and stack (the carpet rule).",
   mods(B) { return { period: 1, flight: 1, multi: false, persist: augAgent(B) }; },
   muzzleAt(B, m, kk, c) { return c; },
   model(c, aim, s, fx, t, col, info, B) { const k = G(s), foe = nearestTo(c, info?.all || []), look = foe ? Math.atan2(foe.p[1] - c[1], foe.p[0] - c[0]) : 0;
     deck(c, k, col, t);
     retro(c, k, B, t, col);
     dome(c, k, B, t, col);
+    critOuter(c, k, B, t, col);
     orbit(c, k, B, t, col);
-    core(c, k, B, t, col, look); },
+    core(c, k, B, t, col, look);
+    critTop(c, k, B, t, col); },
   paths: [], retrofits: [],
 };
 
 // ---- Option tables (names and effects as in design/tower_roster.md) ----------------------------------------------------------------------------------------------
 const T = (a, b, c) => [["A", ...a], ["B", ...b], ["C", ...c]].map(([key, name, desc]) => ({ key, name, desc }));
+const TK = (...o) => o.map(([key, name, desc]) => ({ key, name, desc }));
 P2.paths = [
   { name: "Energy Conversion", theme: "the dome: a quarter more of its cells charge cyan each step, in the style you pick (charged cells, plasma veins, or big capacitor panels); gold-rimmed with arcs at Overcharge", steps: [
     { name: "Charged Rounds", cost: 105, effect: "25% of nearby towers' damage counts as energy", options: T(["Charged Cells", "A quarter of the dome's cells, round its centre, glow cyan; a quarter of the shots fly cyan."], ["Plasma Veins", "Cyan plasma veins spread from the dome's centre through a quarter of its cells."], ["Capacitor Panels", "The dome is rebuilt with big hex panels, a quarter of them charged cyan."]) },
@@ -776,12 +791,12 @@ P2.paths = [
     { name: "Full Conversion", cost: 820, effect: "100%: every nearby tower's damage is energy, so even Ballistic and Explosive towers can hurt the Wraith", options: T(["Full Dome", "Every cell glows cyan; every shot flies cyan."], ["Full Veins", "The veins reach every cell."], ["Full Panels", "Every panel is charged."]) },
     { name: "Overcharge", cost: 4375, effect: "100% energy, plus +10% bonus energy damage (mastery)", options: T(["Gold Charged Dome", "A gold-rimmed dome, every cell charged, with arcs crackling over it; hits show +10%."], ["Gold Veins", "Gold-rimmed, the veins everywhere, with arcs; +10%."], ["Gold Panels", "Gold-rimmed charged panels with arcs; +10%."]) },
   ] },
-  { name: "Critical Hits", theme: "a gold core crowning the dome, in the style you pick (a targeting lens, a tracking eye, or a crystal star), bigger each step; all gold at Executioner Link", steps: [
-    { name: "Targeting Assist", cost: 80, effect: "8% crit chance", options: T(["Targeting Lens", "A gold lens with crosshairs crowns the dome."], ["Tracking Eye", "A gold-irised eye on the dome follows the nearest enemy."], ["Crystal Star", "A small gold crystal star turns on the dome."]) },
-    { name: "Weak-Point Scan", cost: 165, effect: "11%", options: T(["Bigger Lens", "A bigger lens."], ["Wider Eye", "A wider eye."], ["Bigger Star", "A bigger star with more points."]) },
-    { name: "Precision Matrix", cost: 1260, effect: "15%; crits do ×2.5 (primary)", options: T(["Matrix Lens", "A turning ring of matrix segments round the lens; crits show ×2.5."], ["Ringed Eye", "The iris gets a ring; crits show ×2.5."], ["Matrix Star", "More points; crits show ×2.5."]) },
-    { name: "Lethal Matrix", cost: 985, effect: "18%", options: T(["Lethal Lens", "A bigger lens and matrix."], ["Lethal Eye", "A bigger eye."], ["Lethal Star", "A bigger star."]) },
-    { name: "Executioner Link", cost: 7440, effect: "22%; crits do ×3 (mastery)", options: T(["Gold Lens", "An all-gold lens and matrix; crits show ×3."], ["Gold Eye", "An all-gold eye; crits show ×3."], ["Gold Star", "A solid gold star; crits show ×3."]) },
+  { name: "Critical Hits", theme: "round 2 (your note: change the design idea): gold round and over the dome, more each step, in the style you pick (a gold nanite swarm, a crown of gold needles, gold reticle brackets, or gold strike tendrils); brighter and denser at Executioner Link", steps: [
+    { name: "Targeting Assist", cost: 80, effect: "8% crit chance", options: TK(["D", "Gold Swarm", "A small swarm of gold nanites swirls over the dome."], ["E", "Crit Needles", "Four gold needles rise round the dome's rim."], ["F", "Reticle Brackets", "Four gold targeting brackets frame the dome, turning slowly."], ["G", "Strike Tendrils", "Two gold nanite tendrils curl out from the dome."]) },
+    { name: "Weak-Point Scan", cost: 165, effect: "11%", options: TK(["D", "Bigger Swarm", "A bigger gold swarm."], ["E", "Six Needles", "Six longer needles."], ["F", "Tighter Brackets", "The brackets close in and thicken."], ["G", "Three Tendrils", "Three tendrils."]) },
+    { name: "Precision Matrix", cost: 1260, effect: "15%; crits do ×2.5 (primary)", options: TK(["D", "Swarm Vortex", "The swarm spirals into a vortex; crits show ×2.5."], ["E", "Needle Crown", "Eight needles; crits show ×2.5."], ["F", "Six Brackets", "Six brackets lock round the dome; crits show ×2.5."], ["G", "Four Tendrils", "Four longer tendrils; crits show ×2.5."]) },
+    { name: "Lethal Matrix", cost: 985, effect: "18%", options: TK(["D", "Dense Vortex", "A denser vortex."], ["E", "Ten Needles", "Ten needles."], ["F", "Locking Brackets", "Thicker brackets, closer in."], ["G", "Five Tendrils", "Five tendrils."]) },
+    { name: "Executioner Link", cost: 7440, effect: "22%; crits do ×3 (mastery)", options: TK(["D", "Gold Storm", "A dense, bright gold storm over the dome; crits show ×3."], ["E", "Gold Needle Crown", "Twelve bright needles with glowing tips; crits show ×3."], ["F", "Gold Reticle", "The brightest, thickest brackets; crits show ×3."], ["G", "Gold Tendrils", "Six bright tendrils; crits show ×3."]) },
   ] },
   { name: "Ricochet", theme: "green deflectors orbiting the dome, in the style you pick (plates, orbs, or a mirror ring), more each step; gold-trimmed and wobbling at Pinball", steps: [
     { name: "Deflector Rounds", cost: 135, effect: "10% of hits bounce to another enemy within 60 px at 50% damage", options: T(["Deflector Plates", "Two curved green deflector plates orbit the dome; one hit in ten bounces green."], ["Bounce Orbs", "Two green orbs orbit the dome."], ["Mirror Ring", "A segmented mirror ring turns round the dome, glinting."]) },
@@ -796,6 +811,11 @@ P2.retrofits = [
   { name: "Amplified Bonus", cost: 135, effect: "The stock crit chance doubles to 10% (+5%, stacks with Critical Hits)", options: T(["Amplifier Coils", "Two copper coils round the core."], ["Gold Halo", "A broken gold halo turns over the dome."], ["Booster Fins", "Four gold booster fins round the dome."]) },
   { name: "Remote Link", cost: 75, effect: "Towers up to twice its radius away get its effects at half strength", options: T(["Relay Dish", "A small relay dish on the deck; a far tower shows 'half'."], ["Relay Antennae", "Two blinking relay antennae."], ["Link Beacon", "A blinking link beacon on the deck."]) },
 ];
+
+// ---- Round 2 picks (owner, 2026-10-20): Energy Conversion all A, Ricochet all A, Wide Aura A; Critical Hits (new ideas), Amplified Bonus and Remote Link open ------
+P2.picks = { p0s0: "A", p0s1: "A", p0s2: "A", p0s3: "A", p0s4: "A", p2s0: "A", p2s1: "A", p2s2: "A", p2s3: "A", p2s4: "A", r0: "A" };
+P2.paths.forEach((pa, pi) => pa.steps.forEach((st, k) => { const pk = P2.picks["p" + pi + "s" + k]; if (pk) st.options = st.options.filter((o) => o.key === pk); }));
+P2.retrofits.forEach((rf, ri) => { const pk = P2.picks["r" + ri]; if (pk) rf.options = rf.options.filter((o) => o.key === pk); });
 
 // ---- Tower art engine: previews towers aiming and firing at enemies on a lane --------------------------
 // Data (defined before this): PAGE {title, key, store}, TOWERS [...], DEFAULTS {id: {look, anim}}.

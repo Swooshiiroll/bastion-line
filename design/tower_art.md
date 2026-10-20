@@ -350,7 +350,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 17 | Scrapyard | copper | C Magnet Yard | B Sparks and Sale |
 | 18 | Magneto Tower | violet | F Stacked Coil Tower | F Drag Trails |
 | 19 | Tractor Tower | `design/tower_art_p2_19_tractor.html` | Base redesign **confirmed** (owner, 2026-10-19: B Armoured Dish, B Focus Beam; base page `design/tower_art_p19_tractor.html`). Second pass **confirmed** (owner, 2026-10-19, "finished"; round 12) |
-| 20 | Augmentation Tower | `design/tower_art_p2_20_augment.html` | Second pass round 1: pick one option per stage and Retrofit |
+| 20 | Augmentation Tower | `design/tower_art_p2_20_augment.html` | Second pass round 2: Energy, Ricochet and Wide Aura picked; pick Critical Hits (new ideas), Amplified Bonus and Remote Link |
 | 20 | Augmentation Tower | lavender | F Nanite Hive | D Nanite Swarm |
 
 ## Second pass: per-path and Retrofit looks (owner, 2026-10-16)
@@ -1372,6 +1372,11 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
   - **Remote Link:** a relay dish, antennae, or a beacon.
 - **Carpet-rule overlap (kept, stacking):** Amplified Bonus's +5% crit chance with Critical Hits.
 
+**Round 2 (owner's picks and note, 2026-10-20):**
+- **Picked:** Energy Conversion all A (charged cells), Ricochet all A (deflector plates), Wide Aura A (the aura ring).
+- **Critical Hits, "Change the design idea":** the core on the dome is dropped. It is now gold round and over the dome, more each step, in four styles: a swirling gold nanite swarm (a vortex from Precision Matrix), a crown of gold needles round the rim (four to twelve), gold reticle brackets framing the dome (four, then six, closing in), or gold strike tendrils curling out of it (two to six). All are brightest at Executioner Link.
+- **Open:** Amplified Bonus and Remote Link (the same options).
+
 ## Open questions
 
-1. **Second pass, Augmentation Tower** (tower 20, round 1; the last tower): pick one option per stage and Retrofit.
+1. **Second pass, Augmentation Tower** (tower 20, round 2; the last tower): pick Critical Hits (new ideas), Amplified Bonus and Remote Link.
