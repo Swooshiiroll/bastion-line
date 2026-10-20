@@ -11,7 +11,7 @@ extends RefCounted
 ##   command tree  "start_gold": +fraction, "lives": +fraction of the mode's shields, "sell_refund": +fraction,
 ##                 "ability_cd": -fraction, "bounty": +fraction
 
-const TREE_ORDER := ["command", "arrow", "cannon", "frost", "sniper", "tesla", "laser", "missile", "amp", "flak", "sensor", "gravity", "nullifier", "nova", "drones", "scrap", "gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon", "railgun", "tesla_tower", "drone_bay", "cas_gunship", "mine_layer", "chemical_plant", "cryo_tower", "boost_tower", "radar_tower", "shockwave_generator", "scrapyard"]
+const TREE_ORDER := ["command", "arrow", "cannon", "frost", "sniper", "tesla", "laser", "missile", "amp", "flak", "sensor", "gravity", "nullifier", "nova", "drones", "scrap", "gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon", "railgun", "tesla_tower", "drone_bay", "cas_gunship", "mine_layer", "chemical_plant", "cryo_tower", "boost_tower", "radar_tower", "shockwave_generator", "scrapyard", "magneto_tower", "tractor_tower", "augmentation_tower"]
 
 ## RP sources, all derived from profile records so they can't be farmed and are never lost.
 ## (Medals pay their mode's medal_rp, from data/difficulty.gd.)
@@ -730,6 +730,69 @@ const NODES := {
 	"scrapyard_m": {
 		"tree": "scrapyard", "slot": Vector2i(0, 2), "cost": 3, "requires": ["scrapyard_2a", "scrapyard_2b"], "icon": "mastery",
 		"name": "Scrapyard Mastery", "blurb": "Unlocks the masteries: Gold Foundry, Breaker's Yard and Parts Exchange.",
+		"effects": {"mastery": true},
+	},
+	# --- Magneto Tower (the tower rework, issue #59: a minimal tree until the research pass) ----------
+	"magneto_tower_1": {
+		"tree": "magneto_tower", "slot": Vector2i(0, 0), "cost": 1, "requires": [], "icon": "range",
+		"name": "Wider Coil", "blurb": "Magneto Towers reach 7% farther.",
+		"effects": {"mult": {"range": 0.07}},
+	},
+	"magneto_tower_2a": {
+		"tree": "magneto_tower", "slot": Vector2i(-1, 1), "cost": 2, "requires": ["magneto_tower_1"], "icon": "rate",
+		"name": "Stronger Coil", "blurb": "Magneto Towers slow 7% more.",
+		"effects": {"mult": {"slow": 0.07}},
+	},
+	"magneto_tower_2b": {
+		"tree": "magneto_tower", "slot": Vector2i(1, 1), "cost": 2, "requires": ["magneto_tower_1"], "icon": "rate",
+		"name": "Cold Windings", "blurb": "Magneto Towers slow 4% more.",
+		"effects": {"mult": {"slow": 0.04}},
+	},
+	"magneto_tower_m": {
+		"tree": "magneto_tower", "slot": Vector2i(0, 2), "cost": 3, "requires": ["magneto_tower_2a", "magneto_tower_2b"], "icon": "mastery",
+		"name": "Magneto Tower Mastery", "blurb": "Unlocks the masteries: Absolute Pull, Magnetosphere and Reverse Polarity.",
+		"effects": {"mastery": true},
+	},
+	# --- Tractor Tower (the tower rework, issue #59: a minimal tree until the research pass) ----------
+	"tractor_tower_1": {
+		"tree": "tractor_tower", "slot": Vector2i(0, 0), "cost": 1, "requires": [], "icon": "range",
+		"name": "Long Dish", "blurb": "Tractor Towers reach 7% farther.",
+		"effects": {"mult": {"range": 0.07}},
+	},
+	"tractor_tower_2a": {
+		"tree": "tractor_tower", "slot": Vector2i(-1, 1), "cost": 2, "requires": ["tractor_tower_1"], "icon": "rate",
+		"name": "Quick Release", "blurb": "Tractor Towers recharge 7% faster.",
+		"effects": {"mult": {"recharge": -0.07}},
+	},
+	"tractor_tower_2b": {
+		"tree": "tractor_tower", "slot": Vector2i(1, 1), "cost": 2, "requires": ["tractor_tower_1"], "icon": "rate",
+		"name": "Steady Beam", "blurb": "Holds last 8% longer.",
+		"effects": {"mult": {"hold": 0.08}},
+	},
+	"tractor_tower_m": {
+		"tree": "tractor_tower", "slot": Vector2i(0, 2), "cost": 3, "requires": ["tractor_tower_2a", "tractor_tower_2b"], "icon": "mastery",
+		"name": "Tractor Tower Mastery", "blurb": "Unlocks the masteries: Undo, Supercapacitor and Gravity Hammer.",
+		"effects": {"mastery": true},
+	},
+	# --- Augmentation Tower (the tower rework, issue #59: a minimal tree until the research pass) ----------
+	"augmentation_tower_1": {
+		"tree": "augmentation_tower", "slot": Vector2i(0, 0), "cost": 1, "requires": [], "icon": "range",
+		"name": "Wider Aura", "blurb": "Augmentation Towers reach 7% farther.",
+		"effects": {"mult": {"range": 0.07}},
+	},
+	"augmentation_tower_2a": {
+		"tree": "augmentation_tower", "slot": Vector2i(-1, 1), "cost": 2, "requires": ["augmentation_tower_1"], "icon": "damage",
+		"name": "Sharper Crits", "blurb": "Crit chances are 10% higher.",
+		"effects": {"mult": {"aug_crit": 0.1}},
+	},
+	"augmentation_tower_2b": {
+		"tree": "augmentation_tower", "slot": Vector2i(1, 1), "cost": 2, "requires": ["augmentation_tower_1"], "icon": "rate",
+		"name": "Lucky Bounces", "blurb": "Ricochet chances are 10% higher.",
+		"effects": {"mult": {"ricochet": 0.1}},
+	},
+	"augmentation_tower_m": {
+		"tree": "augmentation_tower", "slot": Vector2i(0, 2), "cost": 3, "requires": ["augmentation_tower_2a", "augmentation_tower_2b"], "icon": "mastery",
+		"name": "Augmentation Tower Mastery", "blurb": "Unlocks the masteries: Overcharge, Executioner Link and Pinball.",
 		"effects": {"mastery": true},
 	},
 }

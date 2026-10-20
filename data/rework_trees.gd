@@ -6,7 +6,7 @@ extends RefCounted
 ## (a, b, c), each with four `nodes` and a `mastery`. A node's `set` values replace the stat and its `add` values add to it;
 ## nodes apply in order on top of the base (the Retrofit, then each path's steps).
 
-const ORDER := ["gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon", "railgun", "tesla_tower", "drone_bay", "cas_gunship", "mine_layer", "chemical_plant", "cryo_tower", "boost_tower", "radar_tower", "shockwave_generator", "scrapyard"]
+const ORDER := ["gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon", "railgun", "tesla_tower", "drone_bay", "cas_gunship", "mine_layer", "chemical_plant", "cryo_tower", "boost_tower", "radar_tower", "shockwave_generator", "scrapyard", "magneto_tower", "tractor_tower", "augmentation_tower"]
 
 const TREES := {
 	"gun_turret": {
@@ -3733,6 +3733,651 @@ const TREES := {
 						"build_discount": 0.1,
 						"range": 190.0,
 						"sell_field": 1.0,
+					},
+					"add": {},
+				},
+			},
+		],
+	},
+	"magneto_tower": {
+		"name": "Magneto Tower",
+		"class": "Defense",
+		"weapon": "Field",
+		"blurb": "A massive electromagnet that magnetically pulls against enemies in range, slowing them down and pulling off armor. \"Yeah, science!\"",
+		"air": true,
+		"ground": true,
+		"size": 1,
+		"damage_kind": "energy",
+		"beam": false,
+		"uncapped": false,
+		"support": false,
+		"economy": false,
+		"cost": 525,
+		"base": {
+			"name": "Magneto Tower",
+			"cost": 525,
+			"blurb": "525 credits; a constant magnetic field of 120 px. Every enemy inside, air and ground, is slowed 25% while inside, scaled by weight. The strongest slow applies, as today.",
+			"set": {
+				"range": 120.0,
+				"slow": 0.25,
+			},
+			"add": {},
+		},
+		"retrofits": [
+			{
+				"name": "Superconducting Coil",
+				"cost": 210,
+				"blurb": "Slow 25% to 30%; the coil frosts over.",
+				"set": {
+					"slow": 0.3,
+				},
+				"add": {},
+			},
+			{
+				"name": "Field Stabiliser",
+				"cost": 280,
+				"blurb": "+15 px radius (135).",
+				"set": {},
+				"add": {
+					"range": 15.0,
+				},
+			},
+			{
+				"name": "Pole Shoes",
+				"cost": 135,
+				"blurb": "Heavy roles resist 30% less.",
+				"set": {
+					"pole_shoes": 0.3,
+				},
+				"add": {},
+			},
+		],
+		"paths": [
+			{
+				"key": "a",
+				"name": "Pull Strength",
+				"nodes": [
+					{
+						"name": "Stronger Coil",
+						"cost": 295,
+						"blurb": "Slow 32%",
+						"set": {
+							"slow": 0.32,
+						},
+						"add": {},
+					},
+					{
+						"name": "Heavy Grip",
+						"cost": 565,
+						"blurb": "Slow 35%; heavy roles resist a quarter less",
+						"set": {
+							"slow": 0.35,
+							"grip_relief": 0.25,
+						},
+						"add": {},
+					},
+					{
+						"name": "Mass Lock",
+						"cost": 2060,
+						"blurb": "Slow 42%; heavy roles resist half as much",
+						"set": {
+							"slow": 0.42,
+							"grip_relief": 0.5,
+						},
+						"add": {},
+					},
+					{
+						"name": "Dense Field",
+						"cost": 2450,
+						"blurb": "Slow 48%",
+						"set": {
+							"slow": 0.48,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Absolute Pull",
+					"cost": 13630,
+					"blurb": "Slow 55%; no role resists: Tanks and bosses are slowed fully",
+					"set": {
+						"slow": 0.55,
+						"grip_relief": 1.0,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "b",
+				"name": "Field Size",
+				"nodes": [
+					{
+						"name": "Wider Coil",
+						"cost": 180,
+						"blurb": "130 px",
+						"set": {
+							"range": 130.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Field Extender",
+						"cost": 395,
+						"blurb": "140 px",
+						"set": {
+							"range": 140.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Broad Field",
+						"cost": 1290,
+						"blurb": "155 px",
+						"set": {
+							"range": 155.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Great Field",
+						"cost": 2845,
+						"blurb": "170 px",
+						"set": {
+							"range": 170.0,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Magnetosphere",
+					"cost": 10645,
+					"blurb": "195 px",
+					"set": {
+						"range": 195.0,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "c",
+				"name": "Polarity",
+				"nodes": [
+					{
+						"name": "Plate Puller",
+						"cost": 360,
+						"blurb": "Enemies in the field lose 2 armour while inside",
+						"set": {
+							"armor_pull": 2.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Plate Ripper",
+						"cost": 720,
+						"blurb": "4 armour",
+						"set": {
+							"armor_pull": 4.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Torn Plates",
+						"cost": 1440,
+						"blurb": "Pulled armour is gone for good, even after they leave",
+						"set": {
+							"pull_perm": true,
+						},
+						"add": {},
+					},
+					{
+						"name": "Deep Pull",
+						"cost": 2160,
+						"blurb": "5 armour",
+						"set": {
+							"armor_pull": 5.0,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Reverse Polarity",
+					"cost": 9600,
+					"blurb": "Every 4 s the field flips to repel: enemies are flung into each other for impact damage and a 0.3 s stun",
+					"set": {
+						"flip_every": 4.0,
+						"flip_damage": 40.0,
+					},
+					"add": {},
+				},
+			},
+		],
+	},
+	"tractor_tower": {
+		"name": "Tractor Tower",
+		"class": "Defense",
+		"weapon": "Energy",
+		"blurb": "A dish-mounted emitter that locks a tractor beam onto a single enemy and hauls it back down the track before letting go. \"You're my friend now.\"",
+		"air": true,
+		"ground": true,
+		"size": 1,
+		"damage_kind": "energy",
+		"beam": false,
+		"uncapped": false,
+		"support": false,
+		"economy": false,
+		"cost": 575,
+		"base": {
+			"name": "Tractor Tower",
+			"cost": 575,
+			"blurb": "575 credits; 160 px range; air and ground. It locks one enemy (by its targeting mode), holds it for 1.5 s while hauling it 80 px back along the track, releases it, then recharges for 6 s. While held, the enemy can't move forward, blink or use abilities (a hold counts as a stun for those rules). The pull scales by role weight, as on the Magneto (Swarm full, Tank half, Boss a quarter).",
+			"set": {
+				"range": 160.0,
+				"hold": 1.5,
+				"pull": 80.0,
+				"recharge": 6.0,
+			},
+			"add": {},
+		},
+		"retrofits": [
+			{
+				"name": "Beam Sweep",
+				"cost": 175,
+				"blurb": "While holding, the beam slows every other enemy it crosses by 30%. It replaced Twin Emitter (a second beam at half the pull, 575), by the owner's choice of three ideas on 2026-10-19. Price (proposed): the formula's step-1 price for about a 15% gain on the stock effect (a 30% slow on the enemies crossing the beam during each 1.5 s hold); the balance probe checks it.",
+				"set": {
+					"beam_slow": 0.3,
+				},
+				"add": {},
+			},
+			{
+				"name": "Longer Hold",
+				"cost": 140,
+				"blurb": "Holds for 2 s.",
+				"set": {
+					"hold": 2.0,
+				},
+				"add": {},
+			},
+			{
+				"name": "Faster Recharge",
+				"cost": 230,
+				"blurb": "Recharges in 5 s.",
+				"set": {
+					"recharge": 5.0,
+				},
+				"add": {},
+			},
+		],
+		"paths": [
+			{
+				"key": "a",
+				"name": "Pull Distance",
+				"nodes": [
+					{
+						"name": "Longer Haul",
+						"cost": 185,
+						"blurb": "100 px pull",
+						"set": {
+							"pull": 100.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Stronger Beam",
+						"cost": 535,
+						"blurb": "120 px; holds 1.8 s",
+						"set": {
+							"pull": 120.0,
+							"hold": 1.8,
+						},
+						"add": {},
+					},
+					{
+						"name": "Rewind",
+						"cost": 1840,
+						"blurb": "Sends the enemy back to where it was 3 s ago (by time, owner)",
+						"set": {
+							"rewind": 3.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Long Rewind",
+						"cost": 2945,
+						"blurb": "Back 4 s",
+						"set": {
+							"rewind": 4.0,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Undo",
+					"cost": 9215,
+					"blurb": "Back 5 s; and once per round, sends one non-boss enemy back to the start of its current track segment (owner: weaker than to the entrance)",
+					"set": {
+						"rewind": 5.0,
+						"undo": true,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "b",
+				"name": "Recharge",
+				"nodes": [
+					{
+						"name": "Quick Release",
+						"cost": 175,
+						"blurb": "Recharge 5.2 s",
+						"set": {
+							"recharge": 5.2,
+						},
+						"add": {},
+					},
+					{
+						"name": "Capacitor Bank",
+						"cost": 345,
+						"blurb": "4.6 s",
+						"set": {
+							"recharge": 4.6,
+						},
+						"add": {},
+					},
+					{
+						"name": "Rapid Lock",
+						"cost": 1265,
+						"blurb": "3.8 s",
+						"set": {
+							"recharge": 3.8,
+						},
+						"add": {},
+					},
+					{
+						"name": "Overclocked Emitter",
+						"cost": 2200,
+						"blurb": "3.3 s",
+						"set": {
+							"recharge": 3.3,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Supercapacitor",
+					"cost": 21745,
+					"blurb": "Recharge 2 s. It replaced Dual Beam (a second beam at a third of the pull, 10,035) on 2026-10-19, by the owner's choice; priced by the formula (the 3.3 s to 2 s rise in grab rate, ×32)",
+					"set": {
+						"recharge": 2.0,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "c",
+				"name": "Grip",
+				"nodes": [
+					{
+						"name": "Firm Grip",
+						"cost": 190,
+						"blurb": "Heavy roles resist half as much",
+						"set": {
+							"grip_relief": 0.5,
+						},
+						"add": {},
+					},
+					{
+						"name": "Crushing Grip",
+						"cost": 270,
+						"blurb": "The held enemy takes 15 energy damage/s",
+						"set": {
+							"grip_dps": 15.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Lift and Drop",
+						"cost": 1075,
+						"blurb": "Ground enemies are lifted, then slammed down, stunning everything within 50 px for 0.4 s",
+						"set": {
+							"slam_radius": 50.0,
+							"slam_stun": 0.4,
+						},
+						"add": {},
+					},
+					{
+						"name": "Grip Lock",
+						"cost": 1610,
+						"blurb": "The held enemy's barrier and abilities switch off while held",
+						"set": {
+							"grip_lock": true,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Gravity Hammer",
+					"cost": 5365,
+					"blurb": "The slam stuns everything within 80 px for 0.8 s and shatters barriers",
+					"set": {
+						"slam_radius": 80.0,
+						"slam_stun": 0.8,
+						"slam_shatter": true,
+					},
+					"add": {},
+				},
+			},
+		],
+	},
+	"augmentation_tower": {
+		"name": "Augmentation Tower",
+		"class": "Support",
+		"weapon": "None",
+		"blurb": "Neighboring towers are given special augmentations to their weaponry through mysterious means. \"So my 12-guage shotgun shoots thermonuclear explosives now apparently.\"",
+		"air": true,
+		"ground": true,
+		"size": 1,
+		"damage_kind": "physical",
+		"beam": false,
+		"uncapped": false,
+		"support": true,
+		"economy": false,
+		"cost": 650,
+		"base": {
+			"name": "Augmentation Tower",
+			"cost": 650,
+			"blurb": "650 credits; towers within 96 px get a 5% chance to crit (double damage) on every hit. Doesn't attack.",
+			"set": {
+				"range": 96.0,
+				"aug_crit": 0.05,
+				"crit_mult": 2.0,
+			},
+			"add": {},
+		},
+		"retrofits": [
+			{
+				"name": "Wide Aura",
+				"cost": 170,
+				"blurb": "A 3-tile radius (144 px).",
+				"set": {
+					"range": 144.0,
+				},
+				"add": {},
+			},
+			{
+				"name": "Amplified Bonus",
+				"cost": 135,
+				"blurb": "The stock crit chance doubles to 10%.",
+				"set": {
+					"aug_crit": 0.1,
+				},
+				"add": {},
+			},
+			{
+				"name": "Remote Link",
+				"cost": 75,
+				"blurb": "Towers up to twice its radius away get its effects at half strength.",
+				"set": {
+					"remote_link": true,
+				},
+				"add": {},
+			},
+		],
+		"paths": [
+			{
+				"key": "a",
+				"name": "Energy Conversion",
+				"nodes": [
+					{
+						"name": "Charged Rounds",
+						"cost": 105,
+						"blurb": "25% of nearby towers' damage counts as energy",
+						"set": {
+							"energy_conv": 0.25,
+						},
+						"add": {},
+					},
+					{
+						"name": "Plasma Coating",
+						"cost": 205,
+						"blurb": "50%",
+						"set": {
+							"energy_conv": 0.5,
+						},
+						"add": {},
+					},
+					{
+						"name": "Energy Weave",
+						"cost": 410,
+						"blurb": "75%",
+						"set": {
+							"energy_conv": 0.75,
+						},
+						"add": {},
+					},
+					{
+						"name": "Full Conversion",
+						"cost": 820,
+						"blurb": "100%: every nearby tower's damage is energy, so even Ballistic and Explosive towers can hurt the Wraith",
+						"set": {
+							"energy_conv": 1.0,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Overcharge",
+					"cost": 4375,
+					"blurb": "100% energy, plus +10% bonus energy damage",
+					"set": {
+						"energy_conv": 1.0,
+						"energy_bonus": 0.1,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "b",
+				"name": "Critical Hits",
+				"nodes": [
+					{
+						"name": "Targeting Assist",
+						"cost": 80,
+						"blurb": "8% crit chance",
+						"set": {
+							"aug_crit": 0.08,
+						},
+						"add": {},
+					},
+					{
+						"name": "Weak-Point Scan",
+						"cost": 165,
+						"blurb": "11%",
+						"set": {
+							"aug_crit": 0.11,
+						},
+						"add": {},
+					},
+					{
+						"name": "Precision Matrix",
+						"cost": 1260,
+						"blurb": "15%; crits do ×2.5",
+						"set": {
+							"aug_crit": 0.15,
+							"crit_mult": 2.5,
+						},
+						"add": {},
+					},
+					{
+						"name": "Lethal Matrix",
+						"cost": 985,
+						"blurb": "18%",
+						"set": {
+							"aug_crit": 0.18,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Executioner Link",
+					"cost": 7440,
+					"blurb": "22%; crits do ×3",
+					"set": {
+						"aug_crit": 0.22,
+						"crit_mult": 3.0,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "c",
+				"name": "Ricochet",
+				"nodes": [
+					{
+						"name": "Deflector Rounds",
+						"cost": 135,
+						"blurb": "10% of hits bounce to another enemy within 60 px at 50% damage",
+						"set": {
+							"ricochet": 0.1,
+							"ricochet_str": 0.5,
+						},
+						"add": {},
+					},
+					{
+						"name": "Bounce Coating",
+						"cost": 275,
+						"blurb": "20%",
+						"set": {
+							"ricochet": 0.2,
+						},
+						"add": {},
+					},
+					{
+						"name": "Ricochet Field",
+						"cost": 1205,
+						"blurb": "30%; bounces at 70%",
+						"set": {
+							"ricochet": 0.3,
+							"ricochet_str": 0.7,
+						},
+						"add": {},
+					},
+					{
+						"name": "Chain Bounce",
+						"cost": 1530,
+						"blurb": "40%",
+						"set": {
+							"ricochet": 0.4,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Pinball",
+					"cost": 7660,
+					"blurb": "50%; a bounce can bounce again",
+					"set": {
+						"ricochet": 0.5,
+						"bounce_again": true,
 					},
 					"add": {},
 				},

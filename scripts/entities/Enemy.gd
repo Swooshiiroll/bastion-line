@@ -49,6 +49,9 @@ var soak_dps := 0.0
 var soak_slow := 0.0
 var soak_source = null
 var perm_slow := 0.0
+## Tractor Tower: a distance sample every quarter second (the last six seconds), so it can rewind an enemy to where it was.
+var dist_log: Array = []
+var _log_clock := 0.0
 var vuln_amount := 0.0
 var vuln_timer := 0.0
 var stun_timer := 0.0
@@ -158,6 +161,20 @@ func apply_slow(amount: float, duration: float) -> void:
 		slow_timer = maxf(slow_timer, duration)
 
 
+## Puts the enemy at `d` px along its route (clamped), moving it there at once.
+func set_distance(d: float) -> void:
+	distance = clampf(d, 0.0, path_len)
+	pos = curve.sample_baked(minf(distance, path_len))
+
+
+## Where the enemy was `seconds` ago along its route (its distance then), or 0 if it hasn't been alive that long.
+func distance_ago(seconds: float) -> float:
+	var back := int(round(seconds / 0.25))
+	if back > dist_log.size():
+		return 0.0
+	return float(dist_log[dist_log.size() - back]) if back >= 1 else distance
+
+
 func effective_armor() -> float:
 	return maxf(0.0, armor - armor_shred - (armor_break if armor_break_timer > 0.0 else 0.0))
 
@@ -235,6 +252,12 @@ func step(dt: float) -> void:
 	hit_flash = maxf(0.0, hit_flash - dt)
 	reveal_timer = maxf(0.0, reveal_timer - dt)
 	since_hit += dt
+	_log_clock += dt
+	if _log_clock >= 0.25:
+		_log_clock = 0.0
+		dist_log.append(distance)
+		if dist_log.size() > 24:
+			dist_log.pop_front()
 	if soak_timer > 0.0:
 		soak_timer = maxf(0.0, soak_timer - dt)
 		if soak_timer <= 0.0:

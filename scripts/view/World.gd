@@ -429,6 +429,23 @@ func _visual(ev: Dictionary) -> void:
 			if sl.E >= 1:
 				fx.ring(ev.pos, 6.0, float(ev.radius) * 0.9, Color(0.7, 0.4, 1.0, 0.8), 0.45, 2.0)
 			shake = maxf(shake, 0.05)
+		"magneto_flip":
+			# Reverse Polarity: the field flips to repel, a red and blue shock tearing out of the pole.
+			fx.ring(ev.pos, 6.0, float(ev.radius), Color(0.85, 0.2, 0.2), 0.4, 3.0, true)
+			fx.ring(ev.pos, 4.0, float(ev.radius) * 0.7, Color(0.28, 0.48, 0.95), 0.35, 2.5)
+			fx.flash(ev.pos, 16.0, Draw.GOLD, 0.12)
+			shake = maxf(shake, 0.04)
+		"tractor_lock":
+			fx.tracer(ev.from, ev.to, Color(Draw.ACCENT.tractor_tower, 0.8), 0.25, 2.0)
+			fx.flash(ev.to, 10.0, Draw.ACCENT.tractor_tower, 0.15)
+		"tractor_slam":
+			fx.ring(ev.pos, 6.0, float(ev.radius), Color(1.0, 0.85, 0.3), 0.35, 3.0, true)
+			fx.burst(ev.pos, Color(1.0, 0.85, 0.3), 8, float(ev.radius) * 2.0, 2.0, 0.4)
+			ground_fx.scorch(ev.pos, float(ev.radius) * 0.4)
+			shake = maxf(shake, 0.06)
+		"ricochet":
+			fx.tracer(ev.from, ev.to, Color(0.4, 1.0, 0.5, 0.9), 0.15, 1.6)
+			fx.flash(ev.to, 6.0, Color(0.4, 1.0, 0.5), 0.08)
 		"mine_toss":
 			# A mine lobbed from the launcher to its spot: a short arc of light and a ring where it lands.
 			fx.tracer(ev.pos, ev.to, Color(1, 1, 1, 0.5), 0.25, 1.0)

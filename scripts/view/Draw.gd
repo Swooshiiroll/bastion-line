@@ -20,6 +20,9 @@ const BoostTowerArt = preload("res://scripts/view/towers/BoostTowerArt.gd")
 const RadarTowerArt = preload("res://scripts/view/towers/RadarTowerArt.gd")
 const ShockwaveGeneratorArt = preload("res://scripts/view/towers/ShockwaveGeneratorArt.gd")
 const ScrapyardArt = preload("res://scripts/view/towers/ScrapyardArt.gd")
+const MagnetoTowerArt = preload("res://scripts/view/towers/MagnetoTowerArt.gd")
+const TractorTowerArt = preload("res://scripts/view/towers/TractorTowerArt.gd")
+const AugmentationTowerArt = preload("res://scripts/view/towers/AugmentationTowerArt.gd")
 const Difficulty = preload("res://data/difficulty.gd")
 
 const OUTLINE := Color(0.03, 0.04, 0.06, 0.95)
@@ -63,6 +66,9 @@ const ACCENT := {
 	"radar_tower": Color(0.35, 1.00, 0.85),
 	"shockwave_generator": Color(1.00, 0.70, 0.28),
 	"scrapyard": Color(0.95, 0.72, 0.42),
+	"magneto_tower": Color(0.60, 0.45, 1.00),
+	"tractor_tower": Color(0.78, 0.71, 1.00),
+	"augmentation_tower": Color(0.32, 0.62, 1.00),
 }
 const SPEC_ALT := {
 	"mint": Color(1.00, 0.84, 0.30),
@@ -469,7 +475,7 @@ static var _bake_seg := 0
 static var _seg_used := {}
 static var _turrets := {}
 static var _live := {}
-const AIMED := ["arrow", "cannon", "sniper", "laser", "missile", "flak", "gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "railgun", "mine_layer"]
+const AIMED := ["arrow", "cannon", "sniper", "laser", "missile", "flak", "gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "railgun", "mine_layer", "tractor_tower"]
 ## The aim of each extra gun of the tower being drawn (gun 0 is the main one); set by tower().
 static var _extra: Array = []
 const TURRET_BUCKETS := 8
@@ -703,6 +709,12 @@ static func _turret(ci: CanvasItem, type: String, tier: int, c: Vector2, aim: fl
 			ShockwaveGeneratorArt.draw(ci, c, aim, s, t, flash, spec, acc, _extra)
 		"scrapyard":
 			ScrapyardArt.draw(ci, c, aim, s, t, flash, spec, acc, _extra)
+		"magneto_tower":
+			MagnetoTowerArt.draw(ci, c, aim, s, t, flash, spec, acc, _extra)
+		"tractor_tower":
+			TractorTowerArt.draw(ci, c, aim, s, t, flash, spec, acc, _extra)
+		"augmentation_tower":
+			AugmentationTowerArt.draw(ci, c, aim, s, t, flash, spec, acc, _extra)
 
 
 ## --- Shading helpers: light comes from the upper left. ------------------------------------

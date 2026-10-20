@@ -1012,7 +1012,7 @@ func _rework_checks(g) -> void:
 		g.state = Game.State.BUILD
 	else:
 		fails += _expect(false, "an enemy could be put in the Gun Turret's range")
-	for type in ["mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon", "railgun", "tesla_tower", "drone_bay", "cas_gunship", "mine_layer", "chemical_plant", "cryo_tower", "boost_tower", "radar_tower", "shockwave_generator", "scrapyard"]:
+	for type in ["mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon", "railgun", "tesla_tower", "drone_bay", "cas_gunship", "mine_layer", "chemical_plant", "cryo_tower", "boost_tower", "radar_tower", "shockwave_generator", "scrapyard", "magneto_tower", "tractor_tower", "augmentation_tower"]:
 		fails += await _rework_fire_check(g, type)
 	screen.world.selected_tower = null
 	await _wait(0.2)
@@ -1026,6 +1026,7 @@ func _rework_checks(g) -> void:
 func _rework_fire_check(g, type: String) -> int:
 	var screen = app.current
 	var fails := 0
+	var existing: Array = g.towers.duplicate()
 	var free: Array = []
 	for y in 14:
 		for x in 24:
@@ -1043,7 +1044,7 @@ func _rework_fire_check(g, type: String) -> int:
 	for k in 3:
 		g.upgrade_tower(t, "a")
 	g.upgrade_tower(t, "b")
-	if type == "boost_tower":
+	if type == "boost_tower" or type == "augmentation_tower":
 		var mate = g.place_tower("gun_turret", free[mini(2, free.size() - 1)])
 		if mate != null:
 			mate.pos = t.pos + Vector2(30, 0)
@@ -1076,6 +1077,15 @@ func _rework_fire_check(g, type: String) -> int:
 				worked = t.cooldown > 0.0 or t.pulse_count > 0
 			"shockwave_generator":
 				worked = t.damage_dealt > 0.0 or foe.hp < foe.max_hp
+			"magneto_tower":
+				worked = foe.slow_amount > 0.0
+			"tractor_tower":
+				worked = t.cooldown > 0.0 or float(t.gun_cds.get("hold_left", 0.0)) > 0.0
+			"augmentation_tower":
+				worked = false
+				for o in g.towers:
+					if o != t and o.buff_crit > 0.0:
+						worked = true
 			"boost_tower":
 				worked = false
 				for o in g.towers:
@@ -1089,7 +1099,9 @@ func _rework_fire_check(g, type: String) -> int:
 	else:
 		fails += _expect(false, "an enemy could be put in %s's range" % type)
 	screen.world.selected_tower = null
-	g.sell_tower(t)
+	for o in g.towers.duplicate():
+		if not existing.has(o):
+			g.sell_tower(o)
 	return fails
 
 

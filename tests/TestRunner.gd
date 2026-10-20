@@ -4315,3 +4315,297 @@ func test_rework_scrapyard() -> void:
 	check(ps.mastered and near(ps.stats().income, 320.0) and near(ps.stats().interest, 0.03) and near(ps.stats().interest_cap, 400.0), "Gold Foundry: 320 per round and 3% interest")
 	# Its own upgrades aren't discounted by itself.
 	check(near(ps.discount, 0.0), "a Scrapyard's own upgrades aren't discounted")
+
+
+func test_rework_magneto_tower() -> void:
+	var g = new_game()
+	g.gold = 900000
+	g.emit_events = true
+	var t = g.place_tower("magneto_tower", spot(g, "magneto_tower", 0))
+	check(t != null and t.is_rework and g.tower_cost("magneto_tower") == 525, "the Magneto Tower builds for 525")
+	var s: Dictionary = t.stats()
+	check(near(s.range, 120.0) and near(s.slow, 0.25), "stock: a 120 px field, 25% slow")
+	check(g.buy_retrofit(t, 0) and near(t.stats().slow, 0.30), "Superconducting Coil: 30%")
+	var fs = g.place_tower("magneto_tower", spot(g, "magneto_tower", 20))
+	check(g.buy_retrofit(fs, 1) and near(fs.stats().range, 135.0), "Field Stabiliser: 135 px")
+	var ps = g.place_tower("magneto_tower", spot(g, "magneto_tower", 40))
+	check(g.buy_retrofit(ps, 2) and near(ps.stats().pole_shoes, 0.3), "Pole Shoes")
+	# The slow, scaled by role weight; air and ground; outside the field nothing.
+	g.enemies.clear()
+	var m = g.place_tower("magneto_tower", spot(g, "magneto_tower", 60))
+	var swarm = put(g, "swarmling", 100.0, 0, 500.0)
+	var tank = put(g, "brute", 100.0, 0, 500.0)
+	var bat = put(g, "bat", 100.0, 0, 500.0)
+	var boss = put(g, "colossus", 100.0, 0, 1.0)
+	var far = put(g, "grunt", 100.0, 0, 500.0)
+	far.pos = Vector2(5000, 5000)
+	for e in [swarm, tank, bat, boss]:
+		e.pos = m.pos + Vector2(30, 0)
+	m.cooldown = 99.0
+	g._update_magneto(m, m.stats(), 0.05)
+	check(near(swarm.slow_amount, 0.25, 0.01) and bat.slow_amount > 0.2 and far.slow_amount == 0.0, "air and ground in the field are slowed; the far one isn't")
+	check(tank.slow_amount < swarm.slow_amount and boss.slow_amount < tank.slow_amount, "heavier roles resist more (swarm %.2f, brute %.2f, boss %.2f)" % [swarm.slow_amount, tank.slow_amount, boss.slow_amount])
+	# Pull Strength: heavy roles resist less; the mastery slows everyone fully.
+	var pw = g.place_tower("magneto_tower", spot(g, "magneto_tower", 80))
+	pw.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, pw, "a", 5)
+	check(pw.mastered and near(pw.stats().slow, 0.55) and near(pw.stats().grip_relief, 1.0), "Absolute Pull: 55%, no role resists")
+	pw.pos = tank.pos
+	boss.slow_amount = 0.0
+	boss.slow_timer = 0.0
+	pw.cooldown = 99.0
+	g._update_magneto(pw, pw.stats(), 0.05)
+	check(near(boss.slow_amount, 0.55 * (1.0 - boss.slow_resist), 0.02), "even a boss is slowed fully (%.2f)" % boss.slow_amount)
+	# Field size.
+	var fz = g.place_tower("magneto_tower", spot(g, "magneto_tower", 100))
+	fz.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, fz, "b", 5)
+	check(fz.mastered and near(fz.stats().range, 195.0), "Magnetosphere: 195 px")
+	# Polarity: armour comes off while inside, for good with Torn Plates.
+	var pl = g.place_tower("magneto_tower", spot(g, "magneto_tower", 120))
+	pl.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, pl, "c", 2)
+	check(near(pl.stats().armor_pull, 4.0), "Plate Ripper: 4 armour")
+	g.enemies.clear()
+	var brute = put(g, "brute", 100.0, 0, 500.0)
+	pl.pos = brute.pos + Vector2(30, 0)
+	pl.cooldown = 99.0
+	var a0: float = brute.effective_armor()
+	g._update_magneto(pl, pl.stats(), 0.05)
+	check(near(brute.effective_armor(), maxf(0.0, a0 - 4.0)), "armour is pulled off inside the field (%.1f)" % brute.effective_armor())
+	for i in 20:
+		brute.step(0.05)
+	check(near(brute.effective_armor(), a0), "and comes back when it leaves")
+	buy_steps(g, pl, "c", 1)
+	g._update_magneto(pl, pl.stats(), 0.05)
+	for i in 20:
+		brute.step(0.05)
+	check(brute.armor_shred >= 4.0 and brute.effective_armor() < a0, "Torn Plates: gone for good (%.1f)" % brute.effective_armor())
+	# Reverse polarity: a flip flings crowded enemies together.
+	buy_steps(g, pl, "c", 2)
+	check(pl.mastered and int(pl.stats().flip_every) == 4 and near(pl.stats().flip_damage, 40.0), "Reverse Polarity: a flip every 4 s")
+	g.enemies.clear()
+	var a = put(g, "grunt", 100.0, 0, 5000.0)
+	var b = put(g, "grunt", 100.0, 0, 5000.0)
+	b.pos = a.pos + Vector2(10, 0)
+	var lone = put(g, "grunt", 100.0, 0, 5000.0)
+	lone.pos = a.pos + Vector2(0, 80)
+	pl.pos = a.pos + Vector2(30, 0)
+	pl.cooldown = 0.0
+	var ha: float = a.hp
+	var hl: float = lone.hp
+	g._update_magneto(pl, pl.stats(), 0.05)
+	check(a.hp < ha and b.hp < b.max_hp and near(lone.hp, hl) and a.stun_timer > 0.2, "the flip hurts and stuns the crowded, not the lone one")
+
+
+func test_rework_tractor_tower() -> void:
+	var g = new_game()
+	g.gold = 900000
+	g.emit_events = true
+	var t = g.place_tower("tractor_tower", spot(g, "tractor_tower", 0))
+	check(t != null and t.is_rework and g.tower_cost("tractor_tower") == 575, "the Tractor Tower builds for 575")
+	var s: Dictionary = t.stats()
+	check(near(s.range, 160.0) and near(s.hold, 1.5) and near(s.pull, 80.0) and near(s.recharge, 6.0), "stock: 160 px, hold 1.5 s, pull 80 px, recharge 6 s")
+	check(g.buy_retrofit(t, 0) and near(t.stats().beam_slow, 0.3), "Beam Sweep")
+	var lh = g.place_tower("tractor_tower", spot(g, "tractor_tower", 20))
+	check(g.buy_retrofit(lh, 1) and near(lh.stats().hold, 2.0), "Longer Hold: 2 s")
+	var fr = g.place_tower("tractor_tower", spot(g, "tractor_tower", 40))
+	check(g.buy_retrofit(fr, 2) and near(fr.stats().recharge, 5.0), "Faster Recharge: 5 s")
+	# A grab: locks one enemy, holds it (no forward motion), hauls it back, releases it, recharges.
+	g.enemies.clear()
+	var tr = g.place_tower("tractor_tower", spot(g, "tractor_tower", 60))
+	var e = put(g, "grunt", 200.0, 0, 5000.0)
+	tr.pos = e.pos + Vector2(30, 0)
+	tr.cooldown = 0.0
+	var d0: float = e.distance
+	g._update_tractor(tr, tr.stats(), 0.05)
+	check(tr.target == e and float(tr.gun_cds.hold_left) > 1.4, "it locks the enemy")
+	for i in 31:
+		g._update_tractor(tr, tr.stats(), 0.05)
+		e.step(0.05)
+	check(d0 - e.distance > 70.0 and d0 - e.distance < 95.0, "a swarm-weight enemy is hauled back about 80 px (%.1f)" % (d0 - e.distance))
+	check(tr.cooldown > 5.5 and tr.target == null, "released, then it recharges 6 s")
+	# Role weight: a boss is pulled a quarter as far and held half as long.
+	var boss = put(g, "colossus", 200.0, 0, 1.0)
+	var btr = g.place_tower("tractor_tower", spot(g, "tractor_tower", 80))
+	btr.pos = boss.pos + Vector2(30, 0)
+	g.enemies.erase(e)
+	btr.cooldown = 0.0
+	g._update_tractor(btr, btr.stats(), 0.05)
+	check(float(btr.gun_cds.hold_left) < 0.8 and float(btr.gun_cds.pull_rate) * float(btr.gun_cds.hold_left) < 25.0, "a boss: shorter hold, about a quarter of the pull")
+	# Pull path: longer, then Rewind by time, then Undo.
+	var pu = g.place_tower("tractor_tower", spot(g, "tractor_tower", 100))
+	pu.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, pu, "a", 3)
+	check(near(pu.stats().rewind, 3.0), "Rewind: back to where it was 3 s ago")
+	g.enemies.clear()
+	var rw = put(g, "grunt", 50.0, 0, 5000.0)
+	for i in 80:
+		rw.step(0.05)
+		if i % 5 == 4:
+			rw.dist_log.append(rw.distance)
+	var then: float = rw.distance_ago(3.0)
+	check(then < rw.distance and rw.distance - then > 10.0, "the enemy remembers where it was (%.0f now, %.0f then)" % [rw.distance, then])
+	pu.pos = rw.pos + Vector2(30, 0)
+	pu.cooldown = 0.0
+	g._update_tractor(pu, pu.stats(), 0.05)
+	check(float(pu.gun_cds.pull_rate) * float(pu.gun_cds.hold_left) > (rw.distance - then) * 0.8, "the pull is the rewind distance")
+	buy_steps(g, pu, "a", 2)
+	check(pu.mastered and near(pu.stats().rewind, 5.0) and pu.stats().undo, "Undo: back 5 s, and once a round to the segment start")
+	# Undo: once per round, a non-boss goes back to the start of its segment.
+	g.enemies.clear()
+	var u = put(g, "grunt", 400.0, 0, 5000.0)
+	pu.pos = u.pos + Vector2(30, 0)
+	pu.cooldown = 0.0
+	pu.gun_cds.clear()
+	var seg: float = g._segment_start(u)
+	g._update_tractor(pu, pu.stats(), 0.05)
+	check(float(pu.gun_cds.pull_rate) * float(pu.gun_cds.hold_left) >= (u.distance - seg) * 0.95 or seg <= 0.0, "Undo sends it back to its segment start (%.0f -> %.0f)" % [u.distance, seg])
+	check(int(pu.gun_cds.undo_wave) == g.wave, "it's used for this round")
+	# Recharge path.
+	var rc = g.place_tower("tractor_tower", spot(g, "tractor_tower", 120))
+	rc.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, rc, "b", 5)
+	check(rc.mastered and near(rc.stats().recharge, 2.0), "Supercapacitor: recharge 2 s")
+	# Grip path: crushing damage, lock, slam.
+	var gr = g.place_tower("tractor_tower", spot(g, "tractor_tower", 140))
+	gr.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, gr, "c", 2)
+	check(near(gr.stats().grip_relief, 0.5) and near(gr.stats().grip_dps, 15.0), "Crushing Grip: 15/s")
+	g.enemies.clear()
+	var hv = put(g, "brute", 200.0, 0, 5000.0)
+	gr.pos = hv.pos + Vector2(30, 0)
+	gr.cooldown = 0.0
+	var hp: float = hv.hp
+	g._update_tractor(gr, gr.stats(), 0.05)
+	for i in 20:
+		g._update_tractor(gr, gr.stats(), 0.05)
+	check(hp - hv.hp > 10.0, "the held enemy takes crushing damage (%.1f)" % (hp - hv.hp))
+	hv.alive = false
+	buy_steps(g, gr, "c", 3)
+	check(gr.mastered and near(gr.stats().slam_radius, 80.0) and near(gr.stats().slam_stun, 0.8) and gr.stats().slam_shatter and gr.stats().grip_lock, "Gravity Hammer: an 80 px slam, 0.8 s, shatters barriers")
+	g.enemies.clear()
+	var held = put(g, "aegis", 200.0, 0, 5000.0)
+	gr.pos = held.pos + Vector2(40, 0)
+	gr.cooldown = 0.0
+	g._update_tractor(gr, gr.stats(), 0.05)
+	check(held.barrier_block == 0.0, "no lock before the grab ticks")
+	g._update_tractor(gr, gr.stats(), 0.05)
+	check(held.barrier_block > 0.0 and held.suppress_timer > 0.0, "Grip Lock: the held enemy's barrier and abilities are off (%.2f %.2f %s %.2f)" % [held.barrier_block, held.suppress_timer, str(gr.target == held), float(gr.gun_cds.get("hold_left", -1.0))])
+	var nb = put(g, "grunt", 200.0, 0, 5000.0)
+	nb.pos = held.pos + Vector2(30, 0)
+	gr.gun_cds["hold_left"] = 0.01
+	g._update_tractor(gr, gr.stats(), 0.05)
+	check(nb.stun_timer > 0.5 and held.shield == 0.0, "the slam stuns what is near it and shatters the barrier")
+
+
+func test_rework_augmentation_tower() -> void:
+	var g = new_game()
+	g.gold = 900000
+	g.emit_events = true
+	var a = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 0))
+	check(a != null and a.is_rework and a.is_support() and g.tower_cost("augmentation_tower") == 650, "the Augmentation Tower builds for 650")
+	var s: Dictionary = a.stats()
+	check(near(s.range, 96.0) and near(s.aug_crit, 0.05) and near(s.crit_mult, 2.0), "stock: 96 px, a 5% crit chance (x2)")
+	check(g.buy_retrofit(a, 0) and near(a.stats().range, 144.0), "Wide Aura: 144 px")
+	var ab = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 20))
+	check(g.buy_retrofit(ab, 1) and near(ab.stats().aug_crit, 0.10), "Amplified Bonus: 10%")
+	var rl = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 40))
+	check(g.buy_retrofit(rl, 2) and rl.stats().remote_link, "Remote Link")
+	# Towers in range get the effects; Support towers and itself don't.
+	var base = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 60))
+	var gun = g.place_tower("gun_turret", spot(g, "gun_turret", 5))
+	var far_gun = g.place_tower("gun_turret", spot(g, "gun_turret", 150))
+	base.pos = gun.pos + Vector2(40, 0)
+	far_gun.pos = Vector2(5000, 5000)
+	g._recompute_buffs()
+	check(near(gun.buff_crit, 0.05) and far_gun.buff_crit == 0.0 and base.buff_crit == 0.0, "a tower in range gets 5% crit; one out of range and the Augmentation itself don't")
+	# Crits double a hit (a sure crit), continuous damage gets the average.
+	gun.buff_crit = 1.0
+	gun.aug_crit_mult = 2.0
+	g.enemies.clear()
+	var e = put(g, "grunt", 100.0, 0, 5000.0)
+	var h0: float = e.hp
+	var d1 := g.damage_enemy(e, 10.0, true, gun)
+	check(near(d1, 20.0), "a sure crit does double damage (%.1f)" % d1)
+	var d2 := g.damage_enemy(e, 10.0, true, gun, false)
+	check(near(d2, 20.0), "continuous damage takes the average (x2 at 100%% here: %.1f)" % d2)
+	gun.buff_crit = 0.0
+	# Crit path.
+	var cp = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 80))
+	cp.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, cp, "b", 3)
+	check(near(cp.stats().aug_crit, 0.15) and near(cp.stats().crit_mult, 2.5), "Precision Matrix: 15%, crits x2.5")
+	buy_steps(g, cp, "b", 2)
+	check(cp.mastered and near(cp.stats().aug_crit, 0.22) and near(cp.stats().crit_mult, 3.0), "Executioner Link: 22%, x3")
+	cp.pos = gun.pos + Vector2(40, 0)
+	base.pos = Vector2(5000, 5000)
+	g._recompute_buffs()
+	check(near(gun.buff_crit, 0.22) and near(gun.aug_crit_mult, 3.0), "the tower takes the strongest crit effect")
+	# Two Augmentation Towers don't stack.
+	var cp2 = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 100))
+	cp2.pos = gun.pos + Vector2(-40, 0)
+	g._recompute_buffs()
+	check(near(gun.buff_crit, 0.22), "overlapping Augmentation Towers don't stack")
+	# Energy conversion: a share of the damage counts as energy; full conversion tags every hit.
+	var ec = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 120))
+	ec.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, ec, "a", 4)
+	check(near(ec.stats().energy_conv, 1.0), "Full Conversion: 100%")
+	cp.pos = Vector2(5000, 5000)
+	cp2.pos = Vector2(5000, 5000)
+	ec.pos = gun.pos + Vector2(40, 0)
+	g._recompute_buffs()
+	check(near(gun.aug_energy, 1.0), "a nearby tower's damage is all energy")
+	e.last_hit_kind = "physical"
+	g.damage_enemy(e, 1.0, true, gun)
+	check(e.last_hit_kind == "energy", "so the hit is tagged energy")
+	buy_steps(g, ec, "a", 1)
+	g._recompute_buffs()
+	var before: float = e.hp
+	var dealt: float = g.damage_enemy(e, 10.0, true, gun)
+	check(ec.mastered and near(gun.aug_energy_bonus, 0.10) and dealt >= 10.9, "Overcharge: +10%% energy damage (%.1f)" % dealt)
+	# Ricochet: a single-target hit bounces to another enemy within 60 px at a share of its damage.
+	var rc = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 140))
+	rc.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, rc, "c", 3)
+	check(near(rc.stats().ricochet, 0.30) and near(rc.stats().ricochet_str, 0.7), "Ricochet Field: 30%, bounces at 70%")
+	ec.pos = Vector2(5000, 5000)
+	rc.pos = gun.pos + Vector2(40, 0)
+	g._recompute_buffs()
+	gun.aug_ricochet = 1.0
+	g.enemies.clear()
+	var e1 = put(g, "grunt", 100.0, 0, 5000.0)
+	var e2 = put(g, "grunt", 100.0, 0, 5000.0)
+	e2.pos = e1.pos + Vector2(30, 0)
+	var e3 = put(g, "grunt", 100.0, 0, 5000.0)
+	e3.pos = e1.pos + Vector2(0, 300)
+	var h2: float = e2.hp
+	g._ricochet(gun, e1, 100.0)
+	check(near(h2 - e2.hp, 100.0 * gun.aug_ricochet_str, 0.5) and near(e3.hp, e3.max_hp), "a bounce hits the nearest other enemy within 60 px at its share (%.1f)" % (h2 - e2.hp))
+	var h3: float = e2.hp
+	var e4 = put(g, "grunt", 100.0, 0, 5000.0)
+	e4.pos = e2.pos + Vector2(30, 0)
+	g._ricochet(gun, e1, 100.0)
+	check(near(e4.hp, e4.max_hp), "without Pinball a bounce doesn't bounce again")
+	gun.aug_bounce_again = true
+	g._ricochet(gun, e1, 100.0)
+	check(e4.hp < e4.max_hp, "with Pinball it does")
+	var pb = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 160))
+	pb.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, pb, "c", 5)
+	check(pb.mastered and near(pb.stats().ricochet, 0.5) and pb.stats().bounce_again, "Pinball: 50%, a bounce can bounce again")
+	# Remote Link: twice the radius at half strength.
+	var rem = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 180))
+	g.buy_retrofit(rem, 2)
+	var far2 = g.place_tower("gun_turret", spot(g, "gun_turret", 170))
+	rc.pos = Vector2(5000, 5000)
+	pb.pos = Vector2(5000, 5000)
+	rem.pos = far2.pos + Vector2(150, 0)
+	gun.pos = Vector2(5000, 4000)
+	g._recompute_buffs()
+	check(near(far2.buff_crit, 0.025), "Remote Link: a tower up to twice the radius away gets half the effect (%.3f)" % far2.buff_crit)
+	# An EMP switches it off.
+	rem.disabled = 3.0
+	g._update_boost_state()
+	check(far2.buff_crit == 0.0, "an offline Augmentation Tower gives nothing")

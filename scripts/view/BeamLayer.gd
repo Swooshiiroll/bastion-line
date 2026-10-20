@@ -36,6 +36,11 @@ func _draw() -> void:
 		_storm(z, t)
 	for z in g.trails:
 		_trail(z, t)
+	for tw in g.towers:
+		if tw.type == "tractor_tower" and tw.target != null and float(tw.gun_cds.get("hold_left", 0.0)) > 0.0 and tw.target.alive:
+			_tractor_beam(tw, t)
+		elif tw.type == "magneto_tower" and tw.disabled <= 0.0:
+			_magneto_field(tw, t)
 
 
 ## The Laser Tower's beams (the confirmed art): each ramps on its own target, widening and whitening with the Power path, wrapped
@@ -100,6 +105,31 @@ func _sweeps(tw, t: float) -> void:
 		draw_line(src, end, Color(acc, 0.55 * flick), 3.0, true)
 		draw_line(src, end, Color(1, 1, 1, 0.7 * flick), 1.2, true)
 		Draw.disc(self, end, 4.0, Color(acc, 0.3))
+
+
+## The Tractor Tower's focus beam: a bright line to the held enemy with rings sliding back down it, afterimages of the enemy gliding backward.
+func _tractor_beam(tw, t: float) -> void:
+	var acc: Color = Draw.ACCENT.tractor_tower
+	var src: Vector2 = tw.pos + Vector2.from_angle(tw.aim) * 18.0
+	var dst: Vector2 = tw.target.pos
+	draw_line(src, dst, Color(acc, 0.18), 7.0, true)
+	draw_line(src, dst, Color(acc, 0.7), 2.4, true)
+	draw_line(src, dst, Color(1, 1, 1, 0.8), 1.0, true)
+	for i in 4:
+		var u := fmod(t * 1.4 + float(i) / 4.0, 1.0)
+		var p := dst.lerp(src, u)
+		Draw.ring(self, p, 2.5 + 3.0 * (1.0 - u), Color(acc, 0.8 * (1.0 - u)), 1.0)
+	Draw.disc(self, dst, tw.target.radius + 4.0, Color(acc, 0.25))
+
+
+## The Magneto Tower's field: a faint ring at its reach, with a ring drawn inward toward the coil (the pull).
+func _magneto_field(tw, t: float) -> void:
+	var r: float = tw.get_range()
+	var acc: Color = Draw.ACCENT.magneto_tower
+	Draw.arc(self, tw.pos, r, 0.0, TAU, 56, Color(acc, 0.16), 1.2, true)
+	for i in 2:
+		var u := fmod(t * 0.5 + float(i) * 0.5, 1.0)
+		Draw.arc(self, tw.pos, r * (1.0 - u), 0.0, TAU, 48, Color(acc, 0.12 * (1.0 - u)), 1.5, true)
 
 
 ## A Railgun ion trail: a lingering, crackling line of ion-blue (gold at the Power mastery) that fades with its time.

@@ -765,12 +765,25 @@ func spawn_enemy(type: String, path_idx: int, start_dist := 0.0, hp_mult := 1.0,
 
 ## Deals damage after vulnerability, energy barrier and armor. Returns the damage actually dealt.
 ## A barrier soaks damage before armor applies; Arc Coils hit barriers twice as hard.
-func damage_enemy(e, amount: float, pierce: bool, source, flash := true, bypass_shield := false, reach_burrowed := false) -> float:
+func damage_enemy(e, amount: float, pierce: bool, source, flash := true, bypass_shield := false, reach_burrowed := false, no_aug := false) -> float:
 	if not e.alive or (e.burrowed and not reach_burrowed):
 		return 0.0
 	e.since_hit = 0.0
 	e.last_hit_kind = source.damage_kind() if source is Tower else "physical"
 	var amt := amount
+	if source is Tower and not no_aug:
+		# The Augmentation Tower and the Boost Tower's Crit Link: a crit chance on every hit (continuous damage gets the average), and a share
+		# of the damage counts as energy.
+		if source.buff_crit > 0.0:
+			if flash:
+				if _roll(source.buff_crit):
+					amt *= source.aug_crit_mult
+			else:
+				amt *= 1.0 + source.buff_crit * (source.aug_crit_mult - 1.0)
+		if source.aug_energy > 0.0 and (source.aug_energy >= 1.0 or _roll(source.aug_energy)):
+			e.last_hit_kind = "energy"
+			if source.aug_energy_bonus > 0.0 and source.aug_energy >= 1.0:
+				amt *= 1.0 + source.aug_energy_bonus
 	if e.vuln_timer > 0.0:
 		amt *= 1.0 + e.vuln_amount
 	var absorbed := 0.0
@@ -1028,6 +1041,14 @@ func _update_tower(t, dt: float) -> void:
 		return
 	if t.type == "boost_tower":
 		return
+	if t.type == "augmentation_tower":
+		return
+	if t.type == "magneto_tower":
+		_update_magneto(t, s, dt)
+		return
+	if t.type == "tractor_tower":
+		_update_tractor(t, s, dt)
+		return
 	if t.type == "radar_tower":
 		_update_radar(t, s, dt)
 		return
@@ -1144,6 +1165,168 @@ func aim_artillery(t, pos: Vector2) -> void:
 
 
 ## Loads a shell type, if the cannon has unlocked it. Takes effect from the next shell.
+## Augmentation Tower: every attacking tower in range (not Support, Economy or Sensor towers) takes the strongest of each effect: crit chance and
+## multiplier, energy conversion, ricochet. Remote Link extends the reach to twice the radius at half strength.
+func _apply_augmentation(a, s: Dictionary, r: float) -> void:
+	var remote := bool(s.get("remote_link", false))
+	for t in towers:
+		if t == a or t.is_support() or t.is_economy() or t.is_sensor() or not t.stats().has("damage"):
+			continue
+		var d2: float = a.pos.distance_squared_to(t.pos)
+		var f := 1.0
+		if d2 > r * r:
+			if not remote or d2 > 4.0 * r * r:
+				continue
+			f = 0.5
+		t.buff_crit = maxf(t.buff_crit, float(s.get("aug_crit", 0.0)) * f)
+		t.aug_crit_mult = maxf(t.aug_crit_mult, 1.0 + (float(s.get("crit_mult", 2.0)) - 1.0) * f)
+		t.aug_energy = maxf(t.aug_energy, float(s.get("energy_conv", 0.0)) * f)
+		t.aug_energy_bonus = maxf(t.aug_energy_bonus, float(s.get("energy_bonus", 0.0)) * f)
+		t.aug_ricochet = maxf(t.aug_ricochet, float(s.get("ricochet", 0.0)) * f)
+		t.aug_ricochet_str = maxf(t.aug_ricochet_str, float(s.get("ricochet_str", 0.5)))
+		t.aug_bounce_again = t.aug_bounce_again or bool(s.get("bounce_again", false))
+
+
+## A ricochet: a single-target hit bounces to another enemy within 60 px at a share of its damage; with Pinball a bounce can bounce again.
+func _ricochet(source, from, dmg: float, depth := 0) -> void:
+	if source == null or not (source is Tower) or source.aug_ricochet <= 0.0 or depth > 3:
+		return
+	if depth > 0 and not source.aug_bounce_again:
+		return
+	if not _roll(source.aug_ricochet):
+		return
+	var best = null
+	var bd := 60.0 * 60.0
+	for e in enemies:
+		if e.alive and e != from and not e.is_hidden():
+			var d2: float = e.pos.distance_squared_to(from.pos)
+			if d2 <= bd:
+				bd = d2
+				best = e
+	if best == null:
+		return
+	var bdmg: float = dmg * source.aug_ricochet_str
+	damage_enemy(best, bdmg, false, source, true, false, false, true)
+	_emit({"type": "ricochet", "from": from.pos, "to": best.pos})
+	_ricochet(source, best, bdmg, depth + 1)
+
+
+## Magneto Tower: a constant field slows every enemy inside, air and ground, scaled by the enemy's role weight (heavier roles resist more;
+## Pull Strength and the Pole Shoes make them resist less). Polarity pulls armour off while they are inside (for good with Torn Plates);
+## Reverse Polarity flips the field every few seconds and flings enemies together for damage and a short stun.
+func _update_magneto(t, s: Dictionary, dt: float) -> void:
+	var r: float = t.get_range()
+	var slow := float(s.slow)
+	var relief := float(s.get("grip_relief", 0.0))
+	var shoes := float(s.get("pole_shoes", 0.0))
+	var pull := float(s.get("armor_pull", 0.0))
+	var perm := bool(s.get("pull_perm", false))
+	var inside := _enemies_near(t.pos, r, t.hits_air(), t.hits_ground())
+	for e in inside:
+		var resist: float = e.role_resist() * (1.0 - shoes) * (1.0 - relief)
+		e.apply_slow(slow * (1.0 - resist), 0.25)
+		if pull > 0.0:
+			if perm:
+				e.armor_shred = maxf(e.armor_shred, pull)
+			else:
+				e.armor_break = maxf(e.armor_break, pull)
+				e.armor_break_timer = maxf(e.armor_break_timer, 0.3)
+	var every := float(s.get("flip_every", 0.0))
+	if every > 0.0:
+		t.cooldown -= dt
+		if t.cooldown <= 0.0:
+			t.cooldown = every
+			t.pulse_count += 1
+			var hit := 0
+			for e in inside:
+				var crowded := false
+				for o in inside:
+					if o != e and o.pos.distance_squared_to(e.pos) <= 24.0 * 24.0:
+						crowded = true
+						break
+				if crowded:
+					damage_enemy(e, float(s.get("flip_damage", 40.0)), true, t)
+					if e.alive:
+						e.apply_stun(0.3 * _boss_factor(e))
+					hit += 1
+			t.fire_flash = 0.4
+			_emit({"type": "magneto_flip", "pos": t.pos, "radius": r, "hit": hit, "look": t.look_key()})
+
+
+## Tractor Tower: locks one enemy (by the targeting mode), holds it (a stun) while hauling it back along the track, releases it, then recharges.
+## The pull scales with the enemy's role weight; Rewind sends it back to where it was a few seconds ago; Undo (once a round) sends one non-boss enemy
+## back to the start of its track segment. While held it can take crushing damage and lose its barrier and abilities; Lift and Drop stuns what
+## it lands among.
+func _update_tractor(t, s: Dictionary, dt: float) -> void:
+	var cds: Dictionary = t.gun_cds
+	var held = t.target
+	if held != null and (not held.alive or not t.can_target(held)) and float(cds.get("hold_left", 0.0)) > 0.0:
+		cds["hold_left"] = 0.0
+		held = null
+	if held != null and float(cds.get("hold_left", 0.0)) > 0.0:
+		cds["hold_left"] = float(cds.hold_left) - dt
+		held.set_distance(held.distance - float(cds.get("pull_rate", 0.0)) * dt)
+		held.apply_stun(0.2)
+		if float(s.get("grip_dps", 0.0)) > 0.0:
+			damage_enemy(held, float(s.grip_dps) * dt, true, t, false)
+		if bool(s.get("grip_lock", false)):
+			held.barrier_block = maxf(held.barrier_block, 0.3)
+			held.suppress_timer = maxf(held.suppress_timer, 0.3)
+		if float(s.get("beam_slow", 0.0)) > 0.0:
+			for e in enemies:
+				if e.alive and e != held and Geometry2D.get_closest_point_to_segment(e.pos, t.pos, held.pos).distance_to(e.pos) <= e.radius + 6.0:
+					e.apply_slow(float(s.beam_slow), 0.3)
+		if float(cds.hold_left) <= 0.0:
+			_tractor_release(t, s, held)
+		return
+	t.cooldown -= dt
+	if t.cooldown > 0.0:
+		return
+	var target = pick_target(t)
+	if target == null:
+		t.target = null
+		t.cooldown = RETARGET_DELAY
+		return
+	t.target = target
+	t.aim = (target.pos - t.pos).angle()
+	var share: float = 1.0 - target.role_resist() * (1.0 - float(s.get("grip_relief", 0.0)))
+	var hold := float(s.hold) * (0.5 if target.boss else 1.0)
+	var back: float = float(s.pull) * share
+	if float(s.get("rewind", 0.0)) > 0.0:
+		back = maxf(0.0, target.distance - target.distance_ago(float(s.rewind))) * share
+	if bool(s.get("undo", false)) and not target.boss and int(cds.get("undo_wave", -1)) != wave:
+		cds["undo_wave"] = wave
+		back = maxf(back, target.distance - _segment_start(target))
+	cds["hold_left"] = hold
+	cds["pull_rate"] = back / maxf(hold, 0.1)
+	t.fire_flash = 0.2
+	_emit({"type": "tractor_lock", "from": t.pos, "to": target.pos, "look": t.look_key()})
+
+
+func _tractor_release(t, s: Dictionary, held) -> void:
+	t.cooldown = float(s.recharge)
+	t.gun_cds["hold_left"] = 0.0
+	var radius := float(s.get("slam_radius", 0.0))
+	if radius > 0.0 and not held.flying:
+		for e in _enemies_near(held.pos, radius, false, true):
+			e.apply_stun(float(s.get("slam_stun", 0.4)) * _boss_factor(e))
+			if bool(s.get("slam_shatter", false)) and e.max_shield > 0.0:
+				e.shield = 0.0
+		_emit({"type": "tractor_slam", "pos": held.pos, "radius": radius, "look": t.look_key()})
+	t.target = null
+
+
+## The distance along its route of the start of the segment an enemy is on (its last waypoint), for the Undo.
+func _segment_start(e) -> float:
+	var best := 0.0
+	if e.path_index >= 0 and e.path_index < grid.waypoints.size():
+		for pt in grid.waypoints[e.path_index]:
+			var off: float = e.curve.get_closest_offset(Grid.cell_center(pt))
+			if off <= e.distance - 2.0:
+				best = maxf(best, off)
+	return best
+
+
 ## Boost fields switch off while an EMP has the Boost Tower down: recompute when any support tower's offline state changes.
 func _update_boost_state() -> void:
 	var sig := 0
@@ -2206,7 +2389,7 @@ func _fire_projectile(t, target, s: Dictionary, dmg_mult := 1.0) -> void:
 	p.target_pos = target.pos
 	p.speed = float(s.proj_speed)
 	p.damage = t.eff_damage() * dmg_mult
-	if float(s.get("crit", 0.0)) + t.buff_crit > 0.0 and _roll(float(s.get("crit", 0.0)) + t.buff_crit):
+	if float(s.get("crit", 0.0)) > 0.0 and _roll(float(s.get("crit", 0.0))):
 		p.damage *= CRIT_MULT
 		p.crit = true
 	if t.is_rework:
@@ -2582,6 +2765,7 @@ func _projectile_hit(p) -> void:
 				var dealt2 := damage_enemy(p.target, p.damage, false, p.source)
 				_emit({"type": "hit", "pos": p.target.pos, "amount": dealt2, "kind": "flak"})
 				_rework_hit_effects(p, s)
+				_ricochet(p.source, p.target, p.damage)
 		"rocket_salvo":
 			# Rocket Salvo: a blast on flyers and ground alike (more against air with Proximity Fuses); Incendiary Warheads
 			# leave burning ground.
@@ -2657,6 +2841,7 @@ func _projectile_hit(p) -> void:
 				damage_enemy(p.target, p.damage, false, p.source)
 				if p.source != null and p.source.is_rework:
 					_rework_hit_effects(p, s)
+					_ricochet(p.source, p.target, p.damage)
 				_emit({"type": "arrow_hit", "pos": p.pos, "shred": p.shred > 0.0, "crit": p.crit, "look": p.look})
 
 
@@ -2766,11 +2951,20 @@ func _recompute_buffs() -> void:
 		t.buff_rate = 0.0
 		t.buff_range = 0.0
 		t.buff_crit = 0.0
+		t.aug_crit_mult = 2.0
+		t.aug_energy = 0.0
+		t.aug_energy_bonus = 0.0
+		t.aug_ricochet = 0.0
+		t.aug_ricochet_str = 0.5
+		t.aug_bounce_again = false
 	for a in towers:
 		if not a.is_support() or a.is_sensor() or a.is_economy() or a.disabled > 0.0:
 			continue
 		var s: Dictionary = a.stats()
 		var r: float = a.get_range()
+		if a.type == "augmentation_tower":
+			_apply_augmentation(a, s, r)
+			continue
 		# The Boost Tower's Retrofit adds a flat share on top of whatever each boost is (the strongest of each kind still wins).
 		var extra := float(s.get("buff_extra", 0.0))
 		for t in towers:

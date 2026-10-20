@@ -43,6 +43,12 @@ const STAT_ROWS := [
 	["Gel slow", "gel_slow", "pct"], ["Slow lasts", "slow_time", "%.1fs"], ["Permanent chill", "perm_slow", "pct"], ["Freeze every", "freeze_every", "%d waves"],
 	["Spray targets", "nozzles", "%d"], ["Damage boost", "buff_dmg", "+pct"], ["Fire-rate boost", "buff_rate", "+pct"], ["Range boost", "buff_range", "+pct"],
 	["Extra boost, all stats", "buff_extra", "+pct"], ["Crit chance given", "crit_link", "pct"], ["Jump range", "jump_range", "%d"],
+	["Holds for", "hold", "%.1fs"], ["Pull", "pull", "%d"], ["Recharge", "recharge", "%.1fs"], ["Rewinds", "rewind", "%.0fs"], ["Beam slows others", "beam_slow", "pct"],
+	["Crushing damage/s", "grip_dps", "%d"], ["Slam radius", "slam_radius", "%d"], ["Slam stun", "slam_stun", "%.1fs"], ["Heavy roles resist less", "grip_relief", "pct"],
+	["Armour pulled", "armor_pull", "%d"], ["Repel every", "flip_every", "%.0fs"], ["Repel damage", "flip_damage", "%d"],
+	["Ping every", "ping_every", "%.1fs"], ["Reveal lasts", "reveal_time", "%.1fs"], ["Radiation damage/s", "rad_dps", "%d"], ["Radiation radius", "rad_range", "%d"],
+	["Build discount in field", "build_discount", "pct"], ["Barrier damage", "shield_mult", "x%.1f"], ["Crit chance given", "aug_crit", "pct"], ["Crit damage", "crit_mult", "x%.1f"],
+	["Energy conversion", "energy_conv", "pct"], ["Ricochet chance", "ricochet", "pct"], ["Bounce strength", "ricochet_str", "pct"],
 ]
 ## Mechanic flags shown as a "yes" row: [label, stat key].
 const FLAG_ROWS := [
@@ -54,6 +60,8 @@ const FLAG_ROWS := [
 	["Homing", "homing"], ["Re-targets", "retarget"], ["Never misses", "never_miss"], ["Rippling salvo", "ripple"],
 	["Overloads disruptors", "overload"], ["Incendiary shells", "incendiary"], ["Shrapnel shells", "shrapnel"],
 	["Concussion shells", "concussion"], ["Combined shell", "combined"], ["Fast traverse", "turn_fast"],
+	["Pulled armour is gone for good", "pull_perm"], ["Grip lock", "grip_lock"], ["Slam shatters barriers", "slam_shatter"], ["Undo once a round", "undo"],
+	["Wave halves barriers", "shatter_half"], ["Constant reveal", "constant"], ["Early warning", "early_warning"], ["Remote link", "remote_link"], ["Bounces can bounce", "bounce_again"],
 	["Radar: reveals cloaked", "radar"], ["Mist soaks a neighbour", "mist"], ["Acid strips for good", "acid_perm"], ["Constant cold field", "cold_front"], ["Missiles loadout", "lo_missiles"], ["Bombs loadout", "lo_bombs"],
 	["Laser loadout", "lo_laser"], ["Full kit loadout", "lo_full"],
 ]

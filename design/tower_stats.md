@@ -450,3 +450,81 @@ air: no · ground: no · size: 2 · damage_kind: physical · economy: yes
 | c3 | discount 0.15 · build_discount 0.05 · range 160 |
 | c4 | discount 0.20 · range 175 |
 | cm | discount 0.25 · build_discount 0.10 · range 190 · sell_field 1.0 |
+
+## magneto_tower
+
+air: yes · ground: yes · size: 1 · damage_kind: energy
+
+| Node | Tokens |
+|---|---|
+| base | range 120 · slow 0.25 |
+| r1 | slow 0.30 |
+| r2 | range +15 |
+| r3 | pole_shoes 0.3 |
+| a1 | slow 0.32 |
+| a2 | slow 0.35 · grip_relief 0.25 |
+| a3 | slow 0.42 · grip_relief 0.5 |
+| a4 | slow 0.48 |
+| am | slow 0.55 · grip_relief 1 |
+| b1 | range 130 |
+| b2 | range 140 |
+| b3 | range 155 |
+| b4 | range 170 |
+| bm | range 195 |
+| c1 | armor_pull 2 |
+| c2 | armor_pull 4 |
+| c3 | pull_perm |
+| c4 | armor_pull 5 |
+| cm | flip_every 4 · flip_damage 40 |
+
+## tractor_tower
+
+air: yes · ground: yes · size: 1 · damage_kind: energy
+
+| Node | Tokens |
+|---|---|
+| base | range 160 · hold 1.5 · pull 80 · recharge 6 |
+| r1 | beam_slow 0.3 |
+| r2 | hold 2 |
+| r3 | recharge 5 |
+| a1 | pull 100 |
+| a2 | pull 120 · hold 1.8 |
+| a3 | rewind 3 |
+| a4 | rewind 4 |
+| am | rewind 5 · undo |
+| b1 | recharge 5.2 |
+| b2 | recharge 4.6 |
+| b3 | recharge 3.8 |
+| b4 | recharge 3.3 |
+| bm | recharge 2 |
+| c1 | grip_relief 0.5 |
+| c2 | grip_dps 15 |
+| c3 | slam_radius 50 · slam_stun 0.4 |
+| c4 | grip_lock |
+| cm | slam_radius 80 · slam_stun 0.8 · slam_shatter |
+
+## augmentation_tower
+
+air: yes · ground: yes · size: 1 · damage_kind: physical · support: yes
+
+| Node | Tokens |
+|---|---|
+| base | range 96 · aug_crit 0.05 · crit_mult 2 |
+| r1 | range 144 |
+| r2 | aug_crit 0.10 |
+| r3 | remote_link |
+| a1 | energy_conv 0.25 |
+| a2 | energy_conv 0.5 |
+| a3 | energy_conv 0.75 |
+| a4 | energy_conv 1 |
+| am | energy_conv 1 · energy_bonus 0.10 |
+| b1 | aug_crit 0.08 |
+| b2 | aug_crit 0.11 |
+| b3 | aug_crit 0.15 · crit_mult 2.5 |
+| b4 | aug_crit 0.18 |
+| bm | aug_crit 0.22 · crit_mult 3 |
+| c1 | ricochet 0.10 · ricochet_str 0.5 |
+| c2 | ricochet 0.20 |
+| c3 | ricochet 0.30 · ricochet_str 0.7 |
+| c4 | ricochet 0.40 |
+| cm | ricochet 0.50 · bounce_again |

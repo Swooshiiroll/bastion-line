@@ -69,6 +69,14 @@ var buff_rate := 0.0
 var buff_range := 0.0
 ## Boost Tower Crit Link: extra crit chance for towers in its field.
 var buff_crit := 0.0
+## Augmentation Tower effects on this tower (the strongest of each from towers in range): crit multiplier, the share of its damage that is energy,
+## bonus energy damage, ricochet chance and strength, and whether a bounce can bounce again.
+var aug_crit_mult := 2.0
+var aug_energy := 0.0
+var aug_energy_bonus := 0.0
+var aug_ricochet := 0.0
+var aug_ricochet_str := 0.5
+var aug_bounce_again := false
 ## Set by a Supply Depot in range: upgrade discount and sell refund (0 = none).
 var discount := 0.0
 var refund_field := 0.0

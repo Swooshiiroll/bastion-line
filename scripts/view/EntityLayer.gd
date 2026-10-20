@@ -54,6 +54,12 @@ func _draw() -> void:
 		var extra: Array = []
 		if tw.is_rework and tw.type == "gun_turret":
 			extra = _extra_aims(tw, key, cur)
+		elif tw.is_rework and tw.type == "magneto_tower":
+			extra = [tw.pulse_count]
+		elif tw.is_rework and tw.type == "tractor_tower":
+			var rech := float(tw.stats().get("recharge", 6.0))
+			var holding := float(tw.gun_cds.get("hold_left", 0.0)) > 0.0
+			extra = [1.0 if holding else clampf(1.0 - tw.cooldown / maxf(rech, 0.1), 0.0, 1.0), 1.0 if holding else 0.0]
 		elif tw.is_rework and tw.type == "shockwave_generator":
 			extra = [g.time - float(tw.gun_cds.get("wave_t", -9.0))]
 		elif tw.is_rework and tw.type == "radar_tower":
