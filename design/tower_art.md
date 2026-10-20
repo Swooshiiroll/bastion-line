@@ -349,7 +349,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 16 | Shockwave Generator | amber | B Ring Reactor | B Mushroom Pulse |
 | 17 | Scrapyard | copper | C Magnet Yard | B Sparks and Sale |
 | 18 | Magneto Tower | violet | F Stacked Coil Tower | F Drag Trails |
-| 19 | Tractor Tower | `design/tower_art_p2_19_tractor.html` | Base redesign **confirmed** (owner, 2026-10-19: B Armoured Dish, B Focus Beam; base page `design/tower_art_p19_tractor.html`). Second pass round 11: every stage picked; single dish; Supercapacitor; a round platform in true gold at the mastery; waiting for "Tractor Tower finished" |
+| 19 | Tractor Tower | `design/tower_art_p2_19_tractor.html` | Base redesign **confirmed** (owner, 2026-10-19: B Armoured Dish, B Focus Beam; base page `design/tower_art_p19_tractor.html`). Second pass round 12: every stage picked; thinner focus rings; waiting for "Tractor Tower finished" |
 | 20 | Augmentation Tower | lavender | F Nanite Hive | D Nanite Swarm |
 
 ## Second pass: per-path and Retrofit looks (owner, 2026-10-16)
@@ -1347,6 +1347,8 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
 
 **Round 11 (owner's note, "Make the platform round and restore the original gold color to it"):** the platform is round, with an inner ring, on both pages. At Supercapacitor it, its rams and its battery banks turn true gold, as on the other masteries (it had been a grey-gold mix).
 
+**Round 12 (owner's note, "make the path 3 waves thinner"):** Grip's focus rings are thinner: the arcs on the dish (0.45 to 0.7 units, from 0.8 to 1.4), the rings along the beam (0.8 px, from 1.4) and the rings closing round the held enemy (0.75 px, from 1.2).
+
 ## Open questions
 
-1. **Second pass, Tractor Tower** (tower 19, round 11, a round platform): every stage is picked. Confirm with "Tractor Tower finished". Then the Augmentation Tower.
+1. **Second pass, Tractor Tower** (tower 19, round 12, thinner focus rings): every stage is picked. Confirm with "Tractor Tower finished". Then the Augmentation Tower.
