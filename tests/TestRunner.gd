@@ -15,6 +15,7 @@ const Grid = preload("res://scripts/core/Grid.gd")
 const Enemy = preload("res://scripts/entities/Enemy.gd")
 const EnemyTraits = preload("res://scripts/core/EnemyTraits.gd")
 const GameScreen = preload("res://scripts/ui/GameScreen.gd")
+const Modifiers = preload("res://data/modifiers.gd")
 const Tower = preload("res://scripts/entities/Tower.gd")
 const Projectile = preload("res://scripts/entities/Projectile.gd")
 const Towers = preload("res://data/towers.gd")
@@ -290,16 +291,13 @@ func test_data_integrity() -> void:
 				check(level_dps(ln[b.key][1]) > level_dps(ln.t2), "%s %s out-damages tier 2 per second" % [type, b.id])
 	check(not Towers.TOWERS.cannon.air, "mortar can't hit air")
 
-	check(Waves.WAVES.size() == Waves.AUTHORED, "the authored table covers rounds 1-%d" % Waves.AUTHORED)
-	for i in Waves.WAVES.size():
-		var w: Array = Waves.WAVES[i]
-		check(not w.is_empty(), "wave %d not empty" % (i + 1))
-		for g in w:
-			check(Enemies.ENEMIES.has(g.t), "wave %d enemy %s exists" % [i + 1, g.t])
-			check(int(g.n) > 0 and float(g.i) > 0.0, "wave %d group sane" % (i + 1))
-	for bw in [5, 10, 15, 20, 25]:
-		check(Waves.WAVES[bw - 1].any(func(g): return g.t == "juggernaut"), "round %d is a Dreadnought round" % bw)
-	check(not Waves.WAVES.any(func(w): return w.any(func(g): return g.t == "warlord")), "the Overmind no longer appears in the authored rounds")
+	for w in range(1, 26):
+		var groups: Array = Waves.get_wave(w)
+		check(not groups.is_empty(), "wave %d not empty" % w)
+		for g in groups:
+			check(Enemies.ENEMIES.has(g.t), "wave %d enemy %s exists" % [w, g.t])
+			check(int(g.n) > 0 and float(g.i) > 0.0, "wave %d group sane" % w)
+	check(not Waves.get_wave(5).any(func(g): return g.t == "juggernaut"), "no more Dreadnought every 5th round")
 	check(Waves.hp_scale(1) == 1.0 and Waves.speed_scale(1) == 1.0, "round 1 is the base strength")
 	var prev_hp := 0.0
 	var prev_sp := 0.0
@@ -319,11 +317,12 @@ func test_data_integrity() -> void:
 	bg.damage_enemy(be, 1e12, true, null)
 	check(bg.gold - bg0 == int(floor(float(Enemies.ENEMIES.grunt.bounty) * Waves.bounty_scale(60) + 1e-6)), "a round-60 grunt pays its scaled bounty (%d)" % (bg.gold - bg0))
 	for t in Waves.COST:
-		check(Enemies.ENEMIES.has(t) and not Enemies.ENEMIES[t].get("boss", false), "%s is a regular enemy" % t)
+		check(Enemies.ENEMIES.has(t), "%s is an enemy" % t)
 		check(Waves.SPACING.has(t), "%s has a spawn spacing" % t)
 	for t in Enemies.ORDER:
 		check(Enemies.ENEMIES.has(t), "%s is defined" % t)
-		check(Waves.COST.has(t) or Enemies.ENEMIES[t].get("boss", false), "%s is either generated or a boss" % t)
+		check(Waves.COST.has(t), "%s has a threat cost" % t)
+		check(Waves.INTRO.has(t) or Enemies.ENEMIES[t].get("boss", false), "%s has an introduction round or is a boss" % t)
 	check(Enemies.ORDER.size() == 22 and Enemies.ENEMIES.size() == 22, "22 enemy types")
 	var cheapest := 1 << 30
 	for type in Towers.ORDER:
@@ -1142,7 +1141,11 @@ func test_wave_clear_and_early_call() -> void:
 	check(g.wave == 2, "now in wave 2")
 	check(run_until(g, func(): return g.state == Game.State.BUILD, 150.0), "field clears back to build phase")
 	check(g.stats.waves_cleared == 2, "both overlapping waves paid a clear bonus")
-	check(g.lives == 100 - 20, "20 grunts leaked one life each (%d)" % g.lives)
+	var leak_cost := 0
+	for w in [1, 2]:
+		for x in g.preview_wave(w):
+			leak_cost += int(x.n) * int(Enemies.ENEMIES[x.t].lives)
+	check(g.lives == 100 - leak_cost, "every enemy of both rounds leaked (%d, expected %d)" % [g.lives, 100 - leak_cost])
 	check(g.can_save(), "can save in build phase")
 
 	var d = new_game()
@@ -1186,47 +1189,62 @@ func test_warlord_minions() -> void:
 
 
 func test_round_generation() -> void:
-	var r1 := RandomNumberGenerator.new()
-	var r2 := RandomNumberGenerator.new()
-	r1.seed = 99
-	r2.seed = 99
-	check(deep_equal(Waves.generated_round(53, r1, 60), Waves.generated_round(53, r2, 60)), "generated rounds are deterministic per seed")
 	var g = new_game()
 	check(deep_equal(g.preview_wave(47), g.preview_wave(47)), "preview_wave is stable")
-	check(deep_equal(g.preview_wave(12), Waves.WAVES[11]), "rounds 1-25 come from the authored table")
-	for w in range(26, 161):
-		var groups: Array = Waves.get_wave(w, g._wave_rng(w), 120)
-		var total := 0
+	var other = Game.new("canyon", 424242, "hard")
+	for w in [1, 12, 33, 60, 97]:
+		check(deep_equal(g.preview_wave(w), other.preview_wave(w)), "round %d is the same on any seed, sector and mode" % w)
+	check(g.preview_wave(1).size() == 1 and g.preview_wave(1)[0].t == "grunt", "round 1 is Drones")
+	var prev_budget := 0.0
+	for w in range(1, 161):
+		var groups: Array = Waves.get_wave(w)
 		var regular := 0
 		for x in groups:
 			check(Enemies.ENEMIES.has(x.t) and int(x.n) > 0 and float(x.i) > 0.0, "round %d group valid" % w)
-			total += int(x.n)
 			if not Enemies.ENEMIES[x.t].get("boss", false):
 				regular += int(x.n)
-				check(Waves.unlock_round(x.t) <= w, "round %d only uses unlocked enemies (%s)" % [w, x.t])
+				check(Waves.first_round(x.t) <= w, "round %d only uses enemies met by then (%s)" % [w, x.t])
+			elif not Waves.boss_line(w).any(func(l): return l[0] == x.t):
+				check(Waves.first_boss_round(x.t) < w and int(x.n) == 1, "a boss recurs alone, after its own round (%s, %d)" % [x.t, w])
+			if x.has("m"):
+				check(int(x.n) == 1 and not x.m.is_empty() and x.m.size() <= Modifiers.max_per_elite(w), "round %d: an elite is one enemy with 1-%d modifiers" % [w, Modifiers.max_per_elite(w)])
+				for m in x.m:
+					check(int(Modifiers.MODIFIERS[m].intro) <= w and Modifiers.allowed(x.t, m), "round %d: %s may carry %s" % [w, x.t, m])
 		check(regular <= Waves.MAX_SPAWNS, "round %d respects the spawn cap (%d)" % [w, regular])
-		check(groups.size() >= 3, "round %d has several groups" % w)
-	# Each v3 enemy leads its introduction round.
+		if w >= 10:
+			check(groups.size() >= 3, "round %d has several groups" % w)
+		check(Waves.threat_budget(w) > prev_budget, "the budget grows every round (%d)" % w)
+		prev_budget = Waves.threat_budget(w)
+	check(near(Waves.threat_budget(1), 8.0) and near(Waves.threat_budget(25), 106.0, 1.0) and near(Waves.threat_budget(60), 290.0, 1.0), "the budget curve")
+	check(Waves.elite_share(7) == 0.0 and near(Waves.elite_share(8), 0.10) and near(Waves.elite_share(60), 0.30) and near(Waves.elite_share(100), 0.30), "elites: 10% from round 8, 30% by 60")
+	check(not Waves.get_wave(9).any(func(x): return x.has("m")), "no elites before the first modifier (round 10)")
+	# Each regular enemy leads its introduction round; each modifier shows up on its own.
 	for t in Waves.INTRO:
+		if not Enemies.ENEMIES.has(t):
+			continue
 		var w := int(Waves.INTRO[t])
-		var groups: Array = g.preview_wave(w)
-		check(groups[0].t == t, "%s leads round %d" % [t, w])
+		check(g.preview_wave(w)[0].t == t, "%s leads round %d" % [t, w])
 		check(Waves.first_round(t) == w, "%s first appears in round %d" % [t, w])
-	# Boss schedule and finales.
-	var has := func(w: int, t: String, final: int) -> bool:
-		return Waves.boss_groups(w, final).any(func(x): return x.t == t)
-	check(has.call(30, "juggernaut", 60) and not has.call(31, "juggernaut", 60), "Dreadnoughts every 5 rounds")
-	check(has.call(50, "warlord", 60) and has.call(75, "warlord", 80) and not has.call(60, "warlord", 80), "the Overmind at 50, 75, 100")
-	check(has.call(35, "leviathan", 60) and has.call(55, "leviathan", 60) and not has.call(45, "leviathan", 60), "Leviathans from round 35, every 20")
-	check(has.call(60, "colossus", 80) and has.call(80, "colossus", 120) and not has.call(70, "colossus", 120), "Colossi from round 60, every 20")
-	for final in Waves.FINALES:
-		var line: Array = Waves.boss_groups(final, final)
-		check(line.size() == Waves.FINALES[final].size(), "round %d is its mode's finale" % final)
-	check(has.call(40, "warlord", 40) and not has.call(40, "warlord", 60), "the Easy finale only happens on Easy")
-	check(Waves.first_round("warlord", 40) == 40 and Waves.first_round("warlord", 60) == 50, "the Overmind first shows up at the Easy finale or round 50")
-	var e40 = new_game("meadow", 1, "easy")
-	check(e40.preview_wave(40).any(func(x): return x.t == "leviathan"), "an Easy run's round 40 has the finale")
-	check(not new_game("meadow", 1, "medium").preview_wave(40).any(func(x): return x.t == "leviathan"), "a Medium run's round 40 doesn't")
+	for m in Modifiers.ORDER:
+		var w := int(Modifiers.MODIFIERS[m].intro)
+		check(Waves.get_wave(w).any(func(x): return x.has("m") and x.m.has(m)), "%s debuts on round %d" % [m, w])
+		check(not Waves.get_wave(w - 1).any(func(x): return x.has("m") and x.m.has(m)), "not before")
+	check(Waves.get_wave(45).any(func(x): return x.has("m") and x.m.size() >= 1), "late rounds have elites")
+	# Boss rounds: every 20, each bigger than the last.
+	var has := func(w: int, t: String) -> bool:
+		return Waves.boss_groups(w).any(func(x): return x.t == t)
+	check(has.call(20, "juggernaut") and has.call(40, "warlord") and has.call(60, "leviathan") and has.call(80, "colossus"), "a new boss at 20, 40, 60 and 80")
+	check(Waves.boss_groups(30).is_empty() and Waves.boss_groups(45).is_empty(), "no boss line-up between boss rounds")
+	var prev := 0.0
+	for w in [20, 40, 60, 80, 100, 120, 140]:
+		var threat := 0.0
+		for x in Waves.boss_groups(w):
+			threat += float(Waves.COST[x.t]) * int(x.n)
+		check(threat > prev, "boss round %d is bigger than the last" % w)
+		prev = threat
+	check(Waves.first_round("warlord") == 40 and Waves.first_round("colossus") == 80, "a boss is first met on its round")
+	for final in [40, 60, 80, 100, 120]:
+		check(g.is_boss_round(final), "each mode's last round (%d) is a boss round" % final)
 
 
 ## Places a tower and upgrades it straight to a tier-3 spec with free credits.
@@ -3015,6 +3033,61 @@ func test_enemy_traits() -> void:
 	var held: float = e.trait_timers.emp
 	g.tick(SIM_DT)
 	check(near(e.trait_timers.emp, held), "a silenced trait's timer holds")
+
+
+func test_elite_modifiers() -> void:
+	var g = new_game()
+	g.gold = 5000
+	g.state = Game.State.WAVE
+	var plain = put(g, "grunt", 60.0)
+	var e = g.spawn_enemy("grunt", 0, 80.0, 1.0, -1, 1.0, ["hasty", "plated"])
+	g.enemies.append(e)
+	check(e.elite and not plain.elite and e.elite_label == "HASTY PLATED", "an elite knows its modifiers")
+	check(near(e.speed, 55.0 * 1.35) and near(e.armor, 4.0), "Hasty +35% speed, Plated +4 armor")
+	check(e.rank > plain.rank and near(e.rank, Enemies.strength_of({"speed": 55.0 * 1.35, "armor": 4.0, "hp": 70.0})), "both re-score its rank")
+	check(e.bounty == 2 * plain.bounty and e.lives_cost == plain.lives_cost + 1, "double bounty, one more shield on a leak")
+	check(not Enemies.ENEMIES.grunt.has("shield") and near(float(Enemies.ENEMIES.grunt.speed), 55.0), "the enemy table is left alone")
+	var s = g.spawn_enemy("brute", 0, 100.0, 2.0, -1, 1.0, ["shielded"])
+	check(near(s.max_shield, s.max_hp * 0.5) and s.has_trait("barrier") and near(s.rank, Enemies.rank_score("brute")), "Shielded: a barrier worth half its health; rank unchanged")
+	var r = g.spawn_enemy("brute", 0, 100.0, 1.0, -1, 1.0, ["resolute"])
+	r.apply_stun(1.0)
+	check(r.stun_timer == 0.0 and near(r.slow_resist, 0.5), "Resolute: can't be stunned, resists half of a slow")
+	check(Modifiers.split_type("brute") == "runner" and Modifiers.split_type("bulwark") == "rally" and Modifiers.split_type("aegis") == "runner", "Splitting: the tier below in its role, else Skitters")
+	var sp = g.spawn_enemy("bulwark", 0, 120.0, 1.0, -1, 1.0, ["splitting"])
+	g.enemies.append(sp)
+	var n0: int = g.enemies.size()
+	g.damage_enemy(sp, 1e9, true, null)
+	g.tick(SIM_DT)
+	check(g.enemies.filter(func(x): return x.alive and x.type == "rally").size() == 2, "a Splitting Bulwark breaks into two Rally Beacons")
+	var tw = g.place_tower("arrow", Vector2i(2, 3))
+	var jm = g.spawn_enemy("grunt", 0, 100.0, 1e4, -1, 1.0, ["jamming"])
+	jm.speed = 0.0
+	g.enemies.append(jm)
+	jm.trait_timers.emp = 0.01
+	g.tick(SIM_DT)
+	check(jm.has_trait("emp") and near(tw.disabled, 1.5, 0.05), "Jamming: an EMP that knocks towers out for 1.5 s")
+	var cm = g.spawn_enemy("brute", 0, 300.0, 1.0, -1, 1.0, ["commanding"])
+	var mate = put(g, "grunt", 320.0)
+	g.enemies.append(cm)
+	g.tick(SIM_DT)
+	check(near(mate.haste, 0.15) and near(cm.haste, 0.0), "Commanding: others nearby +15% speed")
+	check(not Modifiers.allowed("jammer", "jamming") and not Modifiers.allowed("aegis", "shielded") and not Modifiers.allowed("rampart", "resolute"), "never a trait it already has")
+	check(not Modifiers.allowed("juggernaut", "hasty"), "bosses are never elites")
+	check(near(Modifiers.cost_mult(["hasty", "plated"]), 2.56), "modifier costs multiply")
+	check(Modifiers.max_per_elite(39) == 1 and Modifiers.max_per_elite(40) == 2 and Modifiers.max_per_elite(80) == 3, "1, 2 from round 40, 3 from round 80")
+	# A real round's elites arrive with their modifiers.
+	var g2 = new_game()
+	g2.wave = 9
+	g2.start_wave()
+	var seen_elite := false
+	for i in int(40.0 / SIM_DT):
+		g2.tick(SIM_DT)
+		for x in g2.enemies:
+			if x.elite and x.mods.has("shielded"):
+				seen_elite = true
+		if seen_elite:
+			break
+	check(seen_elite, "round 10 sends its Shielded elite")
 
 
 func test_rework_roles_and_damage_kinds() -> void:

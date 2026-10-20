@@ -13,6 +13,8 @@ const Abilities = preload("res://data/abilities.gd")
 const Research = preload("res://scripts/core/Research.gd")
 const Game = preload("res://scripts/core/Game.gd")
 const Waves = preload("res://data/waves.gd")
+const Enemies = preload("res://data/enemies.gd")
+const Modifiers = preload("res://data/modifiers.gd")
 
 const HEIGHT := 92.0
 const CTX_X := 190.0
@@ -506,12 +508,21 @@ func _enemy_card() -> void:
 	ctx.add_child(icon)
 	var id_box := UiKit.vbox(0)
 	id_box.position = Vector2(64, 8)
-	id_box.add_child(UiKit.label(str(e.def.name).to_upper(), 20, Draw.ENEMY_COLOR.get(etype, UiKit.TEXT)))
+	var name_row := UiKit.hbox(10)
+	name_row.add_child(UiKit.label(str(e.def.name).to_upper(), 20, Draw.ENEMY_COLOR.get(etype, UiKit.TEXT)))
+	name_row.add_child(UiKit.label(Enemies.role_label(e.def), 13, UiKit.DIM))
+	if e.elite:
+		name_row.add_child(UiKit.label("ELITE: " + Modifiers.label(e.mods), 13, Color(1.0, 0.82, 0.30)))
+	id_box.add_child(name_row)
 	var stats := UiKit.label("", 13, UiKit.TEXT)
 	id_box.add_child(stats)
 	_live_labels["enemy"] = stats
-	var bl := UiKit.label(e.def.blurb, 12, UiKit.DIM)
+	var blurb: String = e.def.blurb
+	for m in e.mods:
+		blurb += "  " + str(Modifiers.MODIFIERS[m].name) + ": " + str(Modifiers.MODIFIERS[m].blurb)
+	var bl := UiKit.label(blurb, 12, UiKit.DIM)
 	bl.clip_text = true
+	bl.tooltip_text = blurb
 	bl.custom_minimum_size = Vector2(1320, 0)
 	id_box.add_child(bl)
 	ctx.add_child(id_box)

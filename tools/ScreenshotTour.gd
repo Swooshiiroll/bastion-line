@@ -252,6 +252,15 @@ func _run() -> void:
 	jam.ability_timer = 0.01
 	await _wait(0.5)
 	await _shot("15_new_threats")
+	# Elites: a gold ring and a label of their modifiers.
+	var elite_spots := {"grunt": [["hasty", "plated"], 330.0], "brute": [["shielded"], 520.0], "aegis": [["jamming", "resolute"], 700.0]}
+	for type in elite_spots:
+		var el = ng.spawn_enemy(type, 0, float(elite_spots[type][1]), 4.0, -1, 1.0, elite_spots[type][0])
+		el.hp *= 0.7
+		ng.enemies.append(el)
+	await _wait(0.4)
+	_expect(ng.enemies.filter(func(x): return x.elite).size() == 3, "three elites on the field")
+	await _shot("15e_elites")
 	ns.world.selected_tower = sensor_t
 	await _wait(0.3)
 	await _shot("15b_sensor_selected")
@@ -705,6 +714,16 @@ func _popout_checks() -> void:
 	await _shot("16f_intel")
 	await _key(KEY_N)
 	fails += _expect(not hud.is_open("intel"), "N toggles intel")
+	# A late round's Intel lists its elites, each with its modifiers (enemy rework phase 3).
+	var w_keep: int = g.wave
+	g.wave = 44
+	await _key(KEY_N)
+	await _wait(0.3)
+	fails += _expect(hud.is_open("intel") and g.preview_wave(45).any(func(x): return x.has("m")), "round 45 has elites for the Intel panel")
+	await _shot("16f2_intel_elites")
+	await _key(KEY_N)
+	g.wave = w_keep
+	await _wait(0.2)
 	await _key(KEY_ESCAPE)
 	await _key(KEY_ESCAPE)
 	fails += _expect(screen.modal != null and screen.paused, "Esc with nothing open or selected opens the pause menu")

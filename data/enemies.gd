@@ -148,11 +148,25 @@ const BOSS_RANK := 100000.0
 
 ## The strength score (design/enemy_roster.md): spd² × (max(1, armor) × hp), with spd = speed / 100, from round-1 stats.
 static func strength(type: String) -> float:
-	var d: Dictionary = ENEMIES[type]
+	return strength_of(ENEMIES[type])
+
+
+## The strength score of enemy data `d` (an elite's, with its modifiers merged in, scores its changed speed and armor).
+static func strength_of(d: Dictionary) -> float:
 	var spd := float(d.speed) / 100.0
 	return spd * spd * maxf(1.0, float(d.get("armor", 0.0))) * float(d.hp)
 
 
 ## Its strength rank score: the strength score, with every boss above every non-boss.
 static func rank_score(type: String) -> float:
-	return strength(type) + (BOSS_RANK if bool(ENEMIES[type].get("boss", false)) else 0.0)
+	return rank_of(ENEMIES[type])
+
+
+## Its role and tier for labels: "Swarm T3", "Special", "Boss".
+static func role_label(d: Dictionary) -> String:
+	var r := str(d.get("role", "")).capitalize()
+	return r if int(d.get("tier", 0)) <= 0 else "%s T%d" % [r, int(d.tier)]
+
+
+static func rank_of(d: Dictionary) -> float:
+	return strength_of(d) + (BOSS_RANK if bool(d.get("boss", false)) else 0.0)

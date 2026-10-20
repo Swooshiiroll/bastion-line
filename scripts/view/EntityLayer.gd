@@ -18,6 +18,9 @@ const BoostTowerArt = preload("res://scripts/view/towers/BoostTowerArt.gd")
 const RadarTowerArt = preload("res://scripts/view/towers/RadarTowerArt.gd")
 const ShockwaveGeneratorArt = preload("res://scripts/view/towers/ShockwaveGeneratorArt.gd")
 
+## The ring and label colour of an elite (an enemy with modifiers).
+const ELITE_COLOR := Color(1.0, 0.82, 0.30)
+
 var world
 ## Microseconds spent per section of _draw, summed; tools/PerfProbe.gd reads and resets it.
 static var timing := {}
@@ -154,6 +157,9 @@ func _enemy(e, t: float) -> void:
 	if hidden:
 		return
 	var d: Dictionary = e.def
+	if e.elite:
+		# An elite: a pulsing gold ring (its label sits over its health bar).
+		Draw.ring(self, e.pos, e.radius + 4.0, Color(ELITE_COLOR, 0.55 + 0.25 * sin(t * 3.0 + float(e.id))), 1.6)
 	if d.has("aura_radius"):
 		Draw.arc(self, e.pos, float(d.aura_radius), 0.0, TAU, 48, Color(Draw.ENEMY_COLOR.rally, 0.16 + 0.08 * sin(t * 4.0)), 1.5, true)
 	if d.has("regen_pct") and e.since_hit >= float(d.regen_delay) and e.hp < e.max_hp:
@@ -458,11 +464,17 @@ func _mortar_shell(p) -> void:
 func _hp_bar(e) -> void:
 	if e.boss or e.is_hidden():
 		return
+	var w: float = e.radius * 2.0 + 6.0
+	var p := Vector2(e.pos.x - w / 2.0, e.pos.y - e.radius - (14.0 if e.flying else 9.0))
+	if e.elite:
+		# The elite's label: its modifiers, over the bar.
+		var lw := 120.0
+		var lp := Vector2(e.pos.x - lw / 2.0, p.y - (7.0 if e.max_shield > 0.0 else 3.0))
+		draw_string_outline(_font, lp, e.elite_label, HORIZONTAL_ALIGNMENT_CENTER, lw, 9, 3, Color(0, 0, 0, 0.85))
+		draw_string(_font, lp, e.elite_label, HORIZONTAL_ALIGNMENT_CENTER, lw, 9, ELITE_COLOR)
 	var shielded: bool = e.max_shield > 0.0 and e.shield < e.max_shield
 	if e.hp >= e.max_hp and not shielded:
 		return
-	var w: float = e.radius * 2.0 + 6.0
-	var p := Vector2(e.pos.x - w / 2.0, e.pos.y - e.radius - (14.0 if e.flying else 9.0))
 	var f := clampf(e.hp / e.max_hp, 0.0, 1.0)
 	draw_rect(Rect2(p - Vector2(1, 1), Vector2(w + 2, 5)), Color(0, 0, 0, 0.8))
 	draw_rect(Rect2(p, Vector2(w * f, 3)), Color(1.0, 0.25, 0.3).lerp(Color(0.3, 0.95, 1.0), f))

@@ -6,6 +6,7 @@ extends RefCounted
 
 const Enemies = preload("res://data/enemies.gd")
 const EnemyTraits = preload("res://scripts/core/EnemyTraits.gd")
+const Modifiers = preload("res://data/modifiers.gd")
 
 const MIN_DAMAGE_FRACTION := 0.2
 const SLOW_CAP := 0.7
@@ -25,8 +26,13 @@ var speed := 0.0
 var armor := 0.0
 var flying := false
 var boss := false
-## Its strength rank score (Enemies.rank_score): what Strongest targeting compares first.
+## Its strength rank score (Enemies.rank_of): what Strongest targeting compares first.
 var rank := 0.0
+## An elite carries modifiers (data/modifiers.gd), merged into its `def`; it pays double bounty and costs a shield more.
+var elite := false
+var mods: Array = []
+## Its modifiers' names in capitals, for the label over an elite ("HASTY PLATED").
+var elite_label := ""
 ## The kind ("physical" or "energy") of the last hit it took.
 var last_hit_kind := ""
 var radius := 10.0
@@ -125,19 +131,24 @@ var in_storm := false
 var storm_until := -99.0
 
 
-func setup(enemy_type: String, route: Curve2D, hp_mult: float, wave: int, path_idx: int, start_distance := 0.0, speed_mult := 1.0) -> void:
+func setup(enemy_type: String, route: Curve2D, hp_mult: float, wave: int, path_idx: int, start_distance := 0.0, speed_mult := 1.0, modifiers: Array = []) -> void:
 	type = enemy_type
 	def = Enemies.ENEMIES[enemy_type]
+	mods = modifiers.duplicate()
+	elite = not mods.is_empty()
+	if elite:
+		def = Modifiers.apply(def, enemy_type, mods)
+		elite_label = Modifiers.label(mods).to_upper()
 	max_hp = float(def.hp) * hp_mult
 	hp = max_hp
 	speed = float(def.speed) * speed_mult
 	armor = float(def.get("armor", 0.0))
 	flying = bool(def.get("flying", false))
 	boss = bool(def.get("boss", false))
-	rank = Enemies.rank_score(enemy_type)
+	rank = Enemies.rank_of(def)
 	radius = float(def.radius)
-	bounty = int(def.bounty)
-	lives_cost = int(def.lives)
+	bounty = int(def.bounty) * (2 if elite else 1)
+	lives_cost = int(def.lives) + (1 if elite else 0)
 	slow_resist = float(def.get("slow_resist", 0.0))
 	max_shield = float(def.get("shield", 0.0)) * hp_mult
 	shield = max_shield
@@ -151,7 +162,7 @@ func setup(enemy_type: String, route: Curve2D, hp_mult: float, wave: int, path_i
 	if ahead.distance_squared_to(pos) > 0.0001:
 		facing = (ahead - pos).normalized()
 	wave_id = wave
-	set_traits(EnemyTraits.of(enemy_type))
+	set_traits(EnemyTraits.of_def(def) if elite else EnemyTraits.of(enemy_type))
 
 
 ## Gives it the traits `list` (read from `def`), each timed one starting a full interval from now.

@@ -1,4 +1,4 @@
-# Bastion Line
+| Rampart | 35 || Bulwark | 33 || Mender Hulk | 51 || Blink Stalker | 11 || Gunship | 43 || Burrower | 31 || Rally Beacon | 21 || Locust | 15 || Jammer | 9 || Hydra Frame | 29 || Aegis Walker | 17 || Repair Bot | 5 || Phantom | 13 || Strike Drone | 25 || Siege Mech | 7 || Nanite | 2 || Skitter | 3 || Drone | 1 |# Bastion Line
 
 A sci-fi tower defense game built in Godot 4.7 (GDScript).
 
@@ -249,10 +249,10 @@ Every enemy's health and speed scale with the round number, the same on every se
 | Mender Hulk | 36 | Regenerates 4% of its health per second after 1.5 s without taking damage |
 | Bulwark | 38 | Every 6 s gives nearby non-boss enemies (not itself) a barrier worth 25% of their health |
 | Rampart | 40 | Immune to slows, stuns and shoves; 8 armor |
-| **Dreadnought** (boss) | 5 | Every 5th round, more of them later. Armored, half-immune to slows, costs 6 shields if it leaks |
-| **Leviathan** (boss) | 35 | Flying carrier that launches 6 Locusts every 6 s. From round 35, then every 20. Costs 15 shields |
-| **Overmind** (boss) | 40 / 50 | Spawns Nanites as it advances. Rounds 50, 75 and 100, plus the finales. Costs 20 shields |
-| **Colossus** (boss) | 60 | Can't be stunned. At 66% and 33% health it sheds 5 armor, speeds up 20% and drops two Siege Mechs. From round 60, then every 20. Costs 25 shields |
+| **Dreadnought** (boss) | 20 | Boss of round 20, back in every later boss round. Armored, half-immune to slows, costs 6 shields if it leaks |
+| **Leviathan** (boss) | 60 | Flying carrier that launches 6 Locusts every 6 s. Boss of round 60. Costs 15 shields |
+| **Overmind** (boss) | 40 | Spawns Nanites as it advances. Boss of round 40. Costs 20 shields |
+| **Colossus** (boss) | 80 | Can't be stunned. At 66% and 33% health it sheds 5 armor, speeds up 20% and drops two Siege Mechs. Boss of round 80. Costs 25 shields |
 
 Bosses get half the round speed bonus and resist slows and shoves. After a stun wears off, an enemy
 can't be stunned again for 1 s, and Graviton shoves can push any one enemy back at most 320 px in
@@ -293,22 +293,25 @@ hard, and Cataclysm brutal:
 - Clearing a mode's last round earns that sector's **medal** for the mode (a banner announces it and
   it's recorded at once), and **endless mode** begins straight away: the rounds keep coming until the
   core falls. There are 30 medals in all; each sector card shows its row of five.
-- The last round of each mode is a **finale** with a boss line-up (Easy: Overmind and Leviathan;
-  Cataclysm: two of every boss and four Dreadnoughts).
+- Every 20th round is a **boss round**, so each mode's last round is one (Easy: the Overmind and a
+  Dreadnought; Cataclysm: two Colossi, a Leviathan, two Overminds and three Dreadnoughts).
 - On Cataclysm a single leak ends the run.
 
 ### Rounds and scaling
 
-- **Rounds 1-25** are hand-authored. From round 26 a seeded generator spends a threat budget that
-  grows every round on the enemies unlocked so far, favouring recent ones. Rounds 26-40 each introduce
-  one of the eight newer enemies.
-- **Bosses** follow a schedule on top: Dreadnoughts every 5 rounds, Leviathans from 35 (every 20),
-  the Overmind at 50/75/100, Colossi from 60 (every 20).
-- **HP** grows every round (about 7× base by round 40), and from round 40 it also compounds by 4%
+- **One generator** makes every round, seeded by the round number alone, so a round is the same on
+  every playthrough, sector and mode. It spends a threat budget that grows every round on the enemies
+  met so far, favouring recent ones. A new enemy leads its round every two rounds (`Waves.INTRO`).
+- **Elites** (from round 10): single enemies with modifiers, a gold ring and a label. Their share of
+  the budget grows from 10% to 30% by round 60 (design/enemies.md, section 4).
+- **Bosses**: every 20th round has a boss line-up, each bigger than the last: the Dreadnought at 20,
+  the Overmind at 40, the Leviathan at 60, the Colossus at 80, then mixes. A boss met once can recur
+  alone in later rounds.
+- **HP** grows every round (about 4.8× base by round 40), and from round 60 it also compounds by 3%
   per round, so a map full of maxed towers eventually breaks.
 - **Speed** grows 0.45% per round up to +50% (bosses +25%).
 - **Kill credits** grow with enemy HP: a kill pays its base bounty × (the round's HP multiplier)^0.3,
-  about ×1.8 at round 40, ×2.7 at round 60 and ×5.2 at round 95. Without this, income fell so far
+  about ×1.6 at round 40, ×1.9 at round 60 and ×3.2 at round 95. Without this, income fell so far
   behind late HP that a full map of towers could only afford to master about one in six.
 - A round never spawns more than 250 regular enemies; past that, it gets tougher through HP and speed.
 

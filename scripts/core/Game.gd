@@ -233,7 +233,7 @@ func enemies_remaining() -> int:
 
 
 func preview_wave(n: int) -> Array:
-	return Waves.get_wave(n, _wave_rng(n), final_round())
+	return Waves.get_wave(n)
 
 
 ## True if round `n` contains a boss.
@@ -564,6 +564,7 @@ func _queue_round(n: int, wave_id: int) -> Dictionary:
 				"group": _spawn_counter % n_groups,
 				"hp_mult": hp_mult,
 				"speed_mult": speed_mult,
+				"mods": g.get("m", []),
 			})
 			_spawn_counter += 1
 			total += 1
@@ -716,7 +717,7 @@ func tick(dt: float) -> void:
 
 	while not spawn_queue.is_empty() and float(spawn_queue[0].time) <= time:
 		var s: Dictionary = spawn_queue.pop_front()
-		enemies.append(spawn_enemy(s.type, _pick_route(int(s.get("group", 0))), 0.0, float(s.hp_mult), int(s.wave), float(s.get("speed_mult", 1.0))))
+		enemies.append(spawn_enemy(s.type, _pick_route(int(s.get("group", 0))), 0.0, float(s.hp_mult), int(s.wave), float(s.get("speed_mult", 1.0)), s.get("mods", [])))
 
 	_update_abilities(dt)
 	_update_pools(dt)
@@ -754,11 +755,11 @@ func tick(dt: float) -> void:
 
 
 ## Creates an enemy on a path at a distance. Does not add it to `enemies` (callers decide).
-func spawn_enemy(type: String, path_idx: int, start_dist := 0.0, hp_mult := 1.0, wave_id := -1, speed_mult := 1.0):
+func spawn_enemy(type: String, path_idx: int, start_dist := 0.0, hp_mult := 1.0, wave_id := -1, speed_mult := 1.0, mods: Array = []):
 	var e = Enemy.new()
 	var flying := bool(Enemies.ENEMIES[type].get("flying", false))
 	var route: Curve2D = grid.air_paths[path_idx] if flying else grid.ground_paths[path_idx]
-	e.setup(type, route, hp_mult, wave_id, path_idx, start_dist, speed_mult)
+	e.setup(type, route, hp_mult, wave_id, path_idx, start_dist, speed_mult, mods)
 	e.id = _next_enemy_id
 	_next_enemy_id += 1
 	if e.boss:
@@ -3187,12 +3188,6 @@ func _add_gold(n: int) -> void:
 func _emit(ev: Dictionary) -> void:
 	if emit_events:
 		events.append(ev)
-
-
-func _wave_rng(n: int) -> RandomNumberGenerator:
-	var r := RandomNumberGenerator.new()
-	r.seed = seed_value * 1000 + n
-	return r
 
 
 # --- Persistence ---------------------------------------------------------------------------

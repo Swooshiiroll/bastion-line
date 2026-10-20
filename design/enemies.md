@@ -352,6 +352,39 @@ they exist.
   a purple eye. **Speed (owner):** the Drone's 55 while disguised, faster once uncovered; how much faster is Still
   open, item 6.
 
+- **Phase 3 numbers (owner, 2026-10-20), all drafts confirmed, tuned with the balance probe:**
+  - **Modifiers** (`data/modifiers.gd`; cost multiplies the enemy's threat cost, intro is the first round):
+
+    | Modifier | Effect | Rank | Cost | Intro |
+    |---|---|---|---|---|
+    | Shielded | barrier = 50% HP, recharges like the Aegis Walker's | unchanged | x1.5 | 10 |
+    | Hasty | +35% speed | re-scored | x1.6 | 12 |
+    | Regenerating | 3% HP/s after 2 s unhit | unchanged | x1.4 | 14 |
+    | Plated | +4 armor | re-scored | x1.6 | 16 |
+    | Cloaked | cloak (Radar or area damage reveals it) | unchanged | x1.5 | 18 |
+    | Splitting | on death, 2 of its role's tier below (T1 or Special: 2 Skitters) | unchanged | x1.6 | 22 |
+    | Jamming | EMP radius 80, towers off 1.5 s, every 6 s | unchanged | x1.6 | 24 |
+    | Resolute | +50% slow resist, can't be stunned | unchanged | x1.4 | 28 |
+    | Commanding | aura radius 90: others +15% speed | unchanged | x1.5 | 32 |
+
+    An enemy never gets a modifier for a trait it already has (no Jamming Jammer), and bosses are never elites.
+  - **Stacking:** one modifier per elite to round 39, up to two from 40, up to three from 80.
+  - **Elites:** same body; double bounty, +1 leak, a gold ring and a label of its modifiers.
+  - **Generator:** budget 8 + 3.6(w-1) + 0.02(w-1)² Drone-equivalents (round 1: 8, 25: 106, 60: 290). Elites get
+    10% of it from round 8, rising to 30% by round 60; with no modifier open yet (rounds 8 and 9) that share stays with
+    the regular groups, so the first elite is round 10's Shielded one. A modifier's introduction round always has an
+    elite carrying it.
+  - **HP scaling:** 1 + 0.05w + 0.0012w² (w = round - 1), compounding 3% a round after round 60 (was
+    1 + 0.06w + 0.0025w² and 4% after 40).
+  - **Introductions:** one new enemy every two rounds (odd rounds, so never on a boss round), every role's T1 first,
+    then the Specials and higher tiers, in `Waves.INTRO`; the new enemies of phase 4 already have their slots
+    (Needle 19, Mirage 23, Siphon 27, Decoy Beacon 37, Blackout Rig 39, Shifter 41, Masquerade 45, Shrike 47,
+    Fury Drone 49, Wraith 53, Capacitor 55, Titan 57).
+  - **Boss rounds:** 20 Dreadnought; 40 Overmind and Dreadnought; 60 Leviathan, Overmind and Dreadnought; 80 Colossus,
+    Leviathan and two Dreadnoughts; 100 one of each with two Dreadnoughts; 120 two Colossi, a Leviathan, two Overminds
+    and three Dreadnoughts; past 120, the 120 line-up with one more of each per 20 rounds. A boss met once can recur
+    alone in a later regular round.
+
 ### Still open
 
 1. **Boss rounds: details.** Every 20 rounds, and a boss met once can recur in later rounds (decided). Which
