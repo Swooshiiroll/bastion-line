@@ -65,7 +65,7 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Tower rework · Tower art · Bastion Line · Tower rework · Tower art · second pass · tower 19 of 20 · round 2 (redesign)</div>
+    <div class="eyebrow">Bastion Line · Tower rework · Tower art · Bastion Line · Tower rework · Tower art · second pass · tower 19 of 20 · round 3 (redesign)</div>
     <h1>Tower art: Tractor Tower paths and Retrofits</h1>
     <p class="note">Second pass for one tower: <b>every upgrade step and mastery</b> on each path, and each <b>Retrofit</b>, adds or changes a detail on the confirmed model. Each card shows the model with that path's earlier steps (your picks, or option A until you pick) plus the candidate. Pick one of three per step, add notes per path, then <b>Copy picks and notes</b>.</p>
     <ul class="rules">
@@ -403,7 +403,7 @@ const BASE = (() => {
 // Scope (owner): the art and the upgrade art start over; the mechanic, the paths, their effects and their names stay. Direction (owner): a dish on a mast,
 // as two dish looks plus one wildcard, and three new animations to pick. The tower grabs one enemy, holds it 1.5 s while hauling it back 80 px, lets go and
 // recharges (6 s; the preview shortens it). The preview can't move enemies, so the held one is hidden and redrawn where the beam drags it.
-const PAGE = { title: "Tractor Tower base look (redesign)", store: "bl-tower-art-tractor-looks-3" };
+const PAGE = { title: "Tractor Tower base look (redesign)", store: "bl-tower-art-tractor-looks-4" };
 const distTo = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 const enemyR = (s) => Math.max(4, Math.min(11, s * 0.12));
 const nearestTo = (p, list) => { let best = null, bd = 1e9; for (const e of list) { const d = distTo(e.p, p); if (d < bd) { bd = d; best = e; } } return best; };
@@ -429,7 +429,7 @@ function dishFace(dc, aim, k, rx, ry, rim, face, ribs) { oval(dc, rx * k, ry * k
 
 // The dish seen from straight above (owner, 2026-10-19: the tilted dish looked out of place): a thick armoured band curved round its focus F, cupped toward
 // the aim, with crisp outlines, segment lines and rivets, like the other towers' flat top-down parts
-const DF = 10, DR = 9, DSPAN = 1.15, DW = 3.2;
+const DF = 10, DR = 10, DSPAN = 1.45, DW = 2;   // round 3 (owner): "Widen the dish and make it thinner"
 function dishArc(c, aim, k, armour, face, rivetCol) { const F = P(c, aim, k, DF, 0), a0 = aim + Math.PI - DSPAN, a1 = aim + Math.PI + DSPAN;
   arc(F, DR * k, a0, a1, OUTLINE, (DW + 1.6) * k); arc(F, DR * k, a0, a1, armour, DW * k); arc(F, (DR - DW * 0.28) * k, a0 + 0.04, a1 - 0.04, face, DW * 0.38 * k);
   for (let i = 0; i <= 6; i++) { const a = a0 + i * (a1 - a0) / 6; line(add(F, mul(fa(a), (DR - DW / 2) * k)), add(F, mul(fa(a), (DR + DW / 2) * k)), A(OUTLINE, 0.7), 0.8 * k); }
@@ -485,7 +485,7 @@ const DEFAULTS = { tractor: { look: "B", anim: "B" } };
 return { TOWERS };
 })();
 const NO_BOOT = true;
-// ---- Tower art second pass: Tractor Tower (tower 19), round 2 on the redesigned base (the dish drawn flat, straight from above) ---------------------------------------------------------------------------
+// ---- Tower art second pass: Tractor Tower (tower 19), round 3 on the redesigned base (every stage picked; the dish wider and thinner; Beam Sweep) (the dish drawn flat, straight from above) ---------------------------------------------------------------------------
 // Base (owner, 2026-10-19, after "I want to completely redesign the tractor tower from scratch"): look B Armoured Dish, animation B Focus Beam
 // (tools/tower_art/data_tractor_looks.js). The mechanic, paths, effects and names stay. The owner chose the parts:
 //  - Path 1, Pull Distance, rebuilds the EMITTER SPIKE (a lance, a fork or a coil spike; longer each step; a rewind coil from Rewind; gold at Undo).
@@ -496,7 +496,7 @@ const NO_BOOT = true;
 // Each step rebuilds its part in the style picked for that step (the new design replaces the old one); masteries are gold; the agent runs the real rules.
 // The first Retrofit slot offers three replacements for Twin Emitter (the owner asked for something else): Stasis Wake, Beam Sweep or Shock Field.
 // Overlaps kept and stacking (the carpet rule): Longer Hold's +0.5 s with Stronger Beam's hold, Faster Recharge's -1 s with the Recharge path.
-const PAGE = { title: "Tractor Tower: paths and Retrofits (second pass)", store: "bl-tower-art-p2-tractor-d2" };
+const PAGE = { title: "Tractor Tower: paths and Retrofits (second pass)", store: "bl-tower-art-p2-tractor-d3" };
 const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], COPPER = [0.78, 0.5, 0.28, 1], LOCKC = [1, 0.85, 0.3, 1], ARMOUR = [0.36, 0.39, 0.44, 1], HOTG = [1, 0.92, 0.6, 1], STASIS = [0.6, 0.85, 1, 1];
 const rnd = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
 const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
@@ -511,7 +511,7 @@ const holdOf = (B) => (B.lv[0] >= 2 ? 1.8 : 1.5) + (B.r === 1 ? 0.5 : 0), rechOf
 function muzzleOf(B, m, c, aim, k, aim2) { if (m === 2) return add(P(c, aim, k, -4, -8.8), mul(fa(aim2 ?? aim), 4 * k)); return P(c, aim, k, SLEN[B.lv[0]] - 0.4, 0); }
 // The dish seen from straight above (owner, 2026-10-19: the tilted dish looked out of place): a thick armoured band curved round its focus F, cupped toward
 // the aim, with crisp outlines, segment lines and rivets, like the other towers' flat top-down parts
-const DF = 10, DR = 9, DSPAN = 1.15, DW = 3.2;
+const DF = 10, DR = 10, DSPAN = 1.45, DW = 2;   // round 3 (owner): "Widen the dish and make it thinner"
 function dishArc(c, aim, k, armour, face, rivetCol) { const F = P(c, aim, k, DF, 0), a0 = aim + Math.PI - DSPAN, a1 = aim + Math.PI + DSPAN;
   arc(F, DR * k, a0, a1, OUTLINE, (DW + 1.6) * k); arc(F, DR * k, a0, a1, armour, DW * k); arc(F, (DR - DW * 0.28) * k, a0 + 0.04, a1 - 0.04, face, DW * 0.38 * k);
   for (let i = 0; i <= 6; i++) { const a = a0 + i * (a1 - a0) / 6; line(add(F, mul(fa(a), (DR - DW / 2) * k)), add(F, mul(fa(a), (DR + DW / 2) * k)), A(OUTLINE, 0.7), 0.8 * k); }
@@ -558,7 +558,7 @@ function retroUnder(c, aim, k, B, t, col) { if (B.r === 1 && B.key("r1") === "A"
 function retroOver(c, aim, k, B, t, col) { const r = BASER[B.lv[1]], Q = (x, y) => P(c, aim, k, x, y);
   if (B.r === 0) { const key = B.key("r0"), q = Q(-4, 8.6);
     if (key === "A") { disc(q, 3.2 * k, OUTLINE); disc(q, 2.7 * k, METAL_D); ring(q, 1.9 * k, A(STASIS, 0.6 + 0.3 * Math.sin(t * 3)), 1 * k); glowDot(q, 0.7 * k, STASIS); }   // a stasis coil
-    if (key === "B") for (const sg of [-1, 1]) { const pts = [[0, -1], [3.4, 0], [0, 1]]; fill(Q(7.4, sg * 9.8), pts, METAL_L, aim, k); outline(Q(7.4, sg * 9.8), pts, OUTLINE, 0.8, aim, k); }   // sweep vanes at the dish's ends
+    if (key === "B") for (const sg of [-1, 1]) { const pts = [[0, -1], [3.4, 0], [0, 1]]; fill(Q(9.6, sg * 11.2), pts, METAL_L, aim, k); outline(Q(9.6, sg * 11.2), pts, OUTLINE, 0.8, aim, k); }   // sweep vanes at the dish's ends
     if (key === "C") { bar(q, Q(-4, 11.2), 0.9 * k, METAL); orb(Q(-4, 11.2), 1.6 * k, [0.55, 0.6, 0.75, 1]); for (let j = 0; j < 2; j++) { const a = rnd(Math.floor(t * 12) + j) * TAU; line(Q(-4, 11.2), add(Q(-4, 11.2), mul(fa(a), 2.4 * k)), A([0.8, 0.9, 1, 1], 0.8), 0.7 * k); } } }   // a shock node on a post
   if (B.r === 1) { const key = B.key("r1");
     if (key === "B") { const q = Q(-r - 1.6, 0); plate(q, rectPts(1.6, 3.6), METAL_D, aim, k, 1); for (let j = -2; j <= 2; j++) line(Q(-r - 2.6, j * 1.2), Q(-r - 0.6, j * 1.2), A(col, 0.5 + 0.3 * Math.sin(t * 3 + j)), 0.6 * k); }   // a hold battery
@@ -615,7 +615,7 @@ function tractorAgent2(B) { return (m, t, info, s, col) => {
 // ---- The model ----------------------------------------------------------------------------------------------------------------------------------------------------
 const P2 = {
   tower: "tractor", look: "B", anim: "B",
-  intro: "Round 2, your note (the tilted dish looked out of place): the dish is redrawn flat, straight from above like the other towers: a thick armoured band cupped toward the target round its focus, with crisp outlines, segments and rivets; Grip's energy is drawn in crisp lines too (a brighter rim with emitter nodes, focus arcs closing on the focus, or hex cells along the band). Nothing else changed. Round 1 on the redesigned base, the Armoured Dish with the Focus Beam; the names and effects stay. Each path rebuilds one part, in the style you pick for each step, and the new design replaces the old one: Pull Distance rebuilds the emitter spike (a lance with steel collars, a fork with a crackling arc, or a coil spike lighting toward its tip; longer each step; a rewind coil turning backwards from Rewind; gold with two counter-turning coils at Undo); Recharge rebuilds the base and its rams with capacitors that light up as it recharges (a ring of cells, capacitor rams with charge bands, or battery banks; glowing vents from Overclocked Emitter; gold with a second small dish at Dual Beam); Grip is the effect's strength (your note): it rebuilds the dish's energy (a glowing rim, focus rings closing across the face, or a hex lattice field), matched in the beam (thicker, more rings, or a lattice sheath) and the hold round the enemy, stronger each step; gold at Gravity Hammer. The first Retrofit slot offers three replacements for Twin Emitter: Stasis Wake, Beam Sweep or Shock Field. The preview runs the real rules: the hold time, the pull (or the rewind with a trail of past positions and -3s, -4s, -5s; a gold UNDO every third grab at the mastery), the recharge, Dual Beam's second beam, -15 crush, the lift-and-slam stun ring, the padlock, and the new Retrofit's effect. Overlapping Retrofits are kept and stack (the carpet rule).",
+  intro: "Round 3: every stage is picked (Pull Distance all A, the lance; Recharge all A, the cell ring; Grip all B, the focus rings; Beam Sweep, the hold capacitor ring, the fan vent) and drawn as one build. Your note: the dish is wider and thinner. Beam Sweep replaces Twin Emitter in the spec at 175 credits (proposed: the formula's step-1 price for about a 15% gain). Round 2, your note (the tilted dish looked out of place): the dish is redrawn flat, straight from above like the other towers: a thick armoured band cupped toward the target round its focus, with crisp outlines, segments and rivets; Grip's energy is drawn in crisp lines too (a brighter rim with emitter nodes, focus arcs closing on the focus, or hex cells along the band). Nothing else changed. Round 1 on the redesigned base, the Armoured Dish with the Focus Beam; the names and effects stay. Each path rebuilds one part, in the style you pick for each step, and the new design replaces the old one: Pull Distance rebuilds the emitter spike (a lance with steel collars, a fork with a crackling arc, or a coil spike lighting toward its tip; longer each step; a rewind coil turning backwards from Rewind; gold with two counter-turning coils at Undo); Recharge rebuilds the base and its rams with capacitors that light up as it recharges (a ring of cells, capacitor rams with charge bands, or battery banks; glowing vents from Overclocked Emitter; gold with a second small dish at Dual Beam); Grip is the effect's strength (your note): it rebuilds the dish's energy (a glowing rim, focus rings closing across the face, or a hex lattice field), matched in the beam (thicker, more rings, or a lattice sheath) and the hold round the enemy, stronger each step; gold at Gravity Hammer. The first Retrofit slot offers three replacements for Twin Emitter: Stasis Wake, Beam Sweep or Shock Field. The preview runs the real rules: the hold time, the pull (or the rewind with a trail of past positions and -3s, -4s, -5s; a gold UNDO every third grab at the mastery), the recharge, Dual Beam's second beam, -15 crush, the lift-and-slam stun ring, the padlock, and the new Retrofit's effect. Overlapping Retrofits are kept and stack (the carpet rule).",
   mods(B) { return { period: 1, flight: 1, multi: false, persist: tractorAgent2(B) }; },
   muzzleAt(B, m, kk, c, aim, s, info) { return muzzleOf(B, m, c, aim, G(s), info?.view?.mem?.aim2); },
   model(c, aim, s, fx, t, col, info, B) { const k = G(s), mm = fx.mem || {}, on = mm.state === "hold" ? 1 : 0, ch = mm.charge ?? 1;
@@ -655,10 +655,15 @@ P2.paths = [
   ] },
 ];
 P2.retrofits = [
-  { name: "New Retrofit (replaces Twin Emitter)", cost: 575, effect: "Pick one of three new ideas; each option is its own Retrofit and effect (the price is set by the pricing formula once you pick)", options: T(["Stasis Wake", "After release, the enemy stays slowed 40% for 2 s (a -40% ring follows it). A stasis coil on the base's side."], ["Beam Sweep", "While holding, the beam slows every other enemy it crosses by 30%. Sweep vanes on the dish's rim."], ["Shock Field", "The held enemy shocks every enemy within 40 px for 10 damage/s. A shock node on a post on the base."]) },
+  { name: "Beam Sweep", cost: 175, effect: "While holding, the beam slows every other enemy it crosses by 30% (replaces Twin Emitter; your pick)", options: T(["Stasis Wake", "After release, the enemy stays slowed 40% for 2 s (a -40% ring follows it). A stasis coil on the base's side."], ["Beam Sweep", "While holding, the beam slows every other enemy it crosses by 30%. Sweep vanes on the dish's rim."], ["Shock Field", "The held enemy shocks every enemy within 40 px for 10 damage/s. A shock node on a post on the base."]) },
   { name: "Longer Hold", cost: 140, effect: "Holds for 2 s (+0.5 s, stacks with Stronger Beam)", options: T(["Hold Capacitor Ring", "A glowing capacitor ring on the deck round the base."], ["Hold Battery", "A battery pack on the base's back."], ["Hold Coils", "Two copper coils round the spike's base."]) },
   { name: "Faster Recharge", cost: 230, effect: "Recharges in 5 s (-1 s, stacks with Recharge)", options: T(["Cooling Fins", "Cooling fins fanned out at the base's back."], ["Radiator Panels", "Two radiator panels on the deck."], ["Fan Vent", "A spinning fan vent on the base."]) },
 ];
+
+// ---- Round 3 picks (owner, 2026-10-19): every stage picked; Beam Sweep replaces Twin Emitter ---------------------------------------------------------------
+P2.picks = { p0s0: "A", p0s1: "A", p0s2: "A", p0s3: "A", p0s4: "A", p1s0: "A", p1s1: "A", p1s2: "A", p1s3: "A", p1s4: "A", p2s0: "B", p2s1: "B", p2s2: "B", p2s3: "B", p2s4: "B", r0: "B", r1: "A", r2: "C" };
+P2.paths.forEach((pa, pi) => pa.steps.forEach((st, k) => { const pk = P2.picks["p" + pi + "s" + k]; if (pk) st.options = st.options.filter((o) => o.key === pk); }));
+P2.retrofits.forEach((rf, ri) => { const pk = P2.picks["r" + ri]; if (pk) rf.options = rf.options.filter((o) => o.key === pk); });
 
 // ---- Tower art engine: previews towers aiming and firing at enemies on a lane --------------------------
 // Data (defined before this): PAGE {title, key, store}, TOWERS [...], DEFAULTS {id: {look, anim}}.

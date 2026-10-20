@@ -43,7 +43,7 @@ All 20 towers are designed and confirmed by the owner (2026-10-15). Costs are bu
 | 16 | Shockwave Generator | Assault | Field | 450 | Power/Range / Speed / Effect | Wave Focus / Containment Coils / Reactor Venting |
 | 17 | Scrapyard | Utility | None | 875 | Passive Income / Kill Income / Discounts | Hammer Mill / Faster Loading / Surplus |
 | 18 | Magneto Tower (Claude's proposal) | Defense | Field | 525 | Pull Strength / Field Size / Polarity | Superconducting Coil / Field Stabiliser / Pole Shoes |
-| 19 | Tractor Tower (Claude's proposal) | Defense | Energy | 575 | Pull Distance / Recharge / Grip | Twin Emitter / Longer Hold / Faster Recharge |
+| 19 | Tractor Tower (Claude's proposal) | Defense | Energy | 575 | Pull Distance / Recharge / Grip | Beam Sweep / Longer Hold / Faster Recharge |
 | 20 | Augmentation Tower | Support | None | 650 | Energy Conversion / Critical Hits / Ricochet | Wide Aura / Amplified Bonus / Remote Link |
 
 **By class:** Assault 11, Defense 3, Support 4, Utility 2.
@@ -1750,7 +1750,9 @@ forward, blink or use abilities (a hold counts as a stun for those rules). The p
 Magneto (Swarm full, Tank half, Boss a quarter).
 
 **Retrofit (pick one when buying it):**
-- **Twin Emitter, 575:** a second, weaker beam that holds another enemy at half the pull.
+- **Beam Sweep, 175:** while holding, the beam slows every other enemy it crosses by 30%. It replaced Twin Emitter (a second beam at
+  half the pull, 575), by the owner's choice of three ideas on 2026-10-19. Price (proposed): the formula's step-1 price for about a
+  15% gain on the stock effect (a 30% slow on the enemies crossing the beam during each 1.5 s hold); the balance probe checks it.
 - **Longer Hold, 140:** holds for 2 s.
 - **Faster Recharge, 230:** recharges in 5 s.
 
@@ -1802,11 +1804,13 @@ Magneto (Swarm full, Tank half, Boss a quarter).
 - **The Rampart:** immune (shoves and holds).
 - **Wave pacing:** rewinds make rounds longer; the balance probe checks round length.
 
-**Look (for the art phase):** a dish emitter on a slim mast with a cyan beam cone; held enemies hover with afterimages
-and glide backwards. The Retrofit's choice shows (a second emitter, a capacitor ring or cooling fins). Per path:
-- **Pull:** a long barrel on the dish.
-- **Recharge:** capacitor drums.
-- **Grip:** clamp arms on the dish rim.
+**Look (for the art phase; redesigned and confirmed 2026-10-19):** an armoured dish, drawn flat from above, on twin hydraulic rams
+over a round base, with an emitter spike through its focus; a focus beam with rings sliding back down it; held enemies hover
+with afterimages and glide backwards. The Retrofit's choice shows (sweep vanes at the dish's ends, a capacitor ring or a fan
+vent). Per path (see `design/tower_art.md`):
+- **Pull:** the emitter spike (longer; a rewind coil).
+- **Recharge:** capacitors on the base that light up as it recharges.
+- **Grip:** the dish's energy, matched in the beam and the hold (the effect's strength, not a physical part).
 
 
 ## 20. Augmentation Tower

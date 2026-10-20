@@ -484,7 +484,7 @@ A dish-mounted emitter that locks a tractor beam onto a single enemy and hauls i
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
 | 1 | base | Tractor Tower | 575 |  | 575 credits; 160 px range; air and ground. It locks one enemy (by its targeting mode), holds it for 1.5 s while hauling it 80 px back along the track, releases it, then recharges for 6 s. While held, the enemy can't move forward, blink or use abilities (a hold counts as a stun for those rules). The pull scales by role weight, as on the Magneto (Swarm full, Tank half, Boss a quarter). | new |
-| 2 | r1 | Twin Emitter | 575 |  | A second, weaker beam that holds another enemy at half the pull. | new |
+| 2 | r1 | Beam Sweep | 175 |  | While holding, the beam slows every other enemy it crosses by 30%. It replaced Twin Emitter (a second beam at half the pull, 575), by the owner's choice of three ideas on 2026-10-19. Price (proposed): the formula's step-1 price for about a 15% gain on the stock effect (a 30% slow on the enemies crossing the beam during each 1.5 s hold); the balance probe checks it. | new |
 | 2 | r2 | Longer Hold | 140 |  | Holds for 2 s. | new |
 | 2 | r3 | Faster Recharge | 230 |  | Recharges in 5 s. | new |
 | 3 | a | Longer Haul | 185 |  | 100 px pull | new |

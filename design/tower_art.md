@@ -349,7 +349,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 16 | Shockwave Generator | amber | B Ring Reactor | B Mushroom Pulse |
 | 17 | Scrapyard | copper | C Magnet Yard | B Sparks and Sale |
 | 18 | Magneto Tower | violet | F Stacked Coil Tower | F Drag Trails |
-| 19 | Tractor Tower | `design/tower_art_p2_19_tractor.html` | Base redesign **confirmed** (owner, 2026-10-19: B Armoured Dish, B Focus Beam; base page `design/tower_art_p19_tractor.html`). Second pass round 2: the dish redrawn flat (owner: it looked out of place); pick one option per stage and Retrofit, including the Twin Emitter replacement |
+| 19 | Tractor Tower | `design/tower_art_p2_19_tractor.html` | Base redesign **confirmed** (owner, 2026-10-19: B Armoured Dish, B Focus Beam; base page `design/tower_art_p19_tractor.html`). Second pass round 3: every stage picked; Beam Sweep replaces Twin Emitter; the dish wider and thinner; waiting for "Tractor Tower finished" |
 | 20 | Augmentation Tower | lavender | F Nanite Hive | D Nanite Swarm |
 
 ## Second pass: per-path and Retrofit looks (owner, 2026-10-16)
@@ -1323,6 +1323,11 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
 
 **Round 2 (owner's note, "This design looks out of place compared to the rest of the towers"; the owner named the tilted dish perspective and chose a restyle):** the dish is redrawn flat, straight from above like the other towers (and like the Radar Tower's dish): a thick armoured band cupped toward the target round its focus, with crisp outlines, segment lines and rivets. The spike runs through the focus, and the rams sit behind the band. The base page shows the same flat dish. Grip's energy is drawn in crisp lines too: a brighter rim with emitter nodes, focus arcs closing on the focus, or hex cells along the band. Dual Beam's second dish and Beam Sweep's vanes match the flat dish. Nothing else changed.
 
+**Round 3 (owner's picks and note, 2026-10-19):**
+- **Picks:** Pull Distance all A (the lance), Recharge all A (the cell ring), Grip all B (the focus rings); Retrofits Beam Sweep, Longer Hold A (the capacitor ring) and Faster Recharge C (the fan vent). The page shows only the picks.
+- **Beam Sweep replaces Twin Emitter** (the owner's pick of three). It is in `design/tower_roster.md` and the regenerated trees at 175 credits (proposed: the formula's step-1 price for about a 15% gain on the stock effect; the balance probe checks it).
+- **"Widen the dish and make it thinner":** the dish band is thinner (2 units, was 3.2) and spans wider (radius 10, ±83° round its focus, was 9 and ±66°), on both pages. Beam Sweep's vanes moved to its new ends.
+
 ## Open questions
 
-1. **Second pass, Tractor Tower** (tower 19, round 2, the dish drawn flat): pick one option per stage and Retrofit, including the replacement for Twin Emitter. Then the Augmentation Tower.
+1. **Second pass, Tractor Tower** (tower 19, round 3): every stage is picked. Confirm with "Tractor Tower finished". Then the Augmentation Tower.

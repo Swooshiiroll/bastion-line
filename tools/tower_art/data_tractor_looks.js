@@ -2,7 +2,7 @@
 // Scope (owner): the art and the upgrade art start over; the mechanic, the paths, their effects and their names stay. Direction (owner): a dish on a mast,
 // as two dish looks plus one wildcard, and three new animations to pick. The tower grabs one enemy, holds it 1.5 s while hauling it back 80 px, lets go and
 // recharges (6 s; the preview shortens it). The preview can't move enemies, so the held one is hidden and redrawn where the beam drags it.
-const PAGE = { title: "Tractor Tower base look (redesign)", store: "bl-tower-art-tractor-looks-3" };
+const PAGE = { title: "Tractor Tower base look (redesign)", store: "bl-tower-art-tractor-looks-4" };
 const distTo = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 const enemyR = (s) => Math.max(4, Math.min(11, s * 0.12));
 const nearestTo = (p, list) => { let best = null, bd = 1e9; for (const e of list) { const d = distTo(e.p, p); if (d < bd) { bd = d; best = e; } } return best; };
@@ -28,7 +28,7 @@ function dishFace(dc, aim, k, rx, ry, rim, face, ribs) { oval(dc, rx * k, ry * k
 
 // The dish seen from straight above (owner, 2026-10-19: the tilted dish looked out of place): a thick armoured band curved round its focus F, cupped toward
 // the aim, with crisp outlines, segment lines and rivets, like the other towers' flat top-down parts
-const DF = 10, DR = 9, DSPAN = 1.15, DW = 3.2;
+const DF = 10, DR = 10, DSPAN = 1.45, DW = 2;   // round 3 (owner): "Widen the dish and make it thinner"
 function dishArc(c, aim, k, armour, face, rivetCol) { const F = P(c, aim, k, DF, 0), a0 = aim + Math.PI - DSPAN, a1 = aim + Math.PI + DSPAN;
   arc(F, DR * k, a0, a1, OUTLINE, (DW + 1.6) * k); arc(F, DR * k, a0, a1, armour, DW * k); arc(F, (DR - DW * 0.28) * k, a0 + 0.04, a1 - 0.04, face, DW * 0.38 * k);
   for (let i = 0; i <= 6; i++) { const a = a0 + i * (a1 - a0) / 6; line(add(F, mul(fa(a), (DR - DW / 2) * k)), add(F, mul(fa(a), (DR + DW / 2) * k)), A(OUTLINE, 0.7), 0.8 * k); }
