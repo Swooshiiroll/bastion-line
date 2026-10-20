@@ -2899,3 +2899,23 @@ func test_rework_data_and_unlocks() -> void:
 	var g = research_game(["gun_turret_1"])
 	var t = g.place_tower("gun_turret", Vector2i(2, 3))
 	check(near(t.stats().damage, 16.0 * 1.06), "research applies to a reworked tower")
+
+
+func test_rework_roles_and_damage_kinds() -> void:
+	var valid: Array = Enemies.ROLE_RESIST.keys()
+	for id in Enemies.ORDER:
+		check(valid.has(str(Enemies.ENEMIES[id].get("role", ""))), "%s has a role" % id)
+	var g = new_game()
+	check(Enemies.ENEMIES.warlord.role == "boss" and Enemies.ENEMIES.brute.role == "tank" and Enemies.ENEMIES.swarmling.role == "swarm", "roles read sensibly")
+	var boss = put(g, "warlord", 50.0)
+	var swarm = put(g, "swarmling", 60.0)
+	check(near(boss.role_resist(), 0.75) and near(swarm.role_resist(), 0.0), "a boss resists 75%, a swarm nothing")
+	g.gold = 5000
+	var t = g.place_tower("gun_turret", spot(g, "gun_turret", 5))
+	check(t.damage_kind() == "physical", "the Gun Turret's hits are physical")
+	g.damage_enemy(swarm, 1.0, false, t)
+	check(swarm.last_hit_kind == "physical", "a hit records its kind")
+	var arc = g.place_tower("tesla", spot(g, "tesla", 80))
+	check(arc != null and not arc.is_rework, "an old tower still builds beside the reworked ones")
+	g.damage_enemy(swarm, 1.0, false, null)
+	check(swarm.last_hit_kind == "physical", "a hit with no tower is physical")

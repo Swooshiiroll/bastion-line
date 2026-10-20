@@ -24,6 +24,8 @@ var speed := 0.0
 var armor := 0.0
 var flying := false
 var boss := false
+## The kind ("physical" or "energy") of the last hit it took.
+var last_hit_kind := ""
 var radius := 10.0
 var bounty := 0
 var lives_cost := 1
@@ -124,6 +126,16 @@ static func mitigate(amount: float, armor_value: float, pierce: bool) -> float:
 	if pierce:
 		return amount
 	return maxf(amount - armor_value, amount * MIN_DAMAGE_FRACTION)
+
+
+## Its role (swarm, rusher, evader, support, disruptor, special, tank or boss), from its data.
+func role() -> String:
+	return str(def.get("role", "rusher"))
+
+
+## The share of a slow or pull it resists, by role.
+func role_resist() -> float:
+	return float(Enemies.ROLE_RESIST.get(role(), 0.0))
 
 
 func progress() -> float:

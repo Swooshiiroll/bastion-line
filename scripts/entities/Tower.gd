@@ -509,6 +509,14 @@ func spec_ids() -> Array:
 	return tree(type).branches.map(func(b): return str(b.id))
 
 
+## "physical" or "energy": what a hit from this tower counts as. Set by the weapon type; the Augmentation Tower's Energy
+## Conversion (a share of nearby towers' damage; full at 100%) turns it to energy. Nothing reacts to it until the Wraith (#53).
+func damage_kind() -> String:
+	if str(def.get("damage_kind", "physical")) == "energy" or float(stats().get("energy_convert", 0.0)) >= 1.0:
+		return "energy"
+	return "physical"
+
+
 func is_support() -> bool:
 	return bool(def.get("support", false))
 

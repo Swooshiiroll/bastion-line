@@ -748,6 +748,7 @@ func damage_enemy(e, amount: float, pierce: bool, source, flash := true, bypass_
 	if not e.alive or (e.burrowed and not reach_burrowed):
 		return 0.0
 	e.since_hit = 0.0
+	e.last_hit_kind = source.damage_kind() if source is Tower else "physical"
 	var amt := amount
 	if e.vuln_timer > 0.0:
 		amt *= 1.0 + e.vuln_amount
