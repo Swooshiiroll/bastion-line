@@ -2,7 +2,7 @@
 // Scope (owner): the art and the upgrade art start over; the mechanic, the paths, their effects and their names stay. Direction (owner): a dish on a mast,
 // as two dish looks plus one wildcard, and three new animations to pick. The tower grabs one enemy, holds it 1.5 s while hauling it back 80 px, lets go and
 // recharges (6 s; the preview shortens it). The preview can't move enemies, so the held one is hidden and redrawn where the beam drags it.
-const PAGE = { title: "Tractor Tower base look (redesign)", store: "bl-tower-art-tractor-looks-6" };
+const PAGE = { title: "Tractor Tower base look (redesign)", store: "bl-tower-art-tractor-looks-7" };
 const distTo = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 const enemyR = (s) => Math.max(4, Math.min(11, s * 0.12));
 const nearestTo = (p, list) => { let best = null, bd = 1e9; for (const e of list) { const d = distTo(e.p, p); if (d < bd) { bd = d; best = e; } } return best; };
@@ -57,7 +57,7 @@ const TOWERS = [
           disc(F, 2 * k, OUTLINE); disc(F, 1.5 * k, METAL); glowDot(F, (0.8 + 0.9 * on + 0.2 * Math.sin(t * 5)) * k, col); } },
       { key: "B", name: "Armoured Dish", muzzle: 13 / 48, theme: "A solid armoured dish of riveted steel segments raised on twin hydraulic rams over a heavy round base; a long emitter spike juts from its centre, and its rim glows cyan when it locks on.",
         draw(c, aim, s, fx, t, col) { const k = G(s), on = fx.mem?.state === "hold" ? 1 : 0, Q = (x, y) => P(c, aim, k, x, y); deck(c, k, col, t);
-          plate(c, ngon(10, 1, 0), METAL, aim, 9.4 * k, 1.3); rivets(c, ngon(10, 1, 0), aim, 9.4 * k, 0.84, 0.7 * k);
+          plate(c, ngon(32, 1, 0), METAL, aim, 9.4 * k, 1.3); ring(c, 9.4 * 0.72 * k, A(OUTLINE, 0.35), 0.8 * k); rivets(c, ngon(10, 1, 0), aim, 9.4 * k, 0.84, 0.7 * k);   // a round platform (owner)
           for (const sg of [-1, 1]) { bar(Q(-6.5, sg * 3.6), Q(1, sg * 4.4), 2.6 * k, METAL_D); bar(Q(-2.5, sg * 4), Q(1, sg * 4.4), 1.3 * k, METAL_L); }                   // twin hydraulic rams
           const F = dishArc(c, aim, k, ARMOUR, lt(ARMOUR, 0.14), METAL_L); rimLine(F, aim, k, A(col, 0.45 + 0.5 * on + 0.1 * Math.sin(t * 4)), 1.2);   // the flat dish (round 3); its rim glows on a lock
           antennaRod(c, aim, k, 12.6, METAL_L, METAL_L); spikeHub(c, aim, k, METAL_D); feedHead(Q(12.8, 0), k, METAL, col, on); } },
