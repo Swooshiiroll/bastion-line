@@ -140,3 +140,81 @@ air: yes · ground: no · size: 1 · damage_kind: physical
 | c3 | rate 4.5 · barrels 2 |
 | c4 | rate 5.2 |
 | cm | rate 7 · barrels 4 |
+
+## artillery_cannon
+
+air: no · ground: yes · size: 1 · damage_kind: physical
+
+| Node | Tokens |
+|---|---|
+| base | damage 75 · splash 70 · rate 0.25 · flight 1.5 · scatter 30 · burn_dps 15 · burn_time 3 · shrap_radius 40 · shrap_mult 0.7 · stun_time 0.5 |
+| r1 | heavy_every 3 |
+| r2 | scatter 15 |
+| r3 | splash +15 |
+| a1 | damage +15 |
+| a2 | splash 85 |
+| a3 | damage 110 |
+| a4 | damage 120 · armor_pct 0.5 |
+| am | damage 140 · splash 90 · armor_pct 0.75 |
+| b1 | rate 0.303 |
+| b2 | rate 0.345 |
+| b3 | rate 0.5 |
+| b4 | rate 0.588 |
+| bm | rate 0.238 · barrage 3 |
+| c1 | incendiary |
+| c2 | shrapnel |
+| c3 | concussion |
+| c4 | burn_dps 22 · shrap_mult 0.85 · stun_time 0.7 |
+| cm | combined |
+
+## railgun
+
+air: yes · ground: yes · size: 1 · damage_kind: physical
+
+| Node | Tokens |
+|---|---|
+| base | damage 90 · range 380 · rate 0.4 · falloff 0.4 |
+| r1 | rate 0.4545 |
+| r2 | damage +15 · range +30 |
+| r3 | falloff 0.3 |
+| a1 | damage +30 |
+| a2 | boss_mult 1.5 |
+| a3 | damage 200 · rate 0.333 |
+| a4 | damage 240 · boss_mult 2 |
+| am | damage 280 · rate 0.303 · boss_mult 2.5 |
+| b1 | rate 0.4545 |
+| b2 | range +40 |
+| b3 | rate 0.625 |
+| b4 | rate 0.741 |
+| bm | rate 0.833 · rails 2 |
+| c1 | shatter 2 |
+| c2 | falloff 0.25 |
+| c3 | trail_dps 30 · trail_time 2 |
+| c4 | shatter 4 · trail_dps 45 · falloff 0.15 |
+| cm | shatter 6 · trail_dps 50 · falloff 0 |
+
+## tesla_tower
+
+air: yes · ground: yes · size: 1 · damage_kind: energy
+
+| Node | Tokens |
+|---|---|
+| base | damage 32 · range 140 · rate 0.8 · jumps 3 · jump_range 70 · falloff 0.15 |
+| r1 | damage +4 · range +15 |
+| r2 | jumps +1 |
+| r3 | rate 0.909 |
+| a1 | damage +8 |
+| a2 | overload |
+| a3 | damage 48 · stun_time 0.3 |
+| a4 | damage 54 · falloff 0.08 |
+| am | damage 60 · falloff 0.03 · stun_time 0.5 |
+| b1 | range +20 |
+| b2 | jumps 4 |
+| b3 | jumps 5 · storm_radius 25 · storm_dps 10 · storm_time 2 |
+| b4 | range +20 · jumps 6 |
+| bm | jumps 7 · storm_radius 30 · storm_dps 14 |
+| c1 | rate 0.9 |
+| c2 | rate 1.0 |
+| c3 | rate 1.4 |
+| c4 | rate 1.6 |
+| cm | rate 2.1 |

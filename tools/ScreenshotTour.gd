@@ -1010,7 +1010,7 @@ func _rework_checks(g) -> void:
 		g.state = Game.State.BUILD
 	else:
 		fails += _expect(false, "an enemy could be put in the Gun Turret's range")
-	for type in ["mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret"]:
+	for type in ["mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon"]:
 		fails += await _rework_fire_check(g, type)
 	screen.world.selected_tower = null
 	await _wait(0.2)
@@ -1047,7 +1047,7 @@ func _rework_fire_check(g, type: String) -> int:
 	var kind := "bat" if type == "anti_aircraft_turret" else "brute"
 	for dist in range(0, 3000, 30):
 		var cand = g.spawn_enemy(kind, 0, float(dist), 60.0, -1)
-		if cand.pos.distance_to(t.pos) < t.get_range() * 0.7:
+		if (type == "artillery_cannon" and cand.pos.distance_to(t.aim_point) < 40.0) or (type != "artillery_cannon" and cand.pos.distance_to(t.pos) < t.get_range() * 0.7):
 			foe = cand
 			break
 	if foe != null:

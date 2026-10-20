@@ -6,7 +6,7 @@ extends RefCounted
 ## (a, b, c), each with four `nodes` and a `mastery`. A node's `set` values replace the stat and its `add` values add to it;
 ## nodes apply in order on top of the base (the Retrofit, then each path's steps).
 
-const ORDER := ["gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret"]
+const ORDER := ["gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon", "railgun", "tesla_tower"]
 
 const TREES := {
 	"gun_turret": {
@@ -1110,6 +1110,667 @@ const TREES := {
 					"set": {
 						"rate": 7.0,
 						"barrels": 4.0,
+					},
+					"add": {},
+				},
+			},
+		],
+	},
+	"artillery_cannon": {
+		"name": "Artillery Cannon",
+		"class": "Assault",
+		"weapon": "Explosive",
+		"blurb": "A large-bore cannon that fires high-explosive shells very long distances. \"It's not DiGiorno...\"",
+		"air": false,
+		"ground": true,
+		"size": 1,
+		"damage_kind": "physical",
+		"beam": false,
+		"cost": 300,
+		"base": {
+			"name": "Artillery Cannon",
+			"cost": 300,
+			"blurb": "300 credits; a heavy shell every 4 s onto the aimed spot, 75 damage, a 70 px blast, 1.5 s flight time; ground only. A new cannon aims at the track point nearest to itself until you set it.",
+			"set": {
+				"damage": 75.0,
+				"splash": 70.0,
+				"rate": 0.25,
+				"flight": 1.5,
+				"scatter": 30.0,
+				"burn_dps": 15.0,
+				"burn_time": 3.0,
+				"shrap_radius": 40.0,
+				"shrap_mult": 0.7,
+				"stun_time": 0.5,
+			},
+			"add": {},
+		},
+		"retrofits": [
+			{
+				"name": "Shell Magazine",
+				"cost": 120,
+				"blurb": "Every third shell is a heavy round for +50% damage (about +17% on average), with no change to reload time.",
+				"set": {
+					"heavy_every": 3.0,
+				},
+				"add": {},
+			},
+			{
+				"name": "Stabilised Mount",
+				"cost": 120,
+				"blurb": "Shells land within 15 px of the aimed spot instead of scattering up to 30 px, so the blast hits what you aimed at.",
+				"set": {
+					"scatter": 15.0,
+				},
+				"add": {},
+			},
+			{
+				"name": "Wide Charge",
+				"cost": 80,
+				"blurb": "+15 px blast (85).",
+				"set": {},
+				"add": {
+					"splash": 15.0,
+				},
+			},
+		],
+		"paths": [
+			{
+				"key": "a",
+				"name": "Power",
+				"nodes": [
+					{
+						"name": "Heavy Shells",
+						"cost": 120,
+						"blurb": "+15 damage (90)",
+						"set": {},
+						"add": {
+							"damage": 15.0,
+						},
+					},
+					{
+						"name": "Wide Bursting Charge",
+						"cost": 200,
+						"blurb": "Blast 70 to 85 px",
+						"set": {
+							"splash": 85.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "HE Shells",
+						"cost": 730,
+						"blurb": "110 damage",
+						"set": {
+							"damage": 110.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Penetrator Shells",
+						"cost": 2930,
+						"blurb": "120 damage; ignores 50% of armour",
+						"set": {
+							"damage": 120.0,
+							"armor_pct": 0.5,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Siege Shells",
+					"cost": 7355,
+					"blurb": "140 damage, 90 px blast, ignores 75% of armour",
+					"set": {
+						"damage": 140.0,
+						"splash": 90.0,
+						"armor_pct": 0.75,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "b",
+				"name": "Speed",
+				"nodes": [
+					{
+						"name": "Drilled Crew",
+						"cost": 120,
+						"blurb": "A shell every 3.3 s",
+						"set": {
+							"rate": 0.303,
+						},
+						"add": {},
+					},
+					{
+						"name": "Quick Breech",
+						"cost": 240,
+						"blurb": "Every 2.9 s",
+						"set": {
+							"rate": 0.345,
+						},
+						"add": {},
+					},
+					{
+						"name": "Autoloader",
+						"cost": 1450,
+						"blurb": "Every 2 s",
+						"set": {
+							"rate": 0.5,
+						},
+						"add": {},
+					},
+					{
+						"name": "Rapid Breech",
+						"cost": 1935,
+						"blurb": "Every 1.7 s",
+						"set": {
+							"rate": 0.588,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Rolling Barrage",
+					"cost": 3865,
+					"blurb": "Fires in 3-shell barrages that walk across the aimed spot: an average of one shell every 1.4 s",
+					"set": {
+						"rate": 0.238,
+						"barrage": 3.0,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "c",
+				"name": "Special Effects",
+				"nodes": [
+					{
+						"name": "Incendiary Shells",
+						"cost": 365,
+						"blurb": "Unlocks incendiary: the blast leaves burning ground (15 damage/s for 3 s)",
+						"set": {
+							"incendiary": true,
+						},
+						"add": {},
+					},
+					{
+						"name": "Shrapnel Shells",
+						"cost": 195,
+						"blurb": "Unlocks shrapnel: a 40 px wider blast at 70% damage",
+						"set": {
+							"shrapnel": true,
+						},
+						"add": {},
+					},
+					{
+						"name": "Concussion Shells",
+						"cost": 1085,
+						"blurb": "Unlocks concussion: everything in the blast is stunned for 0.5 s (bosses 0.15 s)",
+						"set": {
+							"concussion": true,
+						},
+						"add": {},
+					},
+					{
+						"name": "Improved Payloads",
+						"cost": 3505,
+						"blurb": "Every shell type stronger: burn 22/s, shrapnel at 85%, stun 0.7 s",
+						"set": {
+							"burn_dps": 22.0,
+							"shrap_mult": 0.85,
+							"stun_time": 0.7,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Combined Payload",
+					"cost": 5725,
+					"blurb": "A fourth type that does all three at once",
+					"set": {
+						"combined": true,
+					},
+					"add": {},
+				},
+			},
+		],
+	},
+	"railgun": {
+		"name": "Railgun",
+		"class": "Assault",
+		"weapon": "Ballistic",
+		"blurb": "A large cannon with magnetically polarized rails that launch a large projectile extremely far, extremely fast. \"Known to cause cancer in the state of California.\"",
+		"air": true,
+		"ground": true,
+		"size": 1,
+		"damage_kind": "physical",
+		"beam": false,
+		"cost": 500,
+		"base": {
+			"name": "Railgun",
+			"cost": 500,
+			"blurb": "500 credits; a 90-damage slug every 2.5 s, 380 range; air and ground; armour applies (a Titan's 9 armour costs it only 10%). Penetration: the slug pierces every enemy on its line, losing 40% of its damage with each enemy it passes through (90, 54, 32...).",
+			"set": {
+				"damage": 90.0,
+				"range": 380.0,
+				"rate": 0.4,
+				"falloff": 0.4,
+			},
+			"add": {},
+		},
+		"retrofits": [
+			{
+				"name": "Capacitor Coils",
+				"cost": 140,
+				"blurb": "Recharge 2.5 to 2.2 s.",
+				"set": {
+					"rate": 0.4545,
+				},
+				"add": {},
+			},
+			{
+				"name": "Longer Rails",
+				"cost": 265,
+				"blurb": "+15 damage (105) and +30 range (410).",
+				"set": {},
+				"add": {
+					"damage": 15.0,
+					"range": 30.0,
+				},
+			},
+			{
+				"name": "Penetrator Tips",
+				"cost": 65,
+				"blurb": "Falloff per enemy 40% to 30%.",
+				"set": {
+					"falloff": 0.3,
+				},
+				"add": {},
+			},
+		],
+		"paths": [
+			{
+				"key": "a",
+				"name": "Power",
+				"nodes": [
+					{
+						"name": "Dense Slugs",
+						"cost": 345,
+						"blurb": "+30 damage (120)",
+						"set": {},
+						"add": {
+							"damage": 30.0,
+						},
+					},
+					{
+						"name": "Boss Rounds",
+						"cost": 275,
+						"blurb": "×1.5 damage to bosses",
+						"set": {
+							"boss_mult": 1.5,
+						},
+						"add": {},
+					},
+					{
+						"name": "Overcharge",
+						"cost": 2260,
+						"blurb": "It charges each shot longer: 200 damage, a 3 s recharge",
+						"set": {
+							"damage": 200.0,
+							"rate": 0.333,
+						},
+						"add": {},
+					},
+					{
+						"name": "Kill Charge",
+						"cost": 5125,
+						"blurb": "240 damage; ×2 to bosses",
+						"set": {
+							"damage": 240.0,
+							"boss_mult": 2.0,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Kingslayer",
+					"cost": 6465,
+					"blurb": "280 damage per charged shot (3.3 s); ×2.5 to bosses",
+					"set": {
+						"damage": 280.0,
+						"rate": 0.303,
+						"boss_mult": 2.5,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "b",
+				"name": "Range/Speed",
+				"nodes": [
+					{
+						"name": "Fast Capacitors",
+						"cost": 140,
+						"blurb": "Recharge 2.2 s",
+						"set": {
+							"rate": 0.4545,
+						},
+						"add": {},
+					},
+					{
+						"name": "Extended Rails",
+						"cost": 245,
+						"blurb": "+40 range (420)",
+						"set": {},
+						"add": {
+							"range": 40.0,
+						},
+					},
+					{
+						"name": "Rapid Capacitors",
+						"cost": 1930,
+						"blurb": "Recharge 1.6 s",
+						"set": {
+							"rate": 0.625,
+						},
+						"add": {},
+					},
+					{
+						"name": "Supercapacitors",
+						"cost": 2610,
+						"blurb": "Recharge 1.35 s",
+						"set": {
+							"rate": 0.741,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Twin Rails",
+					"cost": 5000,
+					"blurb": "Two rails firing in turn: a slug every 1.2 s, twice the stock rate",
+					"set": {
+						"rate": 0.833,
+						"rails": 2.0,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "c",
+				"name": "Special Effects",
+				"nodes": [
+					{
+						"name": "Shatter Rounds",
+						"cost": 60,
+						"blurb": "Each hit strips 2 armour permanently, so every tower benefits",
+						"set": {
+							"shatter": 2.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Penetrator Core",
+						"cost": 260,
+						"blurb": "Falloff per enemy 40% to 25%",
+						"set": {
+							"falloff": 0.25,
+						},
+						"add": {},
+					},
+					{
+						"name": "Ionised Trail",
+						"cost": 1535,
+						"blurb": "The line burns for 2 s: 30 energy damage/s to every enemy on it, targeted or not (cloaked ones too)",
+						"set": {
+							"trail_dps": 30.0,
+							"trail_time": 2.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Hot Rail",
+						"cost": 3685,
+						"blurb": "Shatter 4 armour; trail 45/s; falloff 15%",
+						"set": {
+							"shatter": 4.0,
+							"trail_dps": 45.0,
+							"falloff": 0.15,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Ion Cannon",
+					"cost": 6920,
+					"blurb": "Shatter 6; trail 50/s; no falloff: full damage to everything on the line",
+					"set": {
+						"shatter": 6.0,
+						"trail_dps": 50.0,
+						"falloff": 0.0,
+					},
+					"add": {},
+				},
+			},
+		],
+	},
+	"tesla_tower": {
+		"name": "Tesla Tower",
+		"class": "Assault",
+		"weapon": "Energy",
+		"blurb": "A large metal disk mounted atop of a large tower that generates high-voltage electrical arcs that damage incoming enemies. \"It was built in a cave with a box of scraps.\"",
+		"air": true,
+		"ground": true,
+		"size": 1,
+		"damage_kind": "energy",
+		"beam": false,
+		"cost": 250,
+		"base": {
+			"name": "Tesla Tower",
+			"cost": 250,
+			"blurb": "250 credits; an arc every 1.25 s (0.8/s), 32 damage, jumping to 3 more enemies within 70 px and losing 15% per jump; 140 range; air and ground. It's Energy, so it ignores armour like other energy damage (to confirm), and it's a Wraith counter once the Wraith is revealed.",
+			"set": {
+				"damage": 32.0,
+				"range": 140.0,
+				"rate": 0.8,
+				"jumps": 3.0,
+				"jump_range": 70.0,
+				"falloff": 0.15,
+			},
+			"add": {},
+		},
+		"retrofits": [
+			{
+				"name": "Bigger Disk",
+				"cost": 120,
+				"blurb": "+4 damage (36), +15 range (155).",
+				"set": {},
+				"add": {
+					"damage": 4.0,
+					"range": 15.0,
+				},
+			},
+			{
+				"name": "Grounding Rods",
+				"cost": 65,
+				"blurb": "+1 jump (4).",
+				"set": {},
+				"add": {
+					"jumps": 1.0,
+				},
+			},
+			{
+				"name": "Insulated Coils",
+				"cost": 70,
+				"blurb": "An arc every 1.1 s.",
+				"set": {
+					"rate": 0.909,
+				},
+				"add": {},
+			},
+		],
+		"paths": [
+			{
+				"key": "a",
+				"name": "Power/Damage",
+				"nodes": [
+					{
+						"name": "High Voltage",
+						"cost": 125,
+						"blurb": "+8 damage (40)",
+						"set": {},
+						"add": {
+							"damage": 8.0,
+						},
+					},
+					{
+						"name": "Overload Circuits",
+						"cost": 100,
+						"blurb": "EMP-enemy overload: ×2 damage to Disruptors (Jammer, Siphon, Blackout Rig, Capacitor); a hit cancels a Capacitor's charge",
+						"set": {
+							"overload": true,
+						},
+						"add": {},
+					},
+					{
+						"name": "Arc Stun",
+						"cost": 1020,
+						"blurb": "48 damage; arcs stun for 0.3 s (bosses 0.1 s)",
+						"set": {
+							"damage": 48.0,
+							"stun_time": 0.3,
+						},
+						"add": {},
+					},
+					{
+						"name": "Clean Conduction",
+						"cost": 1705,
+						"blurb": "54 damage; only 8% lost per jump",
+						"set": {
+							"damage": 54.0,
+							"falloff": 0.08,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Lightning Rod",
+					"cost": 4310,
+					"blurb": "60 damage; 3% lost per jump; stun 0.5 s",
+					"set": {
+						"damage": 60.0,
+						"falloff": 0.03,
+						"stun_time": 0.5,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "b",
+				"name": "Range/Chaining",
+				"nodes": [
+					{
+						"name": "Taller Coil",
+						"cost": 70,
+						"blurb": "+20 range (160)",
+						"set": {},
+						"add": {
+							"range": 20.0,
+						},
+					},
+					{
+						"name": "Extra Jump",
+						"cost": 155,
+						"blurb": "4 jumps",
+						"set": {
+							"jumps": 4.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Storm Field",
+						"cost": 2260,
+						"blurb": "5 jumps; each arc leaves a 25 px storm for 2 s (10 energy damage/s to every enemy in it)",
+						"set": {
+							"jumps": 5.0,
+							"storm_radius": 25.0,
+							"storm_dps": 10.0,
+							"storm_time": 2.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Wide Storm",
+						"cost": 2390,
+						"blurb": "+20 range (180); 6 jumps",
+						"set": {
+							"jumps": 6.0,
+						},
+						"add": {
+							"range": 20.0,
+						},
+					},
+				],
+				"mastery": {
+					"name": "Tempest",
+					"cost": 8140,
+					"blurb": "7 jumps; storms of 14/s, 30 px",
+					"set": {
+						"jumps": 7.0,
+						"storm_radius": 30.0,
+						"storm_dps": 14.0,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "c",
+				"name": "Speed",
+				"nodes": [
+					{
+						"name": "Quick Recharge",
+						"cost": 60,
+						"blurb": "0.9 arcs/s",
+						"set": {
+							"rate": 0.9,
+						},
+						"add": {},
+					},
+					{
+						"name": "Fast Capacitor",
+						"cost": 125,
+						"blurb": "1.0 arcs/s",
+						"set": {
+							"rate": 1.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Rapid Discharge",
+						"cost": 995,
+						"blurb": "1.4 arcs/s",
+						"set": {
+							"rate": 1.4,
+						},
+						"add": {},
+					},
+					{
+						"name": "Overclocked Coil",
+						"cost": 995,
+						"blurb": "1.6 arcs/s",
+						"set": {
+							"rate": 1.6,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Continuous Discharge",
+					"cost": 4980,
+					"blurb": "2.1 arcs/s: near-constant lightning",
+					"set": {
+						"rate": 2.1,
 					},
 					"add": {},
 				},

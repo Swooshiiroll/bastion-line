@@ -8,6 +8,7 @@ const GunTurretArt = preload("res://scripts/view/towers/GunTurretArt.gd")
 const MortarTowerArt = preload("res://scripts/view/towers/MortarTowerArt.gd")
 const RocketSalvoArt = preload("res://scripts/view/towers/RocketSalvoArt.gd")
 const AntiAircraftArt = preload("res://scripts/view/towers/AntiAircraftArt.gd")
+const ArtilleryCannonArt = preload("res://scripts/view/towers/ArtilleryCannonArt.gd")
 
 var world
 ## Microseconds spent per section of _draw, summed; tools/PerfProbe.gd reads and resets it.
@@ -38,10 +39,15 @@ func _draw() -> void:
 		var cur: float = _aim.get(key, -PI / 2.0)
 		if tw.target != null and tw.target.alive:
 			cur = lerp_angle(cur, (tw.target.pos - tw.pos).angle(), 0.6 if (tw.is_rework and bool(tw.stats().get("turn_fast", false))) else 0.35)
+		if tw.type == "artillery_cannon":
+			# It points at the spot it shells, not at an enemy.
+			cur = lerp_angle(cur, (tw.aim_point - tw.pos).angle(), 0.35)
 		_aim[key] = cur
 		var extra: Array = []
 		if tw.is_rework and tw.type == "gun_turret":
 			extra = _extra_aims(tw, key, cur)
+		elif tw.is_rework and tw.type == "artillery_cannon":
+			extra = [ArtilleryCannonArt.types(ArtilleryCannonArt.levels(tw.look_key())).find(tw.shell), tw.pulse_count]
 		elif tw.is_rework and tw.type == "anti_aircraft_turret":
 			extra = [tw.pulse_count]
 		elif tw.is_rework and tw.type == "laser_tower":
@@ -144,6 +150,8 @@ func _extra_aims(tw, key: int, main: float) -> Array:
 
 
 func _projectile(p) -> void:
+	if p.hold > 0.0:
+		return
 	match p.kind:
 		"cannon":
 			# A plasma shell arcing up and down: ground shadow, a glowing trail behind it.
@@ -191,6 +199,8 @@ func _projectile(p) -> void:
 			_salvo_rocket(p)
 		"anti_aircraft_turret":
 			_aa_round(p)
+		"artillery_cannon":
+			_artillery_shell(p)
 		_:
 			var d: Vector2 = (p.target_pos - p.pos).normalized()
 			if d == Vector2.ZERO:
@@ -235,6 +245,56 @@ func _gun_round(p) -> void:
 		draw_line(p.pos - d * 0.9 + o * 0.6, p.pos - d * 0.9 - o * 0.6, Color(1, 0.85, 0.2), 0.7, true)
 	if lv.P >= 4:
 		Draw.glow_dot(self, p.pos - d * 1.8, 0.45, Color(1, 0.95, 0.85))
+
+
+## The Artillery Cannon's shell (the confirmed art): lobbed high, it changes with each Power step (bigger, dark with a yellow band, long
+## and slim with a steel tip, gold at the mastery), and carries the mark of its type: an incendiary flame, shrapnel studs, concussion
+## rings, or all three bands for the combined shell. A heavy round (Shell Magazine) is bigger and red-ringed.
+func _artillery_shell(p) -> void:
+	var lv := ArtilleryCannonArt.levels(str(p.look))
+	var frac := clampf(p.traveled / maxf(p.total, 1.0), 0.0, 1.0)
+	var lift: float = sin(frac * PI) * float(p.total) * 0.4
+	var heavy: bool = p.crit
+	var z := (1.2 if lv.P >= 1 else 1.0) * (1.25 if lv.r == 2 else 1.0) * (1.35 if heavy else 1.0)
+	var r := 2.6 * z
+	Draw.ellipse(self, p.pos + Vector2(0, 3), 3.0 * z, 1.5 * z, Color(0, 0, 0, 0.3))
+	var sp: Vector2 = p.pos - Vector2(0, lift)
+	var kind := String(p.shell)
+	var tc: Color = ArtilleryCannonArt.TYPE_COLORS.get(kind, Color(1.0, 0.55, 0.2)) if kind != "he" else (Draw.GOLD if lv.P >= 5 else Color(1.0, 0.55, 0.2))
+	var back: Vector2 = (p.start - p.pos).normalized() if p.start.distance_squared_to(p.pos) > 1.0 else Vector2.LEFT
+	if kind != "he" or lv.P >= 5:
+		for k in 4:
+			Draw.disc(self, sp + back * (3.0 + 3.0 * float(k)) + Vector2(0, float(k) * 1.5), (0.9 + float(k + 1) * 0.4) * z, Color(tc, 0.34 - 0.06 * float(k + 1)))
+	var body := ArtilleryCannonArt.body_color(lv)
+	var d := Vector2.DOWN if frac > 0.5 else Vector2.UP
+	if lv.P >= 4:
+		Draw.bar(self, sp - d * r * 1.9, sp + d * r * 0.9, r * 1.05, body)
+		Draw.poly(self, PackedVector2Array([sp + d * r * 2.4, sp + d * r * 0.9 + d.orthogonal() * r * 0.4, sp + d * r * 0.9 - d.orthogonal() * r * 0.4]), ArtilleryCannonArt.STEEL)
+	else:
+		Draw.orb(self, sp, r, body)
+	if lv.P >= 5:
+		Draw.ring(self, sp, r * 0.55, Draw.GOLD, 0.8)
+	if lv.P >= 3:
+		draw_line(sp + Vector2(r * 0.9, 0), sp - Vector2(r * 0.9, 0), ArtilleryCannonArt.YEL, 1.0, true)
+	if lv.P >= 2:
+		for i in 3:
+			draw_line(sp + Vector2.from_angle(float(i) * 1.05 + 0.5) * r * 0.3, sp + Vector2.from_angle(float(i) * 1.05 + 0.5) * r * 0.95, Color(0, 0, 0, 0.45), 0.6, true)
+	if heavy:
+		Draw.ring(self, sp, r * 1.05, ArtilleryCannonArt.RED, 1.1)
+	match kind:
+		"incendiary":
+			Draw.ring(self, sp, r * 0.8, ArtilleryCannonArt.FIRE, 0.9)
+		"shrapnel":
+			for i in 6:
+				draw_line(sp + Vector2.from_angle(float(i) * TAU / 6.0 + 0.3) * r * 0.95, sp + Vector2.from_angle(float(i) * TAU / 6.0 + 0.3) * r * 1.3, ArtilleryCannonArt.SHRAP, 0.8, true)
+		"concussion":
+			Draw.ring(self, sp, r * 1.15, Color(ArtilleryCannonArt.CONC, 0.8), 0.8)
+			Draw.ring(self, sp, r * 1.5, Color(ArtilleryCannonArt.CONC, 0.4), 0.7)
+		"combined":
+			Draw.ring(self, sp, r * 0.45, ArtilleryCannonArt.FIRE, 0.8)
+			Draw.ring(self, sp, r * 0.75, ArtilleryCannonArt.SHRAP, 0.8)
+			Draw.ring(self, sp, r * 1.05, ArtilleryCannonArt.CONC, 0.8)
+	Draw.glow_dot(self, sp, 1.1, tc)
 
 
 ## The Anti-Aircraft Turret's round (the confirmed art): a tracer (thinner and longer with High-Velocity Rounds) and a brass bullet that

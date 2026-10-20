@@ -18,6 +18,7 @@ const Overlay = preload("res://scripts/view/Overlay.gd")
 const GunTurretArt = preload("res://scripts/view/towers/GunTurretArt.gd")
 const RocketSalvoArt = preload("res://scripts/view/towers/RocketSalvoArt.gd")
 const AntiAircraftArt = preload("res://scripts/view/towers/AntiAircraftArt.gd")
+const ArtilleryCannonArt = preload("res://scripts/view/towers/ArtilleryCannonArt.gd")
 
 const MAX_STEPS_PER_FRAME := 40
 const SMOKE := Color(0.35, 0.36, 0.4, 0.7)
@@ -279,6 +280,8 @@ func _visual(ev: Dictionary) -> void:
 			ground_fx.scorch(ev.pos, float(ev.radius) * 0.45)
 			if ev.get("stun", false):
 				fx.ring(ev.pos, float(ev.radius) * 0.5, float(ev.radius) * 1.15, Color(1.0, 0.92, 0.35), 0.4, 2.5)
+			if str(ev.get("look", "")) != "" and ArtilleryCannonArt.levels(str(ev.look)).P >= 5:
+				fx.ring(ev.pos, float(ev.radius) * 0.4, float(ev.radius) * 1.3, Draw.GOLD, 0.35, 1.6)
 			shake = maxf(shake, 0.06)
 		"smoke":
 			# Smoke Shells: a grey cloud that hangs where the shell landed.

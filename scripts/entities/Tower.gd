@@ -75,6 +75,10 @@ var ramp_mult := 1.0
 var beam_targets: Array = []
 ## Laser Tower (reworked): seconds each beam has held its target, parallel to beam_targets.
 var beam_ramps: Array = []
+## Artillery Cannon: the spot it shells (chosen by the player; set to the nearest track point when built) and the shell type loaded.
+var aim_point := Vector2.ZERO
+var aim_set := false
+var shell := "he"
 ## Seconds left knocked offline by a Jammer's EMP.
 var disabled := 0.0
 ## The special tile under the tower: "H" (high ground), "P" (power node) or "".
@@ -533,6 +537,16 @@ func is_support() -> bool:
 ## Scrapyard: an economy tower that never attacks.
 func is_economy() -> bool:
 	return bool(def.get("economy", false))
+
+
+## The shell types an Artillery Cannon has unlocked, plain high explosive first.
+func available_shells() -> Array:
+	var s := stats()
+	var out: Array = ["he"]
+	for k in ["incendiary", "shrapnel", "concussion", "combined"]:
+		if bool(s.get(k, false)):
+			out.append(k)
+	return out
 
 
 func is_beam() -> bool:

@@ -11,7 +11,7 @@ extends RefCounted
 ##   command tree  "start_gold": +fraction, "lives": +fraction of the mode's shields, "sell_refund": +fraction,
 ##                 "ability_cd": -fraction, "bounty": +fraction
 
-const TREE_ORDER := ["command", "arrow", "cannon", "frost", "sniper", "tesla", "laser", "missile", "amp", "flak", "sensor", "gravity", "nullifier", "nova", "drones", "scrap", "gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret"]
+const TREE_ORDER := ["command", "arrow", "cannon", "frost", "sniper", "tesla", "laser", "missile", "amp", "flak", "sensor", "gravity", "nullifier", "nova", "drones", "scrap", "gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon", "railgun", "tesla_tower"]
 
 ## RP sources, all derived from profile records so they can't be farmed and are never lost.
 ## (Medals pay their mode's medal_rp, from data/difficulty.gd.)
@@ -476,6 +476,71 @@ const NODES := {
 	"anti_aircraft_turret_m": {
 		"tree": "anti_aircraft_turret", "slot": Vector2i(0, 2), "cost": 3, "requires": ["anti_aircraft_turret_2a", "anti_aircraft_turret_2b"], "icon": "mastery",
 		"name": "Anti-Aircraft Turret Mastery", "blurb": "Unlocks the masteries: Flak Curtain, Quad Mount and Sky Wall.",
+		"effects": {"mastery": true},
+	},
+	# --- Artillery Cannon (the tower rework, issue #59: a minimal tree until the research pass) ----------
+	"artillery_cannon_1": {
+		"tree": "artillery_cannon", "slot": Vector2i(0, 0), "cost": 1, "requires": [], "icon": "damage",
+		"name": "Heavy Charges", "blurb": "Artillery shells deal +6% damage.",
+		"effects": {"mult": {"damage": 0.06}},
+	},
+	"artillery_cannon_2a": {
+		"tree": "artillery_cannon", "slot": Vector2i(-1, 1), "cost": 2, "requires": ["artillery_cannon_1"], "icon": "damage",
+		"name": "Wide Charges", "blurb": "Artillery shells burst 6% wider.",
+		"effects": {"mult": {"splash": 0.06}},
+	},
+	"artillery_cannon_2b": {
+		"tree": "artillery_cannon", "slot": Vector2i(1, 1), "cost": 2, "requires": ["artillery_cannon_1"], "icon": "rate",
+		"name": "Autoloaders", "blurb": "Artillery fires 7% faster.",
+		"effects": {"mult": {"rate": 0.07}},
+	},
+	"artillery_cannon_m": {
+		"tree": "artillery_cannon", "slot": Vector2i(0, 2), "cost": 3, "requires": ["artillery_cannon_2a", "artillery_cannon_2b"], "icon": "mastery",
+		"name": "Artillery Cannon Mastery", "blurb": "Unlocks the masteries: Siege Shells, Rolling Barrage and Combined Payload.",
+		"effects": {"mastery": true},
+	},
+
+	# --- Railgun (the tower rework, issue #59: a minimal tree until the research pass) ----------
+	"railgun_1": {
+		"tree": "railgun", "slot": Vector2i(0, 0), "cost": 1, "requires": [], "icon": "damage",
+		"name": "Dense Slugs", "blurb": "Railguns deal +6% damage.",
+		"effects": {"mult": {"damage": 0.06}},
+	},
+	"railgun_2a": {
+		"tree": "railgun", "slot": Vector2i(-1, 1), "cost": 2, "requires": ["railgun_1"], "icon": "range",
+		"name": "Long Rails", "blurb": "Railguns get +7% range.",
+		"effects": {"mult": {"range": 0.07}},
+	},
+	"railgun_2b": {
+		"tree": "railgun", "slot": Vector2i(1, 1), "cost": 2, "requires": ["railgun_1"], "icon": "rate",
+		"name": "Fast Capacitors", "blurb": "Railguns recharge 7% faster.",
+		"effects": {"mult": {"rate": 0.07}},
+	},
+	"railgun_m": {
+		"tree": "railgun", "slot": Vector2i(0, 2), "cost": 3, "requires": ["railgun_2a", "railgun_2b"], "icon": "mastery",
+		"name": "Railgun Mastery", "blurb": "Unlocks the masteries: Kingslayer, Twin Rails and Ion Cannon.",
+		"effects": {"mastery": true},
+	},
+
+	# --- Tesla Tower (the tower rework, issue #59: a minimal tree until the research pass) ----------
+	"tesla_tower_1": {
+		"tree": "tesla_tower", "slot": Vector2i(0, 0), "cost": 1, "requires": [], "icon": "damage",
+		"name": "High Voltage", "blurb": "Tesla Towers deal +6% damage.",
+		"effects": {"mult": {"damage": 0.06}},
+	},
+	"tesla_tower_2a": {
+		"tree": "tesla_tower", "slot": Vector2i(-1, 1), "cost": 2, "requires": ["tesla_tower_1"], "icon": "range",
+		"name": "Taller Coils", "blurb": "Tesla Towers get +7% range.",
+		"effects": {"mult": {"range": 0.07}},
+	},
+	"tesla_tower_2b": {
+		"tree": "tesla_tower", "slot": Vector2i(1, 1), "cost": 2, "requires": ["tesla_tower_1"], "icon": "rate",
+		"name": "Quick Discharge", "blurb": "Tesla Towers fire 7% faster.",
+		"effects": {"mult": {"rate": 0.07}},
+	},
+	"tesla_tower_m": {
+		"tree": "tesla_tower", "slot": Vector2i(0, 2), "cost": 3, "requires": ["tesla_tower_2a", "tesla_tower_2b"], "icon": "mastery",
+		"name": "Tesla Tower Mastery", "blurb": "Unlocks the masteries: Lightning Rod, Tempest and Continuous Discharge.",
 		"effects": {"mastery": true},
 	},
 }

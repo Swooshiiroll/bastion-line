@@ -34,6 +34,9 @@ func _draw() -> void:
 	if g == null or not world.interactive:
 		return
 	var build: String = world.build_type
+	for t in g.towers:
+		if t.type == "artillery_cannon" and t.aim_set:
+			_aim_marker(t, world.selected_tower == t)
 	if world.ability_target == "meteor" and world.mouse_in_field:
 		_meteor_reticle(g, world.hover_pos)
 	if build != "":
@@ -103,6 +106,21 @@ func _meteor_reticle(g, p: Vector2) -> void:
 	for e in g.enemies:
 		if e.alive and e.pos.distance_squared_to(p) <= r * r:
 			Draw.arc(self, e.pos, e.radius + 4.0, 0.0, TAU, 24, Color(1.0, 0.5, 0.2, 0.9), 2.0, true)
+
+
+## Where an Artillery Cannon is aimed: a target marker the size of its blast (bright while it's selected, with a line to it).
+func _aim_marker(t, selected: bool) -> void:
+	var p: Vector2 = t.aim_point
+	var r := float(t.stats().splash)
+	var col := Color(1.0, 0.55, 0.2)
+	var a := 0.9 if selected else 0.3
+	Draw.arc(self, p, r, 0.0, TAU, 40, Color(col, a * 0.7), 1.6, true)
+	for k in 4:
+		var d := Vector2.from_angle(float(k) * PI / 2.0)
+		draw_line(p + d * (r * 0.35), p + d * (r * 0.75), Color(col, a), 2.0, true)
+	Draw.disc(self, p, 2.5, Color(col, a))
+	if selected:
+		draw_dashed_line(t.pos, p, Color(col, 0.4), 1.5, 8.0)
 
 
 ## A small label with a dark backing, centred on `p`.

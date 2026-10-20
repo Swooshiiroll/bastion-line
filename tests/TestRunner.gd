@@ -3284,3 +3284,112 @@ func test_rework_anti_aircraft() -> void:
 	pm.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
 	buy_steps(g, pm, "b", 5)
 	check(pm.mastered and near(pm.stats().damage, 42.0) and near(pm.stats().burst, 50.0), "Flak Curtain: 42 damage, 50 px")
+
+
+func test_rework_artillery_cannon() -> void:
+	var g = new_game()
+	g.gold = 90000
+	g.emit_events = true
+	var t = g.place_tower("artillery_cannon", spot(g, "artillery_cannon", 0))
+	check(t != null and t.is_rework and g.tower_cost("artillery_cannon") == 300, "the Artillery Cannon builds for 300")
+	var s: Dictionary = t.stats()
+	check(near(s.damage, 75.0) and near(s.splash, 70.0) and near(s.rate, 0.25) and near(s.flight, 1.5) and near(s.scatter, 30.0), "stock: 75 damage, 70 px, a shell every 4 s, 30 px scatter")
+	check(t.hits_ground() and not t.hits_air(), "ground only")
+	check(t.aim_set and t.aim_point.distance_to(g.nearest_track_point(t.pos)) < 0.01, "a new cannon aims at the track point nearest itself")
+	var far: Vector2 = g.nearest_track_point(Vector2(1100, 600))
+	g.aim_artillery(t, Vector2(1100, 600))
+	check(t.aim_point.distance_to(far) < 0.01, "re-aiming snaps to the lane")
+	# Retrofits.
+	check(g.buy_retrofit(t, 0) and int(t.stats().heavy_every) == 3, "Shell Magazine: every third shell is heavy")
+	var st = g.place_tower("artillery_cannon", spot(g, "artillery_cannon", 20))
+	check(g.buy_retrofit(st, 1) and near(st.stats().scatter, 15.0), "Stabilised Mount: 15 px scatter")
+	var wc = g.place_tower("artillery_cannon", spot(g, "artillery_cannon", 40))
+	check(g.buy_retrofit(wc, 2) and near(wc.stats().splash, 85.0), "Wide Charge: +15 px")
+	# It shells the spot on a loop, enemies or not; the third shell is heavy.
+	g.enemies.clear()
+	g.projectiles.clear()
+	t.cooldown = 0.0
+	g._fire_artillery(t, t.stats())
+	check(g.projectiles.size() == 1, "a shell is fired at an empty spot")
+	var p1 = g.projectiles[0]
+	check(p1.target_pos.distance_to(t.aim_point) <= 30.0 and near(p1.total / p1.speed, 1.5), "it lands within the scatter after 1.5 s of flight")
+	g._fire_artillery(t, t.stats())
+	g._fire_artillery(t, t.stats())
+	var heavy: Array = g.projectiles.filter(func(p): return p.crit)
+	check(heavy.size() == 1 and near(heavy[0].damage, g.projectiles[0].damage * 1.5), "every third shell is heavy (+50%)")
+	# Blast: ground only, armour pierced by the Power path.
+	g.projectiles.clear()
+	var pw = g.place_tower("artillery_cannon", spot(g, "artillery_cannon", 60))
+	pw.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, pw, "a", 5)
+	check(pw.mastered and near(pw.stats().damage, 140.0) and near(pw.stats().splash, 90.0) and near(pw.stats().armor_pct, 0.75), "Siege Shells: 140 damage, 90 px, 75% armour")
+	var brute = put(g, "brute", 100.0, 0, 50.0)
+	var bat = put(g, "bat", 100.0, 0, 50.0)
+	bat.pos = brute.pos
+	pw.pos = brute.pos + Vector2(60, 0)
+	g.aim_artillery(pw, brute.pos)
+	var hp_bat: float = bat.hp
+	var hp_b: float = brute.hp
+	g._fire_artillery(pw, pw.stats())
+	var sh = g.projectiles[g.projectiles.size() - 1]
+	sh.pos = brute.pos
+	g._projectile_hit(sh)
+	check(brute.hp < hp_b and near(bat.hp, hp_bat), "the blast hurts ground enemies and never flyers")
+	# Rolling Barrage: three shells walking across the spot, one after another.
+	var rb = g.place_tower("artillery_cannon", spot(g, "artillery_cannon", 80))
+	rb.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, rb, "b", 5)
+	g.projectiles.clear()
+	g._fire_artillery(rb, rb.stats())
+	check(g.projectiles.size() == 3 and near(g.projectiles[1].hold, 0.2) and near(rb.stats().rate, 0.238), "Rolling Barrage: three shells, 0.2 s apart")
+	# Shell types.
+	var sp = g.place_tower("artillery_cannon", spot(g, "artillery_cannon", 100))
+	check(sp.available_shells() == ["he"] and not g.set_shell(sp, "incendiary"), "only high explosive at first")
+	buy_steps(g, sp, "c", 3)
+	check(sp.available_shells() == ["he", "incendiary", "shrapnel", "concussion"], "three paths steps unlock three shells")
+	check(g.set_shell(sp, "incendiary") and not g.set_shell(sp, "combined"), "a shell type can be loaded once unlocked")
+	g.enemies.clear()
+	g.pools.clear()
+	var e = put(g, "grunt", 100.0, 0, 500.0)
+	sp.pos = e.pos + Vector2(60, 0)
+	g.aim_artillery(sp, e.pos)
+	g._fire_artillery(sp, sp.stats())
+	var inc = g.projectiles[g.projectiles.size() - 1]
+	inc.pos = e.pos
+	g._projectile_hit(inc)
+	check(g.pools.size() == 1 and near(g.pools[0].dps, 15.0), "incendiary: burning ground, 15/s")
+	g.set_shell(sp, "concussion")
+	g._fire_artillery(sp, sp.stats())
+	var con = g.projectiles[g.projectiles.size() - 1]
+	con.pos = e.pos
+	g._projectile_hit(con)
+	check(e.stun_timer > 0.4, "concussion: stunned (%.2f s)" % e.stun_timer)
+	g.set_shell(sp, "shrapnel")
+	g._fire_artillery(sp, sp.stats())
+	var shr = g.projectiles[g.projectiles.size() - 1]
+	shr.pos = e.pos
+	var evs: int = g.events.size()
+	g._projectile_hit(shr)
+	var rad := 0.0
+	for i in range(evs, g.events.size()):
+		if g.events[i].type == "splash":
+			rad = float(g.events[i].radius)
+	check(near(rad, sp.stats().splash + 40.0), "shrapnel: a 40 px wider blast (%.0f)" % rad)
+	var cm = g.place_tower("artillery_cannon", spot(g, "artillery_cannon", 120))
+	cm.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, cm, "c", 5)
+	check(cm.mastered and cm.available_shells().has("combined"), "Combined Payload unlocks a fourth shell")
+	check(near(cm.stats().burn_dps, 22.0) and near(cm.stats().shrap_mult, 0.85) and near(cm.stats().stun_time, 0.7), "Improved Payloads strengthen every type")
+	# Saves keep the aim and the loaded shell.
+	var g3 = research_game(["artillery_cannon_1", "artillery_cannon_2a"], "canyon", 99, "hard")
+	g3.gold = 50000
+	var sv = g3.place_tower("artillery_cannon", spot(g3, "artillery_cannon", 3))
+	buy_steps(g3, sv, "c", 2)
+	g3.aim_artillery(sv, Vector2(900, 500))
+	g3.set_shell(sv, "shrapnel")
+	var data := SaveCodec.encode(g3)
+	var dec := SaveCodec.decode(JSON.parse_string(JSON.stringify(data)))
+	check(dec.has("game"), "the save decodes (%s)" % dec.get("error", ""))
+	if dec.has("game"):
+		var sv2 = dec.game.tower_at[sv.cell]
+		check(sv2.aim_point.distance_to(sv.aim_point) < 0.01 and sv2.shell == "shrapnel", "the aim point and shell type are saved")

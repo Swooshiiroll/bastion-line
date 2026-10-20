@@ -29,6 +29,12 @@ const STAT_ROWS := [
 	["Interest on banked credits", "interest", "pct"], ["Interest cap", "interest_cap", "%d"],
 	["Crit chance", "crit", "pct"], ["Armour ignored", "armor_pct", "pct"], ["Armour ignored (flat)", "armor_flat", "%d"],
 	["Stun chance", "stun_chance", "pct"], ["Ignite dps", "ignite_dps", "%d"], ["Side gun damage", "side_gun", "pct"],
+	["Burrowed damage", "burrow_sight", "pct"], ["Smoke slow", "smoke_slow", "pct"], ["Ramp memory", "ramp_keep", "pct"],
+	["Extra beam power", "beam_power", "pct"], ["Armour melt/s", "melt", "%.1f"], ["Airburst radius", "burst", "%d"],
+	["Barrels", "barrels", "%d"], ["Flight time", "flight", "%.1fs"], ["Scatter", "scatter", "%d"], ["Heavy shell every", "heavy_every", "%d"],
+	["Barrage", "barrage", "%d"], ["Rails", "rails", "%d"], ["Falloff per enemy", "falloff", "pct"], ["Armour shatter", "shatter", "%d"],
+	["Ion trail dps", "trail_dps", "%d"], ["Jumps", "jumps", "%d"], ["Storm dps", "storm_dps", "%d"], ["Storm radius", "storm_radius", "%d"],
+	["Stun time", "stun_time", "%.1fs"],
 ]
 ## Mechanic flags shown as a "yes" row: [label, stat key].
 const FLAG_ROWS := [
@@ -37,6 +43,9 @@ const FLAG_ROWS := [
 	["Blocks Bulwark barriers", "block_grants"], ["Ignores barriers", "bypass_shield"], ["Hunts specialists", "hunt"],
 	["Suppresses targets", "suppress_hit"], ["Jams support", "jam"],
 	["Tracer rounds", "tracers"], ["Instant retarget, no overkill", "swivel"], ["Extra barrels hit the weakest", "weakest_extra"],
+	["Homing", "homing"], ["Re-targets", "retarget"], ["Never misses", "never_miss"], ["Rippling salvo", "ripple"],
+	["Overloads disruptors", "overload"], ["Incendiary shells", "incendiary"], ["Shrapnel shells", "shrapnel"],
+	["Concussion shells", "concussion"], ["Combined shell", "combined"], ["Fast traverse", "turn_fast"],
 ]
 ## Short keys for the one-line summary.
 const SHORT := {

@@ -435,6 +435,13 @@ func _on_field_clicked(cell: Vector2i, button: int, shift: bool, pos: Vector2) -
 			hud.toast("The gate is recharging (%ds)" % ceili(float(game.gate_cd[gi])), UiKit.BAD)
 			Sfx.play("error", -6.0, 0.0)
 		return
+	# An Artillery Cannon selected: a click on the track aims it there.
+	var sel = world.selected_tower
+	if sel != null and sel.type == "artillery_cannon" and not game.tower_at.has(cell) and game.grid.path_cells.has(cell):
+		game.aim_artillery(sel, pos)
+		hud.toast("Aimed", UiKit.GOLD)
+		Sfx.play("click", -8.0, 0.0)
+		return
 	if game.tower_at.has(cell):
 		var t = game.tower_at[cell]
 		var now := Time.get_ticks_msec()

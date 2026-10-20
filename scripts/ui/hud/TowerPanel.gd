@@ -57,6 +57,28 @@ func _build() -> void:
 	scroll.add_child(_content)
 
 
+const SHELL_NAMES := {"he": "High explosive", "incendiary": "Incendiary", "shrapnel": "Shrapnel", "concussion": "Concussion", "combined": "Combined"}
+## The Artillery Cannon's shell selector (the shell loaded takes effect from the next shot) and the aiming hint.
+var shell_buttons := {}
+
+
+func _shell_selector(t) -> void:
+	shell_buttons.clear()
+	_content.add_child(UiKit.label("SHELL (next shot)", 11, UiKit.DIM))
+	var row := UiKit.hbox(4)
+	for kind in t.available_shells():
+		var b := UiKit.button(str(SHELL_NAMES[kind]), Callable(self, "_pick_shell").bind(kind), Vector2(86, 28))
+		b.disabled = kind == t.shell
+		shell_buttons[kind] = b
+		row.add_child(b)
+	_content.add_child(row)
+	_content.add_child(UiKit.wrap_label("Click a spot on the track to aim. Re-aiming is free.", W - 40, 11, UiKit.DIM))
+
+
+func _pick_shell(kind: String) -> void:
+	screen.game.set_shell(tower, kind)
+
+
 func _update_dps() -> void:
 	var t = tower
 	_dps_label.text = "DPS %s (5 s)  ·  Damage %s  ·  Kills %d" % [_thousands(roundi(t.live_dps(Game.DPS_BUCKET))), _thousands(roundi(t.damage_dealt)), t.kills]
@@ -80,7 +102,7 @@ func refresh(_delta: float) -> void:
 	# affordable or not), prices. Credits alone change with every kill; rebuilding then would swap
 	# the card under the mouse mid-hover.
 	var states := UpgradeRules.card_keys(t).map(func(k): return str(UpgradeRules.card(t, k, screen.game.gold).state))
-	var key := "%d:%d:%s:%s:%s:%s:%s:%.3f" % [t.trunk, t.retrofit, str(t.depth), str(t.started), t.mastered, t.mastery_unlocked(), ",".join(PackedStringArray(states)), t.discount]
+	var key := "%d:%d:%s:%s:%s:%s:%s:%.3f:%s" % [t.trunk, t.retrofit, str(t.depth), str(t.started), t.mastered, t.mastery_unlocked(), ",".join(PackedStringArray(states)), t.discount, t.shell]
 	if key != _key:
 		_key = key
 		_rebuild()
@@ -108,6 +130,8 @@ func _rebuild() -> void:
 	_content.add_child(UiKit.label(level, 12, UiKit.GOLD if t.tier >= 3 else UiKit.DIM))
 	_content.add_child(UiKit.label("COMBAT STATS", 11, UiKit.DIM))
 	_content.add_child(TowerInfo.stats_grid(t.stats(), {}, t.is_beam(), 12, 10))
+	if t.type == "artillery_cannon":
+		_shell_selector(t)
 	_dps_label = null
 	if screen.game.sandbox:
 		_dps_label = UiKit.label("", 12, UiKit.GOLD)

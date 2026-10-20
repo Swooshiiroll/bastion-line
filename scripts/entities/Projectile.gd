@@ -31,6 +31,8 @@ var smoke := false
 ## Rocket Salvo: seconds before this rocket leaves its tube (a rippling salvo), homing / re-targeting / never-miss, and the
 ## Retrofits' trails and burning ground.
 var hold := 0.0
+## Artillery Cannon: the shell type this round carries ("he", "incendiary", "shrapnel", "concussion", "combined").
+var shell := "he"
 var homing := false
 var retarget := false
 var never_miss := false

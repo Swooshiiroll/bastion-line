@@ -417,6 +417,8 @@ func place_tower(type: String, cell: Vector2i):
 	t.site = footprint_site(type, cell)
 	gold -= t.spent
 	towers.append(t)
+	if type == "artillery_cannon":
+		aim_artillery(t, nearest_track_point(t.pos))
 	for c in footprint(type, cell):
 		tower_at[c] = t
 	stats["towers_built"] += 1
@@ -1033,6 +1035,9 @@ func _update_tower(t, dt: float) -> void:
 		"rocket_salvo":
 			_fire_salvo(t, s)
 			return
+		"artillery_cannon":
+			_fire_artillery(t, s)
+			return
 		"nullifier":
 			_null_pulse(t, s)
 			return
@@ -1075,6 +1080,79 @@ func _update_tower(t, dt: float) -> void:
 			_fire_rail(t, target, s)
 		"tesla":
 			_chain(t, target, s)
+
+
+## The point on any lane nearest to `pos`.
+func nearest_track_point(pos: Vector2) -> Vector2:
+	var best := pos
+	var bd := INF
+	for curve in grid.ground_paths:
+		var q: Vector2 = curve.get_closest_point(pos)
+		var d: float = q.distance_squared_to(pos)
+		if d < bd:
+			bd = d
+			best = q
+	return best
+
+
+## Aims an Artillery Cannon at the lane point nearest `pos` (free, any time).
+func aim_artillery(t, pos: Vector2) -> void:
+	t.aim_point = nearest_track_point(pos)
+	t.aim_set = true
+	t.aim = (t.aim_point - t.pos).angle()
+
+
+## Loads a shell type, if the cannon has unlocked it. Takes effect from the next shell.
+func set_shell(t, kind: String) -> bool:
+	if not t.available_shells().has(kind):
+		return false
+	t.shell = kind
+	return true
+
+
+## A deterministic offset inside a circle of radius `r` (shell scatter), from the run's seed and a counter.
+func _scatter(r: float) -> Vector2:
+	_roll_count += 1
+	var a := sin(float(seed_value % 100003) * 12.9898 + float(_roll_count) * 78.233) * 43758.5453
+	var b := sin(float(seed_value % 100003) * 39.346 + float(_roll_count) * 11.135) * 24634.6345
+	return Vector2.from_angle((a - floor(a)) * TAU) * r * sqrt(b - floor(b))
+
+
+## Artillery Cannon: shells the aimed spot on a loop, whether or not anything is there. Every third shell is heavy with the
+## Shell Magazine; the Rolling Barrage walks a barrage of shells across the spot, one after another.
+func _fire_artillery(t, s: Dictionary) -> void:
+	if not t.aim_set:
+		aim_artillery(t, nearest_track_point(t.pos))
+	t.cooldown = 1.0 / t.eff_rate()
+	t.fire_flash = 0.15
+	t.pulse_count += 1
+	var dir: Vector2 = (t.aim_point - t.pos).normalized()
+	if dir == Vector2.ZERO:
+		dir = Vector2.RIGHT
+	t.aim = dir.angle()
+	var kind: String = t.shell if t.available_shells().has(t.shell) else "he"
+	var n := maxi(1, int(s.get("barrage", 1)))
+	var heavy_every := int(s.get("heavy_every", 0))
+	var heavy: bool = heavy_every > 0 and t.pulse_count % heavy_every == 0
+	for i in n:
+		var spot: Vector2 = t.aim_point + dir * (float(i) - float(n - 1) / 2.0) * 30.0 + _scatter(float(s.get("scatter", 30.0)))
+		var p = Projectile.new()
+		p.kind = t.type
+		p.pos = t.pos + dir * 18.0
+		p.start = p.pos
+		p.target_pos = spot
+		p.total = maxf(1.0, p.pos.distance_to(spot))
+		p.speed = p.total / float(s.get("flight", 1.5))
+		p.damage = t.eff_damage() * (1.5 if heavy else 1.0)
+		p.crit = heavy
+		p.splash = float(s.splash)
+		p.shell = kind
+		p.look = t.look_key()
+		p.tier = t.tier
+		p.source = t
+		p.hold = float(i) * 0.2
+		projectiles.append(p)
+	_emit({"type": "fire", "tower": t.type, "pos": t.pos, "tier": t.tier, "spec": t.spec, "count": n})
 
 
 ## Mortar Tower: a shell at the target; every few shells (Smoke Shells) one leaves a cloud. The tube that fires cycles
@@ -1827,6 +1905,9 @@ func _update_laser(t, dt: float) -> void:
 
 
 func _update_projectile(p, dt: float) -> void:
+	if p.hold > 0.0 and p.kind != "rocket_salvo":
+		p.hold -= dt
+		return
 	if p.kind == "rocket_salvo":
 		_update_rocket(p, dt)
 		return
@@ -1931,6 +2012,23 @@ func _projectile_hit(p) -> void:
 			if p.burn_dps > 0.0:
 				pools.append({"pos": p.pos, "r": r * 0.8, "dps": p.burn_dps, "t": p.burn_time, "source": p.source})
 			_emit({"type": "splash", "pos": p.pos, "radius": r, "burn": p.burn_dps > 0.0, "stun": p.stun > 0.0})
+		"artillery_cannon":
+			# Artillery Cannon: a blast on every ground enemy. Shrapnel widens it at part damage, incendiary leaves burning
+			# ground, concussion stuns what it hits; the combined shell does all three.
+			var kind := String(p.shell)
+			var shrap: bool = kind == "shrapnel" or kind == "combined"
+			var burn: bool = kind == "incendiary" or kind == "combined"
+			var stun: bool = kind == "concussion" or kind == "combined"
+			var r: float = p.splash + (float(s.get("shrap_radius", 40.0)) if shrap else 0.0)
+			var dmg: float = p.damage * (float(s.get("shrap_mult", 0.7)) if shrap else 1.0)
+			for e in _enemies_near(p.pos, r, false, true):
+				var dealt := damage_enemy(e, dmg, false, p.source)
+				_emit({"type": "hit", "pos": e.pos, "amount": dealt, "kind": "cannon"})
+				if stun and e.alive:
+					e.apply_stun(float(s.get("stun_time", 0.5)) * _boss_factor(e))
+			if burn:
+				pools.append({"pos": p.pos, "r": r * 0.8, "dps": float(s.get("burn_dps", 15.0)), "t": float(s.get("burn_time", 3.0)), "source": p.source})
+			_emit({"type": "splash", "pos": p.pos, "radius": r, "burn": burn, "stun": stun, "look": p.look})
 		"anti_aircraft_turret":
 			# Anti-Aircraft Turret: stock rounds are direct hits; from Flak Rounds each round also bursts, hurting every flyer in
 			# the burst radius around its target.
@@ -2329,6 +2427,7 @@ func to_save() -> Dictionary:
 	for t in towers:
 		tl.append({
 			"type": t.type, "col": t.cell.x, "row": t.cell.y, "trunk": t.trunk, "depth": t.depth.duplicate(),
+			"aim_x": t.aim_point.x, "aim_y": t.aim_point.y, "shell": t.shell,
 			"retrofit": t.retrofit, "started": t.started.duplicate(), "mastery": t.mastered, "mode": t.mode, "priority": t.priority, "kills": t.kills, "spent": t.spent,
 		})
 	return {
@@ -2359,6 +2458,10 @@ func to_save() -> Dictionary:
 
 ## Restores a saved tower's upgrade state after checking it follows the branch rules.
 func _restore_upgrades(t, entry: Dictionary) -> String:
+	if t.type == "artillery_cannon" and entry.has("aim_x"):
+		t.aim_point = Vector2(float(entry.aim_x), float(entry.aim_y))
+		t.aim_set = true
+		t.shell = str(entry.get("shell", "he"))
 	var trunk := int(entry.get("trunk", 1))
 	if t.is_rework:
 		# The reworked towers have no trunk: an optional Retrofit (one of its options, -1 for none) and three open paths.

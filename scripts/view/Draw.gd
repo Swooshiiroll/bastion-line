@@ -8,6 +8,7 @@ const MortarTowerArt = preload("res://scripts/view/towers/MortarTowerArt.gd")
 const RocketSalvoArt = preload("res://scripts/view/towers/RocketSalvoArt.gd")
 const LaserTowerArt = preload("res://scripts/view/towers/LaserTowerArt.gd")
 const AntiAircraftArt = preload("res://scripts/view/towers/AntiAircraftArt.gd")
+const ArtilleryCannonArt = preload("res://scripts/view/towers/ArtilleryCannonArt.gd")
 const Difficulty = preload("res://data/difficulty.gd")
 
 const OUTLINE := Color(0.03, 0.04, 0.06, 0.95)
@@ -39,6 +40,7 @@ const ACCENT := {
 	"rocket_salvo": Color(1.00, 0.85, 0.30),
 	"laser_tower": Color(1.00, 0.30, 0.35),
 	"anti_aircraft_turret": Color(0.85, 1.00, 0.45),
+	"artillery_cannon": Color(1.00, 0.55, 0.20),
 }
 const SPEC_ALT := {
 	"mint": Color(1.00, 0.84, 0.30),
@@ -655,6 +657,8 @@ static func _turret(ci: CanvasItem, type: String, tier: int, c: Vector2, aim: fl
 			LaserTowerArt.draw(ci, c, aim, s, t, flash, spec, acc, _extra)
 		"anti_aircraft_turret":
 			AntiAircraftArt.draw(ci, c, aim, s, t, flash, spec, acc, _extra)
+		"artillery_cannon":
+			ArtilleryCannonArt.draw(ci, c, aim, s, t, flash, spec, acc, _extra)
 
 
 ## --- Shading helpers: light comes from the upper left. ------------------------------------
