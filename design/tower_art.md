@@ -350,7 +350,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 17 | Scrapyard | copper | C Magnet Yard | B Sparks and Sale |
 | 18 | Magneto Tower | violet | F Stacked Coil Tower | F Drag Trails |
 | 19 | Tractor Tower | `design/tower_art_p2_19_tractor.html` | Base redesign **confirmed** (owner, 2026-10-19: B Armoured Dish, B Focus Beam; base page `design/tower_art_p19_tractor.html`). Second pass **confirmed** (owner, 2026-10-19, "finished"; round 12) |
-| 20 | Augmentation Tower | `design/tower_art_p2_20_augment.html` | Second pass round 2: Energy, Ricochet and Wide Aura picked; pick Critical Hits (new ideas), Amplified Bonus and Remote Link |
+| 20 | Augmentation Tower | `design/tower_art_p2_20_augment.html` | Second pass round 3: cell flickers (blue energy, red crits, green ricochet); pick Critical Hits (the red flicker's style), Amplified Bonus and Remote Link |
 | 20 | Augmentation Tower | lavender | F Nanite Hive | D Nanite Swarm |
 
 ## Second pass: per-path and Retrofit looks (owner, 2026-10-16)
@@ -1377,6 +1377,12 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
 - **Critical Hits, "Change the design idea":** the core on the dome is dropped. It is now gold round and over the dome, more each step, in four styles: a swirling gold nanite swarm (a vortex from Precision Matrix), a crown of gold needles round the rim (four to twelve), gold reticle brackets framing the dome (four, then six, closing in), or gold strike tendrils curling out of it (two to six). All are brightest at Executioner Link.
 - **Open:** Amplified Bonus and Remote Link (the same options).
 
+**Round 3 (owner's notes, 2026-10-20):**
+- **Energy, "Have the cells flicker blue (flickering can happen on solid cells)":** the charged cells flicker blue, with white flashes, more often at Overcharge.
+- **Critical Hits, "Have the cells flicker red (flickering can happen on solid cells)":** the gold ideas are dropped. Critical Hits is now the dome's cells flickering red, on charged cells too, more each step, in three styles: random flickers (two to six cells at a time), bursts spreading from a cell to its neighbours, or a sweep across the dome. All are gold-edged at Executioner Link.
+- **Ricochet:** the note said red. The owner chose green to tell the paths apart: a green flash hops from cell to cell like a bounce, one more hop each step, beside the deflector plates.
+- **"Some effects dont appear" (the owner named the gold halo):** Amplified Bonus's parts (the coils, the gold halo, the fins) were drawn under the dome. They now draw over it.
+
 ## Open questions
 
-1. **Second pass, Augmentation Tower** (tower 20, round 2; the last tower): pick Critical Hits (new ideas), Amplified Bonus and Remote Link.
+1. **Second pass, Augmentation Tower** (tower 20, round 3; the last tower): pick Critical Hits (the red flicker's style), Amplified Bonus and Remote Link.
