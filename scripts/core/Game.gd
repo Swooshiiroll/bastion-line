@@ -371,7 +371,7 @@ func cycle_gate(gi: int) -> bool:
 		var open_route: int = grid.groups[gi].routes[st - 1]
 		var fork_dist: float = grid.groups[gi].fork_dist
 		for e in enemies:
-			if e.alive and not e.flying and grid.route_group[e.path_index] == gi and e.path_index != open_route and e.distance < fork_dist:
+			if e.alive and e.on_track() and grid.route_group[e.path_index] == gi and e.path_index != open_route and e.distance < fork_dist:
 				_move_to_route(e, open_route)
 	_emit({"type": "gate", "group": gi, "state": st, "pos": Grid.cell_center(grid.groups[gi].fork)})
 	return true
@@ -763,8 +763,10 @@ func tick(dt: float) -> void:
 ## Creates an enemy on a path at a distance. Does not add it to `enemies` (callers decide).
 func spawn_enemy(type: String, path_idx: int, start_dist := 0.0, hp_mult := 1.0, wave_id := -1, speed_mult := 1.0, mods: Array = []):
 	var e = Enemy.new()
-	var flying := bool(Enemies.ENEMIES[type].get("flying", false))
-	var route: Curve2D = grid.air_paths[path_idx] if flying else grid.ground_paths[path_idx]
+	# Flyers take the straight flight line, except those that fly along the track (the Phantom).
+	var d: Dictionary = Enemies.ENEMIES[type]
+	var air_line := bool(d.get("flying", false)) and not bool(d.get("track", false))
+	var route: Curve2D = grid.air_paths[path_idx] if air_line else grid.ground_paths[path_idx]
 	e.setup(type, route, hp_mult, wave_id, path_idx, start_dist, speed_mult, mods)
 	e.id = _next_enemy_id
 	_next_enemy_id += 1

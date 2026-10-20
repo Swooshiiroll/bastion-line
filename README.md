@@ -238,7 +238,7 @@ Every enemy's health and speed scale with the round number, the same on every se
 | Siege Mech | 7 | 6 flat armor per hit (minimum 20% of damage gets through) |
 | Jammer | 9 | EMP every 5 s knocks towers within 95 px offline for 2 s |
 | Blink Stalker | 11 | Teleports 80 px down the lane every 4 s. A slow or stun resets the charge |
-| Phantom | 13 | Cloaked flyer. Towers that hit air can only target it inside a Sensor Array field, or for 0.5 s after a blast, field or arc hits it while hidden |
+| Phantom | 13 | Cloaked flyer that follows the track. Towers that hit air can only target it inside a Sensor Array field, or for 0.5 s after a blast, field or arc hits it while hidden |
 | Locust | 15 | Tiny, fast flyer in dense swarms. Flak's favourite target |
 | Aegis Walker | 17 | Energy barrier (scales with HP) soaks damage before armor applies and recharges after 2.5 s untouched. Arc Coils hit barriers twice as hard |
 | Needle | 19 | Very fast, light; always in pairs on one lane |
@@ -472,7 +472,8 @@ The commands below assume the console build is on PATH as `godot_console` (winge
    - v1 through v4 save migration, and rejection of tier-4 towers without research
    - generated music (length, level, clipping, seamless loop)
    - full bot playthroughs of Easy (40 rounds) on every map into endless mode, and a full-research
-     Medium run
+     Medium run, the bot playing the reworked towers (these fail on the 4.0.0 line until the new roster's
+     balance lands; see Current tuning below)
 
    ```
    godot_console --headless --path . res://tests/TestRunner.tscn
@@ -490,7 +491,10 @@ The commands below assume the console build is on PATH as `godot_console` (winge
 
 3. **Balance probe**. It replays the heuristic bot (`scripts/core/Bot.gd`) on every map at several
    enemy-HP multipliers and reports shields and tower counts every 10 rounds, whether it earned the
-   medal, and how far endless mode got.
+   medal, and how far endless mode got. The bot plays the reworked towers: it buys a Retrofit and two
+   paths per tower within the path rules, aims Artillery Cannons and CAS Gunships at the busiest choke,
+   flies each Drone Bay's newest loadout, and places Radars where the most air-hitting towers would see
+   what they reveal.
 
    ```
    godot_console --headless --path . res://tools/BalanceProbe.tscn -- --factors=1.0 --difficulty=easy
@@ -501,10 +505,27 @@ The commands below assume the console build is on PATH as `godot_console` (winge
 
    Other flags: `--endless=N` (endless rounds to play past a medal, default 20), `--lives=N` (override
    the shields, e.g. to measure Cataclysm by rounds survived), `--growth=F` (late HP compounding rate),
-   `--seeds=`, `--no-abilities`.
+   `--seeds=`, `--no-abilities`, `--roster=old` (the bot plays the old towers, for comparison until the
+   final swap). A round that runs past 600 s of game time ends the sector as `STALLED rN`, naming the
+   enemies left (enemies no tower can kill, held in place by stuns, would otherwise keep it running
+   for hours).
 
    `--research=` takes `all`, node ids, tree names (`command`, `arrow`, ...), `towers` or
    `nomastery`. Any missing prerequisites are added automatically.
+
+   **The 4.0.0 line (in progress, #68),** the generated rounds with the twelve new enemies, the bot
+   playing the reworked towers:
+   - Easy, no research: medal on Meadow (51 of 200 left) and Canyon (94); lost on Delta (round 19),
+     Crossroads (35), Foundry and Singularity (40).
+   - Medium, no research: lost on every sector, between rounds 15 and 40.
+   - Hard, full research: lost on every sector, between rounds 14 and 53.
+   - The old roster's bot on the same rounds: Medium medal on Meadow, Delta and Crossroads with 100 of
+     100 shields until round 50, then down to 13 by round 60 as the Wraiths arrive (no old tower deals
+     energy damage).
+   - What leaks: Phantoms most (40 to 100 a run from round 13; the Radar reveals for 1 s in every 3),
+     early crowds on Delta (Shamans, Locusts, Brutes by round 15), and the boss rounds' shield costs.
+     The new roster's best damage per credit is the Mortar's and the Rocket Salvo's, about 45-50,
+     against 70-80 for the old Sniper and Drones.
 
    Current tuning (v3.0), with the bot using abilities, specializations and all 11 towers:
    - Easy, no research: it earns the medal on all six sectors (194-200 of 200 shields left).

@@ -276,7 +276,7 @@ The owner's answers for building it:
    balance probe.
 5. **Old saves and ids:** decided (2026-10-20): saves from before the rework aren't loadable (see Implementation).
 6. **The bot, Codex, tests and tour:** decided (2026-10-20): each follows the new roster tower by tower, in the batches (see
-   Implementation).
+   Implementation). The bot plays the new roster since #68 (`Bot.roster`, `--roster=old` in the probe for comparison).
 7. **What a class does beyond the shop** (TBD): candidates are parked in the class sheet.
 8. **Weapon types and the physical/energy split** the Wraith needs: partly decided (2026-10-20): hits are tagged physical or
    energy from the weapon type now; what reacts to it comes with the Wraith (#53).

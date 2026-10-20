@@ -338,6 +338,11 @@ func apply_vuln(amount: float, duration: float) -> void:
 		vuln_timer = maxf(vuln_timer, duration)
 
 
+## Moves along the track (ground enemies, and flyers that follow it, like the Phantom) rather than a straight flight line.
+func on_track() -> bool:
+	return not flying or bool(def.get("track", false))
+
+
 ## Towers can't pick it as a target: burrowed, or cloaked and not revealed by a Sensor Array.
 func is_hidden() -> bool:
 	return burrowed or (cloaked and reveal_timer <= 0.0 and disrupt_timer <= 0.0)

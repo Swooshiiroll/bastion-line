@@ -341,6 +341,8 @@ trick is revealed.
   Mender Hulk 2 to 3; Rampart and Gunship 3 to 4) and some drafts above (Needle 2, Shifter 3, Masquerade 3, Decoy
   Beacon 3, Mirage 1).
 - **Introduction rounds:** in `Waves.INTRO` (design/enemies.md, Phase 3 numbers).
+- **Phantom route:** it flies along the track (data key `track`), not the straight flight line; still only towers that hit
+  air can shoot it (owner, 2026-10-20).
 - **Wraith:** built now, on the existing physical/energy tags; burns, acid and shock strips count as energy.
 
 ## Open questions

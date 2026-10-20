@@ -137,6 +137,7 @@ func _run() -> void:
 		"test_no_towers_loses",
 		"test_bot_playthroughs",
 		"test_bot_full_research",
+		"test_bot_new_roster",
 	]
 	var extra: Array = []
 	for m in get_method_list():
@@ -2601,6 +2602,48 @@ func test_bot_full_research() -> void:
 	check(t4 > 0, "bot buys tier-4 masteries when researched")
 
 
+## The bot plays the reworked towers: only new towers, Retrofits and paths within the path rules, the Artillery and the CAS
+## Gunship aimed at a lane, the Drone Bay flying its newest loadout, and the Radar's preferred sweep and reveal.
+func test_bot_new_roster() -> void:
+	var g = new_game("meadow", 2024, "easy")
+	var bot = Bot.new(g)
+	check(bot.roster == "new", "the bot plays the reworked towers by default")
+	check(Bot.is_pylon("boost_tower") and Bot.is_pylon("augmentation_tower") and not Bot.is_pylon("radar_tower") \
+			and not Bot.is_pylon("scrapyard"), "Boost and Augmentation Towers are pylons; the Radar and Scrapyard aren't")
+	g.gold = 500000
+	g.wave = 30
+	for i in 20:
+		bot.act()
+	check(g.towers.size() >= 20 and g.towers.all(func(t): return t.is_rework), "the bot builds only reworked towers")
+	check(g.towers.any(func(t): return t.retrofit >= 0), "the bot buys Retrofits")
+	var rules_kept := true
+	for t in g.towers:
+		if t.started.size() > 2 and not t.is_uncapped():
+			rules_kept = false
+		if not t.is_uncapped() and t.locked_in():
+			var s: String = t.secondary()
+			if s != "" and int(t.depth[s]) > Tower.SECONDARY_CAP:
+				rules_kept = false
+	check(rules_kept, "the bot's paths keep the two-path rule and the secondary's cap")
+	for type in ["artillery_cannon", "cas_gunship", "drone_bay", "radar_tower"]:
+		if not g.towers.any(func(t): return t.type == type):
+			bot._try_build(type)
+	var art = g.towers.filter(func(t): return t.type == "artillery_cannon").front()
+	var cas = g.towers.filter(func(t): return t.type == "cas_gunship").front()
+	check(art.aim_set and art.aim_point.distance_to(g.nearest_track_point(art.aim_point)) < 1.0, "the Artillery is aimed at a lane point")
+	check(cas.aim_set and cas.aim_point == bot.choke(Bot.ORBIT_CHOKE), "the CAS Gunship circles the busiest choke")
+	var bay = g.towers.filter(func(t): return t.type == "drone_bay").front()
+	var radar = g.towers.filter(func(t): return t.type == "radar_tower").front()
+	for t in [bay, radar]:
+		for i in 12:
+			var k: String = bot.next_key(t)
+			if bot.cost_of(t, k) > 0:
+				bot.buy(t, k)
+	check(int(bay.depth.b) >= 3 and bay.available_loadouts().has("laser") and bay.loadout == bay.available_loadouts().back(),
+			"the Drone Bay takes its loadout path and flies its newest loadout")
+	check(radar.retrofit == 1 and radar.primary() == "b", "the Radar takes the longer reveal and the faster sweep")
+
+
 ## Every script in the project loads and compiles, including tools that only run from the
 ## command line (a parse error there would otherwise go unnoticed until someone runs them).
 func test_scripts_parse() -> void:
@@ -3111,6 +3154,11 @@ func test_leak_bands() -> void:
 
 func test_packs_and_phantom_flight() -> void:
 	check(bool(Enemies.ENEMIES.phantom.flying), "the Phantom flies")
+	var gp = new_game()
+	var ph = gp.spawn_enemy("phantom", 0)
+	var bat = gp.spawn_enemy("bat", 0)
+	check(ph.flying and ph.on_track() and ph.curve == gp.grid.ground_paths[0], "the Phantom flies along the track")
+	check(not bat.on_track() and bat.curve == gp.grid.air_paths[0], "other flyers take the flight line")
 	var g = new_game()
 	g.wave = 18
 	g.start_wave()

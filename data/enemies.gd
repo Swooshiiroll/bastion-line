@@ -47,8 +47,8 @@ const ENEMIES := {
 	"phantom": {
 		"role": "special", "tier": 0,
 		"name": "Phantom", "hp": 85.0, "speed": 72.0, "armor": 0.0, "bounty": 7, "lives": 1, "radius": 10.0, "flying": true,
-		"cloaked": true,
-		"blurb": "Cloaked flying infiltrator. Towers that hit air can only target it inside a Sensor Array field, or for a moment after it takes damage from a blast, field or arc.",
+		"cloaked": true, "track": true,
+		"blurb": "Cloaked flying infiltrator that follows the track. Towers that hit air can only target it inside a Sensor Array field, or for a moment after it takes damage from a blast, field or arc.",
 	},
 	"aegis": {
 		"role": "special", "tier": 0,

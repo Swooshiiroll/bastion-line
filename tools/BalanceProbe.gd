@@ -4,7 +4,9 @@ extends Node
 ##   godot --headless --path <project> res://tools/BalanceProbe.tscn [-- --factors=1.0,1.5,2.0]
 ## Other flags: --difficulty=hard (easy|medium|hard|nightmare|cataclysm), --no-abilities, --seeds=1,2,
 ## --maps=delta,foundry, --lives=1000 (override shields, e.g. to measure Cataclysm by rounds survived),
-## --endless=20 (endless rounds to play past a medal), --research=all (every Research Lab node).
+## --endless=20 (endless rounds to play past a medal), --research=all (every Research Lab node),
+## --roster=old (the bot plays the old towers instead of the reworked ones).
+## A round that runs past STALL_TIME of game time ends the sector as STALLED, naming the enemies left.
 
 const Game = preload("res://scripts/core/Game.gd")
 const Bot = preload("res://scripts/core/Bot.gd")
@@ -17,6 +19,8 @@ const Difficulty = preload("res://data/difficulty.gd")
 const DT := 1.0 / 60.0
 ## Endless rounds the probe plays past a medal before stopping.
 const ENDLESS_EXTRA := 20
+## Game seconds a round may run before the probe calls it stalled (enemies no tower can kill, held in place).
+const STALL_TIME := 600.0
 
 
 func _ready() -> void:
@@ -29,6 +33,7 @@ func _ready() -> void:
 	var research: Array = []
 	var maps: Array = Maps.ORDER
 	var detail := false
+	var roster := "new"
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--difficulty="):
 			diff = a.substr(13)
@@ -46,6 +51,8 @@ func _ready() -> void:
 			lives = int(a.substr(8))
 		if a.begins_with("--maps="):
 			maps = Array(a.substr(7).split(","))
+		if a.begins_with("--roster="):
+			roster = a.substr(9)
 		if a == "--detail":
 			detail = true
 		if a == "--no-abilities":
@@ -57,7 +64,7 @@ func _ready() -> void:
 	for f in factors:
 		for id in maps:
 			for sd in seeds:
-				_probe(id, f, sd, diff, abilities, research, lives, endless, detail)
+				_probe(id, f, sd, diff, abilities, research, lives, endless, detail, roster)
 	get_tree().quit()
 
 
@@ -85,7 +92,7 @@ static func _research_set(spec: String) -> Array:
 	return Research.sanitize(want)
 
 
-func _probe(map_id: String, factor: float, seed_v: int, diff: String, abilities: bool, research: Array, lives_override: int, endless_extra: int, detail := false) -> void:
+func _probe(map_id: String, factor: float, seed_v: int, diff: String, abilities: bool, research: Array, lives_override: int, endless_extra: int, detail := false, roster := "new") -> void:
 	var g = Game.new(map_id, seed_v, diff, research)
 	g.emit_events = false
 	g.hp_factor = factor
@@ -94,15 +101,22 @@ func _probe(map_id: String, factor: float, seed_v: int, diff: String, abilities:
 		g.max_lives = lives_override
 	var bot = Bot.new(g)
 	bot.use_abilities = abilities
+	bot.roster = roster
 	var final: int = g.final_round()
 	var checkpoints := {}
 	var medal_lives := -1
 	var ticks := 0
 	var t0 := Time.get_ticks_msec()
+	var round_time := 0.0
+	var stalled := ""
 	while not g.is_over() and not (g.medal and g.wave >= final + endless_extra) and ticks < int(float(final + endless_extra) * 900.0 / DT):
 		bot.update(DT)
 		g.tick(DT)
 		ticks += 1
+		round_time = round_time + DT if g.state != Game.State.BUILD else 0.0
+		if round_time > STALL_TIME:
+			stalled = _stall_note(g)
+			break
 		if g.state == Game.State.BUILD and g.wave % 10 == 0 and not checkpoints.has(g.wave):
 			checkpoints[g.wave] = "%d/%dt" % [g.lives, g.towers.size()]
 			if detail:
@@ -113,11 +127,24 @@ func _probe(map_id: String, factor: float, seed_v: int, diff: String, abilities:
 	for w in range(10, final + endless_extra + 1, 10):
 		cp += " r%d:%s" % [w, str(checkpoints.get(w, "-"))]
 	var won: bool = g.medal
+	if stalled != "":
+		cp += " | STALLED r%d: %s" % [g.wave, stalled]
 	print("%-9s x%.2f %-11s seed %5d  %-5s round %3d/%3d lives %4d/%4d |%s | towers %2d | endless reached %d | %ds" % [
 		diff, factor, map_id, seed_v, "MEDAL" if won else "LOST", final if won else g.wave, final,
 		medal_lives if won else g.lives, g.max_lives, cp, g.towers.size(), g.wave if won else 0,
 		(Time.get_ticks_msec() - t0) / 1000])
 
+
+## The enemies holding a stalled round open, by type.
+static func _stall_note(g) -> String:
+	var left := {}
+	for e in g.enemies:
+		if e.alive:
+			left[e.type] = int(left.get(e.type, 0)) + 1
+	var parts: Array = []
+	for k in left:
+		parts.append("%s x%d" % [k, left[k]])
+	return ", ".join(parts) if not parts.is_empty() else "nothing alive"
 
 
 ## One checkpoint line on how full the map is: towers against free tiles (all, and those the bot
@@ -125,7 +152,7 @@ func _probe(map_id: String, factor: float, seed_v: int, diff: String, abilities:
 static func _detail(g, bot) -> void:
 	var free := 0
 	var useful := 0
-	var cov: Dictionary = bot.coverage("arrow")
+	var cov: Dictionary = bot.coverage(bot.build_order()[0])
 	for y in Grid.ROWS:
 		for x in Grid.COLS:
 			var c := Vector2i(x, y)
@@ -141,7 +168,7 @@ static func _detail(g, bot) -> void:
 		if t.mastered:
 			mastered += 1
 		var k: String = bot.next_key(t)
-		if t.upgrade_cost(k) <= 0 or (t.trunk >= 2 and not t.can_buy(t.resolve_key(k))):
+		if bot.cost_of(t, k) <= 0 or (not t.is_rework and t.trunk >= 2 and not t.can_buy(t.resolve_key(k))):
 			maxed += 1
 	print("    r%-3d towers %2d (maxed %2d, mastered %2d) | free tiles %3d, near a lane %3d | bank %6d, spent on towers %7d, avg %5d/tower" % [
 		g.wave, g.towers.size(), maxed, mastered, free, useful, g.gold, spent, spent / maxi(1, g.towers.size())])

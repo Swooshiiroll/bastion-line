@@ -1,19 +1,49 @@
 extends RefCounted
-## A simple heuristic player. Used by the headless balance tests, the main-menu attract mode,
-## and the screenshot tour. It builds on the tiles that see the most path, then upgrades.
+## A simple heuristic player. Used by the headless balance tests, the balance and perf probes, and
+## the screenshot tour. It builds on the tiles that see the most path, then upgrades. It plays the
+## reworked towers (issue #59) unless `roster` is "old".
 
 const Game = preload("res://scripts/core/Game.gd")
 const Towers = preload("res://data/towers.gd")
 const Tower = preload("res://scripts/entities/Tower.gd")
 const Grid = preload("res://scripts/core/Grid.gd")
 
+## The old roster's build order (`roster = "old"`, kept for comparison until the final swap).
 const BUILD_ORDER := [
 	"arrow", "arrow", "cannon", "scrap", "frost", "arrow", "tesla", "sniper", "missile", "sensor",
 	"laser", "nova", "cannon", "amp", "flak", "scrap", "nullifier", "gravity", "tesla", "drones", "arrow",
 	"sniper", "missile", "frost", "laser", "nova", "amp", "flak", "sensor", "cannon", "drones",
 	"tesla", "nullifier", "gravity",
 ]
+## The reworked roster's build order: the strongest damage per credit (Mortar, Rocket Salvo, Gun Turret) first, anti-air and a
+## Radar before the first cloaked flyer (round 13), energy that hits air (Laser, Tesla) well before the Wraith, then the rest.
+const NEW_ORDER := [
+	"gun_turret", "mortar_tower", "rocket_salvo", "gun_turret", "anti_aircraft_turret", "mortar_tower", "laser_tower",
+	"rocket_salvo", "radar_tower", "gun_turret", "scrapyard", "mortar_tower", "anti_aircraft_turret", "rocket_salvo",
+	"laser_tower", "boost_tower", "mortar_tower", "rocket_salvo", "tesla_tower", "railgun", "drone_bay", "radar_tower",
+	"artillery_cannon", "laser_tower", "shockwave_generator", "chemical_plant", "cryo_tower", "mine_layer", "rocket_salvo",
+	"mortar_tower", "magneto_tower", "augmentation_tower", "anti_aircraft_turret", "tractor_tower", "cas_gunship", "scrapyard",
+	"laser_tower", "tesla_tower",
+]
+## Towers whose choices the bot doesn't leave to the tile: the Radar takes the faster sweep (path b) and the longer reveal
+## (Signal Processor), the Drone Bay its loadouts (path b, which reach the energy laser).
+const PREFER := {
+	"radar_tower": {"retrofit": 1, "paths": ["b", "a"]},
+	"drone_bay": {"paths": ["b", "c"]},
+}
+## The upgrade key the bot uses for a reworked tower's Retrofit.
+const RETROFIT := "retrofit"
+## A Retrofit up to this price is bought after the first path step; a dearer one waits until both paths have two steps.
+const CHEAP_RETROFIT := 300
+## Reach the bot scores towers without a range by (Artillery, Drone Bay, CAS Gunship: they work anywhere).
+const ANYWHERE_REACH := 320.0
+## Radius of the busiest choke the Artillery shells (its splash) and the CAS Gunship circles (its orbit).
+const SHELL_CHOKE := 60.0
+const ORBIT_CHOKE := 90.0
 const AIR_WEIGHT := 0.7
+## How much a stretch of ground lane counts against a stretch of flight path when the bot places a Radar (cloaked enemies are
+## mostly flyers; a Cloaked elite can walk).
+const SCOUT_GROUND_WEIGHT := 0.3
 ## How much the bot values a Scrapyard upgrade against a tower upgrade (per credit).
 const ECON_WEIGHT := 20.0
 const MAX_TOWERS := 80
@@ -27,10 +57,13 @@ const Abilities = preload("res://data/abilities.gd")
 var game
 var use_abilities := true
 var use_gates := true
+## "new" (the reworked towers) or "old" (today's roster).
+var roster := "new"
 var order_idx := 0
 var ground_samples := PackedVector2Array()
 var air_samples := PackedVector2Array()
 var _cover := {}
+var _chokes := {}
 var _think := 0.0
 
 
@@ -118,17 +151,22 @@ func act() -> void:
 func _step() -> bool:
 	if game.is_over():
 		return false
-	var want: String = BUILD_ORDER[order_idx % BUILD_ORDER.size()]
+	var order: Array = build_order()
+	var want: String = order[order_idx % order.size()]
 	var target_count := mini(3 + game.wave, MAX_TOWERS)
 	if game.towers.size() < target_count:
 		return _try_build(want)
 	var up = best_upgrade()
 	if up != null:
 		var key := next_key(up)
-		if game.gold >= up.upgrade_cost(key):
-			return game.upgrade_tower(up, key)
+		if game.gold >= cost_of(up, key):
+			return buy(up, key)
 		return false
 	return _try_build(want)
+
+
+func build_order() -> Array:
+	return BUILD_ORDER if roster == "old" else NEW_ORDER
 
 
 func _try_build(type: String) -> bool:
@@ -138,14 +176,119 @@ func _try_build(type: String) -> bool:
 	if cell == null:
 		order_idx += 1
 		return true
-	game.place_tower(type, cell)
+	var t = game.place_tower(type, cell)
+	if t != null:
+		aim(t)
 	order_idx += 1
 	return true
 
 
+## Points an Artillery Cannon at the busiest choke on the active routes, and a CAS Gunship's orbit likewise (a player would
+## click the track). Other towers need no aiming.
+func aim(t) -> void:
+	if ground_samples.is_empty():
+		return
+	if t.type == "artillery_cannon":
+		game.aim_artillery(t, choke(SHELL_CHOKE))
+	elif t.type == "cas_gunship":
+		game.designate_orbit(t, choke(ORBIT_CHOKE))
+
+
+## The route sample point with the most other route samples within `radius` (cached per radius).
+func choke(radius: float) -> Vector2:
+	if _chokes.has(radius):
+		return _chokes[radius]
+	var r2 := radius * radius
+	var best := ground_samples[0]
+	var best_n := -1
+	for p in ground_samples:
+		var n := 0
+		for q in ground_samples:
+			if p.distance_squared_to(q) <= r2:
+				n += 1
+		if n > best_n:
+			best_n = n
+			best = p
+	_chokes[radius] = best
+	return best
+
+
+## The price of upgrade `key` on tower `t` (0 when there's nothing to buy): a path step, or `RETROFIT`.
+func cost_of(t, key: String) -> int:
+	if key == RETROFIT:
+		return t.retrofit_cost(retrofit_pick(t))
+	return t.upgrade_cost(key)
+
+
+## Buys upgrade `key` on tower `t`, then puts any loadout or shell it unlocked to use.
+func buy(t, key: String) -> bool:
+	var ok: bool = game.buy_retrofit(t, retrofit_pick(t)) if key == RETROFIT else game.upgrade_tower(t, key)
+	if ok:
+		use_unlocks(t)
+	return ok
+
+
+## A Drone Bay flies its newest loadout and an Artillery Cannon fires its newest shell (each unlock is a step up).
+func use_unlocks(t) -> void:
+	if t.type == "drone_bay":
+		var lo: Array = t.available_loadouts()
+		if t.loadout != lo.back():
+			game.set_loadout(t, lo.back())
+	elif t.type == "artillery_cannon":
+		var sh: Array = t.available_shells()
+		if t.shell != sh.back():
+			game.set_shell(t, sh.back())
+
+
+## Deterministic but varied: the tower's tile picks its Retrofit option (unless `PREFER` names one).
+func retrofit_pick(t) -> int:
+	if PREFER.has(t.type) and PREFER[t.type].has("retrofit"):
+		return int(PREFER[t.type].retrofit)
+	var n: int = t.retrofit_options().size()
+	return (t.cell.x + t.cell.y) % n if n > 0 else -1
+
+
+## The path a reworked tower's tile makes its primary (`which` 0) or its secondary (1), unless `PREFER` names them.
+static func path_pick(t, which: int) -> String:
+	if PREFER.has(t.type) and PREFER[t.type].has("paths"):
+		return str(PREFER[t.type].paths[which])
+	return Tower.BRANCHES[(t.cell.x * 2 + t.cell.y + which) % Tower.BRANCHES.size()]
+
+
+## A reworked tower's next upgrade: one step on its primary path, the Retrofit if it's cheap, a second primary step, two on
+## the secondary, the Retrofit if it wasn't cheap, then the primary to its mastery. A CAS Gunship (every path uncapped) takes
+## the Retrofit after its first step and otherwise raises its shallowest path.
+func _rework_key(t) -> String:
+	var retro: bool = t.retrofit < 0 and not t.retrofit_options().is_empty()
+	if t.is_uncapped():
+		if retro and int(t.depth.a) + int(t.depth.b) + int(t.depth.c) > 0:
+			return RETROFIT
+		var low := ""
+		for b in Tower.BRANCHES:
+			if t.can_buy(b) and (low == "" or int(t.depth[b]) < int(t.depth[low])):
+				low = b
+		return low
+	var p := path_pick(t, 0)
+	var s := path_pick(t, 1)
+	if int(t.depth[p]) < 1:
+		return p
+	if retro and cost_of(t, RETROFIT) <= CHEAP_RETROFIT:
+		return RETROFIT
+	if int(t.depth[p]) < 2:
+		return p
+	if int(t.depth[s]) < Tower.SECONDARY_CAP:
+		return s
+	if retro:
+		return RETROFIT
+	return p
+
+
 ## Which upgrade to buy next on a tower: its specialization at tier 2, then two upgrades on a
 ## secondary branch once the primary has two, then the rest of the primary ("" = primary).
+## Reworked towers follow `_rework_key`.
 func next_key(t) -> String:
+	if t.is_rework:
+		return _rework_key(t)
 	if t.trunk < 2:
 		return ""
 	if t.needs_spec():
@@ -174,6 +317,31 @@ func choose_spec(t) -> String:
 static func is_pylon(type: String) -> bool:
 	var d: Dictionary = Towers.def(type)
 	return bool(d.get("support", false)) and not bool(d.get("sensor", false)) and not bool(d.get("economy", false))
+
+
+## What a Radar at c would reveal to the towers already built: every stretch of flight path (and, for less, of lane) inside its
+## circle, counted once per attacking tower that can shoot there.
+func scout_value(c: Vector2i, r: float) -> float:
+	var p := Grid.cell_center(c)
+	var r2 := r * r
+	var v := 0.0
+	for q in air_samples:
+		if p.distance_squared_to(q) <= r2:
+			v += float(_shooters(q, true))
+	for q in ground_samples:
+		if p.distance_squared_to(q) <= r2:
+			v += SCOUT_GROUND_WEIGHT * float(_shooters(q, false))
+	return v
+
+
+func _shooters(q: Vector2, air: bool) -> int:
+	var n := 0
+	for t in game.towers:
+		if t.is_support() or t.is_economy() or t.type == "radar_tower":
+			continue
+		if (t.hits_air() if air else t.hits_ground()) and t.pos.distance_squared_to(q) <= t.get_range() * t.get_range():
+			n += 1
+	return n
 
 
 ## Number of attacking towers a pylon at c would boost.
@@ -205,8 +373,22 @@ func best_cell(type: String):
 					best_en = en
 					best_e = ec
 		return best_e
+	if type == "radar_tower":
+		var rr := reach(type, 160.0)
+		var best_s = null
+		var best_v := 0.0
+		for y in Grid.ROWS:
+			for x in Grid.COLS:
+				var sc := Vector2i(x, y)
+				if not game.grid.is_buildable(sc) or game.tower_at.has(sc):
+					continue
+				var v := scout_value(sc, rr)
+				if v > best_v:
+					best_v = v
+					best_s = sc
+		return best_s
 	if is_pylon(type):
-		var r: float = float(Tower.lines(type).t1.get("range", 150.0))
+		var r: float = reach(type, 150.0)
 		var best_c = null
 		var best_n := 1
 		for y in Grid.ROWS:
@@ -242,20 +424,26 @@ func best_upgrade():
 	var best = null
 	var best_val := 0.0
 	for t in game.towers:
-		var cost: int = t.upgrade_cost(next_key(t))
+		var cost: int = cost_of(t, next_key(t))
 		if cost <= 0:
 			continue
-		var val: float
-		if t.is_economy():
-			val = ECON_WEIGHT / float(cost)
-		elif is_pylon(t.type):
-			val = 12.0 * float(pylon_value(t.cell, t.get_range())) / float(cost)
-		else:
-			val = float(coverage(t.type).get(t.cell, 1.0)) / float(cost)
+		var val: float = value_at(t.type, t.cell, t.get_range()) / float(cost)
 		if val > best_val:
 			best_val = val
 			best = t
 	return best
+
+
+## What a tower of `type` at `cell` is worth to the bot: a fixed weight for an economy tower, the towers it boosts for a
+## pylon (within `r`, its stock range when not given), and the route it covers for anything else.
+func value_at(type: String, cell: Vector2i, r := -1.0) -> float:
+	if Towers.def(type).get("economy", false):
+		return ECON_WEIGHT
+	if is_pylon(type):
+		return 12.0 * float(pylon_value(cell, r if r > 0.0 else reach(type, 150.0)))
+	if type == "radar_tower":
+		return scout_value(cell, r if r > 0.0 else reach(type, 160.0))
+	return float(coverage(type).get(cell, 1.0))
 
 
 ## Time Warp when a boss or a big crowd is on the field; Meteor on the best cluster (or a boss).
@@ -289,7 +477,7 @@ func use_abilities_now() -> void:
 func coverage(type: String) -> Dictionary:
 	var d: Dictionary = Towers.def(type)
 	# Drones fly anywhere, so where the bay sits barely matters; score it like a long-range tower.
-	var r: float = float(Tower.lines(type).t1.get("range", 320.0))
+	var r: float = reach(type, ANYWHERE_REACH)
 	var air: bool = d.air
 	var ground: bool = d.get("ground", true)
 	var key := "%d:%d:%d" % [int(r), int(air), int(ground)]
@@ -315,6 +503,13 @@ func coverage(type: String) -> Dictionary:
 			out[c] = score
 	_cover[key] = out
 	return out
+
+
+## A tower type's stock range (`fallback` when it has none: towers that work anywhere on the field).
+static func reach(type: String, fallback: float) -> float:
+	if Towers.is_rework(type):
+		return float(Tower.rework_base(type).get("range", fallback))
+	return float(Tower.lines(type).t1.get("range", fallback))
 
 
 static func _sample_routes(curves: Array) -> PackedVector2Array:
