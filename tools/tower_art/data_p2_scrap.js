@@ -9,7 +9,7 @@
 //  - Path 3, Discounts: the warehouse (Parts Shelves, Pallet Racks, Forklift Bay, Loading Dock, Parts Exchange); the blue discount ring widens.
 // Every step rebuilds its part big and visibly (the owner: the old upgrades were too subtle); earlier picks carry as details; masteries are gold.
 // Overlaps kept and stacking (the carpet rule): the Hammer Mill's +30 with the Passive Income path, Faster Loading's +30 px with both field radii.
-const PAGE = { title: "Scrapyard (production line): paths and Retrofits (second pass)", store: "bl-tower-art-p2-scrap-pl4" };
+const PAGE = { title: "Scrapyard (production line): paths and Retrofits (second pass)", store: "bl-tower-art-p2-scrap-pl5" };
 const GOLD = [1, 0.78, 0.3, 1], RUST = [0.45, 0.3, 0.2, 1], BRICK = [0.55, 0.27, 0.2, 1], MOLTEN = [1, 0.55, 0.15, 1], HOTM = [1, 0.85, 0.45, 1], STEEL = [0.42, 0.45, 0.5, 1];
 const WOOD = [0.6, 0.43, 0.24, 1], DIRT = [0.27, 0.23, 0.19, 1], CONC = [0.29, 0.29, 0.3, 1], ROOF = [0.44, 0.47, 0.5, 1], DOOR = [0.8, 0.58, 0.2, 1], CRANE = [0.92, 0.7, 0.2, 1];
 const LASER = [1, 0.22, 0.18, 1], KILL = [1, 0.5, 0.2, 1], DISCC = [0.45, 0.82, 0.95, 1], ARCC = [0.72, 0.88, 1, 1], CERAM = [0.8, 0.72, 0.6, 1], LOADS = [[0.35, 0.55, 0.8, 1], [0.4, 0.65, 0.4, 1], [0.75, 0.45, 0.3, 1], [0.85, 0.7, 0.3, 1]];
@@ -130,7 +130,7 @@ function junkGround(S, B, t, k) {
 
 // ---- The feed lines: a crane loads a belt that drops the scrap into the furnace, one piece per 3.2 s cycle. Path 2 rebuilds the main line's crane and adds the
 // Sorting Line and the Car Crusher to its belt; the Faster Loading Retrofit adds a second line from the top heap, half a cycle out of step (twice the feed).
-const FEED = { pv: [-36, 13], heap: [-33, 0], b0: [-24, 20], rails: [-43, -13, -8, 26], ofs: 0 };
+const FEED = { pv: [-36, 13], heap: [-33, 0], b0: [-24, 20], rails: [-43, -13, -8, 35], ofs: 0 };   // round 5: the rails run on past the Hammer Mill (owner)
 const FEED2 = { pv: [-29.3, -20.8], heap: [-31, -30], b0: [-22, -22], rails: [-43, -13, -40, -14], ofs: 1.6 };
 const MOUTH = [0, -8], FEND = 9.5, FT = 3.2, FBELT = 0.35;
 const feeds = (B) => (B.r === 1 ? [FEED, FEED2] : [FEED]);
@@ -171,7 +171,7 @@ function feedLine(S, B, t, k, lid, F, style, main) {
   const ph = fmod(tt / FT, 1), sw = ph < 0.14 ? 0 : ph < 0.5 ? ease((ph - 0.14) / 0.36) : ph < 0.6 ? 1 : 1 - ease((ph - 0.6) / 0.4), op = ph < 0.14 ? 1 - ph / 0.14 : ph < 0.5 ? 0 : ph < 0.6 ? (ph - 0.5) / 0.1 : 1;
   const carry = ph > 0.06 && ph < 0.56 ? n * 1.7 + 1 + F.ofs * 5 : 0, mr = main ? [0, 0, 3, 3.4, 3.8, 4.2][L] : 3.4, halo = g && K5 === "A";
   if (style === "C") { const tp = lerp(F.heap, Lp, sw), q = S(...tp), [x0, x1, y0, y1] = F.rails;
-    for (const x of [x0, x1]) { line(S(x, y0), S(x, y1), OUTLINE, 2.6 * k); line(S(x, y0), S(x, y1), steel, 1.4 * k); }
+    for (const x of [x0, x1]) { line(S(x, y0), S(x, y1), OUTLINE, 2.6 * k); line(S(x, y0), S(x, y1), steel, 1.4 * k); for (const y of [y0, y1]) plate(S(x, y), rectPts(1.6, 0.9), dark, 0, k, 1); }
     bar(S(x0, tp[1]), S(x1, tp[1]), 2.6 * k, yel); for (const x of [x0, x1]) plate(S(x, tp[1]), rectPts(2, 2.6), dark, 0, k, 1);
     plate(q, rectPts(2.8, 2.2), dark, 0, k, 1); magnetHead(q, mr, k, g, carry, halo); return; }
   const pv = S(...F.pv), aH = Math.atan2(F.heap[1] - F.pv[1], F.heap[0] - F.pv[0]), aL = Math.atan2(Lp[1] - F.pv[1], Lp[0] - F.pv[0]), rH = dist(F.pv, F.heap), rL = dist(F.pv, Lp), a = aH + (aL - aH) * sw, reach = rH + (rL - rH) * sw, tip = add(pv, mul(fa(a), reach * k));
@@ -252,7 +252,7 @@ function scrapAgent(B) { return (m, t, info, s, col) => { if (!m.pays) { m.pays 
 // ---- The model: the whole production line at every level ---------------------------------------------------------------------------------------------------------------
 const P2 = {
   tower: "scrap", look: "B", anim: "B", sBuild: 112, sCard: 64,                                  // a 2x2 tower: smaller previews so the whole yard fits
-  intro: "Round 4: every stage is picked (the Laser Cutter is the Laser Gantry) and drawn as one build. Round 3: your notes. The Sorting Line becomes a Laser Cutter (same effect), with three ideas on the main belt: a laser gantry sweeping across the belt, a laser cutting table beside it, or a laser turret tracking the scrap; Surplus's two extra crates now stand to the left of the crate stack (the tow truck moved down a little to clear them). Everything else is picked. Round 2: your picks are drawn as one build. Your notes: Hydraulic Shear is now the Sorting Line, with three new ideas on the main belt (a picking gantry, a drum magnet or a sorting screen, each sorting scrap into three bins); the Second Crusher is now the Hammer Mill; the Bigger Yard is now Faster Loading (a second conveyor and crane feed the furnace from the top heap, taking turns with the main line), with three crane styles to pick; the Weighbridge is now Surplus (two more crates), with three ways to show them. Effects are unchanged. Each path rebuilds one part (the furnace stack, the junkyard, the warehouse); masteries are gold; overlapping Retrofits are kept and stack (the carpet rule). Unpicked stages show option A in the build preview.",
+  intro: "Round 5: your note: the bridge magnet's rails now run on past the Hammer Mill (with end stops beyond it), so the rail plainly passes over the mill. Round 4: every stage is picked (the Laser Cutter is the Laser Gantry) and drawn as one build. Round 3: your notes. The Sorting Line becomes a Laser Cutter (same effect), with three ideas on the main belt: a laser gantry sweeping across the belt, a laser cutting table beside it, or a laser turret tracking the scrap; Surplus's two extra crates now stand to the left of the crate stack (the tow truck moved down a little to clear them). Everything else is picked. Round 2: your picks are drawn as one build. Your notes: Hydraulic Shear is now the Sorting Line, with three new ideas on the main belt (a picking gantry, a drum magnet or a sorting screen, each sorting scrap into three bins); the Second Crusher is now the Hammer Mill; the Bigger Yard is now Faster Loading (a second conveyor and crane feed the furnace from the top heap, taking turns with the main line), with three crane styles to pick; the Weighbridge is now Surplus (two more crates), with three ways to show them. Effects are unchanged. Each path rebuilds one part (the furnace stack, the junkyard, the warehouse); masteries are gold; overlapping Retrofits are kept and stack (the carpet rule). Unpicked stages show option A in the build preview.",
   mods(B) { return { period: 1, flight: 1, multi: false, persist: scrapAgent(B) }; },
   muzzleAt(B, m, kk, c) { return c; },
   model(c, aim, s, fx, t, col, info, B) {
