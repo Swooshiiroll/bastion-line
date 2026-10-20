@@ -392,7 +392,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 15 | Cryo Tower | `design/tower_art_p2_15_cryo.html` | **Confirmed** (owner, 2026-10-19: "Finished"; Deep Cold C Frost Collar) |
 | 16 | Shockwave Generator | `design/tower_art_p2_16_shock.html` | **Confirmed** (owner, 2026-10-19: "Finished") |
 | 17 | Scrapyard | `design/tower_art_p2_17_scrap.html` | Base **confirmed** (owner, 2026-10-19: B Production Line, B Melt and Pour; base page `design/tower_art_p17_scrapyard.html`). New upgrade names confirmed. Second pass **confirmed** (owner, 2026-10-19, "Finished"; round 5) |
-| 18 | Magneto Tower | `design/tower_art_p2_18_magneto.html` | Second pass round 2: every stage picked; waiting for "Magneto Tower finished" |
+| 18 | Magneto Tower | `design/tower_art_p2_18_magneto.html` | Second pass round 3: every stage picked; the innermost emitter ring always clears the coils; waiting for "Magneto Tower finished" |
 
 ### Gun Turret (second pass)
 
@@ -1274,6 +1274,8 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
 
 **Round 2 (owner's picks, no notes, 2026-10-19):** every step A (thick windings, emitter rings, the split pole); Retrofits Superconducting Coil A (Frost Rime), Field Stabiliser C (Ferrite Halo), Pole Shoes B (Shoe Ring). The page shows only the picks.
 
+**Round 3 (owner's note, "Make sure the innermost field is always visible when the coil expands"):** the emitter rings now start just outside the coil stack's current edge (straps and teeth included), between 17 and 19.5 units, 2.4 apart. They are drawn over the coils, so the innermost one is always visible as Pull Strength grows the coils. The Ferrite Halo now floats over the outer coil, inside the rings.
+
 ## Open questions
 
-1. **Second pass, Magneto Tower** (tower 18, round 2): every stage is picked. Confirm with "Magneto Tower finished". Then the Tractor Tower and the Augmentation Tower.
+1. **Second pass, Magneto Tower** (tower 18, round 3; the innermost emitter ring always clears the coils): every stage is picked. Confirm with "Magneto Tower finished". Then the Tractor Tower and the Augmentation Tower.

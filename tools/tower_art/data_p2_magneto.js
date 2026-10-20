@@ -1,4 +1,4 @@
-// ---- Tower art second pass: Magneto Tower (tower 18), round 2 (every stage picked) ------------------------------------------------------------------------------------------------
+// ---- Tower art second pass: Magneto Tower (tower 18), round 3 (every stage picked; the innermost emitter ring always clears the coils) ------------------------------------------------------------------------------------------------
 // Base: look F Stacked Coil Tower, animation F Drag Trails (tools/tower_art/data_towers4.js). The owner kept the names and chose the parts (2026-10-19):
 //  - Path 1, Pull Strength, rebuilds the COIL STACK (thick windings, a tiered stack, or an iron yoke; bigger each step; gold at Absolute Pull).
 //  - Path 2, Field Size, rebuilds the BASE into field emitters (emitter rings, pylons, or fold-out field plates; gold with an aurora at Magnetosphere).
@@ -8,7 +8,7 @@
 // (the slow, the radius, the armour stripping, the repel every 4 s).
 // Overlaps kept and stacking (the carpet rule): the Superconducting Coil's +5% slow with Pull Strength, the Field Stabiliser's +15 px with Field Size,
 // the Pole Shoes' 30% less resistance with Pull Strength's heavy-role steps.
-const PAGE = { title: "Magneto Tower: paths and Retrofits (second pass)", store: "bl-tower-art-p2-magneto-r2" };
+const PAGE = { title: "Magneto Tower: paths and Retrofits (second pass)", store: "bl-tower-art-p2-magneto-r3" };
 const GOLD = [1, 0.78, 0.3, 1], COPPER = [0.78, 0.5, 0.28, 1], STEEL = [0.42, 0.45, 0.5, 1], RED = [0.85, 0.2, 0.2, 1], BLUEP = [0.28, 0.48, 0.95, 1], GREYP = [0.62, 0.64, 0.68, 1], FROST = [0.86, 0.95, 1, 1];
 const rnd = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
 const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
@@ -36,11 +36,19 @@ function coilStack(c, k, B, t, col) { const L = B.lv[0], st = pk(B, 0, L), g = L
     if (st === "C") for (let i = 0; i < 12; i++) { const a = i * TAU / 12 + 0.13; plate(add(c, mul(fa(a), (R0 + 3.6 + 0.5 * L) * k)), rectPts(1, 0.8), iron, a, k, 0.8); } }                  // grip teeth on the yoke
   return R0; }
 
+// The coil stack's outer edge in units (straps, braces and yoke teeth included), for each style and step
+function coilOuter(B) { const L = B.lv[0], st = pk(B, 0, L), R0 = 12 * SCALE[L];
+  if (st === "A") return Math.max(R0 + 1.6 * (1 + 0.12 * L) + 0.7, L >= 2 ? R0 + 2.7 : 0);
+  if (st === "B") return R0 + (L >= 2 ? 3.3 : 2.4);
+  if (st === "C") return Math.max(R0 + 2.8 + 0.5 * L + 0.7, L >= 2 ? R0 + 4.4 + 0.5 * L : 0);
+  return R0 + 2.3; }
+
 // ---- Path 2, Field Size: the base rebuilt into field emitters (emitter rings, pylons, or fold-out field plates); gold with an aurora at Magnetosphere -----------
-function fieldBase(c, k, B, t, col) { const L = B.lv[1], st = pk(B, 1, L), g = L >= 5, fc = g ? GOLD : col, steel = gl(STEEL, g, 0.6); if (!st) return;
-  if (g) for (let i = 0; i < 3; i++) { const a0 = t * 0.4 + i * TAU / 3; arc(c, 23 * k, a0, a0 + 1.4, A([1, 0.9, 0.55, 1], 0.35), 2.4 * k); arc(c, 21.8 * k, -a0, -a0 + 1, A(lt(col, 0.3), 0.3), 1.6 * k); }
-  if (st === "A") { const n = [0, 1, 2, 2, 3, 3][L], nodes = 6 + 2 * L, rs = Array.from({ length: n }, (_, j) => 17 + j * 2.6);
-    if (L >= 3) for (let i = 0; i < 6; i++) bar(add(c, mul(fa(i * Math.PI / 3), 15 * k)), add(c, mul(fa(i * Math.PI / 3), rs[n - 1] * k)), 1.2 * k, steel);       // struts out to the rings
+function fieldBase(c, k, B, t, col, over) { const L = B.lv[1], st = pk(B, 1, L), g = L >= 5, fc = g ? GOLD : col, steel = gl(STEEL, g, 0.6); if (!st || over !== (st === "A")) return;
+  if (g && !over) for (let i = 0; i < 3; i++) { const a0 = t * 0.4 + i * TAU / 3; arc(c, 23 * k, a0, a0 + 1.4, A([1, 0.9, 0.55, 1], 0.35), 2.4 * k); arc(c, 21.8 * k, -a0, -a0 + 1, A(lt(col, 0.3), 0.3), 1.6 * k); }
+  if (st === "A") { const n = [0, 1, 2, 2, 3, 3][L], nodes = 6 + 2 * L, r0 = Math.min(19.5, Math.max(17, coilOuter(B) + 1.2)), rs = Array.from({ length: n }, (_, j) => r0 + j * 2.4);   // round 3 (owner): the innermost ring always clears the coils
+    if (g) for (let i = 0; i < 3; i++) { const a0 = t * 0.4 + i * TAU / 3; arc(c, (rs[n - 1] + 1.2) * k, a0, a0 + 1.4, A([1, 0.9, 0.55, 1], 0.35), 2.4 * k); }
+    if (L >= 3) for (let i = 0; i < 6; i++) bar(add(c, mul(fa(i * Math.PI / 3), rs[0] * k)), add(c, mul(fa(i * Math.PI / 3), rs[n - 1] * k)), 1.2 * k, steel);       // struts between the rings
     rs.forEach((r, j) => { ring(c, r * k, OUTLINE, 2.6 * k); ring(c, r * k, steel, 1.6 * k); for (let i = 0; i < nodes; i++) { const a = i * TAU / nodes + j * 0.2 + t * 0.2 * (j % 2 ? -1 : 1), q = add(c, mul(fa(a), r * k)); disc(q, 1.1 * k, OUTLINE); glowDot(q, 0.7 * k, fc); } }); }
   if (st === "B") { const n = [0, 3, 4, 6, 6, 8][L], h = 1.6 + 0.35 * L, r = 19.5, ps = Array.from({ length: n }, (_, i) => add(c, mul(fa(i * TAU / n + Math.PI / 6), r * k)));
     if (L >= 3) ps.forEach((q, i) => { const q2 = ps[(i + 1) % n], pts = [q]; for (let j = 1; j < 6; j++) pts.push(add(lerp(q, q2, j / 6), mul(orth(norm(sub(q2, q))), (rnd(j + i * 7 + Math.floor(t * 12)) - 0.5) * 2.4 * k))); pts.push(q2); polyline(pts, A(fc, 0.3), 2.4 * k); polyline(pts, A(lt(fc, 0.3), 0.8), 0.8 * k); });   // arcs link the pylons
@@ -70,7 +78,7 @@ function poleCap(c, k, B, t, col, mm) { const L = B.lv[2], st = pk(B, 2, L), g =
 function stabiliser(c, k, B, t, under) { if (B.r !== 1) return; const key = B.key("r1"); if (under !== (key !== "C")) return;
   if (key === "A") { ring(c, 21.6 * k, OUTLINE, 2.4 * k); ring(c, 21.6 * k, METAL, 1.4 * k); for (let i = 0; i < 3; i++) { const q = add(c, mul(fa(i * TAU / 3 + 0.5), 21.6 * k)); disc(q, 2.6 * k, OUTLINE); disc(q, 2.1 * k, METAL_D); line(add(q, mul(fa(t * 6 + i), -1.8 * k)), add(q, mul(fa(t * 6 + i), 1.8 * k)), METAL_L, 1 * k); } }   // a gyro ring
   if (key === "B") for (let i = 0; i < 3; i++) { const a = i * TAU / 3, q = add(c, mul(fa(a), 18.2 * k)); plate(q, rectPts(3.4, 2.6), METAL_D, a + Math.PI / 2, k, 1.2); hazard(q, a + Math.PI / 2, k, -3, 3, 0, [0.95, 0.75, 0.2, 1], 1); }   // ballast blocks on the deck's corners
-  if (key === "C") { const r = 12 * SCALE[B.lv[0]] + 4.4; for (let i = 0; i < 8; i++) { const a0 = i * TAU / 8 + t * 0.25; arc(add(c, [1.2 * k, 1.8 * k]), r * k, a0, a0 + 0.55, [0, 0, 0, 0.25], 2.4 * k); arc(c, r * k, a0, a0 + 0.55, OUTLINE, 2.6 * k); arc(c, r * k, a0, a0 + 0.55, [0.22, 0.2, 0.24, 1], 1.6 * k); } } }   // a floating ferrite halo
+  if (key === "C") { const r = 12 * SCALE[B.lv[0]] - 0.6; for (let i = 0; i < 8; i++) { const a0 = i * TAU / 8 + t * 0.25; arc(add(c, [1.2 * k, 1.8 * k]), r * k, a0, a0 + 0.55, [0, 0, 0, 0.25], 2.4 * k); arc(c, r * k, a0, a0 + 0.55, OUTLINE, 2.6 * k); arc(c, r * k, a0, a0 + 0.55, [0.22, 0.2, 0.24, 1], 1.6 * k); } } }   // a floating ferrite halo
 function frost(c, k, B, t, R0) { if (B.r !== 0) return; const key = B.key("r0");
   if (key === "A") { ring(c, R0 * k, A(FROST, 0.45), 1.6 * k); for (let i = 0; i < 46; i++) { const a = rnd(i) * TAU, r = R0 * (0.35 + 0.65 * rnd(i + 7)); disc(add(c, mul(fa(a), r * k)), (0.35 + 0.4 * rnd(i + 3)) * k, A(FROST, 0.8)); } }   // white rime on the coils
   if (key === "B") { ring(c, (R0 + 2.2) * k, A(FROST, 0.3), 3.6 * k); ring(c, (R0 + 2.2) * k, A(FROST, 0.85), 0.8 * k); bar(add(c, mul(fa(2.4), (R0 + 2.2) * k)), add(c, mul(fa(2.4), 18 * k)), 1.4 * k, [0.55, 0.75, 0.9, 1]); }   // a cryo jacket with a coolant line
@@ -101,16 +109,17 @@ function magAgent(B) { return (m, t, info, s, col) => { if (m.rep === undefined)
 // ---- The model ----------------------------------------------------------------------------------------------------------------------------------------------------
 const P2 = {
   tower: "magneto", look: "F", anim: "F",
-  intro: "Round 2: every stage is picked (all A: thick windings, emitter rings, the split pole; Retrofits Frost Rime, Ferrite Halo and Shoe Ring) and drawn as one build. Round 1 on the confirmed Stacked Coil Tower, with the names kept (your choice). Each path rebuilds one part, in the style you pick for each step, and the new design replaces the old one: Pull Strength rebuilds the coil stack (thick windings, a tiered stack, or an iron yoke; bigger each step; current runs round it at Dense Field; gold at Absolute Pull); Field Size rebuilds the base into field emitters (emitter rings, pylons, or fold-out field plates; gold with an aurora at Magnetosphere); Polarity rebuilds the pole cap (a split red/blue pole, claws, or spikes); from Torn Plates the stripped armour plates cling round it, and at Reverse Polarity it turns gold and flips red/blue at each repel. The preview runs the real rules: the slow tag and field radius grow, plates fly off enemies to the cap with -2, -4 or -5, stripped enemies stay cracked after leaving from Torn Plates, and the field flips to repel every 4 s at the mastery. Overlapping Retrofits are kept and stack (the carpet rule).",
+  intro: "Round 3, your note: the innermost emitter ring now always sits just outside the coil stack as it grows, and the rings are drawn over the coils, so the field is always visible; the Ferrite Halo now floats over the outer coil, inside the rings. Round 2: every stage is picked (all A: thick windings, emitter rings, the split pole; Retrofits Frost Rime, Ferrite Halo and Shoe Ring) and drawn as one build. Round 1 on the confirmed Stacked Coil Tower, with the names kept (your choice). Each path rebuilds one part, in the style you pick for each step, and the new design replaces the old one: Pull Strength rebuilds the coil stack (thick windings, a tiered stack, or an iron yoke; bigger each step; current runs round it at Dense Field; gold at Absolute Pull); Field Size rebuilds the base into field emitters (emitter rings, pylons, or fold-out field plates; gold with an aurora at Magnetosphere); Polarity rebuilds the pole cap (a split red/blue pole, claws, or spikes); from Torn Plates the stripped armour plates cling round it, and at Reverse Polarity it turns gold and flips red/blue at each repel. The preview runs the real rules: the slow tag and field radius grow, plates fly off enemies to the cap with -2, -4 or -5, stripped enemies stay cracked after leaving from Torn Plates, and the field flips to repel every 4 s at the mastery. Overlapping Retrofits are kept and stack (the carpet rule).",
   mods(B) { return { period: 1, flight: 1, multi: false, persist: magAgent(B) }; },
   muzzleAt(B, m, kk, c) { return c; },
   model(c, aim, s, fx, t, col, info, B) { const k = G(s), mm = fx.mem || {};
     deck(c, k, col, t);
     stabiliser(c, k, B, t, true);
-    fieldBase(c, k, B, t, col);
+    fieldBase(c, k, B, t, col, false);
     const R0 = coilStack(c, k, B, t, col);
     frost(c, k, B, t, R0);
     stabiliser(c, k, B, t, false);
+    fieldBase(c, k, B, t, col, true);                                                     // the emitter rings, over the coils (round 3)
     poleShoes(c, k, B, t);
     poleCap(c, k, B, t, col, mm); },
   paths: [], retrofits: [],
