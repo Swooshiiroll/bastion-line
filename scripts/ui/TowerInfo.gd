@@ -35,6 +35,10 @@ const STAT_ROWS := [
 	["Barrage", "barrage", "%d"], ["Rails", "rails", "%d"], ["Falloff per enemy", "falloff", "pct"], ["Armour shatter", "shatter", "%d"],
 	["Ion trail dps", "trail_dps", "%d"], ["Jumps", "jumps", "%d"], ["Storm dps", "storm_dps", "%d"], ["Storm radius", "storm_radius", "%d"],
 	["Stun time", "stun_time", "%.1fs"],
+	["Orbit radius", "orbit", "%d"], ["Autocannon damage", "ac_damage", "%d"], ["Autocannon shots/s", "ac_rate", "%.1f"],
+	["Autocannon blast", "ac_splash", "%d"], ["Missile damage", "ms_damage", "%d"], ["Missiles/s", "ms_rate", "%.2f"],
+	["Missile blast", "ms_splash", "%d"], ["Missiles per volley", "ms_volley", "%d"], ["Fire-rate bonus", "rate_mult", "x%.1f"],
+	["Loadout boost", "loadout_mult", "x%.2f"],
 ]
 ## Mechanic flags shown as a "yes" row: [label, stat key].
 const FLAG_ROWS := [
@@ -46,6 +50,8 @@ const FLAG_ROWS := [
 	["Homing", "homing"], ["Re-targets", "retarget"], ["Never misses", "never_miss"], ["Rippling salvo", "ripple"],
 	["Overloads disruptors", "overload"], ["Incendiary shells", "incendiary"], ["Shrapnel shells", "shrapnel"],
 	["Concussion shells", "concussion"], ["Combined shell", "combined"], ["Fast traverse", "turn_fast"],
+	["Radar: reveals cloaked", "radar"], ["Missiles loadout", "lo_missiles"], ["Bombs loadout", "lo_bombs"],
+	["Laser loadout", "lo_laser"], ["Full kit loadout", "lo_full"],
 ]
 ## Short keys for the one-line summary.
 const SHORT := {

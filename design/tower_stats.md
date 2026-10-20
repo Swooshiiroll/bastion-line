@@ -242,3 +242,29 @@ air: yes · ground: yes · size: 1 · damage_kind: physical
 | c3 | rate 5 |
 | c4 | rate 5.8 |
 | cm | rate 7 |
+
+## cas_gunship
+
+air: yes · ground: yes · size: 1 · damage_kind: physical · uncapped: yes
+
+| Node | Tokens |
+|---|---|
+| base | damage 12 · rate 5 · orbit 90 |
+| r1 | radar |
+| r2 | rate_mult 1.1 |
+| r3 | orbit +25 |
+| a1 | damage 15 |
+| a2 | rate 6 |
+| a3 | damage 19 |
+| a4 | rate 7.5 |
+| am | rate 9 |
+| b1 | ac_damage 40 · ac_rate 1.5 · ac_splash 25 |
+| b2 | ac_rate 1.8 |
+| b3 | ac_damage 52 |
+| b4 | ac_rate 2.2 |
+| bm | ac_damage 58 · ac_splash 30 |
+| c1 | ms_damage 150 · ms_rate 0.333 · ms_splash 45 |
+| c2 | ms_rate 0.4 |
+| c3 | ms_damage 190 |
+| c4 | ms_rate 0.5 |
+| cm | ms_volley 2 |

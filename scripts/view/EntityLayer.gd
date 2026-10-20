@@ -10,6 +10,7 @@ const RocketSalvoArt = preload("res://scripts/view/towers/RocketSalvoArt.gd")
 const AntiAircraftArt = preload("res://scripts/view/towers/AntiAircraftArt.gd")
 const ArtilleryCannonArt = preload("res://scripts/view/towers/ArtilleryCannonArt.gd")
 const DroneBayArt = preload("res://scripts/view/towers/DroneBayArt.gd")
+const CasGunshipArt = preload("res://scripts/view/towers/CasGunshipArt.gd")
 
 var world
 ## Microseconds spent per section of _draw, summed; tools/PerfProbe.gd reads and resets it.
@@ -84,7 +85,7 @@ func _draw() -> void:
 	for e in air:
 		_enemy(e, t)
 	for tw in g.towers:
-		if not tw.wing.is_empty():
+		if not tw.wing.is_empty() or tw.type == "cas_gunship":
 			_wing(tw, t)
 	var t2 := Time.get_ticks_usec()
 	if timing_on:
@@ -131,6 +132,11 @@ func _enemy(e, t: float) -> void:
 ## A Drone Bay's drones in flight, with a faint shadow below each.
 func _wing(tw, t: float) -> void:
 	var acc := Draw.accent(tw.type, tw.spec)
+	if tw.type == "cas_gunship":
+		var orbit := float(tw.stats().get("orbit", 90.0))
+		var pose := CasGunshipArt.plane_pose(tw.aim_point, orbit, tw.orbit_angle)
+		CasGunshipArt.plane(self, pose.pos, pose.heading, 1.0 if tw.size <= 1 else 1.8, t, tw.spec, acc, tw.fire_flash > 0.0 and tw.disabled <= 0.0)
+		return
 	if tw.is_rework:
 		if tw.disabled > 0.0:
 			return

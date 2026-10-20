@@ -37,6 +37,8 @@ func _draw() -> void:
 	for t in g.towers:
 		if t.type == "artillery_cannon" and t.aim_set:
 			_aim_marker(t, world.selected_tower == t)
+		if t.type == "cas_gunship" and t.aim_set:
+			_orbit_marker(t, world.selected_tower == t)
 	if world.ability_target == "meteor" and world.mouse_in_field:
 		_meteor_reticle(g, world.hover_pos)
 	if build != "":
@@ -121,6 +123,20 @@ func _aim_marker(t, selected: bool) -> void:
 	Draw.disc(self, p, 2.5, Color(col, a))
 	if selected:
 		draw_dashed_line(t.pos, p, Color(col, 0.4), 1.5, 8.0)
+
+
+## Where a CAS Gunship circles: its orbit as a ring (bright while selected, with a line to its centre).
+func _orbit_marker(t, selected: bool) -> void:
+	var r := float(t.stats().get("orbit", 90.0))
+	var col := Color(0.62, 0.85, 1.0)
+	var a := 0.9 if selected else 0.3
+	Draw.arc(self, t.aim_point, r, 0.0, TAU, 56, Color(col, a * 0.7), 1.6, true)
+	Draw.disc(self, t.aim_point, 3.0, Color(col, a))
+	for k in 4:
+		var d := Vector2.from_angle(float(k) * PI / 2.0)
+		draw_line(t.aim_point + d * 6.0, t.aim_point + d * 12.0, Color(col, a), 2.0, true)
+	if selected:
+		draw_dashed_line(t.pos, t.aim_point, Color(col, 0.4), 1.5, 8.0)
 
 
 ## A small label with a dark backing, centred on `p`.

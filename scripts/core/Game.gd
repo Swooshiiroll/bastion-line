@@ -421,6 +421,8 @@ func place_tower(type: String, cell: Vector2i):
 	towers.append(t)
 	if type == "artillery_cannon":
 		aim_artillery(t, nearest_track_point(t.pos))
+	if type == "cas_gunship":
+		designate_orbit(t, nearest_track_point(t.pos))
 	for c in footprint(type, cell):
 		tower_at[c] = t
 	stats["towers_built"] += 1
@@ -1009,6 +1011,9 @@ func _update_tower(t, dt: float) -> void:
 	if t.type == "drone_bay":
 		_update_drone_bay(t, s, dt)
 		return
+	if t.type == "cas_gunship":
+		_update_cas(t, s, dt)
+		return
 	if t.is_beam():
 		if t.is_rework:
 			_update_laser_rework(t, s, dt)
@@ -1113,6 +1118,88 @@ func aim_artillery(t, pos: Vector2) -> void:
 
 
 ## Loads a shell type, if the cannon has unlocked it. Takes effect from the next shell.
+## Designates the point a CAS Gunship orbits (free, any time, anywhere on the map).
+func designate_orbit(t, pos: Vector2) -> void:
+	t.aim_point = pos.clamp(Vector2.ZERO, Grid.field_size())
+	t.aim_set = true
+
+
+## CAS Gunship: the plane circles `aim_point` and its guns fire at enemies inside the orbit. The gatling takes the best target,
+## the autocannon the next, the missiles the last, so they spread over a pack. The Radar Retrofit reveals cloaked enemies inside
+## the orbit to every tower. An EMP over the orbit switches the guns off (see the EMP code).
+func _update_cas(t, s: Dictionary, dt: float) -> void:
+	if not t.aim_set:
+		designate_orbit(t, nearest_track_point(t.pos))
+	var radius := float(s.get("orbit", 90.0))
+	t.orbit_angle = fmod(t.orbit_angle + 0.5 * dt, TAU)
+	var plane: Vector2 = t.aim_point + Vector2.from_angle(t.orbit_angle) * radius
+	if bool(s.get("radar", false)):
+		for e in enemies:
+			if e.alive and e.cloaked and e.pos.distance_squared_to(t.aim_point) <= radius * radius:
+				e.reveal_timer = maxf(e.reveal_timer, 0.4)
+	var foes := _cas_targets(t, radius, plane)
+	if foes.is_empty():
+		return
+	var mult: float = float(s.get("rate_mult", 1.0)) * (1.0 + t.buff_rate)
+	var bonus: float = 1.0 + t.buff_dmg
+	var cds: Dictionary = t.gun_cds
+	cds["gat"] = float(cds.get("gat", 0.0)) - dt
+	if float(cds.gat) <= 0.0:
+		cds["gat"] = 1.0 / (float(s.rate) * mult)
+		var tg = foes[0]
+		var dealt := damage_enemy(tg, float(s.damage) * bonus, false, t)
+		t.fire_flash = 0.1
+		_emit({"type": "cas_shot", "gun": "gat", "from": plane, "to": tg.pos, "look": t.look_key()})
+	if s.has("ac_damage"):
+		cds["ac"] = float(cds.get("ac", 0.0)) - dt
+		if float(cds.ac) <= 0.0:
+			cds["ac"] = 1.0 / (float(s.ac_rate) * mult)
+			var tg2 = foes[mini(1, foes.size() - 1)]
+			for e in _enemies_near(tg2.pos, float(s.ac_splash)):
+				damage_enemy(e, float(s.ac_damage) * bonus, false, t)
+			_emit({"type": "cas_shot", "gun": "ac", "from": plane, "to": tg2.pos, "look": t.look_key(), "radius": float(s.ac_splash)})
+	if s.has("ms_damage"):
+		cds["ms"] = float(cds.get("ms", 0.0)) - dt
+		if float(cds.ms) <= 0.0:
+			cds["ms"] = 1.0 / (float(s.ms_rate) * mult)
+			t.pulse_count += 1
+			var volley := int(s.get("ms_volley", 1)) if t.pulse_count % 3 == 0 else 1
+			for j in volley:
+				var tg3 = foes[maxi(0, foes.size() - 1 - j)]
+				var p = Projectile.new()
+				p.kind = "missile"
+				p.pos = plane
+				p.start = plane
+				p.vel = (tg3.pos - plane).normalized().orthogonal() * (120.0 if j % 2 == 0 else -120.0) + (tg3.pos - plane).normalized() * 60.0
+				p.target = tg3
+				p.target_pos = tg3.pos
+				p.speed = 300.0
+				p.damage = float(s.ms_damage) * bonus
+				p.splash = float(s.ms_splash)
+				p.air_mult = 1.0
+				p.tier = t.tier
+				p.source = t
+				projectiles.append(p)
+			_emit({"type": "cas_shot", "gun": "ms", "from": plane, "to": foes[foes.size() - 1].pos, "look": t.look_key()})
+
+
+## Enemies inside a CAS Gunship's orbit, best first by its targeting mode and priority (air or ground first).
+func _cas_targets(t, radius: float, plane: Vector2) -> Array:
+	var out: Array = []
+	for e in enemies:
+		if e.alive and not e.is_hidden() and e.pos.distance_squared_to(t.aim_point) <= radius * radius:
+			out.append(e)
+	if t.priority == 1 and out.any(func(e): return e.flying):
+		out = out.filter(func(e): return e.flying)
+	elif t.priority == 2 and out.any(func(e): return not e.flying):
+		out = out.filter(func(e): return not e.flying)
+	var scores := {}
+	for e in out:
+		scores[e] = _score(t, e, plane.distance_squared_to(e.pos))
+	out.sort_custom(func(a, b): return scores[a] > scores[b])
+	return out
+
+
 func set_loadout(t, kind: String) -> bool:
 	if not t.available_loadouts().has(kind):
 		return false
@@ -2619,7 +2706,7 @@ func to_save() -> Dictionary:
 	for t in towers:
 		tl.append({
 			"type": t.type, "col": t.cell.x, "row": t.cell.y, "trunk": t.trunk, "depth": t.depth.duplicate(),
-			"aim_x": t.aim_point.x, "aim_y": t.aim_point.y, "shell": t.shell, "loadout": t.loadout,
+			"aim_x": t.aim_point.x, "aim_y": t.aim_point.y, "shell": t.shell, "loadout": t.loadout, "masteries": t.mastered_paths.duplicate(),
 			"retrofit": t.retrofit, "started": t.started.duplicate(), "mastery": t.mastered, "mode": t.mode, "priority": t.priority, "kills": t.kills, "spent": t.spent,
 		})
 	return {
@@ -2651,7 +2738,7 @@ func to_save() -> Dictionary:
 ## Restores a saved tower's upgrade state after checking it follows the branch rules.
 func _restore_upgrades(t, entry: Dictionary) -> String:
 	t.loadout = str(entry.get("loadout", "gun"))
-	if t.type == "artillery_cannon" and entry.has("aim_x"):
+	if (t.type == "artillery_cannon" or t.type == "cas_gunship") and entry.has("aim_x"):
 		t.aim_point = Vector2(float(entry.aim_x), float(entry.aim_y))
 		t.aim_set = true
 		t.shell = str(entry.get("shell", "he"))
@@ -2684,8 +2771,21 @@ func _restore_upgrades(t, entry: Dictionary) -> String:
 		if not (str(b) in Tower.BRANCHES) or int(t.depth[str(b)]) == 0:
 			return "invalid started branch list."
 		t.started.append(str(b))
-	if t.started.size() > 2 or deep > 1 or (trunk < 2 and not t.started.is_empty()):
+	if not t.is_uncapped() and (t.started.size() > 2 or deep > 1 or (trunk < 2 and not t.started.is_empty())):
 		return "upgrades break the branch rules."
+	if t.is_uncapped():
+		var ms = entry.get("masteries", [])
+		if not (ms is Array):
+			return "malformed masteries."
+		for k in ms:
+			if not (str(k) in Tower.BRANCHES) or int(t.depth[str(k)]) < Tower.BRANCH_STEPS or t.mastered_paths.has(str(k)):
+				return "invalid mastery path."
+			t.mastered_paths.append(str(k))
+		t.mastered = not t.mastered_paths.is_empty()
+		t.invalidate()
+		if t.mastered and not t.mastery_unlocked():
+			return "it has a mastery, but this run has no %s research." % (Research.tree_name(t.type) + " Mastery")
+		return ""
 	t.mastered = bool(entry.get("mastery", false))
 	t.invalidate()
 	if t.mastered:

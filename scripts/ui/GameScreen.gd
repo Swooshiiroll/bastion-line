@@ -442,6 +442,12 @@ func _on_field_clicked(cell: Vector2i, button: int, shift: bool, pos: Vector2) -
 		hud.toast("Aimed", UiKit.GOLD)
 		Sfx.play("click", -8.0, 0.0)
 		return
+	# A CAS Gunship selected: a click anywhere on the field designates the point it orbits.
+	if sel != null and sel.type == "cas_gunship" and not game.tower_at.has(cell):
+		game.designate_orbit(sel, pos)
+		hud.toast("Orbit set", UiKit.GOLD)
+		Sfx.play("click", -8.0, 0.0)
+		return
 	if game.tower_at.has(cell):
 		var t = game.tower_at[cell]
 		var now := Time.get_ticks_msec()

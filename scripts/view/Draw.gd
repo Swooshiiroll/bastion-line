@@ -12,6 +12,7 @@ const ArtilleryCannonArt = preload("res://scripts/view/towers/ArtilleryCannonArt
 const RailgunArt = preload("res://scripts/view/towers/RailgunArt.gd")
 const TeslaTowerArt = preload("res://scripts/view/towers/TeslaTowerArt.gd")
 const DroneBayArt = preload("res://scripts/view/towers/DroneBayArt.gd")
+const CasGunshipArt = preload("res://scripts/view/towers/CasGunshipArt.gd")
 const Difficulty = preload("res://data/difficulty.gd")
 
 const OUTLINE := Color(0.03, 0.04, 0.06, 0.95)
@@ -47,6 +48,7 @@ const ACCENT := {
 	"railgun": Color(0.45, 0.80, 1.00),
 	"tesla_tower": Color(0.75, 0.50, 1.00),
 	"drone_bay": Color(0.62, 0.91, 0.44),
+	"cas_gunship": Color(0.62, 0.85, 1.00),
 }
 const SPEC_ALT := {
 	"mint": Color(1.00, 0.84, 0.30),
@@ -671,6 +673,8 @@ static func _turret(ci: CanvasItem, type: String, tier: int, c: Vector2, aim: fl
 			TeslaTowerArt.draw(ci, c, aim, s, t, flash, spec, acc, _extra)
 		"drone_bay":
 			DroneBayArt.draw(ci, c, aim, s, t, flash, spec, acc, _extra)
+		"cas_gunship":
+			CasGunshipArt.draw(ci, c, aim, s, t, flash, spec, acc, _extra)
 
 
 ## --- Shading helpers: light comes from the upper left. ------------------------------------

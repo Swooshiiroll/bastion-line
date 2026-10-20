@@ -11,7 +11,7 @@ extends RefCounted
 ##   command tree  "start_gold": +fraction, "lives": +fraction of the mode's shields, "sell_refund": +fraction,
 ##                 "ability_cd": -fraction, "bounty": +fraction
 
-const TREE_ORDER := ["command", "arrow", "cannon", "frost", "sniper", "tesla", "laser", "missile", "amp", "flak", "sensor", "gravity", "nullifier", "nova", "drones", "scrap", "gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon", "railgun", "tesla_tower", "drone_bay"]
+const TREE_ORDER := ["command", "arrow", "cannon", "frost", "sniper", "tesla", "laser", "missile", "amp", "flak", "sensor", "gravity", "nullifier", "nova", "drones", "scrap", "gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon", "railgun", "tesla_tower", "drone_bay", "cas_gunship"]
 
 ## RP sources, all derived from profile records so they can't be farmed and are never lost.
 ## (Medals pay their mode's medal_rp, from data/difficulty.gd.)
@@ -562,6 +562,27 @@ const NODES := {
 	"drone_bay_m": {
 		"tree": "drone_bay", "slot": Vector2i(0, 2), "cost": 3, "requires": ["drone_bay_2a", "drone_bay_2b"], "icon": "mastery",
 		"name": "Drone Bay Mastery", "blurb": "Unlocks the masteries: Elite Drones, Full Kit and Storm Drones.",
+		"effects": {"mastery": true},
+	},
+	# --- CAS Gunship (the tower rework, issue #59: a minimal tree until the research pass) ----------
+	"cas_gunship_1": {
+		"tree": "cas_gunship", "slot": Vector2i(0, 0), "cost": 1, "requires": [], "icon": "damage",
+		"name": "Heavier Rounds", "blurb": "CAS Gunships deal +6% damage.",
+		"effects": {"mult": {"damage": 0.06}},
+	},
+	"cas_gunship_2a": {
+		"tree": "cas_gunship", "slot": Vector2i(-1, 1), "cost": 2, "requires": ["cas_gunship_1"], "icon": "range",
+		"name": "Wide Orbit", "blurb": "CAS Gunships orbit 7% wider.",
+		"effects": {"mult": {"orbit": 0.07}},
+	},
+	"cas_gunship_2b": {
+		"tree": "cas_gunship", "slot": Vector2i(1, 1), "cost": 2, "requires": ["cas_gunship_1"], "icon": "rate",
+		"name": "Faster Spin", "blurb": "CAS Gunships fire 7% faster.",
+		"effects": {"mult": {"rate": 0.07}},
+	},
+	"cas_gunship_m": {
+		"tree": "cas_gunship", "slot": Vector2i(0, 2), "cost": 3, "requires": ["cas_gunship_2a", "cas_gunship_2b"], "icon": "mastery",
+		"name": "CAS Gunship Mastery", "blurb": "Unlocks the masteries: Twin Gatlings, Autocannon Battery and Hellfire Volley.",
 		"effects": {"mastery": true},
 	},
 }

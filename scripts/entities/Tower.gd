@@ -81,6 +81,9 @@ var aim_set := false
 var shell := "he"
 ## Drone Bay (reworked): the loadout its drones fly ("gun", "missiles", "bombs", "laser", "full").
 var loadout := "gun"
+## CAS Gunship: where the plane is on its orbit (radians) and each gun's cooldown. The orbit centre is `aim_point`.
+var orbit_angle := 0.0
+var gun_cds := {}
 ## Seconds left knocked offline by a Jammer's EMP.
 var disabled := 0.0
 ## The special tile under the tower: "H" (high ground), "P" (power node) or "".
@@ -109,6 +112,8 @@ var depth := {"a": 0, "b": 0, "c": 0}
 ## Branch keys in the order they were started (at most two).
 var started: Array = []
 var mastered := false
+## Uncapped towers (the CAS Gunship): the paths that took their mastery (each path has its own).
+var mastered_paths: Array = []
 
 var tier: int:
 	get:
@@ -278,6 +283,14 @@ func block_reason(key: String) -> String:
 	if not depth.has(key):
 		return "No such branch"
 	var d: int = depth[key]
+	if is_uncapped():
+		# Every path takes all four upgrades and its own mastery; there is no primary or secondary.
+		if d >= BRANCH_STEPS:
+			if mastered_paths.has(key):
+				return "Fully upgraded"
+			if not mastery_unlocked():
+				return "Needs %s Mastery research" % str(def.name)
+		return ""
 	if d >= BRANCH_STEPS:
 		if mastered or key != primary():
 			return "Fully upgraded"
@@ -333,7 +346,7 @@ func look_key(retro_override := -2) -> String:
 	var p := primary()
 	var ds: Array = []
 	for key in BRANCHES:
-		ds.append(5 if (mastered and key == p) else int(depth[key]))
+		ds.append(5 if ((mastered and key == p) or mastered_paths.has(key)) else int(depth[key]))
 	return "%d|%d|%d|%d" % [retrofit if retro_override == -2 else retro_override, ds[0], ds[1], ds[2]]
 
 
@@ -344,6 +357,14 @@ func compose_rework(t_retro: int, t_depth: Dictionary, t_started: Array, t_maste
 	var s := _apply_node({}, rt.base)
 	if t_retro >= 0:
 		s = _apply_node(s, rt.retrofits[t_retro])
+	if is_uncapped():
+		for b in BRANCHES:
+			var path := _path(rt, b)
+			for i in mini(int(t_depth[b]), BRANCH_STEPS):
+				s = _apply_node(s, path.nodes[i])
+			if mastered_paths.has(b):
+				s = _apply_node(s, path.mastery)
+		return s
 	var p := ""
 	var best_d := 0
 	for b in t_started:
@@ -386,6 +407,8 @@ func buy(key: String) -> void:
 	var d: int = depth[key]
 	if d >= BRANCH_STEPS:
 		mastered = true
+		if is_uncapped():
+			mastered_paths.append(key)
 	else:
 		if d == 0:
 			started.append(key)
@@ -559,6 +582,10 @@ func available_loadouts() -> Array:
 		if bool(s.get(pr[0], false)):
 			out.append(pr[1])
 	return out
+
+
+func is_uncapped() -> bool:
+	return bool(def.get("uncapped", false))
 
 
 func is_beam() -> bool:

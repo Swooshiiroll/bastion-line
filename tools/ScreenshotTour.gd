@@ -1010,7 +1010,7 @@ func _rework_checks(g) -> void:
 		g.state = Game.State.BUILD
 	else:
 		fails += _expect(false, "an enemy could be put in the Gun Turret's range")
-	for type in ["mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon", "railgun", "tesla_tower", "drone_bay"]:
+	for type in ["mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon", "railgun", "tesla_tower", "drone_bay", "cas_gunship"]:
 		fails += await _rework_fire_check(g, type)
 	screen.world.selected_tower = null
 	await _wait(0.2)
@@ -1047,7 +1047,7 @@ func _rework_fire_check(g, type: String) -> int:
 	var kind := "bat" if type == "anti_aircraft_turret" else "brute"
 	for dist in range(0, 3000, 30):
 		var cand = g.spawn_enemy(kind, 0, float(dist), 60.0, -1)
-		if (type == "artillery_cannon" and cand.pos.distance_to(t.aim_point) < 40.0) or (type == "drone_bay" and cand.pos.distance_to(t.pos) < 250.0) or (type != "artillery_cannon" and type != "drone_bay" and cand.pos.distance_to(t.pos) < t.get_range() * 0.7):
+		if (type == "artillery_cannon" and cand.pos.distance_to(t.aim_point) < 40.0) or (type == "drone_bay" and cand.pos.distance_to(t.pos) < 250.0) or (type == "cas_gunship" and cand.pos.distance_to(t.aim_point) < 40.0) or (type != "artillery_cannon" and type != "drone_bay" and type != "cas_gunship" and cand.pos.distance_to(t.pos) < t.get_range() * 0.95):
 			foe = cand
 			break
 	if foe != null:
@@ -1063,6 +1063,7 @@ func _rework_fire_check(g, type: String) -> int:
 	else:
 		fails += _expect(false, "an enemy could be put in %s's range" % type)
 	screen.world.selected_tower = null
+	g.sell_tower(t)
 	return fails
 
 

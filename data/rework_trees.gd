@@ -6,7 +6,7 @@ extends RefCounted
 ## (a, b, c), each with four `nodes` and a `mastery`. A node's `set` values replace the stat and its `add` values add to it;
 ## nodes apply in order on top of the base (the Retrofit, then each path's steps).
 
-const ORDER := ["gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon", "railgun", "tesla_tower", "drone_bay"]
+const ORDER := ["gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon", "railgun", "tesla_tower", "drone_bay", "cas_gunship"]
 
 const TREES := {
 	"gun_turret": {
@@ -19,6 +19,7 @@ const TREES := {
 		"size": 1,
 		"damage_kind": "physical",
 		"beam": false,
+		"uncapped": false,
 		"cost": 75,
 		"base": {
 			"name": "Gun Turret",
@@ -244,6 +245,7 @@ const TREES := {
 		"size": 1,
 		"damage_kind": "physical",
 		"beam": false,
+		"uncapped": false,
 		"cost": 150,
 		"base": {
 			"name": "Mortar Tower",
@@ -478,6 +480,7 @@ const TREES := {
 		"size": 1,
 		"damage_kind": "physical",
 		"beam": false,
+		"uncapped": false,
 		"cost": 200,
 		"base": {
 			"name": "Rocket Salvo",
@@ -696,6 +699,7 @@ const TREES := {
 		"size": 1,
 		"damage_kind": "energy",
 		"beam": true,
+		"uncapped": false,
 		"cost": 250,
 		"base": {
 			"name": "Laser Tower",
@@ -912,6 +916,7 @@ const TREES := {
 		"size": 1,
 		"damage_kind": "physical",
 		"beam": false,
+		"uncapped": false,
 		"cost": 150,
 		"base": {
 			"name": "Anti-Aircraft Turret",
@@ -1126,6 +1131,7 @@ const TREES := {
 		"size": 1,
 		"damage_kind": "physical",
 		"beam": false,
+		"uncapped": false,
 		"cost": 300,
 		"base": {
 			"name": "Artillery Cannon",
@@ -1346,6 +1352,7 @@ const TREES := {
 		"size": 1,
 		"damage_kind": "physical",
 		"beam": false,
+		"uncapped": false,
 		"cost": 500,
 		"base": {
 			"name": "Railgun",
@@ -1565,6 +1572,7 @@ const TREES := {
 		"size": 1,
 		"damage_kind": "energy",
 		"beam": false,
+		"uncapped": false,
 		"cost": 250,
 		"base": {
 			"name": "Tesla Tower",
@@ -1787,6 +1795,7 @@ const TREES := {
 		"size": 1,
 		"damage_kind": "physical",
 		"beam": false,
+		"uncapped": false,
 		"cost": 300,
 		"base": {
 			"name": "Drone Bay",
@@ -1960,6 +1969,219 @@ const TREES := {
 					"blurb": "7 shots/s",
 					"set": {
 						"rate": 7.0,
+					},
+					"add": {},
+				},
+			},
+		],
+	},
+	"cas_gunship": {
+		"name": "CAS Gunship",
+		"class": "Assault",
+		"weapon": "Deployable",
+		"blurb": "A large slow-flying cargo plane capable of being with with a wide range of weaponry. \"You know that feeling you get when its raining outside, but then the rain suddenly goes from being water to large metal bullets being shot at you from that giant plane above you? Yeah, I hate that feeling.\"",
+		"air": true,
+		"ground": true,
+		"size": 1,
+		"damage_kind": "physical",
+		"beam": false,
+		"uncapped": true,
+		"cost": 650,
+		"base": {
+			"name": "CAS Gunship",
+			"cost": 650,
+			"blurb": "Gatling (light, built in), autocannon (medium), missiles (heavy). Research unlocks more weapons per class later (the Research Lab rework). - Attack: the tower can be placed anywhere; the gunship orbits a point you designate and side-fires on enemies inside its orbit. Re-designating is free, any time. - Targets: ground and air by default, chosen by the targeting option (the Any/Air/Ground priority). - EMPs under its orbit silence its guns, like the Drone Bay's drones. - Retrofit: Radar: it can detect cloaked enemies. - 650 credits to build. - The masteries need research, as other towers' do (owner). - The Radar reveals cloaked enemies to other towers too (owner).",
+			"set": {
+				"damage": 12.0,
+				"rate": 5.0,
+				"orbit": 90.0,
+			},
+			"add": {},
+		},
+		"retrofits": [
+			{
+				"name": "Radar",
+				"cost": 35,
+				"blurb": "Cloaked enemies inside the gunship's orbit (Phantom, Wraith) are revealed to every tower (owner), making it a mobile Radar Tower. The formula values it low since it only counts the gunship's own damage.",
+				"set": {
+					"radar": true,
+				},
+				"add": {},
+			},
+			{
+				"name": "Extra Ammo",
+				"cost": 70,
+				"blurb": "+10% fire rate on every gun.",
+				"set": {
+					"rate_mult": 1.1,
+				},
+				"add": {},
+			},
+			{
+				"name": "Wide Orbit",
+				"cost": 195,
+				"blurb": "+25 px orbit radius (115), covering more track.",
+				"set": {},
+				"add": {
+					"orbit": 25.0,
+				},
+			},
+		],
+		"paths": [
+			{
+				"key": "a",
+				"name": "Light gun",
+				"nodes": [
+					{
+						"name": "Heavier Rounds",
+						"cost": 175,
+						"blurb": "Damage 12 to 15",
+						"set": {
+							"damage": 15.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Faster Spin",
+						"cost": 350,
+						"blurb": "6 rounds/s",
+						"set": {
+							"rate": 6.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Hardened Rounds",
+						"cost": 1125,
+						"blurb": "19 damage",
+						"set": {
+							"damage": 19.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Overdrive Motor",
+						"cost": 2670,
+						"blurb": "7.5 rounds/s",
+						"set": {
+							"rate": 7.5,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Twin Gatlings",
+					"cost": 5345,
+					"blurb": "9 rounds/s",
+					"set": {
+						"rate": 9.0,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "b",
+				"name": "built in",
+				"nodes": [
+					{
+						"name": "Autocannon",
+						"cost": 1145,
+						"blurb": "Unlocks the autocannon: 40 damage, 1.5 shots/s, 25 px blast",
+						"set": {
+							"ac_damage": 40.0,
+							"ac_rate": 1.5,
+							"ac_splash": 25.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Faster Feed",
+						"cost": 455,
+						"blurb": "1.8 shots/s",
+						"set": {
+							"ac_rate": 1.8,
+						},
+						"add": {},
+					},
+					{
+						"name": "HE Rounds",
+						"cost": 1645,
+						"blurb": "52 damage",
+						"set": {
+							"ac_damage": 52.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Twin Feed",
+						"cost": 3170,
+						"blurb": "2.2 shots/s",
+						"set": {
+							"ac_rate": 2.2,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Autocannon Battery",
+					"cost": 7015,
+					"blurb": "58 damage; 30 px blast",
+					"set": {
+						"ac_damage": 58.0,
+						"ac_splash": 30.0,
+					},
+					"add": {},
+				},
+			},
+			{
+				"key": "c",
+				"name": "Medium gun",
+				"nodes": [
+					{
+						"name": "Missile Rack",
+						"cost": 1235,
+						"blurb": "Unlocks guided missiles: 150 damage, one every 3 s, 45 px blast",
+						"set": {
+							"ms_damage": 150.0,
+							"ms_rate": 0.333,
+							"ms_splash": 45.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Quick Rack",
+						"cost": 525,
+						"blurb": "One every 2.5 s",
+						"set": {
+							"ms_rate": 0.4,
+						},
+						"add": {},
+					},
+					{
+						"name": "Heavy Warheads",
+						"cost": 1595,
+						"blurb": "190 damage",
+						"set": {
+							"ms_damage": 190.0,
+						},
+						"add": {},
+					},
+					{
+						"name": "Auto-Rack",
+						"cost": 3785,
+						"blurb": "One every 2 s",
+						"set": {
+							"ms_rate": 0.5,
+						},
+						"add": {},
+					},
+				],
+				"mastery": {
+					"name": "Hellfire Volley",
+					"cost": 13250,
+					"blurb": "Every third volley fires two missiles",
+					"set": {
+						"ms_volley": 2.0,
 					},
 					"add": {},
 				},

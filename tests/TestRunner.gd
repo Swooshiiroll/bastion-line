@@ -3652,3 +3652,126 @@ func test_rework_drone_bay() -> void:
 	jam.ability_timer = 0.0
 	g._update_enemy(jam, 0.05)
 	check(dd.disabled > 0.0, "an EMP over a drone knocks the bay offline")
+
+
+func test_rework_cas_gunship() -> void:
+	var g = new_game()
+	g.gold = 400000
+	g.emit_events = true
+	var t = g.place_tower("cas_gunship", spot(g, "cas_gunship", 0))
+	check(t != null and t.is_rework and t.is_uncapped() and g.tower_cost("cas_gunship") == 650, "the CAS Gunship builds for 650 and is uncapped")
+	var s: Dictionary = t.stats()
+	check(near(s.damage, 12.0) and near(s.rate, 5.0) and near(s.orbit, 90.0) and not s.has("ac_damage") and not s.has("ms_damage"), "stock: a gatling of 12 at 5/s, a 90 px orbit")
+	check(t.aim_set and t.hits_air() and t.hits_ground() and not s.has("range"), "orbits the track point nearest it; air and ground; no range")
+	# Retrofits.
+	check(g.buy_retrofit(t, 0) and t.stats().radar, "Radar")
+	var ea = g.place_tower("cas_gunship", spot(g, "cas_gunship", 20))
+	check(g.buy_retrofit(ea, 1) and near(ea.stats().rate_mult, 1.1), "Extra Ammo: +10% fire rate")
+	var wo = g.place_tower("cas_gunship", spot(g, "cas_gunship", 40))
+	check(g.buy_retrofit(wo, 2) and near(wo.stats().orbit, 115.0), "Wide Orbit: 115 px")
+	# Uncapped: every path takes every step, all three at once, no secondary cap, no lock.
+	var u = g.place_tower("cas_gunship", spot(g, "cas_gunship", 60))
+	buy_steps(g, u, "a", 4)
+	buy_steps(g, u, "b", 4)
+	buy_steps(g, u, "c", 4)
+	check(u.depth.a == 4 and u.depth.b == 4 and u.depth.c == 4 and u.block_reason("a") == "Needs CAS Gunship Mastery research" or u.block_reason("a").contains("Mastery"), "all three paths reach step 4 (%s)" % u.block_reason("a"))
+	var us: Dictionary = u.stats()
+	check(near(us.damage, 19.0) and near(us.rate, 7.5), "gatling: 19 damage, 7.5/s")
+	check(near(us.ac_damage, 52.0) and near(us.ac_rate, 2.2) and near(us.ac_splash, 25.0), "autocannon: 52 damage, 2.2/s, 25 px")
+	check(near(us.ms_damage, 190.0) and near(us.ms_rate, 0.5) and near(us.ms_splash, 45.0), "missiles: 190, one every 2 s, 45 px")
+	check(u.upgrade_cost("b") == 0 or u.block_reason("b") != "", "the mastery is gated by research")
+	# Each path takes its own mastery.
+	u.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, u, "a", 1)
+	buy_steps(g, u, "b", 1)
+	buy_steps(g, u, "c", 1)
+	check(u.mastered_paths == ["a", "b", "c"], "all three masteries are bought")
+	us = u.stats()
+	check(near(us.rate, 9.0) and near(us.ac_damage, 58.0) and near(us.ac_splash, 30.0) and int(us.ms_volley) == 2, "Twin Gatlings 9/s, Autocannon Battery 58 and 30 px, Hellfire Volley")
+	check(u.look_key() == "-1|5|5|5", "the look shows three masteries (%s)" % u.look_key())
+	check(u.block_reason("a") == "Fully upgraded", "a mastered path is done")
+	# Orbit and guns.
+	g.enemies.clear()
+	var e1 = put(g, "grunt", 100.0, 0, 500.0)
+	var far = put(g, "grunt", 300.0, 0, 500.0)
+	var gun = g.place_tower("cas_gunship", spot(g, "cas_gunship", 80))
+	g.designate_orbit(gun, e1.pos)
+	check(gun.aim_point.distance_to(e1.pos) < 0.01, "designating puts the orbit anywhere")
+	var hp: float = e1.hp
+	var fhp: float = far.hp
+	for i in 20:
+		g._update_cas(gun, gun.stats(), 0.05)
+	check(e1.hp < hp and near(far.hp, fhp), "the gatling hits enemies inside the orbit only")
+	check(absf(gun.orbit_angle - 0.5) < 0.01, "the plane circles at 0.5 rad/s")
+	# Guns spread over targets; missiles fly as projectiles.
+	var multi = g.place_tower("cas_gunship", spot(g, "cas_gunship", 100))
+	buy_steps(g, multi, "b", 1)
+	buy_steps(g, multi, "c", 1)
+	g.enemies.clear()
+	var a1 = put(g, "grunt", 100.0, 0, 5000.0)
+	var a2 = put(g, "grunt", 104.0, 0, 5000.0)
+	var a3 = put(g, "grunt", 108.0, 0, 5000.0)
+	g.designate_orbit(multi, a1.pos)
+	g.projectiles.clear()
+	g._update_cas(multi, multi.stats(), 0.05)
+	var missiles: Array = g.projectiles.filter(func(p): return p.kind == "missile")
+	check(missiles.size() == 1 and missiles[0].damage == 150.0 and missiles[0].splash == 45.0, "a missile of 150 with a 45 px blast leaves the plane")
+	var shots: Array = g.events.filter(func(e): return e.type == "cas_shot")
+	check(shots.size() >= 3, "gatling, autocannon and missile all fired (%d)" % shots.size())
+	# Hellfire Volley: every third volley fires two.
+	var hv = g.place_tower("cas_gunship", spot(g, "cas_gunship", 120))
+	hv.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, hv, "c", 5)
+	g.designate_orbit(hv, a1.pos)
+	g.projectiles.clear()
+	var per_volley: Array = []
+	for v in 3:
+		hv.gun_cds.clear()
+		var before: int = g.projectiles.size()
+		g._update_cas(hv, hv.stats(), 0.05)
+		per_volley.append(g.projectiles.size() - before)
+	check(per_volley == [1, 1, 2], "every third volley fires two missiles (%s)" % str(per_volley))
+	# Radar reveals cloaked enemies inside the orbit to every tower.
+	g.enemies.clear()
+	var ghost = put(g, "grunt", 100.0, 0, 500.0)
+	ghost.cloaked = true
+	var rd = g.place_tower("cas_gunship", spot(g, "cas_gunship", 140))
+	g.buy_retrofit(rd, 0)
+	g.designate_orbit(rd, ghost.pos)
+	check(ghost.is_hidden(), "cloaked before the radar")
+	g._update_cas(rd, rd.stats(), 0.05)
+	check(not ghost.is_hidden(), "the radar reveals it")
+	# Priority: air first when asked.
+	g.enemies.clear()
+	var walker = put(g, "grunt", 100.0, 0, 500.0)
+	var flyer = put(g, "bat", 100.0, 0, 500.0)
+	flyer.pos = walker.pos
+	var pr = g.place_tower("cas_gunship", spot(g, "cas_gunship", 160))
+	g.designate_orbit(pr, walker.pos)
+	pr.priority = 1
+	check(g._cas_targets(pr, 90.0, walker.pos)[0] == flyer, "Air priority: flyers first")
+	pr.priority = 2
+	check(g._cas_targets(pr, 90.0, walker.pos)[0] == walker, "Ground priority: walkers first")
+	# An EMP over the orbit silences it.
+	g.enemies.clear()
+	var jam = put(g, "jammer", 100.0, 0, 50.0)
+	var sil = g.place_tower("cas_gunship", spot(g, "cas_gunship", 180))
+	g.designate_orbit(sil, jam.pos + Vector2(20, 0))
+	jam.ability_timer = 0.0
+	g._update_enemy(jam, 0.05)
+	check(sil.disabled > 0.0, "an EMP over the orbit switches the guns off")
+	# Saves keep the orbit point, uncapped upgrades and masteries.
+	var g3 = research_game(["cas_gunship_1", "cas_gunship_2a", "cas_gunship_2b", "cas_gunship_m"], "canyon", 99, "hard")
+	g3.gold = 400000
+	var sv = g3.place_tower("cas_gunship", spot(g3, "cas_gunship", 3))
+	buy_steps(g3, sv, "a", 5)
+	buy_steps(g3, sv, "b", 3)
+	buy_steps(g3, sv, "c", 1)
+	g3.designate_orbit(sv, Vector2(700, 400))
+	var data := SaveCodec.encode(g3)
+	var dec := SaveCodec.decode(JSON.parse_string(JSON.stringify(data)))
+	check(dec.has("game"), "the save decodes (%s)" % dec.get("error", ""))
+	if dec.has("game"):
+		var sv2 = dec.game.tower_at[sv.cell]
+		check(sv2.depth.a == 4 and sv2.depth.b == 3 and sv2.depth.c == 1 and sv2.mastered_paths == ["a"] and sv2.aim_point.distance_to(Vector2(700, 400)) < 0.01, "depths, the mastery and the orbit point are restored (%s %s %s)" % [str(sv2.depth), str(sv2.mastered_paths), str(sv2.aim_point)])
+		check(near(sv2.stats().rate, sv.stats().rate) and near(sv2.stats().ac_damage, sv.stats().ac_damage), "its stats are restored")

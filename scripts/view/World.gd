@@ -19,6 +19,7 @@ const GunTurretArt = preload("res://scripts/view/towers/GunTurretArt.gd")
 const RailgunArt = preload("res://scripts/view/towers/RailgunArt.gd")
 const TeslaTowerArt = preload("res://scripts/view/towers/TeslaTowerArt.gd")
 const DroneBayArt = preload("res://scripts/view/towers/DroneBayArt.gd")
+const CasGunshipArt = preload("res://scripts/view/towers/CasGunshipArt.gd")
 const RocketSalvoArt = preload("res://scripts/view/towers/RocketSalvoArt.gd")
 const AntiAircraftArt = preload("res://scripts/view/towers/AntiAircraftArt.gd")
 const ArtilleryCannonArt = preload("res://scripts/view/towers/ArtilleryCannonArt.gd")
@@ -398,6 +399,20 @@ func _visual(ev: Dictionary) -> void:
 					continue
 				fx.text(p[0] + Vector2(0, -24), "+%d" % int(p[1]), Color(1.0, 0.8, 0.3), 14, 1.4, 30.0)
 				fx.burst(p[0], Color(1.0, 0.8, 0.3), 10, 70.0, 2.0, 0.5)
+		"cas_shot":
+			# The CAS Gunship's guns: the gatling's tracer thickens with its path (gold at the mastery); the autocannon throws a heavy shell
+			# and a blast; missiles fly as their own projectiles.
+			var cs := CasGunshipArt.gat_style(str(ev.look), Draw.ACCENT.cas_gunship)
+			match str(ev.gun):
+				"gat":
+					fx.tracer(ev.from, ev.to, Color(cs.col, 0.9), 0.1, cs.w)
+					if cs.core:
+						fx.tracer(ev.from, ev.to, Color(1, 1, 1, 0.8), 0.07, cs.w * 0.4)
+					fx.flash(ev.to, 4.0, cs.col, 0.05)
+				"ac":
+					fx.tracer(ev.from, ev.to, Color(1.0, 0.82, 0.45, 0.9), 0.14, 2.2)
+					fx.ring(ev.to, 3.0, float(ev.get("radius", 25.0)), Color(1.0, 0.7, 0.3), 0.22, 1.6)
+					fx.burst(ev.to, Color(1.0, 0.7, 0.3), 5, 70.0, 1.6, 0.25)
 		"drone_shot":
 			if str(ev.get("look", "")) != "":
 				# A Drone Bay drone (confirmed art): gun tracers thicken and heat with Power, missiles and the laser have their own looks.
