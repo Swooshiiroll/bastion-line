@@ -433,23 +433,23 @@ Various collections of scrap metal sold at a profit. "One mans toxic waste is an
 |---|---|---|---|---|---|---|
 | 1 | base | Scrapyard | 875 |  | 875 credits; pays 100 credits at each round's clear (× the round's income scale). A 150 px field (used by the Kill and Discount paths). Doesn't attack. | new |
 | 2 | r1 | Second Crusher | 525 |  | +30 income per round. | new |
-| 2 | r2 | Bigger Yard | 260 |  | +30 px to its fields. Its value depends on the paths, so the formula can't price it at stock; proposed at the Salvage Crane's price. | new |
-| 2 | r3 | Salvage Crane | 260 |  | Towers sold within its field refund 15% more. | new |
-| 3 | a | Stamping Press | 525 |  | 130 per round | new |
-| 4 | a | Vault Doors | 1225 |  | 165 per round | new |
-| 5 | a | Credit Mint | 3850 |  | 220 per round | new |
-| 6 | a | Treasury Link | 7000 |  | 270 per round | new |
-| M | a | Reserve Bank | 27440 |  | 320 per round, plus 3% interest on banked credits at each clear (up to 400) | new |
-| 3 | b | Scrap Collector | 345 |  | Enemies destroyed within 140 px pay 15% more | new |
-| 4 | b | Magnet Cranes | 625 |  | +25%; 150 px | new |
-| 5 | b | Sorting Line | 2095 |  | +35%; 170 px | new |
-| 6 | b | Smelter | 5720 |  | +45%; 190 px | new |
-| M | b | Reclamation Plant | 28945 |  | +60%; 210 px; bosses pay double | new |
-| 3 | c | Supply Depot | 190 |  | Towers within 140 px upgrade for 5% less | new |
-| 4 | c | Bulk Orders | 495 |  | 10% off upgrades; 150 px | new |
-| 5 | c | Procurement Office | 2035 |  | 15% off upgrades, 5% off builds; 160 px | new |
-| 6 | c | Freight Rail | 3865 |  | 20% off upgrades; 175 px | new |
-| M | c | Forward Command | 20935 |  | 25% off upgrades, 10% off builds; 190 px; towers in the field sell back for everything spent on them | new |
+| 2 | r2 | Bigger Yard | 260 |  | +30 px to its fields. Its value depends on the paths, so the formula can't price it at stock; proposed at the Weighbridge's price. | new |
+| 2 | r3 | Weighbridge | 260 |  | Towers sold within its field refund 15% more (their scrap is weighed in at the gate). | new |
+| 3 | a | Firebrick Lining | 525 |  | 130 per round | new |
+| 4 | a | Forced Bellows | 1225 |  | 165 per round | new |
+| 5 | a | Blast Furnace | 3850 |  | 220 per round | new |
+| 6 | a | Arc Furnace | 7000 |  | 270 per round | new |
+| M | a | Gold Foundry | 27440 |  | 320 per round, plus 3% interest on banked credits at each clear (up to 400) | new |
+| 3 | b | Tow Hook | 345 |  | Enemies destroyed within 140 px pay 15% more | new |
+| 4 | b | Magnet Crane | 625 |  | +25%; 150 px | new |
+| 5 | b | Hydraulic Shear | 2095 |  | +35%; 170 px | new |
+| 6 | b | Car Crusher | 5720 |  | +45%; 190 px | new |
+| M | b | Breaker's Yard | 28945 |  | +60%; 210 px; bosses pay double | new |
+| 3 | c | Parts Shelves | 190 |  | Towers within 140 px upgrade for 5% less | new |
+| 4 | c | Pallet Racks | 495 |  | 10% off upgrades; 150 px | new |
+| 5 | c | Forklift Bay | 2035 |  | 15% off upgrades, 5% off builds; 160 px | new |
+| 6 | c | Loading Dock | 3865 |  | 20% off upgrades; 175 px | new |
+| M | c | Parts Exchange | 20935 |  | 25% off upgrades, 10% off builds; 190 px; towers in the field sell back for everything spent on them | new |
 
 ## Magneto Tower
 id: magneto_tower · class: Defense · weapon: Field · build: 525 cr · status: new · branches: Pull Strength (stronger slow, heavies too), Field Size, Polarity (strip, then permanent, then repel)

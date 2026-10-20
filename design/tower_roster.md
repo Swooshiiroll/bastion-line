@@ -41,7 +41,7 @@ All 20 towers are designed and confirmed by the owner (2026-10-15). Costs are bu
 | 14 | Radar Tower | Utility | Energy | 575 | Power/Range / Speed/Frequency / Special Targeting | Bigger Dish / Signal Processor / Early Warning |
 | 15 | Cryo Tower | Support | Field | 150 | Slowing / Power/Range / Speed | Coolant Tank / Compressor / Deep Cold |
 | 16 | Shockwave Generator | Assault | Field | 450 | Power/Range / Speed / Effect | Wave Focus / Containment Coils / Reactor Venting |
-| 17 | Scrapyard | Utility | None | 875 | Passive Income / Kill Income / Discounts | Second Crusher / Bigger Yard / Salvage Crane |
+| 17 | Scrapyard | Utility | None | 875 | Passive Income / Kill Income / Discounts | Second Crusher / Bigger Yard / Weighbridge |
 | 18 | Magneto Tower (Claude's proposal) | Defense | Field | 525 | Pull Strength / Field Size / Polarity | Superconducting Coil / Field Stabiliser / Pole Shoes |
 | 19 | Tractor Tower (Claude's proposal) | Defense | Energy | 575 | Pull Distance / Recharge / Grip | Twin Emitter / Longer Hold / Faster Recharge |
 | 20 | Augmentation Tower | Support | None | 650 | Energy Conversion / Critical Hits / Ricochet | Wide Aura / Amplified Bonus / Remote Link |
@@ -1545,10 +1545,13 @@ effects are Claude's proposals, confirmed as the design; the balance probe tunes
 - **Kill income** is a **bonus field**: enemies destroyed inside it pay extra credits.
 - **Discounts** apply to **towers near it** (building and upgrading inside its field).
 - **Several Scrapyards:** **income stacks; fields don't** (overlapping kill fields and discounts use the strongest).
+- **Names (owner, 2026-10-19):** one machine vocabulary. Each step names the machine built into its part: the furnace
+  stack (Passive Income), the junkyard (Kill Income) or the warehouse (Discounts). The earlier names mixed banking words with
+  machinery.
 - **Pricing:** the **non-damage rule** (stock value = build cost) with the **standard multipliers** (×2 to ×32), so
   the masteries are a pure late-game credit sink. The owner chose this over gentler economy multipliers that would let
   upgrades pay back.
-- **The Retrofit is chosen when you buy it**, from three: **Second Crusher**, **Bigger Yard** and **Salvage Crane**.
+- **The Retrofit is chosen when you buy it**, from three: **Second Crusher**, **Bigger Yard** and **Weighbridge** (named Salvage Crane until 2026-10-19).
 
 **Stock (proposed):** 875 credits; pays 100 credits at each round's clear (× the round's income scale). A 150 px field
 (used by the Kill and Discount paths). Doesn't attack.
@@ -1556,38 +1559,38 @@ effects are Claude's proposals, confirmed as the design; the balance probe tunes
 **Retrofit (pick one when buying it):**
 - **Second Crusher, 525:** +30 income per round.
 - **Bigger Yard, 260:** +30 px to its fields. Its value depends on the paths, so the formula can't price
-  it at stock; proposed at the Salvage Crane's price.
-- **Salvage Crane, 260:** towers sold within its field refund 15% more.
+  it at stock; proposed at the Weighbridge's price.
+- **Weighbridge, 260:** towers sold within its field refund 15% more (their scrap is weighed in at the gate).
 
 **Path 1, Passive Income:**
 
 | Step | Name | Cost | Effect (proposed) |
 |---|---|---|---|
-| 1 | Stamping Press | 525 | 130 per round |
-| 2 | Vault Doors | 1,225 | 165 per round |
-| 3 (primary) | Credit Mint | 3,850 | 220 per round |
-| 4 | Treasury Link | 7,000 | 270 per round |
-| Mastery | Reserve Bank | 27,440 | 320 per round, plus 3% interest on banked credits at each clear (up to 400) |
+| 1 | Firebrick Lining | 525 | 130 per round |
+| 2 | Forced Bellows | 1,225 | 165 per round |
+| 3 (primary) | Blast Furnace | 3,850 | 220 per round |
+| 4 | Arc Furnace | 7,000 | 270 per round |
+| Mastery | Gold Foundry | 27,440 | 320 per round, plus 3% interest on banked credits at each clear (up to 400) |
 
 **Path 2, Kill Income (bonus field):**
 
 | Step | Name | Cost | Effect (proposed) |
 |---|---|---|---|
-| 1 | Scrap Collector | 345 | Enemies destroyed within 140 px pay 15% more |
-| 2 | Magnet Cranes | 625 | +25%; 150 px |
-| 3 (primary) | Sorting Line | 2,095 | +35%; 170 px |
-| 4 | Smelter | 5,720 | +45%; 190 px |
-| Mastery | Reclamation Plant | 28,945 | +60%; 210 px; bosses pay double |
+| 1 | Tow Hook | 345 | Enemies destroyed within 140 px pay 15% more |
+| 2 | Magnet Crane | 625 | +25%; 150 px |
+| 3 (primary) | Hydraulic Shear | 2,095 | +35%; 170 px |
+| 4 | Car Crusher | 5,720 | +45%; 190 px |
+| Mastery | Breaker's Yard | 28,945 | +60%; 210 px; bosses pay double |
 
 **Path 3, Discounts (towers near it):**
 
 | Step | Name | Cost | Effect (proposed) |
 |---|---|---|---|
-| 1 | Supply Depot | 190 | Towers within 140 px upgrade for 5% less |
-| 2 | Bulk Orders | 495 | 10% off upgrades; 150 px |
-| 3 (primary) | Procurement Office | 2,035 | 15% off upgrades, 5% off builds; 160 px |
-| 4 | Freight Rail | 3,865 | 20% off upgrades; 175 px |
-| Mastery | Forward Command | 20,935 | 25% off upgrades, 10% off builds; 190 px; towers in the field sell back for everything spent on them |
+| 1 | Parts Shelves | 190 | Towers within 140 px upgrade for 5% less |
+| 2 | Pallet Racks | 495 | 10% off upgrades; 150 px |
+| 3 (primary) | Forklift Bay | 2,035 | 15% off upgrades, 5% off builds; 160 px |
+| 4 | Loading Dock | 3,865 | 20% off upgrades; 175 px |
+| Mastery | Parts Exchange | 20,935 | 25% off upgrades, 10% off builds; 190 px; towers in the field sell back for everything spent on them |
 
 **Combinations (primary + secondary capped at 2):**
 - **Passive + 2 Kill:** steady income plus a 25% kill bonus.
@@ -1602,11 +1605,14 @@ effects are Claude's proposals, confirmed as the design; the balance probe tunes
 - **Leaked enemies** pay nothing.
 - **The bot:** keeps today's economy rules for when to buy Scrapyards.
 
-**Look (for the art phase):** a 2×2 yard with a crusher, a crane and scrap piles; credit sparks at round clear. The
-Retrofit choice shows (a second crusher, a wider fence, or a salvage crane). Per path:
-- **Passive:** a mint press.
-- **Kill:** magnet cranes reaching over the lane.
-- **Discount:** a depot with crates.
+**Look (for the art phase, confirmed 2026-10-19):** a 2×2 production line of three parts. A grab crane in the junkyard loads
+scrap onto a belt that drops it into a tall furnace stack, and an ingot belt runs on to a warehouse. The stack flares and
+vents coins at each round's clear. Each path rebuilds one part around the machine its step names:
+- **Passive:** the furnace stack.
+- **Kill:** the junkyard.
+- **Discount:** the warehouse.
+
+The Retrofit choice shows (a second crusher, a bigger yard, or a weighbridge). See `design/tower_art.md`.
 
 ## 18. Magneto Tower
 
