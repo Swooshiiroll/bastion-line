@@ -55,6 +55,10 @@ with the owner before writing any code.
    - Columns: Backlog → Next → In progress → In review → Done.
    - Move the issue as work moves: `gh project item-edit`, or drag it on the board.
 2. **Branch:** `feat/<issue>-slug`, `fix/…`, `perf/…`, `balance/…`, `design/…` or `chore/…`.
+   - **The 4.0.0 line (issue #59):** work goes on `v4-dev.N`, one branch per chunk of work: `v4-dev.1` holds the 20 reworked towers,
+     `v4-dev.2` is cut from it, and so on. Each iteration is a PR into the previous one (merged when the owner says so, then
+     `tools/dev.sh lx` for the playtest build). When the owner is satisfied, the last one goes into `feat/59-tower-rework` for final
+     review, then the final swap, the release steps below and `main`. Nothing from the line goes to `main` before that.
 3. **Work in small commits.**
    - **Unit tests:** every behaviour change adds or updates unit tests in `tests/TestRunner.gd`.
    - **Before pushing:** run `tools/dev.sh check` and `tools/dev.sh test`.
