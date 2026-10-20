@@ -391,7 +391,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 15 | Cryo Tower | `design/tower_art_p2_15_cryo.html` | **Confirmed** (owner, 2026-10-19: "Finished"; Deep Cold C Frost Collar) |
 | 16 | Shockwave Generator | `design/tower_art_p2_16_shock.html` | **Confirmed** (owner, 2026-10-19: "Finished") |
-| 17 | Scrapyard | `design/tower_art_p2_17_scrap.html` | Base **confirmed** (owner, 2026-10-19: A Armoured Vault Depot, B Sparks and Sale; base page `design/tower_art_p17_scrapyard.html`). Second pass round 1: pick one option per stage and Retrofit |
+| 17 | Scrapyard | `design/tower_art_p17_scrapyard.html` | **Restarted again** (owner, 2026-10-19). New base-look page (three parts: furnace stack, junkyard, warehouse; three layouts, three animations): pick a look and an animation |
 
 ### Gun Turret (second pass)
 
@@ -1147,29 +1147,27 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
 
 **Round 9 (owner note):** "Make the elasticity stronger, so the bands reciprocate faster". The Path 3 band now opens in under 0.2 s and then swings in and out about 2.3 times faster (a spring of about 3.3 swings a second instead of 1.4) with less than half the damping, so it reciprocates several times before settling; the expansion (3 to 14 px) and the bend are stronger too.
 
-### Scrapyard (restart: base look first)
+### Scrapyard (third restart: a tower of three parts)
 
-**History.** The Scrapyard second-pass page was built twice and rejected twice: the confirmed Magnet Yard base look with its first set of upgrade designs, then a from-scratch Smelting Works with all-new paths (owner: "didn't like the overall design"). The owner then said: "Start over with the Scrapyard in its entirety. Back to the drawing board." Both builds are deleted (`data_scrap_base.js`, `data_p2_scrap.js`, the old p2 page; git keeps them). The `sBuild`/`sCard` preview-scale hook in `pass2_engine.js` stays, since the 2x2 yard needs it for the second pass.
+**History.** Three Scrapyard designs have been rejected: (1) the Magnet Yard base with its first upgrade designs; (2) a from-scratch Smelting Works ("didn't like the overall design"); (3) the Armoured Vault Depot, whose base look was confirmed (with the Sparks and Sale animation) before its second-pass round 1, after which the owner said "Scrap the scrapyard design and start all over again". Its files (`data_scrap_looks.js`, `data_p2_scrap.js`, the p2 page) are deleted; git keeps them. The `sBuild`/`sCard` preview-scale hook in `pass2_engine.js` stays for the 2x2 second pass.
 
-**Restart process (owner's answers):** base looks first (three new looks and an animation to pick, as in the first pass); the upgrades and Retrofits are designed only after a look is confirmed. Directions the owner chose: an **armoured vault depot**, a **wreck breaker's yard** and a **smeltworks** (a fresh, simpler execution than the first one).
+**What went wrong (owner):** the upgrades were too subtle, and the upgrade names mix themes (banking words such as Vault Doors, Treasury Link and Reserve Bank next to machinery such as Smelter and Freight Rail).
 
-**The page** (`design/tower_art_p17_scrapyard.html`, from `tools/tower_art/data_scrap_looks.js`) shows three new looks, each simple and bold with one clear focal element:
-- **A. Armoured Vault Depot:** thick armoured walls with corner bunkers and a sliding gate, a searchlight sweeping the yard, one huge round vault door (the wheel spins at each payout), a weighbridge and crushed-metal bales.
-- **B. Wreck Breaker's Yard:** a half-stripped tank hulk (turret gone, plates cut away) in a hazard-lined yard, a gantry with a cutting torch spraying sparks over it, a drone hull and a pile of stripped plates.
-- **C. Smeltworks:** one big smelter with a glowing crucible mouth and a smoking chimney; a ladle arm swings out and pours into a stack of gold ingots at each payout; nothing else.
-- **Animations (pick one):** Round Payout (a coin spray with a floating +100), Sparks and Sale (ambient sparks, a credit-stack flash at the payout), Wreck Collector (also shows the kill bonus: a wrecked enemy's scrap flies into the yard as a coin).
+**The new brief (owner, 2026-10-19):**
+- **Everything restarts, base look included;** the 2x2 footprint stays.
+- **The tower is three parts:** a recycler/smelter, a junkyard and a warehouse.
+- **Each path builds up one part:** Passive Income the smelter (it melts scrap into ingots sold each round), Kill Income the junkyard (it hauls in wrecks from kills), Discounts the warehouse (it sells salvaged parts cheap to nearby towers). Every step rebuilds its own part, visibly.
+- **The smelter is a tall furnace stack** seen from above: the tallest part and the focal point, with a glowing core and intake chutes.
+- **The three base looks** are the same three parts in three layouts; three animations are offered separately.
+- **Order:** the base look first. Then Claude proposes one scrap-business vocabulary for all 15 upgrade names and the 3 Retrofits (each naming the part its step rebuilds; the effects and numbers stay as confirmed) for the owner to confirm in `design/upgrade_trees_rework.md` and `design/tower_roster.md`; then the second pass.
 
-**Confirmed (owner, 2026-10-19, "Finished"):** look A Armoured Vault Depot, animation B Sparks and Sale.
-
-### Scrapyard (second pass on the Armoured Vault Depot)
-
-Page `design/tower_art_p2_17_scrap.html` (data `tools/tower_art/data_p2_scrap.js` on the base `data_scrap_looks.js`; the 2x2 previews are smaller so the whole yard fits). Simple and bold: every step rebuilds one big part in place; the agent runs the real rules (the payout, the kill bonus, the discount field).
-- **Path 1, Passive Income (the vault in the middle):** a layered vault door (more rings, bolts and locking bars, an eight-spoke wheel from step 3), a mint hall (a small door and two, three, then four stamping presses that pound at each payout) or a treasure dome (more seams, a banded rim); gold at the Reserve Bank, with a +3% interest tag on each payout.
-- **Path 2, Kill Income (the intake over the weighbridge):** a magnet gantry (a bigger magnet, then twin magnets), sorting belts (one to four) or a compactor line (one to three compactors pressing bales); the orange kill ring widens; wrecked enemies in it send a coin to the vault with the bonus amount; gold at the Reclamation Plant.
-- **Path 3, Discounts (the four corner bunkers):** supply bunkers (more crates), radio masts (a turning dish, more signal arcs) or freight hoists (a swinging hook); the blue discount ring widens and shows the percentage off; gold at Forward Command.
-- **Retrofits:** Second Crusher (jaw crusher, roller crusher or hammer mill, top-left inside the wall), Bigger Yard (a second armoured wall, a spiked fence or concrete barriers), Salvage Crane (a gantry, a jib crane or a crane truck above the top wall).
-- **Carpet-rule overlaps (kept, stacking):** the Second Crusher's +30 income stacks with the Passive Income steps; the Bigger Yard's +30 px stacks with both field radii.
+**The page** (`design/tower_art_p17_scrapyard.html`, from `tools/tower_art/data_scrap_parts.js`):
+- **A. Central Stack:** the furnace stack in the middle, fed by two chutes from the junkyard that wraps the left and bottom edges (heaps, a tank hulk, a grab crane); a long warehouse down the right side, its roll-up doors facing the stack.
+- **B. Production Line:** left to right, the junkyard feeds a conveyor up into the stack, and a short ingot belt runs from the stack into a tall warehouse on the right.
+- **C. Yard Corner:** the warehouse along the top edge, doors facing down; the stack in the top-left corner, fed by chutes from the open junkyard that fills the bottom-right (a big grab crane).
+- **Animations (pick one):** Scrap Flow (scrap arcs from the junkyard into the stack and ingots slide to the warehouse; at the payout the doors roll up and a crate ships out with +100), Melt and Pour (embers rise from the stack; at the payout its core flares and a fountain of coins vents with +100), Wreck to Coin (also shows the kill bonus: a wrecked enemy's hulk flies into the junkyard and a +5 coin jumps out of the stack; +100 over the warehouse at the payout).
+- In every look the stack flares and the warehouse doors roll up at each payout.
 
 ## Open questions
 
-1. **Second pass, Scrapyard** (tower 17, round 1, on the confirmed Armoured Vault Depot): pick one option per stage and Retrofit. Then towers 18-20 (next: Magneto Tower).
+1. **Scrapyard base look, third restart** (tower 17): pick one of the three layouts and one animation, then say "Scrapyard base finished". Then the new upgrade names, the second pass, and towers 18-20 (next: Magneto Tower).
