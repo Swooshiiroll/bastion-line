@@ -1,0 +1,1231 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tower Art: Radar Tower paths and Retrofits</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    color-scheme: dark;
+    --ground: #06090e; --field: #0b1016; --panel: #08111a; --panel-2: #0d1a25; --rule: #1d3a4b; --wire: #2a5a70;
+    --text: #dcedf7; --dim: #86a0b1; --faint: #4f6a7b; --accent: #4de1ff; --gold: #ffc85a;
+    --display: "Chakra Petch", "Bahnschrift", "Segoe UI", sans-serif;
+    --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--text); font: 14px/1.5 var(--body); padding: 28px 16px 48px; }
+  .wrap { max-width: 1340px; margin: 0 auto; display: grid; gap: 22px; }
+  .eyebrow { font: 600 12px var(--display); letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
+  h1 { font: 700 30px/1.1 var(--display); margin: 4px 0 0; }
+  h2 { font: 700 22px/1.2 var(--display); margin: 0; letter-spacing: .03em; }
+  h3 { font: 600 13px var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--dim); margin: 6px 0 0; }
+  p.note, .desc { color: var(--dim); }
+  p.note { margin: 6px 0 0; max-width: 95ch; }
+  ul.rules { margin: 8px 0 0; padding-left: 18px; color: var(--dim); max-width: 100ch; }
+  ul.rules b, p.note b { color: var(--text); font-weight: 500; }
+  code { font: 12px var(--mono); color: var(--accent); }
+  .enemy { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px 2px 12px 2px; padding: 12px 14px 14px; display: grid; gap: 8px; }
+  .enemy-head { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+  .num { font: 700 22px var(--display); color: var(--gold); }
+  .tags { font: 600 11px var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; }
+  .panel { border: 1px solid var(--rule); border-radius: 8px; padding: 8px; display: grid; gap: 6px; align-content: start; background: #071019; }
+  .meta { display: flex; gap: 8px; align-items: center; }
+  .key { font: 700 11px var(--display); color: #031018; background: var(--accent); border-radius: 4px; padding: 0 6px; }
+  .panel .desc { font-size: 12.5px; margin: 0; }
+  canvas { display: block; background: var(--field); border: 1px solid var(--rule); border-radius: 4px; max-width: 100%; height: auto; }
+  button { font: 600 12px var(--display); letter-spacing: .06em; color: var(--text); background: var(--panel-2); border: 1px solid var(--wire); border-radius: 6px; padding: 6px 11px; cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  button.pick.on { background: var(--gold); color: #1a1000; border-color: var(--gold); }
+  label.notes { display: grid; gap: 3px; font: 600 11px var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+  label.notes textarea { width: 100%; min-height: 40px; background: #071019; color: var(--text); border: 1px solid var(--rule); border-radius: 6px; font: 13px var(--body); padding: 6px 8px; resize: vertical; text-transform: none; letter-spacing: 0; }
+  .combo { display: grid; gap: 6px; border: 1px solid var(--gold); border-radius: 8px; padding: 8px; background: rgba(255,200,90,.04); justify-items: start; }
+  .combo-head { font: 600 12px var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
+  .out { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px 2px 12px 2px; padding: 12px 14px; display: grid; gap: 8px; }
+  #summary { width: 100%; min-height: 100px; background: #071019; color: var(--text); border: 1px solid var(--rule); border-radius: 6px; font: 12px var(--mono); padding: 8px; }
+  .stage { display: grid; gap: 6px; border-top: 1px solid var(--rule); padding-top: 8px; }
+  .stage-head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+  .lvl { font: 700 13px var(--display); color: #031018; background: var(--gold); border-radius: 4px; padding: 0 7px; }
+  .cost { font: 500 12px var(--mono); color: var(--gold); }
+  .eff { color: var(--dim); font-size: 13px; }
+  .grid3 { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; }
+  .build { display: grid; gap: 10px; grid-template-columns: minmax(0, 560px) minmax(220px, 1fr); align-items: start; border: 1px solid var(--gold); border-radius: 8px; padding: 10px; background: rgba(255,200,90,.04); }
+  .ctrls { display: grid; gap: 10px; }
+  .ctrl { display: grid; gap: 3px; }
+  .ctrl label { font: 600 12px var(--display); letter-spacing: .08em; color: var(--text); }
+  .ctrl input[type=range] { width: 100%; accent-color: var(--gold); }
+  .ctrl select { background: #071019; color: var(--text); border: 1px solid var(--rule); border-radius: 6px; padding: 4px 6px; font: 13px var(--body); }
+  .role { font: 600 11px var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+  @media (max-width: 860px) { .build { grid-template-columns: 1fr; } }
+  @media (max-width: 760px) { h1 { font-size: 24px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Bastion Line · Tower rework · Tower art · second pass · tower 14 of 20 · round 15</div>
+    <h1>Tower art: Radar Tower paths and Retrofits</h1>
+    <p class="note">Second pass for one tower: <b>every upgrade step and mastery</b> on each path, and each <b>Retrofit</b>, adds or changes a detail on the confirmed model. Each card shows the model with that path's earlier steps (your picks, or option A until you pick) plus the candidate. Pick one of three per step, add notes per path, then <b>Copy picks and notes</b>.</p>
+    <ul class="rules">
+      <li><b>Details stack:</b> the primary path's steps and the secondary's (capped at 2) both show and overlap, as in the build preview.</li>
+      <li><b>Build preview:</b> set each path's level (M is the mastery) and a Retrofit; it enforces the primary/secondary rule (two paths at most; once one reaches 3, the other stops at 2).</li>
+      <li><b>Masteries</b> get gold trim, as today's tier-4 towers do.</li>
+      <li>Same style as the base pass: dark gunmetal lit from the upper left, the tower's accent colour, top-down.</li>
+    </ul>
+  </header>
+  <div id="towers" class="wrap"></div>
+  <section class="out">
+    <h2>Picks and notes</h2>
+    <textarea id="summary" readonly></textarea>
+    <button id="copy">Copy picks and notes</button>
+    <button id="clear">Clear this page</button>
+  </section>
+</div>
+<script>
+// ---- Colours and vectors (mirrors Draw.gd) -------------------------------------------------
+const OUTLINE = [0.03, 0.04, 0.06, 0.95], METAL_D = [0.10, 0.115, 0.14, 1], METAL = [0.18, 0.20, 0.24, 1], METAL_L = [0.30, 0.33, 0.38, 1];
+const LIGHT = [-0.6, -0.8];
+const WHITE = [1, 1, 1, 1];
+const A = (c, a) => [c[0], c[1], c[2], a];
+const dk = (c, k) => [c[0] * (1 - k), c[1] * (1 - k), c[2] * (1 - k), c[3] ?? 1];
+const lt = (c, k) => [c[0] + (1 - c[0]) * k, c[1] + (1 - c[1]) * k, c[2] + (1 - c[2]) * k, c[3] ?? 1];
+const mix = (a, b, k) => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k, (a[3] ?? 1) + ((b[3] ?? 1) - (a[3] ?? 1)) * k];
+const css = c => `rgba(${Math.round(c[0] * 255)},${Math.round(c[1] * 255)},${Math.round(c[2] * 255)},${c[3] ?? 1})`;
+const add = (a, b) => [a[0] + b[0], a[1] + b[1]];
+const sub = (a, b) => [a[0] - b[0], a[1] - b[1]];
+const mul = (a, k) => [a[0] * k, a[1] * k];
+const fa = a => [Math.cos(a), Math.sin(a)];
+const orth = v => [v[1], -v[0]];
+const dot = (a, b) => a[0] * b[0] + a[1] * b[1];
+const norm = v => { const l = Math.hypot(v[0], v[1]) || 1; return [v[0] / l, v[1] / l]; };
+const rot = (p, r) => [p[0] * Math.cos(r) - p[1] * Math.sin(r), p[0] * Math.sin(r) + p[1] * Math.cos(r)];
+const TAU = Math.PI * 2;
+const clamp01 = x => Math.max(0, Math.min(1, x));
+const ease = x => { x = clamp01(x); return x * x * (3 - 2 * x); };
+const fmod = (a, b) => ((a % b) + b) % b;
+
+// ---- Drawing primitives (one-to-one with Draw.gd) ------------------------------------------
+let X = null; // current 2D context
+function disc(c, r, col) { if (r <= 0) return; X.fillStyle = css(col); X.beginPath(); X.arc(c[0], c[1], r, 0, TAU); X.fill(); }
+function arc(c, r, a0, a1, col, w) { X.strokeStyle = css(col); X.lineWidth = w > 0 ? w : 1; X.beginPath(); X.arc(c[0], c[1], Math.max(0.01, r), a0, a1); X.stroke(); }
+function ring(c, r, col, w = 1.5) { arc(c, r, 0, TAU, col, w); }
+function line(a, b, col, w = 1) { X.strokeStyle = css(col); X.lineWidth = w > 0 ? w : 1; X.beginPath(); X.moveTo(a[0], a[1]); X.lineTo(b[0], b[1]); X.stroke(); }
+function polyline(pts, col, w = 1) { if (pts.length < 2) return; X.strokeStyle = css(col); X.lineWidth = w > 0 ? w : 1; X.beginPath(); X.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) X.lineTo(pts[i][0], pts[i][1]); X.stroke(); }
+function poly(pts, col) { X.fillStyle = css(col); X.beginPath(); X.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) X.lineTo(pts[i][0], pts[i][1]); X.closePath(); X.fill(); }
+function xform(c, pts, r, s) { return pts.map(p => add(c, rot(mul(p, s), r))); }
+function fill(c, pts, col, r = 0, s = 1) { poly(xform(c, pts, r, s), col); }
+function outline(c, pts, col, w, r = 0, s = 1) { const p = xform(c, pts, r, s); p.push(p[0]); polyline(p, col, w); }
+function solid(c, pts, col, r = 0, s = 1, lw = 1.2) { fill(c, pts, col, r, s); outline(c, pts, OUTLINE, lw, r, s); }
+function ellipse(c, rx, ry, col) { X.fillStyle = css(col); X.beginPath(); X.ellipse(c[0], c[1], Math.max(0.01, rx), Math.max(0.01, ry), 0, 0, TAU); X.fill(); }
+function rect(x, y, w, h, col) { X.fillStyle = css(col); X.fillRect(x, y, w, h); }
+function ngon(n, r, ph = 0) { const o = []; for (let i = 0; i < n; i++) { const a = ph + TAU * i / n; o.push([Math.cos(a) * r, Math.sin(a) * r]); } return o; }
+function rectPts(hw, hh) { return [[-hw, -hh], [hw, -hh], [hw, hh], [-hw, hh]]; }
+function glowDot(c, r, col) { disc(c, r * 2.2, A(col, 0.18 * (col[3] ?? 1))); disc(c, r * 1.4, A(col, 0.35 * (col[3] ?? 1))); disc(c, r, col); disc(c, r * 0.45, [1, 1, 1, 0.9 * (col[3] ?? 1)]); }
+function arcSegments(c, r, count, gap, rt, col, w) { const span = TAU / count; for (let i = 0; i < count; i++) { const a0 = rt + span * i + gap * 0.5; arc(c, r, a0, a0 + span - gap, col, w); } }
+function orb(p, r, col) {
+  disc(p, r + 1.1, OUTLINE); disc(p, r, dk(col, 0.3)); disc(add(p, mul(LIGHT, r * 0.12)), r * 0.8, col);
+  arc(p, r * 0.72, Math.PI * 1.05, Math.PI * 1.6, lt(col, 0.35), Math.max(0.8, r * 0.16));
+  disc(add(p, mul(LIGHT, r * 0.45)), Math.max(0.6, r * 0.13), [1, 1, 1, 0.55]);
+}
+function plate(c, pts, col, r = 0, s = 1, lw = 1.2) {
+  const p = xform(c, pts, r, s);
+  poly(p, dk(col, 0.22));
+  let ce = [0, 0]; for (const q of p) ce = add(ce, q); ce = mul(ce, 1 / p.length);
+  poly(p.map(q => add(ce, mul(sub(q, ce), 0.8))), col);
+  for (let i = 0; i < p.length; i++) {
+    const a = p[i], b = p[(i + 1) % p.length];
+    const m = norm(sub(mul(add(a, b), 0.5), ce));
+    const d = dot(m, LIGHT);
+    const a1 = add(a, mul(sub(ce, a), 0.1)), b1 = add(b, mul(sub(ce, b), 0.1));
+    if (d > 0.15) line(a1, b1, lt(col, 0.45), Math.max(0.8, lw * 0.8));
+    else if (d < -0.15) line(a1, b1, dk(col, 0.5), Math.max(0.8, lw * 0.8));
+  }
+  const cl = p.slice(); cl.push(p[0]); polyline(cl, OUTLINE, lw);
+}
+function rivets(c, pts, r, s, inset = 0.72, rr = 0.9) { for (const q of xform(c, pts, r, s)) { const p = add(c, mul(sub(q, c), inset)); disc(p, rr + 0.3, OUTLINE); disc(p, rr, lt(METAL_L, 0.15)); } }
+function bar(a, b, w, col) {
+  const d = norm(sub(b, a)); let n = orth(d); if (dot(n, LIGHT) < 0) n = mul(n, -1);
+  line(a, b, OUTLINE, w + 1.6); line(a, b, dk(col, 0.25), w);
+  line(add(a, mul(n, w * 0.18)), add(b, mul(n, w * 0.18)), col, w * 0.55);
+  line(add(a, mul(n, w * 0.3)), add(b, mul(n, w * 0.3)), lt(col, 0.4), Math.max(0.6, w * 0.16));
+}
+function strip(a, b, w, col) { line(a, b, A(col, 0.25 * (col[3] ?? 1)), w * 2.6); line(a, b, col, w); line(a, b, [1, 1, 1, 0.6 * (col[3] ?? 1)], Math.max(0.5, w * 0.35)); }
+function oval(c, rx, ry, r, col, ow = 0) {
+  const pts = []; for (let i = 0; i < 20; i++) { const a = TAU * i / 20; pts.push(add(c, rot([Math.cos(a) * rx, Math.sin(a) * ry], r))); }
+  if (ow > 0) poly(pts.map(p => add(c, mul(sub(p, c), 1 + ow / Math.max(rx, ry)))), OUTLINE);
+  poly(pts, col);
+}
+function shadedOval(c, rx, ry, r, col) {
+  const m = Math.min(rx, ry);
+  oval(c, rx, ry, r, dk(col, 0.3), 1.3); oval(add(c, mul(LIGHT, m * 0.12)), rx * 0.8, ry * 0.78, r, col);
+  disc(add(c, mul(LIGHT, m * 0.5)), Math.max(0.6, m * 0.14), [1, 1, 1, 0.45]);
+}
+function limb(pts, w, col) { polyline(pts, OUTLINE, w + 1.4); polyline(pts, col, w); for (let i = 1; i < pts.length - 1; i++) { disc(pts[i], w * 0.75 + 0.4, OUTLINE); disc(pts[i], w * 0.75, lt(col, 0.25)); } }
+
+// ---- Palettes (existing from Draw.gd ENEMY_BODY / ENEMY_COLOR; new ones are drafts) ----------
+const PAL = {
+  grunt: [[0.40, 0.42, 0.48, 1], [1.00, 0.28, 0.22, 1]], runner: [[0.30, 0.30, 0.32, 1], [1.00, 0.80, 0.20, 1]],
+  brute: [[0.40, 0.37, 0.33, 1], [1.00, 0.55, 0.15, 1]], swarmling: [[0.12, 0.30, 0.16, 1], [0.40, 1.00, 0.50, 1]],
+  bat: [[0.30, 0.32, 0.38, 1], [1.00, 0.35, 0.25, 1]], phantom: [[0.16, 0.20, 0.26, 1], [0.55, 0.95, 1.00, 1]],
+  aegis: [[0.30, 0.36, 0.46, 1], [0.40, 0.70, 1.00, 1]], hydra: [[0.36, 0.30, 0.22, 1], [1.00, 0.65, 0.25, 1]],
+  jammer: [[0.26, 0.28, 0.24, 1], [0.90, 1.00, 0.30, 1]], locust: [[0.30, 0.36, 0.22, 1], [0.75, 1.00, 0.35, 1]],
+  gunship: [[0.30, 0.33, 0.30, 1], [1.00, 0.45, 0.30, 1]], burrower: [[0.40, 0.33, 0.24, 1], [1.00, 0.70, 0.35, 1]],
+  stalker: [[0.22, 0.20, 0.30, 1], [0.75, 0.55, 1.00, 1]], rampart: [[0.36, 0.34, 0.30, 1], [1.00, 0.45, 0.35, 1]],
+  // new (draft)
+  needle: [[0.22, 0.24, 0.28, 1], [0.94, 0.95, 0.97, 1]], fury: [[0.25, 0.17, 0.24, 1], [1.00, 0.25, 0.75, 1]],
+  shrike: [[0.34, 0.36, 0.40, 1], [0.20, 0.90, 0.80, 1]], titan: [[0.28, 0.29, 0.32, 1], [1.00, 0.45, 0.10, 1]],
+  siphon: [[0.26, 0.28, 0.24, 1], [0.90, 1.00, 0.30, 1]], blackout: [[0.24, 0.26, 0.22, 1], [0.95, 1.00, 0.45, 1]],
+  capacitor: [[0.22, 0.24, 0.22, 1], [0.85, 1.00, 0.35, 1]], shifter: [[0.27, 0.25, 0.20, 1], [1.00, 0.88, 0.55, 1]],
+  wraith: [[0.12, 0.11, 0.24, 1], [0.86, 0.88, 1.00, 1]], masq: [[0.30, 0.20, 0.32, 1], [1.00, 0.40, 0.55, 1]],
+  decoy: [[0.30, 0.31, 0.33, 1], [1.00, 0.75, 0.30, 1]], mirage: [[0.20, 0.24, 0.30, 1], [0.80, 0.70, 1.00, 1]],
+};
+const FLYERS = new Set(["bat", "locust", "gunship", "shrike"]);
+const SELF_SHADOW = new Set(["siphon"]); // hovers: draws its own offset shadow
+let TELL = "dots";
+
+// ---- Existing enemies, ported from Draw.enemy ------------------------------------------------
+const DRAW = {};
+DRAW.grunt = (c, f, n, ang, rr, t, b, g) => {
+  disc(c, rr * 1.2, A(g, 0.07));
+  for (const side of [-1, 1]) { const pod = add(c, mul(n, side * rr * 0.95)); plate(pod, rectPts(0.5, 0.24), lt(METAL_D, 0.1), ang, rr, 1.0); strip(sub(sub(pod, mul(f, rr * 0.55)), mul(n, rr * 0.12)), add(sub(pod, mul(f, rr * 0.55)), mul(n, rr * 0.12)), 0.8, [0.4, 0.8, 1.0, 1]); }
+  bar(add(c, mul(f, rr * 0.3)), add(c, mul(f, rr * 1.3)), 2.0, METAL_L); disc(add(c, mul(f, rr * 1.3)), 1.1, [0.05, 0.05, 0.05, 1]);
+  orb(c, rr * 0.86, b); arcSegments(c, rr * 0.64, 6, 0.35, ang, dk(b, 0.35), 1.4);
+  const e = add(c, mul(f, rr * 0.12)); disc(e, rr * 0.4, OUTLINE); disc(e, rr * 0.33, [0.15, 0.03, 0.03, 1]); glowDot(e, rr * 0.2, g); disc(add(e, mul(LIGHT, rr * 0.15)), rr * 0.07, [1, 1, 1, 0.8]);
+};
+DRAW.runner = (c, f, n, ang, rr, t, b, g) => {
+  for (let i = 0; i < 3; i++) for (const side of [-1, 1]) {
+    const ph = t * 20 + i * 2.1 + (side > 0 ? Math.PI : 0);
+    const root = add(add(c, mul(f, (1 - i) * rr * 0.35)), mul(n, side * rr * 0.28));
+    const knee = add(add(root, mul(n, side * rr * 0.7)), mul(f, ((1 - i) * 0.35 + 0.22 * Math.sin(ph)) * rr));
+    const foot = add(add(knee, mul(n, side * rr * 0.3)), mul(f, (1 - i) * 0.45 * rr));
+    limb([root, knee, foot], 1.0, METAL_L);
+  }
+  shadedOval(sub(c, mul(f, rr * 0.35)), rr * 0.56, rr * 0.43, ang, b);
+  for (let k = 0; k < 2; k++) { const sp = sub(c, mul(f, rr * (0.2 + 0.25 * k))); line(sub(sp, mul(n, rr * 0.35)), add(sp, mul(n, rr * 0.35)), [0, 0, 0, 0.45], 1.0); }
+  strip(sub(c, mul(f, rr * 0.65)), sub(c, mul(f, rr * 0.1)), 0.8, g);
+  orb(add(c, mul(f, rr * 0.35)), rr * 0.35, lt(b, 0.15));
+  for (const side of [-1, 1]) { line(add(add(c, mul(f, rr * 0.6)), mul(n, side * rr * 0.12)), add(add(c, mul(f, rr * 0.85)), mul(n, side * rr * 0.04)), METAL_L, 1.0); glowDot(add(add(c, mul(f, rr * 0.5)), mul(n, side * rr * 0.14)), rr * 0.08, g); }
+};
+DRAW.brute = (c, f, n, ang, rr, t, b, g) => {
+  for (const side of [-1, 1]) {
+    const step = Math.sin(t * 5 + (side > 0 ? Math.PI : 0)) * rr * 0.35;
+    const hip = add(c, mul(n, side * rr * 0.45)), knee = add(add(hip, mul(n, side * rr * 0.2)), mul(f, step * 0.5)), foot = add(add(hip, mul(n, side * rr * 0.15)), mul(f, step));
+    limb([hip, knee, foot], 3.0, lt(METAL_D, 0.1)); plate(foot, rectPts(0.32, 0.2), METAL_L, ang, rr, 1.0);
+  }
+  const hull = ngon(6, 1.0); plate(c, hull, b, ang, rr * 0.84, 1.6); rivets(c, hull, ang, rr * 0.84, 0.78, 0.6);
+  fill(c, rectPts(0.3, 0.42), dk(b, 0.15), ang, rr);
+  for (const side of [-1, 1]) { const sh = add(c, mul(n, side * rr * 0.78)); plate(sh, rectPts(0.34, 0.3), METAL_L, ang, rr, 1.2); bar(add(sh, mul(f, rr * 0.2)), add(sh, mul(f, rr * 1.15)), 2.4, METAL_L); disc(add(sh, mul(f, rr * 1.15)), 1.4, [0.05, 0.05, 0.05, 1]); disc(add(sh, mul(f, rr * 1.15)), 0.8, A(g, 0.9)); }
+  const v = add(c, mul(f, rr * 0.42)); strip(sub(v, mul(n, rr * 0.28)), add(v, mul(n, rr * 0.28)), 1.6, g);
+};
+DRAW.swarmling = (c, f, n, ang, rr, t, b, g) => {
+  disc(c, rr * 1.7, A(g, 0.13));
+  for (let k = 0; k < 4; k++) { const p = add(c, mul(fa(t * 7 + TAU * k / 4), rr * 0.78)); solid(p, [[0.5, 0], [0, 0.35], [-0.5, 0], [0, -0.35]], lt(b, 0.35), t * 7, rr, 0.8); disc(p, rr * 0.11, g); }
+  orb(c, rr * 0.34, lt(b, 0.2)); glowDot(c, rr * 0.18, g);
+};
+DRAW.bat = (c, f, n, ang, rr, t, b, g) => {
+  ellipse(add(c, [0, rr * 2.4]), rr * 1.3, rr * 0.4, [0, 0, 0, 0.2]);
+  for (let k = 0; k < 4; k++) {
+    const a = ang + Math.PI / 4 + TAU * k / 4, tip = add(c, mul(fa(a), rr * 1.2));
+    bar(c, tip, 1.8, lt(METAL_D, 0.15)); disc(tip, rr * 0.62, [0.8, 0.86, 0.95, 0.12]); ring(tip, rr * 0.62, [0.8, 0.86, 0.95, 0.35], 0.8);
+    const spin = t * 38 * (k % 2 === 0 ? 1 : -1);
+    for (let q = 0; q < 2; q++) line(tip, add(tip, mul(fa(spin + q * Math.PI), rr * 0.58)), [0.85, 0.9, 1.0, 0.55], 1.2);
+    orb(tip, rr * 0.17, METAL_L);
+    const nav = k < 2 ? [1, 0.25, 0.25, 1] : [0.3, 1, 0.45, 1];
+    if (fmod(t * 1.5 + k * 0.25, 1) < 0.35) glowDot(add(c, mul(fa(a), rr * 0.72)), rr * 0.08, nav);
+  }
+  plate(c, [[0.62, 0], [0.35, 0.36], [-0.5, 0.3], [-0.62, 0], [-0.5, -0.3], [0.35, -0.36]], b, ang, rr, 1.2);
+  for (const side of [-1, 1]) { const pod = add(add(c, mul(n, side * rr * 0.34)), mul(f, rr * 0.1)); bar(pod, add(pod, mul(f, rr * 0.45)), 1.6, METAL_L); }
+  const cam = add(c, mul(f, rr * 0.42)); orb(cam, rr * 0.2, METAL); glowDot(add(cam, mul(f, rr * 0.06)), rr * 0.09, g);
+  strip(sub(sub(c, mul(f, rr * 0.35)), mul(n, rr * 0.12)), add(sub(c, mul(f, rr * 0.35)), mul(n, rr * 0.12)), 0.7, g);
+};
+DRAW.locust = (c, f, n, ang, rr, t, b, g) => {
+  ellipse(add(c, [0, rr * 2.6]), rr * 0.9, rr * 0.3, [0, 0, 0, 0.18]);
+  const flap = 0.55 + 0.45 * Math.sin(t * 60);
+  for (const side of [-1, 1]) for (let k = 0; k < 2; k++) { const root = add(c, mul(f, rr * (0.25 - 0.45 * k))); const tip = sub(add(root, mul(n, side * rr * (1.5 * flap + 0.3))), mul(f, rr * 0.35)); line(root, tip, [0.85, 0.95, 0.8, 0.45], 1.6); }
+  shadedOval(sub(c, mul(f, rr * 0.1)), rr * 0.9, rr * 0.42, ang, b); glowDot(add(c, mul(f, rr * 0.6)), rr * 0.3, g);
+};
+DRAW.gunship = (c, f, n, ang, rr, t, b, g) => {
+  ellipse(add(c, [0, rr * 2.0]), rr * 1.4, rr * 0.4, [0, 0, 0, 0.22]);
+  bar(sub(c, mul(f, rr * 0.4)), sub(c, mul(f, rr * 1.35)), 2.4, lt(METAL_D, 0.12)); plate(sub(c, mul(f, rr * 1.35)), rectPts(0.1, 0.42), METAL, ang, rr, 1.0);
+  for (const side of [-1, 1]) {
+    const fan = sub(add(c, mul(n, side * rr * 0.95)), mul(f, rr * 0.1));
+    disc(fan, rr * 0.5, OUTLINE); disc(fan, rr * 0.44, METAL_D);
+    for (let q = 0; q < 3; q++) line(fan, add(fan, mul(fa(t * 30 * side + TAU * q / 3), rr * 0.4)), [0.8, 0.85, 0.95, 0.5], 1.4);
+    ring(fan, rr * 0.47, METAL_L, 1.6); glowDot(sub(fan, mul(f, rr * 0.5)), rr * 0.08, side < 0 ? [1, 0.25, 0.25, 1] : [0.3, 1, 0.45, 1]);
+  }
+  const hull = [[0.95, 0], [0.55, 0.5], [-0.6, 0.55], [-0.85, 0.2], [-0.85, -0.2], [-0.6, -0.55], [0.55, -0.5]];
+  plate(c, hull, b, ang, rr * 0.8, 1.6); rivets(c, hull, ang, rr * 0.8, 0.72, 0.6);
+  line(sub(c, mul(f, rr * 0.4)), add(c, mul(f, rr * 0.45)), [0, 0, 0, 0.35], 1.0);
+  const tur = add(c, mul(f, rr * 0.55));
+  for (const side of [-1, 1]) bar(add(tur, mul(n, side * rr * 0.1)), add(add(tur, mul(n, side * rr * 0.1)), mul(f, rr * 0.6)), 1.8, METAL_L);
+  orb(tur, rr * 0.22, METAL); glowDot(add(c, mul(f, rr * 0.2)), rr * 0.1, g);
+};
+DRAW.rampart = (c, f, n, ang, rr, t, b, g) => {
+  const roll = fmod(t * 14, 5);
+  for (const side of [-1, 1]) { const tread = add(c, mul(n, side * rr * 0.82)); plate(tread, rectPts(1.05, 0.26), lt(METAL_D, 0.05), ang, rr, 1.3); for (let k = 0; k < 5; k++) { const lp = add(tread, mul(f, -rr * 0.95 + fmod(k * rr * 0.42 + roll, rr * 2.0))); line(sub(lp, mul(n, rr * 0.22)), add(lp, mul(n, rr * 0.22)), METAL_L, 1.0); } }
+  const hull = rectPts(0.78, 0.66); plate(c, hull, b, ang, rr, 1.8);
+  for (const cx of [-1, 1]) for (const cy of [-1, 1]) plate(add(add(c, mul(f, cx * rr * 0.62)), mul(n, cy * rr * 0.5)), rectPts(0.16, 0.16), lt(b, 0.12), ang, rr, 1.1);
+  rivets(c, hull, ang, rr, 0.7, 0.7);
+  bar(add(c, mul(f, rr * 0.7)), add(c, mul(f, rr * 1.25)), 4.0, METAL_L); plate(add(c, mul(f, rr * 1.2)), [[0.2, 0], [-0.05, 0.3], [-0.05, -0.3]], lt(METAL_L, 0.1), ang, rr, 1.0);
+  orb(c, rr * 0.28, dk(b, 0.2)); glowDot(c, rr * 0.13, g);
+};
+DRAW.jammer = (c, f, n, ang, rr, t, b, g) => {
+  const ping = fmod(t * 0.9, 1); arc(c, rr * (1.2 + 1.4 * ping), 0, TAU, A(g, 0.35 * (1 - ping)), 1.5);
+  for (const side of [-1, 1]) { const tr = add(c, mul(n, side * rr * 0.72)); plate(tr, rectPts(0.8, 0.22), lt(METAL_D, 0.08), ang, rr, 1.0); for (let k = 0; k < 3; k++) { const lp = add(tr, mul(f, (fmod(t * 6 + k * 0.5, 1.5) - 0.75) * rr)); line(sub(lp, mul(n, rr * 0.16)), add(lp, mul(n, rr * 0.16)), [0, 0, 0, 0.45], 0.9); } }
+  orb(c, rr * 0.72, b); const dir = fa(t * 2.5);
+  arc(c, rr * 0.55, t * 2.5 - 0.9, t * 2.5 + 0.9, OUTLINE, 3.6); arc(c, rr * 0.55, t * 2.5 - 0.9, t * 2.5 + 0.9, METAL_L, 2.2);
+  bar(c, add(c, mul(dir, rr * 0.9)), 1.2, METAL_L); glowDot(add(c, mul(dir, rr * 0.9)), rr * 0.14, g); glowDot(c, rr * 0.18, g);
+};
+DRAW.stalker = (c, f, n, ang, rr, t, b, g) => {
+  const echo = fmod(t * 1.1, 1);
+  const ghost = [[1.1, 0], [0.2, 0.45], [-0.7, 0.3], [-0.7, -0.3], [0.2, -0.45]];
+  outline(sub(c, mul(f, rr * (0.6 + 1.2 * echo))), ghost, A(g, 0.45 * (1 - echo)), 1.0, ang, rr);
+  for (const side of [-1, 1]) {
+    const ph = t * 12 + (side > 0 ? Math.PI : 0);
+    const hip = add(c, mul(n, side * rr * 0.3)), knee = add(add(hip, mul(n, side * rr * 0.45)), mul(f, rr * (0.45 + 0.25 * Math.sin(ph)))), foot = sub(add(knee, mul(n, side * rr * 0.1)), mul(f, rr * (0.55 - 0.3 * Math.sin(ph))));
+    limb([hip, knee, foot], 1.3, METAL_L);
+  }
+  plate(c, ghost, b, ang, rr * 0.8, 1.1); strip(sub(c, mul(f, rr * 0.45)), add(c, mul(f, rr * 0.55)), 0.8, g); glowDot(add(c, mul(f, rr * 0.6)), rr * 0.16, g);
+};
+DRAW.burrower = (c, f, n, ang, rr, t, b, g, o) => {
+  if (o.hidden) {
+    const dirt = [0.42, 0.33, 0.24, 1]; shadedOval(c, rr * 1.15, rr * 0.8, ang, dirt);
+    for (let k = 0; k < 5; k++) { const a = ang + TAU * k / 5 + t * 0.5; disc(add(c, mul(fa(a), rr * (0.85 + 0.15 * Math.sin(t * 9 + k)))), 1.4, lt(dirt, 0.2)); }
+    line(add(c, mul(f, rr * 0.6)), add(c, mul(f, rr * 1.05)), METAL_L, 2.0); glowDot(add(c, mul(f, rr * 0.2)), rr * 0.12, A(g, 0.6)); return;
+  }
+  for (const side of [-1, 1]) { const tr = add(c, mul(n, side * rr * 0.72)); plate(tr, rectPts(0.7, 0.2), lt(METAL_D, 0.08), ang, rr, 1.0); for (let k = 0; k < 3; k++) { const lp = add(tr, mul(f, (fmod(t * 7 + k * 0.45, 1.35) - 0.68) * rr)); line(sub(lp, mul(n, rr * 0.15)), add(lp, mul(n, rr * 0.15)), [0, 0, 0, 0.45], 0.9); } }
+  shadedOval(sub(c, mul(f, rr * 0.15)), rr * 0.7, rr * 0.58, ang, b);
+  for (let k = 0; k < 2; k++) { const sp = sub(c, mul(f, rr * (0.05 + 0.3 * k))); line(sub(sp, mul(n, rr * 0.5)), add(sp, mul(n, rr * 0.5)), [0, 0, 0, 0.35], 1.0); }
+  plate(c, [[1.45, 0], [0.5, 0.42], [0.5, -0.42]], METAL_L, ang, rr, 1.2);
+  for (let k = 0; k < 3; k++) { const fr = fmod(t * 5 + k / 3, 1), x = 0.55 + 0.8 * fr, hw = 0.42 * (1.45 - x) / 0.95; line(sub(add(c, mul(f, rr * x)), mul(n, rr * hw)), add(add(c, mul(f, rr * (x + 0.12))), mul(n, rr * hw)), [0, 0, 0, 0.45], 1.0); }
+  glowDot(sub(c, mul(f, rr * 0.2)), rr * 0.14, g);
+};
+DRAW.phantom = (c, f, n, ang, rr, t, b, g, o) => {
+  const blade = [[1.4, 0], [0.1, 0.55], [-0.9, 1.0], [-0.5, 0], [-0.9, -1.0], [0.1, -0.55]];
+  if (o.hidden) {
+    const a = 0.2 + 0.08 * Math.sin(t * 7), rp = fmod(t * 1.3, 1);
+    arc(c, rr * (1 + 0.8 * rp), 0, TAU, [0.8, 0.95, 1.0, 0.22 * (1 - rp)], 1.0);
+    outline(c, blade, A(g, a), 1.2, ang, rr); outline(add(c, mul(n, Math.sin(t * 11) * 1.5)), blade, A(g, a * 0.5), 1.0, ang, rr * 1.08); return;
+  }
+  plate(c, blade, b, ang, rr, 1.2); line(sub(c, mul(f, rr * 0.4)), add(c, mul(f, rr * 1.1)), A(g, 0.5), 1.0);
+  for (const side of [-1, 1]) { glowDot(add(add(c, mul(f, rr * 0.35)), mul(n, side * rr * 0.28)), rr * 0.13, g); strip(add(sub(c, mul(f, rr * 0.75)), mul(n, side * rr * 0.55)), add(sub(c, mul(f, rr * 0.55)), mul(n, side * rr * 0.4)), 0.8, g); }
+  ring(c, rr * 1.3, A(g, 0.35 + 0.2 * Math.sin(t * 5)), 1.0);
+};
+DRAW.aegis = (c, f, n, ang, rr, t, b, g) => {
+  for (let k = 0; k < 4; k++) { const ld = fa(ang + Math.PI / 4 + k * Math.PI / 2), step = Math.sin(t * 6 + k * Math.PI / 2) * rr * 0.18; const knee = add(add(c, mul(ld, rr * 0.75)), mul(f, step)); limb([add(c, mul(ld, rr * 0.3)), knee, add(knee, mul(ld, rr * 0.35))], 2.0, METAL_L); }
+  const hull = ngon(6, 1.0, Math.PI / 6); plate(c, hull, b, ang, rr * 0.74, 1.4); rivets(c, hull, ang, rr * 0.74, 0.75, 0.55);
+  orb(sub(c, mul(f, rr * 0.25)), rr * 0.2, dk(g, 0.3)); glowDot(sub(c, mul(f, rr * 0.25)), rr * 0.12, g);
+  const sc = add(c, mul(f, rr * 0.2));
+  arc(sc, rr * 0.95, ang - 0.95, ang + 0.95, OUTLINE, 5.6); arc(sc, rr * 0.95, ang - 0.95, ang + 0.95, METAL_L, 3.8); arc(sc, rr * 0.88, ang - 0.8, ang + 0.1, lt(METAL_L, 0.35), 1.0);
+  for (let k = 0; k < 3; k++) disc(add(sc, mul(fa(ang + (k - 1) * 0.55), rr * 0.95)), 0.9, A(g, 0.9));
+  arc(sc, rr * 1.04, ang - 0.9, ang + 0.9, A(g, 0.8), 1.2);
+  const hex = ngon(6, 1.0, t * 0.6); fill(c, hex, [0.4, 0.7, 1.0, 0.15], 0, rr + 6); outline(c, hex, [0.55, 0.8, 1.0, 0.75], 1.4, 0, rr + 6); // barrier (enemy_status)
+};
+DRAW.hydra = (c, f, n, ang, rr, t, b, g) => {
+  shadedOval(sub(c, mul(f, rr * 0.3)), rr * 0.52, rr * 0.48, ang, b); ring(sub(c, mul(f, rr * 0.3)), rr * 0.3, dk(b, 0.35), 1.3); glowDot(sub(c, mul(f, rr * 0.3)), rr * 0.1, g);
+  for (let k = 0; k < 3; k++) {
+    const ba = ang + (k - 1) * 0.7, pts = [];
+    for (let i = 0; i < 5; i++) { const q = i / 4, sway = Math.sin(t * 4 + k * 1.7 - q * 2) * rr * 0.22 * q; pts.push(add(add(c, mul(fa(ba), rr * (0.05 + 1.05 * q))), mul(fa(ba + Math.PI / 2), sway))); }
+    polyline(pts, OUTLINE, 5.0); polyline(pts, lt(b, 0.15), 3.2); for (let i = 1; i < 4; i++) disc(pts[i], 1.0, dk(b, 0.25));
+    const hd = norm(sub(pts[4], pts[3])), hp = add(pts[4], mul(hd, rr * 0.12));
+    plate(hp, [[0.6, 0], [0.05, 0.38], [-0.4, 0.3], [-0.4, -0.3], [0.05, -0.38]], lt(b, 0.1), Math.atan2(hd[1], hd[0]), rr * 0.5, 1.0);
+    const jaw = mul(orth(hd), rr * 0.1 * (1 + Math.sin(t * 8 + k))); line(add(add(hp, mul(hd, rr * 0.28)), jaw), add(hp, mul(hd, rr * 0.1)), METAL_L, 1.0); glowDot(add(hp, mul(hd, rr * 0.06)), rr * 0.1, g);
+  }
+};
+
+// ---- New enemies (draft designs) ---------------------------------------------------------------
+
+// ---- Shared in-game tower style for the tower art pages (mirrors scripts/view/Draw.gd) ----------------------------
+// ---- Game units: drawings use Draw.gd's pixel sizes (a tile is 48 px), scaled to the preview ----------------
+const G = (s) => s / 48;
+const P = (c, aim, k, x, y) => add(c, rot([x * k, y * k], aim)); // x along the aim, y to the side, in game px
+const AMMO = [0.4, 0.42, 0.25, 1], BORE = [0.04, 0.04, 0.05, 1], DARK_STRIPE = [0.06, 0.06, 0.06, 1];
+
+// The hex deck every tower stands on (Draw._pad): bevelled armour, corner bolts, vents, status LEDs, the accent
+// trim that breathes, and one tier pip.
+function deck(c, k, col, t) {
+  const hex = ngon(6, 1);
+  ellipse(add(c, [0, 6 * k]), 21 * k, 9 * k, [0, 0, 0, 0.35]);
+  fill(c, hex, OUTLINE, 0, 20.5 * k); plate(c, hex, lt(METAL_D, 0.05), 0, 19.2 * k, 1); fill(c, hex, METAL, 0, 15.6 * k);
+  outline(c, hex, [0, 0, 0, 0.45], 1, 0, 15.6 * k); outline(c, hex, A(col, 0.5 + 0.2 * Math.sin(t * 2.2)), 1.35 * k, 0, 17.6 * k);
+  for (const q of xform(c, hex, 0, 17.6 * k)) { disc(q, 1.5 * k, OUTLINE); disc(q, 1.0 * k, METAL_L); }
+  for (let i = 0; i < 3; i++) { const y = c[1] - 13 * k + i * 2.2 * k; line([c[0] - 13.5 * k, y], [c[0] - 10 * k, y], [0, 0, 0, 0.5], 1); line([c[0] + 10 * k, y], [c[0] + 13.5 * k, y], [0, 0, 0, 0.5], 1); }
+  disc(add(c, [-9 * k, 11 * k]), k, [0.4, 1, 0.5, fmod(t * 0.9, 2) < 0.12 ? 0.95 : 0.45]); disc(add(c, [9 * k, 11 * k]), k, A(col, 0.8));
+  rect(c[0] - 3 * k, c[1] + 14.4 * k, 6 * k, 3.2 * k, OUTLINE); rect(c[0] - 2.4 * k, c[1] + 15 * k, 4.8 * k, 2 * k, col);
+}
+// Hazard striping along one side of a part, alternating accent and black (Draw._missile).
+function hazard(c, aim, k, x0, x1, y, col, w) { const n = Math.max(2, Math.round((x1 - x0) / 2));
+  for (let i = 0; i < n; i++) { const x = x0 + (x1 - x0) * (i + 0.5) / n; line(P(c, aim, k, x - 0.8, y), P(c, aim, k, x + 0.8, y), i % 2 ? DARK_STRIPE : A(col, 0.95), (w || 1.8) * k); } }
+// A barrel's open end: dark bore that glows in the accent colour as it fires (Draw._flak).
+function muzzleEnd(p, k, w, col, f) { disc(p, w * 0.6 * k, BORE); disc(p, w * 0.45 * k, A(col, Math.min(1, 0.3 + 3 * f))); if (f > 0) glowDot(p, (1.2 + 6 * f) * k, A(col, f)); }
+
+// ---- Shared effects (s = preview px per tile) -------------------------------------------------------------
+const lerp = (a, b, u) => [a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u];
+const decay = (since, len) => (since >= 0 && since < len ? 1 - since / len : 0);
+function firedBarrel(fx, i, len) { return fx.barrel === i && fx.barrelSince < (len || 0.12) ? 1 - fx.barrelSince / (len || 0.12) : 0; }
+function smokePuff(p, v, s, a) { if (v <= 0 || v >= 1) return; disc(add(p, [0, -v * s * 0.25]), s * (0.1 + v * 0.22), [0.55, 0.57, 0.6, (a || 0.4) * (1 - v)]); }
+function blast(p, v, s, col, size) { if (v < 0 || v >= 1) return; const r = s * (size || 0.4);
+  disc(p, r * (0.35 + v * 0.7), A([1, 0.85, 0.5, 1], 0.75 * (1 - v))); ring(p, r * (0.5 + v * 1.1), A(col, 0.85 * (1 - v)), 2); smokePuff(p, v, s, 0.35); }
+function spark(p, v, s, col) { if (v < 0.35) glowDot(p, s * 0.07 * (1 - v / 0.35), col); }
+function tracer(from, to, u, col, w, len) { const a = lerp(from, to, Math.max(0, u - (len || 0.15))), b = lerp(from, to, u); line(a, b, A(col, 0.9), w || 2); line(a, b, [1, 1, 1, 0.8], (w || 2) * 0.4); }
+function beam(from, to, w, col, k) { line(from, to, A(col, 0.3 * k), w * 2.6); line(from, to, A(col, 0.9 * k), w); line(from, to, [1, 1, 1, 0.8 * k], Math.max(1, w * 0.35)); glowDot(to, w * 1.3, A(col, k)); }
+// A mortar shell: a dark round with a glowing fuse, arcing high; optional glowing trail.
+function shell(from, to, u, s, col, z, trail) { const k = G(s) * (z || 1), arcH = (h) => Math.sin(Math.PI * h) * s * 0.85, p = lerp(from, to, u);
+  ellipse(p, 3 * k, 1.5 * k, [0, 0, 0, 0.3]);
+  if (trail) for (let i = 4; i >= 1; i--) { const v = Math.max(0, u - i * 0.035); disc(add(lerp(from, to, v), [0, -arcH(v)]), (1 + i * 0.45) * k, A(col, 0.32 - 0.06 * i)); }
+  const a = add(p, [0, -arcH(u)]); orb(a, 2.6 * k, METAL_L); glowDot(a, 1.1 * k, col); }
+// A rocket as the in-game loaded missiles look: pale body, red nose, grey fins, a hot exhaust and a smoke trail.
+function missile(p, dir, k, col) {
+  for (const sg of [-1, 1]) fill(p, [[-1.5, sg * 1.1], [-4.2, sg * 2.8], [-4.6, sg * 2.8], [-4.2, sg * 1.1]], METAL_L, dir, k);
+  solid(p, [[4.6, 0], [2.7, 1.35], [-4.2, 1.35], [-4.2, -1.35], [2.7, -1.35]], [0.86, 0.88, 0.92, 1], dir, k, 0.8);
+  fill(p, [[4.6, 0], [2.9, 1.35], [2.9, -1.35]], [1, 0.32, 0.25, 1], dir, k); glowDot(add(p, mul(fa(dir), -5 * k)), 1.2 * k, col); }
+function rocketPath(from, to, u, s, col, idx, z, bendK) { const k = G(s) * (z || 1), bend = (bendK ?? 1) * (idx % 2 ? 1 : -1) * (0.28 + 0.1 * (idx % 3)) * s;
+  const mid = add(lerp(from, to, 0.5), mul(orth(norm(sub(to, from))), bend)), q = (x) => lerp(lerp(from, mid, x), lerp(mid, to, x), x);
+  for (let i = 6; i >= 1; i--) disc(q(Math.max(0, u - i * 0.035)), (1.2 + i * 0.55) * k, [0.62, 0.64, 0.66, 0.34 - i * 0.045]);
+  const p = q(u), pb = q(Math.max(0, u - 0.04)); missile(p, Math.atan2(p[1] - pb[1], p[0] - pb[0]), k, col); }
+// Loaded rocket noses showing in the tube mouths; they're gone after a salvo and slide back in as it reloads.
+function noses(c, aim, k, tubes, fx, r) { const ready = fx.ready ?? 1; if (ready <= 0.05) return;
+  for (const [x, y] of tubes) { const p = P(c, aim, k, x, y); orb(p, (r || 1.7) * k * ready, [0.86, 0.88, 0.92, 1]); disc(add(p, mul(fa(aim), 0.5 * k)), (r || 1.7) * 0.45 * k * ready, [1, 0.32, 0.25, 1]); } }
+
+
+// ---- Stand-in neighbour towers for support towers' previews (Boost Tower, Augmentation Tower) ---------------------
+const MATES = [[[1.15, -0.25], [0.30, 0.90, 1.00, 1]], [[1.0, 0.72], [1.00, 0.55, 0.20, 1]], [[-0.85, 0.78], [1.00, 0.30, 0.35, 1]]];
+const matesOf = (info) => MATES.map(([o, col]) => ({ p: add(info.c, mul(o, info.s)), col }));
+function mateTower(p, k, col, t, boosted, bcol, aimAt) { deck(p, k * 0.75, col, t); const aim = aimAt ?? (-0.5 + Math.sin(t * 0.7 + p[0]) * 0.4);
+  bar(p, P(p, aim, k * 0.75, 15, 0), 3 * k * 0.75, METAL_L); plate(p, ngon(8, 1, Math.PI / 8), METAL_L, aim, 6.5 * k * 0.75, 1); orb(p, 3.4 * k * 0.75, METAL); glowDot(p, 1 * k, col);
+  if (boosted > 0) for (let i = 0; i < 2; i++) { const q = add(p, [0, -(16 + i * 3.4) * k * 0.75]); polyline([add(q, [-2.6 * k, 1.6 * k]), q, add(q, [2.6 * k, 1.6 * k])], A(bcol, boosted), 1.6 * k); } }
+
+
+const BASE = (() => {
+// ---- Tower art page 3: towers 11-15, in the style of today's in-game towers (owner, 2026-10-16) ----------
+// Shared style helpers come from game_style.js. Every tower here is a persistent agent (mines on the track, soaks,
+// boosts, pings, cold waves) rather than a turret firing shots.
+const PAGE = { title: "Tower art page 3 (towers 11-15)", store: "bl-tower-art-3-game-v3" };
+
+const rnd = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
+const distTo = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+const nearestTo = (p, list) => { let best = null, bd = 1e9; for (const e of list) { const d = distTo(e.p, p); if (d < bd) { bd = d; best = e; } } return best; };
+const FROST = [0.8, 0.92, 1, 1], ACID = [0.55, 1, 0.3, 1];
+
+// ---- Mine Layer: mines tossed onto the track wait there and go off when a ground enemy rolls over them ----------
+function mineAgent(cfg) { return (m, t, info, s, col) => { const k = G(s), laneY = info.H * 0.8;
+  if (!m.mines) { m.mines = []; m.lastToss = t - 1; m.n = 0; }
+  const pick = () => [s * 0.25 + Math.random() * (info.W - s * 0.5), laneY + (Math.random() - 0.5) * s * 0.3]; // random spots along and across the track (owner)
+  if (!m.next) m.next = pick(); m.aimAt = m.next;
+  if (t - m.lastToss >= 1.5 && m.mines.filter((q) => !q.boom).length < 6) { m.n++; m.mines.push({ to: m.next, t0: t, from: add(info.c, mul(norm(sub(m.next, info.c)), s * 0.3)), n: m.n }); m.lastToss = t; m.next = pick(); }
+  for (const q of m.mines) { const age = t - q.t0;
+    if (q.boom) { cfg.boom(q.to, (t - q.boom) / 0.6, s, col, q.n); continue; }
+    if (age < cfg.flight) { cfg.fly(q.from, q.to, age / cfg.flight, s, col, info.look, t); continue; }
+    if (cfg.land && age < cfg.flight + 0.3) cfg.land(q.to, (age - cfg.flight) / 0.3, s);
+    info.look.mine(q.to, k, t, col, fmod(t * 1.6 + q.n * 0.37, 1) < 0.25, cfg.armed);
+    for (const e of info.ens) if (distTo(e.p, q.to) < s * 0.15) { q.boom = t; break; } }
+  m.mines = m.mines.filter((q) => !q.boom || t - q.boom < 0.6); }; }
+
+// ---- Chemical Plant: sprays one enemy at a time; soaked enemies are skipped until the chemical wears off ----------
+function soakAgent(cfg) { return (m, t, info, s, col) => {
+  if (!m.soak) { m.soak = {}; m.last = -9; }
+  const free = info.ens.filter((e) => !(m.soak[e.i] > t)), tg = nearestTo(info.c, free);
+  if (tg) m.aimAt = tg.p.slice();
+  if (tg && !m.shot && t - m.last >= 1.5) { m.last = t; m.shot = { t0: t, id: tg.i }; }
+  if (m.shot) { const age = t - m.shot.t0, e = info.ens.find((x) => x.i === m.shot.id);
+    if (!e) m.shot = null; else if (age >= cfg.flight) { m.soak[e.i] = t + 4; m.shot = null; } else cfg.shot(info.muzzleAt(0, info.aim), e.p, age / cfg.flight, s, col, t); }
+  for (const e of info.ens) if (m.soak[e.i] > t) cfg.soaked(e.p, (m.soak[e.i] - t) / 4, s, col, t, e.i); }; }
+
+// ---- Boost Tower: no attack; it boosts the towers around it ---------------------------------------------------
+// ---- Radar Tower: cloaked enemies (every other one) stay hidden until a ping reveals them for a moment ------------
+const cloaked = (e) => e.i % 2 === 0;
+function hideCloaked(e, s, t) { const r = Math.max(4, Math.min(11, s * 0.12)) + 2; disc(e.p, r, e.air ? [0.07, 0.09, 0.08, 0.82] : [0.16, 0.15, 0.13, 0.82]);
+  ring(e.p, r - 1, [0.7, 0.9, 1, 0.18 + 0.1 * Math.sin(t * 9 + e.i)], 1); }
+function revealMark(p, s, col, a) { const r = Math.max(4, Math.min(11, s * 0.12)) + 4;
+  for (let i = 0; i < 4; i++) { const d = fa(Math.PI / 4 + i * Math.PI / 2), c0 = add(p, mul(d, r)); line(c0, add(c0, mul(rot(d, Math.PI * 0.75), r * 0.6)), A(col, a), 1.5); line(c0, add(c0, mul(rot(d, -Math.PI * 0.75), r * 0.6)), A(col, a), 1.5); } }
+const sweepAngle = (info, t) => (info.look.dishAngle ? info.look.dishAngle(t) : t * TAU / 3); // the sweep follows the dish (owner)
+function radarAgent(cfg) { return (m, t, info, s, col) => { if (!m.seen) m.seen = {};
+  cfg.draw(m, t, info, s, col);
+  for (const e of info.all) { if (!cloaked(e)) continue; const until = m.seen[e.i] || 0;
+    if (cfg.hits(m, t, info, s, e)) m.seen[e.i] = t + 1;
+    if (until > t) revealMark(e.p, s, col, Math.min(1, (until - t) * 2)); else hideCloaked(e, s, t); } }; }
+
+// ---- Cryo Tower: a cold wave every 2 s; enemies it reaches are chilled (slowed; the preview doesn't slow them) ----
+function chillMark(p, s, a) { const r = Math.max(4, Math.min(11, s * 0.12)); disc(p, r + 1, A([0.6, 0.85, 1, 1], 0.6 * a)); ring(p, r + 2, A([0.75, 0.92, 1, 1], 0.9 * a), 1.4); for (let i = 0; i < 3; i++) { const d = fa(i * Math.PI / 3); line(sub(p, mul(d, r * 0.7)), add(p, mul(d, r * 0.7)), [1, 1, 1, 0.75 * a], 1); } }
+function coldAgent(cfg) { return (m, t, info, s, col) => { if (!m.cold) { m.cold = {}; m.wave = t; }
+  if (t - m.wave >= 2) m.wave = t;
+  const R = s * 2.3, u = (t - m.wave) / cfg.travel; cfg.draw(info.c, Math.min(1, u), R, s, col, t, u);
+  for (const e of info.ens) if (u <= 1 && distTo(e.p, info.c) < R * u) m.cold[e.i] = t + 1.8;
+  for (const e of info.ens) if ((m.cold[e.i] || 0) > t) chillMark(e.p, s, Math.min(1, (m.cold[e.i] - t) * 1.5)); }; }
+
+const TOWERS = [
+  // 11. Mine Layer --------------------------------------------------------------------------------------
+  { id: "mines", num: 11, name: "Mine Layer", cls: "Defense", weapon: "Explosive", hits: "ground", color: [1.00, 0.40, 0.25, 1],
+    desc: "Manufactures and tosses explosive mines onto the track that explode when an enemy passes over them. \"You know it's a party when the high-speed confetti start flying in every direction.\" Ground and burrowed enemies set them off; up to 20 on the track (the preview caps at 6). Mines land at random spots along and across the track (round 3). The look sets the fabricator and its mine. (Colour: a new red-orange; no in-game counterpart.)",
+    looks: [
+      { key: "A", name: "Arm Fabricator", muzzle: 0.3, theme: "A boxy fabricator with a press hatch and a throwing arm that swings round to fling each new mine. Mine: a flat disc with a blinking red-orange light.",
+        draw(c, aim, s, fx, t, col) { const k = G(s), mm = fx.mem || {}, sw = decay(t - (mm.lastToss ?? -9), 0.35); deck(c, k, col, t);
+          plate(c, rectPts(10, 10), METAL_L, 0, k, 1.3); fill(c, rectPts(7.4, 7.4), METAL, 0, k); rivets(c, rectPts(10, 10), 0, k, 0.86, 0.8 * k); hazard(c, 0, k, -7, 7, 10.6, col, 1.3);
+          plate(add(c, [-4.5 * k, -4.5 * k]), rectPts(2.4, 2.4), METAL_D, 0, k, 0.9); glowDot(add(c, [-4.5 * k, -4.5 * k]), 0.8 * k, A(col, 0.6 + 0.4 * Math.sin(t * 6)));
+          const a = aim - sw * 1.6, tip = P(c, a, k, 13, 0); bar(c, tip, 2.4 * k, METAL_L); orb(c, 2.8 * k, METAL); if (t - (mm.lastToss ?? -9) > 0.5) this.mine(tip, k * 0.85, t, col, false); },
+        mine(p, k, t, col, blink) { ellipse(add(p, [k * 0.8, k * 1.6]), 4 * k, 1.8 * k, [0, 0, 0, 0.3]); disc(p, 4 * k, OUTLINE); disc(p, 3.4 * k, METAL); ring(p, 2.4 * k, METAL_L, 0.8 * k); glowDot(p, (blink ? 1.4 : 0.7) * k, A(col, blink ? 1 : 0.55)); } },
+      { key: "B", name: "Mine Mortar", muzzle: 0.3, theme: "A round armoured fabricator with a short launch tube that pops mines out in an arc, a feed hopper behind. Mine: a wide anti-tank pancake mine with four bolts.",
+        draw(c, aim, s, fx, t, col) { const k = G(s), mm = fx.mem || {}, kick = decay(t - (mm.lastToss ?? -9), 0.25); deck(c, k, col, t);
+          disc(c, 12 * k, OUTLINE); disc(c, 11.2 * k, METAL_L); disc(c, 9 * k, METAL); plate(P(c, aim, k, -8, 0), rectPts(3, 4), AMMO, aim, k, 1);
+          bar(P(c, aim, k, -kick * 2, 0), P(c, aim, k, 10 - kick * 2, 0), 6 * k, METAL_L); const b = P(c, aim, k, 10 - kick * 2, 0); disc(b, 3.6 * k, OUTLINE); disc(b, 3 * k, BORE); if (kick > 0) smokePuff(b, 1 - kick, s * 0.6, 0.5);
+          glowDot(P(c, aim, k, -1, 0), 1.1 * k, col); },
+        mine(p, k, t, col, blink) { ellipse(add(p, [k * 0.8, k * 1.6]), 5 * k, 2 * k, [0, 0, 0, 0.3]); disc(p, 5 * k, OUTLINE); disc(p, 4.4 * k, AMMO); ring(p, 3.2 * k, dk(AMMO, 0.3), 0.8 * k);
+          for (let i = 0; i < 4; i++) disc(add(p, mul(fa(Math.PI / 4 + i * Math.PI / 2), 3.6 * k)), 0.6 * k, METAL_L); glowDot(p, (blink ? 1.4 : 0.7) * k, A(col, blink ? 1 : 0.55)); } },
+      { key: "C", name: "Conveyor Catapult", muzzle: 0.3, theme: "A long catapult beam on the turret, fed by a short conveyor of ready mines that tick along. Mine: a hexagonal mine with three sensor prongs.",
+        draw(c, aim, s, fx, t, col) { const k = G(s), mm = fx.mem || {}, sw = decay(t - (mm.lastToss ?? -9), 0.3); deck(c, k, col, t);
+          plate(add(c, [-6 * k, 9 * k]), rectPts(9, 2.4), METAL_D, 0, k, 1); for (let i = 0; i < 3; i++) this.mine(add(c, [(-12 + fmod(t * 4, 4) + i * 5) * k, 9 * k]), k * 0.5, t, col, false);
+          plate(c, ngon(8, 1, Math.PI / 8), METAL_L, aim, 8 * k, 1.2); const tip = P(c, aim - sw * 2.2, k, 15, 0); bar(P(c, aim - sw * 2.2, k, -6, 0), tip, 2.2 * k, METAL_L);
+          plate(P(c, aim - sw * 2.2, k, -6, 0), rectPts(2, 3), METAL_D, aim - sw * 2.2, k, 0.9); orb(c, 2.6 * k, METAL); glowDot(c, 1 * k, col); if (t - (mm.lastToss ?? -9) > 0.5) this.mine(tip, k * 0.8, t, col, false); },
+        mine(p, k, t, col, blink) { ellipse(add(p, [k * 0.8, k * 1.6]), 4 * k, 1.8 * k, [0, 0, 0, 0.3]); for (let i = 0; i < 3; i++) line(p, add(p, mul(fa(-Math.PI / 2 + i * TAU / 3), 5.2 * k)), METAL_L, 0.8 * k);
+          plate(p, ngon(6, 1, 0), METAL, 0, 3.6 * k, 0.9); glowDot(p, (blink ? 1.4 : 0.7) * k, A(col, blink ? 1 : 0.55)); } },
+      { key: "D", name: "Drum Dispenser", muzzle: 0.3, theme: "A big rotating drum magazine that clicks round one slot per mine, feeding a short chute arm that flicks it out. Mine: a small sphere with six contact prongs.",
+        draw(c, aim, s, fx, t, col) { const k = G(s), mm = fx.mem || {}, since = t - (mm.lastToss ?? -9), sw = decay(since, 0.3), step = Math.floor((mm.n || 0)) + Math.min(1, since / 0.4); deck(c, k, col, t);
+          disc(c, 12 * k, OUTLINE); disc(c, 11.2 * k, METAL_L); for (let i = 0; i < 6; i++) { const q = add(c, mul(fa(step * TAU / 6 + i * TAU / 6), 7.5 * k)); disc(q, 2.6 * k, BORE); if (i) this.mine(q, k * 0.55, t, col, false); }
+          orb(c, 3.4 * k, METAL); const tip = P(c, aim - sw * 1.4, k, 15, 0); bar(c, tip, 2.6 * k, METAL); glowDot(c, 1.1 * k, col); if (since > 0.5) this.mine(tip, k * 0.8, t, col, false); },
+        mine(p, k, t, col, blink) { ellipse(add(p, [k * 0.8, k * 1.6]), 3.6 * k, 1.6 * k, [0, 0, 0, 0.3]); for (let i = 0; i < 6; i++) { const d = fa(i * TAU / 6); line(add(p, mul(d, 2.6 * k)), add(p, mul(d, 4.4 * k)), METAL_L, 0.9 * k); disc(add(p, mul(d, 4.4 * k)), 0.6 * k, METAL_L); }
+          orb(p, 3 * k, METAL); glowDot(p, (blink ? 1.3 : 0.6) * k, A(col, blink ? 1 : 0.55)); } },
+      { key: "E", name: "Twin Press Factory", muzzle: 0.3, theme: "Two stamping presses that thump down in turn on a riveted factory block, and a gantry arm that picks up each fresh mine and flicks it out. Mine: a square box mine with a pressure plate on top.",
+        draw(c, aim, s, fx, t, col) { const k = G(s), mm = fx.mem || {}, since = t - (mm.lastToss ?? -9), sw = decay(since, 0.3); deck(c, k, col, t);
+          plate(c, rectPts(12, 9), METAL_L, 0, k, 1.3); rivets(c, rectPts(12, 9), 0, k, 0.86, 0.8 * k); hazard(c, 0, k, -10, 10, 9.6, col, 1.2);
+          for (const [x, ph] of [[-6, 0], [6, 0.75]]) { const down = fmod(t * 0.67 + ph, 1.5) < 0.2; plate(add(c, [x * k, -2 * k]), rectPts(3.4, 3.4), down ? METAL : lt(METAL_L, 0.1), 0, k, 1); if (down) glowDot(add(c, [x * k, -2 * k]), 1 * k, col); }
+          const tip = P(c, aim - sw * 1.8, k, 14, 0); bar(c, tip, 1.8 * k, METAL); plate(c, rectPts(2, 2), METAL_D, aim, k, 0.9); if (since > 0.5) this.mine(tip, k * 0.8, t, col, false); },
+        mine(p, k, t, col, blink) { ellipse(add(p, [k * 0.8, k * 1.6]), 4 * k, 1.8 * k, [0, 0, 0, 0.3]); plate(p, rectPts(3.6, 3.6), AMMO, 0, k, 0.9); fill(p, rectPts(2, 2), dk(AMMO, 0.3), 0, k); glowDot(add(p, [2.4 * k, -2.4 * k]), (blink ? 1.2 : 0.6) * k, A(col, blink ? 1 : 0.55)); } },
+      { key: "F", name: "Rail Launcher", muzzle: 0.3, theme: "A short magnetic rail launcher on a round mount that snaps each mine out along its rails, a stack of canisters loaded behind. Mine: a squat canister with a glowing band.",
+        draw(c, aim, s, fx, t, col) { const k = G(s), mm = fx.mem || {}, since = t - (mm.lastToss ?? -9), fl = decay(since, 0.2); deck(c, k, col, t);
+          disc(c, 10 * k, OUTLINE); disc(c, 9.2 * k, METAL); for (let i = 0; i < 3; i++) this.mine(P(c, aim, k, -6, (i - 1) * 4.2), k * 0.55, t, col, false);
+          for (const y of [-2.6, 2.6]) bar(P(c, aim, k, -2, y), P(c, aim, k, 15, y), 1.8 * k, METAL_L); for (const x of [3, 9]) bar(P(c, aim, k, x, -4), P(c, aim, k, x, 4), 1.4 * k, dk(col, 0.2));
+          strip(P(c, aim, k, 0, 0), P(c, aim, k, 15, 0), 0.6 * k, A(col, 0.3 + 0.7 * fl)); if (since > 0.5) this.mine(P(c, aim, k, 6, 0), k * 0.7, t, col, false); glowDot(c, 1 * k, col); },
+        mine(p, k, t, col, blink) { ellipse(add(p, [k * 0.8, k * 1.6]), 4 * k, 1.8 * k, [0, 0, 0, 0.3]); disc(p, 3.6 * k, OUTLINE); disc(p, 3.1 * k, METAL_L); ring(p, 2.2 * k, A(col, blink ? 1 : 0.5), 0.9 * k); disc(p, 1.2 * k, METAL); } },
+    ],
+    anims: [
+      { key: "A", name: "Lob and Blink", desc: "Each mine arcs onto the track, lands with a puff of dust and blinks slowly until an enemy rolls over it: an orange blast.", period: 1, flight: 1, fx: () => ({}),
+        persist: mineAgent({ flight: 0.6, fly: (f, to, u, s, col, look, t) => { const p = add(lerp(f, to, u), [0, -Math.sin(Math.PI * u) * s * 0.6]); look.mine(p, G(s) * 0.85, t, col, false); },
+          land: (p, v, s) => smokePuff(p, v, s * 0.6, 0.35), boom: (p, v, s, col) => blast(p, v, s, col, 0.45) }) },
+      { key: "B", name: "Skip Toss", desc: "Mines are thrown low and skip twice along the ground before settling; they go off in a ring of shrapnel.", period: 1, flight: 1, fx: () => ({}),
+        persist: mineAgent({ flight: 0.75, fly: (f, to, u, s, col, look, t) => { const h = u < 0.5 ? Math.sin(Math.PI * u / 0.5) * 0.35 : u < 0.8 ? Math.sin(Math.PI * (u - 0.5) / 0.3) * 0.12 : Math.sin(Math.PI * (u - 0.8) / 0.2) * 0.05;
+            look.mine(add(lerp(f, to, Math.min(1, u * 1.05)), [0, -h * s]), G(s) * 0.85, t, col, false); },
+          boom: (p, v, s, col) => { blast(p, v, s, col, 0.35); for (let i = 0; i < 10; i++) line(add(p, mul(fa(i * TAU / 10), s * 0.1 + v * s * 0.5)), add(p, mul(fa(i * TAU / 10), s * 0.18 + v * s * 0.6)), [1, 0.85, 0.5, 1 - v], 1.3); } }) },
+      { key: "C", name: "Confetti Charge", desc: "Mines arc in and arm with a spinning light; when one goes off it's a blast of high-speed confetti in every direction.", period: 1, flight: 1, fx: () => ({}),
+        persist: mineAgent({ flight: 0.6, fly: (f, to, u, s, col, look, t) => look.mine(add(lerp(f, to, u), [0, -Math.sin(Math.PI * u) * s * 0.6]), G(s) * 0.85, t, col, false),
+          land: (p, v, s) => ring(p, s * 0.2 * v, [1, 1, 1, 0.5 * (1 - v)], 1),
+          boom: (p, v, s, col, n) => { blast(p, v, s, col, 0.3); const cs = [[1, 0.3, 0.35, 1], [0.3, 0.9, 1, 1], [1, 0.85, 0.3, 1], [0.6, 1, 0.4, 1], [1, 0.45, 0.85, 1]];
+            for (let i = 0; i < 16; i++) { const d = fa(rnd(n * 13 + i) * TAU), q = add(add(p, mul(d, s * (0.2 + 0.9 * rnd(i + n)) * v)), [0, v * v * s * 0.3]); fill(q, rectPts(1.6, 0.8), A(cs[i % 5], 1 - v), v * 12 + i, 1); } } }) },
+    ] },
+
+  // 12. Chemical Plant ----------------------------------------------------------------------------------
+  { id: "chem", num: 12, name: "Chemical Plant", cls: "Support", weapon: "Chemical", hits: "both", color: [0.55, 1.00, 0.30, 1],
+    desc: "A chemical manufacturing facility that produces and sprays chemicals on nearby enemies. \"Known to cause cancer in the state of California.\" It sprays one enemy at a time; soaked enemies drip and fizz and are skipped until the soak wears off (4 s). (Colour: today's Plasma Burn acid green.)",
+    looks: [
+      { key: "A", name: "Tank Farm Sprayer", muzzle: 16 / 48, theme: "Two round chemical tanks with sight-glass bands, piped into a central turret with a long spray nozzle; hazard striping on the pipe run.",
+        draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t);
+          for (const q of [[-8, -7], [-8, 7]]) { const p = add(c, mul(q, k)); orb(p, 5 * k, METAL_L); arc(p, 3.4 * k, 0.2, Math.PI - 0.2, A(col, 0.75), 1.4 * k); bar(p, c, 1.5 * k, METAL); }
+          hazard(c, 0, k, -12, -4, 0, col, 1.2); plate(c, ngon(8, 1, Math.PI / 8), METAL_L, aim, 6.4 * k, 1.2);
+          bar(c, P(c, aim, k, 15, 0), 2.4 * k, METAL); plate(P(c, aim, k, 15, 0), [[1.6, -2.2], [1.6, 2.2], [-1, 1.2], [-1, -1.2]], METAL_L, aim, k, 0.9); orb(c, 3.2 * k, METAL); glowDot(c, 1 * k, col); } },
+      { key: "B", name: "Vat Works", muzzle: 15 / 48, theme: "A small works building with two open vats of bubbling green chemical and a swivel spray cannon with a wide flared nozzle.",
+        draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t); plate(c, rectPts(11, 10), METAL_L, 0, k, 1.3); rivets(c, rectPts(11, 10), 0, k, 0.86, 0.8 * k);
+          for (const x of [-5.5, 5.5]) { const p = add(c, [x * k, 4.5 * k]); disc(p, 3.6 * k, OUTLINE); disc(p, 3.1 * k, dk(col, 0.45)); for (let i = 0; i < 2; i++) { const b = fmod(t * 1.3 + i * 0.5 + x, 1); disc(add(p, [(rnd(Math.floor(t * 1.3 + i * 0.5 + x)) - 0.5) * 3 * k, 0]), (0.5 + b) * k, A(lt(col, 0.4), 1 - b)); } }
+          bar(P(c, aim, k, -2, 0), P(c, aim, k, 12, 0), 3.4 * k, METAL); plate(P(c, aim, k, 13.5, 0), [[1.8, -3.4], [1.8, 3.4], [-1.4, 1.6], [-1.4, -1.6]], METAL_L, aim, k, 0.9);
+          orb(P(c, aim, k, -2, 0), 3.4 * k, METAL_L); glowDot(P(c, aim, k, -2, 0), 1 * k, col); } },
+      { key: "C", name: "Pressure Sphere", muzzle: 14 / 48, theme: "One big pressurised sphere with two gauges, bolted bands and a stubby twin-hose nozzle on top that turns to spray.",
+        draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t); orb(c, 11 * k, METAL_L); ring(c, 8 * k, METAL, 1.2 * k); for (let i = 0; i < 8; i++) { const q = add(c, mul(fa(i * TAU / 8), 9.6 * k)); disc(q, 0.8 * k, OUTLINE); disc(q, 0.5 * k, METAL_L); }
+          for (const [x, y] of [[-6, -5], [6, -5]]) { const g = add(c, [x * k, y * k]); disc(g, 2 * k, OUTLINE); disc(g, 1.6 * k, [0.9, 0.9, 0.85, 1]); line(g, add(g, mul(fa(-2 + Math.sin(t * 2 + x) * 0.4), 1.4 * k)), [0.8, 0.1, 0.1, 1], 0.6 * k); }
+          for (const y of [-1.6, 1.6]) bar(P(c, aim, k, 0, y), P(c, aim, k, 13, y), 1.4 * k, METAL); orb(c, 3.4 * k, METAL); glowDot(c, 1.1 * k, col); } },
+      { key: "D", name: "Cooling Tower Works", muzzle: 15 / 48, theme: "A squat hyperbolic cooling tower steaming green vapour beside a pump house, with a spray turret on the pump house roof.",
+        draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t); const ct = add(c, [-5 * k, -4 * k]); disc(ct, 8 * k, OUTLINE); disc(ct, 7.3 * k, lt(METAL_L, 0.1)); disc(ct, 5.2 * k, dk(col, 0.6)); ring(ct, 6.3 * k, METAL, 0.9 * k);
+          for (let i = 0; i < 3; i++) { const v = fmod(t * 0.5 + i / 3, 1); disc(add(ct, [v * 3 * k, -v * 9 * k]), (2 + v * 3) * k, A(lt(col, 0.5), 0.25 * (1 - v))); }
+          const ph = add(c, [6 * k, 5 * k]); plate(ph, rectPts(5, 5), METAL_L, 0, k, 1.1); bar(ph, add(ph, mul(fa(aim), 10 * k)), 2.2 * k, METAL); orb(ph, 2.6 * k, METAL); glowDot(ph, 0.9 * k, col); bar(ct, ph, 1.2 * k, METAL); } },
+      { key: "E", name: "Barrel Yard Sprayer", muzzle: 15 / 48, theme: "A ring of hazard-striped chemical drums round a hose-reel turret; a hose runs from the drums to a long lance nozzle.",
+        draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t);
+          for (let i = 0; i < 6; i++) { const q = add(c, mul(fa(i * TAU / 6 + Math.PI / 6), 11 * k)); disc(q, 3.4 * k, OUTLINE); disc(q, 2.9 * k, i % 2 ? [0.9, 0.75, 0.15, 1] : METAL_L); arc(q, 2.2 * k, 0, Math.PI, DARK_STRIPE, 0.9 * k); disc(q, 0.9 * k, dk(col, 0.3)); }
+          disc(c, 6 * k, OUTLINE); disc(c, 5.3 * k, METAL); ring(c, 3.6 * k, A(col, 0.6), 1.2 * k); bar(c, P(c, aim, k, 15, 0), 1.6 * k, METAL_L); glowDot(c, 1 * k, col); } },
+      { key: "F", name: "Distillery Columns", muzzle: 14 / 48, theme: "Three tall distillation columns with ladder rings, joined by pipes to a central still with a gooseneck spray nozzle.",
+        draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t);
+          for (let i = 0; i < 3; i++) { const q = add(c, mul(fa(-Math.PI / 2 + i * TAU / 3), 10 * k)); bar(c, q, 1.4 * k, METAL); orb(q, 4 * k, METAL_L); ring(q, 2.8 * k, METAL, 0.8 * k); glowDot(q, 0.9 * k, A(col, 0.5 + 0.5 * Math.sin(t * 2 + i))); }
+          orb(c, 5 * k, mix(METAL_L, col, 0.15)); bar(c, P(c, aim, k, 6, 0), 2.4 * k, METAL); bar(P(c, aim, k, 6, 0), P(c, aim, k, 13, 0), 1.6 * k, METAL); glowDot(c, 1.1 * k, col); } },
+    ],
+    anims: [
+      { key: "A", name: "Acid Stream", desc: "A green arc of acid droplets streams onto the target; it drips and fizzes while soaked, and the turret moves on to the next dry enemy.", period: 1, flight: 1, fx: () => ({}),
+        persist: soakAgent({ flight: 0.5, shot: (f, to, u, s, col, t) => { for (let i = 0; i < 9; i++) { const q = Math.min(u * 1.6, 1) - i * 0.06; if (q < 0) continue; const p = add(lerp(f, to, q), [0, -Math.sin(Math.PI * q) * s * 0.25]); disc(p, 1.4 + 0.3 * (i % 2), A(col, 0.9 - i * 0.06)); } },
+          soaked: (p, a, s, col, t, n) => { disc(p, s * 0.14, A(col, 0.3 * Math.min(1, a * 3))); for (let i = 0; i < 2; i++) { const d = fmod(t * 1.5 + i * 0.5 + n * 0.3, 1); disc(add(p, [(i - 0.5) * s * 0.1, d * s * 0.18]), 1.2, A(col, (1 - d) * Math.min(1, a * 3))); }
+            for (let i = 0; i < 3; i++) { const b = fmod(t * 2 + i * 0.33 + n, 1); ring(add(p, [(rnd(i + n) - 0.5) * s * 0.18, -b * s * 0.15]), 1 + b * 1.5, A(lt(col, 0.4), (1 - b) * Math.min(1, a * 3)), 0.8); } } }) },
+      { key: "B", name: "Mist Puff", desc: "A ball of green mist flies out and bursts into a clinging cloud around the target, which stays wreathed in mist while soaked.", period: 1, flight: 1, fx: () => ({}),
+        persist: soakAgent({ flight: 0.45, shot: (f, to, u, s, col) => { const p = lerp(f, to, u); for (let i = 0; i < 3; i++) disc(add(p, mul(fa(i * 2.1 + u * 6), s * 0.04)), s * (0.06 + u * 0.05), A(col, 0.35)); },
+          soaked: (p, a, s, col, t, n) => { const al = Math.min(1, a * 3); for (let i = 0; i < 4; i++) disc(add(p, mul(fa(t * 0.8 + i * 1.6 + n), s * 0.1)), s * (0.08 + 0.02 * Math.sin(t * 3 + i)), A(col, 0.18 * al)); } }) },
+      { key: "C", name: "Gel Glob", desc: "A fat glob of chemical gel is lobbed onto the target and splats, leaving it coated in dripping goo while soaked.", period: 1, flight: 1, fx: () => ({}),
+        persist: soakAgent({ flight: 0.55, shot: (f, to, u, s, col) => { const p = add(lerp(f, to, u), [0, -Math.sin(Math.PI * u) * s * 0.45]); disc(p, s * 0.06 + 1, OUTLINE); disc(p, s * 0.06, col); disc(add(p, [-s * 0.02, -s * 0.02]), s * 0.02, [1, 1, 1, 0.6]); },
+          soaked: (p, a, s, col, t, n) => { const al = Math.min(1, a * 3), r = Math.max(4, Math.min(11, s * 0.12)); arc(p, r + 1, Math.PI * 1.1, Math.PI * 1.9, A(col, 0.85 * al), 3);
+            for (let i = 0; i < 3; i++) { const d = fmod(t * 0.9 + i * 0.33 + n * 0.2, 1); line(add(p, [(i - 1) * r * 0.6, -r * 0.6]), add(p, [(i - 1) * r * 0.6, -r * 0.6 + d * s * 0.2]), A(col, al * (1 - d)), 1.6); } } }) },
+    ] },
+
+  // 13. Boost Tower -------------------------------------------------------------------------------------
+  { id: "boost", num: 13, name: "Boost Tower", cls: "Support", weapon: "None", hits: "none", color: [1.00, 0.40, 0.85, 1],
+    desc: "Towers in range are amped up and given stat boosts. \"Are you feeling it now Mr. Krabs?\" It attacks nothing; the preview puts three towers around it (a Gun Turret, Mortar and Laser stand-in) and shows them boosted with chevrons. Its real reach is 3 tiles. (Colour: today's Amplifier Pylon magenta; close to the CAS Gunship's pink.)",
+    looks: [
+      { key: "A", name: "Beacon Mast", muzzle: 0, fixed: true, theme: "A tripod mast on hydraulic legs crowned with a ring of beacon lights that chase round it, a glowing core in the middle.",
+        draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t);
+          for (let i = 0; i < 3; i++) { const d = fa(-Math.PI / 2 + i * TAU / 3); bar(add(c, mul(d, 4 * k)), add(c, mul(d, 14 * k)), 2.8 * k, lt(METAL_D, 0.12)); orb(add(c, mul(d, 14 * k)), 2 * k, METAL_L); }
+          orb(c, 7.4 * k, METAL); ring(c, 5.6 * k, METAL_L, 1.2 * k); for (let i = 0; i < 8; i++) { const on = fmod(t * 8 - i, 8) < 2; glowDot(add(c, mul(fa(i * TAU / 8), 5.6 * k)), (on ? 1 : 0.5) * k, A(col, on ? 1 : 0.4)); }
+          glowDot(c, (2 + 0.5 * Math.sin(t * 4)) * k, col); } },
+      { key: "B", name: "Emitter Array", muzzle: 0, fixed: true, theme: "A low hub with three small emitter dishes on arms, turning slowly and pulsing in turn toward the towers around it.",
+        draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t); plate(c, ngon(6, 1, 0), METAL_L, t * 0.2, 8 * k, 1.2);
+          for (let i = 0; i < 3; i++) { const a = t * 0.5 + i * TAU / 3, p = add(c, mul(fa(a), 11 * k)); bar(c, p, 1.8 * k, METAL); arc(p, 3.6 * k, a - 1.2, a + 1.2, OUTLINE, 3 * k); arc(p, 3.6 * k, a - 1.2, a + 1.2, METAL_L, 1.8 * k);
+            glowDot(p, (0.8 + 0.8 * (fmod(t - i * 0.4, 1.2) < 0.3)) * k, col); }
+          orb(c, 4 * k, METAL); glowDot(c, 1.6 * k, col); } },
+      { key: "C", name: "Broadcast Antenna", muzzle: 0, fixed: true, theme: "A square lattice antenna tower with stacked ring lights that light up bottom to top, and a spinning top rotor.",
+        draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t); const sq = [[-9, -9], [9, -9], [9, 9], [-9, 9]].map((q) => add(c, mul(q, k)));
+          for (let i = 0; i < 4; i++) bar(sq[i], sq[(i + 1) % 4], 1.6 * k, METAL_L); bar(sq[0], sq[2], 1 * k, METAL); bar(sq[1], sq[3], 1 * k, METAL);
+          for (let i = 0; i < 3; i++) ring(c, (7.5 - i * 2.2) * k, A(col, fmod(t * 2, 3) >= i ? 0.95 : 0.25), 1.1 * k);
+          const d = fa(t * 4); bar(sub(c, mul(d, 6 * k)), add(c, mul(d, 6 * k)), 1.4 * k, METAL_L); glowDot(c, 1.3 * k, col); } },
+      { key: "D", name: "Holo Projector", muzzle: 0, fixed: true, theme: "A flat projector disc throwing a slowly spinning holographic triangle and ring above it, flickering in magenta.",
+        draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t); disc(c, 10 * k, OUTLINE); disc(c, 9.3 * k, METAL); ring(c, 7 * k, METAL_L, 1.2 * k);
+          const fl = 0.75 + 0.25 * Math.sin(t * 23) * Math.sin(t * 7); outline(c, ngon(3, 1, t * 0.8), A(col, 0.75 * fl), 1.4 * k, 0, 9 * k); ring(c, (5 + Math.sin(t * 2)) * k, A(col, 0.5 * fl), 1 * k); glowDot(c, 1.6 * k, col); } },
+      { key: "E", name: "Capacitor Obelisk", muzzle: 0, fixed: true, theme: "A square obelisk banded with stacked capacitor rings that charge up one by one, crackling at the tip when full.",
+        draw(c, aim, s, fx, t, col) { const k = G(s), lvl = fmod(t * 1.5, 5); deck(c, k, col, t); plate(c, rectPts(8, 8), METAL_L, Math.PI / 4, k, 1.3);
+          for (let i = 0; i < 4; i++) outline(c, rectPts(7 - i * 1.6, 7 - i * 1.6), A(col, lvl > i ? 0.95 : 0.2), 1.2 * k, Math.PI / 4, k);
+          if (lvl > 4) for (let i = 0; i < 3; i++) { const a = rnd(Math.floor(t * 20) + i) * TAU; line(c, add(c, mul(fa(a), 4 * k)), A(lt(col, 0.4), 0.9), 0.8 * k); } glowDot(c, (1 + 0.4 * lvl) * k, col); } },
+      { key: "F", name: "Signal Drum", muzzle: 0, fixed: true, theme: "A big round drum emitter, its membrane rings rippling outward on each beat, braced by three struts.",
+        draw(c, aim, s, fx, t, col) { const k = G(s), beat = fmod(t * 1.2, 1); deck(c, k, col, t); for (let i = 0; i < 3; i++) { const d = fa(Math.PI / 2 + i * TAU / 3); bar(add(c, mul(d, 9 * k)), add(c, mul(d, 14 * k)), 2 * k, METAL); }
+          disc(c, 11 * k, OUTLINE); disc(c, 10.3 * k, METAL_L); disc(c, 8.6 * k, METAL_D); for (let i = 0; i < 3; i++) { const r = fmod(beat + i / 3, 1); ring(c, (2 + 6.4 * r) * k, A(col, 0.8 * (1 - r)), 1.1 * k); }
+          glowDot(c, (1.2 + 0.8 * (1 - beat)) * k, col); } },
+    ],
+    anims: [
+      { key: "A", name: "Pulse Rings", desc: "Magenta rings ripple out from the tower; as each ring reaches a tower, its chevrons flash and it glows for a moment.", period: 1, flight: 1, fx: () => ({}),
+        persist: (m, t, info, s, col) => { const R = s * 1.6, u = fmod(t, 1.5) / 1.5;
+          ring(info.c, R, A(col, 0.18), 1); for (const q of [u, fmod(u + 0.5, 1)]) ring(info.c, R * q, A(col, 0.6 * (1 - q)), 2);
+          for (const mt of matesOf(info)) { const d = distTo(mt.p, info.c) / R, hit = Math.max(0, 1 - Math.abs(u - d) * 6, 1 - Math.abs(fmod(u + 0.5, 1) - d) * 6); mateTower(mt.p, G(s), mt.col, t, 0.45 + 0.55 * hit, col); if (hit > 0) glowDot(mt.p, s * 0.1 * hit, A(col, 0.6 * hit)); } } },
+      { key: "B", name: "Link Beams", desc: "Thin magenta beams link the tower to each tower it boosts, with bright packets flowing along them; the chevrons glow steadily.", period: 1, flight: 1, fx: () => ({}),
+        persist: (m, t, info, s, col) => { for (const mt of matesOf(info)) { mateTower(mt.p, G(s), mt.col, t, 1, col); line(info.c, mt.p, A(col, 0.3), 3); line(info.c, mt.p, A(col, 0.8), 1);
+          for (let i = 0; i < 2; i++) glowDot(lerp(info.c, mt.p, fmod(t * 0.8 + i * 0.5, 1)), s * 0.03, col); } } },
+      { key: "C", name: "Aura Field", desc: "A steady translucent aura surrounds the tower with a slowly turning edge; boosted towers inside get a glowing outline and rising sparkles.", period: 1, flight: 1, fx: () => ({}),
+        persist: (m, t, info, s, col) => { const R = s * 1.6; disc(info.c, R, A(col, 0.07)); arcSegments(info.c, R, 12, 0.18, t * 0.3, A(col, 0.55), 1.6);
+          for (const mt of matesOf(info)) { ring(mt.p, s * 0.32, A(col, 0.5 + 0.2 * Math.sin(t * 3)), 1.5); mateTower(mt.p, G(s), mt.col, t, 0.9, col);
+            for (let i = 0; i < 3; i++) { const q = fmod(t * 0.7 + i / 3 + mt.p[0], 1); glowDot(add(mt.p, [(rnd(i + mt.p[1]) - 0.5) * s * 0.4, -q * s * 0.4]), s * 0.015, A(col, 1 - q)); } } } },
+      { key: "D", name: "Chevron Rain", desc: "Every couple of seconds a glowing chevron drops onto each boosted tower from above and lands with a flash, stacking with the others.", period: 1, flight: 1, fx: () => ({}),
+        persist: (m, t, info, s, col) => { matesOf(info).forEach((mt, i) => { const u = fmod(t * 0.5 + i * 0.25, 1); mateTower(mt.p, G(s), mt.col, t, u > 0.4 ? 1 : 0.5, col);
+          if (u < 0.4) { const q = add(mt.p, [0, -(16 * G(s) * 0.75) - (1 - u / 0.4) * s * 0.6]); polyline([add(q, [-3 * G(s), 2 * G(s)]), q, add(q, [3 * G(s), 2 * G(s)])], A(col, 0.9), 2); } else if (u < 0.5) glowDot(mt.p, s * 0.12 * (1 - (u - 0.4) * 10), col); }); } },
+      { key: "E", name: "Power Cables", desc: "Glowing cables run along the ground from the tower to each boosted tower, with pulses of power travelling down them; the decks light up as each pulse arrives.", period: 1, flight: 1, fx: () => ({}),
+        persist: (m, t, info, s, col) => { matesOf(info).forEach((mt, i) => { const mid = add(lerp(info.c, mt.p, 0.5), [0, s * 0.15]), pts = []; for (let j = 0; j <= 10; j++) { const u = j / 10; pts.push(lerp(lerp(info.c, mid, u), lerp(mid, mt.p, u), u)); }
+          polyline(pts, OUTLINE, 3.2); polyline(pts, METAL, 2); const q = fmod(t * 0.9 + i * 0.3, 1); glowDot(pts[Math.floor(q * 10)], s * 0.035, col); mateTower(mt.p, G(s), mt.col, t, q > 0.85 ? 1 : 0.55, col); if (q > 0.85) ring(mt.p, s * 0.3, A(col, (q - 0.85) * 6), 1.5); }); } },
+      { key: "F", name: "Overcharge Sparks", desc: "Magenta arcs jump from the tower to each boosted tower in turn; the struck tower crackles and its barrel glows hot for a moment.", period: 1, flight: 1, fx: () => ({}),
+        persist: (m, t, info, s, col) => { const mates = matesOf(info), cur = Math.floor(t * 1.5) % mates.length, u = fmod(t * 1.5, 1);
+          mates.forEach((mt, i) => { const on = i === cur; mateTower(mt.p, G(s), mt.col, t, on ? 1 : 0.5, col);
+            if (on && u < 0.35) { const pts = [info.c]; for (let j = 1; j < 6; j++) pts.push(add(lerp(info.c, mt.p, j / 6), mul(orth(norm(sub(mt.p, info.c))), (rnd(Math.floor(t * 30) + j) - 0.5) * s * 0.25))); pts.push(mt.p);
+              polyline(pts, A(col, 0.3), 4); polyline(pts, col, 1.6); polyline(pts, [1, 1, 1, 0.8], 0.6); }
+            if (on) glowDot(add(mt.p, [s * 0.15, -s * 0.08]), s * 0.05 * (1 - u), [1, 0.6, 0.3, 1]); }); } },
+    ] },
+
+  // 14. Radar Tower -------------------------------------------------------------------------------------
+  { id: "radar", num: 14, name: "Radar Tower", cls: "Utility", weapon: "Energy", hits: "both", color: [0.35, 1.00, 0.85, 1],
+    desc: "Detects and alerts nearby towers of stealthy or otherwise hidden enemies. \"I've lost the bleeps, I've lost the sweeps, and I've lost the creeps.\" In the preview every other enemy is cloaked (a faint shimmer) until a ping reveals it for 1 s, marked with brackets. (Colour: today's Sensor Array teal.)",
+    looks: [
+      { key: "A", name: "Dish Mast", muzzle: 0, fixed: true, theme: "A braced mast carrying a big parabolic dish that turns steadily, a feed horn at its focus.",
+        dishAngle: (t) => t * TAU / 3,
+        draw(c, aim, s, fx, t, col) { const k = G(s), a = this.dishAngle(t); deck(c, k, col, t); for (let i = 0; i < 4; i++) { const d = fa(Math.PI / 4 + i * Math.PI / 2); bar(add(c, mul(d, 3 * k)), add(c, mul(d, 12 * k)), 2 * k, lt(METAL_D, 0.12)); }
+          orb(c, 4 * k, METAL); arc(c, 10 * k, a - 1.1, a + 1.1, OUTLINE, 4.6 * k); arc(c, 10 * k, a - 1.1, a + 1.1, METAL_L, 3 * k); arc(c, 9.6 * k, a - 0.9, a - 0.1, lt(METAL_L, 0.4), 0.9 * k);
+          line(c, add(c, mul(fa(a), 6 * k)), METAL_L, 1 * k); glowDot(add(c, mul(fa(a), 6 * k)), 1 * k, col); } },
+      { key: "B", name: "Phased Array Block", muzzle: 0, fixed: true, theme: "A square block faced with flat phased-array panels whose tiles light up in sweeping sequence, a small whip antenna on top.",
+        draw(c, aim, s, fx, t, col) { const k = G(s); deck(c, k, col, t); plate(c, rectPts(11, 11), METAL_L, 0, k, 1.3);
+          for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) { const on = fmod(t * 3 - (i + j) * 0.25, 2) < 0.4; rect(c[0] + (-8 + i * 4.2) * k, c[1] + (-8 + j * 4.2) * k, 3.4 * k, 3.4 * k, on ? A(col, 0.85) : [0.12, 0.16, 0.16, 1]); }
+          bar(c, add(c, [3 * k, -13 * k]), 0.9 * k, METAL_L); glowDot(add(c, [3 * k, -13 * k]), 0.9 * k, col); } },
+      { key: "C", name: "Twin Dish Rotor", muzzle: 0, fixed: true, theme: "A rotor arm turning on a hub with a small dish at each end facing outward, sweeping twice per turn.",
+        dishAngle: (t) => t * TAU / 3,
+        draw(c, aim, s, fx, t, col) { const k = G(s), a = this.dishAngle(t); deck(c, k, col, t); plate(c, ngon(8, 1, Math.PI / 8), METAL, 0, 7 * k, 1.2);
+          for (const sg of [-1, 1]) { const d = fa(a + (sg > 0 ? 0 : Math.PI)), p = add(c, mul(d, 10 * k)); bar(c, p, 2 * k, METAL_L); const pa = Math.atan2(d[1], d[0]);
+            arc(p, 3.6 * k, pa - 1.2, pa + 1.2, OUTLINE, 3 * k); arc(p, 3.6 * k, pa - 1.2, pa + 1.2, METAL_L, 1.8 * k); glowDot(p, 0.8 * k, col); }
+          orb(c, 3 * k, METAL_L); glowDot(c, 1 * k, col); } },
+    ],
+    anims: [
+      { key: "A", name: "Ping Ring", desc: "Every 3 s a teal ring expands across the radar's range; each cloaked enemy it passes is revealed with brackets for a second.", period: 1, flight: 1, fx: () => ({}),
+        persist: radarAgent({ draw: (m, t, info, s, col) => { const u = fmod(t, 3) / 1.2; if (u < 1) { ring(info.c, s * 3.3 * u, A(col, 0.7 * (1 - u)), 2); ring(info.c, s * 3.3 * u - 4, A(col, 0.25 * (1 - u)), 4); } },
+          hits: (m, t, info, s, e) => { const u = fmod(t, 3) / 1.2; return u < 1 && Math.abs(distTo(e.p, info.c) - s * 3.3 * u) < s * 0.15; } }) },
+      { key: "B", name: "Sweep Beam", desc: "A sweep wedge turns round the tower once every 3 s, following the dish (round 2), like a radar screen; cloaked enemies light up with brackets as it passes over them.", period: 1, flight: 1, fx: () => ({}),
+        persist: radarAgent({ draw: (m, t, info, s, col) => { const a = sweepAngle(info, t), R = s * 3.3; for (let i = 0; i < 6; i++) { const a0 = a - i * 0.08; poly([info.c, add(info.c, mul(fa(a0 - 0.08), R)), add(info.c, mul(fa(a0), R))], A(col, 0.16 * (1 - i / 6))); } line(info.c, add(info.c, mul(fa(a), R)), A(col, 0.7), 1.3); },
+          hits: (m, t, info, s, e) => { const a = fmod(sweepAngle(info, t), TAU), b = fmod(Math.atan2(e.p[1] - info.c[1], e.p[0] - info.c[0]), TAU), d = fmod(a - b, TAU); return d < 0.15; } }) },
+      { key: "C", name: "Pulse Burst", desc: "Every 3 s the whole range flashes in a grid pattern at once; revealed enemies get brackets and a link line back to the radar, alerting the towers.", period: 1, flight: 1, fx: () => ({}),
+        persist: radarAgent({ draw: (m, t, info, s, col) => { const u = fmod(t, 3); if (u < 0.35) { const a = 1 - u / 0.35, R = s * 3.3; disc(info.c, R, A(col, 0.08 * a)); for (let i = -3; i <= 3; i++) { line(add(info.c, [i * s * 0.5, -R]), add(info.c, [i * s * 0.5, R]), A(col, 0.18 * a), 1); line(add(info.c, [-R, i * s * 0.5]), add(info.c, [R, i * s * 0.5]), A(col, 0.18 * a), 1); } }
+            for (const e of info.all) if (cloaked(e) && (m.seen[e.i] || 0) > t) line(info.c, e.p, A(col, 0.35 * Math.min(1, (m.seen[e.i] - t) * 2)), 1); },
+          hits: (m, t, info, s, e) => fmod(t, 3) < 0.05 }) },
+    ] },
+
+  // 15. Cryo Tower --------------------------------------------------------------------------------------
+  { id: "cryo", num: 15, name: "Cryo Tower", cls: "Support", weapon: "Field", hits: "both", color: [0.55, 0.85, 1.00, 1],
+    desc: "Produces a wave of sub-zero gas that stunts the mobility of enemies within range. \"...a snowball fight in the middle of a heatwave.\" A cold wave every 2 s; every enemy it reaches is chilled (frosted) and slowed (the preview doesn't slow them). No damage at stock. (Colour: today's Cryo Emitter ice blue.)",
+    looks: [
+      { key: "A", name: "Vent Tank", muzzle: 0, fixed: true, theme: "A squat frosted tank with four armoured vents round it that breathe white gas as each wave goes out; frost rings its rim.",
+        draw(c, aim, s, fx, t, col) { const k = G(s), mm = fx.mem || {}, puff = decay(t - (mm.wave ?? -9), 0.6); deck(c, k, col, t);
+          for (let i = 0; i < 4; i++) { const d = fa(Math.PI / 4 + i * Math.PI / 2), p = add(c, mul(d, 11 * k)); plate(p, rectPts(2.6, 3.4), METAL_L, Math.PI / 4 + i * Math.PI / 2, k, 1); for (let j = 0; j < 3; j++) line(add(p, mul(rot(d, Math.PI / 2), (j - 1) * 1.6 * k)), add(add(p, mul(rot(d, Math.PI / 2), (j - 1) * 1.6 * k)), mul(d, 1.5 * k)), A(FROST, 0.6), 0.8 * k); if (puff > 0) smokePuff(add(p, mul(d, 3 * k)), 1 - puff, s * 0.6, 0.55); }
+          orb(c, 8 * k, mix(METAL_L, FROST, 0.25)); ring(c, 8 * k, A(FROST, 0.55), 1.2 * k); ring(c, 4.5 * k, METAL, 1 * k); glowDot(c, (1.4 + 1.2 * puff) * k, col); } },
+      { key: "B", name: "Compressor Block", muzzle: 0, fixed: true, theme: "A square compressor housing with a big fan grille spinning on top, coolant pipes round its sides and frost built up on the corners.",
+        draw(c, aim, s, fx, t, col) { const k = G(s), mm = fx.mem || {}, puff = decay(t - (mm.wave ?? -9), 0.6); deck(c, k, col, t); plate(c, rectPts(11.5, 11.5), METAL_L, 0, k, 1.3);
+          for (const q of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) disc(add(c, mul(q, 10 * k)), 2.4 * k, A(FROST, 0.7));
+          disc(c, 8.4 * k, OUTLINE); disc(c, 7.8 * k, METAL_D); for (let i = 0; i < 5; i++) { const a = t * (6 + 10 * puff) + i * TAU / 5; fill(c, [[1.4, 0], [7, 1.8], [7, -1.4]], METAL_L, a, k); }
+          ring(c, 7.8 * k, METAL, 1.2 * k); orb(c, 1.8 * k, METAL); glowDot(c, (1 + puff) * k, col); bar(add(c, [-11.5 * k, -6 * k]), add(c, [-11.5 * k, 6 * k]), 1.4 * k, mix(METAL_L, FROST, 0.4)); } },
+      { key: "C", name: "Cryo Spire", muzzle: 0, fixed: true, theme: "A tall ice-blue frost crystal standing in an armoured collar, coolant lines feeding it, a cold glow pulsing inside with each wave.",
+        draw(c, aim, s, fx, t, col) { const k = G(s), mm = fx.mem || {}, puff = decay(t - (mm.wave ?? -9), 0.8); deck(c, k, col, t);
+          for (let i = 0; i < 3; i++) { const d = fa(Math.PI / 2 + i * TAU / 3); bar(add(c, mul(d, 7 * k)), add(c, mul(d, 14 * k)), 1.4 * k, mix(METAL_L, FROST, 0.4)); }
+          disc(c, 9 * k, OUTLINE); disc(c, 8.3 * k, METAL); ring(c, 7 * k, METAL_L, 1.2 * k);
+          solid(c, [[0, -7], [3.4, -2], [2.6, 5], [0, 7], [-2.6, 5], [-3.4, -2]], A(mix(FROST, col, 0.3), 0.85), 0, k, 1); line(add(c, [0, -6 * k]), add(c, [0, 6 * k]), [1, 1, 1, 0.6], 0.8 * k);
+          glowDot(c, (1.2 + 2 * puff) * k, FROST); } },
+    ],
+    anims: [
+      { key: "A", name: "Gas Wave", desc: "A ring of white freezing fog rolls out to the edge of range every 2 s; enemies it touches frost over.", period: 1, flight: 1, fx: () => ({}),
+        persist: coldAgent({ travel: 1.1, draw: (c, u, R, s, col, t, raw) => { if (raw > 1.2) return; const r = R * u, a = 1 - Math.min(1, raw);
+          for (let i = 0; i < 16; i++) disc(add(c, mul(fa(i * TAU / 16 + t * 0.3), r)), s * (0.1 + 0.05 * Math.sin(i * 3 + t)), A(FROST, 0.35 * a)); ring(c, r, A(FROST, 0.4 * a), 2); } }) },
+      { key: "B", name: "Frost Burst", desc: "A fast, sharp cold flash rings out with ice shards flying outward; chilled enemies sparkle with ice crystals.", period: 1, flight: 1, fx: () => ({}),
+        persist: coldAgent({ travel: 0.45, draw: (c, u, R, s, col, t, raw) => { if (raw > 1.3) return; const r = R * u, a = 1 - Math.min(1, raw / 1.3);
+          ring(c, r, A([1, 1, 1, 1], 0.7 * a), 2.5); ring(c, r * 0.92, A(col, 0.5 * a), 1.5);
+          for (let i = 0; i < 12; i++) { const d = fa(i * TAU / 12 + 0.2), p = add(c, mul(d, r)); line(p, add(p, mul(d, s * 0.12)), A(FROST, a), 1.4); } } }) },
+      { key: "C", name: "Creeping Mist", desc: "Cold mist pours out and creeps slowly to the edge of range, lingering in drifting puffs; each wave brightens it.", period: 1, flight: 1, fx: () => ({}),
+        persist: coldAgent({ travel: 1.8, draw: (c, u, R, s, col, t, raw) => { const a = 0.55 + 0.45 * (1 - Math.min(1, raw / 2));
+          for (let i = 0; i < 22; i++) { const ang = rnd(i) * TAU + t * 0.1 * (i % 2 ? 1 : -1), rr = R * Math.min(u, rnd(i + 9)), p = add(c, mul(fa(ang), rr));
+            disc(p, s * (0.12 + 0.04 * Math.sin(t * 1.5 + i)), A(FROST, 0.16 * a)); } } }) },
+      { key: "D", name: "Snow Squall", desc: "Snowflakes spiral out from the tower in a swirling squall that fills the range; enemies caught in it are dusted white.", period: 1, flight: 1, fx: () => ({}),
+        persist: coldAgent({ travel: 1.3, draw: (c, u, R, s, col, t, raw) => { const a = raw > 1.5 ? 0.3 : 1 - 0.7 * Math.min(1, raw / 1.5);
+          for (let i = 0; i < 26; i++) { const rr = R * fmod(rnd(i) + t * 0.35, 1), ang = rnd(i + 5) * TAU + rr / R * 4 + t * 0.6, p = add(c, mul(fa(ang), rr));
+            const f = 1.2 + rnd(i + 2) * 1.6; for (let j = 0; j < 3; j++) { const d = fa(j * Math.PI / 3 + t); line(sub(p, mul(d, f)), add(p, mul(d, f)), A([1, 1, 1, 1], 0.7 * a), 0.8); } } } }) },
+      { key: "E", name: "Ice Spike Ring", desc: "A ring of ice spikes bursts up out of the ground and races outward, then melts away behind the front.", period: 1, flight: 1, fx: () => ({}),
+        persist: coldAgent({ travel: 0.9, draw: (c, u, R, s, col, t, raw) => { if (raw > 1.6) return;
+          for (let j = 0; j < 3; j++) { const back = u - j * 0.12; if (back <= 0) continue; const r = R * back, a = Math.max(0, 1 - (raw - back) * 1.4) * (1 - j * 0.3);
+            for (let i = 0; i < 18; i++) { const d = fa(i * TAU / 18 + j * 0.17), p = add(c, mul(d, r)); fill(p, [[0, -s * 0.12], [s * 0.035, 0], [-s * 0.035, 0]], A(mix(FROST, [1, 1, 1, 1], 0.4), a), 0, 1); } } } }) },
+      { key: "F", name: "Fog Jets", desc: "Four jets of dense freezing fog blast out of the vents in a cross and spread sideways until they fill the range.", period: 1, flight: 1, fx: () => ({}),
+        persist: coldAgent({ travel: 1.2, draw: (c, u, R, s, col, t, raw) => { if (raw > 1.8) return; const a = 1 - Math.min(1, raw / 1.8);
+          for (let j = 0; j < 4; j++) { const d = fa(Math.PI / 4 + j * Math.PI / 2); for (let i = 0; i < 7; i++) { const q = (i + 1) / 7; if (q > u) break; const spread = q * q * R * 0.5; for (const sg of [-1, 0, 1]) disc(add(add(c, mul(d, R * q)), mul(orth(d), sg * spread)), s * (0.08 + q * 0.12), A(FROST, 0.18 * a)); } } } }) },
+    ] },
+];
+const DEFAULTS = { mines: { look: "F", anim: "C" }, chem: { look: "F", anim: "A" }, boost: { look: "F", anim: "F" }, radar: { look: "A", anim: "B" }, cryo: { look: "B", anim: "C" } };
+
+return { TOWERS };
+})();
+const NO_BOOT = true;
+// ---- Tower art second pass: Radar Tower (tower 14), round 1 ------------------------------------------------------
+// Base: look A Dish Mast, animation B Sweep Beam (the sweep follows the dish). One parametric model built on the lessons so far: every
+// step REBUILDS a part of the station (structure over decoration), the options swap that part's style, masteries turn gold, and the
+// agent runs the real rules (ping rate, reveal time, range, radiation circle) so the preview shows what each step does.
+// Layout (game px, top-down): a hub with the turning dish and feed horn (path 1, Power/Range); a phased-array panel on each edge,
+// added south, north, east, west (path 2, Speed/Frequency); an analysis cabinet in each corner, added NW, NE, SE, SW (path 3, Unmasking).
+// The Bigger Dish Retrofit's +20 px overlaps the path-1 range steps and the Signal Processor's longer reveal overlaps the reveal
+// steps; both are kept and stack (the carpet rule). The radiation circle (path 1, step 3 on) only hurts revealed enemies (owner).
+const PAGE = { title: "Radar Tower: paths and Retrofits (second pass)", store: "bl-tower-art-p2-radar-r15" };
+const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], RAD = [1, 0.3, 0.25, 1], DARKP = [0.12, 0.16, 0.16, 1];
+const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+const cloaked = (e) => e.i % 2 === 0;                                                // every other enemy is cloaked in the preview
+function hideCloaked(e, s, t) { const r = Math.max(4, Math.min(11, s * 0.12)) + 2; disc(e.p, r, e.air ? [0.07, 0.09, 0.08, 0.82] : [0.16, 0.15, 0.13, 0.82]);
+  ring(e.p, r - 1, [0.7, 0.9, 1, 0.18 + 0.1 * Math.sin(t * 9 + e.i)], 1); }
+function revealMark(p, s, col, a) { const r = Math.max(4, Math.min(11, s * 0.12)) + 4;
+  for (let i = 0; i < 4; i++) { const d = fa(Math.PI / 4 + i * Math.PI / 2), c0 = add(p, mul(d, r)); line(c0, add(c0, mul(rot(d, Math.PI * 0.75), r * 0.6)), A(col, a), 1.5); line(c0, add(c0, mul(rot(d, -Math.PI * 0.75), r * 0.6)), A(col, a), 1.5); } }
+const rnd = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
+const Kp = (B, pi, k) => (B.lv[pi] > k ? B.key("p" + pi + "s" + k) : null);
+const RNG = [160, 180, 200, 200, 220, 230], PER = [3, 2.7, 2.4, 2, 1.6, 1.6], DUR = [1, 1.1, 1.2, 1.3, 1.3, 1.3];
+const rangePx = (B) => RNG[B.lv[0]] + (B.r === 0 ? 20 : 0);
+const radPx = (B) => (B.lv[0] >= 5 ? 80 : B.lv[0] === 4 ? 70 : B.lv[0] === 3 ? 60 : 0);
+const durOf = (B) => Math.max(DUR[B.lv[1]], B.lv[2] >= 3 ? 1.3 : 1) + (B.r === 1 ? 0.5 : 0);
+
+// ---- A revealed enemy's mark grows with the unmasking path: rank tag, unmask diamond, track-lock tether, fake-check badge, gold lock --------
+function markFor(p, s, col, a, l3, t, c) {
+  const gold = l3 >= 5, mc = gold ? GOLD : col, r = Math.max(4, Math.min(11, s * 0.12)) + 4;
+  if (l3 === 0) { revealMark(p, s, mc, a); return; }
+  if (l3 === 1) { revealMark(p, s, mc, a); const q = add(p, [r + 3, -r + 1]); polyline([add(q, [-2, 1.4]), q, add(q, [2, 1.4])], A(mc, a), 1.4); polyline([add(q, [-2, 3.4]), add(q, [0, 2]), add(q, [2, 3.4])], A(mc, a), 1.4); return; }     // brackets and a rank tag
+  if (l3 === 2) { outline(p, [[0, -1], [1, 0], [0, 1], [-1, 0]], A(mc, a), 1.5, 0, r * 1.05); outline(p, [[0, -1], [1, 0], [0, 1], [-1, 0]], A(mc, 0.4 * a), 1, 0, r * 1.4); return; }                          // a diamond frame
+  if (l3 === 3) { ring(p, r * 1.1, A(mc, a), 1.5); arcSegments(p, r * 1.5, 3, 0.9, t * 2.4, A(mc, 0.8 * a), 1.4); return; }                                                    // a lock ring, and each turret's tracking line runs from its antenna
+  if (l3 === 4) { outline(p, ngon(6, 1), A(mc, a), 1.5, Math.PI / 6, r * 1.15); const q = add(p, [-r - 3, -r + 1]); ring(q, 2.6, A(mc, 0.8 * a), 1.1); polyline([add(q, [-1.2, 0.2]), add(q, [-0.3, 1.1]), add(q, [1.4, -1.0])], A(mc, a), 1.3); return; } // a hex frame with a fake-check badge
+  ring(p, r * 1.1, A(GOLD, a), 1.6); ring(p, r * 1.5, A(GOLD, 0.6 * a), 1.2); arcSegments(p, r * 1.9, 4, 0.7, t * 1.6, A(GOLD, 0.8 * a), 1.4); }                                      // gold lock rings (they linger)
+
+// ---- The agent: the dish turns once per ping period; the wedge reveals cloaked enemies it passes; the radiation circle hurts revealed ones ---------------
+function radarAgent(B) { return (m, t, info, s, col) => { if (!m.seen) { m.seen = {}; m.lock = {}; m.ang = 0; m.tt = t; }
+  const dt = Math.min(0.1, Math.max(0, t - m.tt)); m.tt = t; const L1 = B.lv[0], L2 = B.lv[1], L3 = B.lv[2], constant = L2 >= 5, c = info.c;
+  m.ang = fmod(m.ang + dt * TAU / PER[L2], TAU);
+  const R = s * 3.3 * rangePx(B) / 160, ang = m.shown ?? m.ang, dur = durOf(B), rr = s * 3.3 * radPx(B) / 160, wc = constant ? GOLD : col;
+  ring(c, R, A(wc, 0.14), 1); for (let i = 0; i < 24; i += 2) line(add(c, mul(fa(i * TAU / 24 + t * 0.05), R)), add(c, mul(fa((i + 1) * TAU / 24 + t * 0.05), R)), A(wc, 0.3), 1.2);
+  if (rr > 0) { const rc = L1 >= 5 ? GOLD : RAD, pulse = 0.5 + 0.5 * Math.sin(t * 3); disc(c, rr, A(rc, 0.07 + 0.05 * pulse)); arcSegments(c, rr, 20, 0.22, t * 0.4, A(rc, 0.55), 1.3); ring(c, rr * 0.92, A(rc, 0.12), 1); }
+  if (constant) { disc(c, R, A(GOLD, 0.05)); ring(c, R * (0.55 + 0.05 * Math.sin(t * 2)), A(GOLD, 0.2), 1); }
+  else for (let i = 0; i < 6; i++) { const a0 = ang - i * 0.08; poly([c, add(c, mul(fa(a0 - 0.08), R)), add(c, mul(fa(a0), R))], A(col, 0.16 * (1 - i / 6))); }
+  if (constant) for (const a of [ang, ang + Math.PI]) line(c, add(c, mul(fa(a), R)), A(GOLD, 0.6), 1);                            // Constant Track: a scan line for each dish                            // Constant Track: a scan line for each dish
+  else line(c, add(c, mul(fa(ang), R)), A(wc, 0.7), 1.3);
+  for (const e of info.all) { const d = dist(e.p, c), inR = d < R;
+    if (!cloaked(e)) { if (rr > 0 && d < rr) radHit(e.p, s, t, e.i, L1); continue; }
+    const b = fmod(Math.atan2(e.p[1] - c[1], e.p[0] - c[0]), TAU), dd = fmod(ang - b, TAU), hit = inR && (constant || dd < Math.max(0.2, 2 * TAU * dt / PER[L2]));
+    if (hit) m.seen[e.i] = t + dur;
+    if (L3 >= 5 && (m.seen[e.i] || 0) > t && !inR) m.lock[e.i] = t + 5;                                          // Total Exposure: they can't re-cloak for 5 s after leaving
+    const until = Math.max(m.seen[e.i] || 0, m.lock[e.i] || 0);
+    if (until > t) { markFor(e.p, s, col, Math.min(1, (until - t) * 2), L3, t, c); if (rr > 0 && d < rr) radHit(e.p, s, t, e.i, L1); } else hideCloaked(e, s, t); } }; }
+function radHit(p, s, t, i, L1) { const r = Math.max(4, Math.min(11, s * 0.12)), rc = L1 >= 5 ? GOLD : RAD; disc(p, r * 1.6, A(rc, 0.22 + 0.15 * Math.sin(t * 14 + i)));
+  for (let j = 0; j < 3; j++) { const a = t * 5 + i + j * 2.1; line(add(p, mul(fa(a), r * 0.7)), add(p, mul(fa(a), r * (1.3 + 0.4 * Math.sin(t * 9 + j)))), A(rc, 0.8), 1.2); } }
+
+// ---- The model ----------------------------------------------------------------------------------------------------------------------------------------------
+const PSLOT = [[0, 12.2, 0], [0, -12.2, Math.PI], [12.8, 0, -Math.PI / 2], [-12.8, 0, Math.PI / 2]];     // panel slots: S, N, E, W (x, y, rotation: facing outward)
+const CSLOT = [[-7.4, -7.4], [7.4, -7.4], [7.4, 7.4], [-7.4, 7.4]];                                                          // cabinet slots: NW, NE, SE, SW
+const P2 = {
+  tower: "radar", look: "A", anim: "B",
+  intro: "Round 15: the tracker turrets move freely: they never spin, and they do not return to a rest position when a target is lost; they hold their last aim until another enemy is revealed in range (your note). Round 14: the tracker turrets no longer spin when idle: they rest pointing outward from their corner and swing freely, through any angle, to each revealed enemy they follow (your note). Round 13: the tracking lines now run from each tracker turret's antenna tip to the revealed enemy it follows (one turret per enemy, the nearest), instead of from the centre of the tower (your screenshot and note). Round 12: the bright scan line now lines up with the dish (your screenshot): it was drawn a frame ahead of the dish, which showed as the line sitting off to one side whenever the page ran slowly; the line and beam are now drawn at the angle the dish was drawn at. Round 11: the scan-line changes of rounds 9 and 10 are reverted (the scan lines and the sweep beam are back to starting at the centre of the tower, as in round 8); the gold antenna lights from round 9 stay. Round 10: every scan line, not just Constant Track's, starts at the antenna light, and the sweep beam is centred on its scan line (it used to trail behind it); an enemy is revealed as the line passes over its middle (your notes). Round 9: with Constant Track both antenna lights are gold (the first dish's light stayed teal when no emitter was fitted), and each dish's scan line starts at its antenna light instead of the centre of the tower (your notes). Round 8: the spars holding the dishes and the antenna arms are grey on both dishes (only the dishes are gold), the curved arrays read grey with small gold lamps, and the second dish's light is drawn on top in gold (your notes). Round 7: every stage is picked and your notes are applied: the Constant Track ring is grey, its dishes and the emitter are gold, both dishes have a scan line and the array bodies are grey with gold lights; the trackers have no light cones. Use the build preview to check combinations. Round 6: three struts join the dish to the centre mast; the Twin Prong Emitter is one solid V; the double radar moved to the Path 2 mastery (Constant Track builds a second gold dish), so the Path 1 mastery shows its three options again, with the twin dish replaced by a gold feed tripod. Round 5: the tracking turrets are smaller again and sit inside the deck, and the radar dish is thinner (your notes). Round 4: the tracking turrets are smaller, nothing sits under them, and the mastery only turns their blue accents gold (your notes); the three mastery options differ by a gold wall, a glowing gold lamp or a twin barrel. Round 3: your picks drawn with your note applied: the tracking turret stays from Track Lock on, the Illusion Filter builds onto it (a lens ring) and the Total Exposure mastery shows three gold turret builds (still to pick). Round 2: your Path 1 and Path 2 picks are drawn; Path 3 is redesigned (your note): instead of adding a cabinet at a time, all four corner stations are rebuilt to a new design at every step, and the mark on a revealed enemy changes style rather than gaining extras. The Signal Processor shows its three options again. Round 1: every step rebuilds a part of the station. Path 1 (Power/Range) owns the centre: a bigger dish, a taller mast, then a radiation emitter (with a faint red inner circle that only hurts revealed enemies), heat-sinks or capacitors, and a gold microwave array. Path 2 (Speed/Frequency) adds a phased-array panel on each edge (south, north, east, west) and the dish turns faster to match the ping rate; the mastery turns them gold with a constant reveal. Path 3 (Unmasking) adds an analysis cabinet in each corner (NW, NE, SE, SW) and the marks on revealed enemies grow with each step (rank tag, unmask diamond, track-lock tether, fake-check badge, gold lock). The Retrofits rebuild the dish, the hub or the mast. Overlapping Retrofits are kept and stack (the carpet rule). Unpicked steps show option A.",
+  mods(B) { return { period: 1, flight: 1, multi: false, persist: radarAgent(B) }; },
+  muzzleAt(B, m, kk, c) { return c; },
+  model(c, aim, s, fx, t, col, info, B) {
+    const k = G(s), mm = fx.mem || {}, ang = mm.ang ?? t * TAU / 3, L1 = B.lv[0], L2 = B.lv[1], L3 = B.lv[2], S = (x, y) => add(c, [x * k, y * k]), R = B.r >= 0 ? B.key("r" + B.r) : null;
+    if (fx.mem) fx.mem.shown = ang;                                                    // the agent draws its scan line at the angle the dish was drawn at (the model runs a frame before the agent, so a slow frame rate would leave the line ahead of the dish)
+    deck(c, k, col, t);
+    // ---- Path 2: a phased-array panel on each edge; the tiles light in sequence at the ping rate ------------------------------------------------------------
+    const gold2 = L2 >= 5, lc2 = gold2 ? GOLD : col, ph = t * (2.2 + 0.5 * L2);
+    if (gold2) { const key = B.key("p1s4");
+      if (key === "A") ring(c, 10.2 * k, A(STEEL, 0.95), 1.4 * k);   // a grey cable ring
+      if (key === "C") for (let i = 0; i < 4; i++) { const a0 = i * Math.PI / 2 + Math.PI / 4 - 0.5, a1 = a0 + 1; arc(c, 12.2 * k, a0, a1, OUTLINE, 3.4 * k); arc(c, 12.2 * k, a0, a1, GOLD, 1.8 * k); } }
+    for (let i = 0; i < 4; i++) { if (L2 <= i) break; const key = B.key("p1s" + i), [x, y, rt] = PSLOT[i], p = S(x, y), lw = (lx, ly) => add(p, mul(rot([lx, ly], rt), k));
+      const tile = (lx, ly, on) => fill(lw(lx, ly), [[-0.75, -0.75], [0.75, -0.75], [0.75, 0.75], [-0.75, 0.75]], on ? A(lc2, 0.95) : DARKP, rt, k);
+      if (key === "A") { plate(p, rectPts(5.2, 1.9), METAL_L, rt, k, 1.1); for (let j = 0; j < 5; j++) tile(-4 + j * 2, 0.1, gold2 || fmod(ph - j * 0.35, 2) < 0.7); }
+      if (key === "B") { const pts = []; for (let j = 0; j < 5; j++) { const a = -0.85 + j * 0.425; pts.push(lw(5.6 * Math.sin(a), 3.2 * Math.cos(a) - 1.8)); }
+        polyline(pts, OUTLINE, 3.6 * k); polyline(pts, METAL_L, 2.2 * k); pts.forEach((q, j) => { disc(q, 1 * k, DARKP); if (gold2) disc(q, 0.62 * k, GOLD); else if (fmod(ph - j * 0.35, 2) < 0.7) glowDot(q, 0.75 * k, lc2); }); }
+      if (key === "C") { plate(p, rectPts(5, 1.7), METAL_D, rt, k, 1.1); for (let j = 0; j < 4; j++) { const on = gold2 || fmod(ph - j * 0.4, 2) < 0.7; line(lw(-3.8 + j * 2.5, -1.2), lw(-2.6 + j * 2.5, 1.2), on ? A(lc2, 0.95) : STEEL, 1.4 * k); } }
+      if (gold2 && B.key("p1s4") === "B") { outline(p, rectPts(5.9, 2.5), GOLD, 1.6, rt, k); for (const [ex, ey] of [[-5.9, -2.5], [5.9, -2.5], [5.9, 2.5], [-5.9, 2.5]]) disc(lw(ex, ey), 0.7 * k, GOLD); }
+      if (gold2) disc(lw(0, 2.4), 0.4 * k, GOLD); }
+    // ---- Path 3: the four corner stations are REBUILT at every step (a new design replaces the old one in all four corners); the mastery makes them gold ---
+    const gold3 = L3 >= 5, lc3 = gold3 ? GOLD : col, key3 = L3 > 0 ? B.key("p2s" + (L3 - 1)) : null;
+    if (L3 > 0) { const seen = mm.seen || {}, hot = (info.all || []).filter((e) => cloaked(e) && (seen[e.i] || 0) > t), sz = [0, 2.6, 3, 3.4, 3.8, 4.2][L3], tur = mm.tur || (mm.tur = []), tdt = Math.min(0.1, Math.max(0, t - (mm.turT ?? t))); mm.turT = t;
+      if (gold3 && key3 === "A") { const pts = CSLOT.map(([x, y]) => S(x * 1.05, y * 1.05)); pts.push(pts[0]); polyline(pts, OUTLINE, 3.6 * k); polyline(pts, GOLD, 2 * k); }   // a gold wall joins the four citadels
+      CSLOT.forEach(([x, y], i) => { const p = S(x, y), out = norm([x, y]), oa = Math.atan2(out[1], out[0]), body = gold3 ? dk(GOLD, 0.45) : METAL_L, trim = gold3 ? GOLD : STEEL;
+        const mine = hot.filter((e) => CSLOT.map(([cx, cy]) => dist(e.p, S(cx, cy))).reduce((bi, dv, j, arr) => (dv < arr[bi] ? j : bi), 0) === i), near = mine.length ? mine.reduce((a, b) => (dist(a.p, p) < dist(b.p, p) ? a : b)) : null, prevA = tur[i] ?? oa, want = near ? Math.atan2(near.p[1] - p[1], near.p[0] - p[0]) : prevA, dA = fmod(want - prevA + Math.PI, TAU) - Math.PI, ta = prevA + Math.max(-9 * tdt, Math.min(9 * tdt, dA));   // a turret holds its last aim when it loses a target (it starts pointing outward) and swings freely to the next revealed enemy
+        tur[i] = ta;
+        if (L3 === 1) {
+          if (key3 === "A") { plate(p, rectPts(sz * 0.8, sz), body, 0, k, 1.2); for (let j = 0; j < 4; j++) { const on = fmod(t * 3 + j * 0.6 + i, 2) < 1; rect(p[0] - 1.6 * k, p[1] - (1.5 - j * 0.9) * k, 3.2 * k, 0.55 * k, on ? lc3 : DARKP); } }                               // a server rack
+          if (key3 === "B") { plate(p, rectPts(sz, sz * 0.8), body, 0, k, 1.2); rect(p[0] - 1.9 * k, p[1] - 1.4 * k, 3.8 * k, 2.8 * k, DARKP); const pts = []; for (let j = 0; j <= 10; j++) pts.push(add(p, [(-1.8 + j * 0.36) * k, Math.sin(j * 1.1 + t * 4 + i) * 0.9 * k])); polyline(pts, lc3, 0.9 * k); }         // a scope console
+          if (key3 === "C") { bar(p, add(p, mul(out, 3.2 * k)), 1.3 * k, METAL); const q = add(p, mul(out, 3.4 * k)); for (let j = 0; j < 3; j++) arc(q, 1.9 * k, oa - 1 + t * 3 + j * 2.1, oa - 0.5 + t * 3 + j * 2.1, lc3, 1.3 * k); disc(p, 1.6 * k, OUTLINE); disc(p, 1.2 * k, METAL_L); } }  // an antenna post with spinning cups
+        if (L3 === 2) {
+          if (key3 === "A") { plate(p, rectPts(sz, sz), body, 0, k, 1.3); plate(p, rectPts(sz * 0.6, sz * 0.6), METAL_D, 0, k, 0.9); bar(p, add(p, mul(out, 4.4 * k)), 0.8 * k, METAL_L); glowDot(add(p, mul(out, 4.6 * k)), 0.6 * k, lc3); for (const [ex, ey] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) disc(add(p, [ex * sz * 0.8 * k, ey * sz * 0.8 * k]), 0.45 * k, trim); }  // a decoder tower
+          if (key3 === "B") { disc(p, sz * k + 1.2 * k, OUTLINE); disc(p, sz * k, body); const q = add(p, mul(out, 1.8 * k)); arc(q, 2.6 * k, oa - 1.1, oa + 1.1, OUTLINE, 2.6 * k); arc(q, 2.6 * k, oa - 1.1, oa + 1.1, METAL_L, 1.5 * k); line(p, add(p, mul(out, 1.8 * k)), METAL, 0.9 * k); glowDot(p, 0.55 * k, lc3); }  // a dish pod
+          if (key3 === "C") { disc(p, 2 * k, OUTLINE); disc(p, 1.6 * k, body); const m2 = add(p, mul(out, 8 * k)); bar(p, m2, 0.9 * k, METAL_L); for (let j = 0; j < 4; j++) { const q = add(p, mul(out, (2.6 + j * 1.4) * k)), o = orth(out); line(add(q, mul(o, (2.4 - j * 0.45) * k)), add(q, mul(o, -(2.4 - j * 0.45) * k)), METAL_L, 0.9 * k); } } }                      // a yagi mast
+        if (L3 >= 3) {                                                                                  // the tracking turret stays from Track Lock on; later steps build onto it
+          const ts = B.key("p2s2"), tsz = [0, 0, 0, 2.1, 2.2, 2.3][L3], k4 = L3 === 4 ? B.key("p2s3") : null, k5 = L3 === 5 ? B.key("p2s4") : null, tb = METAL_L, tt = gold3 ? GOLD : lc3;
+          if (k4 === "B") { disc(p, tsz * k + 1.8 * k, OUTLINE); disc(p, tsz * k + 1.4 * k, A(lc3, 0.28)); ring(p, tsz * k + 1.4 * k, METAL_L, 1 * k); ring(p, tsz * k + 0.7 * k, A(lc3, 0.8), 0.7 * k); arc(p, tsz * k + 1.05 * k, t * 0.8 + i, t * 0.8 + i + 1.1, [1, 1, 1, 0.55], 1 * k); }   // Lens Ring: a big glass ring round the turret
+          if (k4 === "C") for (let g = 0; g < 4; g++) { const a0 = g * Math.PI / 2 + Math.PI / 4 - 0.55; arc(p, tsz * k + 1.3 * k, a0, a0 + 1.1, OUTLINE, 2.2 * k); arc(p, tsz * k + 1.3 * k, a0, a0 + 1.1, A(lc3, 0.9), 1 * k); }   // Filter Gate: four grille shields round the turret
+          // Gold Citadel: no base under the turrets; the gold wall joins the four (drawn above)
+          if (k5 === "B") { ring(p, tsz * k + 1.1 * k, GOLD, 0.9 * k); glowDot(add(p, mul(fa(ta + Math.PI), tsz * 0.5 * k)), (0.55 + 0.2 * Math.sin(t * 4 + i)) * k, GOLD); }   // a gold lamp glows on the turret (no beam)
+          // Gold Obelisk: no base; the turret gets a twin barrel (below)
+          let mz;
+          if (ts === "A") { disc(p, tsz * k + 1.2 * k, OUTLINE); disc(p, tsz * k, tb); ring(p, tsz * 0.78 * k, STEEL, 1 * k); mz = add(p, mul(fa(ta), 3 * k)); bar(p, mz, 1.2 * k, METAL_L); if (k5 === "C") { const o = orth(fa(ta)); bar(add(p, mul(o, 0.9 * k)), add(mz, mul(o, 0.9 * k)), 0.8 * k, METAL_L); } }                 // a tracking turret that follows a revealed enemy
+          else if (ts === "B") { disc(p, tsz * k + 1.2 * k, OUTLINE); orb(p, tsz * k, tb); for (let j = 0; j < 3; j++) { const a = t * 2 + i + j * TAU / 3; line(p, add(p, mul(fa(a), (tsz + 1.6) * k)), tt, 1.1 * k); } mz = add(p, mul(fa(ta), 2.6 * k)); bar(p, mz, 1 * k, METAL_L); }             // a radar dome with a tracking arm
+          else { plate(p, rectPts(tsz * 0.7, tsz * 0.7), tb, Math.PI / 4, k, 1.2); orb(p, tsz * 0.62 * k, METAL); disc(p, tsz * 0.32 * k, DARKP); mz = add(p, mul(fa(ta), tsz * 0.14 * k)); }    // an eye pylon
+          if (near) for (const e of mine) line(mz, e.p, A(tt, 0.35), 1);                                                                                          // the tracking line runs from the antenna tip
+          if (ts !== "C") glowDot(mz, 0.6 * k, tt); else glowDot(mz, (0.55 + 0.15 * Math.sin(t * 6)) * k, tt);
+          if (k4 === "A") { fill(mz, [[0, -1.6], [2, 1.2], [-2, 1.2]], A(lc3, 0.5), ta + Math.PI / 2, k); outline(mz, [[0, -1.6], [2, 1.2], [-2, 1.2]], lc3, 1, ta + Math.PI / 2, k); } }   // Prism: a prism on the muzzle
+        });  // the corner stations
+    }
+    // ---- Path 1: the centre. Footing, then the mast (step 2), the Retrofit hub, the emitter kit (steps 3 and 4), the hub and the dish ----------------
+    const gold1 = L1 >= 5, dc = (gold1 || gold2) ? GOLD : METAL_L, rD = 10 + [0, 1.2, 2, 2.2, 3, 3.4][L1] + (B.r === 0 ? 1.2 : 0), mast = Kp(B, 0, 1);
+    plate(c, ngon(6, 1), METAL_D, 0, 7 * k, 1.2); ring(c, 6.2 * k, A(OUTLINE, 0.6), 1 * k);
+    if (mast === "A") { plate(c, rectPts(3.2, 3.2), METAL, Math.PI / 4, k, 1); line(S(-2.2, -2.2), S(2.2, 2.2), METAL_L, 0.9 * k); line(S(2.2, -2.2), S(-2.2, 2.2), METAL_L, 0.9 * k);
+      for (const [gx, gy] of [[-6.4, -6.4], [6.4, -6.4], [6.4, 6.4], [-6.4, 6.4]]) line(c, S(gx, gy), A(STEEL, 0.9), 0.8 * k); }
+    if (mast === "B") { for (let i = 0; i < 3; i++) { const d = fa(-Math.PI / 2 + i * TAU / 3), e = add(c, mul(d, 7.4 * k)); bar(c, e, 1.7 * k, METAL); disc(e, 1.1 * k, METAL_L); } ring(c, 4.4 * k, METAL_L, 1.1 * k); }
+    if (mast === "C") { disc(c, 6.6 * k, OUTLINE); disc(c, 6.1 * k, METAL_D); ring(c, 5 * k, METAL_L, 1 * k); ring(c, 3.7 * k, METAL, 1 * k); for (let i = 0; i < 8; i++) line(add(c, mul(fa(i * TAU / 8), 3.7 * k)), add(c, mul(fa(i * TAU / 8), 6.1 * k)), STEEL, 0.8 * k); }
+    if (B.r === 1) { if (R === "A") { ring(c, 4.9 * k, METAL_L, 1.8 * k); for (let i = 0; i < 8; i++) { const q = add(c, mul(fa(i * TAU / 8 + 0.2), 4.9 * k)); disc(q, 0.8 * k, OUTLINE); disc(q, 0.55 * k, fmod(t * 2 + i * 0.3, 1.5) < 0.6 ? col : DARKP); } }
+      if (R === "B") { plate(c, rectPts(3, 3), METAL_L, 0, k, 1.2); plate(c, rectPts(2.4, 2.4), METAL_D, 0, k, 0.9); for (let i = 0; i < 3; i++) line(c, add(c, mul(fa(t * 6 + i * TAU / 3), 2.1 * k)), METAL_L, 0.9 * k); glowDot(S(2.2, -2.2), 0.4 * k, col); }
+      if (R === "C") { for (let i = 0; i < 3; i++) { const h = 3.8 - i * 0.9; plate(c, rectPts(h, h), i % 2 ? METAL_D : METAL_L, i * 0.26, k, 1); } glowDot(c, 0.8 * k, col); } }
+    if (B.r === 2) { if (R === "A") { bar(c, S(0, -13.4), 1.6 * k, METAL); for (let i = 0; i < 3; i++) line(S(-2.2 + i * 0.4, -5 - i * 3), S(2.2 - i * 0.4, -5 - i * 3), METAL_L, 1 * k); glowDot(S(0, -14), (0.7 + 0.3 * Math.sin(t * 4)) * k, [1, 0.3, 0.3, 1]); }
+      if (R === "B") { plate(c, rectPts(4, 4), METAL_L, Math.PI / 4, k, 1.2); plate(c, rectPts(2.8, 2.8), METAL_D, Math.PI / 4, k, 0.9); for (let i = 0; i < 4; i++) { const d = fa(Math.PI / 4 + i * Math.PI / 2); bar(add(c, mul(d, 3 * k)), add(c, mul(d, 7 * k)), 1.2 * k, METAL); disc(add(c, mul(d, 3 * k)), 0.5 * k, YELLOW_W); } }
+      if (R === "C") for (let i = 0; i < 4; i++) { const d = fa(Math.PI / 4 + i * Math.PI / 2), q = add(c, mul(d, 5.6 * k)); bar(c, q, 1.3 * k, METAL); disc(q, 1.2 * k, OUTLINE); const on = Math.floor(t * 4) % 4 === i; disc(q, 0.9 * k, on ? [1, 1, 1, 1] : DARKP); if (on) glowDot(q, 0.9 * k, [1, 1, 1, 1]); } }
+    // path 1, steps 3 and 4: the emitter kit
+    const fp = add(c, mul(fa(ang), 6.2 * k)), em = Kp(B, 0, 2), hp = Kp(B, 0, 3), ec = (gold1 || gold2) ? GOLD : RAD;
+    if (hp === "A") for (let i = 0; i < 4; i++) { const d = fa(Math.PI / 4 + i * Math.PI / 2 + 0.3), q = add(c, mul(d, 4.2 * k)); plate(q, rectPts(1.1, 1.8), METAL_D, Math.atan2(d[1], d[0]), k, 0.9); for (let j = -1; j <= 1; j++) line(add(q, mul(orth(d), j * 0.8 * k)), add(add(q, mul(orth(d), j * 0.8 * k)), mul(d, 1.8 * k)), METAL_L, 0.7 * k); }
+    if (hp === "B") for (let i = 0; i < 3; i++) { const q = add(c, mul(fa(Math.PI / 2 + i * TAU / 3 + 0.5), 4.8 * k)); disc(q, 1.7 * k, OUTLINE); disc(q, 1.4 * k, METAL_D); ring(q, 1.1 * k, A(ec, 0.9), 0.8 * k); glowDot(q, 0.45 * k, ec); }
+    if (hp === "C") { const a = add(c, [-5.6 * k, 0]), b = add(c, [5.6 * k, 0]); for (const q of [a, b]) { bar(add(q, [0, 1.8 * k]), add(q, [0, -1.8 * k]), 1.3 * k, METAL); disc(add(q, [0, -2 * k]), 0.9 * k, METAL_L); }
+      const pts = [add(a, [0, -2 * k])]; for (let j = 1; j < 6; j++) pts.push(add(lerp(add(a, [0, -2 * k]), add(b, [0, -2 * k]), j / 6), [0, (rnd(Math.floor(t * 20) + j) - 0.5) * 2.4 * k])); pts.push(add(b, [0, -2 * k])); polyline(pts, A(ec, 0.35), 3); polyline(pts, ec, 1.1); }
+    if (L1 >= 5) { const mk = B.key("p0s4");
+      if (mk === "A") for (let i = 0; i < 8; i++) { const a = i * TAU / 8 + 0.2, q = add(c, mul(fa(a), 6.8 * k)); fill(q, [[-0.4, -0.8], [1.8, -1.5], [1.8, 1.5], [-0.4, 0.8]], GOLD, a, k); }
+      if (mk === "C") { disc(c, 5.8 * k, OUTLINE); disc(c, 5.3 * k, dk(GOLD, 0.5)); for (let i = -1; i <= 1; i++) { line(S(i * 1.9, -5), S(i * 1.9, 5), GOLD, 0.8 * k); line(S(-5, i * 1.9), S(5, i * 1.9), GOLD, 0.8 * k); } ring(c, 5.3 * k, GOLD, 1.2 * k); } }
+    orb(c, 4 * k, METAL); glowDot(c, 1.1 * k, gold1 ? GOLD : col);
+    // the dish (turning) and its feed
+    const dsk = Kp(B, 0, 0), wd = 1.7 * k;
+    for (const sg of [-1, 0, 1]) { const a = ang + sg * 0.85; bar(c, add(c, mul(fa(a), (rD - 0.2) * k)), 1.1 * k, METAL_L); }                          // three struts join the dish to the mast
+    if (L2 >= 5) { const a2 = ang + Math.PI, r2 = rD * 0.95, f2 = add(c, mul(fa(a2), 6.2 * k));                                                                  // Constant Track: a second, gold dish opposite the first
+      for (const sg of [-1, 0, 1]) { const a = a2 + sg * 0.85; bar(c, add(c, mul(fa(a), (r2 - 0.2) * k)), 1.1 * k, METAL_L); }
+      arc(c, r2 * k, a2 - 1.1, a2 + 1.1, OUTLINE, 3 * k); arc(c, r2 * k, a2 - 1.1, a2 + 1.1, GOLD, 1.7 * k); line(c, f2, METAL_L, 1 * k); }
+    if (dsk === "B") { arc(c, (rD - 0.8) * k, ang - 1.1, ang + 1.1, A(OUTLINE, 0.7), 1.2 * k);
+      for (let j = 0; j < 5; j++) { const a0 = ang - 1.1 + j * 0.44 + 0.03; arc(c, rD * k, a0, a0 + 0.38, OUTLINE, 3 * k); arc(c, rD * k, a0, a0 + 0.38, dc, wd); }
+      for (let j = 0; j <= 5; j++) { const a = ang - 1.1 + j * 0.44; line(add(c, mul(fa(a), rD * k)), add(c, mul(fa(a), (rD - 2.6) * k)), A(STEEL, 0.9), 0.9 * k); } }
+    else if (dsk === "C") { arc(c, rD * k, ang - 1.1, ang + 1.1, OUTLINE, 2.6 * k); arc(c, rD * k, ang - 1.1, ang + 1.1, dc, 1 * k); arc(c, (rD - 1.9) * k, ang - 1.1, ang + 1.1, dc, 1 * k);
+      for (let j = 0; j <= 10; j++) { const a = ang - 1.1 + j * 0.22; line(add(c, mul(fa(a), rD * k)), add(c, mul(fa(a + 0.11), (rD - 1.9) * k)), A(dc, 0.8), 0.8 * k); } }
+    else { arc(c, rD * k, ang - 1.1, ang + 1.1, OUTLINE, 3 * k); arc(c, rD * k, ang - 1.1, ang + 1.1, dc, wd); arc(c, (rD - 0.3) * k, ang - 0.9, ang - 0.1, lt(dc, 0.4), 0.6 * k); }
+    if (B.r === 0) { if (R === "A") { arc(c, (rD + 1.8) * k, ang - 1.1, ang + 1.1, OUTLINE, 2 * k); arc(c, (rD + 1.8) * k, ang - 1.1, ang + 1.1, dc, 0.9 * k); }
+      if (R === "B") for (const sg of [-1, 1]) { const a = ang + sg * 1.1; fill(add(c, mul(fa(a), rD * k)), [[0, -1.8], [3.2, 0], [0, 1.8]], dc, a + (sg > 0 ? Math.PI * 0.5 : -Math.PI * 0.5) - sg * 0.1, k); }
+      if (R === "C") { arc(c, rD * 0.6 * k, ang - 1.1, ang + 1.1, OUTLINE, 2.4 * k); arc(c, rD * 0.6 * k, ang - 1.1, ang + 1.1, dc, 1.2 * k); } }
+    line(c, fp, METAL_L, 1 * k);
+    if (L1 >= 5 && B.key("p0s4") === "B") { for (const sg of [-1, 0, 1]) bar(add(c, mul(fa(ang + sg * 0.9), rD * k)), fp, 0.9 * k, GOLD); fill(fp, [[0, -1.2], [3.4, -2.6], [3.4, 2.6], [0, 1.2]], GOLD, ang, k); }   // Gold Feed Tripod
+    if (em === "A") fill(fp, [[0, -0.9], [3.2, -2.3], [3.2, 2.3], [0, 0.9]], (gold1 || gold2) ? GOLD : lt(RAD, 0.1), ang, k);
+    if (em === "B") { const pts = []; for (let j = 0; j <= 8; j++) pts.push(add(add(c, mul(fa(ang), (5 + j * 0.55) * k)), mul(orth(fa(ang)), (j % 2 ? 1.2 : -1.2) * k))); polyline(pts, OUTLINE, 3 * k); polyline(pts, ec, 1.4 * k); }
+    if (em === "C") { const u = fa(ang), v = orth(u), P0 = add(c, mul(u, 5 * k)), Tp = add(add(c, mul(u, 8.4 * k)), mul(v, 2.6 * k)), Tm = add(add(c, mul(u, 8.4 * k)), mul(v, -2.6 * k)),
+        vp = [P0, Tp, add(Tp, mul(v, -1.4 * k)), add(P0, mul(u, 2.6 * k)), add(Tm, mul(v, 1.4 * k)), Tm];                                                       // one solid V, not two bars
+      polyline([...vp, vp[0]], OUTLINE, 2 * k); poly(vp, (gold1 || gold2) ? GOLD : lt(RAD, 0.1)); }
+    if (L2 >= 5) glowDot(add(c, mul(fa(ang + Math.PI), 6.2 * k)), 0.9 * k, GOLD);                                                  // the second dish's light, on top
+    glowDot(add(c, mul(fa(ang), (em ? 7.6 : 6.2) * k)), (em ? 0.9 + 0.3 * Math.sin(t * 6) : 0.9) * k, em ? ec : L2 >= 5 ? GOLD : col);
+  },
+  paths: [], retrofits: [],
+};
+const YELLOW_W = [1, 0.9, 0.4, 1];
+
+// ---- Option tables: [name, desc] per option, per stage ---------------------------------------------------------------------------------------------
+const T = (a, b, c) => [["A", ...a], ["B", ...b], ["C", ...c]].map(([key, name, desc]) => ({ key, name, desc }));
+P2.paths = [
+  { name: "Power / Range", theme: "the centre: the dish grows, the mast rises, then the radiation emitter and the gold microwave array", steps: [
+    { name: "Bigger Array", cost: 305, effect: "180 px radius", options: T(["Solid Dish", "The dish is rebuilt larger as one solid reflector; the range ring widens."], ["Ribbed Dish", "The dish is rebuilt larger from ribbed segments; the range ring widens."], ["Mesh Dish", "The dish is rebuilt larger as an open double-rim mesh; the range ring widens."]) },
+    { name: "Tall Mast", cost: 685, effect: "200 px radius", options: T(["Guyed Lattice Mast", "A square lattice mast with four guy wires is built under the dish; the dish grows again."], ["Tripod Mast", "A three-legged tripod with a ring brace is built under the dish; the dish grows again."], ["Tiered Tower", "A tiered cylindrical tower is built under the dish; the dish grows again."]) },
+    { name: "Radiation Emitter", cost: 585, effect: "Radiation circle: 15 energy damage/s within 60 px of revealed enemies (primary)", options: T(["Horn Emitter", "A microwave horn at the dish's focus; a faint red circle of radiation appears round the tower."], ["Coil Emitter", "A red coil at the dish's focus; a faint red circle of radiation appears round the tower."], ["Twin Prong Emitter", "Two prongs from the hub to the focus; a faint red circle of radiation appears round the tower."]) },
+    { name: "High-Power Emitter", cost: 3995, effect: "220 px radius; radiation 25/s within 70 px", options: T(["Finned Heat Sinks", "Four finned heat sinks are built round the hub; the red circle widens."], ["Capacitor Bank", "Three glowing capacitor drums are built round the hub; the red circle widens."], ["Arc Pylons", "Two arcing pylons are built either side of the hub; the red circle widens."]) },
+    { name: "Microwave Array", cost: 6440, effect: "230 px radius; radiation 40/s within 80 px (mastery)", options: T(["Horn Ring", "The dish turns gold and a ring of eight gold horns is built round the hub; the red circle turns gold."], ["Gold Feed Tripod", "The dish turns gold and three gold struts hold a big gold horn at its focus; the red circle turns gold."], ["Gold Lattice Array", "The dish turns gold and a gold lattice array is built over the hub; the red circle turns gold."]) },
+  ] },
+  { name: "Speed / Frequency", theme: "the edges: a phased-array panel on each edge, then gold with a constant reveal", steps: [
+    { name: "Faster Sweep", cost: 255, effect: "A ping every 2.7 s, revealing for 1.1 s", options: T(["Tile Panel", "A tile panel is built on the south edge; the dish turns faster."], ["Curved Array", "A curved array is built on the south edge; the dish turns faster."], ["Louvre Panel", "A louvre panel is built on the south edge; the dish turns faster."]) },
+    { name: "Pulse Compression", cost: 640, effect: "Every 2.4 s, for 1.2 s", options: T(["Tile Panel", "A tile panel is built on the north edge; the dish turns faster."], ["Curved Array", "A curved array is built on the north edge; the dish turns faster."], ["Louvre Panel", "A louvre panel is built on the north edge; the dish turns faster."]) },
+    { name: "Rapid Sweep", cost: 2070, effect: "Every 2 s, for 1.3 s (primary)", options: T(["Tile Panel", "A tile panel is built on the east edge; the dish turns faster."], ["Curved Array", "A curved array is built on the east edge; the dish turns faster."], ["Louvre Panel", "A louvre panel is built on the east edge; the dish turns faster."]) },
+    { name: "Phased Array", cost: 4485, effect: "Every 1.6 s, for 1.3 s", options: T(["Tile Panel", "A tile panel is built on the west edge; the dish turns at full speed."], ["Curved Array", "A curved array is built on the west edge; the dish turns at full speed."], ["Louvre Panel", "A louvre panel is built on the west edge; the dish turns at full speed."]) },
+    { name: "Constant Track", cost: 10350, effect: "Constant: everything hidden in range stays revealed (mastery)", options: T(["Gold Cable Ring", "Every panel turns gold and is tied by a gold cable ring, and a second gold dish is built opposite the first; the sweep is replaced by a steady gold field and the reveal never lapses."], ["Gold Frames", "Every panel turns gold in a gold frame, and a second gold dish is built opposite the first; the sweep is replaced by a steady gold field and the reveal never lapses."], ["Gold Bridges", "Every panel turns gold and is bridged by gold arcs, and a second gold dish is built opposite the first; the sweep is replaced by a steady gold field and the reveal never lapses."]) },
+  ] },
+  { name: "Unmasking", theme: "the corners: all four corner stations are rebuilt to a new design at every step, and the mark on a revealed enemy changes style", steps: [
+    { name: "Signal Analysis", cost: 230, effect: "Pings expose the Decoy Beacon's fake rank", options: T(["Server Racks", "The four corners get small server racks with lamp rows; revealed enemies get brackets and a rank tag."], ["Scope Consoles", "The four corners get scope consoles with live traces; revealed enemies get brackets and a rank tag."], ["Antenna Posts", "The four corners get antenna posts with spinning cups; revealed enemies get brackets and a rank tag."]) },
+    { name: "Disguise Breaker", cost: 460, effect: "Pings unmask the Masquerade early", options: T(["Decoder Towers", "The corner racks are replaced by taller decoder towers with whip antennas; revealed enemies get a diamond frame instead of brackets."], ["Dish Pods", "The corner consoles are replaced by round dish pods; revealed enemies get a diamond frame instead of brackets."], ["Yagi Masts", "The corner posts are replaced by long yagi masts; revealed enemies get a diamond frame instead of brackets."]) },
+    { name: "Track Lock", cost: 1930, effect: "Reveals last 1.3 s (primary)", options: T(["Tracking Turrets", "The corner towers are replaced by round tracking turrets that turn to follow revealed enemies; the mark becomes a lock ring, and each turret's tracking line runs from its antenna."], ["Radar Domes", "The corner pods are replaced by radar domes with turning prongs; the mark becomes a lock ring, and each turret's tracking line runs from its antenna."], ["Eye Pylons", "The corner masts are replaced by eye pylons whose pupils follow revealed enemies; the mark becomes a lock ring, and each turret's tracking line runs from its antenna."]) },
+    { name: "Illusion Filter", cost: 2390, effect: "Pings mark Mirage holograms as fakes", options: T(["Turret Prisms", "Each tracking turret gets a glass prism on its muzzle that splits the beam; the mark becomes a hex frame with a fake-check badge."], ["Turret Lens Rings", "Each tracking turret is ringed by a big glass lens; the mark becomes a hex frame with a fake-check badge."], ["Turret Filter Gates", "Each tracking turret is ringed by four grille shields; the mark becomes a hex frame with a fake-check badge."]) },
+    { name: "Total Exposure", cost: 3590, effect: "Revealed enemies can't re-cloak, re-disguise or re-burrow for 5 s after leaving range (mastery)", options: T(["Gold Wall", "Each tracking turret's blue accents turn gold and a gold wall joins the four; the marks become gold lock rings that linger after the enemy leaves."], ["Gold Lamp", "Each tracking turret's blue accents turn gold and a gold lamp glows on it; the marks become gold lock rings that linger after the enemy leaves."], ["Twin Barrel", "Each tracking turret's blue accents turn gold and it gains a twin barrel; the marks become gold lock rings that linger after the enemy leaves."]) },
+  ] },
+];
+P2.retrofits = [
+  { name: "Bigger Dish", cost: 305, effect: "+20 radius (stacks with the range steps)", options: T(["Outer Rim", "The dish gains a second outer rim; the range ring widens."], ["Flared Ends", "The dish gains flared ends; the range ring widens."], ["Sub-Reflector", "The dish gains a concentric sub-reflector; the range ring widens."]) },
+  { name: "Signal Processor", cost: 575, effect: "Each reveal lasts 1.5 s (stacks with the reveal steps)", options: T(["Chip Ring", "A ring of blinking chips is built round the hub; brackets stay longer."], ["Fan Box", "A cooled processor box with a spinning fan is built on the hub; brackets stay longer."], ["Chip Stack", "A stack of three rotated chip plates is built on the hub; brackets stay longer."]) },
+  { name: "Early Warning", cost: 230, effect: "Shows the next wave's hidden enemies in the wave preview", options: T(["Beacon Mast", "A tall mast with a red beacon is built north of the hub."], ["Lookout Tower", "A square lookout tower with four legs is built on the hub."], ["Strobe Pylons", "Four strobing pylons are built round the hub."]) },
+];
+
+// ---- Round 2 (owner's picks, 2026-10-19). Path 3 and the Signal Processor are unpicked: they show their options again.
+P2.picks = { p0s0: "A", p0s1: "C", p0s2: "C", p0s3: "B", p0s4: "A", p1s0: "B", p1s1: "B", p1s2: "B", p1s3: "B", p1s4: "A", p2s0: "B", p2s1: "A", p2s2: "A", p2s3: "B", p2s4: "B", r0: "C", r1: "A", r2: "B" };
+P2.paths.forEach((pa, pi) => pa.steps.forEach((st, k) => { const pk = P2.picks["p" + pi + "s" + k]; if (pk) st.options = st.options.filter((o) => o.key === pk); }));
+P2.retrofits.forEach((rf, ri) => { const pk = P2.picks["r" + ri]; if (pk) rf.options = rf.options.filter((o) => o.key === pk); });
+
+// ---- Tower art engine: previews towers aiming and firing at enemies on a lane --------------------------
+// Data (defined before this): PAGE {title, key, store}, TOWERS [...], DEFAULTS {id: {look, anim}}.
+// A look: {key, name, theme, muzzle (tile units along the aim), draw(c, aim, s, fx, t, col)} where s = px per tile.
+// An animation: {key, name, desc, period, burst?, gap?, multi?, flight, beam?, fx(since, period) -> {recoil, flash, glow, spin},
+//   shot(from, to, u, s, col, k, t, info), impact(to, v, s, col, info)}. info = {ens (hittable enemies in reach), c, W, H, s, t, look, spot, orbit}.
+// info.sh is the shot being drawn ({t0, k, to0: where its target was when it fired}). An animation with persist(mem, t,
+//   info, s, col) is a free agent instead (drones, mines, sprays, pulses); it can steer the turret with mem.aimAt, and the
+//   look sees its state as fx.mem. tw.waves {on, off} empties the lane between waves; tw.hits "none" attacks nothing.
+// A tower can set spot {x, y} (player-aimed at a fixed point, fractions of the view) or orbit {x, y, r (tiles), w (rad/s)}
+//   (an aircraft circling a point; the look draws it with plane(p, heading, s, fx, t, col, centre) and fires from its door).
+
+const STORE = PAGE.store;
+let state = {};
+try { state = JSON.parse(localStorage.getItem(STORE) || "{}") || {}; } catch (e) { state = {}; }
+function save() { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) { /* storage unavailable */ } }
+const DEF = typeof DEFAULTS === "undefined" ? {} : DEFAULTS;
+function st(id) { if (!state[id]) { const d = DEF[id] || {}; state[id] = { look: d.look || null, anim: d.anim || null, notes: { look: "", anim: "" } }; } return state[id]; }
+const lookOf = (tw) => tw.looks.find((l) => l.key === st(tw.id).look) || tw.looks[0];
+const animOf = (tw) => tw.anims.find((a) => a.key === st(tw.id).anim) || tw.anims[0];
+
+// ---- Scene: a lane of ground enemies and a few flyers -------------------------------------------------
+const ENEMY_RED = [0.86, 0.24, 0.22, 1];
+function enemiesAt(t, W, H, sc) {
+  const out = [], laneY = H * 0.8, span = W + 80;
+  for (let i = 0; i < 4; i++) out.push({ air: false, p: [fmod(t * 34 + i * span / 4, span) - 40, laneY + Math.sin(t * 2 + i) * 2], i });
+  for (let i = 0; i < 2; i++) { const u = fmod(t * 26 + i * span / 2, span) - 40; out.push({ air: true, p: [u, H * 0.1 + Math.sin(t * 1.5 + i * 2) * 5], i: 10 + i }); }
+  return out;
+}
+function drawEnemy(e, sc) {
+  const r = Math.max(4, Math.min(11, sc * 0.12));
+  if (e.air) {
+    ellipse(add(e.p, [r * 0.6, r * 1.4]), r * 0.9, r * 0.4, [0, 0, 0, 0.25]);
+    fill(e.p, [[1.1, 0], [-0.7, 0.8], [-0.35, 0], [-0.7, -0.8]], ENEMY_RED, 0, r); outline(e.p, [[1.1, 0], [-0.7, 0.8], [-0.35, 0], [-0.7, -0.8]], OUTLINE, 1, 0, r);
+  } else {
+    ellipse(add(e.p, [0, r * 0.7]), r * 1.1, r * 0.45, [0, 0, 0, 0.25]);
+    disc(e.p, r + 1, OUTLINE); disc(e.p, r, ENEMY_RED); disc(add(e.p, [r * 0.35, -r * 0.2]), r * 0.35, [1, 0.85, 0.6, 1]);
+  }
+}
+function drawGround(W, H) {
+  rect(0, 0, W, H, [0.07, 0.09, 0.08, 1]);
+  for (let x = 0; x < W; x += 24) for (let y = 0; y < H; y += 24) if (((x + y) / 24) % 2 === 0) rect(x, y, 24, 24, [0.075, 0.098, 0.085, 1]);
+  rect(0, H * 0.8 - 14, W, 28, [0.16, 0.15, 0.13, 1]); line([0, H * 0.8 - 14], [W, H * 0.8 - 14], [0.24, 0.22, 0.18, 1], 1); line([0, H * 0.8 + 14], [W, H * 0.8 + 14], [0.24, 0.22, 0.18, 1], 1);
+}
+function pad(c, s) {
+  const h = s * 0.5;
+  rect(c[0] - h, c[1] - h, s, s, [0.2, 0.21, 0.22, 1]); rect(c[0] - h + 2, c[1] - h + 2, s - 4, s - 4, [0.25, 0.26, 0.27, 1]);
+  for (const q of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) disc(add(c, [q[0] * (h - 5), q[1] * (h - 5)]), 1.6, [0.15, 0.16, 0.17, 1]);
+}
+
+// ---- One animated preview -------------------------------------------------------------------------------
+function makeView(canvas, tw, getLook, getAnim, scale) {
+  const ctx = canvas.getContext("2d"), W = canvas.width, H = canvas.height, s = scale;
+  const c = tw.center ? [W * tw.center[0], H * tw.center[1]] : [W * 0.34, H * 0.44]; // tw.size 2: a 2x2 tower
+  const v = { aim: -0.6, last: -9, shots: [], lockT: 0, lockId: -1, visible: true };
+  v.frame = (t) => {
+    X = ctx; X.save(); X.globalAlpha = 1; X.lineCap = "round"; X.lineJoin = "round";
+    const look = getLook(), an = getAnim();
+    drawGround(W, H);
+    const live = !tw.waves || fmod(t, tw.waves.on + tw.waves.off) < tw.waves.on, all = live ? enemiesAt(t, W, H, s) : [];
+    const ens = all.filter((e) => (tw.hits === "none" ? false : tw.hits === "air" ? e.air : tw.hits === "ground" ? !e.air : true));
+    const others = all.filter((e) => !ens.includes(e));
+    const inView = ens.filter((e) => e.p[0] > 10 && e.p[0] < W - 10);
+    // tw.spot: the player aims it at a fixed point (it ignores enemies). tw.orbit: an aircraft circles a designated
+    // point and fires at enemies near it.
+    const orR = tw.orbit ? (look.orbitR ? look.orbitR(tw.orbit.r) : tw.orbit.r) : 0; // a look may widen the orbit (the CAS Wide Orbit Retrofit)
+    const O = tw.orbit ? [W * tw.orbit.x, H * tw.orbit.y] : null;
+    const cands = O ? inView.filter((e) => Math.hypot(e.p[0] - O[0], e.p[1] - O[1]) < orR * s * 1.6) : inView;
+    let tgt = null, best = 1e9;
+    if (tw.spot) tgt = { p: [W * tw.spot.x, H * tw.spot.y], i: -5 };
+    else for (const e of cands) { const ref = O || c, d = Math.hypot(e.p[0] - ref[0], e.p[1] - ref[1]); if (d < best) { best = d; tgt = e; } }
+    let pl = null;
+    if (O) { const a = t * (tw.orbit.w || 0.5), p = add(O, mul(fa(a), orR * s)); pl = { p, heading: a + Math.PI / 2, door: add(p, mul(norm(sub(O, p)), s * 0.14)) }; if (look.door) pl.door = look.door(p, pl.heading, s, O); }
+    if (an.persist && (!v.mem || v.mem.key !== an.key + look.key)) v.mem = { key: an.key + look.key };
+    const aimP = an.persist && v.mem.aimAt ? v.mem.aimAt : tgt && tgt.p;
+    if (aimP) {
+      const want = Math.atan2(aimP[1] - c[1], aimP[0] - c[0]);
+      let d = fmod(want - v.aim + Math.PI, TAU) - Math.PI; const dt = Math.min(0.25, Math.max(0, t - (v.prevT || t))); const turn = 7 * dt; v.aim += Math.max(-turn, Math.min(turn, d));
+      if (tgt && tgt.i !== v.lockId) { v.lockId = tgt.i; v.lockT = t; }
+    }
+    v.prevT = t;
+    const since = t - v.last;
+    const muzzles = look.muzzles || [[look.muzzle || 0.45, 0]];
+    const muzzleAt = (m, ang, k) => pl ? pl.door : look.muzzleAt ? look.muzzleAt(m, k ?? 0, c, ang, s, info) : add(c, rot([muzzles[m % muzzles.length][0] * s, muzzles[m % muzzles.length][1] * s], look.fixed ? 0 : ang));
+    // Multi-target order: the aimed-at target first, then the rest nearest first.
+    const order = tgt && tgt.i !== -5 ? [tgt, ...cands.filter((e) => e !== tgt).sort((a, b) => Math.hypot(a.p[0] - c[0], a.p[1] - c[1]) - Math.hypot(b.p[0] - c[0], b.p[1] - c[1]))] : cands;
+    const info = { ens: cands, all, order, view: v, c, W, H, s, t, look, aim: v.aim, muzzleAt, spot: tgt && tgt.i === -5 ? tgt.p : null, orbit: O };
+    const aligned = tgt && (pl || Math.abs(fmod(Math.atan2(tgt.p[1] - c[1], tgt.p[0] - c[0]) - v.aim + Math.PI, TAU) - Math.PI) < (an.beam ? 0.15 : 0.35));
+    if (tgt && !an.beam && !an.persist && since >= an.period && aligned) {
+      v.last = t; const n = an.burst || 1;
+      for (let k = 0; k < n; k++) {
+        const target = an.multi ? (order[k % order.length] || tgt) : tgt;
+        v.shots.push({ t0: t + k * (an.gap || 0), tid: target.i, to0: target.p.slice(), k, m: (v.n = (v.n || 0) + 1) - 1 });
+      }
+    }
+    pad(c, s * (tw.size || 1));
+    for (const e of others) drawEnemy(e, s);
+    for (const e of ens) drawEnemy(e, s);
+    if (info.spot) { const q = info.spot, pu = 0.5 + 0.5 * Math.sin(t * 4); ring(q, s * (0.28 + 0.04 * pu), A(tw.color, 0.55 + 0.3 * pu), 1.5);
+      for (let i = 0; i < 4; i++) { const d = fa(i * Math.PI / 2); line(add(q, mul(d, s * 0.16)), add(q, mul(d, s * 0.36)), A(tw.color, 0.8), 1.2); } }
+    // Beams lock on first: a short acquisition (reticle on the target), then the beam fires.
+    const lockDelay = an.lock || 0, held = tgt ? t - v.lockT : 0, beamOn = an.beam && tgt && aligned && held >= lockDelay;
+    let fx;
+    if (an.beam) fx = an.fx(beamOn ? held - lockDelay : 0, an.period, !!beamOn);
+    else {
+      fx = an.fx(t - v.last, an.period, !!tgt);
+      const fired = v.shots.filter((sh) => t >= sh.t0); const lastShot = fired[fired.length - 1];
+      fx.barrel = lastShot ? lastShot.m % muzzles.length : -1; fx.barrelSince = lastShot ? t - lastShot.t0 : 9; fx.shots = lastShot ? lastShot.m + 1 : 0;
+    }
+    if (an.persist) { fx.docked = !v.mem.out; fx.mem = v.mem; }
+    look.draw(c, v.aim, s, fx, t, tw.color, info);
+    if (an.beam && tgt) {
+      if (beamOn) an.shot(muzzleAt(0, v.aim), tgt.p, held - lockDelay, s, tw.color, 0, t, info);
+      else { const q = Math.min(1, held / Math.max(0.01, lockDelay)), r0 = s * (0.35 - 0.18 * q), sp = t * 4;
+        line(muzzleAt(0, v.aim), tgt.p, A(tw.color, 0.25), 1);
+        for (let i = 0; i < 4; i++) { const a0 = sp + i * Math.PI / 2; arc(tgt.p, r0, a0, a0 + 0.7, A(tw.color, 0.5 + 0.5 * q), 2); } }
+    }
+    v.shots = v.shots.filter((sh) => t - sh.t0 < an.flight + 0.6);
+    for (const sh of v.shots) {
+      const age = t - sh.t0; if (age < 0) continue;
+      if (!sh.from) sh.from = muzzleAt(sh.m, v.aim, sh.k);
+      const live = ens.find((e) => e.i === sh.tid); const to = live ? live.p : sh.to0;
+      info.sh = sh;
+      if (age < an.flight) an.shot(sh.from, to, age / an.flight, s, tw.color, sh.k, t, info);
+      else if (an.impact) an.impact(to, (age - an.flight) / 0.6, s, tw.color, info);
+    }
+    // A persistent agent (a drone that stays out): it moves, fires and draws itself every frame; v.mem is its state.
+    if (an.persist) an.persist(v.mem, t, info, s, tw.color);
+    if (pl && look.plane) look.plane(pl.p, pl.heading, s, fx, t, tw.color, O);
+    X.restore();
+  };
+  return v;
+}
+
+// ---- Page ------------------------------------------------------------------------------------------------
+const views = [];
+function cardCanvas(w, h) { const cv = document.createElement("canvas"); cv.width = w; cv.height = h; return cv; }
+function el(tag, cls, html) { const n = document.createElement(tag); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; }
+function register(cv, tw, gl, ga, s) { const v = makeView(cv, tw, gl, ga, s); v.cv = cv; views.push(v); io && io.observe(cv); return v; }
+const io = typeof IntersectionObserver !== "undefined" ? new IntersectionObserver((es) => { for (const e of es) { const v = views.find((x) => x.cv === e.target); if (v) v.visible = e.isIntersecting; } }) : null;
+
+function buildTower(tw, root) {
+  const sec = el("section", "enemy");
+  sec.appendChild(el("div", "enemy-head", `<span class="num">${tw.num}</span><h2>${tw.name}</h2><span class="tags">${tw.cls} · ${tw.weapon} · ${tw.hits === "none" ? "no attack" : "hits " + (tw.hits === "both" ? "air and ground" : tw.hits)}</span>`));
+  sec.appendChild(el("p", "desc", tw.desc));
+  for (const kind of ["look", "anim"]) {
+    const list = kind === "look" ? tw.looks : tw.anims;
+    const grid = el("div", "grid");
+    sec.appendChild(el("h3", "", kind === "look" ? "Look" : "Firing animation"));
+    for (const o of list) {
+      const p = el("div", "panel");
+      const cv = cardCanvas(260, 180);
+      register(cv, tw, kind === "look" ? () => o : () => lookOf(tw), kind === "anim" ? () => o : () => animOf(tw), 70);
+      p.appendChild(cv);
+      p.appendChild(el("div", "meta", `<span class="key">${o.key}</span><b>${o.name}</b>`));
+      p.appendChild(el("div", "desc", kind === "look" ? o.theme : o.desc));
+      const b = el("button", "pick", "Pick " + o.key);
+      const sync = () => { const on = st(tw.id)[kind] === o.key; b.classList.toggle("on", on); b.textContent = on ? "Picked " + o.key : "Pick " + o.key; };
+      b.onclick = () => { st(tw.id)[kind] = st(tw.id)[kind] === o.key ? null : o.key; save(); refresh(); };
+      b._sync = sync; sync(); p.appendChild(b);
+      grid.appendChild(p);
+    }
+    sec.appendChild(grid);
+    const lab = el("label", "notes", (kind === "look" ? "Look" : "Animation") + " notes");
+    const ta = document.createElement("textarea"); ta.value = st(tw.id).notes[kind] || "";
+    ta.oninput = () => { st(tw.id).notes[kind] = ta.value; save(); summary(); };
+    lab.appendChild(ta); sec.appendChild(lab);
+  }
+  const combo = el("div", "combo");
+  combo.appendChild(el("div", "combo-head", "Your combination"));
+  const cv = cardCanvas(480, 300); register(cv, tw, () => lookOf(tw), () => animOf(tw), 110); combo.appendChild(cv);
+  const cap = el("div", "desc combo-cap"); combo.appendChild(cap); combo._cap = cap; combo._tw = tw;
+  sec.appendChild(combo); combos.push(combo);
+  root.appendChild(sec);
+}
+const combos = [];
+function refresh() {
+  document.querySelectorAll("button.pick").forEach((b) => b._sync && b._sync());
+  for (const c of combos) { const tw = c._tw, l = lookOf(tw), a = animOf(tw); c._cap.textContent = `Look ${l.key} ${l.name} · animation ${a.key} ${a.name}` + (st(tw.id).look ? "" : " (option A until you pick)"); }
+  summary();
+}
+function summary() {
+  const out = [PAGE.title];
+  for (const tw of TOWERS) {
+    const s0 = st(tw.id), l = tw.looks.find((x) => x.key === s0.look), a = tw.anims.find((x) => x.key === s0.anim);
+    let line = `${tw.name}: look ${l ? l.key + " " + l.name : "-"}, animation ${a ? a.key + " " + a.name : "-"}`;
+    const n = [];
+    if ((s0.notes.look || "").trim()) n.push("look: " + s0.notes.look.trim().replace(/\s+/g, " "));
+    if ((s0.notes.anim || "").trim()) n.push("animation: " + s0.notes.anim.trim().replace(/\s+/g, " "));
+    if (n.length) line += "; notes: " + n.join(" | ");
+    out.push(line);
+  }
+  const ta = document.getElementById("summary"); if (ta) { ta.value = out.join("\n"); ta.rows = out.length + 1; }
+}
+function boot() {
+  const root = document.getElementById("towers");
+  for (const tw of TOWERS) buildTower(tw, root);
+  refresh();
+  document.getElementById("copy").onclick = () => { const ta = document.getElementById("summary"), b = document.getElementById("copy");
+    const done = () => { b.textContent = "Copied"; setTimeout(() => { b.textContent = "Copy picks and notes"; }, 1500); };
+    try { navigator.clipboard.writeText(ta.value).then(done, () => ta.select()); } catch (e) { ta.select(); } };
+  document.getElementById("clear").onclick = () => { if (!confirm("Clear this page's picks and notes?")) return; state = {}; save(); location.reload(); };
+  const t0 = performance.now();
+  const tick = () => { const t = (performance.now() - t0) / 1000; for (const v of views) if (v.visible) v.frame(t); requestAnimationFrame(tick); };
+  requestAnimationFrame(tick);
+}
+if (typeof document !== "undefined" && typeof NO_BOOT === "undefined") boot(); // the second-pass pages reuse makeView without this page
+
+// ---- Tower art second pass: per-step path looks and Retrofit looks on top of a confirmed base design --------
+// Data (defined before this): PAGE {title, store}, P2 {tower, look, anim, intro, paths: [{name, theme, steps: [{name, cost,
+// effect, options: [layer x3]}] x5}], retrofits: [{name, cost, effect, options: [layer x3]}], uncapped?}.
+// A layer: {key, name, desc, under?(c, aim, s, fx, t, col, info), over?(...), muzzles?, targets?, crit?, shot?, shotFx?, impactFx?}.
+//   under/over draw before/after the base model; muzzles replace the firing points (the last layer that sets them wins);
+//   targets = enemies it fires at at once; crit = crit chance shown as a gold burst; shot replaces the base shot (last wins);
+//   shotFx/impactFx draw on top of every shot/impact.
+
+const TW = BASE.TOWERS.find((x) => x.id === P2.tower);
+const BASE_LOOK = TW.looks.find((l) => l.key === P2.look), BASE_ANIM = TW.anims.find((a) => a.key === P2.anim);
+let S2 = {};
+try { S2 = JSON.parse(localStorage.getItem(PAGE.store) || "{}") || {}; } catch (e) { S2 = {}; }
+S2.picks ||= { ...(P2.picks || {}) }; S2.notes ||= {}; S2.build ||= { lv: [0, 0, 0], r: -1 };
+function save2() { try { localStorage.setItem(PAGE.store, JSON.stringify(S2)); } catch (e) { /* storage unavailable */ } }
+const STAGE = ["1", "2", "3", "4", "M"];
+const optOf = (list, id) => list.find((o) => o.key === S2.picks[id]) || list[0];
+
+// The layers for path levels lv[] and Retrofit r (-1 none); `over` swaps one stage for a candidate option.
+function layersFor(lv, r, swap) {
+  const out = [], keys = {}; out.build = { lv: lv.slice(), r, keys, key: (id) => keys[id] || "A" };
+  P2.paths.forEach((pa, pi) => { for (let k = 0; k < lv[pi]; k++) { const id = "p" + pi + "s" + k, o = swap && swap.id === id ? swap.opt : optOf(pa.steps[k].options, id); keys[id] = o.key; out.push(o); } });
+  if (r >= 0) { const id = "r" + r, o = swap && swap.id === id ? swap.opt : optOf(P2.retrofits[r].options, id); keys[id] = o.key; out.push(o); }
+  return out;
+}
+const GOLD_C = [1, 0.78, 0.3, 1];
+function critMark(p, v, s) { if (v >= 1) return; glowDot(p, s * 0.1 * (1 - v), GOLD_C); for (let i = 0; i < 6; i++) { const d = fa(i * TAU / 6 + 0.3); line(add(p, mul(d, s * (0.06 + 0.2 * v))), add(p, mul(d, s * (0.12 + 0.24 * v))), A(GOLD_C, 1 - v), 1.4); } }
+function compose(layers) {
+  let muzzles = BASE_LOOK.muzzles, targets = 1, crit = 0, shot = null;
+  for (const L of layers) { if (L.muzzles) muzzles = L.muzzles; if (L.targets) targets = Math.max(targets, L.targets); if (L.crit) crit = Math.max(crit, L.crit); if (L.shot) shot = L.shot; }
+  const B = layers.build || { lv: [0, 0, 0], r: -1 };
+  const md = P2.mods ? P2.mods(B) : null;
+  if (md) { if (md.targets) targets = md.targets; if (md.crit != null) crit = md.crit; if (md.shot) shot = md.shot; }
+  const look = { ...BASE_LOOK, muzzles, key: BASE_LOOK.key + layers.map((L) => L.key).join(""),
+    draw(c, aim, s, fx, t, col, info) { if (P2.model) return P2.model(c, aim, s, fx, t, col, info, B);
+      for (const L of layers) if (L.under) L.under(c, aim, s, fx, t, col, info);
+      BASE_LOOK.draw.call(this, c, aim, s, fx, t, col, info); for (const L of layers) if (L.over) L.over(c, aim, s, fx, t, col, info); } };
+  if (P2.plane) look.plane = (p, h, s, fx, t, col, O) => P2.plane(B, p, h, s, fx, t, col, O);
+  if (P2.door) look.door = (p, h, s, O) => P2.door(B, p, h, s, O);
+  if (P2.orbitR) look.orbitR = (r) => P2.orbitR(B, r);
+  if (P2.muzzleAt) look.muzzleAt = (m, k, c, aim, s, info) => P2.muzzleAt(B, m, k, c, aim, s, info);
+  const b = BASE_ANIM, every = crit > 0 ? Math.max(2, Math.round(1 / crit)) : 0;
+  const anim = { ...b, key: b.key + targets, burst: (b.burst || 1) * targets, multi: targets > 1 || b.multi, gap: targets > 1 ? 0.02 : b.gap,
+    ...(md && md.period ? { period: md.period } : {}), ...(md && md.flight ? { flight: md.flight } : {}), ...(md && md.persist ? { persist: md.persist } : {}), ...(md && md.burst ? { burst: md.burst, gap: md.gap ?? b.gap, multi: md.multi ?? false } : {}),
+    shot: (f, to, u, s, col, k, t, info) => { (shot || b.shot)(f, to, u, s, col, k, t, info); for (const L of layers) if (L.shotFx) L.shotFx(f, to, u, s, col, k, t, info); if (md && md.shotFx) md.shotFx(f, to, u, s, col, k, t, info); },
+    impact: (to, v, s, col, info) => { if (md && md.impact) md.impact(to, v, s, col, info); else if (b.impact) b.impact(to, v, s, col, info); for (const L of layers) if (L.impactFx) L.impactFx(to, v, s, col, info);
+      if (md && md.impactFx) md.impactFx(to, v, s, col, info);
+      if (every && info && info.sh && info.sh.m % every === 0) critMark(to, v, s); } };
+  return { look, anim };
+}
+function clampBuild(lv, changed) { // two paths at most; once one reaches 3, the other stops at 2
+  if (P2.uncapped) return;
+  const others = [0, 1, 2].filter((i) => i !== changed);
+  if (others.filter((i) => lv[i] > 0).length >= 2) lv[changed] = 0;
+  else if (others.some((i) => lv[i] >= 3)) lv[changed] = Math.min(lv[changed], 2);
+}
+
+function card(id, opt, lv, r, root) {
+  const p = el("div", "panel"), cv = cardCanvas(260, 180);
+  const comp = () => compose(layersFor(lv, r, { id, opt }));
+  register(cv, TW, () => comp().look, () => comp().anim, 120);
+  p.appendChild(cv); p.appendChild(el("div", "meta", `<span class="key">${opt.key}</span><b>${opt.name}</b>`)); p.appendChild(el("div", "desc", opt.desc));
+  const b = el("button", "pick"); const sync = () => { const on = S2.picks[id] === opt.key; b.classList.toggle("on", on); b.textContent = (on ? "Picked " : "Pick ") + opt.key; };
+  b.onclick = () => { S2.picks[id] = S2.picks[id] === opt.key ? null : opt.key; save2(); refresh2(); }; b._sync = sync; sync(); p.appendChild(b); root.appendChild(p);
+}
+function notesBox(key, label, root) { const lab = el("label", "notes", label); const ta = document.createElement("textarea"); ta.value = S2.notes[key] || "";
+  ta.oninput = () => { S2.notes[key] = ta.value; save2(); summary2(); }; lab.appendChild(ta); root.appendChild(lab); }
+
+function buildPreview(root) {
+  const box = el("section", "build"), cv = cardCanvas(560, 360), ctrls = el("div", "ctrls");
+  register(cv, TW, () => compose(layersFor(S2.build.lv, S2.build.r)).look, () => compose(layersFor(S2.build.lv, S2.build.r)).anim, 210);
+  box.appendChild(cv); box.appendChild(ctrls);
+  ctrls.appendChild(el("div", "combo-head", "Build preview"));
+  const roles = [];
+  P2.paths.forEach((pa, pi) => { const c = el("div", "ctrl"), lab = el("label", "", ""), inp = document.createElement("input"), role = el("span", "role", "");
+    inp.type = "range"; inp.min = 0; inp.max = 5; inp.step = 1; inp.value = S2.build.lv[pi];
+    const show = () => { const v = S2.build.lv[pi]; lab.textContent = `Path ${pi + 1}: ${pa.name}: ${v === 0 ? "none" : v === 5 ? "mastery" : "step " + v}`; inp.value = v; };
+    inp.oninput = () => { S2.build.lv[pi] = +inp.value; clampBuild(S2.build.lv, pi); save2(); roles.forEach((f) => f()); };
+    roles.push(() => { show(); const lv = S2.build.lv; role.textContent = P2.uncapped ? "" : lv[pi] >= 3 ? "primary" : lv[pi] > 0 && lv.some((x, i) => i !== pi && x >= 3) ? "secondary (max 2)" : ""; });
+    c.appendChild(lab); c.appendChild(inp); c.appendChild(role); ctrls.appendChild(c); });
+  const rc = el("div", "ctrl"), sel = document.createElement("select"); rc.appendChild(el("label", "", "Retrofit"));
+  [["-1", "None"], ...P2.retrofits.map((rf, i) => [String(i), rf.name])].forEach(([v, n]) => { const o = document.createElement("option"); o.value = v; o.textContent = n; sel.appendChild(o); });
+  sel.value = String(S2.build.r); sel.onchange = () => { S2.build.r = +sel.value; save2(); }; rc.appendChild(sel); ctrls.appendChild(rc);
+  ctrls.appendChild(el("div", "desc", "Unpicked steps show option A."));
+  roles.forEach((f) => f()); root.appendChild(box);
+}
+
+function boot2() {
+  const root = document.getElementById("towers");
+  const head = el("section", "enemy");
+  head.appendChild(el("div", "enemy-head", `<span class="num">${TW.num}</span><h2>${TW.name}</h2><span class="tags">${TW.cls} · ${TW.weapon} · base look ${BASE_LOOK.key} ${BASE_LOOK.name}, animation ${BASE_ANIM.key} ${BASE_ANIM.name}</span>`));
+  head.appendChild(el("p", "desc", P2.intro)); root.appendChild(head);
+  buildPreview(root);
+  P2.paths.forEach((pa, pi) => { const sec = el("section", "enemy");
+    sec.appendChild(el("div", "enemy-head", `<h2>Path ${pi + 1}: ${pa.name}</h2><span class="tags">${pa.theme}</span>`));
+    pa.steps.forEach((st, k) => { const row = el("div", "stage"), lv = [0, 0, 0]; lv[pi] = k + 1;
+      row.appendChild(el("div", "stage-head", `<span class="lvl">${STAGE[k]}</span><b>${st.name}</b><span class="cost">${st.cost}</span><span class="eff">${st.effect}</span>`));
+      const g = el("div", "grid3"); st.options.forEach((o) => card("p" + pi + "s" + k, o, lv, -1, g)); row.appendChild(g); sec.appendChild(row); });
+    notesBox("p" + pi, `Path ${pi + 1} notes`, sec); root.appendChild(sec); });
+  const rs = el("section", "enemy"); rs.appendChild(el("div", "enemy-head", `<h2>Retrofit</h2><span class="tags">the player picks one of three</span>`));
+  P2.retrofits.forEach((rf, ri) => { const row = el("div", "stage");
+    row.appendChild(el("div", "stage-head", `<span class="lvl">R</span><b>${rf.name}</b><span class="cost">${rf.cost}</span><span class="eff">${rf.effect}</span>`));
+    const g = el("div", "grid3"); rf.options.forEach((o) => card("r" + ri, o, [0, 0, 0], ri, g)); row.appendChild(g); rs.appendChild(row); });
+  notesBox("r", "Retrofit notes", rs); root.appendChild(rs);
+  refresh2();
+  document.getElementById("copy").onclick = () => { const ta = document.getElementById("summary"), b = document.getElementById("copy");
+    const done = () => { b.textContent = "Copied"; setTimeout(() => { b.textContent = "Copy picks and notes"; }, 1500); };
+    try { navigator.clipboard.writeText(ta.value).then(done, () => ta.select()); } catch (e) { ta.select(); } };
+  document.getElementById("clear").onclick = () => { if (!confirm("Clear this page's picks and notes?")) return; S2 = { picks: {}, notes: {}, build: { lv: [0, 0, 0], r: -1 } }; save2(); location.reload(); };
+  const t0 = performance.now();
+  const tick = () => { const t = (performance.now() - t0) / 1000; for (const v of views) if (v.visible) v.frame(t); requestAnimationFrame(tick); };
+  requestAnimationFrame(tick);
+}
+function refresh2() { document.querySelectorAll("button.pick").forEach((b) => b._sync && b._sync()); summary2(); }
+function summary2() {
+  const out = [PAGE.title], nt = (k) => (S2.notes[k] || "").trim().replace(/\s+/g, " ");
+  P2.paths.forEach((pa, pi) => { let l = `Path ${pi + 1} ${pa.name}: ` + pa.steps.map((st, k) => `${STAGE[k]} ${S2.picks["p" + pi + "s" + k] || "-"}`).join(", ");
+    if (nt("p" + pi)) l += "; notes: " + nt("p" + pi); out.push(l); });
+  let r = "Retrofits: " + P2.retrofits.map((rf, i) => `${rf.name} ${S2.picks["r" + i] || "-"}`).join(", "); if (nt("r")) r += "; notes: " + nt("r"); out.push(r);
+  const ta = document.getElementById("summary"); if (ta) { ta.value = out.join("\n"); ta.rows = out.length + 1; }
+}
+if (typeof document !== "undefined") boot2();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tower Upgrade Structure</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    color-scheme: dark;
+    --ground: #06090e; --field: #0b1016; --panel: #08111a; --panel-2: #0d1a25; --rule: #1d3a4b; --wire: #2a5a70;
+    --text: #dcedf7; --dim: #86a0b1; --faint: #4f6a7b; --accent: #4de1ff; --gold: #ffc85a;
+    --display: "Chakra Petch", "Bahnschrift", "Segoe UI", sans-serif;
+    --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--text); font: 14px/1.5 var(--body); padding: 28px 16px 48px; }
+  .wrap { max-width: 1340px; margin: 0 auto; display: grid; gap: 22px; }
+  .eyebrow { font: 600 12px var(--display); letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
+  h1 { font: 700 30px/1.1 var(--display); margin: 4px 0 0; }
+  h2 { font: 700 20px/1.2 var(--display); margin: 0; letter-spacing: .04em; }
+  h3 { font: 700 16px var(--display); margin: 0; letter-spacing: .03em; }
+  p.note { margin: 6px 0 0; color: var(--dim); max-width: 95ch; }
+  ul.rules { margin: 8px 0 0; padding-left: 18px; color: var(--dim); max-width: 100ch; }
+  ul.rules b, p.note b { color: var(--text); font-weight: 500; }
+  code { font: 12px var(--mono); color: var(--accent); }
+  section { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px 2px 12px 2px; padding: 12px 14px 14px; display: grid; gap: 10px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; }
+  .card { border: 1px solid var(--rule); border-radius: 8px; padding: 10px; display: grid; gap: 7px; align-content: start; background: #071019; }
+  .card.picked { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold) inset; }
+  .card.today .key { background: var(--faint); color: var(--text); }
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .key { font: 700 11px var(--display); color: #031018; background: var(--accent); border-radius: 4px; padding: 0 6px; }
+  .tag { font: 600 11px var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--faint); }
+  .desc { color: var(--dim); font-size: 13px; margin: 0; }
+  .pc { margin: 0; padding-left: 16px; font-size: 12.5px; color: var(--dim); }
+  .pc li.pro::marker { content: "+  "; color: #7be38f; }
+  .pc li.con::marker { content: "−  "; color: #ff8a7a; }
+  label { display: grid; gap: 3px; font: 600 11px var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+  textarea { width: 100%; background: var(--field); color: var(--text); border: 1px solid var(--rule); border-radius: 6px;
+    font: 13px var(--body); padding: 6px 8px; min-height: 44px; resize: vertical; text-transform: none; letter-spacing: 0; }
+  textarea:focus { outline: 1px solid var(--accent); border-color: var(--accent); }
+  button { font: 600 12px var(--display); letter-spacing: .06em; color: var(--text); background: var(--panel-2); border: 1px solid var(--wire);
+    border-radius: 6px; padding: 6px 11px; cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  button.pick.on { background: var(--gold); color: #1a1000; border-color: var(--gold); }
+  button.big { width: 100%; padding: 9px; }
+  /* tree diagram */
+  .dia { display: grid; gap: 6px; justify-items: center; background: var(--field); border: 1px solid var(--rule); border-radius: 6px; padding: 10px 8px; }
+  .dia .top { display: flex; gap: 10px; align-items: center; justify-content: center; flex-wrap: wrap; }
+  .dia .arrow { color: var(--faint); font-size: 12px; line-height: 1; }
+  .dia .fork { font: 600 10.5px var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+  .dia .cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; width: 100%; }
+  .dia .col { display: grid; gap: 5px; align-content: start; justify-items: stretch; }
+  .n { font: 600 11px var(--display); letter-spacing: .03em; text-align: center; border-radius: 5px; padding: 3px 4px; border: 1px solid var(--wire);
+    color: var(--text); background: var(--panel-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; position: relative; }
+  .n.stock { border-color: var(--dim); }
+  .n.trunk { border-color: var(--accent); }
+  .n.side { border-style: dashed; border-color: var(--accent); }
+  .n.head { background: transparent; border-color: transparent; color: var(--dim); padding: 0; }
+  .n.prim { background: rgba(255,200,90,.16); border-color: var(--gold); color: var(--gold); }
+  .n.sec { background: rgba(77,225,255,.13); border-color: var(--accent); color: var(--accent); }
+  .n.cap { color: var(--faint); border-color: var(--rule); background: transparent; text-decoration: line-through; }
+  .n.lock { color: var(--faint); border: 1px dashed var(--rule); background: transparent; }
+  .n.mast { border-width: 2px; }
+  .n .badge { position: absolute; right: 3px; top: 50%; transform: translateY(-50%); font: 700 9px var(--display); color: #1a1000; background: var(--gold); border-radius: 3px; padding: 0 3px; }
+  .dia.big .n { font-size: 12.5px; padding: 5px 6px; }
+  .facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 8px; }
+  .fact { border: 1px solid var(--rule); border-radius: 6px; padding: 6px 8px; background: #071019; }
+  .fact b { display: block; font: 700 20px var(--display); color: var(--gold); }
+  .fact span { color: var(--dim); font-size: 12.5px; }
+  .legend { display: flex; gap: 10px; flex-wrap: wrap; font-size: 12px; color: var(--dim); }
+  .legend .n { display: inline-block; min-width: 0; }
+  .combo { border: 1px solid var(--gold); border-radius: 8px; padding: 10px; background: rgba(255,200,90,.04); display: grid; gap: 10px; }
+  #summary { min-height: 120px; font: 12px var(--mono); }
+  @media (max-width: 760px) { h1 { font-size: 24px; } .dia .n { font-size: 10px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Bastion Line · Tower rework · Upgrade structure · round 1 (decided)</div>
+    <h1>Upgrade structure: depth and trunk</h1>
+    <p class="note">Settled: <b>3 paths per tower</b>, each with its own purpose, and <b>primary/secondary stays</b>. Open: how deep a path goes, and whether
+      the shared trunk (Stock → Retrofit) stays. Pick a <b>trunk</b> and a <b>depth</b> (mix freely) and add notes. <b>Your combination</b> shows the
+      mix on an example tower (today's until you pick). <b>Decided:</b> your picks are preselected (trunk C Optional Retrofit, depth B 4 + mastery). The Retrofit is
+      tower-specific, has a fourth card with its own hotkey, and visibly changes the tower. Spec: <code>design/towers.md</code> (issue #55).</p>
+    <ul class="rules">
+      <li><b>Mixing (kept):</b> climb up to two paths, up to two upgrades each. The 3rd upgrade on either makes it the <b>primary</b>, which goes on to its mastery;
+        the other is the <b>secondary</b>, capped at 2 and keeping its full effects. The third path is locked.</li>
+      <li><b>Masteries</b> still need the tower's Mastery research (research is reworked separately, later).</li>
+      <li><b>The example</b> uses placeholder path purposes (Power, Speed, Effect). Your roster sets the real ones per tower.</li>
+      <li><b>Prices</b> are set per tower later. The "average step" figure only shows how today's budget would spread over more or fewer steps.</li>
+    </ul>
+    <div class="legend" style="margin-top:8px">
+      <span><span class="n prim">owned, primary</span></span><span><span class="n sec">owned, secondary</span></span>
+      <span><span class="n cap">capped</span></span><span><span class="n lock">locked</span></span>
+      <span><span class="n trunk">trunk</span></span><span><span class="n side">optional</span></span>
+    </div>
+  </header>
+
+  <section>
+    <h2>Trunk: what comes before the paths</h2>
+    <div class="grid" id="trunk"></div>
+    <label>Trunk notes<textarea id="note-trunk"></textarea></label>
+  </section>
+
+  <section>
+    <h2>Depth: upgrades in a path before its mastery</h2>
+    <div class="grid" id="depth"></div>
+    <label>Depth notes<textarea id="note-depth"></textarea></label>
+  </section>
+
+  <section>
+    <h2>Your combination</h2>
+    <div class="combo">
+      <div class="row"><span class="tag" id="combo-label"></span></div>
+      <div id="combo-dia"></div>
+      <div class="facts" id="combo-facts"></div>
+    </div>
+  </section>
+
+  <section class="out">
+    <h2>Picks and notes</h2>
+    <label>General notes<textarea id="note-general"></textarea></label>
+    <textarea id="summary" readonly></textarea>
+    <button class="big" id="copy">Copy picks and notes</button>
+    <button class="big" id="clear">Clear picks</button>
+  </section>
+</div>
+
+<script>
+const STORE = "bl-tower-structure-v2";
+const DEFAULTS = { trunk: "C", depth: "B" }; // owner's pick, 2026-10-08
+const TODAY = { trunk: "A", depth: "B" };
+const TODAY_BUDGET = 1600; // Pulse Turret today: every upgrade of a full build (Retrofit, primary to mastery, secondary 2), after the 50 build
+const PURPOSES = ["Power", "Speed", "Effect"];
+const TRUNKS = [
+  { key: "A", name: "Keep the Retrofit", today: true, nodes: ["Retrofit"], mode: "gate",
+    desc: "As today: Stock → Retrofit, then the paths open. One all-round step every tower takes first.",
+    pros: ["A cheap all-round boost before the first choice", "Familiar"], cons: ["One generic step before every tower's first real choice"] },
+  { key: "B", name: "No trunk", nodes: [], mode: "none",
+    desc: "The paths open straight from the stock tower. The Retrofit's all-round boost moves into each path's first step.",
+    pros: ["The first upgrade is already a choice", "Every step has a purpose"], cons: ["No all-round upgrade; a tower is only stronger in the direction you chose"] },
+  { key: "C", name: "Optional Retrofit", nodes: ["Retrofit"], mode: "side",
+    desc: "The Retrofit stays as an all-round upgrade off to the side: buy it any time, before or after the paths. It doesn't unlock anything.",
+    pros: ["Paths open at once, and the all-round boost still exists", "Useful as a cheap top-up on towers you won't specialise"], cons: ["A fourth thing to buy beside the three paths (a fourth card in the tower panel)"] },
+  { key: "D", name: "Two-step trunk", nodes: ["Retrofit", "Refit"], mode: "gate",
+    desc: "Two all-round steps (Retrofit, then Refit) before the paths. Towers are solid before they specialise; paths can be shorter.",
+    pros: ["Strong generalist towers early", "Pairs well with short paths"], cons: ["Two generic steps; the paths start later"] },
+];
+const DEPTHS = [
+  { key: "A", name: "3 + mastery", n: 3,
+    desc: "Three upgrades, then the mastery. The primary locks in on its last upgrade; a secondary gets 2 of 3.",
+    pros: ["Short and punchy: every step is a big one", "Fewer nodes to design and balance"], cons: ["Fewer decisions per tower", "A secondary is almost a whole path"] },
+  { key: "B", name: "4 + mastery", n: 4, today: true,
+    desc: "As today: four upgrades, then the mastery. The primary locks in on the 3rd; a secondary gets 2 of 4.",
+    pros: ["Proven in play", "A clear gap between primary and secondary"], cons: ["Steps 4 to 6 today are often small stat bumps"] },
+  { key: "C", name: "5 + mastery", n: 5,
+    desc: "Five upgrades, then the mastery. The primary locks in on the 3rd; a secondary gets 2 of 5.",
+    pros: ["Finer steps and more to save toward", "Room for counter upgrades inside each path"], cons: ["A longer climb with smaller steps", "The most nodes to design (and draw, for per-path looks)"] },
+];
+
+let S;
+try { S = JSON.parse(localStorage.getItem(STORE) || "null"); } catch (e) { S = null; }
+if (!S || typeof S !== "object") S = {};
+S.picks = S.picks || { trunk: DEFAULTS.trunk, depth: DEFAULTS.depth }; S.notes = S.notes || { trunk: "", depth: "", general: "" };
+function save() { try { localStorage.setItem(STORE, JSON.stringify(S)); } catch (e) { /* storage unavailable */ } }
+
+const $ = (id) => document.getElementById(id);
+function el(tag, attrs, kids) {
+  const n = document.createElement(tag);
+  for (const k in (attrs || {})) { if (k === "text") n.textContent = attrs[k]; else if (k === "cls") n.className = attrs[k]; else n.setAttribute(k, attrs[k]); }
+  for (const c of (kids || [])) n.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
+  return n;
+}
+const trunkOf = (k) => TRUNKS.find((t) => t.key === k);
+const depthOf = (k) => DEPTHS.find((d) => d.key === k);
+
+// The example build: path 1 primary to its mastery, path 2 secondary at its cap of 2, path 3 locked.
+function diagram(tr, dp, big) {
+  const d = el("div", { cls: "dia" + (big ? " big" : "") });
+  const top = el("div", { cls: "top" }, [el("span", { cls: "n stock", text: "Stock" })]);
+  if (tr.mode === "side") top.appendChild(el("span", { cls: "n side", text: tr.nodes[0] + (big ? " (any time)" : "") }));
+  d.appendChild(top);
+  if (tr.mode === "gate") for (const name of tr.nodes) { d.appendChild(el("span", { cls: "arrow", text: "↓" })); d.appendChild(el("span", { cls: "n trunk", text: name })); }
+  d.appendChild(el("span", { cls: "fork", text: big ? "↓ choose up to two paths ↓" : "↓ paths ↓" }));
+  const cols = el("div", { cls: "cols" });
+  PURPOSES.forEach((p, c) => {
+    const col = el("div", { cls: "col" });
+    col.appendChild(el("span", { cls: "n head", text: big ? p + (c === 0 ? " · primary" : c === 1 ? " · secondary" : " · locked") : p }));
+    for (let i = 1; i <= dp.n; i++) {
+      const cls = c === 0 ? "prim" : c === 1 ? (i <= 2 ? "sec" : "cap") : "lock";
+      const node = el("span", { cls: "n " + cls, text: (big ? p + " " : p[0]) + i });
+      if (c === 0 && i === 3) node.appendChild(el("span", { cls: "badge", text: big ? "primary" : "P" }));
+      col.appendChild(node);
+    }
+    col.appendChild(el("span", { cls: "n mast " + (c === 0 ? "prim" : c === 1 ? "cap" : "lock"), text: big ? p + " mastery" : "M" }));
+    cols.appendChild(col);
+  });
+  d.appendChild(cols);
+  return d;
+}
+function stats(tr, dp) {
+  const trunk = tr.nodes.length, purchases = trunk + dp.n + 1 + 2;
+  return { purchases, nodes: trunk + 3 * (dp.n + 1), avg: Math.round(TODAY_BUDGET / purchases), toPrimary: (tr.mode === "gate" ? trunk : 0) + 3, trunk, side: tr.mode === "side" };
+}
+
+function optionCards(boxId, list, group, other) {
+  const box = $(boxId); box.textContent = "";
+  for (const o of list) {
+    const picked = S.picks[group] === o.key;
+    const card = el("div", { cls: "card" + (o.today ? " today" : "") + (picked ? " picked" : "") });
+    const btn = el("button", { cls: "pick" + (picked ? " on" : ""), text: picked ? "Picked" : "Pick " + o.key });
+    btn.addEventListener("click", () => { S.picks[group] = picked ? null : o.key; save(); render(); });
+    card.appendChild(el("div", { cls: "row", style: "justify-content: space-between" }, [
+      el("div", { cls: "row" }, [el("span", { cls: "key", text: o.key }), el("h3", { text: o.name }), o.today ? el("span", { cls: "tag", text: "today" }) : el("span")]), btn]));
+    card.appendChild(el("p", { cls: "desc", text: o.desc }));
+    card.appendChild(diagram(group === "trunk" ? o : trunkOf(other), group === "depth" ? o : depthOf(other), false));
+    const st = stats(group === "trunk" ? o : trunkOf(other), group === "depth" ? o : depthOf(other));
+    card.appendChild(el("div", { cls: "tag", text: st.purchases + " upgrades to a full build" + (st.side ? " (with the Retrofit)" : "") + " · " + st.nodes + " nodes per tower" }));
+    card.appendChild(el("ul", { cls: "pc" }, o.pros.map((x) => el("li", { cls: "pro", text: x })).concat(o.cons.map((x) => el("li", { cls: "con", text: x })))));
+    box.appendChild(card);
+  }
+}
+function render() {
+  const tk = S.picks.trunk || TODAY.trunk, dk = S.picks.depth || TODAY.depth, tr = trunkOf(tk), dp = depthOf(dk);
+  optionCards("trunk", TRUNKS, "trunk", dk);
+  optionCards("depth", DEPTHS, "depth", tk);
+  $("combo-label").textContent = "Trunk " + tk + " " + tr.name + (S.picks.trunk ? "" : " (today's, until you pick)") + " · Depth " + dk + " " + dp.name + (S.picks.depth ? "" : " (today's, until you pick)");
+  const box = $("combo-dia"); box.textContent = ""; box.appendChild(diagram(tr, dp, true));
+  const st = stats(tr, dp), facts = $("combo-facts"); facts.textContent = "";
+  const fact = (b, s) => facts.appendChild(el("div", { cls: "fact" }, [el("b", { text: b }), el("span", { text: s })]));
+  fact(String(st.purchases), "upgrades to a full build: " + (st.trunk ? st.trunk + " trunk, " : "") + dp.n + " primary, the mastery, 2 secondary" + (st.side ? " (the Retrofit is optional)" : ""));
+  fact(String(st.toPrimary), "upgrades until the primary locks in" + (st.side ? " (not counting the optional Retrofit)" : ""));
+  fact(String(st.nodes), "upgrade nodes to design per tower (today: 16)");
+  fact("~" + st.avg, "credits per step on average, if a full build kept today's total (Pulse Turret: " + TODAY_BUDGET.toLocaleString("en") + ")");
+  summary();
+}
+function clean(s) { return String(s || "").replace(/\s+/g, " ").trim(); }
+function summary() {
+  const line = (label, key, find, note) => label + ": " + (key ? key + " " + find(key).name : "-") + (clean(note) ? "; notes: " + clean(note) : "");
+  const out = ["Upgrade structure (round 1)",
+    line("Trunk", S.picks.trunk, trunkOf, S.notes.trunk),
+    line("Depth", S.picks.depth, (k) => ({ name: depthOf(k).name.replace("+", "upgrades +") }), S.notes.depth)];
+  if (clean(S.notes.general)) out.push("General notes: " + clean(S.notes.general));
+  $("summary").value = out.join("\n"); $("summary").rows = out.length + 1;
+}
+for (const k of ["trunk", "depth", "general"]) {
+  const ta = $("note-" + k); ta.value = S.notes[k] || "";
+  ta.addEventListener("input", () => { S.notes[k] = ta.value; save(); summary(); });
+}
+$("copy").addEventListener("click", () => {
+  const ta = $("summary"), b = $("copy"), done = () => { b.textContent = "Copied"; setTimeout(() => { b.textContent = "Copy picks and notes"; }, 1500); };
+  try { navigator.clipboard.writeText(ta.value).then(done, () => { ta.select(); }); } catch (e) { ta.select(); }
+});
+$("clear").addEventListener("click", () => { S.picks = { trunk: null, depth: null }; save(); render(); });
+render();
+</script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>__TITLE__</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    color-scheme: dark;
+    --ground: #06090e; --field: #0b1016; --panel: #08111a; --panel-2: #0d1a25; --rule: #1d3a4b; --wire: #2a5a70;
+    --text: #dcedf7; --dim: #86a0b1; --faint: #4f6a7b; --accent: #4de1ff; --gold: #ffc85a;
+    --display: "Chakra Petch", "Bahnschrift", "Segoe UI", sans-serif;
+    --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--text); font: 14px/1.5 var(--body); padding: 28px 16px 48px; }
+  .wrap { max-width: 1340px; margin: 0 auto; display: grid; gap: 22px; }
+  .eyebrow { font: 600 12px var(--display); letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
+  h1 { font: 700 30px/1.1 var(--display); margin: 4px 0 0; }
+  h2 { font: 700 22px/1.2 var(--display); margin: 0; letter-spacing: .03em; }
+  h3 { font: 600 13px var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--dim); margin: 6px 0 0; }
+  p.note, .desc { color: var(--dim); }
+  p.note { margin: 6px 0 0; max-width: 95ch; }
+  ul.rules { margin: 8px 0 0; padding-left: 18px; color: var(--dim); max-width: 100ch; }
+  ul.rules b, p.note b { color: var(--text); font-weight: 500; }
+  code { font: 12px var(--mono); color: var(--accent); }
+  .enemy { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px 2px 12px 2px; padding: 12px 14px 14px; display: grid; gap: 8px; }
+  .enemy-head { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+  .num { font: 700 22px var(--display); color: var(--gold); }
+  .tags { font: 600 11px var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; }
+  .panel { border: 1px solid var(--rule); border-radius: 8px; padding: 8px; display: grid; gap: 6px; align-content: start; background: #071019; }
+  .meta { display: flex; gap: 8px; align-items: center; }
+  .key { font: 700 11px var(--display); color: #031018; background: var(--accent); border-radius: 4px; padding: 0 6px; }
+  .panel .desc { font-size: 12.5px; margin: 0; }
+  canvas { display: block; background: var(--field); border: 1px solid var(--rule); border-radius: 4px; max-width: 100%; height: auto; }
+  button { font: 600 12px var(--display); letter-spacing: .06em; color: var(--text); background: var(--panel-2); border: 1px solid var(--wire); border-radius: 6px; padding: 6px 11px; cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  button.pick.on { background: var(--gold); color: #1a1000; border-color: var(--gold); }
+  label.notes { display: grid; gap: 3px; font: 600 11px var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+  label.notes textarea { width: 100%; min-height: 40px; background: #071019; color: var(--text); border: 1px solid var(--rule); border-radius: 6px; font: 13px var(--body); padding: 6px 8px; resize: vertical; text-transform: none; letter-spacing: 0; }
+  .combo { display: grid; gap: 6px; border: 1px solid var(--gold); border-radius: 8px; padding: 8px; background: rgba(255,200,90,.04); justify-items: start; }
+  .combo-head { font: 600 12px var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
+  .out { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px 2px 12px 2px; padding: 12px 14px; display: grid; gap: 8px; }
+  #summary { width: 100%; min-height: 100px; background: #071019; color: var(--text); border: 1px solid var(--rule); border-radius: 6px; font: 12px var(--mono); padding: 8px; }
+  .stage { display: grid; gap: 6px; border-top: 1px solid var(--rule); padding-top: 8px; }
+  .stage-head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+  .lvl { font: 700 13px var(--display); color: #031018; background: var(--gold); border-radius: 4px; padding: 0 7px; }
+  .cost { font: 500 12px var(--mono); color: var(--gold); }
+  .eff { color: var(--dim); font-size: 13px; }
+  .grid3 { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; }
+  .build { display: grid; gap: 10px; grid-template-columns: minmax(0, 560px) minmax(220px, 1fr); align-items: start; border: 1px solid var(--gold); border-radius: 8px; padding: 10px; background: rgba(255,200,90,.04); }
+  .ctrls { display: grid; gap: 10px; }
+  .ctrl { display: grid; gap: 3px; }
+  .ctrl label { font: 600 12px var(--display); letter-spacing: .08em; color: var(--text); }
+  .ctrl input[type=range] { width: 100%; accent-color: var(--gold); }
+  .ctrl select { background: #071019; color: var(--text); border: 1px solid var(--rule); border-radius: 6px; padding: 4px 6px; font: 13px var(--body); }
+  .role { font: 600 11px var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+  @media (max-width: 860px) { .build { grid-template-columns: 1fr; } }
+  @media (max-width: 760px) { h1 { font-size: 24px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Bastion Line · Tower rework · Tower art · __EYEBROW__</div>
+    <h1>__H1__</h1>
+    <p class="note">Second pass for one tower: <b>every upgrade step and mastery</b> on each path, and each <b>Retrofit</b>, adds or changes a detail on the confirmed model. Each card shows the model with that path's earlier steps (your picks, or option A until you pick) plus the candidate. Pick one of three per step, add notes per path, then <b>Copy picks and notes</b>.</p>
+    <ul class="rules">
+      <li><b>Details stack:</b> the primary path's steps and the secondary's (capped at 2) both show and overlap, as in the build preview.</li>
+      <li><b>Build preview:</b> set each path's level (M is the mastery) and a Retrofit; it enforces the primary/secondary rule (two paths at most; once one reaches 3, the other stops at 2).</li>
+      <li><b>Masteries</b> get gold trim, as today's tier-4 towers do.</li>
+      <li>Same style as the base pass: dark gunmetal lit from the upper left, the tower's accent colour, top-down.</li>
+    </ul>
+  </header>
+  <div id="towers" class="wrap"></div>
+  <section class="out">
+    <h2>Picks and notes</h2>
+    <textarea id="summary" readonly></textarea>
+    <button id="copy">Copy picks and notes</button>
+    <button id="clear">Clear this page</button>
+  </section>
+</div>
+<script>
+/*__CODE__*/
+</script>
+</body>
+</html>
