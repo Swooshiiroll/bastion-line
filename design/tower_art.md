@@ -391,7 +391,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 15 | Cryo Tower | `design/tower_art_p2_15_cryo.html` | **Confirmed** (owner, 2026-10-19: "Finished"; Deep Cold C Frost Collar) |
 | 16 | Shockwave Generator | `design/tower_art_p2_16_shock.html` | **Confirmed** (owner, 2026-10-19: "Finished") |
-| 17 | Scrapyard | `design/tower_art_p2_17_scrap.html` | Base **confirmed** (owner, 2026-10-19: B Production Line, B Melt and Pour; base page `design/tower_art_p17_scrapyard.html`). New upgrade names confirmed. Second pass round 2: picks drawn; pick the Sorting Line, Faster Loading and Surplus options |
+| 17 | Scrapyard | `design/tower_art_p2_17_scrap.html` | Base **confirmed** (owner, 2026-10-19: B Production Line, B Melt and Pour; base page `design/tower_art_p17_scrapyard.html`). New upgrade names confirmed. Second pass round 3: everything picked except the Laser Cutter (was Sorting Line); pick its option |
 
 ### Gun Turret (second pass)
 
@@ -1183,7 +1183,7 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
 | Path (part) | 1 | 2 | 3 (primary) | 4 | Mastery |
 |---|---|---|---|---|---|
 | Passive Income (furnace stack) | Firebrick Lining | Forced Bellows | Blast Furnace | Arc Furnace | Gold Foundry |
-| Kill Income (junkyard) | Tow Hook | Magnet Crane | Sorting Line (round 2; was Hydraulic Shear) | Car Crusher | Breaker's Yard |
+| Kill Income (junkyard) | Tow Hook | Magnet Crane | Laser Cutter (round 3; was Sorting Line, before that Hydraulic Shear) | Car Crusher | Breaker's Yard |
 | Discounts (warehouse) | Parts Shelves | Pallet Racks | Forklift Bay | Loading Dock | Parts Exchange |
 
 **The page** (`design/tower_art_p2_17_scrap.html`, data `tools/tower_art/data_p2_scrap.js` on the base `data_scrap_parts.js`). Each path rebuilds one part around the machine its step names. Earlier picks carry as details, and masteries are gold. The agent runs the real rules: the payout with the real income, the kill ring, and the discount ring with the percentage off.
@@ -1224,6 +1224,14 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
   - Surplus: the two extra crates are a bigger stack, a pallet of crates, or crates tagged for sale.
 - **Carpet rule (the renamed Retrofits):** the Hammer Mill's +30 stacks with Passive Income, and Faster Loading's +30 px stacks with both field radii.
 
+**Round 3 (owner's picks and notes, 2026-10-19):**
+- **Picks:** the Retrofits Hammer Mill and Faster Loading A (a second grab crane). The paths are as in round 2.
+- **"Lets try a laser cutter instead of a sorting line":** Kill Income step 3 is renamed **Laser Cutter**, with the effect unchanged (in `design/tower_roster.md` and the regenerated trees). It has three new ideas on the main belt:
+  - a laser gantry whose head sweeps across, with a glowing cut line and sparks;
+  - a laser cutting table beside the belt, where a head traces a glowing cut through a plate;
+  - a laser turret on a post, tracking the scrap riding up with a red beam.
+- **"Move the additional crates to the left of the preexisting boxes":** Surplus's two crates now stand to the left of the crate stack (one design, preselected). The tow truck moved down 2 units to clear them.
+
 ## Open questions
 
-1. **Second pass, Scrapyard** (tower 17, round 2): pick the Sorting Line, Faster Loading and Surplus options. The rest is picked. Then the new upgrade names, the second pass, and towers 18-20 (next: Magneto Tower).
+1. **Second pass, Scrapyard** (tower 17, round 3): pick the Laser Cutter option. Everything else is picked. Then the new upgrade names, the second pass, and towers 18-20 (next: Magneto Tower).

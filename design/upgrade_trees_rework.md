@@ -442,7 +442,7 @@ Various collections of scrap metal sold at a profit. "One mans toxic waste is an
 | M | a | Gold Foundry | 27440 |  | 320 per round, plus 3% interest on banked credits at each clear (up to 400) | new |
 | 3 | b | Tow Hook | 345 |  | Enemies destroyed within 140 px pay 15% more | new |
 | 4 | b | Magnet Crane | 625 |  | +25%; 150 px | new |
-| 5 | b | Sorting Line | 2095 |  | +35%; 170 px | new |
+| 5 | b | Laser Cutter | 2095 |  | +35%; 170 px | new |
 | 6 | b | Car Crusher | 5720 |  | +45%; 190 px | new |
 | M | b | Breaker's Yard | 28945 |  | +60%; 210 px; bosses pay double | new |
 | 3 | c | Parts Shelves | 190 |  | Towers within 140 px upgrade for 5% less | new |

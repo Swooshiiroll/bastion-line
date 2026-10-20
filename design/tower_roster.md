@@ -1579,7 +1579,7 @@ effects are Claude's proposals, confirmed as the design; the balance probe tunes
 |---|---|---|---|
 | 1 | Tow Hook | 345 | Enemies destroyed within 140 px pay 15% more |
 | 2 | Magnet Crane | 625 | +25%; 150 px |
-| 3 (primary) | Sorting Line | 2,095 | +35%; 170 px |
+| 3 (primary) | Laser Cutter | 2,095 | +35%; 170 px |
 | 4 | Car Crusher | 5,720 | +45%; 190 px |
 | Mastery | Breaker's Yard | 28,945 | +60%; 210 px; bosses pay double |
 

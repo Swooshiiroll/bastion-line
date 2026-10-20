@@ -65,7 +65,7 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Tower rework · Tower art · Tower art, second pass, tower 17, round 2</div>
+    <div class="eyebrow">Bastion Line · Tower rework · Tower art · Tower art, second pass, tower 17, round 3</div>
     <h1>Scrapyard: paths and Retrofits</h1>
     <p class="note">Second pass for one tower: <b>every upgrade step and mastery</b> on each path, and each <b>Retrofit</b>, adds or changes a detail on the confirmed model. Each card shows the model with that path's earlier steps (your picks, or option A until you pick) plus the candidate. Pick one of three per step, add notes per path, then <b>Copy picks and notes</b>.</p>
     <ul class="rules">
@@ -540,20 +540,21 @@ const DEFAULTS = { scrap: { look: "B", anim: "B" } };
 return { TOWERS };
 })();
 const NO_BOOT = true;
-// ---- Tower art second pass: Scrapyard (tower 17), round 2, on the confirmed Production Line base (owner, 2026-10-19) ---------------------------------------------
+// ---- Tower art second pass: Scrapyard (tower 17), round 3, on the confirmed Production Line base (owner, 2026-10-19) ---------------------------------------------
 // Round 2 (the owner's picks and notes): Hydraulic Shear is renamed Sorting Line (new options, on the main belt); the Retrofits are renamed Hammer Mill (was Second
 // Crusher), Faster Loading (was Bigger Yard: a second conveyor and crane feed the furnace) and Surplus (was Weighbridge: two extra crates). Effects unchanged.
+// Round 3 (the owner's notes): the Sorting Line becomes a Laser Cutter (new options, on the main belt); Surplus's two crates stand left of the crate stack.
 // Base: look B Production Line, animation B Melt and Pour (tools/tower_art/data_scrap_parts.js). The tower is three parts, and each path rebuilds one of them
 // around the machine its step names (the owner's names, 2026-10-19):
 //  - Path 1, Passive Income: the furnace stack (Firebrick Lining, Forced Bellows, Blast Furnace, Arc Furnace, Gold Foundry).
-//  - Path 2, Kill Income: the junkyard (Tow Hook, Magnet Crane, Sorting Line, Car Crusher, Breaker's Yard); the orange kill ring widens.
+//  - Path 2, Kill Income: the junkyard (Tow Hook, Magnet Crane, Laser Cutter, Car Crusher, Breaker's Yard); the orange kill ring widens.
 //  - Path 3, Discounts: the warehouse (Parts Shelves, Pallet Racks, Forklift Bay, Loading Dock, Parts Exchange); the blue discount ring widens.
 // Every step rebuilds its part big and visibly (the owner: the old upgrades were too subtle); earlier picks carry as details; masteries are gold.
 // Overlaps kept and stacking (the carpet rule): the Hammer Mill's +30 with the Passive Income path, Faster Loading's +30 px with both field radii.
-const PAGE = { title: "Scrapyard (production line): paths and Retrofits (second pass)", store: "bl-tower-art-p2-scrap-pl2" };
+const PAGE = { title: "Scrapyard (production line): paths and Retrofits (second pass)", store: "bl-tower-art-p2-scrap-pl3" };
 const GOLD = [1, 0.78, 0.3, 1], RUST = [0.45, 0.3, 0.2, 1], BRICK = [0.55, 0.27, 0.2, 1], MOLTEN = [1, 0.55, 0.15, 1], HOTM = [1, 0.85, 0.45, 1], STEEL = [0.42, 0.45, 0.5, 1];
 const WOOD = [0.6, 0.43, 0.24, 1], DIRT = [0.27, 0.23, 0.19, 1], CONC = [0.29, 0.29, 0.3, 1], ROOF = [0.44, 0.47, 0.5, 1], DOOR = [0.8, 0.58, 0.2, 1], CRANE = [0.92, 0.7, 0.2, 1];
-const KILL = [1, 0.5, 0.2, 1], DISCC = [0.45, 0.82, 0.95, 1], ARCC = [0.72, 0.88, 1, 1], CERAM = [0.8, 0.72, 0.6, 1], LOADS = [[0.35, 0.55, 0.8, 1], [0.4, 0.65, 0.4, 1], [0.75, 0.45, 0.3, 1], [0.85, 0.7, 0.3, 1]];
+const LASER = [1, 0.22, 0.18, 1], KILL = [1, 0.5, 0.2, 1], DISCC = [0.45, 0.82, 0.95, 1], ARCC = [0.72, 0.88, 1, 1], CERAM = [0.8, 0.72, 0.6, 1], LOADS = [[0.35, 0.55, 0.8, 1], [0.4, 0.65, 0.4, 1], [0.75, 0.45, 0.3, 1], [0.85, 0.7, 0.3, 1]];
 const rnd = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
 const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 const INCOME = [100, 130, 165, 220, 270, 320], KILLPX = [0, 140, 150, 170, 190, 210], DISCPX = [0, 140, 150, 160, 175, 190], KBONUS = [0, 0.15, 0.25, 0.35, 0.45, 0.6], DOFF = ["", "-5%", "-10%", "-15%", "-20%", "-25%"];
@@ -660,7 +661,7 @@ function junkGround(S, B, t, k) {
   if (K1 === "A") wx = -36 + 5 * haul; if (K1 === "B") wx = -34 + 4 * haul; if (K1 === "C") lift = Math.max(0, Math.sin(t * 0.8)); if (K4 === "A") wx = -30;
   let sq = 1; if (K4 === "A") { const pc = fmod(t / 3, 1); sq = 1 + 0.14 * (pc < 0.3 ? ease(pc / 0.3) : pc < 0.7 ? 1 : 1 - ease((pc - 0.7) / 0.3)); }
   ellipse(add(S(wx, wy), [(1.5 + 4 * lift) * k, (2.5 + 4 * lift) * k]), 13 * k, 7 * k, [0, 0, 0, 0.3]);
-  if (K1 === "A") { truck(S(-9, 40), 0, k, yel, 3.5); bar(S(-14.5, 40), S(-17.5, 40), 1.4 * k, steel); line(S(-17.5, 40), S(wx + 11, wy), METAL_L, 0.9 * k); }
+  if (K1 === "A") { truck(S(-9, 42), 0, k, yel, 3.5); bar(S(-14.5, 42), S(-17.5, 42), 1.4 * k, steel); line(S(-17.5, 42), S(wx + 11, wy), METAL_L, 0.9 * k); }
   if (K1 === "B") { const wp = S(-41, 25); line(wp, S(wx - 10, wy - 2), METAL_L, 0.9 * k); disc(wp, 3 * k, OUTLINE); disc(wp, 2.5 * k, dark); for (let j = 0; j < 4; j++) line(wp, add(wp, mul(fa(t * 4 * (hc < 0.7 ? 1 : -1) + j * Math.PI / 2), 2.3 * k)), yel, 0.9 * k); }
   wreck(S(wx, wy - 2 * lift), 0.05, k * (1 + 0.06 * lift), sq);
   if (K1 === "C") { const a = S(-44, wy), b = S(-20, wy); for (const q of [a, b]) for (const sg of [-1, 1]) bar(q, add(q, [0, sg * 4 * k]), 1.4 * k, steel); bar(a, b, 2.2 * k, yel); line(S(-32, wy), S(-32, wy - 2 * lift), METAL_L, 1 * k); disc(S(-32, wy - 2 * lift), 1.2 * k, METAL_D); }
@@ -678,21 +679,23 @@ const feeds = (B) => (B.r === 1 ? [FEED, FEED2] : [FEED]);
 const lidHole = (F, R) => add(MOUTH, mul(norm(sub(F.b0, MOUTH)), R * 0.42));
 function magnetHead(q, mr, k, g, carry, halo) { if (carry) chunk(add(q, [mr * 0.5 * k, mr * 0.6 * k]), 1, carry, k);
   if (halo) disc(q, (mr + 2.2) * k, A(GOLD, 0.3)); disc(q, (mr + 0.7) * k, OUTLINE); disc(q, mr * k, g ? dk(GOLD, 0.25) : METAL_D); ring(q, mr * 0.62 * k, g ? GOLD : KILL, 1 * k); disc(q, mr * 0.3 * k, g ? GOLD : METAL_L); if (carry) glowDot(q, 0.7 * k, [0.7, 0.9, 1, 0.9]); }
-// ---- Kill Income step 3, the Sorting Line (round 2, renamed from Hydraulic Shear): a station over the main belt sorts the scrap into three bins beside it
-// (a picking gantry with an arm, a drum magnet across the belt, or a shaking sorting screen)
-function sortLine(S, F, dir, key, t, k, g) { const Q = add(F.b0, mul(dir, 12.5)), n = [-dir[1], dir[0]], ang = Math.atan2(dir[1], dir[0]), P = (u) => S(...u), steel = gl(STEEL, g, 0.7), dark = g ? dk(GOLD, 0.55) : METAL_D;
-  const bins = [-2.5, 2.5, 7.5].map((o) => add(add(Q, mul(n, 10.5)), mul(dir, o)));
-  bins.forEach((b, i) => { fill(add(P(b), [1.2 * k, 1.6 * k]), rectPts(2.4, 2.4), [0, 0, 0, 0.3], ang, k); plate(P(b), rectPts(2.4, 2.4), gl(LOADS[i], g, 0.5), ang, k, 1.2); fill(P(b), rectPts(1.5, 1.5), [0.08, 0.08, 0.08, 1], ang, k); chunk(P(b), 0.35, i * 5 + 2, k); });
-  if (key === "A") { const l1 = add(Q, mul(n, -7)), l2 = add(Q, mul(n, 7)); for (const q of [l1, l2]) plate(P(q), rectPts(1.9, 1.9), dark, ang, k, 1.2); bar(P(l1), P(l2), 2.6 * k, gl(CRANE, g, 0.6));
-    const c3 = fmod(t / 1.2, 1), i = Math.floor(fmod(t / 1.2, 3)), out = c3 < 0.5, u = out ? ease(c3 / 0.5) : 1 - ease((c3 - 0.5) / 0.5), tip = lerp(Q, bins[i], u), pv = add(Q, mul(n, 4));
-    bar(P(pv), P(tip), 1.5 * k, steel); disc(P(pv), 1.6 * k, OUTLINE); disc(P(pv), 1.2 * k, dark); disc(P(tip), 1.4 * k, OUTLINE); disc(P(tip), 1.1 * k, METAL_L); if (out) chunk(P(tip), 0.6, i + 3, k); }
-  if (key === "B") { const a = add(Q, mul(n, -6.8)), b = add(Q, mul(n, 8)); bar(P(a), P(b), 5.6 * k, steel); for (let j = 0; j < 7; j++) { const q = lerp(a, b, fmod(j / 7 + t * 0.8, 1)); line(P(add(q, mul(dir, -2.4))), P(add(q, mul(dir, 2.4))), dark, 1 * k); }
-    for (const e of [a, b]) { disc(P(e), 2.2 * k, OUTLINE); disc(P(e), 1.7 * k, dark); } ring(P(lerp(a, b, 0.5)), 1.4 * k, g ? GOLD : KILL, 0.9 * k);
-    const u = fmod(t * 0.9, 1); if (u < 0.6) chunk(P(lerp(b, bins[Math.floor(t * 0.9) % 3], u / 0.6)), 0.55, 7, k); }
-  if (key === "C") { const q = add(Q, mul(n, Math.sin(t * 40) * 0.35)); fill(add(P(q), [1.5 * k, 2 * k]), rectPts(6.6, 5.8), [0, 0, 0, 0.3], ang, k); fill(P(q), rectPts(6.6, 5.8), A(dark, 0.9), ang, k);
-    for (let j = -4; j <= 4; j++) { line(P(add(add(q, mul(dir, j * 1.45)), mul(n, -5.6))), P(add(add(q, mul(dir, j * 1.45)), mul(n, 5.6))), A(METAL_L, 0.6), 0.7 * k); line(P(add(add(q, mul(n, j * 1.3)), mul(dir, -6.4))), P(add(add(q, mul(n, j * 1.3)), mul(dir, 6.4))), A(METAL_L, 0.6), 0.7 * k); }
-    outline(P(q), rectPts(6.6, 5.8), OUTLINE, 1.4, ang, k); for (const sg of [-1, 1]) plate(P(add(q, mul(dir, sg * 7))), rectPts(1, 6), steel, ang, k, 1);
-    for (let j = 0; j < 3; j++) { const u = fmod(t * 1.3 + j / 3, 1); chunk(P(lerp(add(Q, mul(n, 5.8)), bins[j], u)), 0.4, j + 11, k); } } }
+// ---- Kill Income step 3, the Laser Cutter (round 3, the owner's note; was the Sorting Line, before that the Hydraulic Shear), on the main belt:
+// a laser gantry sweeping across the belt, a cutting table beside it, or a laser turret that tracks the scrap riding up
+function laserCutter(S, F, dir, key, t, k, g) { const Q = add(F.b0, mul(dir, 12.5)), n = [-dir[1], dir[0]], ang = Math.atan2(dir[1], dir[0]), P = (u) => S(...u), steel = gl(STEEL, g, 0.7), dark = g ? dk(GOLD, 0.55) : METAL_D;
+  const beam = (a, b, w = 1) => { line(P(a), P(b), A(LASER, 0.3), 4 * w * k); line(P(a), P(b), LASER, 1.4 * w * k); line(P(a), P(b), [1, 0.88, 0.82, 0.95], 0.5 * w * k); };
+  const sparks = (p, seed) => { for (let j = 0; j < 7; j++) { const q = t * 2.6 + j / 7, u = fmod(q, 1), a = rnd(Math.floor(q) * 5 + j + seed) * TAU; disc(P(add(p, mul(fa(a), u * 4.5))), (1.1 * (1 - u) + 0.25) * k, [1, 0.75 + 0.2 * rnd(j), 0.35, 1 - u]); } glowDot(P(p), 0.9 * k, [1, 0.6, 0.5, 1]); };
+  if (key === "A") { const l1 = add(Q, mul(n, -7)), l2 = add(Q, mul(n, 7)), hx = Math.sin(t * 2.4) * 2.6, hd = add(Q, mul(n, hx)); 
+    const pu = 0.6 + 0.4 * Math.sin(t * 9); const cq = add(Q, mul(dir, -3.2)); beam(add(cq, mul(n, -4.2)), add(cq, mul(n, 4.2)), 0.6 + 0.4 * pu); for (const sg of [-1, 1]) sparks(add(cq, mul(n, sg * 4.2 * Math.sin(t * 2.4))), 21 + sg);                                   // a glowing cut line across the belt
+    for (const q of [l1, l2]) plate(P(q), rectPts(2.4, 2.4), dark, ang, k, 1.2); bar(P(l1), P(l2), 3.4 * k, gl(STEEL, g, 0.6)); plate(P(hd), rectPts(2.4, 2.6), gl(CRANE, g, 0.6), ang, k, 1.2); disc(P(hd), 1.1 * k, LASER); glowDot(P(hd), 0.8 * k, LASER); sparks(hd, 3); }   // the head sweeps along the gantry
+  if (key === "B") { const T0 = add(Q, mul(n, 10.5)), u = fmod(t / 3, 1), cx = -4 + 8 * u, hd = add(add(T0, mul(dir, cx)), mul(n, Math.sin(u * TAU * 2) * 2));
+    fill(add(P(T0), [1.5 * k, 2 * k]), rectPts(6.2, 4.6), [0, 0, 0, 0.3], ang, k); plate(P(T0), rectPts(6.2, 4.6), dark, ang, k, 1.2);
+    for (let j = -2; j <= 2; j++) line(P(add(add(T0, mul(dir, j * 2.3)), mul(n, -4))), P(add(add(T0, mul(dir, j * 2.3)), mul(n, 4))), A(METAL_L, 0.45), 0.6 * k);
+    fill(P(T0), rectPts(4.6, 3.2), mix(RUST, METAL_L, 0.45), ang, k); const cutPts = []; for (let j = 0; j <= 20; j++) { const v = j / 20 * u; cutPts.push(P(add(add(T0, mul(dir, -4 + 8 * v)), mul(n, Math.sin(v * TAU * 2) * 2)))); } polyline(cutPts, A(LASER, 0.35), 2.4 * k); polyline(cutPts, A(LASER, 0.95), 1 * k);
+    bar(P(add(add(T0, mul(dir, cx)), mul(n, -4.8))), P(add(add(T0, mul(dir, cx)), mul(n, 4.8))), 1.6 * k, gl(STEEL, g, 0.6)); plate(P(hd), rectPts(1.3, 1.3), gl(CRANE, g, 0.6), ang, k, 1); sparks(hd, 9);
+    chunk(P(add(Q, mul(n, 5))), 0.6, 4, k); }   // a cutting table beside the belt: the head traces a cut through a plate
+  if (key === "C") { const base = add(Q, mul(n, 10)), aim = add(F.b0, mul(dir, 8 + 9 * (0.5 + 0.5 * Math.sin(t * 1.6)))), a = Math.atan2(aim[1] - base[1], aim[0] - base[0]), muz = add(base, mul(fa(a), 5.4));
+    disc(add(P(base), [1.5 * k, 2 * k]), 4.6 * k, [0, 0, 0, 0.3]); disc(P(base), 4.6 * k, OUTLINE); disc(P(base), 4 * k, dark); ring(P(base), 3.2 * k, gl(METAL_L, g, 0.6), 0.9 * k); bar(P(base), P(muz), 2.6 * k, steel); plate(P(base), rectPts(2.8, 2.2), gl(CRANE, g, 0.6), a, k, 1.1); glowDot(P(muz), 0.8 * k, LASER);
+    beam(muz, aim, 1.2); sparks(aim, 17); } }   // a laser turret tracking the scrap on the belt
 // One feed line. style: null = the grab, "A" = one-boom magnet crane, "B" = twin-boom magnet crane, "C" = overhead bridge magnet. main: the line path 2 rebuilds.
 function feedLine(S, B, t, k, lid, F, style, main) {
   const L = B.lv[1], g = L >= 5, K3 = main && L > 2 ? B.key("p1s2") : null, K4 = main && L > 3 ? B.key("p1s3") : null, K5 = L > 4 ? B.key("p1s4") : null, tt = t - F.ofs;
@@ -705,7 +708,7 @@ function feedLine(S, B, t, k, lid, F, style, main) {
   // ---- step 4, the Car Crusher on the belt: a baler at its foot (the scrap leaves as cubes) or two crushing rollers across it (the flat press is in junkGround)
   if (K4 === "B") { const q = S(-27, 23), pr = 0.5 + 0.5 * Math.sin(t * 2.2); plate(q, rectPts(5.4, 4.4), dark, -0.86, k, 1.3); fill(q, rectPts(3.6, 2.8), [0.1, 0.09, 0.09, 1], -0.86, k); plate(add(q, rot([(-2.4 + 2 * pr) * k, 0], -0.86)), rectPts(0.8, 2.6), steel, -0.86, k, 1); }
   if (rl) { const nn = orth(dir); for (const sg of [-1, 1]) { const r0 = S(...add(add(F.b0, mul(dir, 6)), mul(nn, sg * 4.4))); disc(r0, 3.2 * k, OUTLINE); disc(r0, 2.7 * k, steel); for (let j = 0; j < 6; j++) line(r0, add(r0, mul(fa(t * 6 * sg + j * Math.PI / 3), 2.5 * k)), dark, 0.9 * k); } }
-  if (K3) sortLine(S, F, dir, K3, t, k, g);
+  if (K3) laserCutter(S, F, dir, K3, t, k, g);
   // ---- the crane: grab at the heap, swing, drop on the belt's foot, swing back
   const ph = fmod(tt / FT, 1), sw = ph < 0.14 ? 0 : ph < 0.5 ? ease((ph - 0.14) / 0.36) : ph < 0.6 ? 1 : 1 - ease((ph - 0.6) / 0.4), op = ph < 0.14 ? 1 - ph / 0.14 : ph < 0.5 ? 0 : ph < 0.6 ? (ph - 0.5) / 0.1 : 1;
   const carry = ph > 0.06 && ph < 0.56 ? n * 1.7 + 1 + F.ofs * 5 : 0, mr = main ? [0, 0, 3, 3.4, 3.8, 4.2][L] : 3.4, halo = g && K5 === "A";
@@ -762,12 +765,8 @@ function wareModel(S, B, t, age, k) {
     const wx = 34 + Math.sin(t * 0.3) * 2; plate(S(wx, 39), rectPts(8.5, 4.4), fleet ? dk(GOLD, 0.2) : [0.5, 0.3, 0.22, 1], 0, k, 1.3); for (let j = -2; j <= 2; j++) line(S(wx + j * 3.4, 35.2), S(wx + j * 3.4, 42.8), A(OUTLINE, 0.5), 0.8 * k); }
   if (K4 === "C") for (const x of [28, 38]) { plate(S(x, 25), rectPts(3.6, 1.2), lt(CONC, 0.1), 0, k, 1); truck(S(x, 35), Math.PI / 2, k, fleet ? GOLD : [0.6, 0.35, 0.3, 1], 4.6); }
   surplus(S, B, k, stock); }
-// ---- The crates (the base's 2x2 stack); the Surplus Retrofit (round 2, renamed from Weighbridge) adds two: a bigger stack, a pallet of crates, or two tagged crates
-function surplus(S, B, k, stock) { const key = B.r === 2 ? B.key("r2") : null;
-  crates(key === "A" ? S(7.2, 32) : S(4, 32), key === "A" ? 3 : 2, 2, k, stock);
-  if (key === "B") { const q = S(16, 40); fill(add(q, [1.5 * k, 2 * k]), rectPts(7, 3.8), [0, 0, 0, 0.28], 0, k); plate(q, rectPts(7, 3.6), dk(WOOD, 0.25), 0, k, 1.1); for (let j = -2; j <= 2; j++) line(add(q, [j * 2.6 * k, -3.4 * k]), add(q, [j * 2.6 * k, 3.4 * k]), dk(WOOD, 0.45), 0.8 * k); crates(q, 2, 1, k, stock); }
-  if (key === "C") { const q = S(16, 40); crates(q, 2, 1, k, stock); for (const sx of [-1, 1]) { const c = add(q, [sx * 3.2 * k, 0]); line(add(c, [-2.9 * k, 0]), add(c, [2.9 * k, 0]), [0.25, 0.25, 0.28, 1], 0.9 * k); fill(add(c, [1.2 * k, -1.4 * k]), rectPts(1.3, 0.9), [1, 0.55, 0.2, 1], 0.3, k); outline(add(c, [1.2 * k, -1.4 * k]), rectPts(1.3, 0.9), OUTLINE, 0.8, 0.3, k); } } }
-
+// ---- The crates (the base's 2x2 stack); the Surplus Retrofit (round 2, renamed from Weighbridge) adds two, to the left of the stack (round 3, the owner's note)
+function surplus(S, B, k, stock) { crates(B.r === 2 ? S(0.8, 32) : S(4, 32), B.r === 2 ? 3 : 2, 2, k, stock); }
 // ---- The Hammer Mill Retrofit (round 2, renamed from Second Crusher; the owner picked the hammer mill), by the belt's foot, with a chute onto the belt
 function crusher2(S, B, t, k) { if (B.r !== 0) return; const R = B.key("r0"), p = S(-9, 27);
   bar(S(-13, 24), S(-18.8, 13.9), 2.6 * k, METAL);                                                                            // its chute onto the belt
@@ -795,7 +794,7 @@ function scrapAgent(B) { return (m, t, info, s, col) => { if (!m.pays) { m.pays 
 // ---- The model: the whole production line at every level ---------------------------------------------------------------------------------------------------------------
 const P2 = {
   tower: "scrap", look: "B", anim: "B", sBuild: 112, sCard: 64,                                  // a 2x2 tower: smaller previews so the whole yard fits
-  intro: "Round 2: your picks are drawn as one build. Your notes: Hydraulic Shear is now the Sorting Line, with three new ideas on the main belt (a picking gantry, a drum magnet or a sorting screen, each sorting scrap into three bins); the Second Crusher is now the Hammer Mill; the Bigger Yard is now Faster Loading (a second conveyor and crane feed the furnace from the top heap, taking turns with the main line), with three crane styles to pick; the Weighbridge is now Surplus (two more crates), with three ways to show them. Effects are unchanged. Each path rebuilds one part (the furnace stack, the junkyard, the warehouse); masteries are gold; overlapping Retrofits are kept and stack (the carpet rule). Unpicked stages show option A in the build preview.",
+  intro: "Round 3: your notes. The Sorting Line becomes a Laser Cutter (same effect), with three ideas on the main belt: a laser gantry sweeping across the belt, a laser cutting table beside it, or a laser turret tracking the scrap; Surplus's two extra crates now stand to the left of the crate stack (the tow truck moved down a little to clear them). Everything else is picked. Round 2: your picks are drawn as one build. Your notes: Hydraulic Shear is now the Sorting Line, with three new ideas on the main belt (a picking gantry, a drum magnet or a sorting screen, each sorting scrap into three bins); the Second Crusher is now the Hammer Mill; the Bigger Yard is now Faster Loading (a second conveyor and crane feed the furnace from the top heap, taking turns with the main line), with three crane styles to pick; the Weighbridge is now Surplus (two more crates), with three ways to show them. Effects are unchanged. Each path rebuilds one part (the furnace stack, the junkyard, the warehouse); masteries are gold; overlapping Retrofits are kept and stack (the carpet rule). Unpicked stages show option A in the build preview.",
   mods(B) { return { period: 1, flight: 1, multi: false, persist: scrapAgent(B) }; },
   muzzleAt(B, m, kk, c) { return c; },
   model(c, aim, s, fx, t, col, info, B) {
@@ -828,7 +827,7 @@ P2.paths = [
   { name: "Kill Income", theme: "the junkyard: rebuilt around each step's machine; the orange kill ring widens and wrecked enemies send coins into the junkyard; gold at the Breaker's Yard", steps: [
     { name: "Tow Hook", cost: 345, effect: "Enemies destroyed within 140 px pay 15% more", options: T(["Tow Truck", "A tow truck hauls the wreck into the yard on a cable, over and over."], ["Winch Post", "A winch post drags the wreck in on a cable; its drum turns."], ["Chain Gantry", "A gantry stands over the wreck and lifts it on a hook and chain."]) },
     { name: "Magnet Crane", cost: 625, effect: "+25%; 150 px", options: T(["Electromagnet", "The grab crane is rebuilt with a big round electromagnet that lifts the scrap."], ["Twin-Boom Magnet", "The crane is rebuilt heavier, with two booms carrying the magnet."], ["Bridge Magnet", "The crane is replaced by an overhead bridge spanning the junkyard; its trolley magnet carries the scrap to the belt."]) },
-    { name: "Sorting Line", cost: 2095, effect: "+35%; 170 px (primary)", options: T(["Picking Gantry", "A gantry straddles the main belt; a picker arm flicks scrap off it into three coloured bins beside it."], ["Drum Magnet", "A turning drum magnet across the main belt lifts the steel out and throws it into the bins beside it."], ["Sorting Screen", "A shaking mesh screen over the main belt sifts the small scrap down into the bins beside it."]) },
+    { name: "Laser Cutter", cost: 2095, effect: "+35%; 170 px (primary)", options: T(["Laser Gantry", "A gantry straddles the main belt; its laser head sweeps across and cuts the scrap riding under it, in a spray of sparks."], ["Cutting Table", "A laser cutting table beside the main belt: a gantry head traces a glowing cut through a scrap plate."], ["Laser Turret", "A laser turret on a post beside the main belt tracks the scrap riding up and cuts it with a red beam."]) },
     { name: "Car Crusher", cost: 5720, effect: "+45%; 190 px", options: T(["Flat Press", "A press frame over the wreck flattens it again and again."], ["Baler", "A baler at the foot of the belt packs the scrap into cubes that ride up into the furnace."], ["Crushing Rollers", "Two rollers across the belt crush each piece flat on its way up."]) },
     { name: "Breaker's Yard", cost: 28945, effect: "+60%; 210 px; bosses pay double (mastery)", options: T(["Gold Crane", "The crane and every junkyard machine turn gold and the magnet glows; a gold x2 sign for bosses; the field coins turn gold."], ["Gold Heaps", "The machines turn gold and so do the scrap heaps; a gold x2 sign; the field coins turn gold."], ["Gold Fence", "The machines turn gold and a gold fence rings the junkyard; a gold x2 sign; the field coins turn gold."]) },
   ] },
@@ -843,11 +842,11 @@ P2.paths = [
 P2.retrofits = [
   { name: "Hammer Mill", cost: 525, effect: "+30 income per round (stacks with the Passive Income path)", options: T(["Jaw Crusher", "A jaw crusher beside the foot of the belt chews scrap down a chute onto the belt."], ["Roller Crusher", "Two spinning rollers in a housing feed a chute onto the belt."], ["Hammer Mill", "A spinning hammer mill feeds a chute onto the belt."]) },
   { name: "Faster Loading", cost: 260, effect: "+30 px to its fields (stacks with the Kill and Discount paths)", options: T(["Second Grab Crane", "A second conveyor runs from the top heap into the furnace, loaded by a second grab crane; the two lines take turns, so the furnace is fed twice as often."], ["Second Magnet Crane", "The second conveyor is loaded by a second magnet crane, like the main one."], ["Second Bridge Magnet", "The second conveyor is loaded by a second overhead bridge magnet over the top heap."]) },
-  { name: "Surplus", cost: 260, effect: "Towers sold in its field refund 15% more", options: T(["Bigger Stack", "The crate stack grows by two crates."], ["Pallet of Crates", "Two more crates on a wooden pallet in the warehouse yard."], ["Tagged Crates", "Two more crates, strapped and tagged for sale, in the warehouse yard."]) },
+  { name: "Surplus", cost: 260, effect: "Towers sold in its field refund 15% more", options: [{ key: "A", name: "Crates to the Left", desc: "Two more crates stand to the left of the crate stack (your note)." }] },
 ];
 
-// ---- Round 2 picks (owner, 2026-10-19); the Sorting Line, Faster Loading and Surplus are open again (renamed, new ideas) ------------------------------------------
-P2.picks = { p0s0: "A", p0s1: "B", p0s2: "A", p0s3: "C", p0s4: "A", p1s0: "A", p1s1: "C", p1s3: "A", p1s4: "A", p2s0: "A", p2s1: "C", p2s2: "A", p2s3: "C", p2s4: "C", r0: "C" };
+// ---- Round 3 picks (owner, 2026-10-19); the Laser Cutter is open (renamed from the Sorting Line, new ideas); Surplus is the owner's note ------------------------------------------
+P2.picks = { p0s0: "A", p0s1: "B", p0s2: "A", p0s3: "C", p0s4: "A", p1s0: "A", p1s1: "C", p1s3: "A", p1s4: "A", p2s0: "A", p2s1: "C", p2s2: "A", p2s3: "C", p2s4: "C", r0: "C", r1: "A", r2: "A" };
 P2.paths.forEach((pa, pi) => pa.steps.forEach((st, k) => { const pk = P2.picks["p" + pi + "s" + k]; if (pk) st.options = st.options.filter((o) => o.key === pk); }));
 P2.retrofits.forEach((rf, ri) => { const pk = P2.picks["r" + ri]; if (pk) rf.options = rf.options.filter((o) => o.key === pk); });
 
