@@ -1027,6 +1027,9 @@ func _update_tower(t, dt: float) -> void:
 		"missile":
 			_fire_missiles(t, s)
 			return
+		"rocket_salvo":
+			_fire_salvo(t, s)
+			return
 		"nullifier":
 			_null_pulse(t, s)
 			return
@@ -1086,7 +1089,7 @@ func _update_smokes(dt: float) -> void:
 		c.t -= dt
 		var r2: float = float(c.r) * float(c.r)
 		for e in enemies:
-			if e.alive and not e.flying and e.pos.distance_squared_to(c.pos) <= r2:
+			if e.alive and (c.get("air", false) or not e.flying) and e.pos.distance_squared_to(c.pos) <= r2:
 				e.apply_slow(float(c.slow), 0.25)
 	smokes = smokes.filter(func(c): return c.t > 0.0)
 
@@ -1671,6 +1674,61 @@ func _fire_missiles(t, s: Dictionary) -> void:
 	_emit({"type": "fire", "tower": "missile", "pos": t.pos, "tier": t.tier, "spec": t.spec, "count": n})
 
 
+## Rocket Salvo: one salvo, each rocket at a different enemy (best first); when there are more rockets than enemies the spares
+## go to the strongest. A rippling salvo (the mastery) leaves its tubes one after another.
+func _fire_salvo(t, s: Dictionary) -> void:
+	var cands: Array = []
+	for e in enemies:
+		if t.can_target(e):
+			cands.append(e)
+	if cands.is_empty():
+		t.target = null
+		t.cooldown = RETARGET_DELAY
+		return
+	var scores := {}
+	for e in cands:
+		scores[e] = _score(t, e, t.pos.distance_squared_to(e.pos))
+	cands.sort_custom(func(a, b): return scores[a] > scores[b])
+	var strongest = cands[0]
+	for e in cands:
+		if e.hp > strongest.hp:
+			strongest = e
+	t.target = cands[0]
+	t.cooldown = 1.0 / t.eff_rate()
+	t.fire_flash = 0.15
+	t.aim = (cands[0].pos - t.pos).angle()
+	var n := int(s.get("missiles", 3))
+	var dir := Vector2.from_angle(t.aim)
+	var ripple := bool(s.get("ripple", false))
+	for i in n:
+		var tgt = cands[i] if i < cands.size() else strongest
+		var side := 1.0 if i % 2 == 0 else -1.0
+		var p = Projectile.new()
+		p.kind = "rocket_salvo"
+		p.pos = t.pos + dir.orthogonal() * side * 7.0
+		p.start = p.pos
+		p.vel = dir.orthogonal() * side * (150.0 + 15.0 * float(i)) + dir * 60.0
+		p.target = tgt
+		p.target_pos = tgt.pos
+		p.speed = float(s.proj_speed)
+		p.damage = t.eff_damage()
+		p.splash = float(s.get("splash", 25.0))
+		p.air_mult = float(s.get("air_mult", 1.0))
+		p.homing = bool(s.get("homing", false))
+		p.retarget = bool(s.get("retarget", false))
+		p.never_miss = bool(s.get("never_miss", false))
+		p.smoke_slow = float(s.get("smoke_slow", 0.0))
+		p.smoke_time = float(s.get("smoke_time", 0.0))
+		p.ground_burn = float(s.get("ground_burn", 0.0))
+		p.ground_burn_time = float(s.get("ground_burn_time", 0.0))
+		p.hold = float(i) * 0.09 if ripple else 0.0
+		p.look = t.look_key()
+		p.tier = t.tier
+		p.source = t
+		projectiles.append(p)
+	_emit({"type": "fire", "tower": "rocket_salvo", "pos": t.pos, "tier": t.tier, "spec": t.spec, "count": n})
+
+
 func _update_laser(t, dt: float) -> void:
 	var s: Dictionary = t.stats()
 	var beams := int(s.get("beams", 1))
@@ -1711,6 +1769,9 @@ func _update_laser(t, dt: float) -> void:
 
 
 func _update_projectile(p, dt: float) -> void:
+	if p.kind == "rocket_salvo":
+		_update_rocket(p, dt)
+		return
 	if p.target != null and p.target.alive:
 		p.target_pos = p.target.pos
 	if p.kind == "missile":
@@ -1725,6 +1786,49 @@ func _update_projectile(p, dt: float) -> void:
 		_projectile_hit(p)
 	else:
 		p.pos += to.normalized() * step
+
+
+## A Rocket Salvo rocket: waits out its hold (a rippling salvo), then flies. Without seekers it goes to where its target was;
+## homing curves onto it, re-targeting steers onto the nearest enemy if it dies, never-miss turns fast enough to always arrive.
+func _update_rocket(p, dt: float) -> void:
+	if p.hold > 0.0:
+		p.hold -= dt
+		return
+	p.life += dt
+	if p.homing:
+		if (p.target == null or not p.target.alive) and p.retarget and p.source != null:
+			p.target = _nearest_for(p.source, p.pos, 200.0)
+		if p.target != null and p.target.alive:
+			p.target_pos = p.target.pos
+	var to: Vector2 = p.target_pos - p.pos
+	p.vel = p.vel.lerp(to.normalized() * p.speed, clampf((40.0 if p.never_miss else MISSILE_TURN) * dt, 0.0, 1.0))
+	var step: Vector2 = p.vel * dt
+	p.traveled += step.length()
+	if p.smoke_slow > 0.0:
+		p.smoke_acc += step.length()
+		while p.smoke_acc >= 20.0:
+			p.smoke_acc -= 20.0
+			smokes.append({"pos": p.pos, "r": 16.0, "t": p.smoke_time, "slow": p.smoke_slow, "air": true})
+	if to.length() <= maxf(step.length(), 10.0) or p.life >= (6.0 if p.never_miss else MISSILE_MAX_LIFE):
+		if to.length() <= 30.0:
+			p.pos = p.target_pos
+		p.alive = false
+		_projectile_hit(p)
+	else:
+		p.pos += step
+
+
+## The nearest living enemy to `pos` (within `r`) that tower `t` can hit.
+func _nearest_for(t, pos: Vector2, r: float):
+	var best = null
+	var bd := r * r
+	for e in enemies:
+		if e.alive and not e.is_hidden() and (not e.flying or t.hits_air()) and (e.flying or t.hits_ground()):
+			var d: float = pos.distance_squared_to(e.pos)
+			if d <= bd:
+				bd = d
+				best = e
+	return best
 
 
 func _update_missile(p, dt: float) -> void:
@@ -1769,6 +1873,17 @@ func _projectile_hit(p) -> void:
 			if p.burn_dps > 0.0:
 				pools.append({"pos": p.pos, "r": r * 0.8, "dps": p.burn_dps, "t": p.burn_time, "source": p.source})
 			_emit({"type": "splash", "pos": p.pos, "radius": r, "burn": p.burn_dps > 0.0, "stun": p.stun > 0.0})
+		"rocket_salvo":
+			# Rocket Salvo: a blast on flyers and ground alike (more against air with Proximity Fuses); Incendiary Warheads
+			# leave burning ground.
+			var r: float = p.splash
+			for e in enemies:
+				if e.alive and e.pos.distance_squared_to(p.pos) <= r * r:
+					var dealt := damage_enemy(e, p.damage * (p.air_mult if e.flying else 1.0), false, p.source)
+					_emit({"type": "hit", "pos": e.pos, "amount": dealt, "kind": "missile"})
+			if p.ground_burn > 0.0:
+				pools.append({"pos": p.pos, "r": r * 0.8, "dps": p.ground_burn, "t": p.ground_burn_time, "source": p.source})
+			_emit({"type": "missile_hit", "pos": p.pos, "radius": r, "look": p.look})
 		"mortar_tower":
 			# Mortar Tower: a blast on every ground enemy in range; armour is cracked by the Power path (damage_enemy reads it),
 			# burrowed ones take it only with burrow sight (half damage, full at the mastery); cluster bomblets scatter round the impact.

@@ -3029,3 +3029,109 @@ func test_rework_mortar() -> void:
 	sh3.pos = bur.pos
 	g._projectile_hit(sh3)
 	check(near(bur.hp, hp2), "a stock Mortar can't hurt a burrowed enemy")
+
+
+func test_rework_rocket_salvo() -> void:
+	var g = new_game()
+	g.gold = 40000
+	g.emit_events = true
+	var t = g.place_tower("rocket_salvo", spot(g, "rocket_salvo", 0))
+	check(t != null and t.is_rework and g.tower_cost("rocket_salvo") == 200, "the Rocket Salvo builds for 200")
+	var s: Dictionary = t.stats()
+	check(near(s.damage, 19.0) and near(s.splash, 25.0) and near(s.range, 180.0) and near(s.rate, 0.4) and int(s.missiles) == 3, "stock: 3 rockets of 19, 25 px blast, 180 range, a salvo every 2.5 s")
+	check(t.hits_air() and t.hits_ground(), "air and ground")
+	check(g.buy_retrofit(t, 0) and near(t.stats().air_mult, 1.4), "Proximity Fuses: +40% against air")
+	var sm = g.place_tower("rocket_salvo", spot(g, "rocket_salvo", 20))
+	check(g.buy_retrofit(sm, 1) and near(sm.stats().smoke_slow, 0.1), "Smoke Trails")
+	var fl = g.place_tower("rocket_salvo", spot(g, "rocket_salvo", 40))
+	check(g.buy_retrofit(fl, 2) and near(fl.stats().ground_burn, 3.0), "Incendiary Warheads")
+	# One salvo: each rocket at a different enemy, the spares on the strongest.
+	var e1 = put(g, "grunt", 100.0, 0, 5.0)
+	var e2 = put(g, "grunt", 110.0, 0, 50.0)
+	var shooter = g.place_tower("rocket_salvo", spot(g, "rocket_salvo", 60))
+	shooter.pos = e1.pos + Vector2(40, 0)
+	g._fire_salvo(shooter, shooter.stats())
+	var rockets: Array = g.projectiles.filter(func(p): return p.kind == "rocket_salvo")
+	check(rockets.size() == 3, "three rockets (%d)" % rockets.size())
+	var tg: Array = []
+	for p in rockets:
+		tg.append(p.target)
+	check(tg.has(e1) and tg.has(e2) and tg.filter(func(x): return x == e2).size() == 2, "two enemies get a rocket each; the spare goes to the strongest")
+	# Hits: air bonus, burning ground, smoke trail.
+	g.projectiles.clear()
+	var fly = put(g, "bat", 100.0, 0, 50.0)
+	var base_hp: float = fly.hp
+	g._fire_salvo(t, t.stats())
+	check(true, "fired")
+	var hit_p = Projectile.new()
+	hit_p.kind = "rocket_salvo"
+	hit_p.pos = fly.pos
+	hit_p.splash = 25.0
+	hit_p.damage = 19.0
+	hit_p.air_mult = 1.4
+	hit_p.source = t
+	g._projectile_hit(hit_p)
+	check(fly.hp < base_hp, "a rocket's blast hurts a flyer")
+	g.pools.clear()
+	var fp = Projectile.new()
+	fp.kind = "rocket_salvo"
+	fp.pos = e2.pos
+	fp.splash = 25.0
+	fp.damage = 1.0
+	fp.ground_burn = 3.0
+	fp.ground_burn_time = 2.0
+	fp.source = fl
+	g._projectile_hit(fp)
+	check(g.pools.size() == 1 and near(g.pools[0].dps, 3.0), "Incendiary Warheads leave burning ground")
+	# Paths.
+	var pw = g.place_tower("rocket_salvo", spot(g, "rocket_salvo", 80))
+	buy_steps(g, pw, "a", 2)
+	check(near(pw.stats().damage, 24.0) and near(pw.stats().splash, 35.0), "Power 2: 24 damage, 35 px")
+	var rg = g.place_tower("rocket_salvo", spot(g, "rocket_salvo", 100))
+	rg.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, rg, "b", 2)
+	check(bool(rg.stats().homing) and near(rg.stats().range, 200.0), "Seeker Heads: homing, 200 range")
+	buy_steps(g, rg, "b", 3)
+	check(rg.mastered and near(rg.stats().range, 300.0) and bool(rg.stats().never_miss) and bool(rg.stats().retarget), "Hunter Seekers: 300 range, never miss")
+	var pl = g.place_tower("rocket_salvo", spot(g, "rocket_salvo", 120))
+	pl.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, pl, "c", 5)
+	check(pl.mastered and int(pl.stats().missiles) == 8 and bool(pl.stats().ripple) and near(pl.stats().rate, 0.588), "Ripple Salvo: 8 rockets, rippling")
+	g.projectiles.clear()
+	var tgt = put(g, "grunt", 100.0, 0, 50.0)
+	pl.pos = tgt.pos + Vector2(40, 0)
+	g._fire_salvo(pl, pl.stats())
+	var holds: Array = g.projectiles.map(func(p): return p.hold)
+	check(holds.size() == 8 and near(holds[0], 0.0) and near(holds[7], 0.63), "the salvo ripples out one after another")
+	# Re-targeting: a homing rocket whose target died picks the nearest enemy.
+	g.enemies.clear()
+	g.projectiles.clear()
+	var a = put(g, "grunt", 100.0, 0, 50.0)
+	var b = put(g, "grunt", 130.0, 0, 50.0)
+	var rp = Projectile.new()
+	rp.kind = "rocket_salvo"
+	rp.pos = a.pos
+	rp.vel = Vector2.ZERO
+	rp.speed = 330.0
+	rp.homing = true
+	rp.retarget = true
+	rp.source = rg
+	rp.target = a
+	rp.target_pos = a.pos
+	a.alive = false
+	g._update_rocket(rp, 0.05)
+	check(rp.target == b, "a re-targeting rocket switches to the nearest enemy")
+	# Smoke trail clouds also slow flyers.
+	g.smokes.clear()
+	var tr = Projectile.new()
+	tr.kind = "rocket_salvo"
+	tr.pos = Vector2(10, 10)
+	tr.target_pos = Vector2(400, 10)
+	tr.vel = Vector2(330, 0)
+	tr.speed = 330.0
+	tr.smoke_slow = 0.1
+	tr.smoke_time = 2.0
+	tr.source = sm
+	for i in 20:
+		g._update_rocket(tr, 0.05)
+	check(g.smokes.size() >= 5 and g.smokes[0].air, "a smoke-trail rocket leaves a line of clouds")

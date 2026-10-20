@@ -6,6 +6,7 @@ const Draw = preload("res://scripts/view/Draw.gd")
 const Grid = preload("res://scripts/core/Grid.gd")
 const GunTurretArt = preload("res://scripts/view/towers/GunTurretArt.gd")
 const MortarTowerArt = preload("res://scripts/view/towers/MortarTowerArt.gd")
+const RocketSalvoArt = preload("res://scripts/view/towers/RocketSalvoArt.gd")
 
 var world
 ## Microseconds spent per section of _draw, summed; tools/PerfProbe.gd reads and resets it.
@@ -181,6 +182,8 @@ func _projectile(p) -> void:
 			_gun_round(p)
 		"mortar_tower":
 			_mortar_shell(p)
+		"rocket_salvo":
+			_salvo_rocket(p)
 		_:
 			var d: Vector2 = (p.target_pos - p.pos).normalized()
 			if d == Vector2.ZERO:
@@ -225,6 +228,36 @@ func _gun_round(p) -> void:
 		draw_line(p.pos - d * 0.9 + o * 0.6, p.pos - d * 0.9 - o * 0.6, Color(1, 0.85, 0.2), 0.7, true)
 	if lv.P >= 4:
 		Draw.glow_dot(self, p.pos - d * 1.8, 0.45, Color(1, 0.95, 0.85))
+
+
+## A Rocket Salvo rocket (the confirmed art): a finned rocket whose warhead changes with each Power step (red, orange-banded,
+## yellow-banded dark AP, gold), seeker blue from Seeker Heads, a booster stage shed early with Booster Stage, grey trails
+## with Smoke Trails, longer with Long Burn. A rocket still waiting in its tube isn't drawn.
+func _salvo_rocket(p) -> void:
+	if p.hold > 0.0:
+		return
+	var lv := RocketSalvoArt.levels(str(p.look))
+	var d: Vector2 = p.vel.normalized() if p.vel.length_squared() > 1.0 else Vector2.RIGHT
+	var o := d.orthogonal()
+	var z := 1.2 if lv.P >= 3 else 1.0
+	var smoky: bool = lv.r == 1
+	var trail := 10 if lv.R >= 4 else 6
+	for i in trail:
+		Draw.disc(self, p.pos - d * (3.0 + float(i) * 2.6) * z, (1.2 + float(i) * 0.55) * (1.4 if smoky else 1.0), Color(0.42, 0.43, 0.45, 0.5 - float(i) * 0.04) if smoky else Color(0.62, 0.64, 0.66, 0.34 - float(i) * 0.045))
+	var a := d.angle()
+	if lv.R >= 1 and p.traveled < 80.0:
+		Draw.solid(self, p.pos - d * 6.0 * z, PackedVector2Array([Vector2(1.6, 1.1), Vector2(-2.4, 1.1), Vector2(-2.4, -1.1), Vector2(1.6, -1.1)]), RocketSalvoArt.STEEL, a, z, 0.6)
+	for sg in [-1.0, 1.0]:
+		Draw.poly(self, PackedVector2Array([p.pos + (d * -1.5 + o * sg * 1.1) * z, p.pos + (d * -4.2 + o * sg * 2.8) * z, p.pos + (d * -4.6 + o * sg * 2.8) * z, p.pos + (d * -4.2 + o * sg * 1.1) * z]), RocketSalvoArt.STEEL if lv.P >= 2 else Draw.METAL_L)
+	var body: Color = RocketSalvoArt.DARKR if lv.P >= 4 else RocketSalvoArt.PALE
+	Draw.solid(self, p.pos, PackedVector2Array([Vector2(4.6, 0), Vector2(2.7, 1.35), Vector2(-4.2, 1.35), Vector2(-4.2, -1.35), Vector2(2.7, -1.35)]), body, a, z, 0.8)
+	var nose: Color = RocketSalvoArt.SEEK if lv.R >= 2 else (Draw.GOLD if lv.P >= 5 else (RocketSalvoArt.ORANGE if lv.P >= 2 else RocketSalvoArt.RED))
+	Draw.poly(self, PackedVector2Array([p.pos + d * (5.6 if lv.P >= 1 else 4.6) * z, p.pos + (d * 2.9 + o * 1.35) * z, p.pos + (d * 2.9 - o * 1.35) * z]), nose)
+	if lv.P >= 4:
+		draw_line(p.pos - d * 1.2 * z + o * 1.35 * z, p.pos - d * 1.2 * z - o * 1.35 * z, RocketSalvoArt.YEL, 0.7, true)
+	if lv.r == 2:
+		draw_line(p.pos + d * 0.6 * z + o * 1.35 * z, p.pos + d * 0.6 * z - o * 1.35 * z, RocketSalvoArt.ORANGE, 0.8, true)
+	Draw.glow_dot(self, p.pos - d * 5.0 * z, 1.2 * z, Color(1.0, 0.7, 0.35))
 
 
 ## The Mortar Tower's shell (the confirmed art): a lobbed shell that changes with each Power step (red-banded, pointed, dark

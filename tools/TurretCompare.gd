@@ -18,9 +18,10 @@ const BRANCHES := {
 const REWORK_LOOKS := {
 	"gun_turret": [["", "-1|0|0|0"], ["", "0|5|2|0"], ["", "1|2|5|0"], ["", "2|0|2|5"]],
 	"mortar_tower": [["", "-1|0|0|0"], ["", "0|2|3|1"], ["", "1|5|2|3"], ["", "2|3|5|5"]],
+	"rocket_salvo": [["", "-1|0|0|0"], ["", "0|2|1|1"], ["", "1|5|3|3"], ["", "2|3|5|5"]],
 }
 const AIMS := [-0.5, 2.4]
-const SIZE := Vector2i(1700, 1700)
+const SIZE := Vector2i(1700, 1900)
 const CELL := 100.0
 const MAX_DIFF := 12.0
 var views: Array = []

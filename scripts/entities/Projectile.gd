@@ -28,3 +28,14 @@ var crit := false
 var look := ""
 ## Mortar Tower: this shell leaves a smoke cloud where it lands (Smoke Shells).
 var smoke := false
+## Rocket Salvo: seconds before this rocket leaves its tube (a rippling salvo), homing / re-targeting / never-miss, and the
+## Retrofits' trails and burning ground.
+var hold := 0.0
+var homing := false
+var retarget := false
+var never_miss := false
+var smoke_slow := 0.0
+var smoke_time := 0.0
+var smoke_acc := 0.0
+var ground_burn := 0.0
+var ground_burn_time := 0.0

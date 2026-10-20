@@ -143,11 +143,10 @@ static func draw(ci: CanvasItem, c: Vector2, aim: float, s: float, t: float, fla
 	var f: float = float(T.w) / 11.0
 	var w: float = float(T.w)
 	var gold5: bool = L.B >= 5
-	# The stationary baseplate.
+	# The stationary baseplate and the racks stay put while the tubes turn, so they're drawn live (the cached layer turns with the aim).
+	Draw.dyn(true)
 	Draw.plate(ci, c, Draw.ngon(8, 1.0, PI / 8.0), Draw.METAL, 0.0, 9.5 * k, 1.2)
 	Draw.rivets(ci, c, Draw.ngon(8, 1.0, PI / 8.0), 0.0, 9.5 * k, 0.84, 0.7 * k)
-	for i in n:
-		tube_shadow(ci, c, aim, k, pos[i].x, pos[i].y, len, 11.0 * f)
 	# Racks show the current shells: Power restyles them; Power's own rack appears only when there's none.
 	var shell: Color = Draw.GOLD if gold5 else (DARKSHELL if L.P >= 3 else Draw.METAL_L)
 	var band: Color = Color(0.42, 0.42, 0.44) if L.r == 2 else YEL
@@ -167,11 +166,12 @@ static func draw(ci: CanvasItem, c: Vector2, aim: float, s: float, t: float, fla
 	if L.r == 1:
 		var q := at(c, 0.0, k, 10.0, -11.0)
 		Draw.bar(ci, q, at(c, 0.0, k, 10.0, -7.5), 1.0 * k, Draw.METAL_L)
-		Draw.dyn(true)
 		var ph := fmod(t, 1.0)
 		Draw.glow_dot(ci, q, (1.0 if fmod(t * 1.2, 1.0) < 0.3 else 0.5) * k, GREEN)
 		Draw.ring(ci, q, ph * 5.0 * k, Color(GREEN, 0.5 * (1.0 - ph)), 1.0)
-		Draw.dyn(false)
+	Draw.dyn(false)
+	for i in n:
+		tube_shadow(ci, c, aim, k, pos[i].x, pos[i].y, len, 11.0 * f)
 	if T.get("cradle", false):
 		Draw.plate(ci, c, Draw.rect_pts(4.0, 9.5), Draw.METAL_L, aim, k, 1.0)
 		Draw.orb(ci, at(c, aim, k, -4.0, 0.0), 1.6 * k, Draw.METAL, k)

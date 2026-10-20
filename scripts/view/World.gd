@@ -16,6 +16,7 @@ const BeamLayer = preload("res://scripts/view/BeamLayer.gd")
 const FxLayer = preload("res://scripts/view/FxLayer.gd")
 const Overlay = preload("res://scripts/view/Overlay.gd")
 const GunTurretArt = preload("res://scripts/view/towers/GunTurretArt.gd")
+const RocketSalvoArt = preload("res://scripts/view/towers/RocketSalvoArt.gd")
 
 const MAX_STEPS_PER_FRAME := 40
 const SMOKE := Color(0.35, 0.36, 0.4, 0.7)
@@ -237,6 +238,16 @@ func _gun_hit(ev: Dictionary) -> void:
 		fx.burst(ev.pos + Vector2(0, -2), Color(1.0, 0.55, 0.2), 5, 30.0, 2.0, 0.4)
 
 
+## A Rocket Salvo blast: the Power mastery adds a white-hot flash and a shock ring; Incendiary Warheads throw sparks.
+func _salvo_hit(ev: Dictionary) -> void:
+	var lv := RocketSalvoArt.levels(str(ev.look))
+	if lv.P >= 5:
+		fx.flash(ev.pos, float(ev.radius) * 0.7, Color(1, 0.95, 0.8), 0.14)
+		fx.ring(ev.pos, float(ev.radius) * 0.4, float(ev.radius) * 1.3, Color(1, 0.95, 0.8), 0.3, 1.6)
+	if lv.r == 2:
+		fx.burst(ev.pos, Color(1.0, 0.6, 0.2), 6, 40.0, 2.0, 0.5)
+
+
 func _visual(ev: Dictionary) -> void:
 	var acc := Draw.accent(str(ev.get("tower", "")), str(ev.get("spec", "")))
 	match ev.type:
@@ -268,10 +279,6 @@ func _visual(ev: Dictionary) -> void:
 			if ev.get("stun", false):
 				fx.ring(ev.pos, float(ev.radius) * 0.5, float(ev.radius) * 1.15, Color(1.0, 0.92, 0.35), 0.4, 2.5)
 			shake = maxf(shake, 0.06)
-		"bomblet":
-			# A cluster bomblet bursting round a Mortar impact.
-			fx.ring(ev.pos, 3.0, float(ev.radius), Color(1.0, 0.6, 0.25), 0.22, 1.6)
-			fx.burst(ev.pos, Color(1.0, 0.6, 0.25), 5, 80.0, 1.8, 0.25)
 		"smoke":
 			# Smoke Shells: a grey cloud that hangs where the shell landed.
 			ground_fx.burst(ev.pos, SMOKE, 14, 36.0, 7.0, 2.4)
@@ -279,6 +286,8 @@ func _visual(ev: Dictionary) -> void:
 			fx.flash(ev.pos, 14.0, Color(1.0, 0.7, 0.3), 0.1)
 			fx.burst(ev.pos, Color(1.0, 0.6, 0.25), 10, 110.0, 2.4, 0.35)
 			fx.ring(ev.pos, 4.0, ev.radius, Color(1.0, 0.75, 0.35), 0.25, 2.0)
+			if str(ev.get("look", "")) != "":
+				_salvo_hit(ev)
 		"chain":
 			var ccol := Draw.ACCENT.tesla if str(ev.get("spec", "")) != "overload" else Draw.SPEC_ALT.overload
 			fx.bolt(ev.points, ccol, 2.0 + float(ev.tier) * 0.5, 0.2)
