@@ -349,7 +349,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 16 | Shockwave Generator | amber | B Ring Reactor | B Mushroom Pulse |
 | 17 | Scrapyard | copper | C Magnet Yard | B Sparks and Sale |
 | 18 | Magneto Tower | violet | F Stacked Coil Tower | F Drag Trails |
-| 19 | Tractor Tower | `design/tower_art_p2_19_tractor.html` | Base redesign **confirmed** (owner, 2026-10-19: B Armoured Dish, B Focus Beam; base page `design/tower_art_p19_tractor.html`). Second pass round 4: every stage picked; the spike attached to the dish; waiting for "Tractor Tower finished" |
+| 19 | Tractor Tower | `design/tower_art_p2_19_tractor.html` | Base redesign **confirmed** (owner, 2026-10-19: B Armoured Dish, B Focus Beam; base page `design/tower_art_p19_tractor.html`). Second pass round 5: every stage picked; the spike is now an antenna; waiting for "Tractor Tower finished" |
 | 20 | Augmentation Tower | lavender | F Nanite Hive | D Nanite Swarm |
 
 ## Second pass: per-path and Retrofit looks (owner, 2026-10-16)
@@ -1330,6 +1330,8 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
 
 **Round 4 (owner's note, "Make sure the dish antenna is attched to the dish"):** after the dish got thinner, the spike started in front of it and floated. It now starts on the dish's inner face, bolted to a mounting hub, on both pages. The collars, coils, rewind coil and hold coils moved with it.
 
+**Round 5 (owner's note, "Make it look more like an antenna than a cone"):** the spike is now a slim antenna rod from the hub to a feed head at its tip, held by two thin struts from the dish, on both pages. The lance's collars and the coil spike's coils are even bands along the rod, and the fork is two slim prongs with feed heads.
+
 ## Open questions
 
-1. **Second pass, Tractor Tower** (tower 19, round 4; the spike attached to the dish): every stage is picked. Confirm with "Tractor Tower finished". Then the Augmentation Tower.
+1. **Second pass, Tractor Tower** (tower 19, round 5; the spike is now an antenna): every stage is picked. Confirm with "Tractor Tower finished". Then the Augmentation Tower.
