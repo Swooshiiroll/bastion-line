@@ -349,7 +349,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 16 | Shockwave Generator | amber | B Ring Reactor | B Mushroom Pulse |
 | 17 | Scrapyard | copper | C Magnet Yard | B Sparks and Sale |
 | 18 | Magneto Tower | violet | F Stacked Coil Tower | F Drag Trails |
-| 19 | Tractor Tower | `design/tower_art_p2_19_tractor.html` | Base redesign **confirmed** (owner, 2026-10-19: B Armoured Dish, B Focus Beam; base page `design/tower_art_p19_tractor.html`). Second pass round 5: every stage picked; the spike is now an antenna; waiting for "Tractor Tower finished" |
+| 19 | Tractor Tower | `design/tower_art_p2_19_tractor.html` | Base redesign **confirmed** (owner, 2026-10-19: B Armoured Dish, B Focus Beam; base page `design/tower_art_p19_tractor.html`). Second pass round 6: every stage picked; Undo coil size, two side-by-side beams at Dual Beam, a gold nib at Gravity Hammer; waiting for "Tractor Tower finished" |
 | 20 | Augmentation Tower | lavender | F Nanite Hive | D Nanite Swarm |
 
 ## Second pass: per-path and Retrofit looks (owner, 2026-10-16)
@@ -1332,6 +1332,11 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
 
 **Round 5 (owner's note, "Make it look more like an antenna than a cone"):** the spike is now a slim antenna rod from the hub to a feed head at its tip, held by two thin struts from the dish, on both pages. The lance's collars and the coil spike's coils are even bands along the rod, and the fork is two slim prongs with feed heads.
 
+**Round 6 (owner's notes, 2026-10-19):**
+- **"Keep the rewind size the same as t4":** at Undo the rewind coil keeps Long Rewind's size, as one gold coil (the second, larger coil is gone).
+- **"Make two (smaller beams) side by side" (Dual Beam):** the separate small dish is gone. The antenna ends in two nibs side by side, each firing a smaller beam; the second holds another enemy at a third of the pull.
+- **"make the antenna nib gold" (Grip):** at Gravity Hammer the antenna's nib (or both nibs) turns gold.
+
 ## Open questions
 
-1. **Second pass, Tractor Tower** (tower 19, round 5; the spike is now an antenna): every stage is picked. Confirm with "Tractor Tower finished". Then the Augmentation Tower.
+1. **Second pass, Tractor Tower** (tower 19, round 6): every stage is picked. Confirm with "Tractor Tower finished". Then the Augmentation Tower.
