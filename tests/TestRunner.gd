@@ -3393,3 +3393,90 @@ func test_rework_artillery_cannon() -> void:
 	if dec.has("game"):
 		var sv2 = dec.game.tower_at[sv.cell]
 		check(sv2.aim_point.distance_to(sv.aim_point) < 0.01 and sv2.shell == "shrapnel", "the aim point and shell type are saved")
+
+
+func test_rework_railgun() -> void:
+	var g = new_game()
+	g.gold = 90000
+	g.emit_events = true
+	var t = g.place_tower("railgun", spot(g, "railgun", 0))
+	check(t != null and t.is_rework and g.tower_cost("railgun") == 500, "the Railgun builds for 500")
+	var s: Dictionary = t.stats()
+	check(near(s.damage, 90.0) and near(s.range, 380.0) and near(s.rate, 0.4) and near(s.falloff, 0.4), "stock: 90 damage, 380 range, a slug every 2.5 s, 40% falloff")
+	check(t.hits_air() and t.hits_ground(), "air and ground")
+	check(g.buy_retrofit(t, 0) and near(t.stats().rate, 0.4545), "Capacitor Coils: 2.2 s")
+	var lr = g.place_tower("railgun", spot(g, "railgun", 20))
+	check(g.buy_retrofit(lr, 1) and near(lr.stats().damage, 105.0) and near(lr.stats().range, 410.0), "Longer Rails: +15 damage, +30 range")
+	var pt = g.place_tower("railgun", spot(g, "railgun", 40))
+	check(g.buy_retrofit(pt, 2) and near(pt.stats().falloff, 0.3), "Penetrator Tips: 30% falloff")
+	# The slug pierces the line, losing a share of its damage with each enemy.
+	g.enemies.clear()
+	var shooter = g.place_tower("railgun", spot(g, "railgun", 60))
+	var e1 = put(g, "grunt", 100.0, 0, 50.0)
+	var e2 = put(g, "grunt", 104.0, 0, 50.0)
+	var e3 = put(g, "grunt", 108.0, 0, 50.0)
+	for e in [e1, e2, e3]:
+		e.armor = 0.0
+		e.hp = 100000.0
+		e.max_hp = 100000.0
+	var ahead: Vector2 = (e2.pos - e1.pos).normalized()
+	shooter.pos = e1.pos - ahead * 60.0
+	var before := [e1.hp, e2.hp, e3.hp]
+	g._fire_railgun(shooter, e1, shooter.stats())
+	var d := [before[0] - e1.hp, before[1] - e2.hp, before[2] - e3.hp]
+	d.sort()
+	d.reverse()
+	check(near(d[0], 90.0, 0.5) and near(d[1], 54.0, 0.5) and near(d[2], 32.4, 0.5), "90, 54, 32 down the line (%.1f %.1f %.1f)" % [d[0], d[1], d[2]])
+	# Armour applies to the slug; Shatter strips it for good.
+	var armored = put(g, "brute", 100.0, 0, 50.0)
+	var sh = g.place_tower("railgun", spot(g, "railgun", 80))
+	sh.pos = armored.pos + Vector2(40, 0)
+	buy_steps(g, sh, "c", 1)
+	var a0: float = armored.armor_now() if armored.has_method("armor_now") else armored.armor
+	g.enemies.erase(e1)
+	g.enemies.erase(e2)
+	g.enemies.erase(e3)
+	g._fire_railgun(sh, armored, sh.stats())
+	check(near(armored.armor_shred, 2.0), "Shatter Rounds: each hit strips 2 armour for good")
+	# Boss rounds.
+	var bp = g.place_tower("railgun", spot(g, "railgun", 100))
+	bp.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, bp, "a", 5)
+	check(bp.mastered and near(bp.stats().damage, 280.0) and near(bp.stats().rate, 0.303) and near(bp.stats().boss_mult, 2.5), "Kingslayer: 280 damage, 3.3 s, x2.5 to bosses")
+	g.enemies.clear()
+	var boss = put(g, "colossus", 100.0, 0, 1.0)
+	var grunt = put(g, "grunt", 100.0, 0, 50.0)
+	bp.pos = boss.pos + Vector2(60, 0)
+	var bh: float = boss.hp
+	g._fire_railgun(bp, boss, bp.stats())
+	check(bh - boss.hp > 280.0 * 1.5, "a boss takes the bonus (%.0f)" % (bh - boss.hp))
+	# The ionised trail burns everything on the line, cloaked or not, then fades.
+	g.enemies.clear()
+	g.trails.clear()
+	var it = g.place_tower("railgun", spot(g, "railgun", 120))
+	it.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, it, "c", 3)
+	check(near(it.stats().trail_dps, 30.0) and near(it.stats().trail_time, 2.0), "Ionised Trail: 30/s for 2 s")
+	var tgt = put(g, "grunt", 100.0, 0, 5000.0)
+	var side = put(g, "grunt", 103.0, 0, 5000.0)
+	side.cloaked = true
+	it.pos = tgt.pos - (side.pos - tgt.pos).normalized() * 60.0
+	var sh0: float = side.hp
+	g._fire_railgun(it, tgt, it.stats())
+	check(g.trails.size() == 1, "the shot leaves a trail")
+	var hp1: float = side.hp
+	for i in 20:
+		g._update_trails(0.05)
+	check(side.hp < hp1 - 20.0 and side.reveal_timer > 0.0, "the trail burns an unseen enemy on the line and reveals it (%.1f)" % (hp1 - side.hp))
+	for i in 60:
+		g._update_trails(0.05)
+	check(g.trails.is_empty(), "the trail fades after 2 s")
+	# Twin Rails and the Ion Cannon mastery.
+	var tw = g.place_tower("railgun", spot(g, "railgun", 140))
+	tw.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, tw, "b", 5)
+	check(tw.mastered and int(tw.stats().rails) == 2 and near(tw.stats().rate, 0.833), "Twin Rails: a slug every 1.2 s")
+	var ic = g.place_tower("railgun", spot(g, "railgun", 160))
+	ic.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, ic, "c", 5)
+	check(ic.mastered and near(ic.stats().shatter, 6.0) and near(ic.stats().falloff, 0.0) and near(ic.stats().trail_dps, 50.0), "Ion Cannon: shatter 6, 50/s, no falloff")

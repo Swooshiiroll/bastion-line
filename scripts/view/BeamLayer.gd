@@ -34,6 +34,8 @@ func _draw() -> void:
 			_beams(tw, t)
 	for z in g.storms:
 		_storm(z, t)
+	for z in g.trails:
+		_trail(z, t)
 
 
 ## The Laser Tower's beams (the confirmed art): each ramps on its own target, widening and whitening with the Power path, wrapped
@@ -98,6 +100,26 @@ func _sweeps(tw, t: float) -> void:
 		draw_line(src, end, Color(acc, 0.55 * flick), 3.0, true)
 		draw_line(src, end, Color(1, 1, 1, 0.7 * flick), 1.2, true)
 		Draw.disc(self, end, 4.0, Color(acc, 0.3))
+
+
+## A Railgun ion trail: a lingering, crackling line of ion-blue (gold at the Power mastery) that fades with its time.
+func _trail(z: Dictionary, t: float) -> void:
+	var col: Color = Draw.ACCENT.railgun
+	if z.source != null and z.source.is_rework and z.source.mastered and z.source.primary() == "a":
+		col = Draw.GOLD
+	var k := clampf(float(z.t) / 2.0, 0.0, 1.0)
+	var a: Vector2 = z.a
+	var b: Vector2 = z.b
+	draw_line(a, b, Color(col, 0.12 * k), float(z.w), true)
+	draw_line(a, b, Color(col, 0.35 * k), 3.0, true)
+	var d := (b - a).normalized()
+	var o := d.orthogonal()
+	var len := a.distance_to(b)
+	for i in 8:
+		var q := fmod(float(i) / 8.0 + t * 0.4, 1.0)
+		var p := a + d * len * q
+		var j := o * sin(t * 30.0 + float(i) * 2.3) * 5.0
+		draw_line(p - j, p + j + d * 10.0, Color(col, 0.8 * k), 1.0, true)
 
 
 ## A short-lived storm zone (an Ion Storm secondary).

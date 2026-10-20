@@ -16,6 +16,7 @@ const BeamLayer = preload("res://scripts/view/BeamLayer.gd")
 const FxLayer = preload("res://scripts/view/FxLayer.gd")
 const Overlay = preload("res://scripts/view/Overlay.gd")
 const GunTurretArt = preload("res://scripts/view/towers/GunTurretArt.gd")
+const RailgunArt = preload("res://scripts/view/towers/RailgunArt.gd")
 const RocketSalvoArt = preload("res://scripts/view/towers/RocketSalvoArt.gd")
 const AntiAircraftArt = preload("res://scripts/view/towers/AntiAircraftArt.gd")
 const ArtilleryCannonArt = preload("res://scripts/view/towers/ArtilleryCannonArt.gd")
@@ -286,6 +287,19 @@ func _visual(ev: Dictionary) -> void:
 		"smoke":
 			# Smoke Shells: a grey cloud that hangs where the shell landed.
 			ground_fx.burst(ev.pos, SMOKE, 14, 36.0, 7.0, 2.4)
+		"rail_shot":
+			# The Railgun slug: a thin bright line through everything on it; it thickens and tints with Power.
+			var rl := RailgunArt.levels(str(ev.look))
+			var rc: Color = Draw.GOLD if rl.P >= 5 else Draw.ACCENT.railgun
+			var rw := 2.2 + 0.45 * float(rl.P)
+			fx.tracer(ev.from, ev.to, Color(rc, 0.35), 0.3, rw * 2.4)
+			fx.tracer(ev.from, ev.to, rc, 0.2, rw)
+			if rl.P >= 2:
+				fx.tracer(ev.from, ev.to, Color(0.85, 0.2, 0.18, 0.5), 0.15, rw * 1.8)
+			if rl.P >= 4:
+				fx.tracer(ev.from, ev.to, Color(1, 1, 1, 0.8), 0.12, 1.0)
+			fx.flash(ev.from, 12.0, rc, 0.1)
+			shake = maxf(shake, 0.05)
 		"missile_hit":
 			fx.flash(ev.pos, 14.0, Color(1.0, 0.7, 0.3), 0.1)
 			fx.burst(ev.pos, Color(1.0, 0.6, 0.25), 10, 110.0, 2.4, 0.35)

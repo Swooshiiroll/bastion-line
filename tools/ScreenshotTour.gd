@@ -1010,7 +1010,7 @@ func _rework_checks(g) -> void:
 		g.state = Game.State.BUILD
 	else:
 		fails += _expect(false, "an enemy could be put in the Gun Turret's range")
-	for type in ["mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon"]:
+	for type in ["mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon", "railgun"]:
 		fails += await _rework_fire_check(g, type)
 	screen.world.selected_tower = null
 	await _wait(0.2)

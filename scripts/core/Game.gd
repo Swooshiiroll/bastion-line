@@ -62,6 +62,8 @@ var warp_timer := 0.0
 var pools: Array = []
 ## Short-lived damage zones (an Ion Storm secondary on a chaining Arc Coil).
 var storms: Array = []
+## Railgun ion trails: {a, b, w, dps, t, source}. Everything on the line burns while one lasts, targeted or not, cloaked included.
+var trails: Array = []
 
 ## Nested mini-nova depth, so a chain of kills can't recurse forever.
 var _nova_depth := 0
@@ -709,6 +711,7 @@ func tick(dt: float) -> void:
 	_update_pools(dt)
 	_update_smokes(dt)
 	_update_storms(dt)
+	_update_trails(dt)
 
 	_update_auras()
 	for e in enemies:
@@ -1062,6 +1065,8 @@ func _update_tower(t, dt: float) -> void:
 			_fire_gun(t, target, s)
 		"mortar_tower":
 			_fire_mortar(t, target, s)
+		"railgun":
+			_fire_railgun(t, target, s)
 		"anti_aircraft_turret":
 			t.pulse_count += 1
 			_fire_projectile(t, target, s)
@@ -1153,6 +1158,60 @@ func _fire_artillery(t, s: Dictionary) -> void:
 		p.hold = float(i) * 0.2
 		projectiles.append(p)
 	_emit({"type": "fire", "tower": t.type, "pos": t.pos, "tier": t.tier, "spec": t.spec, "count": n})
+
+
+## Railgun: a slug along the line through the target out to the end of its range. It passes through every enemy on the line,
+## losing `falloff` of its damage with each one. Armour applies. Shatter strips armour for good; bosses take extra; the Ionised
+## Trail leaves the line burning.
+func _fire_railgun(t, target, s: Dictionary) -> void:
+	t.pulse_count += 1
+	var dir: Vector2 = (target.pos - t.pos).normalized()
+	t.aim = dir.angle()
+	t.fire_flash = 0.15
+	var from: Vector2 = t.pos + dir * 26.0
+	var to: Vector2 = t.pos + dir * t.get_range()
+	var width := 4.0
+	var on_line: Array = []
+	for e in enemies:
+		if not e.alive or e.is_hidden() or (e.flying and not t.hits_air()) or (not e.flying and not t.hits_ground()):
+			continue
+		var closest := Geometry2D.get_closest_point_to_segment(e.pos, from, to)
+		if closest.distance_to(e.pos) <= e.radius + width:
+			on_line.append({"e": e, "d": from.distance_to(closest)})
+	on_line.sort_custom(func(a, b): return a.d < b.d)
+	var keep := 1.0 - float(s.get("falloff", 0.4))
+	var dmg: float = t.eff_damage()
+	var shatter := float(s.get("shatter", 0.0))
+	var boss := float(s.get("boss_mult", 1.0))
+	for entry in on_line:
+		var e = entry.e
+		var hit: float = dmg * (boss if e.boss else 1.0)
+		var dealt := damage_enemy(e, hit, false, t)
+		if shatter > 0.0 and e.alive:
+			e.shred(shatter, 999.0)
+		_emit({"type": "hit", "pos": e.pos, "amount": dealt, "kind": "sniper"})
+		dmg *= keep
+	var trail := float(s.get("trail_dps", 0.0))
+	if trail > 0.0:
+		trails.append({"a": from, "b": to, "w": 12.0, "dps": trail, "t": float(s.get("trail_time", 2.0)), "source": t})
+	_emit({"type": "rail_shot", "from": from, "to": to, "look": t.look_key(), "trail": trail > 0.0, "n": t.pulse_count})
+
+
+## Ion trails burn every enemy on their line (energy damage over time ignores armour), cloaked ones too, and reveal them briefly.
+func _update_trails(dt: float) -> void:
+	if trails.is_empty():
+		return
+	for z in trails:
+		z["t"] = float(z.t) - dt
+		for e in enemies:
+			if not e.alive:
+				continue
+			var closest := Geometry2D.get_closest_point_to_segment(e.pos, z.a, z.b)
+			if closest.distance_to(e.pos) <= e.radius + float(z.w) * 0.5:
+				damage_enemy(e, float(z.dps) * dt, true, z.source, false)
+				if e.cloaked:
+					e.reveal_timer = maxf(e.reveal_timer, 0.5)
+	trails = trails.filter(func(z): return z.t > 0.0)
 
 
 ## Mortar Tower: a shell at the target; every few shells (Smoke Shells) one leaves a cloud. The tube that fires cycles

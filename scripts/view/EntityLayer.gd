@@ -46,6 +46,8 @@ func _draw() -> void:
 		var extra: Array = []
 		if tw.is_rework and tw.type == "gun_turret":
 			extra = _extra_aims(tw, key, cur)
+		elif tw.is_rework and tw.type == "railgun":
+			extra = [clampf(1.0 - tw.cooldown * tw.eff_rate(), 0.0, 1.0), tw.pulse_count]
 		elif tw.is_rework and tw.type == "artillery_cannon":
 			extra = [ArtilleryCannonArt.types(ArtilleryCannonArt.levels(tw.look_key())).find(tw.shell), tw.pulse_count]
 		elif tw.is_rework and tw.type == "anti_aircraft_turret":
