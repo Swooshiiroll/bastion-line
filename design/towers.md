@@ -147,7 +147,8 @@ towers, with prices **rounded to 5s and 0s**.
    which enemy mechanics. Then balance targets and how the bot probe checks them.
 5. **Art** (after gameplay): looks and animations from the owner's names and descriptions, then per-path looks (#6),
    on mockup pages like the enemy art (`design/enemy_art.md`), within the turret cache rules.
-6. **Implementation** waits on the owner's confirmation of the whole spec, and ships as its own PRs.
+6. **Implementation** waits on the owner's confirmation of the whole spec, and ships as its own PRs. The spec and art are
+   confirmed (2026-10-20); see Implementation below.
 
 ## Roster (owner, 2026-10-14)
 
@@ -214,6 +215,36 @@ From the enemy rework (`design/enemies.md`, `design/enemy_roster.md` on `design/
 - **Barriers, healing, splitting and immunities:** Aegis Walker and Bulwark barriers, Repair Bot and Mender Hulk
   healing, the Hydra Frame's split, the Rampart's crowd-control immunity, boss slow resist.
 
+## Implementation (decided 2026-10-20)
+
+The design and the art are confirmed (`design/tower_roster.md`, `design/upgrade_trees_rework.md`, `design/tower_art.md`).
+The owner's answers for building it:
+
+- **Order:** the towers first, against today's enemies. Today's enemies get a **role** (Swarm, Rusher, Evader, Support,
+  Disruptor, Special, Tank or Boss) for the role-weighted rules (the Magneto's and Tractor's weights). Counters to
+  enemies the enemy rework (#53) adds later (Wraith, decoys, Masquerade, Siphon...) are built as hooks and tested when
+  those enemies arrive.
+- **Rollout:** a long-lived integration branch. A framework PR, then the towers in batches, each as a PR into it with CI
+  and an LX build for playtesting. It merges to main once all 20 are in, as **4.0.0**.
+- **Old saves:** **not loadable**. A save made before the rework fails with a clear message; profiles and records stay.
+- **Research:** each new tower gets a minimal research tree (its Mastery node, which unlocks its masteries, plus a few
+  generic nodes) until the research pass. Points spent on the old towers' nodes are refunded.
+- **Shop and hotkeys:** colour-coded tiles grouped by class; **no build hotkeys**.
+- **The Retrofit:** a fourth card in the tower panel with hotkey **Y**. Clicking it or pressing Y opens a pop-out of the
+  three options (name, price, effect, preview); click one or press 1-3 to buy, and the choice locks. Paths stay on U, I
+  and O.
+- **Art:** a **faithful port** of the confirmed pages (each step's picked look), within the turret-cache rules; simplified
+  only where the perf budget forces it, and reported.
+- **Damage types:** every hit is tagged **physical or energy** from its weapon type now; the Augmentation Tower's Energy
+  Conversion flips it. Nothing reacts to the tag until the Wraith arrives, but the tests check it.
+- **Game data:** the tower tables in `design/tower_roster.md` get a machine-readable Stats column, carried into
+  `design/upgrade_trees_rework.md`; a new generator writes `data/tower_trees.gd` from it, and `tools/dev.sh check` fails
+  if it's stale. The old `design/upgrade_trees.md` pipeline retires.
+- **Batches:** (1) Gun Turret (the pilot, with the framework), Mortar Tower, Laser Tower, Rocket Salvo, Anti-Aircraft
+  Turret; (2) Artillery Cannon, Railgun, Tesla Tower; (3) Drone Bay, CAS Gunship; (4) Mine Layer, Chemical Plant, Cryo
+  Tower, Boost Tower; (5) Radar Tower, Shockwave Generator, Scrapyard; (6) Magneto Tower, Tractor Tower, Augmentation
+  Tower. Then the balance probe, the Codex, the tour and 4.0.0.
+
 ## Out of scope
 
 - The Research lab, Prestige (#2, #3) and Super Structures (#4, #5): their own passes after the roster.
@@ -239,15 +270,17 @@ From the enemy rework (`design/enemies.md`, `design/enemy_roster.md` on `design/
    accept or drop the Field and Deployable weapon types.
 2. **Air or ground per tower,** and whether the roster covers flyers, the Wraith (energy only) and the Burrower well
    enough (asked tower by tower, then checked across the roster).
-3. **The Retrofit's hotkey:** Y suggested; confirmed in the UI round.
+3. **The Retrofit's hotkey:** decided (2026-10-20): Y, with a pop-out of the three options (see Implementation).
 4. **Per tower:** done, including three Retrofit options per tower (the Drone Bay keeps one, by the owner's choice). All 20
    towers are designed (2026-10-15) in `design/tower_roster.md`; the numbers go to the
    balance probe.
-5. **Old saves and ids:** what happens to towers in old saves when the roster changes (save format bump, refunds).
-6. **The bot, Codex, tests and tour:** how they follow the new roster.
+5. **Old saves and ids:** decided (2026-10-20): saves from before the rework aren't loadable (see Implementation).
+6. **The bot, Codex, tests and tour:** decided (2026-10-20): each follows the new roster tower by tower, in the batches (see
+   Implementation).
 7. **What a class does beyond the shop** (TBD): candidates are parked in the class sheet.
-8. **Weapon types and the physical/energy split** the Wraith needs: decide later.
-9. **Build hotkeys:** 20 towers need more keys than today's 15.
+8. **Weapon types and the physical/energy split** the Wraith needs: partly decided (2026-10-20): hits are tagged physical or
+   energy from the weapon type now; what reacts to it comes with the Wraith (#53).
+9. **Build hotkeys:** decided (2026-10-20): none; the shop's tiles are colour-coded and grouped by class.
 10. **A Wraith counter tower** (owner, 2026-10-15): the AA gun can't hurt the Wraith (physical damage); the owner wants
     a new tower idea for it, after the 19 towers are designed.
 11. **Folding in #6 and #8:** per-path looks come in the art phase; the #8 playtest tree tweaks are rewritten into the
