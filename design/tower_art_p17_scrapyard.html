@@ -51,7 +51,7 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Tower rework · Tower art · Tower art, tower 17 (restart 3), round 2</div>
+    <div class="eyebrow">Bastion Line · Tower rework · Tower art · Tower art, tower 17 (restart 3), round 3</div>
     <h1>Scrapyard: base look, three parts</h1>
     <p class="note">The reworked towers' <b>models</b>, first pass: for each tower pick its <b>look</b> and its <b>firing animation</b> from three proposals each (A to C), and add notes. Mix freely. <b>Your combination</b> shows your mix (option A until you pick). Every preview runs live: the turret tracks and fires at enemies on the lane (flyers for air towers). Picks and notes are kept in this browser; copy them from the bottom of the page and send them back. Spec: <code>design/tower_art.md</code>.</p>
     <ul class="rules">
@@ -388,7 +388,7 @@ function mateTower(p, k, col, t, boosted, bcol, aimAt) { deck(p, k * 0.75, col, 
 // The owner's brief: the tower is three parts, a recycler/smelter (a tall furnace stack, the focal part), a junkyard and a warehouse. Each path will
 // later rebuild one part (Passive Income the stack, Kill Income the junkyard, Discounts the warehouse). The three looks are the same three parts in
 // three layouts; the three animations are picked separately. Every look names its parts' spots (look.parts, in units) so the animations can use them.
-const PAGE = { title: "Scrapyard base look (three parts)", store: "bl-tower-art-scrap-parts-2" };
+const PAGE = { title: "Scrapyard base look (three parts)", store: "bl-tower-art-scrap-parts-3" };
 const rnd = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
 const distTo = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 function txt(p, str, col, px) { X.save(); X.font = "bold " + Math.round(px) + "px sans-serif"; X.textAlign = "center"; X.fillStyle = css(OUTLINE); X.fillText(str, p[0] + 1, p[1] + 1); X.fillStyle = css(col); X.fillText(str, p[0], p[1]); X.restore(); }
@@ -422,10 +422,25 @@ function wreck(p, ang, k) { const o = (x, y) => add(p, rot([x * k, y * k], ang))
   for (const sg of [-1, 1]) plate(o(0, sg * 7.4), rectPts(12, 2), [0.13, 0.12, 0.12, 1], ang, k, 1);
   plate(p, rectPts(11, 6), mix(RUST, METAL, 0.3), ang, k, 1.3); disc(o(-2, 0), 3.8 * k, OUTLINE); disc(o(-2, 0), 3.1 * k, [0.05, 0.05, 0.05, 1]); ring(o(-2, 0), 3.5 * k, RUST, 1.2 * k);
   line(o(5, -3.5), o(9, 1), [0.3, 0.14, 0.1, 1], 1.2 * k); line(o(4, 1), o(7, 4.5), [0.3, 0.14, 0.1, 1], 1.2 * k); }
-function crane(p, reach, a0, t, k) { const a = a0 + Math.sin(t * 0.45) * 0.9, tip = add(p, mul(fa(a), reach * k)), grab = 0.5 + 0.5 * Math.sin(t * 0.9);
+function craneArm(p, a, reach, op, k, carry) { const tip = add(p, mul(fa(a), reach * k));
   disc(add(p, [1.5 * k, 2 * k]), 5.4 * k, [0, 0, 0, 0.3]); disc(p, 5.4 * k, OUTLINE); disc(p, 4.6 * k, dk(CRANE, 0.15));
-  bar(p, tip, 2.6 * k, CRANE); plate(p, rectPts(3.2, 2.6), METAL_D, a, k, 1.1);
-  for (let i = 0; i < 4; i++) { const b = a + i * TAU / 4 + Math.PI / 4; line(tip, add(tip, mul(fa(b), (2.2 + 1.6 * grab) * k)), METAL_L, 1.3 * k); } disc(tip, 1.6 * k, METAL_D); }
+  bar(p, tip, 2.6 * k, CRANE); plate(p, rectPts(3.2, 2.6), METAL_D, a, k, 1.1); if (carry) chunk(tip, 1, carry, k);
+  for (let i = 0; i < 4; i++) { const b = a + i * TAU / 4 + Math.PI / 4; line(tip, add(tip, mul(fa(b), (2.2 + 1.6 * op) * k)), METAL_L, 1.3 * k); } disc(tip, 1.6 * k, METAL_D); }
+function crane(p, reach, a0, t, k) { craneArm(p, a0 + Math.sin(t * 0.45) * 0.9, reach, 0.5 + 0.5 * Math.sin(t * 0.9), k, 0); }
+function chunk(p, sc, seed, k, col) { const pts = []; for (let i = 0; i < 6; i++) { const a = i * TAU / 6; pts.push([Math.cos(a) * 3.1 * (0.7 + 0.3 * rnd(seed + i)), Math.sin(a) * 3.1 * (0.7 + 0.3 * rnd(seed + i + 9))]); }
+  fill(p, pts, col || mix([0.72, 0.46, 0.3, 1], METAL_L, 0.2 + 0.4 * rnd(seed)), seed, k * sc); outline(p, pts, OUTLINE, 1.2, seed, k * sc); line(add(p, mul(fa(seed), -1.2 * k * sc)), add(p, mul(fa(seed), 1.2 * k * sc)), [1, 1, 1, 0.35], 0.9 * k * sc); }
+// The feed line (round 3, owner): the crane grabs scrap off the heap and drops it on the foot of the belt; each piece rides up and falls off the top
+// into the furnace mouth with a flare. One piece per crane cycle (T s); everything is a function of t, so the crane and the belt always agree.
+const FEED = { pv: [-36, 13], heap: [-33, 0], b0: [-24, 20], mouth: [0, -8], end: 9.5, T: 3.2, belt: 0.35 };
+function feedLine(S, k, t) { const F = FEED, dir = norm(sub(F.mouth, F.b0)), e = sub(F.mouth, mul(dir, F.end)), Lu = distTo(F.b0, e), L = add(F.b0, mul(dir, 2.5)), v = F.belt * Lu, ride = (Lu - 2.5) / v, n = Math.floor(t / F.T);
+  conveyor(S(...F.b0), S(...e), t, k);
+  for (let i = 0; i < 4; i++) { const m = n - i, a = t - (m + 0.56) * F.T, sd = m * 1.7 + 1; if (a < 0) continue;
+    if (a < ride) chunk(S(...add(L, mul(dir, a * v))), 1, sd, k);
+    else { const u = (a - ride) / 0.4; if (u < 1) chunk(S(...lerp(e, F.mouth, ease(u))), 1 - 0.65 * u, sd, k, mix([0.72, 0.46, 0.3, 1], MOLTEN, u));
+      else if (u < 2.5) glowDot(S(...F.mouth), (1.4 + 2.2 * (1 - (u - 1) / 1.5)) * k, A(HOTM, 1 - (u - 1) / 1.5)); } }
+  const ph = fmod(t / F.T, 1), aH = Math.atan2(F.heap[1] - F.pv[1], F.heap[0] - F.pv[0]), aL = Math.atan2(L[1] - F.pv[1], L[0] - F.pv[0]), rH = distTo(F.pv, F.heap), rL = distTo(F.pv, L);
+  const sw = ph < 0.14 ? 0 : ph < 0.5 ? ease((ph - 0.14) / 0.36) : ph < 0.6 ? 1 : 1 - ease((ph - 0.6) / 0.4), op = ph < 0.14 ? 1 - ph / 0.14 : ph < 0.5 ? 0 : ph < 0.6 ? (ph - 0.5) / 0.1 : 1;
+  craneArm(S(...F.pv), aH + (aL - aH) * sw, rH + (rL - rH) * sw, op, k, ph > 0.06 && ph < 0.56 ? n * 1.7 + 1 : 0); }
 // The warehouse: a long shed with a corrugated roof, a ridge and skylights; roll-up doors on its local +y side open at each payout.
 function warehouse(p, hw, hh, ang, nDoor, age, k) { const o = (x, y) => add(p, rot([x * k, y * k], ang)), op = age < 0.4 ? ease(age / 0.4) : age < 1.4 ? 1 : 1 - ease(Math.min(1, (age - 1.4) / 0.4));
   fill(add(p, [2.5 * k, 3.5 * k]), rectPts(hw, hh), [0, 0, 0, 0.3], ang, k);
@@ -465,14 +480,14 @@ const TOWERS = [
           warehouse(S(34, -6), 30, 9, Math.PI / 2, 3, age, k); crates(S(34, 36), 2, 1, k);
           stack(S(2, -6), 16, [Math.PI * 0.97, Math.PI * 0.68], t, age, k); smoke(S(2, -6), 16, t, k); } },
       { key: "B", name: "Production Line", muzzle: 0, fixed: true, parts: { junk: [-30, 0], mouth: [0, -8], door: [22, -8] },
-        theme: "Left to right: the junkyard (heaps, a tank hulk, a grab crane) feeds a conveyor up into the furnace stack in the middle, and a short ingot belt runs from the stack into a tall warehouse on the right.",
+        theme: "Left to right: in the junkyard a grab crane lifts scrap off a heap and drops it on the foot of a conveyor; each piece rides up the belt and falls off the top into the furnace stack's glowing mouth. A short ingot belt runs from the stack into a tall warehouse on the right.",
         draw(c, aim, s, fx, t, col) { const k = G(s), age = payAge(fx, t), S = (x, y) => add(c, [x * k, y * k]);
           yardFloor(c, k, col, t); dirt(c, -44, -44, -15, 44, k, 5);
-          scrapPile(S(-31, -30), 9, k, 2); scrapPile(S(-33, 4), 7, k, 13); wreck(S(-30, 30), 1.45, k);
+          scrapPile(S(-31, -30), 8, k, 2); scrapPile(S(-33, 0), 9, k, 13); wreck(S(-32, 34), 0.05, k);
           warehouse(S(33, 0), 40, 9.5, Math.PI / 2, 4, age, k); crates(S(4, 32), 2, 2, k);
-          conveyor(S(-24, 26), S(-7, 3), t, k); conveyor(S(10, -8), S(23, -8), t, k);
+          conveyor(S(10, -8), S(23, -8), t, k);
           stack(S(0, -8), 14, [], t, age, k);
-          crane(S(-21, -10), 15, Math.PI * 0.2, t, k);                                                              // round 2 (owner): the crane's arm swings over the top of the smelter
+          feedLine(S, k, t);                                                                                        // round 3 (owner): crane -> belt -> furnace, all drawn over the stack
           smoke(S(0, -8), 14, t, k); } },
       { key: "C", name: "Yard Corner", muzzle: 0, fixed: true, parts: { junk: [10, 18], mouth: [-29, -29], door: [14, -22] },
         theme: "The warehouse runs along the top edge with its doors facing down, and the furnace stack stands in the top-left corner, fed by chutes from the open junkyard that fills the bottom-right (heaps, a tank hulk, a big grab crane).",
@@ -502,6 +517,7 @@ const TOWERS = [
           pay: (v, s, col, P, W) => coinPop(W(P.door), v, s) }) },
     ] },
 ];
+// Round 3 (owner): "Move the crane to where it can move scrap to the conveyer belt where it can be fall off the conveyer belt into the furnace".
 // Round 2 (owner, 2026-10-19): look B Production Line, animation B Melt and Pour; note "Make sure the crane bar is over top of the smelter" (the crane is now drawn after the stack).
 TOWERS[0].looks = TOWERS[0].looks.filter((l) => l.key === "B"); TOWERS[0].anims = TOWERS[0].anims.filter((a) => a.key === "B");
 const DEFAULTS = { scrap: { look: "B", anim: "B" } };

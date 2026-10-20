@@ -391,7 +391,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 15 | Cryo Tower | `design/tower_art_p2_15_cryo.html` | **Confirmed** (owner, 2026-10-19: "Finished"; Deep Cold C Frost Collar) |
 | 16 | Shockwave Generator | `design/tower_art_p2_16_shock.html` | **Confirmed** (owner, 2026-10-19: "Finished") |
-| 17 | Scrapyard | `design/tower_art_p17_scrapyard.html` | **Restarted again** (owner, 2026-10-19). Base round 2: picks B Production Line, B Melt and Pour, with the crane's arm drawn over the smelter; waiting for "Scrapyard base finished" |
+| 17 | Scrapyard | `design/tower_art_p17_scrapyard.html` | **Restarted again** (owner, 2026-10-19). Base round 3: picks B Production Line, B Melt and Pour; the crane now loads the belt, which drops scrap into the furnace; waiting for "Scrapyard base finished" |
 
 ### Gun Turret (second pass)
 
@@ -631,6 +631,8 @@ director fitted, the mastery's gold radar moves to the other side of the deck so
 
 **Round 2:** the Long Penetrators now change the round itself: a long slim shell with a steel tip, in flight and in the
 tray (it was a round shell with a tail). The page shows only the picks.
+
+**Round 3 (owner's note):** "Move the crane to where it can move scrap to the conveyer belt where it can be fall off the conveyer belt into the furnace". The crane now stands between the big heap and the foot of the belt, in a 3.2 s cycle: it grabs a piece of scrap from the heap, swings it over and drops it on the belt; the piece rides up the belt and falls off the top end into the furnace mouth, glowing as it drops, with a flare. The belt now runs straight at the stack and is drawn over its rim; the tank hulk moved to the bottom-left corner, clear of the belt. The pieces are drawn from the time alone, so the crane and the belt always agree.
 
 ### Railgun (second pass)
 
@@ -1170,6 +1172,8 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
 
 **Round 2 (owner's picks, 2026-10-19):** look **B Production Line**, animation **B Melt and Pour**. Note: "Make sure the crane bar is over top of the smelter": the grab crane is now drawn after the stack, so its arm and claw pass over the smelter when it swings across. The page shows only the picks.
 
+**Round 3 (owner's note):** "Move the crane to where it can move scrap to the conveyer belt where it can be fall off the conveyer belt into the furnace". The crane now stands between the big heap and the foot of the belt, in a 3.2 s cycle: it grabs a piece of scrap from the heap, swings it over and drops it on the belt; the piece rides up the belt and falls off the top end into the furnace mouth, glowing as it drops, with a flare. The belt now runs straight at the stack and is drawn over its rim; the tank hulk moved to the bottom-left corner, clear of the belt. The pieces are drawn from the time alone, so the crane and the belt always agree.
+
 ## Open questions
 
-1. **Scrapyard base look, third restart** (tower 17, round 2: B Production Line, B Melt and Pour, crane over the smelter): confirm with "Scrapyard base finished". Then the new upgrade names, the second pass, and towers 18-20 (next: Magneto Tower).
+1. **Scrapyard base look, third restart** (tower 17, round 3: B Production Line, B Melt and Pour; the crane loads the belt into the furnace): confirm with "Scrapyard base finished". Then the new upgrade names, the second pass, and towers 18-20 (next: Magneto Tower).
