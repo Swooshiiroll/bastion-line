@@ -391,7 +391,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 14 | Radar Tower | `design/tower_art_p2_14_radar.html` | **Confirmed** (owner, 2026-10-19: "finished") |
 | 15 | Cryo Tower | `design/tower_art_p2_15_cryo.html` | **Confirmed** (owner, 2026-10-19: "Finished"; Deep Cold C Frost Collar) |
 | 16 | Shockwave Generator | `design/tower_art_p2_16_shock.html` | **Confirmed** (owner, 2026-10-19: "Finished") |
-| 17 | Scrapyard | `design/tower_art_p17_scrapyard.html` | **Restarted again** (owner, 2026-10-19). Base round 3: picks B Production Line, B Melt and Pour; the crane now loads the belt, which drops scrap into the furnace; waiting for "Scrapyard base finished" |
+| 17 | Scrapyard | `design/tower_art_p2_17_scrap.html` | Base **confirmed** (owner, 2026-10-19: B Production Line, B Melt and Pour; base page `design/tower_art_p17_scrapyard.html`). New upgrade names confirmed. Second pass round 1: pick one option per stage and Retrofit |
 
 ### Gun Turret (second pass)
 
@@ -1174,6 +1174,43 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
 
 **Round 3 (owner's note):** "Move the crane to where it can move scrap to the conveyer belt where it can be fall off the conveyer belt into the furnace". The crane now stands between the big heap and the foot of the belt, in a 3.2 s cycle: it grabs a piece of scrap from the heap, swings it over and drops it on the belt; the piece rides up the belt and falls off the top end into the furnace mouth, glowing as it drops, with a flare. The belt now runs straight at the stack and is drawn over its rim; the tank hulk moved to the bottom-left corner, clear of the belt. The pieces are drawn from the time alone, so the crane and the belt always agree.
 
+**Confirmed (owner, 2026-10-19, "Finished"):** look B Production Line (with the round 3 crane, belt and furnace feed), animation B Melt and Pour.
+
+### Scrapyard (second pass on the Production Line)
+
+**New names (owner, 2026-10-19).** The owner picked one machine vocabulary: each step names the machine built into its part. The Salvage Crane Retrofit is renamed the **Weighbridge**. Effects and prices are unchanged. The names are in `design/tower_roster.md`, and the rework trees are regenerated.
+
+| Path (part) | 1 | 2 | 3 (primary) | 4 | Mastery |
+|---|---|---|---|---|---|
+| Passive Income (furnace stack) | Firebrick Lining | Forced Bellows | Blast Furnace | Arc Furnace | Gold Foundry |
+| Kill Income (junkyard) | Tow Hook | Magnet Crane | Hydraulic Shear | Car Crusher | Breaker's Yard |
+| Discounts (warehouse) | Parts Shelves | Pallet Racks | Forklift Bay | Loading Dock | Parts Exchange |
+
+**The page** (`design/tower_art_p2_17_scrap.html`, data `tools/tower_art/data_p2_scrap.js` on the base `data_scrap_parts.js`). Each path rebuilds one part around the machine its step names. Earlier picks carry as details, and masteries are gold. The agent runs the real rules: the payout with the real income, the kill ring, and the discount ring with the percentage off.
+- **Furnace stack (Passive Income).** The stack grows a little each step.
+  - Firebrick Lining: a glowing firebrick shell, hex refractory tiles, or a double wall with glowing slits.
+  - Forced Bellows: twin bellows, a side blower, or a bustle-pipe ring.
+  - Blast Furnace: rebuilt taller, with hot-blast stoves, a skip hoist and charging bell, or a steel frame and downcomer.
+  - Arc Furnace: the top is rebuilt as a domed electrode lid (the scrap drops in through a charging hole), a tilting vessel under electrode arms, or a plasma ring.
+  - Gold Foundry: the stack turns gold, and the ingots on the ingot belt turn gold. The options add glints round the rim, a gold casting wheel, or a gold ladle. Each payout adds a +3% tag.
+- **Junkyard (Kill Income).**
+  - Tow Hook: a tow truck, a winch post, or a chain gantry hauls in the wreck.
+  - Magnet Crane: the grab crane is rebuilt with an electromagnet, as a twin-boom magnet crane, or as an overhead bridge magnet.
+  - Hydraulic Shear: an alligator shear, a guillotine shear, or shear jaws on the crane.
+  - Car Crusher: a flat press over the wreck, a baler that packs the scrap into cubes, or crushing rollers across the belt.
+  - Breaker's Yard: the machines turn gold and a gold x2 sign marks the bosses. The options add a glowing magnet, gold heaps, or a gold fence. The field coins turn gold.
+- **Warehouse (Discounts).** From step 1 the warehouse is rebuilt shorter, with a yard at its end.
+  - Parts Shelves: half the roof off over the shelves, a shelf lean-to, or a parts cage.
+  - Pallet Racks: high-bay racks under an open roof, pallet stacks outside, or a stacker crane.
+  - Forklift Bay: a forklift run, a charging bay, or automated carts.
+  - Loading Dock: a truck dock, a rail siding, or twin ramps.
+  - Parts Exchange: the frame turns gold. The options add a gold roof, gold stock, or a gold fleet.
+- **Retrofits:**
+  - Second Crusher: a jaw crusher, a roller crusher or a hammer mill, with a chute onto the belt.
+  - Bigger Yard: a chain-link fence, a concrete wall, or scrap ground round the slab.
+  - Weighbridge: a truck scale with a readout, a dial scale, or a weigh hut with a barrier arm, below the yard.
+- **Carpet-rule overlaps (kept, stacking):** the Second Crusher's +30 income stacks with the Passive Income steps, and the Bigger Yard's +30 px stacks with both field radii.
+
 ## Open questions
 
-1. **Scrapyard base look, third restart** (tower 17, round 3: B Production Line, B Melt and Pour; the crane loads the belt into the furnace): confirm with "Scrapyard base finished". Then the new upgrade names, the second pass, and towers 18-20 (next: Magneto Tower).
+1. **Second pass, Scrapyard** (tower 17, round 1, on the confirmed Production Line with the new names): pick one option per stage and Retrofit. Then the new upgrade names, the second pass, and towers 18-20 (next: Magneto Tower).

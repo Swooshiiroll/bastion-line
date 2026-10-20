@@ -1,0 +1,1173 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tower Art: Scrapyard: paths and Retrofits</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=IBM+Plex+Sans:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  :root {
+    color-scheme: dark;
+    --ground: #06090e; --field: #0b1016; --panel: #08111a; --panel-2: #0d1a25; --rule: #1d3a4b; --wire: #2a5a70;
+    --text: #dcedf7; --dim: #86a0b1; --faint: #4f6a7b; --accent: #4de1ff; --gold: #ffc85a;
+    --display: "Chakra Petch", "Bahnschrift", "Segoe UI", sans-serif;
+    --body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--text); font: 14px/1.5 var(--body); padding: 28px 16px 48px; }
+  .wrap { max-width: 1340px; margin: 0 auto; display: grid; gap: 22px; }
+  .eyebrow { font: 600 12px var(--display); letter-spacing: .18em; text-transform: uppercase; color: var(--accent); }
+  h1 { font: 700 30px/1.1 var(--display); margin: 4px 0 0; }
+  h2 { font: 700 22px/1.2 var(--display); margin: 0; letter-spacing: .03em; }
+  h3 { font: 600 13px var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--dim); margin: 6px 0 0; }
+  p.note, .desc { color: var(--dim); }
+  p.note { margin: 6px 0 0; max-width: 95ch; }
+  ul.rules { margin: 8px 0 0; padding-left: 18px; color: var(--dim); max-width: 100ch; }
+  ul.rules b, p.note b { color: var(--text); font-weight: 500; }
+  code { font: 12px var(--mono); color: var(--accent); }
+  .enemy { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px 2px 12px 2px; padding: 12px 14px 14px; display: grid; gap: 8px; }
+  .enemy-head { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+  .num { font: 700 22px var(--display); color: var(--gold); }
+  .tags { font: 600 11px var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; }
+  .panel { border: 1px solid var(--rule); border-radius: 8px; padding: 8px; display: grid; gap: 6px; align-content: start; background: #071019; }
+  .meta { display: flex; gap: 8px; align-items: center; }
+  .key { font: 700 11px var(--display); color: #031018; background: var(--accent); border-radius: 4px; padding: 0 6px; }
+  .panel .desc { font-size: 12.5px; margin: 0; }
+  canvas { display: block; background: var(--field); border: 1px solid var(--rule); border-radius: 4px; max-width: 100%; height: auto; }
+  button { font: 600 12px var(--display); letter-spacing: .06em; color: var(--text); background: var(--panel-2); border: 1px solid var(--wire); border-radius: 6px; padding: 6px 11px; cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  button.pick.on { background: var(--gold); color: #1a1000; border-color: var(--gold); }
+  label.notes { display: grid; gap: 3px; font: 600 11px var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+  label.notes textarea { width: 100%; min-height: 40px; background: #071019; color: var(--text); border: 1px solid var(--rule); border-radius: 6px; font: 13px var(--body); padding: 6px 8px; resize: vertical; text-transform: none; letter-spacing: 0; }
+  .combo { display: grid; gap: 6px; border: 1px solid var(--gold); border-radius: 8px; padding: 8px; background: rgba(255,200,90,.04); justify-items: start; }
+  .combo-head { font: 600 12px var(--display); letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
+  .out { background: var(--panel); border: 1px solid var(--rule); border-radius: 12px 2px 12px 2px; padding: 12px 14px; display: grid; gap: 8px; }
+  #summary { width: 100%; min-height: 100px; background: #071019; color: var(--text); border: 1px solid var(--rule); border-radius: 6px; font: 12px var(--mono); padding: 8px; }
+  .stage { display: grid; gap: 6px; border-top: 1px solid var(--rule); padding-top: 8px; }
+  .stage-head { display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; }
+  .lvl { font: 700 13px var(--display); color: #031018; background: var(--gold); border-radius: 4px; padding: 0 7px; }
+  .cost { font: 500 12px var(--mono); color: var(--gold); }
+  .eff { color: var(--dim); font-size: 13px; }
+  .grid3 { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; }
+  .build { display: grid; gap: 10px; grid-template-columns: minmax(0, 560px) minmax(220px, 1fr); align-items: start; border: 1px solid var(--gold); border-radius: 8px; padding: 10px; background: rgba(255,200,90,.04); }
+  .ctrls { display: grid; gap: 10px; }
+  .ctrl { display: grid; gap: 3px; }
+  .ctrl label { font: 600 12px var(--display); letter-spacing: .08em; color: var(--text); }
+  .ctrl input[type=range] { width: 100%; accent-color: var(--gold); }
+  .ctrl select { background: #071019; color: var(--text); border: 1px solid var(--rule); border-radius: 6px; padding: 4px 6px; font: 13px var(--body); }
+  .role { font: 600 11px var(--display); letter-spacing: .1em; text-transform: uppercase; color: var(--faint); }
+  @media (max-width: 860px) { .build { grid-template-columns: 1fr; } }
+  @media (max-width: 760px) { h1 { font-size: 24px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Bastion Line · Tower rework · Tower art · Tower art, second pass, tower 17</div>
+    <h1>Scrapyard: paths and Retrofits</h1>
+    <p class="note">Second pass for one tower: <b>every upgrade step and mastery</b> on each path, and each <b>Retrofit</b>, adds or changes a detail on the confirmed model. Each card shows the model with that path's earlier steps (your picks, or option A until you pick) plus the candidate. Pick one of three per step, add notes per path, then <b>Copy picks and notes</b>.</p>
+    <ul class="rules">
+      <li><b>Details stack:</b> the primary path's steps and the secondary's (capped at 2) both show and overlap, as in the build preview.</li>
+      <li><b>Build preview:</b> set each path's level (M is the mastery) and a Retrofit; it enforces the primary/secondary rule (two paths at most; once one reaches 3, the other stops at 2).</li>
+      <li><b>Masteries</b> get gold trim, as today's tier-4 towers do.</li>
+      <li>Same style as the base pass: dark gunmetal lit from the upper left, the tower's accent colour, top-down.</li>
+    </ul>
+  </header>
+  <div id="towers" class="wrap"></div>
+  <section class="out">
+    <h2>Picks and notes</h2>
+    <textarea id="summary" readonly></textarea>
+    <button id="copy">Copy picks and notes</button>
+    <button id="clear">Clear this page</button>
+  </section>
+</div>
+<script>
+// ---- Colours and vectors (mirrors Draw.gd) -------------------------------------------------
+const OUTLINE = [0.03, 0.04, 0.06, 0.95], METAL_D = [0.10, 0.115, 0.14, 1], METAL = [0.18, 0.20, 0.24, 1], METAL_L = [0.30, 0.33, 0.38, 1];
+const LIGHT = [-0.6, -0.8];
+const WHITE = [1, 1, 1, 1];
+const A = (c, a) => [c[0], c[1], c[2], a];
+const dk = (c, k) => [c[0] * (1 - k), c[1] * (1 - k), c[2] * (1 - k), c[3] ?? 1];
+const lt = (c, k) => [c[0] + (1 - c[0]) * k, c[1] + (1 - c[1]) * k, c[2] + (1 - c[2]) * k, c[3] ?? 1];
+const mix = (a, b, k) => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k, a[2] + (b[2] - a[2]) * k, (a[3] ?? 1) + ((b[3] ?? 1) - (a[3] ?? 1)) * k];
+const css = c => `rgba(${Math.round(c[0] * 255)},${Math.round(c[1] * 255)},${Math.round(c[2] * 255)},${c[3] ?? 1})`;
+const add = (a, b) => [a[0] + b[0], a[1] + b[1]];
+const sub = (a, b) => [a[0] - b[0], a[1] - b[1]];
+const mul = (a, k) => [a[0] * k, a[1] * k];
+const fa = a => [Math.cos(a), Math.sin(a)];
+const orth = v => [v[1], -v[0]];
+const dot = (a, b) => a[0] * b[0] + a[1] * b[1];
+const norm = v => { const l = Math.hypot(v[0], v[1]) || 1; return [v[0] / l, v[1] / l]; };
+const rot = (p, r) => [p[0] * Math.cos(r) - p[1] * Math.sin(r), p[0] * Math.sin(r) + p[1] * Math.cos(r)];
+const TAU = Math.PI * 2;
+const clamp01 = x => Math.max(0, Math.min(1, x));
+const ease = x => { x = clamp01(x); return x * x * (3 - 2 * x); };
+const fmod = (a, b) => ((a % b) + b) % b;
+
+// ---- Drawing primitives (one-to-one with Draw.gd) ------------------------------------------
+let X = null; // current 2D context
+function disc(c, r, col) { if (r <= 0) return; X.fillStyle = css(col); X.beginPath(); X.arc(c[0], c[1], r, 0, TAU); X.fill(); }
+function arc(c, r, a0, a1, col, w) { X.strokeStyle = css(col); X.lineWidth = w > 0 ? w : 1; X.beginPath(); X.arc(c[0], c[1], Math.max(0.01, r), a0, a1); X.stroke(); }
+function ring(c, r, col, w = 1.5) { arc(c, r, 0, TAU, col, w); }
+function line(a, b, col, w = 1) { X.strokeStyle = css(col); X.lineWidth = w > 0 ? w : 1; X.beginPath(); X.moveTo(a[0], a[1]); X.lineTo(b[0], b[1]); X.stroke(); }
+function polyline(pts, col, w = 1) { if (pts.length < 2) return; X.strokeStyle = css(col); X.lineWidth = w > 0 ? w : 1; X.beginPath(); X.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) X.lineTo(pts[i][0], pts[i][1]); X.stroke(); }
+function poly(pts, col) { X.fillStyle = css(col); X.beginPath(); X.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) X.lineTo(pts[i][0], pts[i][1]); X.closePath(); X.fill(); }
+function xform(c, pts, r, s) { return pts.map(p => add(c, rot(mul(p, s), r))); }
+function fill(c, pts, col, r = 0, s = 1) { poly(xform(c, pts, r, s), col); }
+function outline(c, pts, col, w, r = 0, s = 1) { const p = xform(c, pts, r, s); p.push(p[0]); polyline(p, col, w); }
+function solid(c, pts, col, r = 0, s = 1, lw = 1.2) { fill(c, pts, col, r, s); outline(c, pts, OUTLINE, lw, r, s); }
+function ellipse(c, rx, ry, col) { X.fillStyle = css(col); X.beginPath(); X.ellipse(c[0], c[1], Math.max(0.01, rx), Math.max(0.01, ry), 0, 0, TAU); X.fill(); }
+function rect(x, y, w, h, col) { X.fillStyle = css(col); X.fillRect(x, y, w, h); }
+function ngon(n, r, ph = 0) { const o = []; for (let i = 0; i < n; i++) { const a = ph + TAU * i / n; o.push([Math.cos(a) * r, Math.sin(a) * r]); } return o; }
+function rectPts(hw, hh) { return [[-hw, -hh], [hw, -hh], [hw, hh], [-hw, hh]]; }
+function glowDot(c, r, col) { disc(c, r * 2.2, A(col, 0.18 * (col[3] ?? 1))); disc(c, r * 1.4, A(col, 0.35 * (col[3] ?? 1))); disc(c, r, col); disc(c, r * 0.45, [1, 1, 1, 0.9 * (col[3] ?? 1)]); }
+function arcSegments(c, r, count, gap, rt, col, w) { const span = TAU / count; for (let i = 0; i < count; i++) { const a0 = rt + span * i + gap * 0.5; arc(c, r, a0, a0 + span - gap, col, w); } }
+function orb(p, r, col) {
+  disc(p, r + 1.1, OUTLINE); disc(p, r, dk(col, 0.3)); disc(add(p, mul(LIGHT, r * 0.12)), r * 0.8, col);
+  arc(p, r * 0.72, Math.PI * 1.05, Math.PI * 1.6, lt(col, 0.35), Math.max(0.8, r * 0.16));
+  disc(add(p, mul(LIGHT, r * 0.45)), Math.max(0.6, r * 0.13), [1, 1, 1, 0.55]);
+}
+function plate(c, pts, col, r = 0, s = 1, lw = 1.2) {
+  const p = xform(c, pts, r, s);
+  poly(p, dk(col, 0.22));
+  let ce = [0, 0]; for (const q of p) ce = add(ce, q); ce = mul(ce, 1 / p.length);
+  poly(p.map(q => add(ce, mul(sub(q, ce), 0.8))), col);
+  for (let i = 0; i < p.length; i++) {
+    const a = p[i], b = p[(i + 1) % p.length];
+    const m = norm(sub(mul(add(a, b), 0.5), ce));
+    const d = dot(m, LIGHT);
+    const a1 = add(a, mul(sub(ce, a), 0.1)), b1 = add(b, mul(sub(ce, b), 0.1));
+    if (d > 0.15) line(a1, b1, lt(col, 0.45), Math.max(0.8, lw * 0.8));
+    else if (d < -0.15) line(a1, b1, dk(col, 0.5), Math.max(0.8, lw * 0.8));
+  }
+  const cl = p.slice(); cl.push(p[0]); polyline(cl, OUTLINE, lw);
+}
+function rivets(c, pts, r, s, inset = 0.72, rr = 0.9) { for (const q of xform(c, pts, r, s)) { const p = add(c, mul(sub(q, c), inset)); disc(p, rr + 0.3, OUTLINE); disc(p, rr, lt(METAL_L, 0.15)); } }
+function bar(a, b, w, col) {
+  const d = norm(sub(b, a)); let n = orth(d); if (dot(n, LIGHT) < 0) n = mul(n, -1);
+  line(a, b, OUTLINE, w + 1.6); line(a, b, dk(col, 0.25), w);
+  line(add(a, mul(n, w * 0.18)), add(b, mul(n, w * 0.18)), col, w * 0.55);
+  line(add(a, mul(n, w * 0.3)), add(b, mul(n, w * 0.3)), lt(col, 0.4), Math.max(0.6, w * 0.16));
+}
+function strip(a, b, w, col) { line(a, b, A(col, 0.25 * (col[3] ?? 1)), w * 2.6); line(a, b, col, w); line(a, b, [1, 1, 1, 0.6 * (col[3] ?? 1)], Math.max(0.5, w * 0.35)); }
+function oval(c, rx, ry, r, col, ow = 0) {
+  const pts = []; for (let i = 0; i < 20; i++) { const a = TAU * i / 20; pts.push(add(c, rot([Math.cos(a) * rx, Math.sin(a) * ry], r))); }
+  if (ow > 0) poly(pts.map(p => add(c, mul(sub(p, c), 1 + ow / Math.max(rx, ry)))), OUTLINE);
+  poly(pts, col);
+}
+function shadedOval(c, rx, ry, r, col) {
+  const m = Math.min(rx, ry);
+  oval(c, rx, ry, r, dk(col, 0.3), 1.3); oval(add(c, mul(LIGHT, m * 0.12)), rx * 0.8, ry * 0.78, r, col);
+  disc(add(c, mul(LIGHT, m * 0.5)), Math.max(0.6, m * 0.14), [1, 1, 1, 0.45]);
+}
+function limb(pts, w, col) { polyline(pts, OUTLINE, w + 1.4); polyline(pts, col, w); for (let i = 1; i < pts.length - 1; i++) { disc(pts[i], w * 0.75 + 0.4, OUTLINE); disc(pts[i], w * 0.75, lt(col, 0.25)); } }
+
+// ---- Palettes (existing from Draw.gd ENEMY_BODY / ENEMY_COLOR; new ones are drafts) ----------
+const PAL = {
+  grunt: [[0.40, 0.42, 0.48, 1], [1.00, 0.28, 0.22, 1]], runner: [[0.30, 0.30, 0.32, 1], [1.00, 0.80, 0.20, 1]],
+  brute: [[0.40, 0.37, 0.33, 1], [1.00, 0.55, 0.15, 1]], swarmling: [[0.12, 0.30, 0.16, 1], [0.40, 1.00, 0.50, 1]],
+  bat: [[0.30, 0.32, 0.38, 1], [1.00, 0.35, 0.25, 1]], phantom: [[0.16, 0.20, 0.26, 1], [0.55, 0.95, 1.00, 1]],
+  aegis: [[0.30, 0.36, 0.46, 1], [0.40, 0.70, 1.00, 1]], hydra: [[0.36, 0.30, 0.22, 1], [1.00, 0.65, 0.25, 1]],
+  jammer: [[0.26, 0.28, 0.24, 1], [0.90, 1.00, 0.30, 1]], locust: [[0.30, 0.36, 0.22, 1], [0.75, 1.00, 0.35, 1]],
+  gunship: [[0.30, 0.33, 0.30, 1], [1.00, 0.45, 0.30, 1]], burrower: [[0.40, 0.33, 0.24, 1], [1.00, 0.70, 0.35, 1]],
+  stalker: [[0.22, 0.20, 0.30, 1], [0.75, 0.55, 1.00, 1]], rampart: [[0.36, 0.34, 0.30, 1], [1.00, 0.45, 0.35, 1]],
+  // new (draft)
+  needle: [[0.22, 0.24, 0.28, 1], [0.94, 0.95, 0.97, 1]], fury: [[0.25, 0.17, 0.24, 1], [1.00, 0.25, 0.75, 1]],
+  shrike: [[0.34, 0.36, 0.40, 1], [0.20, 0.90, 0.80, 1]], titan: [[0.28, 0.29, 0.32, 1], [1.00, 0.45, 0.10, 1]],
+  siphon: [[0.26, 0.28, 0.24, 1], [0.90, 1.00, 0.30, 1]], blackout: [[0.24, 0.26, 0.22, 1], [0.95, 1.00, 0.45, 1]],
+  capacitor: [[0.22, 0.24, 0.22, 1], [0.85, 1.00, 0.35, 1]], shifter: [[0.27, 0.25, 0.20, 1], [1.00, 0.88, 0.55, 1]],
+  wraith: [[0.12, 0.11, 0.24, 1], [0.86, 0.88, 1.00, 1]], masq: [[0.30, 0.20, 0.32, 1], [1.00, 0.40, 0.55, 1]],
+  decoy: [[0.30, 0.31, 0.33, 1], [1.00, 0.75, 0.30, 1]], mirage: [[0.20, 0.24, 0.30, 1], [0.80, 0.70, 1.00, 1]],
+};
+const FLYERS = new Set(["bat", "locust", "gunship", "shrike"]);
+const SELF_SHADOW = new Set(["siphon"]); // hovers: draws its own offset shadow
+let TELL = "dots";
+
+// ---- Existing enemies, ported from Draw.enemy ------------------------------------------------
+const DRAW = {};
+DRAW.grunt = (c, f, n, ang, rr, t, b, g) => {
+  disc(c, rr * 1.2, A(g, 0.07));
+  for (const side of [-1, 1]) { const pod = add(c, mul(n, side * rr * 0.95)); plate(pod, rectPts(0.5, 0.24), lt(METAL_D, 0.1), ang, rr, 1.0); strip(sub(sub(pod, mul(f, rr * 0.55)), mul(n, rr * 0.12)), add(sub(pod, mul(f, rr * 0.55)), mul(n, rr * 0.12)), 0.8, [0.4, 0.8, 1.0, 1]); }
+  bar(add(c, mul(f, rr * 0.3)), add(c, mul(f, rr * 1.3)), 2.0, METAL_L); disc(add(c, mul(f, rr * 1.3)), 1.1, [0.05, 0.05, 0.05, 1]);
+  orb(c, rr * 0.86, b); arcSegments(c, rr * 0.64, 6, 0.35, ang, dk(b, 0.35), 1.4);
+  const e = add(c, mul(f, rr * 0.12)); disc(e, rr * 0.4, OUTLINE); disc(e, rr * 0.33, [0.15, 0.03, 0.03, 1]); glowDot(e, rr * 0.2, g); disc(add(e, mul(LIGHT, rr * 0.15)), rr * 0.07, [1, 1, 1, 0.8]);
+};
+DRAW.runner = (c, f, n, ang, rr, t, b, g) => {
+  for (let i = 0; i < 3; i++) for (const side of [-1, 1]) {
+    const ph = t * 20 + i * 2.1 + (side > 0 ? Math.PI : 0);
+    const root = add(add(c, mul(f, (1 - i) * rr * 0.35)), mul(n, side * rr * 0.28));
+    const knee = add(add(root, mul(n, side * rr * 0.7)), mul(f, ((1 - i) * 0.35 + 0.22 * Math.sin(ph)) * rr));
+    const foot = add(add(knee, mul(n, side * rr * 0.3)), mul(f, (1 - i) * 0.45 * rr));
+    limb([root, knee, foot], 1.0, METAL_L);
+  }
+  shadedOval(sub(c, mul(f, rr * 0.35)), rr * 0.56, rr * 0.43, ang, b);
+  for (let k = 0; k < 2; k++) { const sp = sub(c, mul(f, rr * (0.2 + 0.25 * k))); line(sub(sp, mul(n, rr * 0.35)), add(sp, mul(n, rr * 0.35)), [0, 0, 0, 0.45], 1.0); }
+  strip(sub(c, mul(f, rr * 0.65)), sub(c, mul(f, rr * 0.1)), 0.8, g);
+  orb(add(c, mul(f, rr * 0.35)), rr * 0.35, lt(b, 0.15));
+  for (const side of [-1, 1]) { line(add(add(c, mul(f, rr * 0.6)), mul(n, side * rr * 0.12)), add(add(c, mul(f, rr * 0.85)), mul(n, side * rr * 0.04)), METAL_L, 1.0); glowDot(add(add(c, mul(f, rr * 0.5)), mul(n, side * rr * 0.14)), rr * 0.08, g); }
+};
+DRAW.brute = (c, f, n, ang, rr, t, b, g) => {
+  for (const side of [-1, 1]) {
+    const step = Math.sin(t * 5 + (side > 0 ? Math.PI : 0)) * rr * 0.35;
+    const hip = add(c, mul(n, side * rr * 0.45)), knee = add(add(hip, mul(n, side * rr * 0.2)), mul(f, step * 0.5)), foot = add(add(hip, mul(n, side * rr * 0.15)), mul(f, step));
+    limb([hip, knee, foot], 3.0, lt(METAL_D, 0.1)); plate(foot, rectPts(0.32, 0.2), METAL_L, ang, rr, 1.0);
+  }
+  const hull = ngon(6, 1.0); plate(c, hull, b, ang, rr * 0.84, 1.6); rivets(c, hull, ang, rr * 0.84, 0.78, 0.6);
+  fill(c, rectPts(0.3, 0.42), dk(b, 0.15), ang, rr);
+  for (const side of [-1, 1]) { const sh = add(c, mul(n, side * rr * 0.78)); plate(sh, rectPts(0.34, 0.3), METAL_L, ang, rr, 1.2); bar(add(sh, mul(f, rr * 0.2)), add(sh, mul(f, rr * 1.15)), 2.4, METAL_L); disc(add(sh, mul(f, rr * 1.15)), 1.4, [0.05, 0.05, 0.05, 1]); disc(add(sh, mul(f, rr * 1.15)), 0.8, A(g, 0.9)); }
+  const v = add(c, mul(f, rr * 0.42)); strip(sub(v, mul(n, rr * 0.28)), add(v, mul(n, rr * 0.28)), 1.6, g);
+};
+DRAW.swarmling = (c, f, n, ang, rr, t, b, g) => {
+  disc(c, rr * 1.7, A(g, 0.13));
+  for (let k = 0; k < 4; k++) { const p = add(c, mul(fa(t * 7 + TAU * k / 4), rr * 0.78)); solid(p, [[0.5, 0], [0, 0.35], [-0.5, 0], [0, -0.35]], lt(b, 0.35), t * 7, rr, 0.8); disc(p, rr * 0.11, g); }
+  orb(c, rr * 0.34, lt(b, 0.2)); glowDot(c, rr * 0.18, g);
+};
+DRAW.bat = (c, f, n, ang, rr, t, b, g) => {
+  ellipse(add(c, [0, rr * 2.4]), rr * 1.3, rr * 0.4, [0, 0, 0, 0.2]);
+  for (let k = 0; k < 4; k++) {
+    const a = ang + Math.PI / 4 + TAU * k / 4, tip = add(c, mul(fa(a), rr * 1.2));
+    bar(c, tip, 1.8, lt(METAL_D, 0.15)); disc(tip, rr * 0.62, [0.8, 0.86, 0.95, 0.12]); ring(tip, rr * 0.62, [0.8, 0.86, 0.95, 0.35], 0.8);
+    const spin = t * 38 * (k % 2 === 0 ? 1 : -1);
+    for (let q = 0; q < 2; q++) line(tip, add(tip, mul(fa(spin + q * Math.PI), rr * 0.58)), [0.85, 0.9, 1.0, 0.55], 1.2);
+    orb(tip, rr * 0.17, METAL_L);
+    const nav = k < 2 ? [1, 0.25, 0.25, 1] : [0.3, 1, 0.45, 1];
+    if (fmod(t * 1.5 + k * 0.25, 1) < 0.35) glowDot(add(c, mul(fa(a), rr * 0.72)), rr * 0.08, nav);
+  }
+  plate(c, [[0.62, 0], [0.35, 0.36], [-0.5, 0.3], [-0.62, 0], [-0.5, -0.3], [0.35, -0.36]], b, ang, rr, 1.2);
+  for (const side of [-1, 1]) { const pod = add(add(c, mul(n, side * rr * 0.34)), mul(f, rr * 0.1)); bar(pod, add(pod, mul(f, rr * 0.45)), 1.6, METAL_L); }
+  const cam = add(c, mul(f, rr * 0.42)); orb(cam, rr * 0.2, METAL); glowDot(add(cam, mul(f, rr * 0.06)), rr * 0.09, g);
+  strip(sub(sub(c, mul(f, rr * 0.35)), mul(n, rr * 0.12)), add(sub(c, mul(f, rr * 0.35)), mul(n, rr * 0.12)), 0.7, g);
+};
+DRAW.locust = (c, f, n, ang, rr, t, b, g) => {
+  ellipse(add(c, [0, rr * 2.6]), rr * 0.9, rr * 0.3, [0, 0, 0, 0.18]);
+  const flap = 0.55 + 0.45 * Math.sin(t * 60);
+  for (const side of [-1, 1]) for (let k = 0; k < 2; k++) { const root = add(c, mul(f, rr * (0.25 - 0.45 * k))); const tip = sub(add(root, mul(n, side * rr * (1.5 * flap + 0.3))), mul(f, rr * 0.35)); line(root, tip, [0.85, 0.95, 0.8, 0.45], 1.6); }
+  shadedOval(sub(c, mul(f, rr * 0.1)), rr * 0.9, rr * 0.42, ang, b); glowDot(add(c, mul(f, rr * 0.6)), rr * 0.3, g);
+};
+DRAW.gunship = (c, f, n, ang, rr, t, b, g) => {
+  ellipse(add(c, [0, rr * 2.0]), rr * 1.4, rr * 0.4, [0, 0, 0, 0.22]);
+  bar(sub(c, mul(f, rr * 0.4)), sub(c, mul(f, rr * 1.35)), 2.4, lt(METAL_D, 0.12)); plate(sub(c, mul(f, rr * 1.35)), rectPts(0.1, 0.42), METAL, ang, rr, 1.0);
+  for (const side of [-1, 1]) {
+    const fan = sub(add(c, mul(n, side * rr * 0.95)), mul(f, rr * 0.1));
+    disc(fan, rr * 0.5, OUTLINE); disc(fan, rr * 0.44, METAL_D);
+    for (let q = 0; q < 3; q++) line(fan, add(fan, mul(fa(t * 30 * side + TAU * q / 3), rr * 0.4)), [0.8, 0.85, 0.95, 0.5], 1.4);
+    ring(fan, rr * 0.47, METAL_L, 1.6); glowDot(sub(fan, mul(f, rr * 0.5)), rr * 0.08, side < 0 ? [1, 0.25, 0.25, 1] : [0.3, 1, 0.45, 1]);
+  }
+  const hull = [[0.95, 0], [0.55, 0.5], [-0.6, 0.55], [-0.85, 0.2], [-0.85, -0.2], [-0.6, -0.55], [0.55, -0.5]];
+  plate(c, hull, b, ang, rr * 0.8, 1.6); rivets(c, hull, ang, rr * 0.8, 0.72, 0.6);
+  line(sub(c, mul(f, rr * 0.4)), add(c, mul(f, rr * 0.45)), [0, 0, 0, 0.35], 1.0);
+  const tur = add(c, mul(f, rr * 0.55));
+  for (const side of [-1, 1]) bar(add(tur, mul(n, side * rr * 0.1)), add(add(tur, mul(n, side * rr * 0.1)), mul(f, rr * 0.6)), 1.8, METAL_L);
+  orb(tur, rr * 0.22, METAL); glowDot(add(c, mul(f, rr * 0.2)), rr * 0.1, g);
+};
+DRAW.rampart = (c, f, n, ang, rr, t, b, g) => {
+  const roll = fmod(t * 14, 5);
+  for (const side of [-1, 1]) { const tread = add(c, mul(n, side * rr * 0.82)); plate(tread, rectPts(1.05, 0.26), lt(METAL_D, 0.05), ang, rr, 1.3); for (let k = 0; k < 5; k++) { const lp = add(tread, mul(f, -rr * 0.95 + fmod(k * rr * 0.42 + roll, rr * 2.0))); line(sub(lp, mul(n, rr * 0.22)), add(lp, mul(n, rr * 0.22)), METAL_L, 1.0); } }
+  const hull = rectPts(0.78, 0.66); plate(c, hull, b, ang, rr, 1.8);
+  for (const cx of [-1, 1]) for (const cy of [-1, 1]) plate(add(add(c, mul(f, cx * rr * 0.62)), mul(n, cy * rr * 0.5)), rectPts(0.16, 0.16), lt(b, 0.12), ang, rr, 1.1);
+  rivets(c, hull, ang, rr, 0.7, 0.7);
+  bar(add(c, mul(f, rr * 0.7)), add(c, mul(f, rr * 1.25)), 4.0, METAL_L); plate(add(c, mul(f, rr * 1.2)), [[0.2, 0], [-0.05, 0.3], [-0.05, -0.3]], lt(METAL_L, 0.1), ang, rr, 1.0);
+  orb(c, rr * 0.28, dk(b, 0.2)); glowDot(c, rr * 0.13, g);
+};
+DRAW.jammer = (c, f, n, ang, rr, t, b, g) => {
+  const ping = fmod(t * 0.9, 1); arc(c, rr * (1.2 + 1.4 * ping), 0, TAU, A(g, 0.35 * (1 - ping)), 1.5);
+  for (const side of [-1, 1]) { const tr = add(c, mul(n, side * rr * 0.72)); plate(tr, rectPts(0.8, 0.22), lt(METAL_D, 0.08), ang, rr, 1.0); for (let k = 0; k < 3; k++) { const lp = add(tr, mul(f, (fmod(t * 6 + k * 0.5, 1.5) - 0.75) * rr)); line(sub(lp, mul(n, rr * 0.16)), add(lp, mul(n, rr * 0.16)), [0, 0, 0, 0.45], 0.9); } }
+  orb(c, rr * 0.72, b); const dir = fa(t * 2.5);
+  arc(c, rr * 0.55, t * 2.5 - 0.9, t * 2.5 + 0.9, OUTLINE, 3.6); arc(c, rr * 0.55, t * 2.5 - 0.9, t * 2.5 + 0.9, METAL_L, 2.2);
+  bar(c, add(c, mul(dir, rr * 0.9)), 1.2, METAL_L); glowDot(add(c, mul(dir, rr * 0.9)), rr * 0.14, g); glowDot(c, rr * 0.18, g);
+};
+DRAW.stalker = (c, f, n, ang, rr, t, b, g) => {
+  const echo = fmod(t * 1.1, 1);
+  const ghost = [[1.1, 0], [0.2, 0.45], [-0.7, 0.3], [-0.7, -0.3], [0.2, -0.45]];
+  outline(sub(c, mul(f, rr * (0.6 + 1.2 * echo))), ghost, A(g, 0.45 * (1 - echo)), 1.0, ang, rr);
+  for (const side of [-1, 1]) {
+    const ph = t * 12 + (side > 0 ? Math.PI : 0);
+    const hip = add(c, mul(n, side * rr * 0.3)), knee = add(add(hip, mul(n, side * rr * 0.45)), mul(f, rr * (0.45 + 0.25 * Math.sin(ph)))), foot = sub(add(knee, mul(n, side * rr * 0.1)), mul(f, rr * (0.55 - 0.3 * Math.sin(ph))));
+    limb([hip, knee, foot], 1.3, METAL_L);
+  }
+  plate(c, ghost, b, ang, rr * 0.8, 1.1); strip(sub(c, mul(f, rr * 0.45)), add(c, mul(f, rr * 0.55)), 0.8, g); glowDot(add(c, mul(f, rr * 0.6)), rr * 0.16, g);
+};
+DRAW.burrower = (c, f, n, ang, rr, t, b, g, o) => {
+  if (o.hidden) {
+    const dirt = [0.42, 0.33, 0.24, 1]; shadedOval(c, rr * 1.15, rr * 0.8, ang, dirt);
+    for (let k = 0; k < 5; k++) { const a = ang + TAU * k / 5 + t * 0.5; disc(add(c, mul(fa(a), rr * (0.85 + 0.15 * Math.sin(t * 9 + k)))), 1.4, lt(dirt, 0.2)); }
+    line(add(c, mul(f, rr * 0.6)), add(c, mul(f, rr * 1.05)), METAL_L, 2.0); glowDot(add(c, mul(f, rr * 0.2)), rr * 0.12, A(g, 0.6)); return;
+  }
+  for (const side of [-1, 1]) { const tr = add(c, mul(n, side * rr * 0.72)); plate(tr, rectPts(0.7, 0.2), lt(METAL_D, 0.08), ang, rr, 1.0); for (let k = 0; k < 3; k++) { const lp = add(tr, mul(f, (fmod(t * 7 + k * 0.45, 1.35) - 0.68) * rr)); line(sub(lp, mul(n, rr * 0.15)), add(lp, mul(n, rr * 0.15)), [0, 0, 0, 0.45], 0.9); } }
+  shadedOval(sub(c, mul(f, rr * 0.15)), rr * 0.7, rr * 0.58, ang, b);
+  for (let k = 0; k < 2; k++) { const sp = sub(c, mul(f, rr * (0.05 + 0.3 * k))); line(sub(sp, mul(n, rr * 0.5)), add(sp, mul(n, rr * 0.5)), [0, 0, 0, 0.35], 1.0); }
+  plate(c, [[1.45, 0], [0.5, 0.42], [0.5, -0.42]], METAL_L, ang, rr, 1.2);
+  for (let k = 0; k < 3; k++) { const fr = fmod(t * 5 + k / 3, 1), x = 0.55 + 0.8 * fr, hw = 0.42 * (1.45 - x) / 0.95; line(sub(add(c, mul(f, rr * x)), mul(n, rr * hw)), add(add(c, mul(f, rr * (x + 0.12))), mul(n, rr * hw)), [0, 0, 0, 0.45], 1.0); }
+  glowDot(sub(c, mul(f, rr * 0.2)), rr * 0.14, g);
+};
+DRAW.phantom = (c, f, n, ang, rr, t, b, g, o) => {
+  const blade = [[1.4, 0], [0.1, 0.55], [-0.9, 1.0], [-0.5, 0], [-0.9, -1.0], [0.1, -0.55]];
+  if (o.hidden) {
+    const a = 0.2 + 0.08 * Math.sin(t * 7), rp = fmod(t * 1.3, 1);
+    arc(c, rr * (1 + 0.8 * rp), 0, TAU, [0.8, 0.95, 1.0, 0.22 * (1 - rp)], 1.0);
+    outline(c, blade, A(g, a), 1.2, ang, rr); outline(add(c, mul(n, Math.sin(t * 11) * 1.5)), blade, A(g, a * 0.5), 1.0, ang, rr * 1.08); return;
+  }
+  plate(c, blade, b, ang, rr, 1.2); line(sub(c, mul(f, rr * 0.4)), add(c, mul(f, rr * 1.1)), A(g, 0.5), 1.0);
+  for (const side of [-1, 1]) { glowDot(add(add(c, mul(f, rr * 0.35)), mul(n, side * rr * 0.28)), rr * 0.13, g); strip(add(sub(c, mul(f, rr * 0.75)), mul(n, side * rr * 0.55)), add(sub(c, mul(f, rr * 0.55)), mul(n, side * rr * 0.4)), 0.8, g); }
+  ring(c, rr * 1.3, A(g, 0.35 + 0.2 * Math.sin(t * 5)), 1.0);
+};
+DRAW.aegis = (c, f, n, ang, rr, t, b, g) => {
+  for (let k = 0; k < 4; k++) { const ld = fa(ang + Math.PI / 4 + k * Math.PI / 2), step = Math.sin(t * 6 + k * Math.PI / 2) * rr * 0.18; const knee = add(add(c, mul(ld, rr * 0.75)), mul(f, step)); limb([add(c, mul(ld, rr * 0.3)), knee, add(knee, mul(ld, rr * 0.35))], 2.0, METAL_L); }
+  const hull = ngon(6, 1.0, Math.PI / 6); plate(c, hull, b, ang, rr * 0.74, 1.4); rivets(c, hull, ang, rr * 0.74, 0.75, 0.55);
+  orb(sub(c, mul(f, rr * 0.25)), rr * 0.2, dk(g, 0.3)); glowDot(sub(c, mul(f, rr * 0.25)), rr * 0.12, g);
+  const sc = add(c, mul(f, rr * 0.2));
+  arc(sc, rr * 0.95, ang - 0.95, ang + 0.95, OUTLINE, 5.6); arc(sc, rr * 0.95, ang - 0.95, ang + 0.95, METAL_L, 3.8); arc(sc, rr * 0.88, ang - 0.8, ang + 0.1, lt(METAL_L, 0.35), 1.0);
+  for (let k = 0; k < 3; k++) disc(add(sc, mul(fa(ang + (k - 1) * 0.55), rr * 0.95)), 0.9, A(g, 0.9));
+  arc(sc, rr * 1.04, ang - 0.9, ang + 0.9, A(g, 0.8), 1.2);
+  const hex = ngon(6, 1.0, t * 0.6); fill(c, hex, [0.4, 0.7, 1.0, 0.15], 0, rr + 6); outline(c, hex, [0.55, 0.8, 1.0, 0.75], 1.4, 0, rr + 6); // barrier (enemy_status)
+};
+DRAW.hydra = (c, f, n, ang, rr, t, b, g) => {
+  shadedOval(sub(c, mul(f, rr * 0.3)), rr * 0.52, rr * 0.48, ang, b); ring(sub(c, mul(f, rr * 0.3)), rr * 0.3, dk(b, 0.35), 1.3); glowDot(sub(c, mul(f, rr * 0.3)), rr * 0.1, g);
+  for (let k = 0; k < 3; k++) {
+    const ba = ang + (k - 1) * 0.7, pts = [];
+    for (let i = 0; i < 5; i++) { const q = i / 4, sway = Math.sin(t * 4 + k * 1.7 - q * 2) * rr * 0.22 * q; pts.push(add(add(c, mul(fa(ba), rr * (0.05 + 1.05 * q))), mul(fa(ba + Math.PI / 2), sway))); }
+    polyline(pts, OUTLINE, 5.0); polyline(pts, lt(b, 0.15), 3.2); for (let i = 1; i < 4; i++) disc(pts[i], 1.0, dk(b, 0.25));
+    const hd = norm(sub(pts[4], pts[3])), hp = add(pts[4], mul(hd, rr * 0.12));
+    plate(hp, [[0.6, 0], [0.05, 0.38], [-0.4, 0.3], [-0.4, -0.3], [0.05, -0.38]], lt(b, 0.1), Math.atan2(hd[1], hd[0]), rr * 0.5, 1.0);
+    const jaw = mul(orth(hd), rr * 0.1 * (1 + Math.sin(t * 8 + k))); line(add(add(hp, mul(hd, rr * 0.28)), jaw), add(hp, mul(hd, rr * 0.1)), METAL_L, 1.0); glowDot(add(hp, mul(hd, rr * 0.06)), rr * 0.1, g);
+  }
+};
+
+// ---- New enemies (draft designs) ---------------------------------------------------------------
+
+// ---- Shared in-game tower style for the tower art pages (mirrors scripts/view/Draw.gd) ----------------------------
+// ---- Game units: drawings use Draw.gd's pixel sizes (a tile is 48 px), scaled to the preview ----------------
+const G = (s) => s / 48;
+const P = (c, aim, k, x, y) => add(c, rot([x * k, y * k], aim)); // x along the aim, y to the side, in game px
+const AMMO = [0.4, 0.42, 0.25, 1], BORE = [0.04, 0.04, 0.05, 1], DARK_STRIPE = [0.06, 0.06, 0.06, 1];
+
+// The hex deck every tower stands on (Draw._pad): bevelled armour, corner bolts, vents, status LEDs, the accent
+// trim that breathes, and one tier pip.
+function deck(c, k, col, t) {
+  const hex = ngon(6, 1);
+  ellipse(add(c, [0, 6 * k]), 21 * k, 9 * k, [0, 0, 0, 0.35]);
+  fill(c, hex, OUTLINE, 0, 20.5 * k); plate(c, hex, lt(METAL_D, 0.05), 0, 19.2 * k, 1); fill(c, hex, METAL, 0, 15.6 * k);
+  outline(c, hex, [0, 0, 0, 0.45], 1, 0, 15.6 * k); outline(c, hex, A(col, 0.5 + 0.2 * Math.sin(t * 2.2)), 1.35 * k, 0, 17.6 * k);
+  for (const q of xform(c, hex, 0, 17.6 * k)) { disc(q, 1.5 * k, OUTLINE); disc(q, 1.0 * k, METAL_L); }
+  for (let i = 0; i < 3; i++) { const y = c[1] - 13 * k + i * 2.2 * k; line([c[0] - 13.5 * k, y], [c[0] - 10 * k, y], [0, 0, 0, 0.5], 1); line([c[0] + 10 * k, y], [c[0] + 13.5 * k, y], [0, 0, 0, 0.5], 1); }
+  disc(add(c, [-9 * k, 11 * k]), k, [0.4, 1, 0.5, fmod(t * 0.9, 2) < 0.12 ? 0.95 : 0.45]); disc(add(c, [9 * k, 11 * k]), k, A(col, 0.8));
+  rect(c[0] - 3 * k, c[1] + 14.4 * k, 6 * k, 3.2 * k, OUTLINE); rect(c[0] - 2.4 * k, c[1] + 15 * k, 4.8 * k, 2 * k, col);
+}
+// Hazard striping along one side of a part, alternating accent and black (Draw._missile).
+function hazard(c, aim, k, x0, x1, y, col, w) { const n = Math.max(2, Math.round((x1 - x0) / 2));
+  for (let i = 0; i < n; i++) { const x = x0 + (x1 - x0) * (i + 0.5) / n; line(P(c, aim, k, x - 0.8, y), P(c, aim, k, x + 0.8, y), i % 2 ? DARK_STRIPE : A(col, 0.95), (w || 1.8) * k); } }
+// A barrel's open end: dark bore that glows in the accent colour as it fires (Draw._flak).
+function muzzleEnd(p, k, w, col, f) { disc(p, w * 0.6 * k, BORE); disc(p, w * 0.45 * k, A(col, Math.min(1, 0.3 + 3 * f))); if (f > 0) glowDot(p, (1.2 + 6 * f) * k, A(col, f)); }
+
+// ---- Shared effects (s = preview px per tile) -------------------------------------------------------------
+const lerp = (a, b, u) => [a[0] + (b[0] - a[0]) * u, a[1] + (b[1] - a[1]) * u];
+const decay = (since, len) => (since >= 0 && since < len ? 1 - since / len : 0);
+function firedBarrel(fx, i, len) { return fx.barrel === i && fx.barrelSince < (len || 0.12) ? 1 - fx.barrelSince / (len || 0.12) : 0; }
+function smokePuff(p, v, s, a) { if (v <= 0 || v >= 1) return; disc(add(p, [0, -v * s * 0.25]), s * (0.1 + v * 0.22), [0.55, 0.57, 0.6, (a || 0.4) * (1 - v)]); }
+function blast(p, v, s, col, size) { if (v < 0 || v >= 1) return; const r = s * (size || 0.4);
+  disc(p, r * (0.35 + v * 0.7), A([1, 0.85, 0.5, 1], 0.75 * (1 - v))); ring(p, r * (0.5 + v * 1.1), A(col, 0.85 * (1 - v)), 2); smokePuff(p, v, s, 0.35); }
+function spark(p, v, s, col) { if (v < 0.35) glowDot(p, s * 0.07 * (1 - v / 0.35), col); }
+function tracer(from, to, u, col, w, len) { const a = lerp(from, to, Math.max(0, u - (len || 0.15))), b = lerp(from, to, u); line(a, b, A(col, 0.9), w || 2); line(a, b, [1, 1, 1, 0.8], (w || 2) * 0.4); }
+function beam(from, to, w, col, k) { line(from, to, A(col, 0.3 * k), w * 2.6); line(from, to, A(col, 0.9 * k), w); line(from, to, [1, 1, 1, 0.8 * k], Math.max(1, w * 0.35)); glowDot(to, w * 1.3, A(col, k)); }
+// A mortar shell: a dark round with a glowing fuse, arcing high; optional glowing trail.
+function shell(from, to, u, s, col, z, trail) { const k = G(s) * (z || 1), arcH = (h) => Math.sin(Math.PI * h) * s * 0.85, p = lerp(from, to, u);
+  ellipse(p, 3 * k, 1.5 * k, [0, 0, 0, 0.3]);
+  if (trail) for (let i = 4; i >= 1; i--) { const v = Math.max(0, u - i * 0.035); disc(add(lerp(from, to, v), [0, -arcH(v)]), (1 + i * 0.45) * k, A(col, 0.32 - 0.06 * i)); }
+  const a = add(p, [0, -arcH(u)]); orb(a, 2.6 * k, METAL_L); glowDot(a, 1.1 * k, col); }
+// A rocket as the in-game loaded missiles look: pale body, red nose, grey fins, a hot exhaust and a smoke trail.
+function missile(p, dir, k, col) {
+  for (const sg of [-1, 1]) fill(p, [[-1.5, sg * 1.1], [-4.2, sg * 2.8], [-4.6, sg * 2.8], [-4.2, sg * 1.1]], METAL_L, dir, k);
+  solid(p, [[4.6, 0], [2.7, 1.35], [-4.2, 1.35], [-4.2, -1.35], [2.7, -1.35]], [0.86, 0.88, 0.92, 1], dir, k, 0.8);
+  fill(p, [[4.6, 0], [2.9, 1.35], [2.9, -1.35]], [1, 0.32, 0.25, 1], dir, k); glowDot(add(p, mul(fa(dir), -5 * k)), 1.2 * k, col); }
+function rocketPath(from, to, u, s, col, idx, z, bendK) { const k = G(s) * (z || 1), bend = (bendK ?? 1) * (idx % 2 ? 1 : -1) * (0.28 + 0.1 * (idx % 3)) * s;
+  const mid = add(lerp(from, to, 0.5), mul(orth(norm(sub(to, from))), bend)), q = (x) => lerp(lerp(from, mid, x), lerp(mid, to, x), x);
+  for (let i = 6; i >= 1; i--) disc(q(Math.max(0, u - i * 0.035)), (1.2 + i * 0.55) * k, [0.62, 0.64, 0.66, 0.34 - i * 0.045]);
+  const p = q(u), pb = q(Math.max(0, u - 0.04)); missile(p, Math.atan2(p[1] - pb[1], p[0] - pb[0]), k, col); }
+// Loaded rocket noses showing in the tube mouths; they're gone after a salvo and slide back in as it reloads.
+function noses(c, aim, k, tubes, fx, r) { const ready = fx.ready ?? 1; if (ready <= 0.05) return;
+  for (const [x, y] of tubes) { const p = P(c, aim, k, x, y); orb(p, (r || 1.7) * k * ready, [0.86, 0.88, 0.92, 1]); disc(add(p, mul(fa(aim), 0.5 * k)), (r || 1.7) * 0.45 * k * ready, [1, 0.32, 0.25, 1]); } }
+
+
+// ---- Stand-in neighbour towers for support towers' previews (Boost Tower, Augmentation Tower) ---------------------
+const MATES = [[[1.15, -0.25], [0.30, 0.90, 1.00, 1]], [[1.0, 0.72], [1.00, 0.55, 0.20, 1]], [[-0.85, 0.78], [1.00, 0.30, 0.35, 1]]];
+const matesOf = (info) => MATES.map(([o, col]) => ({ p: add(info.c, mul(o, info.s)), col }));
+function mateTower(p, k, col, t, boosted, bcol, aimAt) { deck(p, k * 0.75, col, t); const aim = aimAt ?? (-0.5 + Math.sin(t * 0.7 + p[0]) * 0.4);
+  bar(p, P(p, aim, k * 0.75, 15, 0), 3 * k * 0.75, METAL_L); plate(p, ngon(8, 1, Math.PI / 8), METAL_L, aim, 6.5 * k * 0.75, 1); orb(p, 3.4 * k * 0.75, METAL); glowDot(p, 1 * k, col);
+  if (boosted > 0) for (let i = 0; i < 2; i++) { const q = add(p, [0, -(16 + i * 3.4) * k * 0.75]); polyline([add(q, [-2.6 * k, 1.6 * k]), q, add(q, [2.6 * k, 1.6 * k])], A(bcol, boosted), 1.6 * k); } }
+
+
+const BASE = (() => {
+// ---- Scrapyard base-look page (third restart, owner 2026-10-19: "Scrap the scrapyard design and start all over again") ----------------------------
+// The owner's brief: the tower is three parts, a recycler/smelter (a tall furnace stack, the focal part), a junkyard and a warehouse. Each path will
+// later rebuild one part (Passive Income the stack, Kill Income the junkyard, Discounts the warehouse). The three looks are the same three parts in
+// three layouts; the three animations are picked separately. Every look names its parts' spots (look.parts, in units) so the animations can use them.
+const PAGE = { title: "Scrapyard base look (three parts)", store: "bl-tower-art-scrap-parts-3" };
+const rnd = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
+const distTo = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+function txt(p, str, col, px) { X.save(); X.font = "bold " + Math.round(px) + "px sans-serif"; X.textAlign = "center"; X.fillStyle = css(OUTLINE); X.fillText(str, p[0] + 1, p[1] + 1); X.fillStyle = css(col); X.fillText(str, p[0], p[1]); X.restore(); }
+const GOLDC = [1, 0.78, 0.3, 1], RUST = [0.45, 0.3, 0.2, 1], BRICK = [0.55, 0.27, 0.2, 1], MOLTEN = [1, 0.55, 0.15, 1], HOTM = [1, 0.85, 0.45, 1];
+const WOOD = [0.6, 0.43, 0.24, 1], DIRT = [0.27, 0.23, 0.19, 1], CONC = [0.29, 0.29, 0.3, 1], ROOF = [0.44, 0.47, 0.5, 1], DOOR = [0.8, 0.58, 0.2, 1], CRANE = [0.92, 0.7, 0.2, 1];
+const payAge = (fx, t) => t - ((fx.mem || {}).last ?? -9);
+function scrapPile(p, r, k, seed) { const pts = []; for (let i = 0; i < 9; i++) { const a = i * TAU / 9; pts.push([Math.cos(a) * r * (0.65 + 0.35 * rnd(seed + i)), Math.sin(a) * r * (0.65 + 0.35 * rnd(seed + i + 20))]); }
+  ellipse(add(p, [k * 1.5, k * 2.5]), r * k, r * k * 0.5, [0, 0, 0, 0.3]); solid(p, pts, mix(RUST, METAL, 0.4), 0, k, 1);
+  for (let i = 0; i < 5; i++) { const q = add(p, [(rnd(seed + i * 3) - 0.5) * r * k * 1.1, (rnd(seed + i * 5) - 0.5) * r * k * 0.9]); line(q, add(q, mul(fa(rnd(seed + i) * TAU), r * k * 0.35)), i % 2 ? METAL_L : RUST, 1.4 * k); } }
+function coinPop(c, v, s, label) { for (let i = 0; i < 6; i++) { const d = fa(-Math.PI / 2 + (i - 2.5) * 0.35), p = add(add(c, mul(d, s * 0.5 * Math.min(1, v * 2))), [0, v * v * s * 0.4]); disc(p, s * 0.045 + 1, A(OUTLINE, 0.95 * (1 - v))); disc(p, s * 0.045, A(GOLDC, 1 - v)); }
+  txt(add(c, [0, -s * 0.4 - v * s * 0.5]), label || "+100", A(GOLDC, Math.min(1, 2 - v * 2)), Math.max(11, s * 0.2)); }
+
+// ---- The three parts ----------------------------------------------------------------------------------------------------------------------------------
+// The furnace stack (recycler/smelter): the tallest part, so it casts the longest shadow; brick and steel bands step in towards a glowing mouth.
+// Intake chutes feed it from the sides; smoke rises from it (drawn last, over everything). It flares at each payout.
+function stack(p, R, chutes, t, age, k) { const pay = decay(age, 1.4), fl = 0.5 + 0.5 * Math.sin(t * 6.3) * Math.sin(t * 2.1 + 1);
+  disc(add(p, [R * 0.5 * k, R * 0.6 * k]), R * 1.05 * k, [0, 0, 0, 0.32]);
+  for (const a of chutes) { const o = add(p, mul(fa(a), (R + 9) * k)), i = add(p, mul(fa(a), (R - 2) * k)); bar(o, i, 4.4 * k, METAL); line(o, i, METAL_D, 1.4 * k); plate(o, rectPts(4, 4), METAL_D, a, k, 1.2); fill(o, rectPts(2.5, 2.5), [0.08, 0.07, 0.07, 1], a, k); }
+  disc(p, (R + 1.6) * k, OUTLINE); disc(p, R * k, BRICK);
+  for (let i = 0; i < 26; i++) { const a = i * TAU / 26; line(add(p, mul(fa(a), R * 0.8 * k)), add(p, mul(fa(a), R * k)), [0.32, 0.15, 0.1, 1], 1 * k); }
+  ring(p, (R - 0.7) * k, METAL, 1.8 * k);
+  disc(p, R * 0.8 * k, lt(BRICK, 0.1)); ring(p, R * 0.8 * k, METAL_L, 1.6 * k); for (let i = 0; i < 8; i++) disc(add(p, mul(fa(i * TAU / 8 + 0.2), R * 0.8 * k)), 0.8 * k, lt(METAL_L, 0.15));
+  disc(p, R * 0.63 * k, METAL_D); ring(p, R * 0.63 * k, OUTLINE, 1.2 * k);
+  disc(p, R * 0.5 * k, mix([0.35, 0.08, 0.03, 1], MOLTEN, 0.45 + 0.3 * fl + 0.25 * pay)); ring(p, R * 0.56 * k, A(MOLTEN, 0.25 + 0.2 * fl + 0.4 * pay), 2 * k);
+  disc(p, R * (0.24 + 0.05 * fl + 0.1 * pay) * k, A(HOTM, 0.9)); glowDot(p, (2 + 2.2 * pay) * k, HOTM); }
+function smoke(p, R, t, k) { for (let i = 0; i < 6; i++) { const u = fmod(t * 0.32 + i / 6, 1); disc(add(p, [(R * 0.2 + u * 14) * k, -(R * 0.15 + u * 24) * k]), (2 + u * 6) * k, A([0.5, 0.48, 0.46, 1], 0.42 * (1 - u))); } }
+// The junkyard: dirt ground, scrap heaps, a stripped tank hulk and a grab crane that swings over the heaps.
+function dirt(c, x0, y0, x1, y1, k, seed) { fill(add(c, [(x0 + x1) / 2 * k, (y0 + y1) / 2 * k]), rectPts((x1 - x0) / 2, (y1 - y0) / 2), DIRT, 0, k);
+  for (let i = 0; i < 14; i++) disc(add(c, [(x0 + (x1 - x0) * rnd(seed + i)) * k, (y0 + (y1 - y0) * rnd(seed + i + 40)) * k]), (0.5 + rnd(seed + i + 80)) * k, [0.2, 0.17, 0.14, 1]); }
+function wreck(p, ang, k) { const o = (x, y) => add(p, rot([x * k, y * k], ang));
+  for (const sg of [-1, 1]) plate(o(0, sg * 7.4), rectPts(12, 2), [0.13, 0.12, 0.12, 1], ang, k, 1);
+  plate(p, rectPts(11, 6), mix(RUST, METAL, 0.3), ang, k, 1.3); disc(o(-2, 0), 3.8 * k, OUTLINE); disc(o(-2, 0), 3.1 * k, [0.05, 0.05, 0.05, 1]); ring(o(-2, 0), 3.5 * k, RUST, 1.2 * k);
+  line(o(5, -3.5), o(9, 1), [0.3, 0.14, 0.1, 1], 1.2 * k); line(o(4, 1), o(7, 4.5), [0.3, 0.14, 0.1, 1], 1.2 * k); }
+function craneArm(p, a, reach, op, k, carry) { const tip = add(p, mul(fa(a), reach * k));
+  disc(add(p, [1.5 * k, 2 * k]), 5.4 * k, [0, 0, 0, 0.3]); disc(p, 5.4 * k, OUTLINE); disc(p, 4.6 * k, dk(CRANE, 0.15));
+  bar(p, tip, 2.6 * k, CRANE); plate(p, rectPts(3.2, 2.6), METAL_D, a, k, 1.1); if (carry) chunk(tip, 1, carry, k);
+  for (let i = 0; i < 4; i++) { const b = a + i * TAU / 4 + Math.PI / 4; line(tip, add(tip, mul(fa(b), (2.2 + 1.6 * op) * k)), METAL_L, 1.3 * k); } disc(tip, 1.6 * k, METAL_D); }
+function crane(p, reach, a0, t, k) { craneArm(p, a0 + Math.sin(t * 0.45) * 0.9, reach, 0.5 + 0.5 * Math.sin(t * 0.9), k, 0); }
+function chunk(p, sc, seed, k, col) { const pts = []; for (let i = 0; i < 6; i++) { const a = i * TAU / 6; pts.push([Math.cos(a) * 3.1 * (0.7 + 0.3 * rnd(seed + i)), Math.sin(a) * 3.1 * (0.7 + 0.3 * rnd(seed + i + 9))]); }
+  fill(p, pts, col || mix([0.72, 0.46, 0.3, 1], METAL_L, 0.2 + 0.4 * rnd(seed)), seed, k * sc); outline(p, pts, OUTLINE, 1.2, seed, k * sc); line(add(p, mul(fa(seed), -1.2 * k * sc)), add(p, mul(fa(seed), 1.2 * k * sc)), [1, 1, 1, 0.35], 0.9 * k * sc); }
+// The feed line (round 3, owner): the crane grabs scrap off the heap and drops it on the foot of the belt; each piece rides up and falls off the top
+// into the furnace mouth with a flare. One piece per crane cycle (T s); everything is a function of t, so the crane and the belt always agree.
+const FEED = { pv: [-36, 13], heap: [-33, 0], b0: [-24, 20], mouth: [0, -8], end: 9.5, T: 3.2, belt: 0.35 };
+function feedLine(S, k, t) { const F = FEED, dir = norm(sub(F.mouth, F.b0)), e = sub(F.mouth, mul(dir, F.end)), Lu = distTo(F.b0, e), L = add(F.b0, mul(dir, 2.5)), v = F.belt * Lu, ride = (Lu - 2.5) / v, n = Math.floor(t / F.T);
+  conveyor(S(...F.b0), S(...e), t, k);
+  for (let i = 0; i < 4; i++) { const m = n - i, a = t - (m + 0.56) * F.T, sd = m * 1.7 + 1; if (a < 0) continue;
+    if (a < ride) chunk(S(...add(L, mul(dir, a * v))), 1, sd, k);
+    else { const u = (a - ride) / 0.4; if (u < 1) chunk(S(...lerp(e, F.mouth, ease(u))), 1 - 0.65 * u, sd, k, mix([0.72, 0.46, 0.3, 1], MOLTEN, u));
+      else if (u < 2.5) glowDot(S(...F.mouth), (1.4 + 2.2 * (1 - (u - 1) / 1.5)) * k, A(HOTM, 1 - (u - 1) / 1.5)); } }
+  const ph = fmod(t / F.T, 1), aH = Math.atan2(F.heap[1] - F.pv[1], F.heap[0] - F.pv[0]), aL = Math.atan2(L[1] - F.pv[1], L[0] - F.pv[0]), rH = distTo(F.pv, F.heap), rL = distTo(F.pv, L);
+  const sw = ph < 0.14 ? 0 : ph < 0.5 ? ease((ph - 0.14) / 0.36) : ph < 0.6 ? 1 : 1 - ease((ph - 0.6) / 0.4), op = ph < 0.14 ? 1 - ph / 0.14 : ph < 0.5 ? 0 : ph < 0.6 ? (ph - 0.5) / 0.1 : 1;
+  craneArm(S(...F.pv), aH + (aL - aH) * sw, rH + (rL - rH) * sw, op, k, ph > 0.06 && ph < 0.56 ? n * 1.7 + 1 : 0); }
+// The warehouse: a long shed with a corrugated roof, a ridge and skylights; roll-up doors on its local +y side open at each payout.
+function warehouse(p, hw, hh, ang, nDoor, age, k) { const o = (x, y) => add(p, rot([x * k, y * k], ang)), op = age < 0.4 ? ease(age / 0.4) : age < 1.4 ? 1 : 1 - ease(Math.min(1, (age - 1.4) / 0.4));
+  fill(add(p, [2.5 * k, 3.5 * k]), rectPts(hw, hh), [0, 0, 0, 0.3], ang, k);
+  for (let i = 0; i < nDoor; i++) { const x = (i - (nDoor - 1) / 2) * (hw * 2 - 6) / nDoor, d = o(x, hh + 1.4); fill(d, rectPts(4.4, 2.4), CONC, ang, k); hazard(o(x, hh + 3.6), ang, k, -4, 4, 0, DOOR, 1); }
+  plate(p, rectPts(hw, hh), ROOF, ang, k, 1.5);
+  for (let x = -hw + 2.2; x < hw - 1; x += 2.2) line(o(x, -hh + 0.9), o(x, hh - 0.9), dk(ROOF, 0.2), 0.8 * k);
+  bar(o(-hw + 0.8, 0), o(hw - 0.8, 0), 1.8 * k, lt(ROOF, 0.12));
+  for (const x of [-hw * 0.5, hw * 0.5]) fill(o(x, -hh * 0.5), rectPts(2.8, 1.8), [0.7, 0.86, 0.96, 0.55], ang, k);
+  for (let i = 0; i < nDoor; i++) { const x = (i - (nDoor - 1) / 2) * (hw * 2 - 6) / nDoor, d = o(x, hh - 0.2); fill(d, rectPts(3.6, 1.3), mix(DOOR, [0.04, 0.04, 0.04, 1], op), ang, k); outline(d, rectPts(3.6, 1.3), OUTLINE, 1, ang, k);
+    if (op < 0.9) for (const j of [-0.5, 0.5]) line(o(x - 3.2, hh - 0.2 + j), o(x + 3.2, hh - 0.2 + j), A(dk(DOOR, 0.4), 1 - op), 0.7 * k); } }
+function crates(p, cols, rows, k) { for (let r = 0; r < rows; r++) for (let q = 0; q < cols; q++) { const c = add(p, [(q - (cols - 1) / 2) * 6.4 * k, (r - (rows - 1) / 2) * 6.4 * k]); plate(c, rectPts(2.9, 2.9), WOOD, 0, k, 1); line(add(c, [-2.2 * k, -2.2 * k]), add(c, [2.2 * k, 2.2 * k]), dk(WOOD, 0.35), 0.8 * k); } }
+function conveyor(a, b, t, k) { const d = norm(sub(b, a)), n = orth(d), L = distTo(a, b);
+  line(a, b, OUTLINE, 8 * k); line(a, b, METAL, 6.6 * k); line(a, b, [0.14, 0.13, 0.12, 1], 4.2 * k);
+  for (let j = 0; j < Math.floor(L / (3 * k)); j++) { const u = fmod(j * 3 * k / L + t * 0.35, 1), q = lerp(a, b, u); line(add(q, mul(n, 2 * k)), add(q, mul(n, -2 * k)), [0.42, 0.4, 0.37, 1], 0.9 * k); }
+  for (const e of [a, b]) { disc(e, 3.4 * k, OUTLINE); disc(e, 2.7 * k, METAL_L); disc(e, 1 * k, METAL_D); } }
+// The yard floor: a concrete slab with a copper edge; the junkyard sits on dirt patches.
+function yardFloor(c, k, col, t) { ellipse(add(c, [0, 8 * k]), 44 * k, 16 * k, [0, 0, 0, 0.3]); plate(c, rectPts(46, 46), lt(METAL_D, 0.04), 0, k, 1.3); fill(c, rectPts(44, 44), CONC, 0, k);
+  for (let i = -3; i <= 3; i++) { line(add(c, [i * 12 * k, -44 * k]), add(c, [i * 12 * k, 44 * k]), [0, 0, 0, 0.1], 0.8 * k); line(add(c, [-44 * k, i * 12 * k]), add(c, [44 * k, i * 12 * k]), [0, 0, 0, 0.1], 0.8 * k); }
+  outline(c, rectPts(44, 44), A(col, 0.4 + 0.15 * Math.sin(t * 2.2)), 1.3 * k, 0, k); }
+
+// ---- The payout agent (shared by the three animations): it pays every 4 s in the preview; cfg.extra runs every frame; W(u) maps units to the page.
+function scrapAgent(cfg) { return (m, t, info, s, col) => { if (!m.pays) { m.pays = []; m.last = t; }
+  if (t - m.last >= 4) { m.last = t; m.pays.push(t); } m.pays = m.pays.filter((q) => t - q < 1.6);
+  const P = info.look.parts || { junk: [0, 0], mouth: [0, 0], door: [0, 0] }, W = (u) => add(info.c, mul(u, s / 48));
+  if (cfg.extra) cfg.extra(m, t, info, s, col, P, W);
+  for (const q of m.pays) cfg.pay((t - q) / 1.6, s, col, P, W, info); }; }
+
+const TOWERS = [
+  { id: "scrap", num: 17, name: "Scrapyard", cls: "Utility", weapon: "None", hits: "none", size: 2, center: [0.3, 0.4], color: [0.95, 0.72, 0.42, 1],
+    desc: "Various collections of scrap metal sold at a profit. \"One mans toxic waste is another mans potpourri\" A 2x2 tower of three parts: a recycler/smelter (a tall furnace stack), a junkyard and a warehouse. It attacks nothing and pays 100 credits at each round's clear (the preview pays every 4 s). The three looks are the same parts in three layouts. Later, each path rebuilds one part: Passive Income the stack, Kill Income the junkyard, Discounts the warehouse. (Colour: today's Scrapyard copper.)",
+    looks: [
+      { key: "A", name: "Central Stack", muzzle: 0, fixed: true, parts: { junk: [-30, 4], mouth: [2, -6], door: [23, -6] },
+        theme: "The furnace stack stands in the middle of the yard, fed by two chutes from the junkyard that wraps the left and bottom edges (heaps, a tank hulk, a grab crane). A long warehouse runs down the right side, its roll-up doors facing the stack.",
+        draw(c, aim, s, fx, t, col) { const k = G(s), age = payAge(fx, t), S = (x, y) => add(c, [x * k, y * k]);
+          yardFloor(c, k, col, t); dirt(c, -44, -44, -18, 44, k, 3); dirt(c, -18, 20, 22, 44, k, 9);
+          scrapPile(S(-31, -30), 9, k, 1); scrapPile(S(-32, -4), 7, k, 7); scrapPile(S(10, 33), 7, k, 11); wreck(S(-8, 33), -0.1, k); crane(S(-31, 24), 17, -0.5, t, k);
+          warehouse(S(34, -6), 30, 9, Math.PI / 2, 3, age, k); crates(S(34, 36), 2, 1, k);
+          stack(S(2, -6), 16, [Math.PI * 0.97, Math.PI * 0.68], t, age, k); smoke(S(2, -6), 16, t, k); } },
+      { key: "B", name: "Production Line", muzzle: 0, fixed: true, parts: { junk: [-30, 0], mouth: [0, -8], door: [22, -8] },
+        theme: "Left to right: in the junkyard a grab crane lifts scrap off a heap and drops it on the foot of a conveyor; each piece rides up the belt and falls off the top into the furnace stack's glowing mouth. A short ingot belt runs from the stack into a tall warehouse on the right.",
+        draw(c, aim, s, fx, t, col) { const k = G(s), age = payAge(fx, t), S = (x, y) => add(c, [x * k, y * k]);
+          yardFloor(c, k, col, t); dirt(c, -44, -44, -15, 44, k, 5);
+          scrapPile(S(-31, -30), 8, k, 2); scrapPile(S(-33, 0), 9, k, 13); wreck(S(-32, 34), 0.05, k);
+          warehouse(S(33, 0), 40, 9.5, Math.PI / 2, 4, age, k); crates(S(4, 32), 2, 2, k);
+          conveyor(S(10, -8), S(23, -8), t, k);
+          stack(S(0, -8), 14, [], t, age, k);
+          feedLine(S, k, t);                                                                                        // round 3 (owner): crane -> belt -> furnace, all drawn over the stack
+          smoke(S(0, -8), 14, t, k); } },
+      { key: "C", name: "Yard Corner", muzzle: 0, fixed: true, parts: { junk: [10, 18], mouth: [-29, -29], door: [14, -22] },
+        theme: "The warehouse runs along the top edge with its doors facing down, and the furnace stack stands in the top-left corner, fed by chutes from the open junkyard that fills the bottom-right (heaps, a tank hulk, a big grab crane).",
+        draw(c, aim, s, fx, t, col) { const k = G(s), age = payAge(fx, t), S = (x, y) => add(c, [x * k, y * k]);
+          yardFloor(c, k, col, t); dirt(c, -12, -14, 44, 44, k, 4); dirt(c, -44, 10, -12, 44, k, 8);
+          scrapPile(S(-30, 30), 9, k, 3); scrapPile(S(34, 4), 7, k, 17); scrapPile(S(30, 34), 8, k, 21); wreck(S(4, 8), 0.3, k); crane(S(10, 30), 21, Math.PI * 1.1, t, k);
+          warehouse(S(14, -34), 30, 9.5, 0, 4, age, k); crates(S(-34, -2), 2, 1, k);
+          stack(S(-29, -29), 14, [Math.PI * 0.25, Math.PI * 0.55], t, age, k); smoke(S(-29, -29), 14, t, k); } },
+    ],
+    anims: [
+      { key: "A", name: "Scrap Flow", desc: "Scrap bits arc from the junkyard into the stack and ingots slide from the stack to the warehouse, all the time; at each round's clear the warehouse doors roll up, a crate ships out and +100 rises.", period: 1, flight: 1, fx: () => ({}),
+        persist: scrapAgent({ extra: (m, t, info, s, col, P, W) => { const k = s / 48;
+            for (let i = 0; i < 3; i++) { const u = fmod(t * 0.45 + i / 3, 1), p = add(lerp(W(P.junk), W(P.mouth), u), [0, -Math.sin(Math.PI * u) * s * 0.3]), al = u > 0.85 ? (1 - u) / 0.15 : 1; disc(p, 2.4 * k + 1, A(OUTLINE, al)); disc(p, 2.4 * k, A(mix(RUST, METAL_L, 0.3 + 0.3 * rnd(i)), al)); }
+            for (let i = 0; i < 2; i++) { const u = fmod(t * 0.5 + i / 2, 1), p = lerp(W(P.mouth), W(P.door), u), al = Math.min(1, u * 5, (1 - u) * 5); fill(p, rectPts(2.4, 1.3), A(GOLDC, al), 0, k); outline(p, rectPts(2.4, 1.3), A(OUTLINE, al), 1, 0, k); } },
+          pay: (v, s, col, P, W) => { const k = s / 48, D = W(P.door), dir = norm(sub(W(P.mouth), D)), p = add(D, mul(dir, s * 0.3 * ease(Math.min(1, v * 2)))), al = Math.min(1, 2 - v * 2);
+            plate(p, rectPts(3.4, 3.4), A(WOOD, al), 0, k, 1); glowDot(p, 1.2 * k, A(GOLDC, al)); txt(add(p, [0, -s * 0.3 - v * s * 0.5]), "+100", A(GOLDC, al), Math.max(11, s * 0.2)); } }) },
+      { key: "B", name: "Melt and Pour", desc: "Embers rise from the stack's mouth all the time; at each round's clear its core flares white-hot and a fountain of coins vents from it with +100.", period: 1, flight: 1, fx: () => ({}),
+        persist: scrapAgent({ extra: (m, t, info, s, col, P, W) => { const M = W(P.mouth); for (let i = 0; i < 8; i++) { const q = t * 0.9 + i / 8, u = fmod(q, 1), dx = (rnd(Math.floor(q) * 7 + i) - 0.5) * s * 0.35; disc(add(M, [dx * u, -u * s * 0.55]), 1.4 * (1 - u) + 0.3, [1, 0.7, 0.3, 1 - u]); } },
+          pay: (v, s, col, P, W) => { const M = W(P.mouth); if (v < 0.25) glowDot(M, s * 0.22 * (1 - v / 0.25), HOTM); coinPop(M, v, s); } }) },
+      { key: "C", name: "Wreck to Coin", desc: "Shows the kill bonus too: an enemy wrecked near the yard bursts, its hulk flies into the junkyard, and a coin with +5 jumps out of the stack; the round payout pops +100 over the warehouse.", period: 1, flight: 1, fx: () => ({}),
+        persist: scrapAgent({ extra: (m, t, info, s, col, P, W) => { const near = info.all.filter((e) => !e.air && distTo(e.p, info.c) < s * 3.1);
+            if (near.length && (!m.kill || t - m.kill.t0 > 2)) { const e = near[Math.floor(rnd(Math.floor(t)) * near.length)]; m.kill = { t0: t, p: e.p.slice() }; }
+            if (m.kill) { const v = (t - m.kill.t0) / 0.9, J = W(P.junk), M = W(P.mouth);
+              if (v < 0.33) blast(m.kill.p, v / 0.33, s, col, 0.25);
+              if (v < 1) { const p = add(lerp(m.kill.p, J, v), [0, -Math.sin(Math.PI * v) * s * 0.5]); fill(p, rectPts(3.2, 2), mix(RUST, METAL, 0.3), v * 6, s / 48); outline(p, rectPts(3.2, 2), OUTLINE, 1, v * 6, s / 48); }
+              const w = (t - m.kill.t0 - 0.9) / 0.9; if (w > 0 && w < 1) { const p = add(M, [w * s * 0.15, -Math.sin(Math.PI * Math.min(1, w * 1.2)) * s * 0.45]); disc(p, s * 0.05 + 1, A(OUTLINE, 1 - w * 0.5)); disc(p, s * 0.05, A(GOLDC, 1 - w * 0.5)); txt(add(p, [0, -s * 0.12]), "+5", A(GOLDC, 1 - w), Math.max(9, s * 0.15)); } } },
+          pay: (v, s, col, P, W) => coinPop(W(P.door), v, s) }) },
+    ] },
+];
+// Round 3 (owner): "Move the crane to where it can move scrap to the conveyer belt where it can be fall off the conveyer belt into the furnace".
+// Round 2 (owner, 2026-10-19): look B Production Line, animation B Melt and Pour; note "Make sure the crane bar is over top of the smelter" (the crane is now drawn after the stack).
+TOWERS[0].looks = TOWERS[0].looks.filter((l) => l.key === "B"); TOWERS[0].anims = TOWERS[0].anims.filter((a) => a.key === "B");
+const DEFAULTS = { scrap: { look: "B", anim: "B" } };
+
+return { TOWERS };
+})();
+const NO_BOOT = true;
+// ---- Tower art second pass: Scrapyard (tower 17), round 1, on the confirmed Production Line base (owner, 2026-10-19) ---------------------------------------------
+// Base: look B Production Line, animation B Melt and Pour (tools/tower_art/data_scrap_parts.js). The tower is three parts, and each path rebuilds one of them
+// around the machine its step names (the owner's names, 2026-10-19):
+//  - Path 1, Passive Income: the furnace stack (Firebrick Lining, Forced Bellows, Blast Furnace, Arc Furnace, Gold Foundry).
+//  - Path 2, Kill Income: the junkyard (Tow Hook, Magnet Crane, Hydraulic Shear, Car Crusher, Breaker's Yard); the orange kill ring widens.
+//  - Path 3, Discounts: the warehouse (Parts Shelves, Pallet Racks, Forklift Bay, Loading Dock, Parts Exchange); the blue discount ring widens.
+// Every step rebuilds its part big and visibly (the owner: the old upgrades were too subtle); earlier picks carry as details; masteries are gold.
+// Overlaps kept and stacking (the carpet rule): the Second Crusher's +30 with the Passive Income path, the Bigger Yard's +30 px with both field radii.
+const PAGE = { title: "Scrapyard (production line): paths and Retrofits (second pass)", store: "bl-tower-art-p2-scrap-pl1" };
+const GOLD = [1, 0.78, 0.3, 1], RUST = [0.45, 0.3, 0.2, 1], BRICK = [0.55, 0.27, 0.2, 1], MOLTEN = [1, 0.55, 0.15, 1], HOTM = [1, 0.85, 0.45, 1], STEEL = [0.42, 0.45, 0.5, 1];
+const WOOD = [0.6, 0.43, 0.24, 1], DIRT = [0.27, 0.23, 0.19, 1], CONC = [0.29, 0.29, 0.3, 1], ROOF = [0.44, 0.47, 0.5, 1], DOOR = [0.8, 0.58, 0.2, 1], CRANE = [0.92, 0.7, 0.2, 1];
+const KILL = [1, 0.5, 0.2, 1], DISCC = [0.45, 0.82, 0.95, 1], ARCC = [0.72, 0.88, 1, 1], CERAM = [0.8, 0.72, 0.6, 1], LOADS = [[0.35, 0.55, 0.8, 1], [0.4, 0.65, 0.4, 1], [0.75, 0.45, 0.3, 1], [0.85, 0.7, 0.3, 1]];
+const rnd = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
+const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+const INCOME = [100, 130, 165, 220, 270, 320], KILLPX = [0, 140, 150, 170, 190, 210], DISCPX = [0, 140, 150, 160, 175, 190], KBONUS = [0, 0.15, 0.25, 0.35, 0.45, 0.6], DOFF = ["", "-5%", "-10%", "-15%", "-20%", "-25%"];
+const incomeOf = (B) => INCOME[B.lv[0]] + (B.r === 0 ? 30 : 0);
+const killR = (B) => KILLPX[B.lv[1]] + (B.r === 1 && B.lv[1] > 0 ? 30 : 0), discR = (B) => DISCPX[B.lv[2]] + (B.r === 1 && B.lv[2] > 0 ? 30 : 0);
+const gl = (col, g, u) => (g ? mix(col, GOLD, u ?? 0.75) : col);
+const pick = (B, path, L) => (i) => (L > i ? B.key("p" + path + "s" + i) : null);   // the option picked at step i of a path, or null if not bought
+const STACKR = [14, 14.5, 15, 16, 16.5, 17];
+
+// ---- Shared drawing (copies of the base's helpers; a pass-2 file can't see the base's scope) ------------------------------------------------------------------------
+function txt(p, str, col, px) { X.save(); X.font = "bold " + Math.round(px) + "px sans-serif"; X.textAlign = "center"; X.fillStyle = css(OUTLINE); X.fillText(str, p[0] + 1, p[1] + 1); X.fillStyle = css(col); X.fillText(str, p[0], p[1]); X.restore(); }
+function scrapPile(p, r, k, seed, g) { const pts = [], body = gl(mix(RUST, METAL, 0.4), g, 0.55); for (let i = 0; i < 9; i++) { const a = i * TAU / 9; pts.push([Math.cos(a) * r * (0.65 + 0.35 * rnd(seed + i)), Math.sin(a) * r * (0.65 + 0.35 * rnd(seed + i + 20))]); }
+  ellipse(add(p, [k * 1.5, k * 2.5]), r * k, r * k * 0.5, [0, 0, 0, 0.3]); solid(p, pts, body, 0, k, 1);
+  for (let i = 0; i < 5; i++) { const q = add(p, [(rnd(seed + i * 3) - 0.5) * r * k * 1.1, (rnd(seed + i * 5) - 0.5) * r * k * 0.9]); line(q, add(q, mul(fa(rnd(seed + i) * TAU), r * k * 0.35)), g ? (i % 2 ? HOTM : GOLD) : i % 2 ? METAL_L : RUST, 1.4 * k); } }
+function wreck(p, ang, k, sq = 1) { const kk = k * sq, o = (x, y) => add(p, rot([x * kk, y * kk], ang)), body = dk(mix(RUST, METAL, 0.3), Math.min(0.5, (sq - 1) * 3));
+  for (const sg of [-1, 1]) plate(o(0, sg * 7.4), rectPts(12, 2), [0.13, 0.12, 0.12, 1], ang, kk, 1);
+  plate(p, rectPts(11, 6), body, ang, kk, 1.3); disc(o(-2, 0), 3.8 * kk, OUTLINE); disc(o(-2, 0), 3.1 * kk, [0.05, 0.05, 0.05, 1]); ring(o(-2, 0), 3.5 * kk, RUST, 1.2 * kk);
+  line(o(5, -3.5), o(9, 1), [0.3, 0.14, 0.1, 1], 1.2 * kk); line(o(4, 1), o(7, 4.5), [0.3, 0.14, 0.1, 1], 1.2 * kk); }
+function crates(p, cols, rows, k, g) { const w = gl(WOOD, g, 0.6); for (let r = 0; r < rows; r++) for (let q = 0; q < cols; q++) { const c = add(p, [(q - (cols - 1) / 2) * 6.4 * k, (r - (rows - 1) / 2) * 6.4 * k]); plate(c, rectPts(2.9, 2.9), w, 0, k, 1); line(add(c, [-2.2 * k, -2.2 * k]), add(c, [2.2 * k, 2.2 * k]), dk(w, 0.35), 0.8 * k); } }
+function conveyor(a, b, t, k, g) { const d = norm(sub(b, a)), n = orth(d), L = dist(a, b);
+  line(a, b, OUTLINE, 8 * k); line(a, b, g ? dk(GOLD, 0.15) : METAL, 6.6 * k); line(a, b, [0.14, 0.13, 0.12, 1], 4.2 * k);
+  for (let j = 0; j < Math.floor(L / (3 * k)); j++) { const u = fmod(j * 3 * k / L + t * 0.35, 1), q = lerp(a, b, u); line(add(q, mul(n, 2 * k)), add(q, mul(n, -2 * k)), [0.42, 0.4, 0.37, 1], 0.9 * k); }
+  for (const e of [a, b]) { disc(e, 3.4 * k, OUTLINE); disc(e, 2.7 * k, g ? GOLD : METAL_L); disc(e, 1 * k, METAL_D); } }
+function chunk(p, sc, seed, k, col, cube) { const c2 = col || mix([0.72, 0.46, 0.3, 1], METAL_L, 0.2 + 0.4 * rnd(seed));
+  if (cube) { plate(p, rectPts(2.5, 2.5), c2, seed * 0.2, k * sc, 1); line(add(p, [-1.6 * k * sc, 0]), add(p, [1.6 * k * sc, 0]), A(OUTLINE, 0.4), 0.7 * k); return; }
+  const pts = []; for (let i = 0; i < 6; i++) { const a = i * TAU / 6; pts.push([Math.cos(a) * 3.1 * (0.7 + 0.3 * rnd(seed + i)), Math.sin(a) * 3.1 * (0.7 + 0.3 * rnd(seed + i + 9))]); }
+  fill(p, pts, c2, seed, k * sc); outline(p, pts, OUTLINE, 1.2, seed, k * sc); line(add(p, mul(fa(seed), -1.2 * k * sc)), add(p, mul(fa(seed), 1.2 * k * sc)), [1, 1, 1, 0.35], 0.9 * k * sc); }
+function yardFloor(c, k, col, t) { ellipse(add(c, [0, 8 * k]), 44 * k, 16 * k, [0, 0, 0, 0.3]); plate(c, rectPts(46, 46), lt(METAL_D, 0.04), 0, k, 1.3); fill(c, rectPts(44, 44), CONC, 0, k);
+  for (let i = -3; i <= 3; i++) { line(add(c, [i * 12 * k, -44 * k]), add(c, [i * 12 * k, 44 * k]), [0, 0, 0, 0.1], 0.8 * k); line(add(c, [-44 * k, i * 12 * k]), add(c, [44 * k, i * 12 * k]), [0, 0, 0, 0.1], 0.8 * k); }
+  outline(c, rectPts(44, 44), A(col, 0.4 + 0.15 * Math.sin(t * 2.2)), 1.3 * k, 0, k); }
+function dirt(c, x0, y0, x1, y1, k, seed) { fill(add(c, [(x0 + x1) / 2 * k, (y0 + y1) / 2 * k]), rectPts((x1 - x0) / 2, (y1 - y0) / 2), DIRT, 0, k);
+  for (let i = 0; i < 14; i++) disc(add(c, [(x0 + (x1 - x0) * rnd(seed + i)) * k, (y0 + (y1 - y0) * rnd(seed + i + 40)) * k]), (0.5 + rnd(seed + i + 80)) * k, [0.2, 0.17, 0.14, 1]); }
+function smoke(p, R, t, k, n) { for (let i = 0; i < n; i++) { const u = fmod(t * 0.32 + i / n, 1); disc(add(p, [(R * 0.2 + u * 14) * k, -(R * 0.15 + u * 24) * k]), (2 + u * 6) * k, A([0.5, 0.48, 0.46, 1], 0.42 * (1 - u))); } }
+function truck(p, ang, k, col, len) { const o = (x, y) => add(p, rot([x * k, y * k], ang)); fill(add(p, [1.5 * k, 2 * k]), [[-len - 2, -3.8], [len + 4, -3.8], [len + 4, 3.8], [-len - 2, 3.8]], [0, 0, 0, 0.28], ang, k);
+  plate(o(-2, 0), rectPts(len, 3.6), col, ang, k, 1.2); for (let j = 1; j < 4; j++) line(o(-2 - len + j * len * 0.5, -3.2), o(-2 - len + j * len * 0.5, 3.2), A(OUTLINE, 0.35), 0.7 * k);
+  plate(o(len + 1.4, 0), rectPts(2.4, 3.2), dk(col, 0.12), ang, k, 1.2); fill(o(len + 2.6, 0), rectPts(0.8, 2.4), [0.55, 0.75, 0.9, 0.85], ang, k); }
+function forklift(p, ang, k, col, load) { const o = (x, y) => add(p, rot([x * k, y * k], ang)); plate(p, rectPts(2.2, 1.6), col, ang, k, 1); disc(o(-0.8, 0), 0.8 * k, OUTLINE); line(o(2.2, -1.5), o(2.2, 1.5), METAL_D, 0.9 * k);
+  for (const y of [-0.8, 0.8]) line(o(2.2, y), o(4.4, y), METAL_L, 0.7 * k); if (load) plate(o(3.4, 0), rectPts(1.4, 1.4), load, ang, k, 0.9); }
+function zap(a, b, seed, w, t, k) { const pts = [a], n = orth(norm(sub(b, a))); for (let j = 1; j < 5; j++) pts.push(add(lerp(a, b, j / 5), mul(n, (rnd(seed + j + Math.floor(t * 14) * 3.1) - 0.5) * 2.2 * k))); pts.push(b); polyline(pts, A(ARCC, 0.35), w * 2.6); polyline(pts, [0.95, 0.98, 1, 1], w); }
+
+// ---- Path 1: the furnace stack, rebuilt around each step's machine; returns where the belt's scrap falls in (the lid's charging hole, or the mouth) ------------
+function stackModel(S, B, t, age, k) {
+  const L = B.lv[0], g = L >= 5, K = pick(B, 0, L), K1 = K(0), K2 = K(1), K3 = K(2), K4 = K(3), K5 = K(4);
+  const p = S(0, -8), P = (x, y) => add(p, [x * k, y * k]), R = STACKR[L], pay = decay(age, 1.4), fl = 0.5 + 0.5 * Math.sin(t * 6.3) * Math.sin(t * 2.1 + 1);
+  const shell = gl(BRICK, g, 0.55), band = g ? GOLD : METAL, bandL = g ? lt(GOLD, 0.25) : METAL_L, steel = gl(STEEL, g, 0.7), dark = g ? dk(GOLD, 0.55) : METAL_D, melt = g ? mix(MOLTEN, GOLD, 0.6) : MOLTEN, tall = L >= 3 ? 1.35 : 1;
+  disc(add(p, [R * 0.5 * tall * k, R * 0.6 * tall * k]), R * 1.05 * k, [0, 0, 0, 0.32]);                                   // the tallest part: the longest shadow (longer once it's a blast furnace)
+  // ---- step 3, the Blast Furnace: what stands around it (two hot-blast stoves, a skip hoist, or a steel frame with a downcomer)
+  if (K3 === "A") for (const sx of [-1, 1]) { const q = P(sx * 10, -27), r = 6.2; bar(q, P(sx * 4, -R + 2), 2.6 * k, steel); disc(add(q, [2 * k, 2.6 * k]), r * k, [0, 0, 0, 0.3]); disc(q, (r + 1.2) * k, OUTLINE); disc(q, r * k, steel); disc(add(q, [-1.2 * k, -1.2 * k]), r * 0.62 * k, lt(steel, 0.18)); ring(q, r * 0.8 * k, bandL, 1.1 * k); glowDot(q, 0.8 * k, A(melt, 0.6 + 0.4 * fl)); }
+  if (K3 === "B") { const a = P(9, 30), b = P(2, R * 0.2), d = norm(sub(b, a)), n = orth(d), len = dist(a, b);
+    for (const sg of [-1, 1]) { line(add(a, mul(n, sg * 2.2 * k)), add(b, mul(n, sg * 2.2 * k)), OUTLINE, 2 * k); line(add(a, mul(n, sg * 2.2 * k)), add(b, mul(n, sg * 2.2 * k)), steel, 1.1 * k); }
+    for (let j = 1; j < len / (3 * k); j++) { const q = lerp(a, b, j * 3 * k / len); line(add(q, mul(n, -2.2 * k)), add(q, mul(n, 2.2 * k)), dark, 0.8 * k); }
+    plate(lerp(a, b, (0.5 - 0.5 * Math.cos(t * 0.9)) * 0.82), rectPts(2.2, 1.8), gl(CRANE, g, 0.5), Math.atan2(d[1], d[0]), k, 1); }
+  if (K3 === "C") { const F = R + 3.4, cs = [[-F, -F], [F, -F], [F, F], [-F, F]]; for (let i = 0; i < 4; i++) bar(P(...cs[i]), P(...cs[(i + 1) % 4]), 2.2 * k, steel); for (const q of cs) plate(P(...q), rectPts(2.4, 2.4), dark, 0, k, 1.1);
+    bar(P(3, -R + 3), P(4, -R - 10), 3.2 * k, steel); const dc = P(4, -R - 12); disc(dc, 5 * k, OUTLINE); disc(dc, 4.2 * k, steel); ring(dc, 2.6 * k, bandL, 1 * k); disc(dc, 1.4 * k, dark); }
+  // ---- step 2, the Forced Bellows: its air supply (twin bellows, a side blower or a bustle-pipe ring), bigger once it's a blast furnace
+  const bs = L >= 3 ? 1.25 : 1;
+  if (K2 === "A") [-2.6, -0.5].forEach((a, i) => { const q = add(p, mul(fa(a), (R + 6 * bs) * k)), sq = 0.6 + 0.4 * (0.5 + 0.5 * Math.sin(t * 3 + i * Math.PI)), d = a + Math.PI, o = (x, y) => add(q, rot([x * k * bs, y * k * bs], d)), lc = gl([0.5, 0.32, 0.2, 1], g, 0.5);
+      bar(o(2, 0), add(p, mul(fa(a), (R - 1) * k)), 1.6 * k, steel); fill(q, [[-5, -4 * sq], [2, -1.3], [2, 1.3], [-5, 4 * sq]], lc, d, k * bs); outline(q, [[-5, -4 * sq], [2, -1.3], [2, 1.3], [-5, 4 * sq]], OUTLINE, 1.2, d, k * bs);
+      for (const x of [-3.4, -1.8, -0.2]) { const h = 1.3 + (4 * sq - 1.3) * (2 - x) / 7; line(o(x, -h), o(x, h), dk(lc, 0.35), 0.8 * k); } plate(o(-5.6, 0), rectPts(0.8, 4.2 * sq), gl(WOOD, g, 0.5), d, k * bs, 1); });
+  if (K2 === "B") { const a = -0.75, q = add(p, mul(fa(a), (R + 7 * bs) * k)), r = 5.2 * bs; bar(q, add(p, mul(fa(a), (R - 1) * k)), 3 * k, steel); disc(q, (r + 1.2) * k, OUTLINE); disc(q, r * k, dark);
+    for (let j = 0; j < 5; j++) fill(q, [[0.6, -0.5], [r * 0.9, -1.4], [r * 0.9, 1.4], [0.6, 0.5]], bandL, t * 14 + j * TAU / 5, k); disc(q, 1.4 * k, steel); ring(q, r * k, band, 1.2 * k); }
+  if (K2 === "C") { const rr = R + 3 + (bs - 1) * 4; bar(add(p, mul(fa(-0.75), rr * k)), add(p, mul(fa(-0.75), (rr + 9) * k)), 3.2 * k, steel);
+    for (let j = 0; j < 8; j++) { const a = j * TAU / 8 + 0.2; bar(add(p, mul(fa(a), rr * k)), add(p, mul(fa(a), (R - 0.5) * k)), 1.5 * k, steel); } ring(p, rr * k, OUTLINE, 4.6 * k); ring(p, rr * k, steel, 3.2 * k); ring(p, rr * k, lt(steel, 0.2), 0.9 * k); }
+  // ---- the stack; step 1, the Firebrick Lining, sets its shell (a thick glowing brick shell, hex refractory tiles, or a double wall with glowing slits)
+  disc(p, (R + 1.6) * k, OUTLINE); disc(p, R * k, K1 === "B" ? gl(CERAM, g, 0.5) : shell);
+  if (!K1) for (let i = 0; i < 26; i++) { const a = i * TAU / 26; line(add(p, mul(fa(a), R * 0.8 * k)), add(p, mul(fa(a), R * k)), [0.32, 0.15, 0.1, 1], 1 * k); }
+  if (K1 === "A") { ring(p, R * 0.82 * k, A(melt, 0.25 + 0.3 * fl), 0.9 * k); for (let c2 = 0; c2 < 2; c2++) { const r0 = c2 ? 0.82 : 0.66, r1 = c2 ? 1 : 0.82, n = c2 ? 34 : 28; for (let i = 0; i < n; i++) { const a = (i + 0.5 * c2) * TAU / n; line(add(p, mul(fa(a), R * r0 * k)), add(p, mul(fa(a), R * r1 * k)), A(melt, 0.35 + 0.35 * fl), 0.8 * k); } } }
+  if (K1 === "B") for (const [rf, n] of [[0.9, 26], [0.75, 21]]) for (let i = 0; i < n; i++) { const a = i * TAU / n + rf; outline(add(p, mul(fa(a), R * rf * k)), ngon(6, 1.55, a), dk(CERAM, 0.35), 0.9 * k, 0, k); }
+  if (K1 === "C") { ring(p, (R - 1.4) * k, steel, 2.6 * k); ring(p, R * 0.78 * k, [0.07, 0.05, 0.04, 1], 2.4 * k); for (let i = 0; i < 8; i++) { const a = i * TAU / 8 + 0.2; arc(p, R * 0.78 * k, a, a + 0.3, A(HOTM, 0.55 + 0.4 * fl), 1.3 * k); } }
+  ring(p, (R - 0.7) * k, band, 1.8 * k);
+  const inR = K1 ? 0.66 : 0.8; disc(p, R * inR * k, lt(K1 === "B" ? gl(CERAM, g, 0.5) : shell, 0.1)); ring(p, R * inR * k, bandL, 1.6 * k); for (let i = 0; i < 8; i++) disc(add(p, mul(fa(i * TAU / 8 + 0.2), R * inR * k)), 0.8 * k, lt(bandL, 0.15));
+  // ---- step 4, the Arc Furnace: the top is rebuilt (a domed lid with three electrodes, a tilting vessel under electrode arms, or a ring of electrodes round a plasma core)
+  let hole = null;
+  if (K4 === "A") { const lr = R * 0.64, hd = norm(sub([-24, 20], [0, -8])); hole = [hd[0] * R * 0.42, -8 + hd[1] * R * 0.42];
+    ring(p, (lr + 0.6) * k, A(melt, 0.45 + 0.35 * fl), 2 * k); disc(p, (lr + 0.2) * k, OUTLINE); disc(p, lr * k, steel); disc(add(p, [-lr * 0.18 * k, -lr * 0.18 * k]), lr * 0.62 * k, lt(steel, 0.12)); ring(p, lr * 0.8 * k, band, 1.1 * k);
+    disc(S(...hole), 2.6 * k, OUTLINE); disc(S(...hole), 2.1 * k, mix([0.35, 0.08, 0.03, 1], melt, 0.5 + 0.3 * fl));
+    const es = [0, 1, 2].map((i) => add(p, mul(fa(-Math.PI / 2 + i * TAU / 3), R * 0.26 * k))); for (let i = 0; i < 3; i++) if (rnd(i + Math.floor(t * 12) * 1.7) > 0.3) zap(es[i], es[(i + 1) % 3], i * 7, 0.9 * k, t, k);
+    for (const e of es) { disc(e, 2.3 * k, OUTLINE); disc(e, 1.9 * k, g ? dk(GOLD, 0.3) : [0.24, 0.24, 0.26, 1]); disc(add(e, [-0.5 * k, -0.5 * k]), 0.7 * k, [1, 1, 1, 0.35]); glowDot(e, (0.6 + 0.4 * fl) * k, ARCC); } }
+  else if (K4 === "B") { const vc = P(Math.sin(t * 0.6) * 1.4, 0); disc(p, R * 0.66 * k, dark); oval(vc, R * 0.62 * k, R * 0.54 * k, 0, gl(STEEL, g, 0.6), 1.4); oval(vc, R * 0.46 * k, R * 0.4 * k, 0, mix([0.35, 0.08, 0.03, 1], melt, 0.55 + 0.3 * fl + 0.2 * pay), 0); glowDot(vc, (1.6 + 1.6 * pay) * k, HOTM);
+    const mast = P(-R - 4, R * 0.35); plate(mast, rectPts(2.4, 2.4), dark, 0, k, 1.2); const es = [-1, 0, 1].map((i) => add(vc, mul(fa(Math.PI + i * 0.9), R * 0.24 * k)));
+    es.forEach((e, i) => { polyline([mast, add(lerp(mast, e, 0.5), [0, 3 * k]), e], A(OUTLINE, 0.8), 1.4 * k); bar(mast, e, 1.4 * k, steel); disc(e, 1.9 * k, OUTLINE); disc(e, 1.5 * k, g ? dk(GOLD, 0.3) : [0.24, 0.24, 0.26, 1]); if (rnd(i + Math.floor(t * 12) * 2.3) > 0.35) zap(e, add(e, [(rnd(i + Math.floor(t * 9)) - 0.5) * 6 * k, 3 * k]), i * 11, 0.8 * k, t, k); }); }
+  else if (K4 === "C") { disc(p, R * 0.63 * k, dark); ring(p, R * 0.63 * k, OUTLINE, 1.2 * k); const pc = R * (0.3 + 0.04 * fl + 0.06 * pay); disc(p, pc * 1.5 * k, A(ARCC, 0.25)); disc(p, pc * k, mix(ARCC, [1, 1, 1, 1], 0.5 + 0.3 * fl)); glowDot(p, (1.8 + 1.5 * pay) * k, [1, 1, 1, 1]);
+    for (let i = 0; i < 6; i++) { const e = add(p, mul(fa(i * TAU / 6 + 0.3), R * 0.52 * k)); if (rnd(i + Math.floor(t * 13) * 1.9) > 0.3) zap(e, p, i * 5, 0.8 * k, t, k); disc(e, 1.9 * k, OUTLINE); disc(e, 1.5 * k, g ? dk(GOLD, 0.3) : [0.24, 0.24, 0.26, 1]); } }
+  else { disc(p, R * 0.63 * k, dark); ring(p, R * 0.63 * k, OUTLINE, 1.2 * k); disc(p, R * 0.5 * k, mix([0.35, 0.08, 0.03, 1], melt, 0.45 + 0.3 * fl + 0.25 * pay)); ring(p, R * 0.56 * k, A(melt, 0.25 + 0.2 * fl + 0.4 * pay), 2 * k);
+    disc(p, R * (0.24 + 0.05 * fl + 0.1 * pay) * k, A(HOTM, 0.9)); glowDot(p, (2 + 2.2 * pay) * k, HOTM);
+    if (K3 === "B") { ring(p, R * 0.56 * k, OUTLINE, 3 * k); ring(p, R * 0.56 * k, steel, 1.8 * k); for (let i = 0; i < 4; i++) bar(add(p, mul(fa(i * Math.PI / 2 + 0.4), R * 0.56 * k)), add(p, mul(fa(i * Math.PI / 2 + 0.4), R * 0.66 * k)), 1.2 * k, steel); } }   // the charging bell's rim
+  // ---- the mastery, Gold Foundry: everything above is gold; option A adds glints running round the rim (B and C are drawn by foundryExtra)
+  if (g) { ring(p, (R + 0.4) * k, A(GOLD, 0.9), 1.2 * k); if (K5 === "A") { const a = t * 1.3; arc(p, R * k, a, a + 0.7, [1, 1, 0.85, 0.9], 1.6 * k); arc(p, R * 0.63 * k, -a, -a + 0.5, [1, 1, 0.85, 0.8], 1.2 * k); } }
+  return hole; }
+function foundryExtra(S, B, t, k) { if (B.lv[0] < 5) return; const K5 = B.key("p0s4");
+  if (K5 === "B") { const q = S(14, 10), r = 5.4, tap = S(10.4, 5.4); disc(add(q, [1.5 * k, 2 * k]), (r + 1) * k, [0, 0, 0, 0.3]); disc(q, (r + 1.2) * k, OUTLINE); disc(q, r * k, dk(GOLD, 0.35));
+    for (let i = 0; i < 8; i++) { const a = t * 0.6 + i * TAU / 8, m = add(q, mul(fa(a), r * 0.7 * k)); fill(m, rectPts(1.5, 0.9), i % 3 ? GOLD : HOTM, a + Math.PI / 2, k); outline(m, rectPts(1.5, 0.9), OUTLINE, 0.8, a + Math.PI / 2, k); }
+    disc(q, 1.6 * k, GOLD); line(tap, add(q, mul(norm(sub(tap, q)), r * 0.7 * k)), A(HOTM, 0.9), 1.4 * k); }
+  if (K5 === "C") { const pv = S(22, -20), bk = S(17, -14), on = 0.5 + 0.5 * Math.sin(t * 1.2); bar(pv, bk, 1.6 * k, GOLD); disc(pv, 1.4 * k, dk(GOLD, 0.3)); disc(bk, 3 * k, OUTLINE); disc(bk, 2.6 * k, dk(GOLD, 0.2)); disc(bk, 1.7 * k, mix(GOLD, HOTM, 0.5));
+    line(add(bk, [0, 1.6 * k]), S(17, -8.6), A(HOTM, 0.5 + 0.5 * on), (0.8 + 0.8 * on) * k); glowDot(S(17, -8.6), (0.6 + 0.6 * on) * k, HOTM); } }
+
+// ---- Path 2: the junkyard's ground (the heaps, the hauled-in wreck, the shears and the press); the crane is in the feed line ------------------------------------------
+function junkGround(S, B, t, k) {
+  const L = B.lv[1], g = L >= 5, K = pick(B, 1, L), K1 = K(0), K3 = K(2), K4 = K(3), K5 = K(4), steel = gl(STEEL, g, 0.7), dark = g ? dk(GOLD, 0.55) : METAL_D, yel = gl(CRANE, g, 0.6);
+  if (g && K5 === "C") { const pts = [S(-44.5, -44.5), S(-14.5, -44.5), S(-14.5, 44.5), S(-44.5, 44.5)]; for (let i = 0; i < 4; i++) { const a = pts[i], b = pts[(i + 1) % 4], n = Math.round(dist(a, b) / (3 * k)); for (let j = 0; j < n; j += 2) line(lerp(a, b, j / n), lerp(a, b, (j + 1) / n), GOLD, 1.4 * k); } }
+  scrapPile(S(-31, -30), 8, k, 2, g && K5 === "B"); scrapPile(S(-33, 0), 9, k, 13, g && K5 === "B");
+  // ---- step 1, the Tow Hook: the wreck is hauled in (by a tow truck, a winch post or a hook-and-chain gantry); step 4's flat press crushes it where it lies
+  const hc = fmod(t / 6, 1), haul = hc < 0.7 ? ease(hc / 0.7) : 1 - ease((hc - 0.7) / 0.3), wy = 34; let wx = -32, lift = 0;
+  if (K1 === "A") wx = -36 + 5 * haul; if (K1 === "B") wx = -34 + 4 * haul; if (K1 === "C") lift = Math.max(0, Math.sin(t * 0.8)); if (K4 === "A") wx = -30;
+  let sq = 1; if (K4 === "A") { const pc = fmod(t / 3, 1); sq = 1 + 0.14 * (pc < 0.3 ? ease(pc / 0.3) : pc < 0.7 ? 1 : 1 - ease((pc - 0.7) / 0.3)); }
+  ellipse(add(S(wx, wy), [(1.5 + 4 * lift) * k, (2.5 + 4 * lift) * k]), 13 * k, 7 * k, [0, 0, 0, 0.3]);
+  if (K1 === "A") { truck(S(-9, 40), 0, k, yel, 3.5); bar(S(-14.5, 40), S(-17.5, 40), 1.4 * k, steel); line(S(-17.5, 40), S(wx + 11, wy), METAL_L, 0.9 * k); }
+  if (K1 === "B") { const wp = S(-41, 25); line(wp, S(wx - 10, wy - 2), METAL_L, 0.9 * k); disc(wp, 3 * k, OUTLINE); disc(wp, 2.5 * k, dark); for (let j = 0; j < 4; j++) line(wp, add(wp, mul(fa(t * 4 * (hc < 0.7 ? 1 : -1) + j * Math.PI / 2), 2.3 * k)), yel, 0.9 * k); }
+  wreck(S(wx, wy - 2 * lift), 0.05, k * (1 + 0.06 * lift), sq);
+  if (K1 === "C") { const a = S(-44, wy), b = S(-20, wy); for (const q of [a, b]) for (const sg of [-1, 1]) bar(q, add(q, [0, sg * 4 * k]), 1.4 * k, steel); bar(a, b, 2.2 * k, yel); line(S(-32, wy), S(-32, wy - 2 * lift), METAL_L, 1 * k); disc(S(-32, wy - 2 * lift), 1.2 * k, METAL_D); }
+  if (K4 === "A") { const q = S(wx, wy), pr = sq - 1; for (const sx of [-1, 1]) plate(add(q, [sx * 14 * k, 0]), rectPts(2, 5), dark, 0, k, 1.2); for (const sy of [-1, 1]) bar(add(q, [-14 * k, sy * 4.4 * k]), add(q, [14 * k, sy * 4.4 * k]), 2 * k, steel);
+    fill(q, rectPts(12, 6.4), A(steel, 0.25 + 2.5 * pr), 0, k); disc(q, 2.4 * k, OUTLINE); disc(q, 1.9 * k, steel); }
+  // ---- step 3, the Hydraulic Shear (an alligator shear or a guillotine shear beside the heap; the crane-mounted shear is in the feed line)
+  if (K3 === "A") { const h = S(-29, -14), op = 0.08 + 0.42 * (0.5 + 0.5 * Math.sin(t * 2.4)); plate(add(h, [4 * k, 0]), rectPts(6, 2.6), dark, 0, k, 1.2); bar(h, add(h, [11 * k, 0]), 2 * k, steel); bar(h, add(h, mul(fa(-op), 11 * k)), 2 * k, steel);
+    disc(h, 1.8 * k, OUTLINE); disc(h, 1.4 * k, yel); for (let j = 1; j < 4; j++) disc(add(h, [j * 2.8 * k, 0]), 0.5 * k, METAL_L); if (op < 0.14) for (let j = 0; j < 5; j++) disc(add(h, add([9 * k, 0], mul(fa(-1 - j * 0.4), (1 + j) * k))), 0.6 * k, [1, 0.8, 0.4, 1]); }
+  if (K3 === "B") { const q = S(-27, -15), bx = Math.sin(t * 2) * 5.5; plate(q, rectPts(8, 4), dark, 0, k, 1.3); fill(q, rectPts(6.6, 2.6), [0.1, 0.09, 0.09, 1], 0, k); chunk(add(q, [-2 * k, 0]), 0.9, 3, k); plate(add(q, [bx * k, 0]), rectPts(0.9, 4.4), steel, 0, k, 1);
+    if (Math.abs(Math.cos(t * 2)) < 0.25) glowDot(add(q, [bx * k, 0]), 0.8 * k, [1, 0.85, 0.5, 1]); }
+  // ---- the mastery, Breaker's Yard: a gold x2 sign for bosses
+  if (g) { const q = S(-22, -41); plate(q, rectPts(4.4, 2.4), dk(GOLD, 0.3), 0, k, 1); txt(add(q, [0, 1.3 * k]), "x2", GOLD, Math.max(8, 3.2 * k)); } }
+
+// ---- The feed line: the crane (a grab, then a magnet crane in three builds) loads the belt; the scrap rides up and falls into the furnace -----------------------------
+const FEED = { pv: [-36, 13], heap: [-33, 0], b0: [-24, 20], mouth: [0, -8], end: 9.5, T: 3.2, belt: 0.35 };
+function magnetHead(q, mr, k, g, carry, halo) { if (carry) chunk(add(q, [mr * 0.5 * k, mr * 0.6 * k]), 1, carry, k);
+  if (halo) disc(q, (mr + 2.2) * k, A(GOLD, 0.3)); disc(q, (mr + 0.7) * k, OUTLINE); disc(q, mr * k, g ? dk(GOLD, 0.25) : METAL_D); ring(q, mr * 0.62 * k, g ? GOLD : KILL, 1 * k); disc(q, mr * 0.3 * k, g ? GOLD : METAL_L); if (carry) glowDot(q, 0.7 * k, [0.7, 0.9, 1, 0.9]); }
+function feedLine(S, B, t, k, fallTo) {
+  const L = B.lv[1], g = L >= 5, K = pick(B, 1, L), K2 = K(1), K3 = K(2), K4 = K(3), K5 = K(4), F = FEED, dir = norm(sub(F.mouth, F.b0)), e = sub(F.mouth, mul(dir, F.end)), Lu = dist(F.b0, e), Lp = add(F.b0, mul(dir, 2.5)), v = F.belt * Lu, ride = (Lu - 2.5) / v, n = Math.floor(t / F.T), tgt = fallTo || F.mouth;
+  const steel = gl(STEEL, g, 0.7), yel = gl(CRANE, g, 0.7), dark = g ? dk(GOLD, 0.55) : METAL_D, cube = K4 === "B", rl = K4 === "C";
+  conveyor(S(...F.b0), S(...e), t, k, g);
+  for (let i = 0; i < 4; i++) { const m = n - i, a = t - (m + 0.56) * F.T, sd = m * 1.7 + 1; if (a < 0) continue;
+    if (a < ride) { const d = a * v + 2.5; chunk(S(...add(F.b0, mul(dir, d))), rl && d > 7 ? 0.75 : 1, sd, k, null, cube || (rl && d > 7)); }
+    else { const u = (a - ride) / 0.4; if (u < 1) chunk(S(...lerp(e, tgt, ease(u))), 1 - 0.65 * u, sd, k, mix([0.72, 0.46, 0.3, 1], MOLTEN, u), cube); else if (u < 2.5) glowDot(S(...tgt), (1.4 + 2.2 * (1 - (u - 1) / 1.5)) * k, A(HOTM, 1 - (u - 1) / 1.5)); } }
+  // ---- step 4, the Car Crusher on the belt: a baler at its foot (the scrap leaves as cubes) or two crushing rollers across it (the flat press is in junkGround)
+  if (K4 === "B") { const q = S(-27, 23), pr = 0.5 + 0.5 * Math.sin(t * 2.2); plate(q, rectPts(5.4, 4.4), dark, -0.86, k, 1.3); fill(q, rectPts(3.6, 2.8), [0.1, 0.09, 0.09, 1], -0.86, k); plate(add(q, rot([(-2.4 + 2 * pr) * k, 0], -0.86)), rectPts(0.8, 2.6), steel, -0.86, k, 1); }
+  if (rl) { const q = S(...add(F.b0, mul(dir, 6))), nn = orth(dir); for (const sg of [-1, 1]) { const r0 = S(...add(add(F.b0, mul(dir, 6)), mul(nn, sg * 4.4))); disc(r0, 3.2 * k, OUTLINE); disc(r0, 2.7 * k, steel); for (let j = 0; j < 6; j++) line(r0, add(r0, mul(fa(t * 6 * sg + j * Math.PI / 3), 2.5 * k)), dark, 0.9 * k); } }
+  // ---- the crane: one 3.2 s cycle (grab at the heap, swing, drop on the belt's foot, swing back); step 2 rebuilds it as a magnet crane (one boom, twin booms, or an overhead bridge)
+  const ph = fmod(t / F.T, 1), sw = ph < 0.14 ? 0 : ph < 0.5 ? ease((ph - 0.14) / 0.36) : ph < 0.6 ? 1 : 1 - ease((ph - 0.6) / 0.4), op = ph < 0.14 ? 1 - ph / 0.14 : ph < 0.5 ? 0 : ph < 0.6 ? (ph - 0.5) / 0.1 : 1;
+  const carry = ph > 0.06 && ph < 0.56 ? n * 1.7 + 1 : 0, mr = [0, 0, 3, 3.4, 3.8, 4.2][L], halo = g && K5 === "A";
+  if (K2 === "C") { const tp = lerp(F.heap, Lp, sw), q = S(...tp);
+    for (const x of [-43, -13]) { line(S(x, -8), S(x, 26), OUTLINE, 2.6 * k); line(S(x, -8), S(x, 26), steel, 1.4 * k); }
+    bar(S(-43, tp[1]), S(-13, tp[1]), 2.6 * k, yel); for (const x of [-43, -13]) plate(S(x, tp[1]), rectPts(2, 2.6), dark, 0, k, 1);
+    plate(q, rectPts(2.8, 2.2), dark, 0, k, 1); if (K3 === "C") { const jo = 0.15 + 0.35 * (0.5 + 0.5 * Math.sin(t * 3)); for (const sg of [-1, 1]) bar(add(q, [4 * k, 0]), add(q, add([4 * k, 0], mul(fa(sg * (0.5 + jo)), 3.4 * k))), 1.2 * k, steel); }
+    magnetHead(q, mr, k, g, carry, halo); return; }
+  const pv = S(...F.pv), aH = Math.atan2(F.heap[1] - F.pv[1], F.heap[0] - F.pv[0]), aL = Math.atan2(Lp[1] - F.pv[1], Lp[0] - F.pv[0]), rH = dist(F.pv, F.heap), rL = dist(F.pv, Lp), a = aH + (aL - aH) * sw, reach = rH + (rL - rH) * sw, tip = add(pv, mul(fa(a), reach * k));
+  disc(add(pv, [1.5 * k, 2 * k]), 5.4 * k, [0, 0, 0, 0.3]); disc(pv, (K2 === "B" ? 6.2 : 5.4) * k, OUTLINE); disc(pv, (K2 === "B" ? 5.4 : 4.6) * k, dk(yel, 0.15));
+  if (K2 === "B") { const nn = orth(fa(a)); for (const sg of [-1, 1]) bar(add(pv, mul(nn, sg * 1.8 * k)), add(tip, mul(nn, sg * 1.2 * k)), 1.8 * k, yel); } else bar(pv, tip, 2.6 * k, yel);
+  plate(pv, rectPts(3.2, 2.6), dark, a, k, 1.1);
+  if (K3 === "C") { const sh = add(pv, mul(fa(a), reach * 0.55 * k)), jo = 0.15 + 0.35 * (0.5 + 0.5 * Math.sin(t * 3)); for (const sg of [-1, 1]) bar(sh, add(sh, mul(fa(a + sg * (0.5 + jo)), 3.4 * k)), 1.2 * k, steel); disc(sh, 1.3 * k, dark); }
+  if (K2) magnetHead(tip, mr, k, g, carry, halo);
+  else { if (carry) chunk(tip, 1, carry, k); for (let i = 0; i < 4; i++) { const b = a + i * TAU / 4 + Math.PI / 4; line(tip, add(tip, mul(fa(b), (2.2 + 1.6 * op) * k)), METAL_L, 1.3 * k); } disc(tip, 1.6 * k, METAL_D); } }
+
+// ---- Path 3: the warehouse, rebuilt shorter (its end becomes a yard for the dock) and around each step's machine ---------------------------------------------------
+function wareP(p, hw, hh, ang, nDoor, age, k, o) { const O = (x, y) => add(p, rot([x * k, y * k], ang)), op = age < 0.4 ? ease(age / 0.4) : age < 1.4 ? 1 : 1 - ease(Math.min(1, (age - 1.4) / 0.4)), roof = o.roof || ROOF, t = o.t || 0, dx = (i) => (i - (nDoor - 1) / 2) * (hw * 2 - 6) / nDoor;
+  fill(add(p, [2.5 * k, 3.5 * k]), rectPts(hw, hh), [0, 0, 0, 0.3], ang, k);
+  for (let i = 0; i < nDoor; i++) { fill(O(dx(i), hh + 1.4), rectPts(4.4, 2.4), CONC, ang, k); hazard(O(dx(i), hh + 3.6), ang, k, -4, 4, 0, DOOR, 1); }
+  plate(p, rectPts(hw, hh), roof, ang, k, 1.5);
+  const x0 = o.open >= 1 ? -hw : o.open > 0 ? 0 : hw;                                                                         // the roof is off from local x0 to the end
+  if (x0 < hw) { const a = x0 + 1.2, b = hw - 1.2, cx = (a + b) / 2, hx = (b - a) / 2, shelf = o.rack === "shelf", rows = shelf ? [-5.2, 5.2] : [-5.6, -2.6, 2.6, 5.6];
+    fill(O(cx, 0), rectPts(hx, hh - 1.2), [0.15, 0.15, 0.16, 1], ang, k);
+    rows.forEach((y, ri) => { fill(O(cx, y), rectPts(hx - 0.4, shelf ? 1.3 : 1.2), gl(METAL_D, o.gold, 0.6), ang, k);
+      for (let x = a + 1.4, j = 0; x < b - 1; x += shelf ? 1.9 : 2.8, j++) { const col = o.goldStock ? GOLD : LOADS[Math.floor(rnd(j * 3.1 + ri * 7) * 4)]; if (shelf) disc(O(x, y), 0.55 * k, col); else { fill(O(x, y), rectPts(1.1, 0.9), col, ang, k); outline(O(x, y), rectPts(1.1, 0.9), OUTLINE, 0.7, ang, k); } } });
+    if (o.rack === "stacker") { const sx = cx + Math.sin(t * 0.5) * hx * 0.8; bar(O(sx, -hh + 0.8), O(sx, hh - 0.8), 1.4 * k, gl(CRANE, o.gold, 0.6)); plate(O(sx, Math.sin(t * 1.3) * 3), rectPts(1.4, 1.2), METAL_D, ang, k, 1); }
+    for (let x = a + 6; x < b; x += 8) line(O(x, -hh + 0.6), O(x, hh - 0.6), A(gl(METAL_L, o.gold, 0.6), 0.8), 0.9 * k);
+    outline(O(cx, 0), rectPts(hx, hh - 1.2), OUTLINE, 1, ang, k); }
+  const r1 = Math.min(hw, x0);
+  if (r1 > -hw + 3) { for (let x = -hw + 2.2; x < r1 - 1; x += 2.2) line(O(x, -hh + 0.9), O(x, hh - 0.9), dk(roof, 0.2), 0.8 * k); bar(O(-hw + 0.8, 0), O(r1 - 0.8, 0), 1.8 * k, lt(roof, 0.12));
+    for (const x of [-hw + (r1 + hw) * 0.25, -hw + (r1 + hw) * 0.75]) fill(O(x, -hh * 0.5), rectPts(2.8, 1.8), [0.7, 0.86, 0.96, 0.55], ang, k); }
+  for (let i = 0; i < nDoor; i++) { const d = O(dx(i), hh - 0.2); fill(d, rectPts(3.6, 1.3), mix(DOOR, [0.04, 0.04, 0.04, 1], op), ang, k); outline(d, rectPts(3.6, 1.3), OUTLINE, 1, ang, k);
+    if (op < 0.9) for (const j of [-0.5, 0.5]) line(O(dx(i) - 3.2, hh - 0.2 + j), O(dx(i) + 3.2, hh - 0.2 + j), A(dk(DOOR, 0.4), 1 - op), 0.7 * k); }
+  if (o.gold) outline(p, rectPts(hw + 0.3, hh + 0.3), GOLD, 1.3 * k, ang, k); }
+function wareModel(S, B, t, age, k) {
+  const L = B.lv[2], g = L >= 5, K = pick(B, 2, L), K1 = K(0), K2 = K(1), K3 = K(2), K4 = K(3), K5 = K(4);
+  if (!L) { wareP(S(33, 0), 40, 9.5, Math.PI / 2, 4, age, k, { t }); crates(S(4, 32), 2, 2, k); return; }
+  const fleet = g && K5 === "C", stock = g && K5 === "B", fc = fleet ? GOLD : CRANE, cc = (i) => (stock ? GOLD : LOADS[((i % 4) + 4) % 4]);
+  const open = K2 === "A" || K2 === "C" ? 1 : K1 === "A" ? 0.5 : 0, rack = K2 === "A" ? "pallet" : K2 === "C" ? "stacker" : "shelf";
+  wareP(S(33, -10), 30, 9.5, Math.PI / 2, 3, age, k, { open, rack, t, gold: g, goldStock: stock, roof: g && K5 === "A" ? mix(ROOF, GOLD, 0.7) : ROOF });
+  // ---- step 1: half the roof off over shelves (drawn by wareP), a lean-to of shelves at the shed's end, or a parts cage in the yard
+  if (K1 === "B") { const q = S(33, 21.6); plate(q, rectPts(9.5, 1.6), lt(ROOF, 0.08), 0, k, 1.1); for (let j = -3; j <= 3; j++) disc(add(q, [j * 2.6 * k, 0.4 * k]), 0.55 * k, cc(j + 3)); }
+  if (K1 === "C") { const q = S(16, 17); fill(q, rectPts(3.6, 3.6), [0.15, 0.15, 0.16, 1], 0, k); for (let j = 0; j < 4; j++) disc(add(q, [((j % 2) - 0.5) * 3.2 * k, (Math.floor(j / 2) - 0.5) * 3.2 * k]), 0.8 * k, cc(j));
+    for (let j = -3; j <= 3; j++) { line(add(q, [j * 1.2 * k, -3.6 * k]), add(q, [j * 1.2 * k, 3.6 * k]), A(METAL_L, 0.5), 0.6 * k); line(add(q, [-3.6 * k, j * 1.2 * k]), add(q, [3.6 * k, j * 1.2 * k]), A(METAL_L, 0.5), 0.6 * k); } outline(q, rectPts(3.6, 3.6), gl(METAL_L, g, 0.6), 1.2 * k, 0, k); }
+  // ---- step 2: racks inside (wareP), or pallet stacks outside the doors
+  if (K2 === "B") [[18, 2], [14, 26]].forEach(([x, y], i) => { const q = S(x, y); plate(q, rectPts(3, 3), WOOD, 0, k, 1); plate(add(q, [-0.4 * k, -0.4 * k]), rectPts(2.4, 2.4), cc(i), 0, k, 1); plate(add(q, [-0.8 * k, -0.8 * k]), rectPts(1.7, 1.7), lt(cc(i + 1), 0.1), 0, k, 1); });
+  // ---- step 3, the Forklift Bay: a forklift running pallets out, a charging bay with two forklifts, or automated carts on a painted loop
+  if (K3 === "A") { const c6 = fmod(t / 6, 1), out = c6 < 0.5, u = out ? ease(c6 / 0.5) : 1 - ease((c6 - 0.5) / 0.5), a = S(20.5, 8), b = S(11, 23), hd = Math.atan2(b[1] - a[1], b[0] - a[0]) + (out ? 0 : Math.PI); forklift(lerp(a, b, u), hd, k, fc, out ? cc(1) : null); }
+  if (K3 === "B") { const q = S(17, 38); fill(q, rectPts(5.4, 4.6), [0.22, 0.22, 0.24, 1], 0, k); hazard(add(q, [0, -4.6 * k]), 0, k, -5, 5, 0, DOOR, 1); for (const sx of [-2.6, 2.6]) { forklift(add(q, [sx * k, 0.8 * k]), -Math.PI / 2, k, fc, null); glowDot(add(q, [sx * k, 4 * k]), 0.6 * k, [0.4, 1, 0.5, 0.6 + 0.4 * Math.sin(t * 3 + sx)]); } }
+  if (K3 === "C") { const loop = [[12, 10], [22, 10], [22, 32], [12, 32]]; for (let i = 0; i < 4; i++) { const a2 = S(...loop[i]), b2 = S(...loop[(i + 1) % 4]); for (let j = 0; j < 8; j += 2) line(lerp(a2, b2, j / 8), lerp(a2, b2, (j + 1) / 8), A(DOOR, 0.6), 0.8 * k); }
+    for (let c3 = 0; c3 < 3; c3++) { const u = fmod(t * 0.12 + c3 / 3, 1) * 4, i = Math.floor(u), a2 = loop[i], b2 = loop[(i + 1) % 4], q = S(...lerp(a2, b2, u - i)), hd = Math.atan2(b2[1] - a2[1], b2[0] - a2[0]); plate(q, rectPts(1.8, 1.3), fc, hd, k, 1); fill(add(q, rot([0.4 * k, 0], hd)), rectPts(0.9, 0.9), cc(c3), hd, k); } }
+  // ---- step 4, the Loading Dock at the shed's end: a truck backed in, a rail siding with a wagon, or two trucks at levelled ramps
+  if (K4 === "A") { plate(S(33, 25), rectPts(9, 1.2), CONC, 0, k, 1); hazard(S(33, 26.4), 0, k, -8, 8, 0, DOOR, 1); truck(S(33, 35), Math.PI / 2, k, fleet ? GOLD : [0.35, 0.45, 0.6, 1], 6); }
+  if (K4 === "B") { plate(S(33, 25), rectPts(9, 1.2), CONC, 0, k, 1); for (const y of [36.6, 41.4]) { line(S(24, y), S(46, y), OUTLINE, 1.6 * k); line(S(24, y), S(46, y), METAL_L, 0.8 * k); } for (let x = 25; x < 46; x += 2.6) line(S(x, 35.4), S(x, 42.6), WOOD, 0.9 * k);
+    const wx = 34 + Math.sin(t * 0.3) * 2; plate(S(wx, 39), rectPts(8.5, 4.4), fleet ? dk(GOLD, 0.2) : [0.5, 0.3, 0.22, 1], 0, k, 1.3); for (let j = -2; j <= 2; j++) line(S(wx + j * 3.4, 35.2), S(wx + j * 3.4, 42.8), A(OUTLINE, 0.5), 0.8 * k); }
+  if (K4 === "C") for (const x of [28, 38]) { plate(S(x, 25), rectPts(3.6, 1.2), lt(CONC, 0.1), 0, k, 1); truck(S(x, 35), Math.PI / 2, k, fleet ? GOLD : [0.6, 0.35, 0.3, 1], 4.6); }
+  crates(S(4, 32), 2, 2, k, stock); }
+
+// ---- The Retrofits: the Bigger Yard round the slab and the Weighbridge below it (drawn first), and the Second Crusher by the belt's foot ------------------------------
+function retroBack(S, c, B, t, k) {
+  if (B.r === 1) { const R = B.key("r1"), E = 54, pts = [S(-E, -E), S(E, -E), S(E, E), S(-E, E)];
+    if (R === "C") { fill(c, rectPts(56, 56), DIRT, 0, k); for (let i = 0; i < 30; i++) { const a = rnd(i) * TAU, r = 48 + rnd(i + 9) * 7; disc(add(c, [Math.cos(a) * r * k, Math.sin(a) * r * k]), (0.5 + rnd(i + 3)) * k, [0.2, 0.17, 0.14, 1]); }
+      for (const [x, y, s2] of [[-51, -30, 31], [-51, 22, 37], [-34, 51, 41], [30, -51, 43], [51, 30, 47]]) scrapPile(S(x, y), 4, k, s2); }
+    for (let i = 0; i < 4; i++) { const a = pts[i], b = pts[(i + 1) % 4], ang = Math.atan2(b[1] - a[1], b[0] - a[0]);
+      if (R === "A") { const n = Math.round(dist(a, b) / (9 * k)); line(a, b, A(METAL_L, 0.6), 0.9 * k); for (let j = 0; j < n * 4; j++) { const q = lerp(a, b, (j + 0.5) / (n * 4)); line(add(q, rot([-1 * k, -1 * k], ang)), add(q, rot([1 * k, 1 * k], ang)), A(METAL_L, 0.35), 0.6 * k); } for (let j = 0; j <= n; j++) { const q = lerp(a, b, j / n); disc(q, 1.3 * k, OUTLINE); disc(q, 0.9 * k, METAL_L); } }
+      if (R === "B") { const n = Math.round(dist(a, b) / (7 * k)); for (let j = 0; j < n; j++) plate(lerp(a, b, (j + 0.5) / n), rectPts(3.2, 1.8), [0.55, 0.55, 0.54, 1], ang, k, 1); } } }
+  if (B.r === 2) { const R = B.key("r2"), q = S(0, 52);
+    if (R === "A") { plate(q, rectPts(14, 3.6), METAL_D, 0, k, 1.2); for (let j = -6; j <= 6; j++) line(add(q, [j * 2 * k, -2.8 * k]), add(q, [j * 2 * k, 2.8 * k]), [0, 0, 0, 0.35], 0.8 * k);
+      const dp = S(19, 52); plate(dp, rectPts(3.4, 2.2), [0.12, 0.13, 0.14, 1], 0, k, 1); txt(add(dp, [0, 1 * k]), (1 + 0.1 * Math.floor(fmod(t * 2, 9))).toFixed(1) + "t", [0.4, 1, 0.5, 1], Math.max(7, 2.4 * k)); }
+    if (R === "B") { plate(q, rectPts(7, 3.6), METAL_L, 0, k, 1.2); outline(q, rectPts(6, 2.6), METAL_D, 0.8 * k, 0, k); const dq = S(11, 52); disc(dq, 3.6 * k, OUTLINE); disc(dq, 3.1 * k, [0.92, 0.9, 0.84, 1]);
+      for (let j = 0; j < 8; j++) { const a = -Math.PI * 0.9 + j * Math.PI * 0.8 / 7 * 1; line(add(dq, mul(fa(a), 2.2 * k)), add(dq, mul(fa(a), 2.8 * k)), OUTLINE, 0.6 * k); }
+      line(dq, add(dq, mul(fa(-Math.PI / 2 + Math.sin(t * 1.5) * 1.2), 2.6 * k)), [0.8, 0.15, 0.1, 1], 0.9 * k); disc(dq, 0.6 * k, OUTLINE); }
+    if (R === "C") { const h = S(-14, 52), hb = S(-9, 52), ba = -Math.max(0, Math.sin(t * 0.7)) * 1.2, tip = add(hb, mul(fa(ba), 20 * k)); plate(S(3, 52), rectPts(9, 3), METAL_D, 0, k, 1);
+      plate(h, rectPts(3.6, 3.4), [0.55, 0.5, 0.42, 1], 0, k, 1.2); fill(add(h, [0, -1.6 * k]), rectPts(2.6, 0.9), [0.6, 0.8, 0.95, 0.8], 0, k);
+      for (let j = 0; j < 5; j++) line(lerp(hb, tip, j / 5), lerp(hb, tip, (j + 1) / 5), j % 2 ? [0.95, 0.95, 0.95, 1] : [0.85, 0.2, 0.15, 1], 1.4 * k); disc(hb, 1.2 * k, METAL_D); } } }
+function crusher2(S, B, t, k) { if (B.r !== 0) return; const R = B.key("r0"), p = S(-9, 27);
+  bar(S(-13, 24), S(-18.8, 13.9), 2.6 * k, METAL);                                                                            // its chute onto the belt
+  if (R === "A") { plate(p, rectPts(6, 4.6), METAL_L, 0, k, 1.3); fill(p, rectPts(4.6, 3.2), [0.1, 0.09, 0.09, 1], 0, k); const j = 1 + 2.6 * (0.5 + 0.5 * Math.sin(t * 4)); fill(add(p, [-4.6 * k, 0]), [[0, -3.2], [j, 0], [0, 3.2]], STEEL, 0, k); fill(add(p, [4.6 * k, 0]), [[0, -3.2], [-j, 0], [0, 3.2]], STEEL, 0, k); }
+  if (R === "B") { plate(p, rectPts(6, 4.6), METAL_D, 0, k, 1.2); for (const sx of [-1, 1]) { const q = add(p, [sx * 2.8 * k, 0]); disc(q, 2.7 * k, OUTLINE); disc(q, 2.3 * k, METAL_L); for (let j = 0; j < 6; j++) line(q, add(q, mul(fa(t * 5 * sx + j * Math.PI / 3), 2.2 * k)), STEEL, 0.9 * k); } }
+  if (R === "C") { plate(p, rectPts(6, 4.6), METAL_D, 0, k, 1.2); disc(p, 3.8 * k, OUTLINE); disc(p, 3.3 * k, METAL); for (let j = 0; j < 4; j++) { const a = t * 9 + j * Math.PI / 2; bar(p, add(p, mul(fa(a), 4 * k)), 1.1 * k, METAL_L); disc(add(p, mul(fa(a), 4 * k)), 0.9 * k, STEEL); } } }
+
+// ---- The agent: Melt and Pour (embers, and at each payout the core flares and a coin fountain vents with the real income), the kill ring and the discount ring ---------
+function scrapAgent(B) { return (m, t, info, s, col) => { if (!m.pays) { m.pays = []; m.last = t; m.kills = []; m.kt = t; }
+  const L1 = B.lv[0], L2 = B.lv[1], L3 = B.lv[2], c = info.c, k = G(s), M = add(c, [0, -8 * k]), J = add(c, [-30 * k, 0]);
+  if (t - m.last >= 4) { m.last = t; m.pays.push(t); } m.pays = m.pays.filter((q) => t - q < 1.6);
+  for (let i = 0; i < 8; i++) { const q = t * 0.9 + i / 8, u = fmod(q, 1), dx = (rnd(Math.floor(q) * 7 + i) - 0.5) * s * 0.35; disc(add(M, [dx * u, -u * s * 0.55]), 1.4 * (1 - u) + 0.3, [1, 0.7, 0.3, 1 - u]); }
+  if (L2 > 0) { const R = s * killR(B) / 48; ring(c, R, A(KILL, 0.2), 1.2); for (let i = 0; i < 24; i += 2) line(add(c, mul(fa(i * TAU / 24 + t * 0.03), R)), add(c, mul(fa((i + 1) * TAU / 24 + t * 0.03), R)), A(KILL, 0.34), 1.2); }
+  if (L3 > 0) { const R = s * discR(B) / 48; ring(c, R, A(DISCC, 0.2), 1.2); for (let i = 1; i < 24; i += 2) line(add(c, mul(fa(i * TAU / 24 - t * 0.03), R)), add(c, mul(fa((i + 1) * TAU / 24 - t * 0.03), R)), A(DISCC, 0.34), 1.2); txt(add(c, [R * 0.7, -R * 0.7]), DOFF[L3], A(DISCC, 0.9), Math.max(10, s * 0.14)); }
+  if (L2 > 0 && t - m.kt >= 1.7) { const near = info.all.filter((e) => !e.air && dist(e.p, c) < s * killR(B) / 48); if (near.length) { const e = near[Math.floor(rnd(Math.floor(t) + 1) * near.length)]; m.kills.push({ t0: t, p: e.p.slice() }); m.kt = t; } }
+  m.kills = m.kills.filter((q) => t - q.t0 < 1);
+  for (const q of m.kills) { const v = (t - q.t0) / 1, gc = L2 >= 5 ? GOLD : KILL; if (v < 0.25) { const r = Math.max(4, Math.min(11, s * 0.12)); glowDot(q.p, r * (1 - v / 0.25), [1, 0.9, 0.7, 1]); ring(q.p, r + v * 40, A(KILL, 1 - v / 0.25), 1.6); }
+    const p = add(lerp(q.p, J, Math.min(1, v * 1.1)), [0, -Math.sin(Math.PI * Math.min(1, v)) * s * 0.4]); disc(p, s * 0.05 + 1, OUTLINE); disc(p, s * 0.05, gc);
+    if (v < 0.55) txt(add(q.p, [0, -s * 0.22 - v * s * 0.3]), "+" + Math.round(5 * (1 + KBONUS[L2])), A(gc, 1 - v * 1.8), Math.max(9, s * 0.15)); }
+  for (const q of m.pays) { const v = (t - q) / 1.6; if (v > 1) continue; if (v < 0.25) glowDot(M, s * 0.22 * (1 - v / 0.25), HOTM);
+    for (let i = 0; i < 6; i++) { const d = fa(-Math.PI / 2 + (i - 2.5) * 0.35), p = add(add(M, mul(d, s * 0.5 * Math.min(1, v * 2))), [0, v * v * s * 0.4]); disc(p, s * 0.045 + 1, A(OUTLINE, 0.95 * (1 - v))); disc(p, s * 0.045, A(GOLD, 1 - v)); }
+    txt(add(M, [0, -s * 0.4 - v * s * 0.5]), "+" + incomeOf(B), A(GOLD, Math.min(1, 2 - v * 2)), Math.max(11, s * 0.2));
+    if (L1 >= 5 && v > 0.1) txt(add(M, [s * 0.5, -s * 0.25 - v * s * 0.4]), "+3%", A([0.8, 1, 0.6, 1], Math.min(1, 2 - v * 2)), Math.max(9, s * 0.14)); } }; }
+
+// ---- The model: the whole production line at every level ---------------------------------------------------------------------------------------------------------------
+const P2 = {
+  tower: "scrap", look: "B", anim: "B", sBuild: 112, sCard: 64,                                  // a 2x2 tower: smaller previews so the whole yard fits
+  intro: "Round 1 on the confirmed Production Line, with your new names. Each path rebuilds one part around the machine its step names, big and visible: Passive Income rebuilds the furnace stack (Firebrick Lining, Forced Bellows, Blast Furnace, Arc Furnace, Gold Foundry); Kill Income rebuilds the junkyard (Tow Hook, Magnet Crane, Hydraulic Shear, Car Crusher, Breaker's Yard), and the orange kill ring widens; Discounts rebuilds the warehouse, shorter with a yard at its end (Parts Shelves, Pallet Racks, Forklift Bay, Loading Dock, Parts Exchange), and the blue discount ring widens. Earlier picks carry as details; masteries are gold. The Retrofits add a Second Crusher by the belt's foot, a Bigger Yard round the slab, or a Weighbridge below it. Overlapping Retrofits are kept and stack (the carpet rule). Unpicked steps show option A.",
+  mods(B) { return { period: 1, flight: 1, multi: false, persist: scrapAgent(B) }; },
+  muzzleAt(B, m, kk, c) { return c; },
+  model(c, aim, s, fx, t, col, info, B) {
+    const k = G(s), mm = fx.mem || {}, age = t - (mm.last ?? -9), S = (x, y) => add(c, [x * k, y * k]), g1 = B.lv[0] >= 5;
+    retroBack(S, c, B, t, k);
+    yardFloor(c, k, col, t); dirt(c, -44, -44, -15, 44, k, 5);
+    junkGround(S, B, t, k);
+    wareModel(S, B, t, age, k);
+    conveyor(S(10, -8), S(23, -8), t, k, g1);                                                      // the ingot belt, with ingots sliding to the warehouse (gold at the Gold Foundry)
+    for (let i = 0; i < 2; i++) { const q = lerp(S(10, -8), S(23, -8), fmod(t * 0.35 + i / 2, 1)), ic = g1 ? GOLD : [0.82, 0.62, 0.45, 1]; fill(q, rectPts(2.2, 1.3), ic, 0, k); outline(q, rectPts(2.2, 1.3), OUTLINE, 1, 0, k); }
+    const hole = stackModel(S, B, t, age, k);
+    foundryExtra(S, B, t, k);
+    crusher2(S, B, t, k);
+    feedLine(S, B, t, k, hole);
+    smoke(S(0, -8), STACKR[B.lv[0]], t, k, 6 + B.lv[0]);
+  },
+  paths: [], retrofits: [],
+};
+
+// ---- Option tables (the owner's names, 2026-10-19; effects and prices as confirmed) ----------------------------------------------------------------------------------
+const T = (a, b, c) => [["A", ...a], ["B", ...b], ["C", ...c]].map(([key, name, desc]) => ({ key, name, desc }));
+P2.paths = [
+  { name: "Passive Income", theme: "the furnace stack: rebuilt around each step's machine and a little bigger each step; gold at the Gold Foundry", steps: [
+    { name: "Firebrick Lining", cost: 525, effect: "130 per round", options: T(["Glowing Firebrick", "The stack is relined with a thick two-course firebrick shell; its joints glow orange with the heat."], ["Hex Refractory Tiles", "The stack is relined with pale hexagonal refractory tiles."], ["Double Wall", "The stack is rebuilt with a steel outer wall and a dark cooling gap; glowing slits show the fire inside."]) },
+    { name: "Forced Bellows", cost: 1225, effect: "165 per round", options: T(["Twin Bellows", "Two big leather bellows on either side pump air into the stack, squeezing in turn."], ["Side Blower", "A fan housing bolted to the stack's side; its blades spin and a duct feeds the fire."], ["Bustle Pipe", "A thick pipe ring circles the stack, with eight tuyeres blowing air into it."]) },
+    { name: "Blast Furnace", cost: 3850, effect: "220 per round (primary)", options: T(["Hot-Blast Stoves", "The stack is rebuilt taller as a blast furnace, with two round hot-blast stoves behind it piping in hot air; the bellows grow."], ["Skip Hoist", "The stack is rebuilt taller as a blast furnace; a skip car runs up an inclined hoist to a charging bell on its top."], ["Steel Frame", "The stack is rebuilt taller inside a square steel frame, with a downcomer pipe to a dust catcher."]) },
+    { name: "Arc Furnace", cost: 7000, effect: "270 per round", options: T(["Electrode Lid", "The top is rebuilt as a domed lid with three graphite electrodes; arcs crackle between them, and the scrap drops in through a charging hole."], ["Tilting Vessel", "The top is rebuilt as a vessel that rocks gently, with three electrodes on arms from a mast; arcs spark down into it."], ["Plasma Ring", "Six electrodes ring the mouth and arc into a white-hot plasma core."]) },
+    { name: "Gold Foundry", cost: 27440, effect: "320 per round, plus 3% interest on banked credits at each clear (mastery)", options: T(["Gold Shell", "The whole stack turns gold, with glints running round its rim; the ingots turn gold; each payout adds a +3% tag."], ["Gold Casting Wheel", "The stack turns gold and pours into a turning wheel of gold ingot moulds; each payout adds a +3% tag."], ["Gold Ladle", "The stack turns gold and a ladle pours a gold stream onto the ingot belt; each payout adds a +3% tag."]) },
+  ] },
+  { name: "Kill Income", theme: "the junkyard: rebuilt around each step's machine; the orange kill ring widens and wrecked enemies send coins into the junkyard; gold at the Breaker's Yard", steps: [
+    { name: "Tow Hook", cost: 345, effect: "Enemies destroyed within 140 px pay 15% more", options: T(["Tow Truck", "A tow truck hauls the wreck into the yard on a cable, over and over."], ["Winch Post", "A winch post drags the wreck in on a cable; its drum turns."], ["Chain Gantry", "A gantry stands over the wreck and lifts it on a hook and chain."]) },
+    { name: "Magnet Crane", cost: 625, effect: "+25%; 150 px", options: T(["Electromagnet", "The grab crane is rebuilt with a big round electromagnet that lifts the scrap."], ["Twin-Boom Magnet", "The crane is rebuilt heavier, with two booms carrying the magnet."], ["Bridge Magnet", "The crane is replaced by an overhead bridge spanning the junkyard; its trolley magnet carries the scrap to the belt."]) },
+    { name: "Hydraulic Shear", cost: 2095, effect: "+35%; 170 px (primary)", options: T(["Alligator Shear", "A hinged alligator shear chomps scrap beside the heap, throwing sparks."], ["Guillotine Shear", "A feed box with a sliding guillotine blade cuts scrap beside the heap."], ["Crane Shear", "A pair of shear jaws on the crane (or the bridge's trolley) snaps as it works."]) },
+    { name: "Car Crusher", cost: 5720, effect: "+45%; 190 px", options: T(["Flat Press", "A press frame over the wreck flattens it again and again."], ["Baler", "A baler at the foot of the belt packs the scrap into cubes that ride up into the furnace."], ["Crushing Rollers", "Two rollers across the belt crush each piece flat on its way up."]) },
+    { name: "Breaker's Yard", cost: 28945, effect: "+60%; 210 px; bosses pay double (mastery)", options: T(["Gold Crane", "The crane and every junkyard machine turn gold and the magnet glows; a gold x2 sign for bosses; the field coins turn gold."], ["Gold Heaps", "The machines turn gold and so do the scrap heaps; a gold x2 sign; the field coins turn gold."], ["Gold Fence", "The machines turn gold and a gold fence rings the junkyard; a gold x2 sign; the field coins turn gold."]) },
+  ] },
+  { name: "Discounts", theme: "the warehouse: rebuilt shorter, with a yard at its end, and around each step's machine; the blue discount ring widens and shows the percentage off; gold at the Parts Exchange", steps: [
+    { name: "Parts Shelves", cost: 190, effect: "Towers within 140 px upgrade for 5% less", options: T(["Open-Roof Shelves", "The warehouse is rebuilt shorter with half its roof off, showing rows of parts shelves."], ["Shelf Lean-To", "The warehouse is rebuilt shorter, with a lean-to of parts shelves at its end."], ["Parts Cage", "The warehouse is rebuilt shorter, with a mesh parts cage in the yard by its doors."]) },
+    { name: "Pallet Racks", cost: 495, effect: "10% off upgrades; 150 px", options: T(["High-Bay Racks", "The whole roof comes off: four rows of pallet racks loaded with coloured goods."], ["Pallet Stacks", "Stacked pallets of goods stand in the yard outside the doors."], ["Stacker Crane", "The roof comes off over open racks, with a stacker crane running up and down the aisle."]) },
+    { name: "Forklift Bay", cost: 2035, effect: "15% off upgrades, 5% off builds; 160 px (primary)", options: T(["Forklift Run", "A forklift carries pallets out of the doors to the yard and drives back."], ["Charging Bay", "A charging bay with two forklifts parked at glowing chargers."], ["Automated Carts", "Three small carts run a painted loop through the yard."]) },
+    { name: "Loading Dock", cost: 3865, effect: "20% off upgrades; 175 px", options: T(["Truck Dock", "A loading dock at the warehouse's end with a truck backed in."], ["Rail Siding", "A rail siding at the warehouse's end with a freight wagon."], ["Twin Ramps", "Two levelled ramps with a truck at each."]) },
+    { name: "Parts Exchange", cost: 20935, effect: "25% off upgrades, 10% off builds; 190 px; towers in the field sell back for everything spent on them (mastery)", options: T(["Gold Roof", "The warehouse's frame and roof turn gold."], ["Gold Stock", "The frame turns gold and every shelf, pallet and crate is stocked in gold."], ["Gold Fleet", "The frame turns gold and so do the forklifts, carts and trucks."]) },
+  ] },
+];
+P2.retrofits = [
+  { name: "Second Crusher", cost: 525, effect: "+30 income per round (stacks with the Passive Income path)", options: T(["Jaw Crusher", "A jaw crusher beside the foot of the belt chews scrap down a chute onto the belt."], ["Roller Crusher", "Two spinning rollers in a housing feed a chute onto the belt."], ["Hammer Mill", "A spinning hammer mill feeds a chute onto the belt."]) },
+  { name: "Bigger Yard", cost: 260, effect: "+30 px to its fields (stacks with the Kill and Discount paths)", options: T(["Chain-Link Fence", "A wider chain-link fence on posts surrounds the yard."], ["Concrete Wall", "A wider wall of concrete blocks surrounds the yard."], ["Scrap Ground", "The yard spreads onto dirt all round, with small scrap heaps outside the slab."]) },
+  { name: "Weighbridge", cost: 260, effect: "Towers sold in its field refund 15% more", options: T(["Truck Scale", "A truck scale below the yard with a digital readout."], ["Dial Scale", "A platform scale with a big dial; its needle swings."], ["Weigh Hut", "A weigh hut with a red-and-white barrier arm that lifts."]) },
+];
+
+// ---- Tower art engine: previews towers aiming and firing at enemies on a lane --------------------------
+// Data (defined before this): PAGE {title, key, store}, TOWERS [...], DEFAULTS {id: {look, anim}}.
+// A look: {key, name, theme, muzzle (tile units along the aim), draw(c, aim, s, fx, t, col)} where s = px per tile.
+// An animation: {key, name, desc, period, burst?, gap?, multi?, flight, beam?, fx(since, period) -> {recoil, flash, glow, spin},
+//   shot(from, to, u, s, col, k, t, info), impact(to, v, s, col, info)}. info = {ens (hittable enemies in reach), c, W, H, s, t, look, spot, orbit}.
+// info.sh is the shot being drawn ({t0, k, to0: where its target was when it fired}). An animation with persist(mem, t,
+//   info, s, col) is a free agent instead (drones, mines, sprays, pulses); it can steer the turret with mem.aimAt, and the
+//   look sees its state as fx.mem. tw.waves {on, off} empties the lane between waves; tw.hits "none" attacks nothing.
+// A tower can set spot {x, y} (player-aimed at a fixed point, fractions of the view) or orbit {x, y, r (tiles), w (rad/s)}
+//   (an aircraft circling a point; the look draws it with plane(p, heading, s, fx, t, col, centre) and fires from its door).
+
+const STORE = PAGE.store;
+let state = {};
+try { state = JSON.parse(localStorage.getItem(STORE) || "{}") || {}; } catch (e) { state = {}; }
+function save() { try { localStorage.setItem(STORE, JSON.stringify(state)); } catch (e) { /* storage unavailable */ } }
+const DEF = typeof DEFAULTS === "undefined" ? {} : DEFAULTS;
+function st(id) { if (!state[id]) { const d = DEF[id] || {}; state[id] = { look: d.look || null, anim: d.anim || null, notes: { look: "", anim: "" } }; } return state[id]; }
+const lookOf = (tw) => tw.looks.find((l) => l.key === st(tw.id).look) || tw.looks[0];
+const animOf = (tw) => tw.anims.find((a) => a.key === st(tw.id).anim) || tw.anims[0];
+
+// ---- Scene: a lane of ground enemies and a few flyers -------------------------------------------------
+const ENEMY_RED = [0.86, 0.24, 0.22, 1];
+function enemiesAt(t, W, H, sc) {
+  const out = [], laneY = H * 0.8, span = W + 80;
+  for (let i = 0; i < 4; i++) out.push({ air: false, p: [fmod(t * 34 + i * span / 4, span) - 40, laneY + Math.sin(t * 2 + i) * 2], i });
+  for (let i = 0; i < 2; i++) { const u = fmod(t * 26 + i * span / 2, span) - 40; out.push({ air: true, p: [u, H * 0.1 + Math.sin(t * 1.5 + i * 2) * 5], i: 10 + i }); }
+  return out;
+}
+function drawEnemy(e, sc) {
+  const r = Math.max(4, Math.min(11, sc * 0.12));
+  if (e.air) {
+    ellipse(add(e.p, [r * 0.6, r * 1.4]), r * 0.9, r * 0.4, [0, 0, 0, 0.25]);
+    fill(e.p, [[1.1, 0], [-0.7, 0.8], [-0.35, 0], [-0.7, -0.8]], ENEMY_RED, 0, r); outline(e.p, [[1.1, 0], [-0.7, 0.8], [-0.35, 0], [-0.7, -0.8]], OUTLINE, 1, 0, r);
+  } else {
+    ellipse(add(e.p, [0, r * 0.7]), r * 1.1, r * 0.45, [0, 0, 0, 0.25]);
+    disc(e.p, r + 1, OUTLINE); disc(e.p, r, ENEMY_RED); disc(add(e.p, [r * 0.35, -r * 0.2]), r * 0.35, [1, 0.85, 0.6, 1]);
+  }
+}
+function drawGround(W, H) {
+  rect(0, 0, W, H, [0.07, 0.09, 0.08, 1]);
+  for (let x = 0; x < W; x += 24) for (let y = 0; y < H; y += 24) if (((x + y) / 24) % 2 === 0) rect(x, y, 24, 24, [0.075, 0.098, 0.085, 1]);
+  rect(0, H * 0.8 - 14, W, 28, [0.16, 0.15, 0.13, 1]); line([0, H * 0.8 - 14], [W, H * 0.8 - 14], [0.24, 0.22, 0.18, 1], 1); line([0, H * 0.8 + 14], [W, H * 0.8 + 14], [0.24, 0.22, 0.18, 1], 1);
+}
+function pad(c, s) {
+  const h = s * 0.5;
+  rect(c[0] - h, c[1] - h, s, s, [0.2, 0.21, 0.22, 1]); rect(c[0] - h + 2, c[1] - h + 2, s - 4, s - 4, [0.25, 0.26, 0.27, 1]);
+  for (const q of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) disc(add(c, [q[0] * (h - 5), q[1] * (h - 5)]), 1.6, [0.15, 0.16, 0.17, 1]);
+}
+
+// ---- One animated preview -------------------------------------------------------------------------------
+function makeView(canvas, tw, getLook, getAnim, scale) {
+  const ctx = canvas.getContext("2d"), W = canvas.width, H = canvas.height, s = scale;
+  const c = tw.center ? [W * tw.center[0], H * tw.center[1]] : [W * 0.34, H * 0.44]; // tw.size 2: a 2x2 tower
+  const v = { aim: -0.6, last: -9, shots: [], lockT: 0, lockId: -1, visible: true };
+  v.frame = (t) => {
+    X = ctx; X.save(); X.globalAlpha = 1; X.lineCap = "round"; X.lineJoin = "round";
+    const look = getLook(), an = getAnim();
+    drawGround(W, H);
+    const live = !tw.waves || fmod(t, tw.waves.on + tw.waves.off) < tw.waves.on, all = live ? enemiesAt(t, W, H, s) : [];
+    const ens = all.filter((e) => (tw.hits === "none" ? false : tw.hits === "air" ? e.air : tw.hits === "ground" ? !e.air : true));
+    const others = all.filter((e) => !ens.includes(e));
+    const inView = ens.filter((e) => e.p[0] > 10 && e.p[0] < W - 10);
+    // tw.spot: the player aims it at a fixed point (it ignores enemies). tw.orbit: an aircraft circles a designated
+    // point and fires at enemies near it.
+    const orR = tw.orbit ? (look.orbitR ? look.orbitR(tw.orbit.r) : tw.orbit.r) : 0; // a look may widen the orbit (the CAS Wide Orbit Retrofit)
+    const O = tw.orbit ? [W * tw.orbit.x, H * tw.orbit.y] : null;
+    const cands = O ? inView.filter((e) => Math.hypot(e.p[0] - O[0], e.p[1] - O[1]) < orR * s * 1.6) : inView;
+    let tgt = null, best = 1e9;
+    if (tw.spot) tgt = { p: [W * tw.spot.x, H * tw.spot.y], i: -5 };
+    else for (const e of cands) { const ref = O || c, d = Math.hypot(e.p[0] - ref[0], e.p[1] - ref[1]); if (d < best) { best = d; tgt = e; } }
+    let pl = null;
+    if (O) { const a = t * (tw.orbit.w || 0.5), p = add(O, mul(fa(a), orR * s)); pl = { p, heading: a + Math.PI / 2, door: add(p, mul(norm(sub(O, p)), s * 0.14)) }; if (look.door) pl.door = look.door(p, pl.heading, s, O); }
+    if (an.persist && (!v.mem || v.mem.key !== an.key + look.key)) v.mem = { key: an.key + look.key };
+    const aimP = an.persist && v.mem.aimAt ? v.mem.aimAt : tgt && tgt.p;
+    if (aimP) {
+      const want = Math.atan2(aimP[1] - c[1], aimP[0] - c[0]);
+      let d = fmod(want - v.aim + Math.PI, TAU) - Math.PI; const dt = Math.min(0.25, Math.max(0, t - (v.prevT || t))); const turn = 7 * dt; v.aim += Math.max(-turn, Math.min(turn, d));
+      if (tgt && tgt.i !== v.lockId) { v.lockId = tgt.i; v.lockT = t; }
+    }
+    v.prevT = t;
+    const since = t - v.last;
+    const muzzles = look.muzzles || [[look.muzzle || 0.45, 0]];
+    const muzzleAt = (m, ang, k) => pl ? pl.door : look.muzzleAt ? look.muzzleAt(m, k ?? 0, c, ang, s, info) : add(c, rot([muzzles[m % muzzles.length][0] * s, muzzles[m % muzzles.length][1] * s], look.fixed ? 0 : ang));
+    // Multi-target order: the aimed-at target first, then the rest nearest first.
+    const order = tgt && tgt.i !== -5 ? [tgt, ...cands.filter((e) => e !== tgt).sort((a, b) => Math.hypot(a.p[0] - c[0], a.p[1] - c[1]) - Math.hypot(b.p[0] - c[0], b.p[1] - c[1]))] : cands;
+    const info = { ens: cands, all, order, view: v, c, W, H, s, t, look, aim: v.aim, muzzleAt, spot: tgt && tgt.i === -5 ? tgt.p : null, orbit: O };
+    const aligned = tgt && (pl || Math.abs(fmod(Math.atan2(tgt.p[1] - c[1], tgt.p[0] - c[0]) - v.aim + Math.PI, TAU) - Math.PI) < (an.beam ? 0.15 : 0.35));
+    if (tgt && !an.beam && !an.persist && since >= an.period && aligned) {
+      v.last = t; const n = an.burst || 1;
+      for (let k = 0; k < n; k++) {
+        const target = an.multi ? (order[k % order.length] || tgt) : tgt;
+        v.shots.push({ t0: t + k * (an.gap || 0), tid: target.i, to0: target.p.slice(), k, m: (v.n = (v.n || 0) + 1) - 1 });
+      }
+    }
+    pad(c, s * (tw.size || 1));
+    for (const e of others) drawEnemy(e, s);
+    for (const e of ens) drawEnemy(e, s);
+    if (info.spot) { const q = info.spot, pu = 0.5 + 0.5 * Math.sin(t * 4); ring(q, s * (0.28 + 0.04 * pu), A(tw.color, 0.55 + 0.3 * pu), 1.5);
+      for (let i = 0; i < 4; i++) { const d = fa(i * Math.PI / 2); line(add(q, mul(d, s * 0.16)), add(q, mul(d, s * 0.36)), A(tw.color, 0.8), 1.2); } }
+    // Beams lock on first: a short acquisition (reticle on the target), then the beam fires.
+    const lockDelay = an.lock || 0, held = tgt ? t - v.lockT : 0, beamOn = an.beam && tgt && aligned && held >= lockDelay;
+    let fx;
+    if (an.beam) fx = an.fx(beamOn ? held - lockDelay : 0, an.period, !!beamOn);
+    else {
+      fx = an.fx(t - v.last, an.period, !!tgt);
+      const fired = v.shots.filter((sh) => t >= sh.t0); const lastShot = fired[fired.length - 1];
+      fx.barrel = lastShot ? lastShot.m % muzzles.length : -1; fx.barrelSince = lastShot ? t - lastShot.t0 : 9; fx.shots = lastShot ? lastShot.m + 1 : 0;
+    }
+    if (an.persist) { fx.docked = !v.mem.out; fx.mem = v.mem; }
+    look.draw(c, v.aim, s, fx, t, tw.color, info);
+    if (an.beam && tgt) {
+      if (beamOn) an.shot(muzzleAt(0, v.aim), tgt.p, held - lockDelay, s, tw.color, 0, t, info);
+      else { const q = Math.min(1, held / Math.max(0.01, lockDelay)), r0 = s * (0.35 - 0.18 * q), sp = t * 4;
+        line(muzzleAt(0, v.aim), tgt.p, A(tw.color, 0.25), 1);
+        for (let i = 0; i < 4; i++) { const a0 = sp + i * Math.PI / 2; arc(tgt.p, r0, a0, a0 + 0.7, A(tw.color, 0.5 + 0.5 * q), 2); } }
+    }
+    v.shots = v.shots.filter((sh) => t - sh.t0 < an.flight + 0.6);
+    for (const sh of v.shots) {
+      const age = t - sh.t0; if (age < 0) continue;
+      if (!sh.from) sh.from = muzzleAt(sh.m, v.aim, sh.k);
+      const live = ens.find((e) => e.i === sh.tid); const to = live ? live.p : sh.to0;
+      info.sh = sh;
+      if (age < an.flight) an.shot(sh.from, to, age / an.flight, s, tw.color, sh.k, t, info);
+      else if (an.impact) an.impact(to, (age - an.flight) / 0.6, s, tw.color, info);
+    }
+    // A persistent agent (a drone that stays out): it moves, fires and draws itself every frame; v.mem is its state.
+    if (an.persist) an.persist(v.mem, t, info, s, tw.color);
+    if (pl && look.plane) look.plane(pl.p, pl.heading, s, fx, t, tw.color, O);
+    X.restore();
+  };
+  return v;
+}
+
+// ---- Page ------------------------------------------------------------------------------------------------
+const views = [];
+function cardCanvas(w, h) { const cv = document.createElement("canvas"); cv.width = w; cv.height = h; return cv; }
+function el(tag, cls, html) { const n = document.createElement(tag); if (cls) n.className = cls; if (html != null) n.innerHTML = html; return n; }
+function register(cv, tw, gl, ga, s) { const v = makeView(cv, tw, gl, ga, s); v.cv = cv; views.push(v); io && io.observe(cv); return v; }
+const io = typeof IntersectionObserver !== "undefined" ? new IntersectionObserver((es) => { for (const e of es) { const v = views.find((x) => x.cv === e.target); if (v) v.visible = e.isIntersecting; } }) : null;
+
+function buildTower(tw, root) {
+  const sec = el("section", "enemy");
+  sec.appendChild(el("div", "enemy-head", `<span class="num">${tw.num}</span><h2>${tw.name}</h2><span class="tags">${tw.cls} · ${tw.weapon} · ${tw.hits === "none" ? "no attack" : "hits " + (tw.hits === "both" ? "air and ground" : tw.hits)}</span>`));
+  sec.appendChild(el("p", "desc", tw.desc));
+  for (const kind of ["look", "anim"]) {
+    const list = kind === "look" ? tw.looks : tw.anims;
+    const grid = el("div", "grid");
+    sec.appendChild(el("h3", "", kind === "look" ? "Look" : "Firing animation"));
+    for (const o of list) {
+      const p = el("div", "panel");
+      const cv = cardCanvas(260, 180);
+      register(cv, tw, kind === "look" ? () => o : () => lookOf(tw), kind === "anim" ? () => o : () => animOf(tw), 70);
+      p.appendChild(cv);
+      p.appendChild(el("div", "meta", `<span class="key">${o.key}</span><b>${o.name}</b>`));
+      p.appendChild(el("div", "desc", kind === "look" ? o.theme : o.desc));
+      const b = el("button", "pick", "Pick " + o.key);
+      const sync = () => { const on = st(tw.id)[kind] === o.key; b.classList.toggle("on", on); b.textContent = on ? "Picked " + o.key : "Pick " + o.key; };
+      b.onclick = () => { st(tw.id)[kind] = st(tw.id)[kind] === o.key ? null : o.key; save(); refresh(); };
+      b._sync = sync; sync(); p.appendChild(b);
+      grid.appendChild(p);
+    }
+    sec.appendChild(grid);
+    const lab = el("label", "notes", (kind === "look" ? "Look" : "Animation") + " notes");
+    const ta = document.createElement("textarea"); ta.value = st(tw.id).notes[kind] || "";
+    ta.oninput = () => { st(tw.id).notes[kind] = ta.value; save(); summary(); };
+    lab.appendChild(ta); sec.appendChild(lab);
+  }
+  const combo = el("div", "combo");
+  combo.appendChild(el("div", "combo-head", "Your combination"));
+  const cv = cardCanvas(480, 300); register(cv, tw, () => lookOf(tw), () => animOf(tw), 110); combo.appendChild(cv);
+  const cap = el("div", "desc combo-cap"); combo.appendChild(cap); combo._cap = cap; combo._tw = tw;
+  sec.appendChild(combo); combos.push(combo);
+  root.appendChild(sec);
+}
+const combos = [];
+function refresh() {
+  document.querySelectorAll("button.pick").forEach((b) => b._sync && b._sync());
+  for (const c of combos) { const tw = c._tw, l = lookOf(tw), a = animOf(tw); c._cap.textContent = `Look ${l.key} ${l.name} · animation ${a.key} ${a.name}` + (st(tw.id).look ? "" : " (option A until you pick)"); }
+  summary();
+}
+function summary() {
+  const out = [PAGE.title];
+  for (const tw of TOWERS) {
+    const s0 = st(tw.id), l = tw.looks.find((x) => x.key === s0.look), a = tw.anims.find((x) => x.key === s0.anim);
+    let line = `${tw.name}: look ${l ? l.key + " " + l.name : "-"}, animation ${a ? a.key + " " + a.name : "-"}`;
+    const n = [];
+    if ((s0.notes.look || "").trim()) n.push("look: " + s0.notes.look.trim().replace(/\s+/g, " "));
+    if ((s0.notes.anim || "").trim()) n.push("animation: " + s0.notes.anim.trim().replace(/\s+/g, " "));
+    if (n.length) line += "; notes: " + n.join(" | ");
+    out.push(line);
+  }
+  const ta = document.getElementById("summary"); if (ta) { ta.value = out.join("\n"); ta.rows = out.length + 1; }
+}
+function boot() {
+  const root = document.getElementById("towers");
+  for (const tw of TOWERS) buildTower(tw, root);
+  refresh();
+  document.getElementById("copy").onclick = () => { const ta = document.getElementById("summary"), b = document.getElementById("copy");
+    const done = () => { b.textContent = "Copied"; setTimeout(() => { b.textContent = "Copy picks and notes"; }, 1500); };
+    try { navigator.clipboard.writeText(ta.value).then(done, () => ta.select()); } catch (e) { ta.select(); } };
+  document.getElementById("clear").onclick = () => { if (!confirm("Clear this page's picks and notes?")) return; state = {}; save(); location.reload(); };
+  const t0 = performance.now();
+  const tick = () => { const t = (performance.now() - t0) / 1000; for (const v of views) if (v.visible) v.frame(t); requestAnimationFrame(tick); };
+  requestAnimationFrame(tick);
+}
+if (typeof document !== "undefined" && typeof NO_BOOT === "undefined") boot(); // the second-pass pages reuse makeView without this page
+
+// ---- Tower art second pass: per-step path looks and Retrofit looks on top of a confirmed base design --------
+// Data (defined before this): PAGE {title, store}, P2 {tower, look, anim, intro, paths: [{name, theme, steps: [{name, cost,
+// effect, options: [layer x3]}] x5}], retrofits: [{name, cost, effect, options: [layer x3]}], uncapped?}.
+// A layer: {key, name, desc, under?(c, aim, s, fx, t, col, info), over?(...), muzzles?, targets?, crit?, shot?, shotFx?, impactFx?}.
+//   under/over draw before/after the base model; muzzles replace the firing points (the last layer that sets them wins);
+//   targets = enemies it fires at at once; crit = crit chance shown as a gold burst; shot replaces the base shot (last wins);
+//   shotFx/impactFx draw on top of every shot/impact.
+
+const TW = BASE.TOWERS.find((x) => x.id === P2.tower);
+const BASE_LOOK = TW.looks.find((l) => l.key === P2.look), BASE_ANIM = TW.anims.find((a) => a.key === P2.anim);
+let S2 = {};
+try { S2 = JSON.parse(localStorage.getItem(PAGE.store) || "{}") || {}; } catch (e) { S2 = {}; }
+S2.picks ||= { ...(P2.picks || {}) }; S2.notes ||= {}; S2.build ||= { lv: [0, 0, 0], r: -1 };
+function save2() { try { localStorage.setItem(PAGE.store, JSON.stringify(S2)); } catch (e) { /* storage unavailable */ } }
+const STAGE = ["1", "2", "3", "4", "M"];
+const optOf = (list, id) => list.find((o) => o.key === S2.picks[id]) || list[0];
+
+// The layers for path levels lv[] and Retrofit r (-1 none); `over` swaps one stage for a candidate option.
+function layersFor(lv, r, swap) {
+  const out = [], keys = {}; out.build = { lv: lv.slice(), r, keys, key: (id) => keys[id] || "A" };
+  P2.paths.forEach((pa, pi) => { for (let k = 0; k < lv[pi]; k++) { const id = "p" + pi + "s" + k, o = swap && swap.id === id ? swap.opt : optOf(pa.steps[k].options, id); keys[id] = o.key; out.push(o); } });
+  if (r >= 0) { const id = "r" + r, o = swap && swap.id === id ? swap.opt : optOf(P2.retrofits[r].options, id); keys[id] = o.key; out.push(o); }
+  return out;
+}
+const GOLD_C = [1, 0.78, 0.3, 1];
+function critMark(p, v, s) { if (v >= 1) return; glowDot(p, s * 0.1 * (1 - v), GOLD_C); for (let i = 0; i < 6; i++) { const d = fa(i * TAU / 6 + 0.3); line(add(p, mul(d, s * (0.06 + 0.2 * v))), add(p, mul(d, s * (0.12 + 0.24 * v))), A(GOLD_C, 1 - v), 1.4); } }
+function compose(layers) {
+  let muzzles = BASE_LOOK.muzzles, targets = 1, crit = 0, shot = null;
+  for (const L of layers) { if (L.muzzles) muzzles = L.muzzles; if (L.targets) targets = Math.max(targets, L.targets); if (L.crit) crit = Math.max(crit, L.crit); if (L.shot) shot = L.shot; }
+  const B = layers.build || { lv: [0, 0, 0], r: -1 };
+  const md = P2.mods ? P2.mods(B) : null;
+  if (md) { if (md.targets) targets = md.targets; if (md.crit != null) crit = md.crit; if (md.shot) shot = md.shot; }
+  const look = { ...BASE_LOOK, muzzles, key: BASE_LOOK.key + layers.map((L) => L.key).join(""),
+    draw(c, aim, s, fx, t, col, info) { if (P2.model) return P2.model(c, aim, s, fx, t, col, info, B);
+      for (const L of layers) if (L.under) L.under(c, aim, s, fx, t, col, info);
+      BASE_LOOK.draw.call(this, c, aim, s, fx, t, col, info); for (const L of layers) if (L.over) L.over(c, aim, s, fx, t, col, info); } };
+  if (P2.plane) look.plane = (p, h, s, fx, t, col, O) => P2.plane(B, p, h, s, fx, t, col, O);
+  if (P2.door) look.door = (p, h, s, O) => P2.door(B, p, h, s, O);
+  if (P2.orbitR) look.orbitR = (r) => P2.orbitR(B, r);
+  if (P2.muzzleAt) look.muzzleAt = (m, k, c, aim, s, info) => P2.muzzleAt(B, m, k, c, aim, s, info);
+  const b = BASE_ANIM, every = crit > 0 ? Math.max(2, Math.round(1 / crit)) : 0;
+  const anim = { ...b, key: b.key + targets, burst: (b.burst || 1) * targets, multi: targets > 1 || b.multi, gap: targets > 1 ? 0.02 : b.gap,
+    ...(md && md.period ? { period: md.period } : {}), ...(md && md.flight ? { flight: md.flight } : {}), ...(md && md.persist ? { persist: md.persist } : {}), ...(md && md.burst ? { burst: md.burst, gap: md.gap ?? b.gap, multi: md.multi ?? false } : {}),
+    shot: (f, to, u, s, col, k, t, info) => { (shot || b.shot)(f, to, u, s, col, k, t, info); for (const L of layers) if (L.shotFx) L.shotFx(f, to, u, s, col, k, t, info); if (md && md.shotFx) md.shotFx(f, to, u, s, col, k, t, info); },
+    impact: (to, v, s, col, info) => { if (md && md.impact) md.impact(to, v, s, col, info); else if (b.impact) b.impact(to, v, s, col, info); for (const L of layers) if (L.impactFx) L.impactFx(to, v, s, col, info);
+      if (md && md.impactFx) md.impactFx(to, v, s, col, info);
+      if (every && info && info.sh && info.sh.m % every === 0) critMark(to, v, s); } };
+  return { look, anim };
+}
+function clampBuild(lv, changed) { // two paths at most; once one reaches 3, the other stops at 2
+  if (P2.uncapped) return;
+  const others = [0, 1, 2].filter((i) => i !== changed);
+  if (others.filter((i) => lv[i] > 0).length >= 2) lv[changed] = 0;
+  else if (others.some((i) => lv[i] >= 3)) lv[changed] = Math.min(lv[changed], 2);
+}
+
+function card(id, opt, lv, r, root) {
+  const p = el("div", "panel"), cv = cardCanvas(260, 180);
+  const comp = () => compose(layersFor(lv, r, { id, opt }));
+  register(cv, TW, () => comp().look, () => comp().anim, P2.sCard || 120);
+  p.appendChild(cv); p.appendChild(el("div", "meta", `<span class="key">${opt.key}</span><b>${opt.name}</b>`)); p.appendChild(el("div", "desc", opt.desc));
+  const b = el("button", "pick"); const sync = () => { const on = S2.picks[id] === opt.key; b.classList.toggle("on", on); b.textContent = (on ? "Picked " : "Pick ") + opt.key; };
+  b.onclick = () => { S2.picks[id] = S2.picks[id] === opt.key ? null : opt.key; save2(); refresh2(); }; b._sync = sync; sync(); p.appendChild(b); root.appendChild(p);
+}
+function notesBox(key, label, root) { const lab = el("label", "notes", label); const ta = document.createElement("textarea"); ta.value = S2.notes[key] || "";
+  ta.oninput = () => { S2.notes[key] = ta.value; save2(); summary2(); }; lab.appendChild(ta); root.appendChild(lab); }
+
+function buildPreview(root) {
+  const box = el("section", "build"), cv = cardCanvas(560, 360), ctrls = el("div", "ctrls");
+  register(cv, TW, () => compose(layersFor(S2.build.lv, S2.build.r)).look, () => compose(layersFor(S2.build.lv, S2.build.r)).anim, P2.sBuild || 210);
+  box.appendChild(cv); box.appendChild(ctrls);
+  ctrls.appendChild(el("div", "combo-head", "Build preview"));
+  const roles = [];
+  P2.paths.forEach((pa, pi) => { const c = el("div", "ctrl"), lab = el("label", "", ""), inp = document.createElement("input"), role = el("span", "role", "");
+    inp.type = "range"; inp.min = 0; inp.max = 5; inp.step = 1; inp.value = S2.build.lv[pi];
+    const show = () => { const v = S2.build.lv[pi]; lab.textContent = `Path ${pi + 1}: ${pa.name}: ${v === 0 ? "none" : v === 5 ? "mastery" : "step " + v}`; inp.value = v; };
+    inp.oninput = () => { S2.build.lv[pi] = +inp.value; clampBuild(S2.build.lv, pi); save2(); roles.forEach((f) => f()); };
+    roles.push(() => { show(); const lv = S2.build.lv; role.textContent = P2.uncapped ? "" : lv[pi] >= 3 ? "primary" : lv[pi] > 0 && lv.some((x, i) => i !== pi && x >= 3) ? "secondary (max 2)" : ""; });
+    c.appendChild(lab); c.appendChild(inp); c.appendChild(role); ctrls.appendChild(c); });
+  const rc = el("div", "ctrl"), sel = document.createElement("select"); rc.appendChild(el("label", "", "Retrofit"));
+  [["-1", "None"], ...P2.retrofits.map((rf, i) => [String(i), rf.name])].forEach(([v, n]) => { const o = document.createElement("option"); o.value = v; o.textContent = n; sel.appendChild(o); });
+  sel.value = String(S2.build.r); sel.onchange = () => { S2.build.r = +sel.value; save2(); }; rc.appendChild(sel); ctrls.appendChild(rc);
+  ctrls.appendChild(el("div", "desc", "Unpicked steps show option A."));
+  roles.forEach((f) => f()); root.appendChild(box);
+}
+
+function boot2() {
+  const root = document.getElementById("towers");
+  const head = el("section", "enemy");
+  head.appendChild(el("div", "enemy-head", `<span class="num">${TW.num}</span><h2>${TW.name}</h2><span class="tags">${TW.cls} · ${TW.weapon} · base look ${BASE_LOOK.key} ${BASE_LOOK.name}, animation ${BASE_ANIM.key} ${BASE_ANIM.name}</span>`));
+  head.appendChild(el("p", "desc", P2.intro)); root.appendChild(head);
+  buildPreview(root);
+  P2.paths.forEach((pa, pi) => { const sec = el("section", "enemy");
+    sec.appendChild(el("div", "enemy-head", `<h2>Path ${pi + 1}: ${pa.name}</h2><span class="tags">${pa.theme}</span>`));
+    pa.steps.forEach((st, k) => { const row = el("div", "stage"), lv = [0, 0, 0]; lv[pi] = k + 1;
+      row.appendChild(el("div", "stage-head", `<span class="lvl">${STAGE[k]}</span><b>${st.name}</b><span class="cost">${st.cost}</span><span class="eff">${st.effect}</span>`));
+      const g = el("div", "grid3"); st.options.forEach((o) => card("p" + pi + "s" + k, o, lv, -1, g)); row.appendChild(g); sec.appendChild(row); });
+    notesBox("p" + pi, `Path ${pi + 1} notes`, sec); root.appendChild(sec); });
+  const rs = el("section", "enemy"); rs.appendChild(el("div", "enemy-head", `<h2>Retrofit</h2><span class="tags">the player picks one of three</span>`));
+  P2.retrofits.forEach((rf, ri) => { const row = el("div", "stage");
+    row.appendChild(el("div", "stage-head", `<span class="lvl">R</span><b>${rf.name}</b><span class="cost">${rf.cost}</span><span class="eff">${rf.effect}</span>`));
+    const g = el("div", "grid3"); rf.options.forEach((o) => card("r" + ri, o, [0, 0, 0], ri, g)); row.appendChild(g); rs.appendChild(row); });
+  notesBox("r", "Retrofit notes", rs); root.appendChild(rs);
+  refresh2();
+  document.getElementById("copy").onclick = () => { const ta = document.getElementById("summary"), b = document.getElementById("copy");
+    const done = () => { b.textContent = "Copied"; setTimeout(() => { b.textContent = "Copy picks and notes"; }, 1500); };
+    try { navigator.clipboard.writeText(ta.value).then(done, () => ta.select()); } catch (e) { ta.select(); } };
+  document.getElementById("clear").onclick = () => { if (!confirm("Clear this page's picks and notes?")) return; S2 = { picks: {}, notes: {}, build: { lv: [0, 0, 0], r: -1 } }; save2(); location.reload(); };
+  const t0 = performance.now();
+  const tick = () => { const t = (performance.now() - t0) / 1000; for (const v of views) if (v.visible) v.frame(t); requestAnimationFrame(tick); };
+  requestAnimationFrame(tick);
+}
+function refresh2() { document.querySelectorAll("button.pick").forEach((b) => b._sync && b._sync()); summary2(); }
+function summary2() {
+  const out = [PAGE.title], nt = (k) => (S2.notes[k] || "").trim().replace(/\s+/g, " ");
+  P2.paths.forEach((pa, pi) => { let l = `Path ${pi + 1} ${pa.name}: ` + pa.steps.map((st, k) => `${STAGE[k]} ${S2.picks["p" + pi + "s" + k] || "-"}`).join(", ");
+    if (nt("p" + pi)) l += "; notes: " + nt("p" + pi); out.push(l); });
+  let r = "Retrofits: " + P2.retrofits.map((rf, i) => `${rf.name} ${S2.picks["r" + i] || "-"}`).join(", "); if (nt("r")) r += "; notes: " + nt("r"); out.push(r);
+  const ta = document.getElementById("summary"); if (ta) { ta.value = out.join("\n"); ta.rows = out.length + 1; }
+}
+if (typeof document !== "undefined") boot2();
+
+</script>
+</body>
+</html>
