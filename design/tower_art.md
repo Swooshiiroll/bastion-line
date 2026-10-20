@@ -392,6 +392,7 @@ The Tractor cyan and Augmentation lavender weren't changed, so they stand.
 | 15 | Cryo Tower | `design/tower_art_p2_15_cryo.html` | **Confirmed** (owner, 2026-10-19: "Finished"; Deep Cold C Frost Collar) |
 | 16 | Shockwave Generator | `design/tower_art_p2_16_shock.html` | **Confirmed** (owner, 2026-10-19: "Finished") |
 | 17 | Scrapyard | `design/tower_art_p2_17_scrap.html` | Base **confirmed** (owner, 2026-10-19: B Production Line, B Melt and Pour; base page `design/tower_art_p17_scrapyard.html`). New upgrade names confirmed. Second pass **confirmed** (owner, 2026-10-19, "Finished"; round 5) |
+| 18 | Magneto Tower | `design/tower_art_p2_18_magneto.html` | Second pass round 1: pick one option per stage and Retrofit |
 
 ### Gun Turret (second pass)
 
@@ -1235,6 +1236,42 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
 - **Round 5 (owner's note, "Make sure the hammer mill is underneath the gantry"; the owner chose "rail clearly over it"):** the bridge magnet's rails now run on past the Hammer Mill to y 35, with end stops, so the rail plainly passes over the mill instead of ending on it.
 - **"Move the additional crates to the left of the preexisting boxes":** Surplus's two crates now stand to the left of the crate stack (one design, preselected). The tow truck moved down 2 units to clear them.
 
+### Magneto Tower (second pass on the Stacked Coil Tower)
+
+**Owner's choices (2026-10-19):** the names stay as they are. Each path rebuilds one part: Pull Strength the **coil stack**, Field Size the **base** (rebuilt into field emitters), Polarity the **pole cap**.
+
+**The page** (`design/tower_art_p2_18_magneto.html`, data `tools/tower_art/data_p2_magneto.js` on the base `data_towers4.js`, look F, animation F). Each step rebuilds its part in the style picked for that step, and the new design replaces the old one. Masteries are gold.
+- **Pull Strength (coil stack, bigger each step):**
+  - **Thick windings:** striped, then clamped by four straps, then double-banded.
+  - **Tiered stack:** four, then five, then six coils, held in a three-legged brace.
+  - **Iron yoke:** each coil gets an iron core band on a laminated yoke with grip teeth.
+  - **Dense Field:** current runs visibly round the windings, or flux glows between the coils over the yoke.
+  - **Absolute Pull:** all gold.
+- **Field Size (the base as field emitters):**
+  - **Emitter rings:** one, two, then three rings of glowing nodes, on struts from Broad Field.
+  - **Pylons:** three, four, six, then eight, linked by arcs from Broad Field, with dishes from Great Field.
+  - **Fold-out field plates:** six plates, longer each step, layered from Great Field.
+  - **Magnetosphere:** gold under a gold aurora.
+- **Polarity (the pole cap, bigger each step):**
+  - **Split pole:** a red/blue split pole, ringed, then turning.
+  - **Claws:** three to six hooked claws round a red core.
+  - **Spikes:** a crown of five to nine red and blue spikes.
+  - **Torn Plates onward:** the stripped armour plates cling round the cap.
+  - **Reverse Polarity:** gold, and the pole's red and blue swap at each repel.
+- **The agent (Drag Trails plus the real rules):**
+  - The field ring grows, and a slow tag shows the real slow.
+  - Armour plates fly from enemies in the field to the cap, with -2, -4 or -5.
+  - From Torn Plates, stripped enemies stay cracked after they leave.
+  - At Reverse Polarity, every 4 s the field flips to repel: a ring flash in the new pole colour, and enemies are flung out and stunned.
+- **Retrofits:**
+  - **Superconducting Coil:** frost rime, a cryo jacket, or cold vapour.
+  - **Field Stabiliser:** a gyro ring, ballast blocks, or a floating ferrite halo.
+  - **Pole Shoes:** iron shoes, a shoe ring, or shoe plates by the cap.
+- **Carpet-rule overlaps (kept, stacking):**
+  - The Superconducting Coil's +5% slow with Pull Strength.
+  - The Field Stabiliser's +15 px with Field Size.
+  - The Pole Shoes' 30% less resistance with Heavy Grip and Mass Lock.
+
 ## Open questions
 
-1. **Second pass, Magneto Tower** (tower 18, next): then the Tractor Tower and the Augmentation Tower.
+1. **Second pass, Magneto Tower** (tower 18, round 1): pick one option per stage and Retrofit. Then the Tractor Tower and the Augmentation Tower.
