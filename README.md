@@ -1,4 +1,4 @@
-| Rampart | 35 || Bulwark | 33 || Mender Hulk | 51 || Blink Stalker | 11 || Gunship | 43 || Burrower | 31 || Rally Beacon | 21 || Locust | 15 || Jammer | 9 || Hydra Frame | 29 || Aegis Walker | 17 || Repair Bot | 5 || Phantom | 13 || Strike Drone | 25 || Siege Mech | 7 || Nanite | 2 || Skitter | 3 || Drone | 1 |# Bastion Line
+# Bastion Line
 
 A sci-fi tower defense game built in Godot 4.7 (GDScript).
 
@@ -232,23 +232,23 @@ Every enemy's health and speed scale with the round number, the same on every se
 | Enemy | From | Traits |
 |---|---|---|
 | Drone | 1 | Basic |
+| Nanite | 2 | Tiny, comes in swarms |
 | Skitter | 3 | Fast, fragile |
-| Nanite | 6 | Tiny, comes in swarms |
+| Repair Bot | 5 | Heals nearby non-boss enemies |
 | Siege Mech | 7 | 6 flat armor per hit (minimum 20% of damage gets through) |
-| Strike Drone | 8 | Quad-rotor flyer; flies straight from the warp gate to the core, ignoring the lane |
-| Phantom | 8 | Cloaked. Towers can only target it inside a Sensor Array field, or for 0.5 s after a blast, field or arc hits it while hidden |
-| Repair Bot | 9 | Heals nearby non-boss enemies |
-| Aegis Walker | 9 | Energy barrier (scales with HP) soaks damage before armor applies and recharges after 2.5 s untouched. Arc Coils hit barriers twice as hard |
-| Hydra Frame | 11 | Armored walker that splits into three Skitters when destroyed |
-| Jammer | 13 | EMP every 5 s knocks towers within 95 px offline for 2 s |
-| Locust | 26 | Tiny, fast flyer in dense swarms. Flak's favourite target |
-| Rally Beacon | 28 | Other non-boss enemies within 100 px move 25% faster (doesn't stack). Kill it first |
-| Burrower | 30 | Tunnels under the lane for 2.5 s every 5 s: untargetable, unhurt and immune to lane hazards while under |
-| Gunship | 32 | Armored heavy flyer (5 armor) |
-| Blink Stalker | 34 | Teleports 80 px down the lane every 4 s. A slow or stun resets the charge |
-| Mender Hulk | 36 | Regenerates 4% of its health per second after 1.5 s without taking damage |
-| Bulwark | 38 | Every 6 s gives nearby non-boss enemies (not itself) a barrier worth 25% of their health |
-| Rampart | 40 | Immune to slows, stuns and shoves; 8 armor |
+| Jammer | 9 | EMP every 5 s knocks towers within 95 px offline for 2 s |
+| Blink Stalker | 11 | Teleports 80 px down the lane every 4 s. A slow or stun resets the charge |
+| Phantom | 13 | Cloaked. Towers can only target it inside a Sensor Array field, or for 0.5 s after a blast, field or arc hits it while hidden |
+| Locust | 15 | Tiny, fast flyer in dense swarms. Flak's favourite target |
+| Aegis Walker | 17 | Energy barrier (scales with HP) soaks damage before armor applies and recharges after 2.5 s untouched. Arc Coils hit barriers twice as hard |
+| Rally Beacon | 21 | Other non-boss enemies within 100 px move 25% faster (doesn't stack). Kill it first |
+| Strike Drone | 25 | Quad-rotor flyer; flies straight from the warp gate to the core, ignoring the lane |
+| Hydra Frame | 29 | Armored walker that splits into three Skitters when destroyed |
+| Burrower | 31 | Tunnels under the lane for 2.5 s every 5 s: untargetable, unhurt and immune to lane hazards while under |
+| Bulwark | 33 | Every 6 s gives nearby non-boss enemies (not itself) a barrier worth 25% of their health |
+| Rampart | 35 | Immune to slows, stuns and shoves; 8 armor |
+| Gunship | 43 | Armored heavy flyer (5 armor) |
+| Mender Hulk | 51 | Regenerates 4% of its health per second after 1.5 s without taking damage |
 | **Dreadnought** (boss) | 20 | Boss of round 20, back in every later boss round. Armored, half-immune to slows, costs 6 shields if it leaks |
 | **Leviathan** (boss) | 60 | Flying carrier that launches 6 Locusts every 6 s. Boss of round 60. Costs 15 shields |
 | **Overmind** (boss) | 40 | Spawns Nanites as it advances. Boss of round 40. Costs 20 shields |
