@@ -109,3 +109,168 @@ export function applyNode(stats, n) {
   for (const k in n.set) out[k] = n.set[k];
   return out;
 }
+
+// --- GDScript number literals owned by balance.md -------------------------------------------------------------------
+// A path names a literal in a .gd source: "NAME" is `const NAME := 5` or `static var NAME := 0.3`; "NAME.a.b" walks into
+// `const NAME := {...}` by keys ("a": or 20:) and array indices (0, 1...), ending on a number literal.
+const NUM = /^-?\d+(?:\.\d+)?(?:e[-+]?\d+)?/;
+
+// Skips a string or a comment starting at i; returns the index after it (or i if neither).
+function skip(src, i) {
+  const ch = src[i];
+  if (ch === '"') { i++; while (i < src.length && src[i] !== '"') i += src[i] === "\\" ? 2 : 1; return i + 1; }
+  if (ch === "#") { while (i < src.length && src[i] !== "\n") i++; return i; }
+  return i;
+}
+function closing(src, open) {
+  let d = 0;
+  for (let i = open; i < src.length; ) {
+    const j = skip(src, i);
+    if (j !== i) { i = j; continue; }
+    const ch = src[i];
+    if ("{[(".includes(ch)) d++;
+    else if ("}])".includes(ch) && --d === 0) return i;
+    i++;
+  }
+  return -1;
+}
+// Within the container opening at `open`, the index where the value of key `key` (or array element `key`) starts.
+function member(src, open, key) {
+  const close = closing(src, open);
+  const isArr = src[open] === "[";
+  let d = 0, idx = 0, atItem = true;
+  const lit = /^\d+$/.test(key) ? `${key}:` : `"${key}":`;
+  for (let i = open + 1; i < close; ) {
+    if (d === 0 && !isArr && src.startsWith(lit, i) && (lit[0] === '"' || /[\s{,]/.test(src[i - 1]))) {
+      let k = i + lit.length;
+      while (/\s/.test(src[k])) k++;
+      return k;
+    }
+    const ch = src[i];
+    if (d === 0 && isArr && atItem && !/\s/.test(ch) && ch !== "#") { if (String(idx) === key) return i; atItem = false; }
+    const j = skip(src, i);
+    if (j !== i) { i = j; continue; }
+    if ("{[(".includes(ch)) d++;
+    else if ("}])".includes(ch)) d--;
+    else if (ch === "," && d === 0) { idx++; atItem = true; }
+    i++;
+  }
+  return -1;
+}
+// The [start, end) span of the literal at `path`, or null.
+export function gdSpan(src, path) {
+  const segs = String(path).split(".");
+  const top = new RegExp(`^(?:const|static var) ${segs[0]}(?:\\s*:\\s*\\w+)?\\s*:?=\\s*`, "m").exec(src);
+  if (!top) return null;
+  let at = top.index + top[0].length;
+  for (const s of segs.slice(1)) {
+    if (!"{[".includes(src[at])) return null;
+    at = member(src, at, s);
+    if (at < 0) return null;
+  }
+  const m = NUM.exec(src.slice(at));
+  return m ? [at, at + m[0].length] : null;
+}
+// The string literal at `path` (e.g. "ENEMIES.grunt.name"), or undefined.
+export function gdString(src, path) {
+  const segs = String(path).split(".");
+  const top = new RegExp(`^(?:const|static var) ${segs[0]}(?:\\s*:\\s*\\w+)?\\s*:?=\\s*`, "m").exec(src);
+  if (!top) return undefined;
+  let at = top.index + top[0].length;
+  for (const s of segs.slice(1)) { if (!"{[".includes(src[at])) return undefined; at = member(src, at, s); if (at < 0) return undefined; }
+  if (src[at] !== '"') return undefined;
+  return JSON.parse(src.slice(at, skip(src, at)));
+}
+export function gdRead(src, path) {
+  const sp = gdSpan(src, path);
+  return sp ? parseFloat(src.slice(sp[0], sp[1])) : undefined;
+}
+// `src` with the literal at `path` set to `raw` (a number as typed in balance.md), keeping a float literal a float.
+export function gdWrite(src, path, raw) {
+  const sp = gdSpan(src, path);
+  if (!sp) throw new Error(`no number at ${path}`);
+  const old = src.slice(sp[0], sp[1]);
+  if (Math.abs(parseFloat(old) - parseFloat(raw)) < 1e-12) return src;
+  let lit = String(raw);
+  if (/[.e]/.test(old) && !/[.e]/.test(lit)) lit += ".0";
+  return src.slice(0, sp[0]) + lit + src.slice(sp[1]);
+}
+// The keys of the dictionary at `path` whose values are number literals (one level deep).
+export function gdNumberKeys(src, path) {
+  const segs = String(path).split(".");
+  const top = new RegExp(`^(?:const|static var) ${segs[0]}(?:\\s*:\\s*\\w+)?\\s*:?=\\s*`, "m").exec(src);
+  if (!top) return [];
+  let at = top.index + top[0].length;
+  for (const s of segs.slice(1)) { at = member(src, at, s); if (at < 0) return []; }
+  if (src[at] !== "{") return [];
+  const out = [];
+  const close = closing(src, at);
+  let d = 0;
+  for (let i = at + 1; i < close; ) {
+    const j = skip(src, i);
+    if (j !== i) {
+      if (d === 0 && src[i] === '"') {
+        const k = src.slice(i + 1, j - 1);
+        let v = j;
+        if (src[v] === ":") { v++; while (/\s/.test(src[v])) v++; if (NUM.test(src.slice(v, v + 30))) out.push(k); }
+      }
+      i = j; continue;
+    }
+    if ("{[(".includes(src[i])) d++;
+    else if ("}])".includes(src[i])) d--;
+    i++;
+  }
+  return out;
+}
+// Every number literal inside the dictionary at `path`, as dotted sub-paths ("hp", "keys.shield_regen"), recursing into
+// nested dictionaries (not arrays).
+export function gdNumberPaths(src, path) {
+  const out = [];
+  for (const k of gdNumberKeys(src, path)) out.push(k);
+  for (const k of gdDictChildren(src, path)) for (const sub of gdNumberPaths(src, `${path}.${k}`)) out.push(`${k}.${sub}`);
+  return out;
+}
+// The keys of the dictionary at `path` whose values are themselves dictionaries.
+function gdDictChildren(src, path) {
+  const segs = String(path).split(".");
+  const top = new RegExp(`^(?:const|static var) ${segs[0]}(?:\\s*:\\s*\\w+)?\\s*:?=\\s*`, "m").exec(src);
+  if (!top) return [];
+  let at = top.index + top[0].length;
+  for (const s of segs.slice(1)) { at = member(src, at, s); if (at < 0) return []; }
+  if (src[at] !== "{") return [];
+  const out = [];
+  const close = closing(src, at);
+  let d = 0;
+  for (let i = at + 1; i < close; ) {
+    const j = skip(src, i);
+    if (j !== i) {
+      if (d === 0 && src[i] === '"' && src[j] === ":") {
+        let v = j + 1;
+        while (/\s/.test(src[v])) v++;
+        if (src[v] === "{") out.push(src.slice(i + 1, j - 1));
+      }
+      i = j; continue;
+    }
+    if ("{[(".includes(src[i])) d++;
+    else if ("}])".includes(src[i])) d--;
+    i++;
+  }
+  return out;
+}
+
+// The top-level keys of the dictionary const `name`.
+export function gdDictKeys(src, name) {
+  const top = new RegExp(`^const ${name}(?:\\s*:\\s*\\w+)?\\s*:?=\\s*\\{`, "m").exec(src);
+  if (!top) return [];
+  const open = top.index + top[0].length - 1, close = closing(src, open);
+  const out = [];
+  let d = 0;
+  for (let i = open + 1; i < close; ) {
+    const j = skip(src, i);
+    if (j !== i) { if (d === 0 && src[i] === '"' && src[j] === ":") out.push(src.slice(i + 1, j - 1)); i = j; continue; }
+    if ("{[(".includes(src[i])) d++;
+    else if ("}])".includes(src[i])) d--;
+    i++;
+  }
+  return out;
+}
