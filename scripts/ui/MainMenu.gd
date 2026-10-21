@@ -54,7 +54,7 @@ func _build_ui() -> void:
 	panel.add_child(_buttons)
 	_fill_buttons()
 
-	var foot := UiKit.label("B shop   1-9, 0, -, =, [, ], \\ build   E upgrade tree   R research   Space launch round   Q / W abilities   Esc close menus", 13, UiKit.DIM, HORIZONTAL_ALIGNMENT_CENTER)
+	var foot := UiKit.label("B shop   Y Retrofit   U / I / O upgrade   R research   Space launch round   Q / W abilities   Esc close menus", 13, UiKit.DIM, HORIZONTAL_ALIGNMENT_CENTER)
 	foot.add_theme_constant_override("outline_size", 4)
 	foot.position = Vector2(0, 836)
 	foot.size = Vector2(1600, 20)

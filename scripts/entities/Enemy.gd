@@ -343,7 +343,7 @@ func on_track() -> bool:
 	return not flying or bool(def.get("track", false))
 
 
-## Towers can't pick it as a target: burrowed, or cloaked and not revealed by a Sensor Array.
+## Towers can't pick it as a target: burrowed, or cloaked and not revealed (a Radar Tower ping).
 func is_hidden() -> bool:
 	return burrowed or (cloaked and reveal_timer <= 0.0 and disrupt_timer <= 0.0)
 

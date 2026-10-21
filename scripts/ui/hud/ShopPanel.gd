@@ -28,7 +28,7 @@ func _build() -> void:
 	var all: Array = Towers.all_types()
 	for i in all.size():
 		var type: String = all[i]
-		var b := _card(type, TowerInfo.build_key(i) if Towers.TOWERS.has(type) else "")
+		var b := _card(type, "")
 		b.position = Vector2(10 + (i % 2) * (CARD.x + 8), 8 + (i / 2) * (CARD.y + 6))
 		body.add_child(b)
 		cards[type] = b
@@ -102,7 +102,6 @@ func _show(type: String) -> void:
 		c.queue_free()
 	if type == "help":
 		_detail.add_child(UiKit.wrap_label("Hover a tower for its details. Click one to place it: the shop closes while you build and reopens afterwards.", rect.size.x - 28, 12, UiKit.DIM))
-		_detail.add_child(UiKit.wrap_label("Keys 1-9, 0, -, =, [, ] and \\ build directly.", rect.size.x - 28, 12, UiKit.DIM))
 		return
 	var g = screen.game
 	var d: Dictionary = Towers.def(type)
@@ -110,9 +109,5 @@ func _show(type: String) -> void:
 	_detail.add_child(UiKit.label("%d cr  ·  %s" % [g.tower_cost(type), TowerInfo.reach_text(type)], 12, UiKit.GOLD))
 	_detail.add_child(UiKit.wrap_label(d.blurb, rect.size.x - 28, 11, UiKit.DIM))
 	_detail.add_child(TowerInfo.stats_grid(g.level_stats(type, 1), {}, bool(d.get("beam", false)), 11, 8))
-	var specs: Array = []
-	if Towers.is_rework(type):
-		specs = Towers.Rework.TREES[type].paths.map(func(p): return str(p.name))
-	else:
-		specs = Tower.tree(type).branches.map(func(b): return str(b.nodes[0].name))
-	_detail.add_child(UiKit.label("%s: %s" % ["Paths" if Towers.is_rework(type) else "Branches", ", ".join(PackedStringArray(specs))], 11, UiKit.GOLD))
+	var specs: Array = Towers.Rework.TREES[type].paths.map(func(p): return str(p.name))
+	_detail.add_child(UiKit.label("%s: %s" % ["Paths", ", ".join(PackedStringArray(specs))], 11, UiKit.GOLD))

@@ -4,7 +4,7 @@ extends Node2D
 
 const Draw = preload("res://scripts/view/Draw.gd")
 const REPS := 40
-const LOOKS := [["scrap", 4, ""], ["arrow", 6, "flechette"], ["arrow", 6, "gatling"], ["arrow", 6, "shredder"], ["nova", 4, ""], ["flak", 4, ""], ["gravity", 4, ""], ["tesla", 6, "ionstorm"], ["drones", 5, "interceptors"], ["cannon", 6, "buster"], ["frost", 6, "stasis"], ["sensor", 5, "deepscan"], ["nullifier", 5, "dampener"], ["laser", 6, "focus"], ["missile", 6, "hellfire"], ["amp", 5, "array"]]
+const LOOKS := [["scrapyard", 4, "1|5|2|0"], ["gun_turret", 4, "0|5|2|0"], ["gun_turret", 4, "2|0|2|5"], ["mortar_tower", 4, "1|5|2|3"], ["rocket_salvo", 4, "2|3|5|5"], ["laser_tower", 4, "1|5|3|3"], ["tesla_tower", 4, "2|3|5|5"], ["drone_bay", 4, "0|5|3|3"], ["cryo_tower", 4, "1|5|3|3"], ["radar_tower", 4, "1|5|3|3"], ["railgun", 4, "2|3|5|5"], ["boost_tower", 4, "1|5|3|3"]]
 var frames := 0
 
 
@@ -44,7 +44,7 @@ func _draw() -> void:
 	parts.mastery_ring = (Time.get_ticks_usec() - t1) / REPS
 	t1 = Time.get_ticks_usec()
 	for i in REPS:
-		var _k := "%s|%d|%s|%s|%.2f|%d" % ["arrow", 6, "shredder", Color.CYAN.to_html(), 1.0, 3]
+		var _k := "%s|%d|%s|%s|%.2f|%d" % ["gun_turret", 4, "0|5|2|0", Color.CYAN.to_html(), 1.0, 3]
 	parts.key_format = (Time.get_ticks_usec() - t1) / REPS
 	t1 = Time.get_ticks_usec()
 	for i in REPS:

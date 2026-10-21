@@ -52,46 +52,46 @@ func _draw() -> void:
 		var key: int = tw.get_instance_id()
 		var cur: float = _aim.get(key, -PI / 2.0)
 		if tw.target != null and tw.target.alive:
-			cur = lerp_angle(cur, (tw.target.pos - tw.pos).angle(), 0.6 if (tw.is_rework and bool(tw.stats().get("turn_fast", false))) else 0.35)
+			cur = lerp_angle(cur, (tw.target.pos - tw.pos).angle(), 0.6 if bool(tw.stats().get("turn_fast", false)) else 0.35)
 		if tw.type == "artillery_cannon":
 			# It points at the spot it shells, not at an enemy.
 			cur = lerp_angle(cur, (tw.aim_point - tw.pos).angle(), 0.35)
 		_aim[key] = cur
 		var extra: Array = []
-		if tw.is_rework and tw.type == "gun_turret":
+		if tw.type == "gun_turret":
 			extra = _extra_aims(tw, key, cur)
-		elif tw.is_rework and tw.type == "magneto_tower":
+		elif tw.type == "magneto_tower":
 			extra = [tw.pulse_count]
-		elif tw.is_rework and tw.type == "tractor_tower":
+		elif tw.type == "tractor_tower":
 			var rech := float(tw.stats().get("recharge", 6.0))
 			var holding := float(tw.gun_cds.get("hold_left", 0.0)) > 0.0
 			extra = [1.0 if holding else clampf(1.0 - tw.cooldown / maxf(rech, 0.1), 0.0, 1.0), 1.0 if holding else 0.0]
-		elif tw.is_rework and tw.type == "shockwave_generator":
+		elif tw.type == "shockwave_generator":
 			extra = [g.time - float(tw.gun_cds.get("wave_t", -9.0))]
-		elif tw.is_rework and tw.type == "radar_tower":
+		elif tw.type == "radar_tower":
 			extra = [3.0 if tw.stats().get("constant", false) else float(tw.stats().get("ping_every", 3.0))]
-		elif tw.is_rework and tw.type == "cryo_tower":
+		elif tw.type == "cryo_tower":
 			extra = [clampf(tw.fire_flash / 0.3, 0.0, 1.0)]
-		elif tw.is_rework and tw.type == "chemical_plant":
+		elif tw.type == "chemical_plant":
 			var second: float = cur
 			if tw.shot_targets.size() > 1 and tw.shot_targets[1] != null and tw.shot_targets[1].alive:
 				second = (tw.shot_targets[1].pos - tw.pos).angle()
 			extra = [second]
-		elif tw.is_rework and tw.type == "mine_layer":
+		elif tw.type == "mine_layer":
 			extra = [tw.pulse_count]
-		elif tw.is_rework and tw.type == "drone_bay":
+		elif tw.type == "drone_bay":
 			extra = [tw.available_loadouts().find(tw.loadout), tw.wing.is_empty()]
-		elif tw.is_rework and tw.type == "tesla_tower":
+		elif tw.type == "tesla_tower":
 			extra = [clampf(1.0 - tw.cooldown * tw.eff_rate(), 0.0, 1.0)]
-		elif tw.is_rework and tw.type == "railgun":
+		elif tw.type == "railgun":
 			extra = [clampf(1.0 - tw.cooldown * tw.eff_rate(), 0.0, 1.0), tw.pulse_count]
-		elif tw.is_rework and tw.type == "artillery_cannon":
+		elif tw.type == "artillery_cannon":
 			extra = [ArtilleryCannonArt.types(ArtilleryCannonArt.levels(tw.look_key())).find(tw.shell), tw.pulse_count]
-		elif tw.is_rework and tw.type == "anti_aircraft_turret":
+		elif tw.type == "anti_aircraft_turret":
 			extra = [tw.pulse_count]
-		elif tw.is_rework and tw.type == "laser_tower":
+		elif tw.type == "laser_tower":
 			extra = [clampf(tw.ramp / float(tw.stats().ramp_time), 0.0, 1.0) if tw.target != null else 0.0]
-		Draw.tower(self, tw.type, tw.tier, tw.pos, cur, 1.0 if tw.size <= 1 else 1.8, t + float(tw.cell.x) * 0.3, tw.fire_flash, tw.spec, tw.shown_spec, extra)
+		Draw.tower(self, tw.type, tw.tier, tw.pos, cur, 1.0 if tw.size <= 1 else 1.8, t + float(tw.cell.x) * 0.3, tw.fire_flash, tw.spec, "", extra)
 		if tw.disabled > 0.0:
 			Draw.tower_offline(self, tw.pos, t)
 		elif tw.debuff_rate > 0.0 or tw.debuff_range > 0.0:
@@ -103,7 +103,7 @@ func _draw() -> void:
 			BoostTowerArt.chevrons(self, tw.pos, [tw.buff_dmg, tw.buff_rate, tw.buff_range])
 		if tw.buff_dmg > 0.0:
 			Draw.disc(self, tw.pos + Vector2(14, -14), 3.0, Draw.OUTLINE)
-			Draw.disc(self, tw.pos + Vector2(14, -14), 2.2, Draw.ACCENT.amp)
+			Draw.disc(self, tw.pos + Vector2(14, -14), 2.2, Draw.ACCENT.boost_tower)
 	Draw.turret_cache = false
 	var t1 := Time.get_ticks_usec()
 	if timing_on:
@@ -203,29 +203,18 @@ func _wing(tw, t: float) -> void:
 		var pose := CasGunshipArt.plane_pose(tw.aim_point, orbit, tw.orbit_angle)
 		CasGunshipArt.plane(self, pose.pos, pose.heading, 1.0 if tw.size <= 1 else 1.8, t, tw.spec, acc, tw.fire_flash > 0.0 and tw.disabled <= 0.0)
 		return
-	if tw.is_rework:
-		if tw.disabled > 0.0:
-			return
-		for i in tw.wing.size():
-			var dr: Dictionary = tw.wing[i]
-			var tg = dr.target
-			var face := -PI / 2.0
-			if tg != null and tg.alive and tg.pos.distance_squared_to(dr.pos) > 1.0:
-				face = (tg.pos - dr.pos).angle()
-			var lift := sin(t * 5.0 + float(i)) * 1.5
-			Draw.ellipse(self, dr.pos + Vector2(0, 9), 4.0, 1.6, Color(0, 0, 0, 0.22))
-			DroneBayArt.drone(self, dr.pos + Vector2(0, lift), face, 1.25, t + float(i), tw.spec, acc)
+	if tw.disabled > 0.0:
 		return
 	for i in tw.wing.size():
-		var d: Dictionary = tw.wing[i]
-		var p: Vector2 = d.pos
-		var facing := Vector2.UP
-		var tg = d.target
-		if tg != null and tg.alive and tg.pos.distance_squared_to(p) > 1.0:
-			facing = (tg.pos - p).normalized()
-		var bob := sin(t * 5.0 + float(i)) * 1.5
-		Draw.ellipse(self, p + Vector2(0, 9), 4.0, 1.6, Color(0, 0, 0, 0.22))
-		Draw.drone(self, p + Vector2(0, bob), facing, 1.25, t + float(i), tw.spec, acc, d.kind == "bomber")
+		var dr: Dictionary = tw.wing[i]
+		var tg = dr.target
+		var face := -PI / 2.0
+		if tg != null and tg.alive and tg.pos.distance_squared_to(dr.pos) > 1.0:
+			face = (tg.pos - dr.pos).angle()
+		var lift := sin(t * 5.0 + float(i)) * 1.5
+		Draw.ellipse(self, dr.pos + Vector2(0, 9), 4.0, 1.6, Color(0, 0, 0, 0.22))
+		DroneBayArt.drone(self, dr.pos + Vector2(0, lift), face, 1.25, t + float(i), tw.spec, acc)
+
 
 ## Turns each extra gun toward the enemy its shots go at (the main aim when it has none).
 func _extra_aims(tw, key: int, main: float) -> Array:
@@ -245,30 +234,6 @@ func _projectile(p) -> void:
 	if p.hold > 0.0:
 		return
 	match p.kind:
-		"cannon":
-			# A plasma shell arcing up and down: ground shadow, a glowing trail behind it.
-			var frac := clampf(p.traveled / p.total, 0.0, 1.0)
-			var lift := sin(frac * PI) * minf(34.0, p.total * 0.22)
-			Draw.ellipse(self, p.pos + Vector2(0, 3), 4.0 + 2.0 * (1.0 - lift / 34.0), 2.0, Color(0, 0, 0, 0.3))
-			var sp: Vector2 = p.pos - Vector2(0, lift)
-			var col := Color(0.55, 1.0, 0.3) if p.burn_dps > 0.0 else Color(1.0, 0.55, 0.2)
-			var back: Vector2 = (p.start - p.pos).normalized() if p.start.distance_squared_to(p.pos) > 1.0 else Vector2.LEFT
-			for k in 4:
-				var tp: Vector2 = sp + back * (4.0 + 3.5 * float(k)) + Vector2(0, float(k) * 1.5)
-				Draw.disc(self, tp, 3.4 - 0.7 * float(k), Color(col, 0.35 - 0.08 * float(k)))
-			Draw.disc(self, sp, 7.0, Color(col, 0.22))
-			Draw.disc(self, sp, 4.8, Draw.OUTLINE)
-			Draw.disc(self, sp, 4.2, col)
-			Draw.disc(self, sp + Vector2(-1.2, -1.2), 1.8, Color(1, 1, 0.9))
-		"flak":
-			var fd: Vector2 = (p.target_pos - p.pos).normalized()
-			if fd == Vector2.ZERO:
-				fd = Vector2.RIGHT
-			draw_line(p.pos - fd * 10.0, p.pos, Color(Draw.ACCENT.flak, 0.3), 4.0, true)
-			draw_line(p.pos - fd * 6.0, p.pos, Color(1.0, 0.9, 0.6, 0.6), 1.4, true)
-			Draw.disc(self, p.pos, 3.0, Draw.OUTLINE)
-			Draw.disc(self, p.pos, 2.3, Color(0.8, 0.75, 0.5))
-			Draw.disc(self, p.pos + fd * 0.8, 1.1, Color(1.0, 0.4, 0.3))
 		"missile":
 			# A finned missile with a red warhead, a flaring motor and a smoke trail.
 			var d: Vector2 = p.vel.normalized() if p.vel.length_squared() > 1.0 else Vector2.RIGHT
@@ -297,7 +262,7 @@ func _projectile(p) -> void:
 			var d: Vector2 = (p.target_pos - p.pos).normalized()
 			if d == Vector2.ZERO:
 				d = Vector2.RIGHT
-			var col := Color(1.0, 0.35, 0.35) if p.shred > 0.0 else Draw.ACCENT.arrow
+			var col := Color(1.0, 0.35, 0.35) if p.shred > 0.0 else Draw.ACCENT.gun_turret
 			draw_line(p.pos - d * 14.0, p.pos, Color(col, 0.2), 6.0, true)
 			draw_line(p.pos - d * 11.0, p.pos, Color(col, 0.5), 3.2, true)
 			draw_line(p.pos - d * 8.0, p.pos, col, 1.8, true)

@@ -9,7 +9,6 @@ const Bot = preload("res://scripts/core/Bot.gd")
 const SaveCodec = preload("res://scripts/core/SaveCodec.gd")
 const Lore = preload("res://scripts/core/Lore.gd")
 const UpgradeRules = preload("res://scripts/core/UpgradeRules.gd")
-const UpgradePreview = preload("res://scripts/ui/hud/UpgradePreview.gd")
 const Glossary = preload("res://data/glossary.gd")
 const Grid = preload("res://scripts/core/Grid.gd")
 const Enemy = preload("res://scripts/entities/Enemy.gd")
@@ -25,7 +24,6 @@ const Maps = preload("res://data/maps.gd")
 const Abilities = preload("res://data/abilities.gd")
 const Research = preload("res://scripts/core/Research.gd")
 const ResearchData = preload("res://data/research.gd")
-const Trees = preload("res://data/tower_trees.gd")
 const Difficulty = preload("res://data/difficulty.gd")
 
 const SANDBOX := "user://test_sandbox/"
@@ -62,34 +60,18 @@ func _run() -> void:
 		"test_rubble",
 		"test_lane_hazards",
 		"test_switch_gates",
-		"test_save_migration_v5",
-		"test_save_migration_v6",
-		"test_save_migration_v7",
 		"test_armor_math",
 		"test_slow_rules",
 		"test_targeting_modes",
 		"test_flyer_rules",
-		"test_cannon_splash",
-		"test_tesla_chain",
-		"test_sniper_pierce",
 		"test_placement_rules",
 		"test_economy",
 		"test_wave_clear_and_early_call",
 		"test_shaman_heal",
 		"test_warlord_minions",
 		"test_round_generation",
-		"test_spec_pulse",
-		"test_spec_mortar",
-		"test_spec_cryo",
-		"test_spec_railgun",
-		"test_spec_arc",
-		"test_laser",
-		"test_missiles",
-		"test_amplifier",
-		"test_save_migration_v2",
 		"test_abilities",
 		"test_difficulty_modes",
-		"test_save_migration_v1",
 		"test_music_synthesis",
 		"test_save_roundtrip_and_determinism",
 		"test_save_error_handling",
@@ -98,22 +80,14 @@ func _run() -> void:
 		"test_research_points",
 		"test_research_profile",
 		"test_research_effects",
-		"test_mastery_upgrades",
-		"test_branch_rules",
-		"test_laser_charge_stat",
 		"test_knowledge_base",
 		"test_footprint",
 		"test_target_priority",
 		"test_mastery_needs_all_research",
-		"test_scrapyard",
-		"test_mastery_mechanics",
-		"test_save_research_v4",
 		"test_phantom_cloak",
 		"test_aegis_barrier",
 		"test_hydra_split",
 		"test_jammer_emp",
-		"test_flak",
-		"test_graviton",
 		"test_burrower",
 		"test_blink_stalker",
 		"test_mender_regen",
@@ -122,7 +96,6 @@ func _run() -> void:
 		"test_rampart",
 		"test_is_boss_round",
 		"test_launch_view",
-		"test_sweeper_beams_clear_between_rounds",
 		"test_sandbox_resources",
 		"test_sandbox_spawn",
 		"test_sandbox_call_round",
@@ -222,75 +195,26 @@ func run_until(g, cond: Callable, max_seconds: float) -> bool:
 
 
 ## Rough damage per second of a tower level: projectiles, pellets, bomblets and drones included.
-func level_dps(lv: Dictionary) -> float:
-	var per_hit := float(lv.get("damage", 0.0)) * float(lv.get("missiles", 1.0)) * float(maxi(1, ceili(float(lv.get("pellets", 1.0)) / 2.0)))
-	per_hit *= 1.0 + float(lv.get("bomblets", 0.0)) + float(lv.get("beams", 1.0)) - 1.0
-	var dps := per_hit * float(lv.get("rate", 1.0)) * float(lv.get("multishot", 1.0)) * maxf(1.0, float(lv.get("drones", 1.0)))
-	dps += float(lv.get("burn_dps", 0.0)) * 0.5 + float(lv.get("aura_dps", 0.0))
-	return dps + float(lv.get("bomb_damage", 0.0)) * float(lv.get("bombers", 0.0)) / 2.2
-
-
 # --- Data ------------------------------------------------------------------------------------
 
 func test_data_integrity() -> void:
-	check(Towers.ORDER.size() == 15 and Trees.ORDER == Towers.ORDER, "fifteen tower types, each with a generated tree")
+	check(Towers.ORDER.size() == 20 and Towers.ORDER == Towers.Rework.ORDER, "twenty tower types, each with generated data")
 	for type in Towers.ORDER:
-		check(Trees.TREES.has(type), "%s has an upgrade tree" % type)
-		if not Trees.TREES.has(type):
-			continue
-		var tr: Dictionary = Trees.TREES[type]
-		var d: Dictionary = Towers.TOWERS[type]
-		check(tr.tiers.size() == 2 and tr.branches.size() == 3, "%s: two trunk tiers and three branches" % type)
-		var ids := {}
-		for b in tr.branches:
-			check(b.nodes.size() == Tower.BRANCH_STEPS and b.mastery != null, "%s branch %s: four upgrades and a mastery" % [type, b.key])
-			check(not ids.has(b.id), "%s branch ids are unique" % type)
-			ids[b.id] = true
-			var all_nodes: Array = b.nodes.duplicate()
-			all_nodes.append(b.mastery)
+		var tr: Dictionary = Towers.Rework.TREES[type]
+		check(tr.paths.size() == 3 and not tr.retrofits.is_empty() and tr.retrofits.size() <= 3, "%s: three paths and one to three Retrofits" % type)
+		for p in tr.paths:
+			check(p.nodes.size() == Tower.BRANCH_STEPS and p.mastery != null, "%s path %s: four upgrades and a mastery" % [type, p.key])
+			var all_nodes: Array = p.nodes.duplicate()
+			all_nodes.append(p.mastery)
 			for nd in all_nodes:
-				check(str(nd.name) != "" and str(nd.blurb) != "" and int(nd.cost) > 0, "%s %s %s has a name, description and price" % [type, b.key, nd.name])
-			for i in range(1, b.nodes.size()):
-				check(int(b.nodes[i].cost) >= int(b.nodes[i - 1].cost), "%s %s: upgrade prices rise along the branch" % [type, b.key])
-			check(int(b.mastery.cost) > int(b.nodes[Tower.BRANCH_STEPS - 1].cost), "%s %s: the mastery costs the most" % [type, b.key])
-		for sid in d.get("spec_order", []):
-			check(ids.has(sid), "%s: old specialization %s is still a branch (saves use it)" % [type, sid])
-		# Every level has the stats its attack needs.
-		var ln := Tower.lines(type)
-		var levels: Array = [ln.t1, ln.t2]
-		for b in tr.branches:
-			levels.append_array(ln[b.key].slice(1))
-			levels.append(ln[b.key + "_m"])
-		var support: bool = d.get("support", false)
-		for lv in levels:
-			var keys := [] if d.get("drones", false) else ["range"]
-			if d.get("economy", false):
-				keys = ["income"]
-			elif support:
-				keys.append("mark" if d.get("sensor", false) else "buff_dmg")
-			elif d.get("beam", false):
-				keys.append("damage")
-			else:
-				keys.append_array(["damage", "rate"])
-			for key in keys:
-				check(lv.has(key) and float(lv[key]) > 0.0, "%s level has positive %s" % [type, key])
-		var key_needed := {
-			"arrow": ["proj_speed"], "cannon": ["splash", "proj_speed"], "frost": ["slow", "slow_time"],
-			"sniper": ["pierce"], "tesla": ["chains", "chain_range", "falloff"],
-			"missile": ["missiles", "splash", "air_mult", "proj_speed"],
-			"flak": ["splash", "proj_speed"], "gravity": ["push"], "sensor": ["mark"],
-			"nullifier": ["strip"], "drones": ["drones", "drone_speed"],
-		}
-		for key in key_needed.get(type, []):
-			check(levels.all(func(lv): return lv.has(key)), "%s levels all have %s" % [type, key])
-		if not support:
-			check(float(ln.t2.damage) > float(ln.t1.damage), "%s damage rises at tier 2" % type)
-			for b in tr.branches:
-				# Attack-style branches trade damage for area; the Nullifier is utility first.
-				if bool(b.attack) or type == "nullifier":
-					continue
-				check(level_dps(ln[b.key][1]) > level_dps(ln.t2), "%s %s out-damages tier 2 per second" % [type, b.id])
-	check(not Towers.TOWERS.cannon.air, "mortar can't hit air")
+				check(str(nd.name) != "" and str(nd.blurb) != "" and int(nd.cost) > 0, "%s %s %s has a name, description and price" % [type, p.key, nd.name])
+		for r in tr.retrofits:
+			check(str(r.name) != "" and int(r.cost) > 0, "%s Retrofit %s has a name and price" % [type, r.name])
+		var d: Dictionary = Towers.def(type)
+		var base: Dictionary = Tower.rework_base(type)
+		if not d.support and not d.economy and not (type in ["artillery_cannon", "drone_bay", "cas_gunship"]):
+			check(float(base.get("range", 0.0)) > 0.0, "%s has a range" % type)
+	check(not Towers.def("mortar_tower").air, "the Mortar can't hit air")
 
 	for w in range(1, 26):
 		var groups: Array = Waves.get_wave(w)
@@ -327,7 +251,7 @@ func test_data_integrity() -> void:
 	check(Enemies.ORDER.size() == 34 and Enemies.ENEMIES.size() == 34, "34 enemy types")
 	var cheapest := 1 << 30
 	for type in Towers.ORDER:
-		cheapest = mini(cheapest, int(Trees.TREES[type].tiers[0].cost))
+		cheapest = mini(cheapest, int(Towers.Rework.TREES[type].cost))
 	check(Game.START_GOLD >= cheapest * 3, "starting credits buy a few towers")
 
 
@@ -410,14 +334,14 @@ func test_map_geometry() -> void:
 func test_terrain_sites() -> void:
 	var g = new_game("meadow")
 	g.gold = 5000
-	var plain = g.place_tower("arrow", Vector2i(2, 3))
-	var high = g.place_tower("arrow", Vector2i(11, 5))
-	var power = g.place_tower("arrow", Vector2i(7, 6))
+	var plain = g.place_tower("gun_turret", Vector2i(2, 3))
+	var high = g.place_tower("gun_turret", Vector2i(11, 5))
+	var power = g.place_tower("gun_turret", Vector2i(7, 6))
 	check(high.site == "H" and power.site == "P" and plain.site == "", "towers know the tile they stand on")
 	check(near(high.get_range(), plain.get_range() * 1.15), "high ground: +15%% range (%.1f)" % high.get_range())
 	check(near(power.eff_damage(), plain.eff_damage() * 1.15) and near(power.get_range(), plain.get_range()), "power node: +15%% damage, no range")
-	var amp = g.place_tower("amp", Vector2i(12, 5))
-	check(near(amp.get_range(), 100.0 * 1.15), "high ground widens a pylon's field too")
+	var amp = g.place_tower("boost_tower", Vector2i(12, 5))
+	check(near(amp.get_range(), float(Tower.rework_base("boost_tower").range) * 1.15), "high ground widens a Boost Tower's field too")
 	var data := SaveCodec.encode(g)
 	var res := SaveCodec.decode(data)
 	check(res.has("game") and res.game.tower_at[Vector2i(11, 5)].site == "H", "sites come back after loading")
@@ -427,14 +351,15 @@ func test_rubble() -> void:
 	var g = new_game("meadow")
 	var r := Vector2i(16, 5)
 	check(g.has_rubble(r) and not g.is_buildable(r), "rubble blocks building")
-	check(g.placement_error("arrow", r).contains("Rubble"), "placement explains rubble (%s)" % g.placement_error("arrow", r))
+	check(g.placement_error("gun_turret", r).contains("Rubble"), "placement explains rubble (%s)" % g.placement_error("gun_turret", r))
 	g.gold = 30
 	check(not g.clear_rubble(r) and g.rubble_error(r).contains("40"), "clearing needs 40 cr")
 	g.gold = 100
 	check(g.clear_rubble(r) and g.gold == 60, "clearing costs 40 cr")
-	check(not g.has_rubble(r) and g.is_buildable(r) and g.placement_error("arrow", r) == "", "cleared rubble is buildable")
+	g.gold += 100
+	check(not g.has_rubble(r) and g.is_buildable(r) and g.placement_error("gun_turret", r) == "", "cleared rubble is buildable")
 	check(not g.clear_rubble(r) and not g.clear_rubble(Vector2i(2, 3)), "only rubble can be cleared, once")
-	g.place_tower("arrow", r)
+	g.place_tower("gun_turret", r)
 	var data := SaveCodec.encode(g)
 	check(data.cleared == [[16, 5]], "cleared rubble is saved")
 	var res := SaveCodec.decode(JSON.parse_string(JSON.stringify(data)))
@@ -522,47 +447,6 @@ func test_switch_gates() -> void:
 	check(not new_game("meadow").cycle_gate(0), "maps without forks have no gate to flip")
 	var sg = new_game("singularity")
 	check(sg.grid.groups.size() == 2 and sg.gates.size() == 2, "Singularity Array has two gates")
-
-
-func test_save_migration_v5() -> void:
-	# A v4 run on the old Red Rift with a tower where the new layout has a wall, and one on rubble.
-	var v4 := {
-		"version": 4, "map_id": "canyon", "difficulty": "normal", "ability_cd": {}, "wave": 6, "gold": 100, "lives": 18,
-		"research": [], "bounty_carry": 0.0,
-		"towers": [
-			{"type": "arrow", "col": 4, "row": 0, "tier": 1, "mode": 0, "kills": 1, "spent": 50},
-			{"type": "arrow", "col": 5, "row": 6, "tier": 2, "mode": 0, "kills": 3, "spent": 120},
-			{"type": "cannon", "col": 6, "row": 3, "tier": 1, "mode": 0, "kills": 0, "spent": 90},
-		],
-	}
-	var res := SaveCodec.decode(v4)
-	check(res.has("game"), "v4 save loads (%s)" % res.get("error", ""))
-	if res.has("game"):
-		var g = res.game
-		check(not g.tower_at.has(Vector2i(4, 0)) and g.gold == 150, "a tower on a new wall is refunded (%d cr)" % g.gold)
-		check(g.tower_at.has(Vector2i(5, 6)) and g.cleared.has(Vector2i(5, 6)), "a tower on new rubble clears it")
-		check(g.tower_at.has(Vector2i(6, 3)) and int(SaveCodec.encode(g).version) == Game.SAVE_VERSION, "other towers stay; re-saving writes the current format")
-
-
-func test_save_migration_v6() -> void:
-	# A v5 run on the 20×12 Outpost Theta: (19, 10) was floor there and is lane now; (5, 5) was
-	# rubble there (cleared) and is floor now.
-	var v5 := {
-		"version": 5, "map_id": "meadow", "difficulty": "normal", "ability_cd": {}, "wave": 9, "gold": 40, "lives": 20,
-		"research": [], "bounty_carry": 0.0, "cleared": [[5, 5], [1, 10]], "gates": [], "route_counters": [0],
-		"towers": [
-			{"type": "arrow", "col": 2, "row": 3, "tier": 2, "mode": 0, "kills": 5, "spent": 120},
-			{"type": "sniper", "col": 19, "row": 10, "tier": 1, "mode": 0, "kills": 2, "spent": 120},
-		],
-	}
-	var res := SaveCodec.decode(v5)
-	check(res.has("game"), "v5 save loads (%s)" % res.get("error", ""))
-	if res.has("game"):
-		var g = res.game
-		check(not g.tower_at.has(Vector2i(19, 10)) and g.gold == 160, "a tower on a new lane is refunded (%d cr)" % g.gold)
-		check(g.tower_at.has(Vector2i(2, 3)) and g.tower_at[Vector2i(2, 3)].tier == 2, "other towers stay")
-		check(g.cleared.has(Vector2i(1, 10)) and not g.cleared.has(Vector2i(5, 5)), "cleared rubble that no longer exists is dropped")
-		check(int(SaveCodec.encode(g).version) == Game.SAVE_VERSION, "re-saving writes the current format")
 
 
 
@@ -697,19 +581,6 @@ func test_launch_view() -> void:
 	check(BottomBar.launch_view(g, false).counter == "ROUND 3  ENDLESS", "endless drops the total")
 
 
-func test_sweeper_beams_clear_between_rounds() -> void:
-	var g = new_game()
-	g.state = Game.State.WAVE
-	var sw = spec_tower(g, "laser", Vector2i(2, 3), "sweeper")
-	put(g, "grunt", 80.0, 0, 30.0)
-	g.tick(SIM_DT)
-	check(not sw.sweep_angles.is_empty(), "a sweeper with a target is sweeping")
-	g.state = Game.State.BUILD
-	g.tick(SIM_DT)
-	check(sw.sweep_angles.is_empty(), "no sweep beams between rounds")
-	check(Draw.laser_barrel_length(1, 1.0) > 11.0, "the barrel tip is past the old 11 px beam origin")
-
-
 func sandbox_game(diff := "medium"):
 	var g = new_game("meadow", 1234, diff)
 	g.make_sandbox()
@@ -719,7 +590,7 @@ func sandbox_game(diff := "medium"):
 func test_sandbox_resources() -> void:
 	var g = sandbox_game()
 	check(g.gold == Game.SANDBOX_GOLD, "credits start pinned")
-	var t = g.place_tower("arrow", Vector2i(2, 3))
+	var t = g.place_tower("gun_turret", Vector2i(2, 3))
 	check(t != null, "towers can be built")
 	g.upgrade_tower(t)
 	g.tick(SIM_DT)
@@ -781,8 +652,7 @@ func test_sandbox_clear_field() -> void:
 
 func test_sandbox_max_branch() -> void:
 	var g = sandbox_game()
-	var t = g.place_tower("arrow", Vector2i(2, 3))
-	g.upgrade_tower(t)
+	var t = g.place_tower("gun_turret", Vector2i(2, 3))
 	var n: int = g.sandbox_max_branch(t, "a")
 	check(n == Tower.BRANCH_STEPS, "a branch buys its %d steps, no mastery without research (%d)" % [Tower.BRANCH_STEPS, n])
 	g.sandbox_set_research("all", [])
@@ -790,8 +660,8 @@ func test_sandbox_max_branch() -> void:
 	check(m == 1 and t.tier >= Tower.MASTERY_TIER, "with research on, Max reaches the mastery (%d)" % m)
 	g.sandbox_set_research("none", [])
 	check(g.research.is_empty() and g.gold == Game.SANDBOX_GOLD, "research off again")
-	g.sandbox_set_research("mine", ["arrow_1"])
-	check(g.research == ["arrow_1"], "mine applies the player's own")
+	g.sandbox_set_research("mine", ["gun_turret_1"])
+	check(g.research == ["gun_turret_1"], "mine applies the player's own")
 
 
 func test_sandbox_no_medal() -> void:
@@ -804,7 +674,7 @@ func test_sandbox_no_medal() -> void:
 
 func test_sandbox_dps() -> void:
 	var g = sandbox_game()
-	var t = g.place_tower("arrow", Vector2i(2, 3))
+	var t = g.place_tower("gun_turret", Vector2i(2, 3))
 	var e = put(g, "grunt", 60.0, 0, 1000.0)
 	g.state = Game.State.WAVE
 	for i in int(6.0 / SIM_DT):
@@ -846,7 +716,7 @@ func test_colossus() -> void:
 func test_v3_flyers() -> void:
 	var g = new_game()
 	g.gold = 5000
-	var mortar = g.place_tower("cannon", Vector2i(2, 3))
+	var mortar = g.place_tower("mortar_tower", Vector2i(2, 3))
 	var locust = put(g, "locust", 60.0)
 	var gunship = put(g, "gunship", 60.0)
 	check(locust.flying and gunship.flying, "Locusts and Gunships fly")
@@ -871,33 +741,6 @@ func test_crowd_control_limits() -> void:
 		s.shove(100.0)
 	check(near(s.shoved, Enemy.SHOVE_BUDGET) and s.shove_immune(), "shoves stop at the budget")
 	check(near(s.distance, 800.0 - Enemy.SHOVE_BUDGET), "total pushback is capped (%.0f)" % s.distance)
-
-
-func test_save_migration_v7() -> void:
-	var v6 := {
-		"version": 6, "map_id": "singularity", "difficulty": "casual", "ability_cd": {}, "wave": 14, "gold": 90, "lives": 11,
-		"research": [], "bounty_carry": 0.0, "cleared": [], "gates": [0, 0], "route_counters": [0, 0], "towers": [],
-	}
-	var res := SaveCodec.decode(v6)
-	check(res.has("game"), "v6 save loads (%s)" % res.get("error", ""))
-	if res.has("game"):
-		var g = res.game
-		check(g.difficulty == "easy" and g.final_round() == 40, "Casual becomes Easy")
-		check(g.lives == 100, "11 of 22 old shields become 100 of Easy's 200 (%d)" % g.lives)
-		check(g.wave == 14 and not g.medal and not g.endless, "progress kept; no medal yet")
-	var full := v6.duplicate(true)
-	full["map_id"] = "canyon"
-	full["difficulty"] = "veteran"
-	full["lives"] = 23
-	full["research"] = ["cmd_funds", "cmd_core"]
-	var r2 := SaveCodec.decode(full)
-	check(r2.has("game") and r2.game.difficulty == "hard" and r2.game.lives == 55, "a full-shield Veteran run with Reinforced Core becomes Hard at 55/55")
-	var ended := v6.duplicate(true)
-	ended["difficulty"] = "normal"
-	ended["wave"] = 30
-	ended["endless"] = true
-	var r3 := SaveCodec.decode(ended)
-	check(r3.has("game") and not r3.game.medal and not r3.game.endless, "an old endless run past 25 is a Medium run at round 30")
 
 
 # --- Combat rules ----------------------------------------------------------------------------
@@ -936,7 +779,7 @@ func test_slow_rules() -> void:
 
 func test_targeting_modes() -> void:
 	var g = new_game()
-	var t = g.place_tower("arrow", Vector2i(2, 3))
+	var t = g.place_tower("gun_turret", Vector2i(2, 3))
 	check(t != null, "arrow placed next to the road")
 	var near_e = put(g, "grunt", 100.0)
 	var far_e = put(g, "grunt", 200.0)
@@ -965,7 +808,7 @@ func test_targeting_modes() -> void:
 
 func test_strongest_by_strength_rank() -> void:
 	var g = new_game()
-	var t = g.place_tower("arrow", Vector2i(2, 3))
+	var t = g.place_tower("gun_turret", Vector2i(2, 3))
 	t.mode = Tower.Mode.STRONG
 	var mech = put(g, "brute", 150.0)
 	var bot = put(g, "shaman", 160.0, 0, 5.0)
@@ -988,7 +831,7 @@ func test_strongest_by_strength_rank() -> void:
 func test_support_priority() -> void:
 	var g = new_game()
 	g.gold = 5000
-	var t = g.place_tower("cannon", Vector2i(2, 3))
+	var t = g.place_tower("mortar_tower", Vector2i(2, 3))
 	t.mode = Tower.Mode.FIRST
 	var front = put(g, "brute", 200.0)
 	var helper = put(g, "rally", 150.0)
@@ -1009,8 +852,8 @@ func test_support_priority() -> void:
 	check(g.pick_target(t) == front, "with no Support enemy in range it falls back to everyone")
 	g.cycle_priority(t)
 	check(t.priority == 0, "Support cycles back to Any")
-	var coil = g.place_tower("tesla", spot(g, "tesla", 80))
-	check(coil.hits_air() and coil.hits_ground(), "a Tesla Coil hits both")
+	var coil = g.place_tower("tesla_tower", spot(g, "tesla_tower", 80))
+	check(coil.hits_air() and coil.hits_ground(), "a Tesla Tower hits both")
 	var seen := []
 	for i in 4:
 		g.cycle_priority(coil)
@@ -1022,8 +865,8 @@ func test_support_priority() -> void:
 func test_flyer_rules() -> void:
 	var g = new_game()
 	g.gold = 10000
-	var cannon = g.place_tower("cannon", Vector2i(2, 3))
-	var arrow = g.place_tower("arrow", Vector2i(3, 3))
+	var cannon = g.place_tower("mortar_tower", Vector2i(2, 3))
+	var arrow = g.place_tower("gun_turret", Vector2i(3, 3))
 	var bat = put(g, "bat", 150.0)
 	check(bat.flying, "bat flies")
 	check(cannon.pos.distance_to(bat.pos) < cannon.get_range(), "bat is inside cannon range")
@@ -1031,92 +874,39 @@ func test_flyer_rules() -> void:
 	check(g.pick_target(arrow) == bat, "arrow targets flyers")
 
 
-func test_cannon_splash() -> void:
-	var g = new_game()
-	g.gold = 10000
-	var cannon = g.place_tower("cannon", Vector2i(2, 3))
-	var a = put(g, "grunt", 100.0)
-	var b = put(g, "grunt", 130.0)
-	var c = put(g, "grunt", 200.0)
-	var bat = put(g, "bat", 60.0)
-	bat.pos = a.pos + Vector2(10, 0)
-	var p = Projectile.new()
-	p.kind = "cannon"
-	p.pos = a.pos
-	p.target_pos = a.pos
-	p.damage = 22.0
-	p.splash = 55.0
-	p.source = cannon
-	g._projectile_hit(p)
-	check(near(a.hp, a.max_hp - 22.0), "center target hit")
-	check(near(b.hp, b.max_hp - 22.0), "target within 55px hit")
-	check(near(c.hp, c.max_hp), "target 100px away untouched")
-	check(near(bat.hp, bat.max_hp), "splash does not hit flyers")
-
-
-func test_tesla_chain() -> void:
-	var g = new_game()
-	g.gold = 10000
-	var tesla = g.place_tower("tesla", Vector2i(2, 3))
-	var es: Array = []
-	for i in 5:
-		es.append(put(g, "grunt", 60.0 + 40.0 * i, 0, 10.0))
-	g._chain(tesla, es[0], tesla.stats())
-	var expect := [16.0, 12.8, 10.24]
-	for i in 3:
-		check(near(es[i].max_hp - es[i].hp, expect[i], 0.01), "chain jump %d damage %.2f" % [i, expect[i]])
-	check(near(es[3].hp, es[3].max_hp), "tier-1 tesla stops after 3 targets")
-
-
-func test_sniper_pierce() -> void:
-	var g = new_game()
-	g.gold = 10000
-	g.place_tower("sniper", Vector2i(2, 3))
-	g.state = Game.State.WAVE
-	var brute = put(g, "brute", 100.0, 0, 10.0)
-	for i in 3:
-		g.tick(SIM_DT)
-	check(near(brute.max_hp - brute.hp, 55.0), "sniper deals full damage through armor")
-
-
 # --- Economy & rules -------------------------------------------------------------------------
 
 func test_placement_rules() -> void:
 	var g = new_game()
-	check(g.placement_error("arrow", Vector2i(0, 2)) != "", "can't build on path")
-	check(g.placement_error("arrow", Vector2i(1, 5)) != "", "can't build on blocked tile")
-	check(g.placement_error("arrow", Vector2i(-1, 0)) != "", "can't build out of bounds")
-	check(g.placement_error("arrow", Vector2i(Grid.COLS, 5)) != "", "can't build out of bounds (right)")
-	check(g.placement_error("arrow", Vector2i(2, 3)) == "", "can build next to path")
-	g.place_tower("arrow", Vector2i(2, 3))
-	check(g.placement_error("arrow", Vector2i(2, 3)) != "", "can't stack towers")
+	check(g.placement_error("gun_turret", Vector2i(0, 2)) != "", "can't build on path")
+	check(g.placement_error("gun_turret", Vector2i(1, 5)) != "", "can't build on blocked tile")
+	check(g.placement_error("gun_turret", Vector2i(-1, 0)) != "", "can't build out of bounds")
+	check(g.placement_error("gun_turret", Vector2i(Grid.COLS, 5)) != "", "can't build out of bounds (right)")
+	check(g.placement_error("gun_turret", Vector2i(2, 3)) == "", "can build next to path")
+	g.place_tower("gun_turret", Vector2i(2, 3))
+	check(g.placement_error("gun_turret", Vector2i(2, 3)) != "", "can't stack towers")
 	g.gold = 10
-	check(g.placement_error("arrow", Vector2i(3, 3)) == "Not enough credits", "credits are required")
-	check(g.place_tower("arrow", Vector2i(3, 3)) == null, "place fails without gold")
+	check(g.placement_error("gun_turret", Vector2i(3, 3)) == "Not enough credits", "credits are required")
+	check(g.place_tower("gun_turret", Vector2i(3, 3)) == null, "place fails without gold")
 
 
 func test_economy() -> void:
 	var g = new_game()
 	var g0: int = g.gold
-	var t = g.place_tower("arrow", Vector2i(2, 3))
-	check(g.gold == g0 - 50, "build deducts cost")
-	check(g.upgrade_tower(t), "upgrade succeeds")
-	check(g.gold == g0 - 120 and t.tier == 2 and t.spent == 120, "upgrade deducts and tracks spend")
+	var t = g.place_tower("gun_turret", Vector2i(2, 3))
+	check(g.gold == g0 - 75, "build deducts cost")
+	check(g.upgrade_tower(t, "a"), "a path step succeeds")
+	check(g.gold == g0 - 130 and t.tier == 3 and t.spent == 130, "upgrade deducts and tracks spend")
 	g.gold = 0
-	check(not g.upgrade_tower(t, "gatling"), "upgrade needs gold")
+	check(not g.upgrade_tower(t, "b"), "upgrade needs credits")
 	g.gold = 1000
-	check(t.needs_spec(), "tier 2 needs a specialization choice")
-	check(not g.upgrade_tower(t), "tier 3 upgrade without a spec is refused")
-	check(not g.upgrade_tower(t, "bogus"), "tier 3 upgrade with an unknown spec is refused")
-	check(t.upgrade_cost() == 140 and t.upgrade_cost("shredder") == 140, "spec costs reported")
-	check(g.upgrade_tower(t, "shredder"), "tier 3 upgrade with a spec succeeds")
-	check(t.tier == 3 and t.spec == "shredder" and t.display_name() == "Pulse Turret", "spec applied (the name stays stock until the primary locks in)")
-	check(g.gold == 1000 - 140, "spec cost deducted")
-	check(t.upgrade_cost() == 170, "the next Shredder upgrade costs 170 (%d)" % t.upgrade_cost())
-	check(g.upgrade_tower(t, "gatling") and t.started == ["b", "a"], "a second branch can be started")
-	check(not g.upgrade_tower(t, "flechette"), "the third branch is locked once two are started")
+	check(not g.upgrade_tower(t, "bogus"), "an unknown path is refused")
+	check(t.upgrade_cost("b") == 25 and t.upgrade_cost() == 40, "path costs reported (the primary's next step without a key)")
+	check(g.upgrade_tower(t, "b") and t.started == ["a", "b"], "a second path can be started")
+	check(not g.upgrade_tower(t, "c"), "the third path is locked once two are started")
+	check(g.gold == 1000 - 25, "the step's cost is deducted")
 	var refund := g.sell_value(t)
-	check(refund == int(floor(400 * 0.7)), "sell refunds 70%% of total spend (%d)" % refund)
+	check(refund == int(floor(155 * 0.7)), "sell refunds 70%% of total spend (%d)" % refund)
 	var before: int = g.gold
 	g.sell_tower(t)
 	check(g.gold == before + refund and not g.tower_at.has(Vector2i(2, 3)), "sell pays out and frees the tile")
@@ -1153,11 +943,11 @@ func test_wave_clear_and_early_call() -> void:
 	var d = new_game()
 	d.gold = 5000
 	for c in [Vector2i(2, 3), Vector2i(3, 3), Vector2i(5, 4), Vector2i(3, 1), Vector2i(5, 1)]:
-		d.place_tower("sniper", c)
+		d.place_tower("railgun", c)
 	d.start_wave()
 	check(run_until(d, func(): return d.state == Game.State.BUILD, 120.0), "defended wave clears")
-	check(d.lives == d.max_lives, "no leaks with five snipers")
-	var expected: int = 5000 - 600 + 8 * int(Enemies.ENEMIES.grunt.bounty) + Waves.clear_bonus(1)
+	check(d.lives == d.max_lives, "no leaks with five Railguns")
+	var expected: int = 5000 - 5 * d.tower_cost("railgun") + 8 * int(Enemies.ENEMIES.grunt.bounty) + Waves.clear_bonus(1)
 	check(d.gold == expected, "bounties and clear bonus paid (%d, expected %d)" % [d.gold, expected])
 
 
@@ -1258,261 +1048,6 @@ func spec_tower(g, type: String, cell: Vector2i, spec: String):
 	return t
 
 
-func test_spec_pulse() -> void:
-	var g = new_game()
-	var gat = spec_tower(g, "arrow", Vector2i(2, 3), "gatling")
-	check(near(gat.eff_rate(), 5.0), "gatling fires 5 times a second")
-	var g2 = new_game()
-	var sh = spec_tower(g2, "arrow", Vector2i(2, 3), "shredder")
-	g2.state = Game.State.WAVE
-	var brute = put(g2, "brute", 100.0, 0, 20.0)
-	for i in int(3.0 / SIM_DT):
-		g2.tick(SIM_DT)
-	check(brute.armor_shred > 0.0, "shredder strips armor (%.0f)" % brute.armor_shred)
-	check(brute.armor_shred <= 8.0 and brute.effective_armor() >= 0.0, "shred is capped")
-	for i in int(6.0 / SIM_DT):
-		g2.tick(SIM_DT)
-	check(near(brute.effective_armor(), 0.0), "enough hits strip the brute bare")
-	check(sh.kills >= 0, "shredder still alive in the sim")
-
-
-func test_spec_mortar() -> void:
-	var g = new_game()
-	var burn = spec_tower(g, "cannon", Vector2i(2, 3), "napalm")
-	var a = put(g, "grunt", 100.0, 0, 20.0)
-	var p = Projectile.new()
-	p.kind = "cannon"
-	p.pos = a.pos
-	p.target_pos = a.pos
-	p.damage = 10.0
-	p.splash = 70.0
-	p.burn_dps = 32.0
-	p.burn_time = 3.0
-	p.source = burn
-	g._projectile_hit(p)
-	check(g.pools.size() == 1, "plasma burn leaves a pool")
-	var hp_after_hit: float = a.hp
-	g.state = Game.State.WAVE
-	g._update_pools(1.0)
-	check(near(hp_after_hit - a.hp, 32.0, 0.5), "pool burns for its dps, ignoring armor (%.1f)" % (hp_after_hit - a.hp))
-	g._update_pools(2.5)
-	check(g.pools.is_empty(), "pool expires after its duration")
-	var sg = new_game()
-	var siege = spec_tower(sg, "cannon", Vector2i(2, 3), "siege")
-	check(near(float(siege.stats().splash), 90.0), "siege mortar has the big blast")
-
-
-func test_spec_cryo() -> void:
-	var g = new_game()
-	g.state = Game.State.WAVE
-	spec_tower(g, "frost", Vector2i(2, 3), "shatter")
-	var e = put(g, "grunt", 100.0, 0, 20.0)
-	g.tick(SIM_DT)
-	check(e.vuln_timer > 0.0 and near(e.vuln_amount, 0.25), "shatter field applies +25% vulnerability")
-	var hp0: float = e.hp
-	g.damage_enemy(e, 100.0, true, null)
-	check(near(hp0 - e.hp, 125.0), "vulnerable enemies take 25% more damage")
-	var s = new_game()
-	s.state = Game.State.WAVE
-	spec_tower(s, "frost", Vector2i(2, 3), "stasis")
-	var f = put(s, "grunt", 100.0, 0, 20.0)
-	s.tick(SIM_DT)
-	check(near(f.slow_amount, 0.65), "stasis field slows 65%")
-
-
-func test_spec_railgun() -> void:
-	var g = new_game()
-	g.state = Game.State.WAVE
-	var dead = spec_tower(g, "sniper", Vector2i(2, 3), "deadeye")
-	var boss = put(g, "juggernaut", 100.0, 0, 5.0)
-	g.tick(SIM_DT)
-	var dd: Dictionary = Towers.TOWERS.sniper.specs.deadeye
-	check(near(boss.max_hp - boss.hp, float(dd.damage) * float(dd.boss_mult)), "deadeye does double damage to bosses (%.0f)" % (boss.max_hp - boss.hp))
-	check(dead.kills == 0, "boss survived one shot")
-	var l = new_game()
-	l.state = Game.State.WAVE
-	spec_tower(l, "sniper", Vector2i(5, 1), "lance")
-	# Three grunts in a row along the first stretch of lane (row 2), all in the rail's line.
-	var es: Array = []
-	for d in [60.0, 110.0, 160.0]:
-		es.append(put(l, "grunt", d, 0, 20.0))
-	for e in es:
-		e.pos.y = 120.0
-	var tw = l.tower_at[Vector2i(5, 1)]
-	tw.mode = Tower.Mode.LAST
-	l._update_tower(tw, SIM_DT)
-	var hits := es.filter(func(e): return e.hp < e.max_hp).size()
-	check(hits >= 2, "piercing rail hits every enemy on its line (%d of 3)" % hits)
-
-
-func test_spec_arc() -> void:
-	var g = new_game()
-	var ov = spec_tower(g, "tesla", Vector2i(2, 3), "overload")
-	var es: Array = []
-	for i in 3:
-		es.append(put(g, "grunt", 60.0 + 40.0 * i, 0, 20.0))
-	var boss = put(g, "juggernaut", 180.0, 0, 5.0)
-	g._chain(ov, es[0], ov.stats())
-	check(es.all(func(e): return near(e.stun_timer, 0.5)), "overload stuns every arc target")
-	check(near(boss.stun_timer, 0.15), "bosses are stunned for less (%.2f)" % boss.stun_timer)
-	var d0: float = es[0].distance
-	es[0].step(0.3)
-	check(near(es[0].distance, d0), "stunned enemies don't move")
-	var sg = new_game()
-	var storm = spec_tower(sg, "tesla", Vector2i(2, 3), "storm")
-	check(int(storm.stats().chains) == 9, "storm coil arcs to 9 targets")
-
-
-func test_laser() -> void:
-	var g = new_game()
-	g.state = Game.State.WAVE
-	var t = g.place_tower("laser", Vector2i(2, 3))
-	var e = put(g, "brute", 100.0, 0, 30.0)
-	g.tick(SIM_DT)
-	check(t.target == e and t.beam_targets.size() == 1, "laser locks on")
-	var hp0: float = e.hp
-	for i in 60:
-		g.tick(SIM_DT)
-	var first_sec: float = hp0 - e.hp
-	check(first_sec > 22.0 and first_sec < 44.0, "first second: ramping dps, armor ignored (%.1f)" % first_sec)
-	for i in int(2.0 / SIM_DT):
-		g.tick(SIM_DT)
-	check(near(t.ramp_mult, 2.0), "ramp tops out at 2x for tier 1 (%.2f)" % t.ramp_mult)
-	var p = new_game()
-	p.state = Game.State.WAVE
-	var prism = spec_tower(p, "laser", Vector2i(2, 3), "prism")
-	for d in [70.0, 100.0, 130.0, 160.0]:
-		put(p, "grunt", d, 0, 30.0)
-	p.tick(SIM_DT)
-	check(prism.beam_targets.size() == 3, "prism array splits into 3 beams")
-
-
-func test_missiles() -> void:
-	var g = new_game()
-	g.state = Game.State.WAVE
-	var t = g.place_tower("missile", Vector2i(2, 3))
-	var bat = put(g, "bat", 60.0, 0, 30.0)
-	var grunt = put(g, "grunt", 300.0, 0, 30.0)
-	g.tick(SIM_DT)
-	var missiles: Array = g.projectiles.filter(func(p): return p.kind == "missile")
-	check(missiles.size() == 2, "tier 1 fires 2 missiles per salvo")
-	var ok := run_until(g, func(): return g.projectiles.is_empty(), 4.0)
-	check(ok, "missiles land within their lifetime")
-	var md: Dictionary = Towers.TOWERS.missile.tiers[0]
-	check(bat.max_hp - bat.hp >= float(md.damage) * float(md.air_mult) - 0.01, "flyers take double missile damage (%.0f)" % (bat.max_hp - bat.hp))
-	check(grunt.hp < grunt.max_hp, "ground targets hit too")
-
-
-func test_amplifier() -> void:
-	var g = new_game()
-	g.gold = 10000
-	var arrow = g.place_tower("arrow", Vector2i(2, 3))
-	var far = g.place_tower("arrow", Vector2i(12, 1))
-	var amp = g.place_tower("amp", Vector2i(3, 3))
-	check(near(arrow.buff_dmg, 0.15) and near(far.buff_dmg, 0.0), "pylon boosts only towers in its field")
-	check(near(arrow.eff_damage(), 9.0 * 1.15), "boosted damage")
-	g.upgrade_tower(amp)
-	g.upgrade_tower(amp, "overclock")
-	check(near(arrow.buff_rate, 0.25) and near(arrow.eff_rate(), 2.0 * 1.25), "overclock adds attack speed")
-	var amp2 = g.place_tower("amp", Vector2i(2, 4))
-	g.upgrade_tower(amp2)
-	g.upgrade_tower(amp2, "array")
-	check(near(arrow.buff_dmg, 0.30) and near(arrow.buff_range, 0.25), "pylons don't stack; each stat takes the best")
-	check(near(arrow.get_range(), 140.0 * 1.25), "array extends range")
-	g.sell_tower(amp)
-	check(near(arrow.buff_rate, 0.0) and near(arrow.buff_dmg, 0.25), "selling a pylon removes its boost")
-	check(g.pick_target(amp) == null, "pylons never target")
-
-
-func test_scrapyard() -> void:
-	var g = new_game()
-	g.gold = 100000
-	var yard = g.place_tower("scrap", Vector2i(2, 3))
-	check(yard != null and yard.is_economy() and g.tower_cost("scrap") == 150, "the Scrapyard builds for 150 as an economy tower")
-	check(g.pick_target(yard) == null, "Scrapyards never target")
-	var before: int = g.gold
-	g._pay_income(1)
-	check(g.gold - before == 25, "tier 1 pays 25 credits at a round clear (%d)" % (g.gold - before))
-	g.upgrade_tower(yard)
-	g.upgrade_tower(yard, "mint")
-	before = g.gold
-	g._pay_income(40)
-	var want := roundi(110.0 * Waves.bounty_scale(40))
-	check(g.gold - before == want, "Credit Mint pays 110 scaled like kill credits at round 40 (%d of %d)" % [g.gold - before, want])
-	# Scrap Collector: kills in its field pay more; bosses double on the Reclamation Plant.
-	var col = g.place_tower("scrap", Vector2i(21, 11))
-	g.upgrade_tower(col)
-	g.upgrade_tower(col, "collector")
-	var e = put(g, "grunt", 40.0)
-	e.pos = col.pos + Vector2(30, 0)
-	check(near(g._salvage_mult(e), 1.25), "a kill inside a Scrap Collector field pays +25%")
-	e.pos = col.pos + Vector2(400, 0)
-	check(near(g._salvage_mult(e), 1.0), "kills outside the field pay the normal bounty")
-	e.pos = col.pos + Vector2(30, 0)
-	var b0: int = g.gold
-	g.damage_enemy(e, 1e9, true, null)
-	check(g.gold - b0 == int(floor(4.0 * 1.25)), "the bonus is paid on the kill (%d)" % (g.gold - b0))
-	# Supply Depot: cheaper upgrades for towers in its field; Forward Command refunds everything.
-	var arrow = g.place_tower("arrow", Vector2i(5, 3))
-	var far = g.place_tower("arrow", Vector2i(12, 1))
-	check(arrow.upgrade_cost() == 70, "no depot, full upgrade price")
-	var depot = g.place_tower("scrap", Vector2i(6, 2))
-	g.upgrade_tower(depot)
-	g.upgrade_tower(depot, "depot")
-	check(near(arrow.discount, 0.10) and arrow.upgrade_cost() == 63 and far.upgrade_cost() == 70, "towers in a Supply Depot field upgrade 10% cheaper")
-	check(near(depot.discount, 0.0) and near(yard.discount, 0.0), "depots don't discount Scrapyards")
-	g.upgrade_tower(arrow)
-	check(arrow.spent == 50 + 63, "the discounted price is what's charged and refunded")
-	check(g.sell_value(arrow) == int(floor(113 * 0.7)), "the depot alone doesn't change sell refunds")
-	g.sell_tower(depot)
-	check(near(arrow.discount, 0.0) and arrow.upgrade_cost() > 0, "selling the depot removes its discount")
-	# Reserve Bank interest (research unlocks the mastery; Scrap Contracts adds 10% income).
-	var r = Game.new("meadow", 1, "medium", ["scrap_1", "scrap_2a", "scrap_2b", "scrap_m"])
-	r.emit_events = false
-	r.gold = 100000
-	var bank = r.place_tower("scrap", Vector2i(2, 3))
-	for k in "Taaaaa":
-		r.upgrade_tower(bank, "" if k == "T" else k)
-	check(bank.mastered and bank.display_name() == "Reserve Bank", "the Credit Mint masters into the Reserve Bank")
-	r.gold = 5000
-	r._pay_income(1)
-	check(r.gold - 5000 == roundi(250.0 * 1.1) + 150, "Reserve Bank: 275 income plus 3%% interest on 5000 (%d)" % (r.gold - 5000))
-	r.gold = 50000
-	r._pay_income(1)
-	check(r.gold - 50000 == roundi(250.0 * 1.1) + 300, "interest is capped at 300 (%d)" % (r.gold - 50000))
-	var fc = Game.new("meadow", 1, "medium", ["scrap_1", "scrap_2a", "scrap_2b", "scrap_m"])
-	fc.emit_events = false
-	fc.gold = 100000
-	var cmd = fc.place_tower("scrap", Vector2i(2, 4))
-	for k in "Tccccc":
-		fc.upgrade_tower(cmd, "" if k == "T" else k)
-	var fa = fc.place_tower("arrow", Vector2i(5, 4))
-	check(cmd.display_name() == "Forward Command" and fc.sell_value(fa) == fa.spent, "Forward Command: towers in its field sell back for everything")
-	check(not Bot.is_pylon("scrap"), "the bot doesn't treat Scrapyards as pylons")
-
-
-func test_save_migration_v2() -> void:
-	var v2 := {
-		"version": 2, "map_id": "meadow", "difficulty": "normal", "ability_cd": {}, "wave": 9, "gold": 400, "lives": 17,
-		"towers": [
-			{"type": "arrow", "col": 2, "row": 3, "tier": 3, "mode": 0, "kills": 40, "spent": 250},
-			{"type": "tesla", "col": 3, "row": 3, "tier": 3, "mode": 0, "kills": 12, "spent": 570},
-			{"type": "cannon", "col": 5, "row": 5, "tier": 2, "mode": 0, "kills": 3, "spent": 210},
-		],
-	}
-	var res := SaveCodec.decode(v2)
-	check(res.has("game"), "v2 save loads (%s)" % res.get("error", ""))
-	if res.has("game"):
-		var g = res.game
-		check(g.tower_at[Vector2i(2, 3)].spec == "gatling", "v2 tier-3 pulse turret becomes Gatling")
-		check(g.tower_at[Vector2i(3, 3)].spec == "storm", "v2 tier-3 arc coil becomes Storm")
-		check(g.tower_at[Vector2i(5, 5)].spec == "", "tier-2 towers have no spec")
-		check(int(SaveCodec.encode(g).version) == Game.SAVE_VERSION, "re-saving writes the current format")
-	var bad := v2.duplicate(true)
-	bad["version"] = 3
-	check(SaveCodec.decode(bad).has("error"), "v3 tier-3 tower without a spec is rejected")
-
-
 func test_abilities() -> void:
 	var g = new_game()
 	check(not g.ability_ready("meteor") and not g.cast_meteor(Vector2(100, 120)), "no abilities in the build phase")
@@ -1571,9 +1106,10 @@ func test_difficulty_modes() -> void:
 		prev_price = p
 		var pg = new_game("meadow", 1, mode)
 		pg.gold = 100000
-		check(pg.tower_cost("cannon") == int(round(90.0 * p)), "%s: a Plasma Mortar costs %d" % [mode, pg.tower_cost("cannon")])
-		var pt = pg.place_tower("cannon", Vector2i(2, 3))
-		check(pt.upgrade_cost() == int(round(float(Tower.tree("cannon").tiers[1].cost) * p)), "%s: upgrades are priced x%.2f too" % [mode, p])
+		var mt: Dictionary = Towers.Rework.TREES.mortar_tower
+		check(pg.tower_cost("mortar_tower") == int(round(float(mt.cost) * p)), "%s: a Mortar Tower costs %d" % [mode, pg.tower_cost("mortar_tower")])
+		var pt = pg.place_tower("mortar_tower", Vector2i(2, 3))
+		check(pt.upgrade_cost("a") == int(round(float(mt.paths[0].nodes[0].cost) * p)), "%s: upgrades are priced x%.2f too" % [mode, p])
 	check(Difficulty.price("cataclysm") > Difficulty.price("nightmare") and Difficulty.price("nightmare") > Difficulty.price("medium"), "Nightmare and Cataclysm cost more than the gentle modes")
 	# Reinforced Core: +10% shields, rounded down (Cataclysm stays at 1).
 	var want := {"easy": 220, "medium": 110, "hard": 55, "nightmare": 27, "cataclysm": 1}
@@ -1606,25 +1142,6 @@ func test_difficulty_modes() -> void:
 	check(not md.medal and not md.endless, "round 40 on Medium is just another round")
 
 
-func test_save_migration_v1() -> void:
-	var v1 := {
-		"version": 1, "map_id": "meadow", "wave": 3, "gold": 180, "lives": 12, "seed": 77,
-		"towers": [{"type": "arrow", "col": 2, "row": 3, "tier": 2, "mode": 1, "kills": 4, "spent": 120}],
-	}
-	var res := SaveCodec.decode(v1)
-	check(res.has("game"), "v1 save still loads (%s)" % res.get("error", ""))
-	if res.has("game"):
-		var g = res.game
-		check(g.difficulty == "medium" and g.wave == 3 and g.gold == 180, "v1 fields carried over")
-		check(g.lives == 60, "12 of 20 old shields become 60 of Medium's 100 (%d)" % g.lives)
-		check(g.ability_cd.meteor == 0.0 and g.ability_cd.warp == 0.0, "v1 abilities start ready")
-		check(int(SaveCodec.encode(g).version) == Game.SAVE_VERSION, "re-saving writes the current format")
-	var bad := v1.duplicate(true)
-	bad["version"] = 2
-	bad["difficulty"] = "impossible"
-	check(SaveCodec.decode(bad).has("error"), "unknown difficulty rejected")
-
-
 func test_music_synthesis() -> void:
 	var t0 := Time.get_ticks_msec()
 	var m: PackedFloat32Array = Sfx.compose_music()
@@ -1654,13 +1171,13 @@ func test_save_roundtrip_and_determinism() -> void:
 	check(not SaveManager.has_run(), "no save at start")
 	var g = new_game("canyon", 4242, "hard")
 	g.gold = 2000
-	var t1 = g.place_tower("arrow", Vector2i(3, 2))
-	var t2 = g.place_tower("cannon", Vector2i(4, 5))
-	g.place_tower("tesla", Vector2i(8, 3))
-	g.place_tower("frost", Vector2i(10, 5))
-	g.place_tower("sniper", Vector2i(9, 2))
-	g.upgrade_tower(t1)
-	g.upgrade_tower(t2)
+	var t1 = g.place_tower("gun_turret", Vector2i(3, 2))
+	var t2 = g.place_tower("mortar_tower", Vector2i(4, 5))
+	g.place_tower("tesla_tower", Vector2i(8, 3))
+	g.place_tower("cryo_tower", Vector2i(10, 5))
+	g.place_tower("railgun", Vector2i(9, 2))
+	g.upgrade_tower(t1, "a")
+	g.upgrade_tower(t2, "a")
 	g.cycle_mode(t1)
 	g.auto_start = false
 	g.speed = 2
@@ -1688,7 +1205,7 @@ func test_save_roundtrip_and_determinism() -> void:
 	check(deep_equal(a, b), "encode(load(save(g))) == encode(g)")
 	check(g2.tower_at.size() == 5 and g2.towers.size() == 5, "towers restored")
 	check(g2.difficulty == "hard" and near(g2.ability_cd.meteor, 12.5), "difficulty and ability cooldowns restored")
-	check(g2.tower_at[Vector2i(3, 2)].tier == 2 and g2.tower_at[Vector2i(3, 2)].mode == 1, "tier and mode restored")
+	check(g2.tower_at[Vector2i(3, 2)].depth.a == 1 and g2.tower_at[Vector2i(3, 2)].mode == 1, "upgrades and mode restored")
 	# Determinism: both games play the next wave identically.
 	g.start_wave()
 	g2.start_wave()
@@ -1709,12 +1226,15 @@ func test_save_error_handling() -> void:
 	SaveManager.delete_run()
 
 	var good = new_game("meadow", 7)
-	good.place_tower("arrow", Vector2i(2, 3))
+	good.place_tower("gun_turret", Vector2i(2, 3))
 	var data := SaveCodec.encode(good)
 
 	var newer := data.duplicate(true)
 	newer["version"] = 999
 	check(str(SaveCodec.decode(newer).get("error", "")).contains("newer"), "newer save version rejected")
+	var before_swap := data.duplicate(true)
+	before_swap["version"] = 9
+	check(str(SaveCodec.decode(before_swap).get("error", "")).contains("tower rework"), "a save from before the tower rework is rejected")
 	var bad_map := data.duplicate(true)
 	bad_map["map_id"] = "atlantis"
 	check(SaveCodec.decode(bad_map).has("error"), "unknown map rejected")
@@ -1723,15 +1243,13 @@ func test_save_error_handling() -> void:
 	on_path["towers"][0]["row"] = 2
 	check(SaveCodec.decode(on_path).has("error"), "tower on the path rejected")
 	var bad_tier := data.duplicate(true)
-	bad_tier["towers"][0]["trunk"] = 9
-	check(SaveCodec.decode(bad_tier).has("error"), "impossible trunk tier rejected")
+	bad_tier["towers"][0]["retrofit"] = 9
+	check(SaveCodec.decode(bad_tier).has("error"), "impossible Retrofit option rejected")
 	var bad_branch := data.duplicate(true)
-	bad_branch["towers"][0]["trunk"] = 2
 	bad_branch["towers"][0]["depth"] = {"a": 3, "b": 3, "c": 0}
 	bad_branch["towers"][0]["started"] = ["a", "b"]
 	check(SaveCodec.decode(bad_branch).has("error"), "two primary branches rejected")
 	var three := data.duplicate(true)
-	three["towers"][0]["trunk"] = 2
 	three["towers"][0]["depth"] = {"a": 1, "b": 1, "c": 1}
 	three["towers"][0]["started"] = ["a", "b", "c"]
 	check(SaveCodec.decode(three).has("error"), "three started branches rejected")
@@ -1815,16 +1333,6 @@ func research_game(research: Array, map_id := "meadow", seed_v := 1234, diff := 
 	return g
 
 
-## Builds a tower and upgrades it through `spec` to `tier` (3 = spec, 4 = mastery).
-func build_to(g, type: String, cell: Vector2i, spec: String, tier: int):
-	g.gold += 20000
-	var t = g.place_tower(type, cell)
-	while t != null and t.tier < tier:
-		if not g.upgrade_tower(t, spec if t.tier == 2 else ""):
-			break
-	return t
-
-
 func test_research_data() -> void:
 	var trees := {}
 	for id in ResearchData.NODES:
@@ -1848,45 +1356,12 @@ func test_research_data() -> void:
 		check(m != "" and ResearchData.NODES[m].slot.y == 2, "%s tree ends in a Mastery node" % type)
 	check(Research.tree_nodes("command").size() == 5, "command tree has 5 nodes")
 	check(Research.max_points() == 150, "records can yield 150 RP across 6 sectors (%d)" % Research.max_points())
-	# While the old and reworked rosters coexist (issue #59), only the old trees count: the reworked ones replace them at the final swap.
-	var lab_cost := 0
-	for id in ResearchData.NODES:
-		if not Towers.is_rework(str(ResearchData.NODES[id].tree)):
-			lab_cost += int(ResearchData.NODES[id].cost)
-	check(lab_cost <= Research.max_points(), "the whole lab is affordable (%d <= %d)" % [lab_cost, Research.max_points()])
 	check(Research.node_ids().size() == ResearchData.NODES.size(), "node_ids lists every node once")
 
-	# Every branch ends in a mastery that is a real step up from its specialization.
-	for type in Towers.ORDER:
-		var d: Dictionary = Towers.TOWERS[type]
-		var ln := Tower.lines(type)
-		var tr: Dictionary = Trees.TREES[type]
-		for b in tr.branches:
-			var sp: Dictionary = ln[b.key][1]
-			var m: Dictionary = ln[b.key + "_m"]
-			for key in sp:
-				check(m.has(key), "%s %s mastery keeps stat %s" % [type, b.id, key])
-			if d.get("economy", false):
-				check(sp.keys().any(func(k): return float(m[k]) > float(sp[k])) or m.size() > sp.size(), "%s %s mastery pays out more" % [type, b.id])
-				continue
-			if d.get("support", false):
-				var key := "mark" if d.get("sensor", false) else "buff_dmg"
-				check(float(m[key]) > float(sp[key]), "%s %s mastery boosts more" % [type, b.id])
-				continue
-			check(level_dps(m) > level_dps(sp), "%s %s mastery out-damages the specialization" % [type, b.id])
-			# Diminishing returns: damage per credit shouldn't jump far past the specialization's.
-			var spec_total := float(tr.tiers[0].cost + tr.tiers[1].cost + b.nodes[0].cost)
-			var branch_total := spec_total
-			for i in range(1, b.nodes.size()):
-				branch_total += float(b.nodes[i].cost)
-			branch_total += float(b.mastery.cost)
-			var ratio: float = (level_dps(m) / branch_total) / (level_dps(sp) / spec_total)
-			check(ratio < 1.4, "%s %s mastery damage per credit stays in line (x%.2f)" % [type, b.id, ratio])
-
-
-	check(Research.sanitize(["arrow_m", "bogus", "arrow_1", "arrow_1", 7]) == ["arrow_1"], "sanitize drops unknown, duplicate and orphaned nodes")
-	check(Research.sanitize(["arrow_2b", "arrow_1", "arrow_m", "arrow_2a"]) == ["arrow_1", "arrow_2a", "arrow_2b", "arrow_m"], "sanitize keeps a valid chain in canonical order")
-	check(Research.sanitize(["arrow_2b", "arrow_1", "arrow_m"]) == ["arrow_1", "arrow_2b"], "a mastery without both branches is dropped (it needs the whole tree)")
+	check(Research.sanitize(["gun_turret_m", "bogus", "gun_turret_1", "gun_turret_1", 7]) == ["gun_turret_1"], "sanitize drops unknown, duplicate and orphaned nodes")
+	check(Research.sanitize(["gun_turret_2b", "gun_turret_1", "gun_turret_m", "gun_turret_2a"]) == ["gun_turret_1", "gun_turret_2a", "gun_turret_2b", "gun_turret_m"], "sanitize keeps a valid chain in canonical order")
+	check(Research.sanitize(["gun_turret_2b", "gun_turret_1", "gun_turret_m"]) == ["gun_turret_1", "gun_turret_2b"], "a mastery without both branches is dropped (it needs the whole tree)")
+	check(Research.sanitize(["arrow_1", "gun_turret_1"]) == ["gun_turret_1"], "research for the retired towers is dropped (its points come back)")
 	check(Research.sanitize("nope").is_empty(), "sanitize tolerates garbage")
 
 
@@ -1922,16 +1397,16 @@ func test_research_profile() -> void:
 	check(SaveManager.buy_research("cmd_funds").contains("research points"), "can't buy without RP")
 	SaveManager.record_run("meadow", "hard", 80, true, false)
 	check(SaveManager.research_earned() == 7, "a Hard medal at round 80 earns 7 RP (3 + four milestones) (%d)" % SaveManager.research_earned())
-	check(SaveManager.buy_research("arrow_m") != "", "can't skip to a mastery")
+	check(SaveManager.buy_research("gun_turret_m") != "", "can't skip to a mastery")
 	check(SaveManager.buy_research("nope") != "", "unknown node refused")
-	check(SaveManager.buy_research("arrow_1") == "", "root node bought")
-	check(SaveManager.buy_research("arrow_1") != "", "can't buy twice")
-	check(SaveManager.buy_research("arrow_2b") == "" and SaveManager.buy_research("arrow_m").contains("everything else"), "one branch isn't enough for the mastery")
-	check(SaveManager.buy_research("arrow_2a") == "" and SaveManager.buy_research("arrow_m").contains("research points"), "with both branches the mastery only waits on RP")
+	check(SaveManager.buy_research("gun_turret_1") == "", "root node bought")
+	check(SaveManager.buy_research("gun_turret_1") != "", "can't buy twice")
+	check(SaveManager.buy_research("gun_turret_2b") == "" and SaveManager.buy_research("gun_turret_m").contains("everything else"), "one branch isn't enough for the mastery")
+	check(SaveManager.buy_research("gun_turret_2a") == "" and SaveManager.buy_research("gun_turret_m").contains("research points"), "with both branches the mastery only waits on RP")
 	check(SaveManager.research_available() == 2, "7 - 1 - 2 - 2 = 2 RP left (%d)" % SaveManager.research_available())
-	check(SaveManager.buy_research("cannon_1") == "" and SaveManager.buy_research("cannon_2a").contains("research points"), "runs out of RP")
+	check(SaveManager.buy_research("mortar_tower_1") == "" and SaveManager.buy_research("mortar_tower_2a").contains("research points"), "runs out of RP")
 	SaveManager.load_profile()
-	check(SaveManager.research_owned() == ["arrow_1", "arrow_2a", "arrow_2b", "cannon_1"], "research persists (%s)" % str(SaveManager.research_owned()))
+	check(SaveManager.research_owned() == ["gun_turret_1", "gun_turret_2a", "gun_turret_2b", "mortar_tower_1"], "research persists (%s)" % str(SaveManager.research_owned()))
 	SaveManager.reset_research()
 	SaveManager.load_profile()
 	check(SaveManager.research_owned().is_empty() and SaveManager.research_available() == 7, "reset refunds everything")
@@ -1951,27 +1426,16 @@ func test_research_effects() -> void:
 	var g = research_game(Research.node_ids())
 	check(base.gold == Game.START_GOLD and base.lives == 100, "no research: the standard credits and Medium's shields")
 	check(g.gold == int(round(Game.START_GOLD * 1.1)) and g.lives == 110, "Reserve Funds +10%% credits, Reinforced Core +10%% shields (%d, %d)" % [g.gold, g.lives])
-	check(research_game(["arrow_m"]).research.is_empty(), "a run's research is sanitized too")
-	check(g.tower_cost("amp") == 80 and g.tower_cost("arrow") == 50, "Modular Build discounts only pylons")
+	check(research_game(["gun_turret_m"]).research.is_empty(), "a run's research is sanitized too")
 	g.gold += 5000
-	var amp = g.place_tower("amp", Vector2i(3, 4))
-	check(amp.spent == 80 and amp.upgrade_cost() == 96, "pylon upgrades discounted too (%d)" % amp.upgrade_cost())
-	check(near(float(amp.stats().buff_dmg), 0.19) and near(amp.get_range(), 108.0), "Resonance and Field Coils (%.2f, %.1f)" % [amp.stats().buff_dmg, amp.get_range()])
-
-	var arrow = g.place_tower("arrow", Vector2i(2, 3))
-	check(near(arrow.stats().damage, 9.54) and near(arrow.stats().range, 149.8) and near(arrow.stats().rate, 2.14), "pulse research applies to damage, range and rate")
+	var arrow = g.place_tower("gun_turret", Vector2i(2, 3))
+	check(near(arrow.stats().damage, 16.96) and near(arrow.stats().range, 139.1) and near(arrow.stats().rate, 1.284), "Gun Turret research applies to damage, range and rate")
 	check(not arrow.stats().has("splash"), "research never adds stats a level lacks")
-	check(near(float(Towers.TOWERS.arrow.tiers[0].damage), 9.0), "research never mutates the data table")
-	var tesla = g.place_tower("tesla", Vector2i(8, 3))
-	check(int(tesla.stats().chains) == 4 and near(tesla.stats().chain_range, 99.0), "Conductive Arcs +1 chain, Antennae +10%% reach")
-	var frost = g.place_tower("frost", Vector2i(10, 5))
-	check(near(frost.stats().slow, 0.40) and near(frost.stats().slow_time, 1.8) and near(frost.stats().range, 111.3), "Deep Freeze and Wide Emitters")
-	var laser = g.place_tower("laser", Vector2i(8, 9))
-	check(near(laser.stats().ramp_time, 2.0), "Heat Sinks shorten the ramp")
-	var missile = g.place_tower("missile", Vector2i(12, 4))
-	check(near(missile.stats().splash, 31.36), "Warhead Packing widens blasts")
-	g.upgrade_tower(arrow)
-	check(near(arrow.stats().damage, 15.9), "research follows the tower through upgrades")
+	check(near(float(Tower.rework_base("gun_turret").damage), 16.0), "research never mutates the data table")
+	var boost = g.place_tower("boost_tower", Vector2i(3, 4))
+	check(near(boost.get_range(), float(Tower.rework_base("boost_tower").range) * 1.07), "Boost Tower research widens its field")
+	g.upgrade_tower(arrow, "a")
+	check(near(arrow.stats().damage, float(arrow.base_stats().damage) * 1.06), "research follows the tower through upgrades")
 	check(g.sell_value(arrow) == int(floor(arrow.spent * 0.85)), "Salvage Protocols refund 85%")
 
 	g.start_wave()
@@ -1989,28 +1453,29 @@ func test_research_effects() -> void:
 	var e0 = put(base, "grunt", 40.0)
 	base.damage_enemy(e0, 1e9, true, null)
 	check(base.gold - b0 == e0.bounty and base.bounty_carry == 0.0, "no research: exact bounty, no carry")
-	var partial = research_game(["arrow_1"])
-	check(near(partial.level_stats("arrow", 1).damage, 9.54) and near(partial.level_stats("cannon", 1).damage, 22.0), "research only touches its own tower")
+	var partial = research_game(["gun_turret_1"])
+	check(near(partial.level_stats("gun_turret").damage, 16.96) and near(partial.level_stats("mortar_tower").damage, float(Tower.rework_base("mortar_tower").damage)), "research only touches its own tower")
 
 
 ## Research bought or reset mid-run applies at once (playtest round 2, #29).
 func test_live_research() -> void:
 	var g = research_game([])
 	g.gold += 5000
-	var old = g.place_tower("arrow", Vector2i(2, 3))
-	check(near(old.stats().damage, 9.0), "no research: 9 damage")
-	g.apply_research(["arrow_1"])
-	check(near(old.stats().damage, 9.54), "a boost bought mid-run reaches an existing tower (%.2f)" % old.stats().damage)
-	var fresh = g.place_tower("arrow", Vector2i(8, 3))
-	check(near(fresh.stats().damage, 9.54), "and new towers")
-	check(g.research == ["arrow_1"], "the run's research list follows")
+	var old = g.place_tower("gun_turret", Vector2i(2, 3))
+	check(near(old.stats().damage, 16.0), "no research: 16 damage")
+	g.apply_research(["gun_turret_1"])
+	check(near(old.stats().damage, 16.96), "a boost bought mid-run reaches an existing tower (%.2f)" % old.stats().damage)
+	var fresh = g.place_tower("gun_turret", Vector2i(8, 3))
+	check(near(fresh.stats().damage, 16.96), "and new towers")
+	check(g.research == ["gun_turret_1"], "the run's research list follows")
 
 	# Masteries: a tower stopped before its mastery can buy it once the research is in.
-	var gat = build_to(g, "arrow", Vector2i(10, 5), "gatling", 4)
-	check(gat.tier == 3 and not g.upgrade_tower(gat), "without Mastery research the branch stops before the mastery")
-	g.apply_research(["arrow_1", "arrow_2a", "arrow_2b", "arrow_m"])
-	g.gold += 5000
-	check(g.upgrade_tower(gat) and gat.tier == 4, "with it, the mastery can be bought at once")
+	var gat = g.place_tower("gun_turret", Vector2i(10, 5))
+	buy_steps(g, gat, "a", 4)
+	check(gat.tier == 3 and not g.upgrade_tower(gat, "a"), "without Mastery research the path stops before the mastery")
+	g.apply_research(["gun_turret_1", "gun_turret_2a", "gun_turret_2b", "gun_turret_m"])
+	g.gold += 50000
+	check(g.upgrade_tower(gat, "a") and gat.tier == 4, "with it, the mastery can be bought at once")
 
 	# Run-start bonuses: the difference is granted on the spot.
 	var c = research_game([])
@@ -2021,7 +1486,7 @@ func test_live_research() -> void:
 
 	# A reset takes it all back: boosts gone, bought masteries kept, credits >= 0, shields >= 1.
 	g.apply_research([])
-	check(near(old.stats().damage, 9.0) and near(fresh.stats().damage, 9.0), "a reset removes the boosts")
+	check(near(old.stats().damage, 16.0) and near(fresh.stats().damage, 16.0), "a reset removes the boosts")
 	check(gat.tier == 4, "a mastery already bought stays bought")
 	c.gold = 10
 	c.lives = 1
@@ -2035,8 +1500,8 @@ func test_live_research() -> void:
 	# Saving after a live purchase keeps the same run.
 	var h = research_game([])
 	h.gold += 5000
-	var ht = h.place_tower("arrow", Vector2i(2, 3))
-	h.apply_research(["arrow_1", "cmd_core"])
+	var ht = h.place_tower("gun_turret", Vector2i(2, 3))
+	h.apply_research(["gun_turret_1", "cmd_core"])
 	var res := SaveCodec.decode(JSON.parse_string(JSON.stringify(SaveCodec.encode(h))))
 	check(res.has("game"), "the run saves and loads")
 	if res.has("game"):
@@ -2047,8 +1512,9 @@ func test_live_research() -> void:
 
 ## The MASTERY burst is for the mastery purchase only, not later secondaries (#32).
 func test_upgrade_event_mastery() -> void:
-	var g = research_game(["arrow_1", "arrow_2a", "arrow_2b", "arrow_m"])
-	var t = build_to(g, "arrow", Vector2i(2, 3), "gatling", 3)
+	var g = research_game(["gun_turret_1", "gun_turret_2a", "gun_turret_2b", "gun_turret_m"])
+	g.gold += 5000
+	var t = g.place_tower("gun_turret", Vector2i(2, 3))
 	while t.tier < 4 and t.depth.a < Tower.BRANCH_STEPS:
 		g.gold += 1000
 		g.upgrade_tower(t, "a")
@@ -2065,111 +1531,37 @@ func test_upgrade_event_mastery() -> void:
 	check(ups.size() == 1 and not bool(ups[0].get("mastery", true)), "a secondary bought after the mastery is not marked")
 
 
-## One flechette trace per flechette (#35): the event carries the count.
-func test_flechette_pellets() -> void:
-	var counts := []
-	for setup in ["flechette", "dense", "secondary"]:
-		var g = new_game()
-		var t
-		if setup == "secondary":
-			g.gold += 5000
-			t = g.place_tower("arrow", Vector2i(2, 3))
-			g.upgrade_tower(t)
-			g.upgrade_tower(t, "a")
-			g.upgrade_tower(t, "c")
-		else:
-			t = spec_tower(g, "arrow", Vector2i(2, 3), "flechette")
-			if setup == "dense":
-				g.upgrade_tower(t, "c")
-				g.upgrade_tower(t, "c")
-		g.emit_events = true
-		g.state = Game.State.WAVE
-		put(g, "brute", 100.0, 0, 50.0)
-		var seen := -1
-		for i in int(8.0 / SIM_DT):
-			g.events.clear()
-			g.tick(SIM_DT)
-			for ev in g.events:
-				if ev.type == "flechette":
-					seen = int(ev.get("pellets", -1))
-			if seen >= 0:
-				break
-		counts.append(seen)
-	check(counts == [6, 7, 3], "flechette volleys carry 6, 7 after Dense Pack, and 3 for the secondary (%s)" % str(counts))
-
-
-func test_mastery_upgrades() -> void:
-	var g = research_game([])
-	var t = build_to(g, "arrow", Vector2i(2, 3), "gatling", 4)
-	check(t.tier == 3 and t.depth.a == 4 and t.upgrade_cost() == 0, "no research: the branch stops before its mastery")
-	check(t.block_reason("a").contains("research"), "the reason names the missing research")
-	check(not g.upgrade_tower(t), "mastery refused without research")
-	var r = research_game(["arrow_1", "arrow_2a", "arrow_2b", "arrow_m"])
-	var gat = build_to(r, "arrow", Vector2i(2, 3), "gatling", 3)
-	check(gat.depth.a == 1 and gat.upgrade_cost() == 170, "the next Gatling upgrade costs 170 (%d)" % gat.upgrade_cost())
-	while gat.depth.a < Tower.BRANCH_STEPS:
-		r.gold += 1000
-		r.upgrade_tower(gat)
-	var br: Dictionary = Tower.tree("arrow").branches[0]
-	var mc := int(br.mastery.cost)
-	check(gat.upgrade_cost() == mc, "mastery research opens the mastery (%d cr)" % mc)
-	r.gold = mc - 1
-	check(not r.upgrade_tower(gat), "mastery needs the credits")
-	r.gold = mc
-	check(r.upgrade_tower(gat) and r.gold == 0 and gat.tier == 4 and gat.spec == "gatling", "mastery bought, branch kept")
-	check(gat.display_name() == "Storm Gatling" and int(gat.stats().multishot) == 2, "the mastery is the branch's capstone")
-	var m: Dictionary = Tower.lines("arrow").a_m
-	check(near(gat.stats().damage, float(m.damage) * 1.06) and near(gat.stats().range, float(m.range) * 1.07), "research still applies to the mastery")
-	check(not r.upgrade_tower(gat) and gat.upgrade_cost() == 0, "nothing past the mastery")
-	var total := int(Tower.tree("arrow").tiers[0].cost) + int(Tower.tree("arrow").tiers[1].cost) + mc
-	for nd in br.nodes:
-		total += int(nd.cost)
-	check(gat.spent == total, "spend tracked through the whole branch (%d / %d)" % [gat.spent, total])
-	var shred = build_to(r, "arrow", Vector2i(3, 4), "shredder", 4)
-	check(shred.tier == 4 and shred.display_name() == "Disintegrator", "each branch has its own mastery")
-	var mortar = build_to(r, "cannon", Vector2i(5, 5), "siege", 4)
-	check(mortar.tier == 3, "mastery research is per tower type")
-	check(r.level_stats("cannon", 4, "siege").has("stun"), "level_stats reaches the mastery")
-
-
 func test_footprint() -> void:
 	var g = new_game()
 	g.gold = 100000
-	check(Game.size_of("scrap") == 2 and Game.size_of("drones") == 2 and Game.size_of("arrow") == 1, "the Scrapyard and Drone Bay are 2x2, the rest 1x1")
-	var y = g.place_tower("scrap", Vector2i(2, 5))
+	check(Game.size_of("scrapyard") == 2 and Game.size_of("drone_bay") == 1 and Game.size_of("gun_turret") == 1, "the Scrapyard is 2x2, the rest 1x1")
+	var y = g.place_tower("scrapyard", Vector2i(2, 5))
 	check(y != null and y.size == 2, "a Scrapyard builds on a clear 2x2 block")
 	var covered := [Vector2i(2, 5), Vector2i(3, 5), Vector2i(2, 6), Vector2i(3, 6)]
 	check(covered.all(func(c): return g.tower_at.get(c) == y), "it fills all four tiles")
 	check(y.pos == Vector2(144, 288), "it stands at the centre of its footprint (%s)" % str(y.pos))
-	check(g.placement_error("arrow", Vector2i(3, 6)).contains("already has a tower"), "its other tiles are taken")
-	check(g.placement_error("drones", Vector2i(3, 4)).contains("lane"), "a 2x2 block can't overlap the lane")
-	check(g.placement_error("drones", Vector2i(31, 15)) == "Out of bounds", "or run off the grid")
+	check(g.placement_error("gun_turret", Vector2i(3, 6)).contains("already has a tower"), "its other tiles are taken")
+	check(g.placement_error("scrapyard", Vector2i(3, 4)).contains("lane"), "a 2x2 block can't overlap the lane")
+	check(g.placement_error("scrapyard", Vector2i(31, 15)) == "Out of bounds", "or run off the grid")
 	g.sell_tower(y)
 	check(covered.all(func(c): return not g.tower_at.has(c)), "selling frees all four tiles")
-	var hg = g.place_tower("drones", Vector2i(11, 5))
+	var hg = g.place_tower("scrapyard", Vector2i(11, 5))
 	check(hg != null and hg.site == "H", "a 2x2 tower on high ground gets the high-ground bonus")
-	var pn = g.place_tower("scrap", Vector2i(6, 5))
+	var pn = g.place_tower("scrapyard", Vector2i(6, 5))
 	check(pn != null and pn.site == "P", "one power-node tile under it is enough for the power bonus")
 	# Save and load keep the footprint.
 	var res := SaveCodec.decode(JSON.parse_string(JSON.stringify(SaveCodec.encode(g))))
 	check(res.has("game"), "a game with 2x2 towers saves and loads")
 	if res.has("game"):
 		var lg = res.game
-		check(lg.tower_at.get(Vector2i(12, 6)) != null and lg.tower_at.get(Vector2i(12, 6)).type == "drones", "loading restores all four tiles")
-	# An old 1x1 Drone Bay whose 2x2 block no longer fits is refunded.
-	var old: Dictionary = SaveCodec.encode(new_game())
-	old["version"] = 8
-	old["gold"] = 100
-	old["towers"] = [{"type": "drones", "col": 3, "row": 5, "trunk": 1, "depth": {"a": 0, "b": 0, "c": 0}, "started": [], "mastery": false, "mode": 0, "kills": 0, "spent": 180}]
-	var ro := SaveCodec.decode(JSON.parse_string(JSON.stringify(old)))
-	check(ro.has("game") and ro.game.towers.is_empty() and ro.game.gold == 280, "an old 1x1 Drone Bay that no longer fits is refunded (%s)" % str(ro.get("error", "")))
+		check(lg.tower_at.get(Vector2i(12, 6)) != null and lg.tower_at.get(Vector2i(12, 6)).type == "scrapyard", "loading restores all four tiles")
 
 
 func test_target_priority() -> void:
 	var g = new_game()
 	g.gold = 10000
-	var t = g.place_tower("tesla", Vector2i(6, 3))
-	check(t.hits_air() and t.hits_ground() and t.priority == 0, "an Arc Coil hits both and starts on Any")
+	var t = g.place_tower("tesla_tower", Vector2i(6, 3))
+	check(t.hits_air() and t.hits_ground() and t.priority == 0, "a Tesla Tower hits both and starts on Any")
 	var walker = put(g, "grunt", 300.0)
 	var flyer = g.spawn_enemy("bat", 0, 0.0, 1.0, -1)
 	g.enemies.append(flyer)
@@ -2191,10 +1583,10 @@ func test_target_priority() -> void:
 
 
 func test_mastery_needs_all_research() -> void:
-	check(not Research.prerequisites_met(["arrow_1", "arrow_2a"], "arrow_m"), "a mastery needs both branches")
-	check(Research.prerequisites_met(["arrow_1", "arrow_2a", "arrow_2b"], "arrow_m"), "with the whole tree it's open")
-	check(Research.prerequisites_met(["arrow_1"], "arrow_2a") and Research.prerequisites_met(["arrow_1"], "arrow_2b"), "branch nodes still need only the root")
-	check(Research.buy_block_reason(["arrow_1", "arrow_2b"], "arrow_m", 99).contains("everything else"), "the reason says what's missing")
+	check(not Research.prerequisites_met(["gun_turret_1", "gun_turret_2a"], "gun_turret_m"), "a mastery needs both branches")
+	check(Research.prerequisites_met(["gun_turret_1", "gun_turret_2a", "gun_turret_2b"], "gun_turret_m"), "with the whole tree it's open")
+	check(Research.prerequisites_met(["gun_turret_1"], "gun_turret_2a") and Research.prerequisites_met(["gun_turret_1"], "gun_turret_2b"), "branch nodes still need only the root")
+	check(Research.buy_block_reason(["gun_turret_1", "gun_turret_2b"], "gun_turret_m", 99).contains("everything else"), "the reason says what's missing")
 
 
 func test_knowledge_base() -> void:
@@ -2217,180 +1609,8 @@ func test_knowledge_base() -> void:
 	check(Lore.text("sludge").contains("%d%%" % roundi(Game.SLUDGE_SLOW * 100.0)), "glossary numbers come from the game's constants")
 	for t in Towers.ORDER:
 		var rows := Lore.tower_rows(t)
-		check(rows.size() == 2 + 3 * 5, "the Codex lists %s's whole tree (%d rows)" % [t, rows.size()])
+		check(rows.size() == 1 + Towers.Rework.TREES[t].retrofits.size() + 3 * 5, "the Codex lists %s's whole tree (%d rows)" % [t, rows.size()])
 		check(rows.all(func(r): return int(r.cost) > 0 and str(r.blurb) != "" and not (r.stats as Dictionary).is_empty()), "every %s row has a price, description and stats" % t)
-
-
-func test_laser_charge_stat() -> void:
-	for lv in [Tower.lines("laser").t1, Tower.lines("laser").t2, Tower.lines("laser").a[1], Tower.lines("laser").b[1]]:
-		check(float(lv.get("ramp_time", 0.0)) > 0.0, "laser levels carry a charge time (ramp_time)")
-	check(Game.START_GOLD == 500, "runs start with 500 credits")
-
-
-func test_branch_rules() -> void:
-	var g = research_game(Research.node_ids())
-	g.gold = 100000
-	var t = g.place_tower("arrow", Vector2i(2, 3))
-	check(g.upgrade_tower(t, "gatling") and t.trunk == 2 and t.started.is_empty(), "tier 1 always upgrades the trunk first")
-	check(g.upgrade_tower(t, "a") and g.upgrade_tower(t, "b"), "two branches can be started, by key or id")
-	check(t.block_reason("c").contains("Locked"), "the third branch locks once two are started")
-	check(g.upgrade_tower(t, "b") and g.upgrade_tower(t, "a"), "both branches can reach two upgrades")
-	check(t.primary() == "a" and not t.locked_in(), "nothing is locked in at 2 and 2 (the first started leads)")
-	check(t.display_name() == "Pulse Turret" and t.shown_spec == "", "until the primary locks in, the tower keeps its stock name and colour")
-	check(g.upgrade_tower(t, "a") and t.primary() == "a" and t.locked_in(), "the first third upgrade makes the primary")
-	check(t.display_name() == "Gatling Pulse" and t.shown_spec == "gatling", "then it takes its specialization's name and colour")
-	check(not g.upgrade_tower(t, "b") and t.block_reason("b").contains("Blocked"), "a secondary already at its cap of 2 is then blocked")
-	check(g.upgrade_tower(t, "a") and t.depth.a == 4, "the primary climbs on")
-	check(g.upgrade_tower(t, "a") and t.mastered and t.tier == 4, "and takes its mastery")
-	# The playtest case: the primary locks in while the secondary has only one upgrade. The secondary
-	# can still take its second, then stops; the third branch stays locked.
-	var s = g.place_tower("sensor", Vector2i(12, 1))
-	for k in "Tacaa":
-		g.upgrade_tower(s, "" if k == "T" else k)
-	check(int(s.depth.a) == 3 and int(s.depth.c) == 1 and s.locked_in() and s.primary() == "a", "Sensor Array: primary A at 3, secondary C at 1")
-	check(s.can_buy("c") and g.upgrade_tower(s, "c") and int(s.depth.c) == 2, "the secondary can still take its second upgrade after the primary locks in")
-	check(not g.upgrade_tower(s, "c") and s.block_reason("c").contains("capped"), "then it stops at its cap of 2")
-	check(s.block_reason("b").contains("Locked"), "the third branch is still locked")
-	var sln := Tower.lines("sensor")
-	check(near(float(s.base_stats().range), float(sln.a[3].range) + float(sln.c[2].range) - float(sln.t2.range)), "the secondary's second upgrade counts in the stats")
-	# Stats: primary line plus the secondary's difference from Tier 2.
-	var ln := Tower.lines("arrow")
-	var expect_dmg := float(ln.a_m.damage) + float(ln.b[2].damage) - float(ln.t2.damage)
-	var expect_rate := float(ln.a_m.rate) + float(ln.b[2].rate) - float(ln.t2.rate)
-	var raw: Dictionary = t.base_stats()
-	check(near(raw.damage, expect_dmg) and near(raw.rate, expect_rate), "secondary adds its difference from Tier 2 (%.1f dmg, %.2f/s)" % [raw.damage, raw.rate])
-	check(float(raw.get("shred", 0.0)) > 0.0 and int(raw.multishot) == 2, "the secondary's mechanic comes along (shred) with the primary's (multishot)")
-	# Attack-style secondaries add their attack instead of their stat line; everything else stacks in
-	# full, downsides included (Supernova plus Pulse Reactor).
-	var f = g.place_tower("arrow", Vector2i(3, 3))
-	g.upgrade_tower(f)
-	g.upgrade_tower(f, "a")
-	g.upgrade_tower(f, "c")
-	var fs: Dictionary = f.base_stats()
-	check(int(fs.get("flechette_every", 0)) == 3 and not fs.has("cone"), "a Flechette secondary adds a flechette volley, not its cone stats")
-	var n = g.place_tower("nova", Vector2i(5, 4))
-	g.upgrade_tower(n)
-	g.upgrade_tower(n, "a")
-	g.upgrade_tower(n, "b")
-	var ns: Dictionary = n.base_stats()
-	var nl := Tower.lines("nova")
-	check(near(ns.rate, float(nl.a[1].rate) + float(nl.b[1].rate) - float(nl.t2.rate)), "stat changes apply in full, downsides included")
-
-
-
-func test_mastery_mechanics() -> void:
-	var all := Research.node_ids()
-	# Storm Gatling: every volley also fires at a second target.
-	var g = research_game(all)
-	build_to(g, "arrow", Vector2i(2, 3), "gatling", 4)
-	g.state = Game.State.WAVE
-	put(g, "brute", 60.0, 0, 50.0)
-	put(g, "brute", 90.0, 0, 50.0)
-	g.tick(SIM_DT)
-	check(g.projectiles.size() == 2, "Storm Gatling fires twice per volley (%d)" % g.projectiles.size())
-	check(g.projectiles.size() == 2 and g.projectiles[0].target != g.projectiles[1].target, "...at two different targets")
-
-	# Earthshaker: blasts stun, bosses less.
-	var g2 = research_game(all)
-	var es = build_to(g2, "cannon", Vector2i(5, 5), "siege", 4)
-	g2.state = Game.State.WAVE
-	var grunt = put(g2, "brute", 330.0, 0, 50.0)
-	var boss = put(g2, "juggernaut", 334.0, 0, 5.0)
-	check(es.can_target(grunt), "earthshaker reaches the test spot")
-	var hit := run_until(g2, func(): return grunt.stun_timer > 0.0, 3.0)
-	check(hit and grunt.stun_timer > 0.3, "Earthshaker stuns ground targets (%.2f)" % grunt.stun_timer)
-	check(boss.stun_timer > 0.0 and boss.stun_timer < 0.15, "bosses shrug off most of the stun (%.2f)" % boss.stun_timer)
-
-	# Executioner: non-boss survivors under 20% are destroyed; bosses aren't.
-	var g3 = research_game(all)
-	var ex = build_to(g3, "sniper", Vector2i(7, 4), "deadeye", 4)
-	g3.state = Game.State.WAVE
-	var victim = put(g3, "grunt", 200.0)
-	victim.max_hp = 10000.0
-	victim.hp = ex.eff_damage() + 1500.0
-	g3.tick(SIM_DT)
-	check(not victim.alive and ex.kills == 1, "Executioner finishes a target left at 15%")
-	var g4 = research_game(all)
-	var ex2 = build_to(g4, "sniper", Vector2i(7, 4), "deadeye", 4)
-	g4.state = Game.State.WAVE
-	var jug = put(g4, "juggernaut", 200.0)
-	jug.max_hp = 10000.0
-	jug.hp = ex2.eff_damage() * 2.5 + 1500.0
-	g4.tick(SIM_DT)
-	check(jug.alive and near(jug.hp, 1500.0, 0.5), "bosses are never executed (%.1f)" % jug.hp)
-	var g5 = research_game(all)
-	var dead = build_to(g5, "sniper", Vector2i(7, 4), "deadeye", 3)
-	g5.state = Game.State.WAVE
-	var v2 = put(g5, "grunt", 200.0)
-	v2.max_hp = 10000.0
-	v2.hp = dead.eff_damage() + 1500.0
-	g5.tick(SIM_DT)
-	check(v2.alive, "plain Deadeye has no execute")
-
-	# Ion Lance: the wide channel catches an enemy that a plain Piercing Rail misses.
-	for tier in [3, 4]:
-		var g6 = research_game(all)
-		var rail = build_to(g6, "sniper", Vector2i(7, 4), "lance", tier)
-		g6.state = Game.State.WAVE
-		var front = put(g6, "brute", 200.0, 0, 50.0)
-		var side = put(g6, "brute", 200.0, 0, 50.0)
-		var dir: Vector2 = (front.pos - rail.pos).normalized()
-		side.pos = front.pos + dir.orthogonal() * (side.radius + 17.0)
-		rail.aim = dir.angle()
-		g6._fire_rail(rail, front, rail.stats())
-		check(front.hp < front.max_hp, "tier %d rail hits the lined-up target" % tier)
-		if tier == 3:
-			check(near(side.hp, side.max_hp), "Piercing Rail misses a target 17 px off the line")
-		else:
-			check(side.hp < side.max_hp, "Ion Lance's wide channel catches it")
-
-	# Masteries that extend existing mechanics.
-	var g7 = research_game(all)
-	var loc = build_to(g7, "missile", Vector2i(12, 4), "swarm", 4)
-	g7.state = Game.State.WAVE
-	put(g7, "grunt", 960.0, 0, 50.0)
-	run_until(g7, func(): return not g7.projectiles.is_empty(), 2.0)
-	check(g7.projectiles.size() == 8, "Locust Swarm fires 8 missiles (%d)" % g7.projectiles.size())
-	var prism = build_to(g7, "laser", Vector2i(8, 9), "prism", 4)
-	check(int(prism.stats().beams) == 6, "Refraction Grid has 6 beams")
-	build_to(g7, "amp", Vector2i(11, 5), "overclock", 4)
-	check(near(loc.buff_dmg, 0.49) and near(loc.buff_rate, 0.40), "Hypercore Pylon boosts neighbors, plus Resonance (%.2f, %.2f)" % [loc.buff_dmg, loc.buff_rate])
-
-
-func test_save_research_v4() -> void:
-	var owned := ["cmd_funds", "cmd_core", "sniper_1", "sniper_2a", "sniper_2b", "sniper_m"]
-	var g = research_game(owned, "canyon", 777)
-	var ex = build_to(g, "sniper", Vector2i(9, 2), "deadeye", 4)
-	g.gold = 321
-	g.bounty_carry = 0.4
-	var data := SaveCodec.encode(g)
-	check(int(data.version) == Game.SAVE_VERSION and data.research == owned, "saves record the run's research")
-	var res := SaveCodec.decode(JSON.parse_string(JSON.stringify(data)))
-	check(res.has("game"), "v4 save loads (%s)" % res.get("error", ""))
-	if res.has("game"):
-		var g2 = res.game
-		check(g2.research == owned and g2.max_lives == g.max_lives, "research restored with the run")
-		var t2 = g2.tower_at[Vector2i(9, 2)]
-		check(t2.tier == 4 and t2.display_name() == "Executioner" and near(t2.stats().damage, ex.stats().damage), "tier-4 tower restored with research")
-		check(near(g2.bounty_carry, 0.4), "bounty carry restored")
-		var a := SaveCodec.encode(g)
-		var b := SaveCodec.encode(g2)
-		a.erase("saved_at")
-		b.erase("saved_at")
-		check(deep_equal(a, b), "v4 round trip is exact")
-	var stripped := data.duplicate(true)
-	stripped["research"] = []
-	check(str(SaveCodec.decode(stripped).get("error", "")).contains("Mastery"), "a mastered tower without its research is rejected")
-	var junk := data.duplicate(true)
-	junk["research"] = "all of it"
-	check(SaveCodec.decode(junk).has("error"), "malformed research list rejected")
-	var v3 := data.duplicate(true)
-	v3["version"] = 3
-	v3.erase("research")
-	v3.erase("bounty_carry")
-	v3["towers"] = [{"type": "sniper", "col": 9, "row": 2, "tier": 3, "spec": "deadeye", "mode": 0, "kills": 0, "spent": 530}]
-	var r3 := SaveCodec.decode(v3)
-	check(r3.has("game") and r3.game.research.is_empty(), "v3 saves load with no research")
 
 
 # --- Phantoms, Aegis Walkers, Hydra Frames, Jammers and the new towers -----------------------
@@ -2398,7 +1618,7 @@ func test_save_research_v4() -> void:
 func test_phantom_cloak() -> void:
 	var g = new_game()
 	g.gold = 5000
-	var arrow = g.place_tower("arrow", Vector2i(2, 3))
+	var arrow = g.place_tower("gun_turret", Vector2i(2, 3))
 	g.state = Game.State.WAVE
 	var ph = put(g, "phantom", 150.0)
 	check(ph.is_hidden(), "phantoms start cloaked")
@@ -2406,28 +1626,25 @@ func test_phantom_cloak() -> void:
 	for i in 30:
 		g.tick(SIM_DT)
 	check(g.projectiles.is_empty() and near(ph.hp, ph.max_hp), "the turret holds fire")
-	var frost = g.place_tower("frost", Vector2i(1, 3))
+	var radar = g.place_tower("radar_tower", Vector2i(3, 4))
+	check(not radar.is_support() and near(arrow.buff_dmg, 0.0), "the Radar isn't a support tower and boosts nothing")
 	g.tick(SIM_DT)
-	check(ph.hp < ph.max_hp and ph.slow_amount > 0.0, "area pulses still hit cloaked enemies")
-	var sensor = g.place_tower("sensor", Vector2i(3, 4))
-	check(sensor.is_support() and sensor.is_sensor() and near(arrow.buff_dmg, 0.0), "the sensor is support and doesn't act as a pylon")
-	g.tick(SIM_DT)
-	check(not ph.is_hidden(), "a Sensor Array reveals phantoms in its field")
-	check(ph.vuln_timer > 0.0 and near(ph.vuln_amount, 0.08), "and marks them (+8%%)")
+	check(not ph.is_hidden(), "a Radar ping reveals phantoms in its circle")
 	check(arrow.can_target(ph), "revealed phantoms can be targeted")
-	for gone in [sensor, frost]:
+	for gone in [radar, arrow]:
 		g.towers.erase(gone)
 		g.tower_at.erase(gone.cell)
-	for i in 40:
+	g.projectiles.clear()
+	for i in 90:
 		g.tick(SIM_DT)
-	check(ph.is_hidden(), "the cloak returns after leaving the field")
-	check(not Bot.is_pylon("sensor") and Bot.is_pylon("amp"), "the bot places sensors for coverage, pylons for boosts")
+	check(ph.is_hidden(), "the cloak returns once the reveal wears off")
+	check(not Bot.is_pylon("radar_tower") and Bot.is_pylon("boost_tower"), "the bot places Radars by what they reveal, pylons for boosts")
 
 
 func test_aegis_barrier() -> void:
 	var g = new_game()
 	g.gold = 5000
-	var coil = g.place_tower("tesla", Vector2i(15, 6))
+	var coil = g.place_tower("tesla_tower", Vector2i(15, 6))
 	var e = put(g, "aegis", 40.0)
 	check(near(e.shield, 130.0) and near(e.max_shield, 130.0), "aegis starts with a full barrier")
 	var d := g.damage_enemy(e, 50.0, false, null)
@@ -2469,8 +1686,8 @@ func test_hydra_split() -> void:
 func test_jammer_emp() -> void:
 	var g = new_game()
 	g.gold = 5000
-	var near_t = g.place_tower("arrow", Vector2i(2, 3))
-	var far_t = g.place_tower("sniper", Vector2i(10, 2))
+	var near_t = g.place_tower("gun_turret", Vector2i(2, 3))
+	var far_t = g.place_tower("railgun", Vector2i(10, 2))
 	g.state = Game.State.WAVE
 	var j = put(g, "jammer", 100.0, 0, 20.0)
 	j.ability_timer = 0.01
@@ -2486,50 +1703,6 @@ func test_jammer_emp() -> void:
 	for i in int(1.0 / SIM_DT):
 		g.tick(SIM_DT)
 	check(near_t.disabled == 0.0 and near_t.target != null, "the tower comes back online and re-acquires")
-
-
-func test_flak() -> void:
-	var g = new_game()
-	g.gold = 5000
-	var flak = g.place_tower("flak", Vector2i(2, 3))
-	g.state = Game.State.WAVE
-	var grunt = put(g, "grunt", 60.0, 0, 20.0)
-	check(g.pick_target(flak) == null and not flak.can_target(grunt), "flak can't target ground units")
-	g.tick(SIM_DT)
-	check(g.projectiles.is_empty(), "flak holds fire with only ground units around")
-	var bat = put(g, "bat", 60.0, 0, 20.0)
-	var bat2 = put(g, "bat", 66.0, 0, 20.0)
-	check(run_until(g, func(): return bat.hp < bat.max_hp, 2.0), "flak hits flyers")
-	check(bat2.hp < bat2.max_hp, "the airburst catches nearby flyers too")
-	check(near(grunt.hp, grunt.max_hp), "the airburst never hurts ground units")
-	var g2 = research_game(Research.node_ids())
-	var th = build_to(g2, "flak", Vector2i(2, 3), "burst", 4)
-	check(th.display_name() == "Thunderhead" and near(float(th.stats().stun), 0.5), "Thunderhead mastery stuns flyers")
-
-
-func test_graviton() -> void:
-	var g = new_game()
-	g.gold = 5000
-	var gp = g.place_tower("gravity", Vector2i(5, 5))
-	g.state = Game.State.WAVE
-	var e = put(g, "grunt", 330.0, 0, 20.0)
-	var boss = put(g, "juggernaut", 334.0, 0, 5.0)
-	var fly = put(g, "bat", 300.0)
-	var d0: float = e.distance
-	var b0: float = boss.distance
-	var f0: float = fly.distance
-	g.tick(SIM_DT)
-	check(near(e.distance, d0 + 55.0 * SIM_DT - 40.0, 0.2), "pulse shoves ground enemies back 40 px (%.1f)" % (d0 - e.distance))
-	check(near(boss.distance, b0 + 32.0 * SIM_DT - 10.0, 0.2), "bosses only move a quarter as far")
-	check(near(fly.distance, f0 + 82.0 * SIM_DT, 0.2), "flyers are unaffected")
-	check(e.hp < e.max_hp and gp.cooldown > 3.0, "the pulse crushes and then recharges (%.2f s)" % gp.cooldown)
-	var g2 = new_game()
-	var cf = build_to(g2, "gravity", Vector2i(5, 5), "crush", 3)
-	g2.state = Game.State.WAVE
-	var e2 = put(g2, "brute", 330.0, 0, 20.0)
-	g2.tick(SIM_DT)
-	check(e2.stun_timer > 0.5, "Crush Field stuns (%.2f)" % e2.stun_timer)
-	check(g2.level_stats("gravity", 4, "repulsor").push > g2.level_stats("gravity", 3, "repulsor").push, "graviton masteries exist")
 
 
 # --- Whole-game simulations ------------------------------------------------------------------
@@ -2607,14 +1780,13 @@ func test_bot_full_research() -> void:
 func test_bot_new_roster() -> void:
 	var g = new_game("meadow", 2024, "easy")
 	var bot = Bot.new(g)
-	check(bot.roster == "new", "the bot plays the reworked towers by default")
 	check(Bot.is_pylon("boost_tower") and Bot.is_pylon("augmentation_tower") and not Bot.is_pylon("radar_tower") \
 			and not Bot.is_pylon("scrapyard"), "Boost and Augmentation Towers are pylons; the Radar and Scrapyard aren't")
 	g.gold = 500000
 	g.wave = 30
 	for i in 20:
 		bot.act()
-	check(g.towers.size() >= 20 and g.towers.all(func(t): return t.is_rework), "the bot builds only reworked towers")
+	check(g.towers.size() >= 20 and g.towers.all(func(t): return Towers.has(t.type)), "the bot builds only reworked towers")
 	check(g.towers.any(func(t): return t.retrofit >= 0), "the bot buys Retrofits")
 	var rules_kept := true
 	for t in g.towers:
@@ -2676,7 +1848,7 @@ func _upgraded(type: String, path: String, research := false) -> Array:
 		t.mods["mastery"] = true
 		t.invalidate()
 	for ch in path:
-		g.upgrade_tower(t, "" if ch == "t" else ch)
+		g.upgrade_tower(t, ch)
 	return [g, t]
 
 
@@ -2685,127 +1857,37 @@ func _card_state(t, key: String, gold := 1 << 30) -> String:
 
 
 func test_upgrade_cards() -> void:
-	var t = _upgraded("arrow", "")[1]
-	check(UpgradeRules.card_keys(t) == ["trunk"], "a stock tower's panel offers only the Retrofit")
-	check(_card_state(t, "trunk") == "buy", "the Retrofit card can be bought with credits")
-	var short := UpgradeRules.card(t, "trunk", 0)
+	var t = _upgraded("gun_turret", "")[1]
+	check(UpgradeRules.card_keys(t) == ["retrofit", "a", "b", "c"], "a tower's panel offers the Retrofit and a card per path")
+	check(_card_state(t, "retrofit") == "buy", "the Retrofit card can be bought with credits")
+	var short := UpgradeRules.card(t, "retrofit", 0)
 	check(short.state == "short" and str(short.reason) == "Cannot afford", "without credits the card says Cannot afford")
-	t = _upgraded("arrow", "t")[1]
-	check(UpgradeRules.card_keys(t) == ["a", "b", "c"], "after the Retrofit there's a card per branch")
-	check(["a", "b", "c"].all(func(k): return _card_state(t, k) == "buy"), "every branch's first upgrade is buyable after the Retrofit")
-	check(UpgradeRules.card(t, "b", 1 << 30).node == t.branch("b").nodes[0], "the card offers the branch's specialization first")
-	t = _upgraded("arrow", "tab")[1]
-	check(_card_state(t, "c") == "locked", "the third branch is locked once two are started")
+	check(["a", "b", "c"].all(func(k): return _card_state(t, k) == "buy"), "every path's first upgrade is buyable from stock")
+	check(UpgradeRules.card(t, "b", 1 << 30).node == t.branch("b").nodes[0], "the card offers the path's first step first")
+	var tg = _upgraded("gun_turret", "")
+	tg[0].buy_retrofit(tg[1], 1)
+	check(_card_state(tg[1], "retrofit") == "done" and str(UpgradeRules.card(tg[1], "retrofit", 0).reason) == "Retrofit installed", "a fitted Retrofit shows a finished card")
+	t = _upgraded("gun_turret", "ab")[1]
+	check(_card_state(t, "c") == "locked", "the third path is locked once two are started")
 	check(str(UpgradeRules.card(t, "c", 1 << 30).reason).begins_with("Branch locked"), "and says so")
-	t = _upgraded("arrow", "tbabab")[1]
+	t = _upgraded("gun_turret", "babab")[1]
 	check(t.locked_in() and t.primary() == "b", "b locked in as the primary")
 	check(_card_state(t, "a") == "capped", "the secondary's card is capped at 2")
 	check(_card_state(t, "b") == "buy", "the primary keeps going")
-	t = _upgraded("arrow", "tbbbb")[1]
+	t = _upgraded("gun_turret", "bbbb")[1]
 	check(_card_state(t, "b") == "research", "the mastery card needs research without it")
 	check(str(UpgradeRules.card(t, "b", 1 << 30).reason).contains("Mastery research"), "and names the research")
-	t = _upgraded("arrow", "tbbbb", true)[1]
+	t = _upgraded("gun_turret", "bbbb", true)[1]
 	check(_card_state(t, "b") == "buy" and UpgradeRules.card(t, "b", 1 << 30).node == t.branch("b").mastery, "with research the card offers the mastery")
-	t = _upgraded("arrow", "tbbbbb", true)[1]
-	check(t.mastered and _card_state(t, "b") == "done", "a mastered branch shows a finished card")
+	t = _upgraded("gun_turret", "bbbbb", true)[1]
+	check(t.mastered and _card_state(t, "b") == "done", "a mastered path shows a finished card")
 	check(str(UpgradeRules.card(t, "b", 1 << 30).reason) == "Mastered", "labelled Mastered")
 	# Cards agree with what U / I / O would do.
 	for type in Towers.ORDER:
-		var tw = _upgraded(type, "tc")[1]
+		var tw = _upgraded(type, "c")[1]
 		for k in ["a", "b", "c"]:
 			var c := UpgradeRules.card(tw, k, 1 << 30)
 			check((c.state == "buy") == tw.can_buy(k), "%s %s: card state matches the buy rules" % [type, k])
-
-
-func test_upgrade_reachable_nodes() -> void:
-	var t = _upgraded("arrow", "")[1]
-	for id in ["t1", "t2", "a1", "a4", "am", "b3", "cm"]:
-		check(UpgradeRules.reachable(t, id), "stock: %s is reachable" % id)
-	t = _upgraded("arrow", "tab")[1]
-	check(not UpgradeRules.reachable(t, "c1"), "two branches started: the third isn't reachable")
-	check(UpgradeRules.reachable(t, "a3") and UpgradeRules.reachable(t, "bm"), "either started branch can still become the primary")
-	t = _upgraded("arrow", "tbabab")[1]
-	check(UpgradeRules.reachable(t, "a2") and not UpgradeRules.reachable(t, "a3"), "the secondary is reachable up to its cap")
-	check(not UpgradeRules.reachable(t, "am"), "the secondary's mastery isn't reachable")
-	check(UpgradeRules.reachable(t, "bm"), "the primary's mastery is reachable even before its research")
-	check(UpgradeRules.reachable(t, "b1"), "owned nodes are reachable")
-
-
-## A tower set to a preview state, as the preview builds it.
-func _at_state(type: String, st: Dictionary, research := true):
-	var g2 = Game.new("meadow", 5, "medium")
-	var tw = g2.place_tower(type, Vector2i(0, 0))
-	if research:
-		tw.mods["mastery"] = true
-	tw.trunk = st.trunk
-	tw.depth = st.depth
-	tw.started = st.started
-	tw.mastered = st.mastered
-	tw.invalidate()
-	return tw
-
-
-## A preview builds the same tower stats as buying up to the node in a real game.
-func test_upgrade_preview_state() -> void:
-	var cases := [["arrow", "", "b3", "tbbb"], ["cannon", "t", "am", "taaaaa"], ["tesla", "tab", "a3", "tabaa"],
-		["sniper", "tbabab", "a2", "tbabab"], ["frost", "tcc", "c4", "tcccc"], ["drones", "", "t2", "t"], ["scrap", "tb", "bm", "tbbbbb"]]
-	for cs in cases:
-		var t = _upgraded(cs[0], cs[1], true)[1]
-		var want = _upgraded(cs[0], cs[3], true)[1]
-		var tw = _at_state(cs[0], UpgradeRules.preview_state(t, cs[2]))
-		check(tw.stats() == want.stats(), "%s from '%s' previewing %s matches buying %s" % [cs[0], cs[1], cs[2], cs[3]])
-
-
-func test_upgrade_preview_enemies() -> void:
-	var ids := ["t1", "t2"]
-	for b in ["a", "b", "c"]:
-		for k in 4:
-			ids.append("%s%d" % [b, k + 1])
-		ids.append(b + "m")
-	for type in Towers.ORDER:
-		var t = _upgraded(type, "", true)[1]
-		for id in ids:
-			var tw = _at_state(type, UpgradeRules.preview_state(t, id))
-			var partner: bool = UpgradeRules.needs_partner(tw)
-			var air: bool = partner or tw.hits_air()
-			var ground: bool = partner or tw.hits_ground()
-			var list := UpgradeRules.enemies_for(UpgradeRules.node_for(type, id), air, ground)
-			check(not list.is_empty(), "%s %s: the preview sends enemies" % [type, id])
-			var ok := true
-			for e in list:
-				var flying := bool(Enemies.ENEMIES[e].get("flying", false))
-				if (flying and not air) or (not flying and not ground):
-					ok = false
-			check(ok, "%s %s: the tower can hit every preview enemy" % [type, id])
-	check(UpgradeRules.enemies_for({"set": {"shred": 1.0}}, true, true).has("brute"), "shred previews against armored enemies")
-	check(UpgradeRules.enemies_for({"add": {"air_mult": 0.5}}, true, true).has("bat"), "anti-air previews against flyers")
-	check(UpgradeRules.enemies_for({"set": {"boss_mult": 3.0}}, true, true) == ["juggernaut"], "boss bonuses preview against a boss")
-
-
-## The preview's sandbox runs on its own: playing it never changes the real game.
-func test_upgrade_preview_sandbox() -> void:
-	var r = _upgraded("arrow", "tbb", true)
-	var real = r[0]
-	var t = r[1]
-	var before := [real.gold, real.wave, real.time, real.enemies.size(), real.towers.size(), t.stats().duplicate(), str(t.depth)]
-	var p = UpgradePreview.new(Vector2(600, 300))
-	add_child(p)
-	p.show_node(real, t, "bm")
-	check(p.game != null and p.tower != null, "the preview builds a sandbox")
-	check(p.game != real and p.game.map_id == "range", "on the test range, separate from the real game")
-	check(p.tower.mastered and p.tower.primary() == "b", "the sandbox tower is at the previewed node")
-	check(str(p.game.grid.def.theme) == str(real.map_def.theme), "in the current sector's look")
-	var fought := false
-	for i in 300:
-		p._process(1.0 / 30.0)
-		if not p.game.enemies.is_empty() or int(p.game.stats.kills) > 0:
-			fought = true
-	check(fought, "the sandbox sends enemies at the tower")
-	var after := [real.gold, real.wave, real.time, real.enemies.size(), real.towers.size(), t.stats(), str(t.depth)]
-	check(after == before, "the real game is untouched by the preview")
-	p.show_node(real, t, "", "Not reachable")
-	check(p.game == null, "an unreachable node shows a note instead of a sandbox")
-	p.queue_free()
 
 
 func test_range_map() -> void:
@@ -2839,10 +1921,10 @@ func buy_steps(g, t, key: String, n: int) -> void:
 func test_rework_gun_turret_stock() -> void:
 	var g = new_game()
 	g.gold = 1000
-	check(Towers.is_rework("gun_turret") and Towers.has("gun_turret"), "the Gun Turret is a reworked tower")
+	check(Towers.has("gun_turret"), "the Gun Turret is a tower")
 	check(g.tower_cost("gun_turret") == 75, "it costs 75")
 	var t = g.place_tower("gun_turret", Vector2i(2, 3))
-	check(t != null and t.is_rework and g.gold == 925, "it builds for 75")
+	check(t != null and g.gold == 925, "it builds for 75")
 	var s: Dictionary = t.stats()
 	check(near(s.damage, 16.0) and near(s.range, 130.0) and near(s.rate, 1.2), "stock: 16 damage, 130 range, 1.2 shots/s")
 	check(t.hits_air() and t.hits_ground(), "it hits air and ground")
@@ -2953,7 +2035,7 @@ func test_rework_crit_and_hit_effects() -> void:
 	for i in 60:
 		var f = put(g, "grunt", 120.0 + float(i), 0, 50.0)
 		var pr = Projectile.new()
-		pr.kind = "arrow"
+		pr.kind = "gun_turret"
 		pr.target = f
 		pr.target_pos = f.pos
 		pr.pos = f.pos
@@ -2967,7 +2049,7 @@ func test_rework_crit_and_hit_effects() -> void:
 	g.buy_retrofit(v, 2)
 	var burn = put(g, "grunt", 200.0, 0, 50.0)
 	var bp = Projectile.new()
-	bp.kind = "arrow"
+	bp.kind = "gun_turret"
 	bp.target = burn
 	bp.pos = burn.pos
 	bp.damage = 1.0
@@ -3056,7 +2138,7 @@ func test_enemy_traits() -> void:
 	# Two timed traits on one enemy keep their own clocks: a Repair Bot carrying a Jammer's EMP too.
 	var g = new_game()
 	g.gold = 5000
-	var t = g.place_tower("arrow", Vector2i(2, 3))
+	var t = g.place_tower("gun_turret", Vector2i(2, 3))
 	g.state = Game.State.WAVE
 	var e = put(g, "shaman", 100.0, 0, 1e4)
 	var mate = put(g, "grunt", 110.0, 0, 1e4)
@@ -3103,7 +2185,7 @@ func test_elite_modifiers() -> void:
 	g.damage_enemy(sp, 1e9, true, null)
 	g.tick(SIM_DT)
 	check(g.enemies.filter(func(x): return x.alive and x.type == "rally").size() == 2, "a Splitting Bulwark breaks into two Rally Beacons")
-	var tw = g.place_tower("arrow", Vector2i(2, 3))
+	var tw = g.place_tower("gun_turret", Vector2i(2, 3))
 	var jm = g.spawn_enemy("grunt", 0, 100.0, 1e4, -1, 1.0, ["jamming"])
 	jm.speed = 0.0
 	g.enemies.append(jm)
@@ -3201,7 +2283,7 @@ func test_fury_and_titan() -> void:
 func test_siphon_drain() -> void:
 	var g = new_game()
 	g.gold = 5000
-	var t = g.place_tower("arrow", Vector2i(2, 3))
+	var t = g.place_tower("gun_turret", Vector2i(2, 3))
 	var rate0: float = t.eff_rate()
 	var range0: float = t.get_range()
 	g.state = Game.State.WAVE
@@ -3224,7 +2306,7 @@ func test_siphon_drain() -> void:
 func test_disruptors_and_disable_guard() -> void:
 	var g = new_game()
 	g.gold = 5000
-	var t = g.place_tower("arrow", Vector2i(2, 3))
+	var t = g.place_tower("gun_turret", Vector2i(2, 3))
 	g.state = Game.State.WAVE
 	var b = put(g, "blackout", 100.0, 0, 1e4)
 	b.speed = 0.0
@@ -3246,7 +2328,7 @@ func test_disruptors_and_disable_guard() -> void:
 	# Capacitor: a telegraphed 2 s charge, then a 3 s blackout; a stun during the charge cancels it.
 	var g2 = new_game()
 	g2.gold = 5000
-	var t2 = g2.place_tower("arrow", Vector2i(2, 3))
+	var t2 = g2.place_tower("gun_turret", Vector2i(2, 3))
 	g2.state = Game.State.WAVE
 	var c = put(g2, "capacitor", 100.0, 0, 1e4)
 	c.speed = 0.0
@@ -3303,7 +2385,7 @@ func test_wraith_energy_only() -> void:
 func test_masquerade_and_decoy() -> void:
 	var g = new_game()
 	g.gold = 5000
-	var t = g.place_tower("arrow", Vector2i(2, 3))
+	var t = g.place_tower("gun_turret", Vector2i(2, 3))
 	t.mode = Tower.Mode.STRONG
 	var m = put(g, "masquerade", 150.0)
 	var mech = put(g, "brute", 140.0)
@@ -3370,8 +2452,7 @@ func test_rework_roles_and_damage_kinds() -> void:
 	check(t.damage_kind() == "physical", "the Gun Turret's hits are physical")
 	g.damage_enemy(swarm, 1.0, false, t)
 	check(swarm.last_hit_kind == "physical", "a hit records its kind")
-	var arc = g.place_tower("tesla", spot(g, "tesla", 80))
-	check(arc != null and not arc.is_rework, "an old tower still builds beside the reworked ones")
+	var arc = g.place_tower("tesla_tower", spot(g, "tesla_tower", 80))
 	g.damage_enemy(swarm, 1.0, false, null)
 	check(swarm.last_hit_kind == "physical", "a hit with no tower is physical")
 
@@ -3394,7 +2475,7 @@ func test_rework_save_roundtrip() -> void:
 	var g2 = dec.game
 	check(g2.towers.size() == 2, "both towers come back")
 	var a2 = g2.tower_at[a.cell]
-	check(a2.is_rework and a2.retrofit == 2 and a2.depth.a == 3 and a2.depth.c == 2 and a2.primary() == "a", "the Retrofit and the paths are restored")
+	check(a2.retrofit == 2 and a2.depth.a == 3 and a2.depth.c == 2 and a2.primary() == "a", "the Retrofit and the paths are restored")
 	check(a2.look_key() == a.look_key() and near(a2.stats().ignite_dps, 3.0) and near(a2.stats().armor_pct, 0.5), "its stats are restored")
 	var m2 = g2.tower_at[m.cell]
 	check(m2.mastered and m2.look_key() == m.look_key() and near(m2.stats().range, m.stats().range) and near(m2.stats().range, 230.0 * 1.07), "the mastery is restored (research still applies)")
@@ -3407,7 +2488,7 @@ func test_rework_mortar() -> void:
 	var g = new_game()
 	g.gold = 20000
 	var t = g.place_tower("mortar_tower", spot(g, "mortar_tower", 0))
-	check(t != null and t.is_rework and g.tower_cost("mortar_tower") == 150, "the Mortar Tower builds for 150")
+	check(t != null and g.tower_cost("mortar_tower") == 150, "the Mortar Tower builds for 150")
 	var s: Dictionary = t.stats()
 	check(near(s.damage, 30.0) and near(s.splash, 60.0) and near(s.range, 110.0) and near(s.rate, 0.6), "stock: 30 damage, 60 px blast, 110 range, 0.6/s")
 	check(t.hits_ground() and not t.hits_air(), "ground only")
@@ -3485,7 +2566,7 @@ func test_rework_rocket_salvo() -> void:
 	g.gold = 40000
 	g.emit_events = true
 	var t = g.place_tower("rocket_salvo", spot(g, "rocket_salvo", 0))
-	check(t != null and t.is_rework and g.tower_cost("rocket_salvo") == 200, "the Rocket Salvo builds for 200")
+	check(t != null and g.tower_cost("rocket_salvo") == 200, "the Rocket Salvo builds for 200")
 	var s: Dictionary = t.stats()
 	check(near(s.damage, 19.0) and near(s.splash, 25.0) and near(s.range, 180.0) and near(s.rate, 0.4) and int(s.missiles) == 3, "stock: 3 rockets of 19, 25 px blast, 180 range, a salvo every 2.5 s")
 	check(t.hits_air() and t.hits_ground(), "air and ground")
@@ -3590,7 +2671,7 @@ func test_rework_laser_tower() -> void:
 	var g = new_game()
 	g.gold = 60000
 	var t = g.place_tower("laser_tower", spot(g, "laser_tower", 0))
-	check(t != null and t.is_rework and g.tower_cost("laser_tower") == 250, "the Laser Tower builds for 250")
+	check(t != null and g.tower_cost("laser_tower") == 250, "the Laser Tower builds for 250")
 	var s: Dictionary = t.stats()
 	check(near(s.damage, 25.0) and near(s.range, 150.0) and near(s.ramp, 3.0) and near(s.ramp_time, 3.0) and int(s.beams) == 1, "stock: 25 dps, x3 over 3 s, 150 range")
 	check(t.is_beam() and t.hits_air() and t.hits_ground() and t.def.damage_kind == "energy", "an energy beam that hits air and ground")
@@ -3671,7 +2752,7 @@ func test_rework_anti_aircraft() -> void:
 	g.gold = 60000
 	g.emit_events = true
 	var t = g.place_tower("anti_aircraft_turret", spot(g, "anti_aircraft_turret", 0))
-	check(t != null and t.is_rework and g.tower_cost("anti_aircraft_turret") == 150, "the Anti-Aircraft Turret builds for 150")
+	check(t != null and g.tower_cost("anti_aircraft_turret") == 150, "the Anti-Aircraft Turret builds for 150")
 	var s: Dictionary = t.stats()
 	check(near(s.damage, 25.0) and near(s.range, 160.0) and near(s.rate, 2.5), "stock: 25 damage, 160 range, 2.5 rounds/s")
 	check(t.hits_air() and not t.hits_ground(), "air only")
@@ -3740,7 +2821,7 @@ func test_rework_artillery_cannon() -> void:
 	g.gold = 90000
 	g.emit_events = true
 	var t = g.place_tower("artillery_cannon", spot(g, "artillery_cannon", 0))
-	check(t != null and t.is_rework and g.tower_cost("artillery_cannon") == 300, "the Artillery Cannon builds for 300")
+	check(t != null and g.tower_cost("artillery_cannon") == 300, "the Artillery Cannon builds for 300")
 	var s: Dictionary = t.stats()
 	check(near(s.damage, 75.0) and near(s.splash, 70.0) and near(s.rate, 0.25) and near(s.flight, 1.5) and near(s.scatter, 30.0), "stock: 75 damage, 70 px, a shell every 4 s, 30 px scatter")
 	check(t.hits_ground() and not t.hits_air(), "ground only")
@@ -3849,7 +2930,7 @@ func test_rework_railgun() -> void:
 	g.gold = 90000
 	g.emit_events = true
 	var t = g.place_tower("railgun", spot(g, "railgun", 0))
-	check(t != null and t.is_rework and g.tower_cost("railgun") == 500, "the Railgun builds for 500")
+	check(t != null and g.tower_cost("railgun") == 500, "the Railgun builds for 500")
 	var s: Dictionary = t.stats()
 	check(near(s.damage, 90.0) and near(s.range, 380.0) and near(s.rate, 0.4) and near(s.falloff, 0.4), "stock: 90 damage, 380 range, a slug every 2.5 s, 40% falloff")
 	check(t.hits_air() and t.hits_ground(), "air and ground")
@@ -3936,7 +3017,7 @@ func test_rework_tesla_tower() -> void:
 	g.gold = 90000
 	g.emit_events = true
 	var t = g.place_tower("tesla_tower", spot(g, "tesla_tower", 0))
-	check(t != null and t.is_rework and g.tower_cost("tesla_tower") == 250, "the Tesla Tower builds for 250")
+	check(t != null and g.tower_cost("tesla_tower") == 250, "the Tesla Tower builds for 250")
 	var s: Dictionary = t.stats()
 	check(near(s.damage, 32.0) and near(s.range, 140.0) and near(s.rate, 0.8) and int(s.jumps) == 3 and near(s.falloff, 0.15), "stock: 32 damage, 140 range, 0.8 arcs/s, 3 jumps, 15% lost per jump")
 	check(t.hits_air() and t.hits_ground() and t.def.damage_kind == "energy", "an energy tower that hits air and ground")
@@ -4024,7 +3105,7 @@ func test_rework_drone_bay() -> void:
 	g.gold = 90000
 	g.emit_events = true
 	var t = g.place_tower("drone_bay", spot(g, "drone_bay", 0))
-	check(t != null and t.is_rework and g.tower_cost("drone_bay") == 300, "the Drone Bay builds for 300")
+	check(t != null and g.tower_cost("drone_bay") == 300, "the Drone Bay builds for 300")
 	var s: Dictionary = t.stats()
 	check(near(s.damage, 16.0) and near(s.rate, 3.0) and int(s.drones) == 1, "stock: one drone, 16 damage, 3 shots/s")
 	check(t.hits_air() and t.hits_ground() and not t.stats().has("range"), "air and ground, anywhere on the map")
@@ -4108,7 +3189,7 @@ func test_rework_cas_gunship() -> void:
 	g.gold = 400000
 	g.emit_events = true
 	var t = g.place_tower("cas_gunship", spot(g, "cas_gunship", 0))
-	check(t != null and t.is_rework and t.is_uncapped() and g.tower_cost("cas_gunship") == 650, "the CAS Gunship builds for 650 and is uncapped")
+	check(t != null and t.is_uncapped() and g.tower_cost("cas_gunship") == 650, "the CAS Gunship builds for 650 and is uncapped")
 	var s: Dictionary = t.stats()
 	check(near(s.damage, 12.0) and near(s.rate, 5.0) and near(s.orbit, 90.0) and not s.has("ac_damage") and not s.has("ms_damage"), "stock: a gatling of 12 at 5/s, a 90 px orbit")
 	check(t.aim_set and t.hits_air() and t.hits_ground() and not s.has("range"), "orbits the track point nearest it; air and ground; no range")
@@ -4231,7 +3312,7 @@ func test_rework_mine_layer() -> void:
 	g.gold = 90000
 	g.emit_events = true
 	var t = g.place_tower("mine_layer", spot(g, "mine_layer", 0))
-	check(t != null and t.is_rework and g.tower_cost("mine_layer") == 450, "the Mine Layer builds for 450")
+	check(t != null and g.tower_cost("mine_layer") == 450, "the Mine Layer builds for 450")
 	var s: Dictionary = t.stats()
 	check(near(s.damage, 85.0) and near(s.splash, 40.0) and near(s.range, 120.0) and int(s.cap) == 20, "stock: 85 damage, 40 px, 120 toss range, cap 20")
 	check(t.hits_ground() and not t.hits_air(), "ground only")
@@ -4320,7 +3401,7 @@ func test_rework_chemical_plant() -> void:
 	g.gold = 90000
 	g.emit_events = true
 	var t = g.place_tower("chemical_plant", spot(g, "chemical_plant", 0))
-	check(t != null and t.is_rework and g.tower_cost("chemical_plant") == 250, "the Chemical Plant builds for 250")
+	check(t != null and g.tower_cost("chemical_plant") == 250, "the Chemical Plant builds for 250")
 	var s: Dictionary = t.stats()
 	check(near(s.range, 130.0) and near(s.rate, 0.667) and near(s.soak_time, 4.0) and near(s.armor_strip, 3.0), "stock: 130 range, a spray every 1.5 s, a 4 s soak, 3 armour stripped")
 	check(t.hits_air() and t.hits_ground(), "air and ground")
@@ -4411,7 +3492,7 @@ func test_rework_cryo_tower() -> void:
 	g.gold = 90000
 	g.emit_events = true
 	var t = g.place_tower("cryo_tower", spot(g, "cryo_tower", 0))
-	check(t != null and t.is_rework and g.tower_cost("cryo_tower") == 150, "the Cryo Tower builds for 150")
+	check(t != null and g.tower_cost("cryo_tower") == 150, "the Cryo Tower builds for 150")
 	var s: Dictionary = t.stats()
 	check(near(s.range, 110.0) and near(s.rate, 0.5) and near(s.slow, 0.2) and near(s.slow_time, 1.5) and not s.has("damage"), "stock: a 110 px wave every 2 s, 20% slow for 1.5 s, no damage")
 	check(g.buy_retrofit(t, 0) and near(t.stats().slow_time, 2.2), "Coolant Tank: 2.2 s")
@@ -4492,7 +3573,7 @@ func test_rework_boost_tower() -> void:
 	g.gold = 90000
 	g.emit_events = true
 	var b = g.place_tower("boost_tower", spot(g, "boost_tower", 0))
-	check(b != null and b.is_rework and b.is_support() and g.tower_cost("boost_tower") == 400, "the Boost Tower builds for 400")
+	check(b != null and b.is_support() and g.tower_cost("boost_tower") == 400, "the Boost Tower builds for 400")
 	var s: Dictionary = b.stats()
 	check(near(s.range, 144.0) and near(s.buff_dmg, 0.05) and near(s.buff_rate, 0.05) and near(s.buff_range, 0.05), "stock: 144 px, +5% damage, fire rate and range")
 	# A tower inside the field is boosted; outside isn't.
@@ -4557,7 +3638,7 @@ func test_rework_radar_tower() -> void:
 	g.gold = 90000
 	g.emit_events = true
 	var t = g.place_tower("radar_tower", spot(g, "radar_tower", 0))
-	check(t != null and t.is_rework and g.tower_cost("radar_tower") == 575, "the Radar Tower builds for 575")
+	check(t != null and g.tower_cost("radar_tower") == 575, "the Radar Tower builds for 575")
 	var s: Dictionary = t.stats()
 	check(near(s.range, 160.0) and near(s.ping_every, 3.0) and near(s.reveal_time, 1.0), "stock: 160 px, a ping every 3 s revealing for 1 s")
 	check(g.buy_retrofit(t, 0) and near(t.stats().range, 180.0), "Bigger Dish: 180 px")
@@ -4643,7 +3724,7 @@ func test_rework_shockwave_generator() -> void:
 	g.gold = 90000
 	g.emit_events = true
 	var t = g.place_tower("shockwave_generator", spot(g, "shockwave_generator", 0))
-	check(t != null and t.is_rework and g.tower_cost("shockwave_generator") == 450, "the Shockwave Generator builds for 450")
+	check(t != null and g.tower_cost("shockwave_generator") == 450, "the Shockwave Generator builds for 450")
 	var s: Dictionary = t.stats()
 	check(near(s.damage, 75.0) and near(s.range, 100.0) and near(s.rate, 0.571), "stock: 75 damage, 100 px, a wave every 1.75 s")
 	check(g.buy_retrofit(t, 0) and near(t.stats().range, 115.0), "Wave Focus: +15 px")
@@ -4715,7 +3796,7 @@ func test_rework_scrapyard() -> void:
 	g.gold = 900000
 	g.emit_events = true
 	var t = g.place_tower("scrapyard", spot(g, "scrapyard", 0))
-	check(t != null and t.is_rework and t.is_economy() and t.size == 2 and g.tower_cost("scrapyard") == 875, "the Scrapyard builds for 875, 2x2")
+	check(t != null and t.is_economy() and t.size == 2 and g.tower_cost("scrapyard") == 875, "the Scrapyard builds for 875, 2x2")
 	var s: Dictionary = t.stats()
 	check(near(s.income, 100.0) and near(s.range, 150.0), "stock: 100 per round, a 150 px field")
 	check(g.buy_retrofit(t, 0) and near(t.stats().income, 130.0), "Hammer Mill: +30 per round")
@@ -4771,7 +3852,7 @@ func test_rework_magneto_tower() -> void:
 	g.gold = 900000
 	g.emit_events = true
 	var t = g.place_tower("magneto_tower", spot(g, "magneto_tower", 0))
-	check(t != null and t.is_rework and g.tower_cost("magneto_tower") == 525, "the Magneto Tower builds for 525")
+	check(t != null and g.tower_cost("magneto_tower") == 525, "the Magneto Tower builds for 525")
 	var s: Dictionary = t.stats()
 	check(near(s.range, 120.0) and near(s.slow, 0.25), "stock: a 120 px field, 25% slow")
 	check(g.buy_retrofit(t, 0) and near(t.stats().slow, 0.30), "Superconducting Coil: 30%")
@@ -4852,7 +3933,7 @@ func test_rework_tractor_tower() -> void:
 	g.gold = 900000
 	g.emit_events = true
 	var t = g.place_tower("tractor_tower", spot(g, "tractor_tower", 0))
-	check(t != null and t.is_rework and g.tower_cost("tractor_tower") == 575, "the Tractor Tower builds for 575")
+	check(t != null and g.tower_cost("tractor_tower") == 575, "the Tractor Tower builds for 575")
 	var s: Dictionary = t.stats()
 	check(near(s.range, 160.0) and near(s.hold, 1.5) and near(s.pull, 80.0) and near(s.recharge, 6.0), "stock: 160 px, hold 1.5 s, pull 80 px, recharge 6 s")
 	check(g.buy_retrofit(t, 0) and near(t.stats().beam_slow, 0.3), "Beam Sweep")
@@ -4953,7 +4034,7 @@ func test_rework_augmentation_tower() -> void:
 	g.gold = 900000
 	g.emit_events = true
 	var a = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 0))
-	check(a != null and a.is_rework and a.is_support() and g.tower_cost("augmentation_tower") == 650, "the Augmentation Tower builds for 650")
+	check(a != null and a.is_support() and g.tower_cost("augmentation_tower") == 650, "the Augmentation Tower builds for 650")
 	var s: Dictionary = a.stats()
 	check(near(s.range, 96.0) and near(s.aug_crit, 0.05) and near(s.crit_mult, 2.0), "stock: 96 px, a 5% crit chance (x2)")
 	check(g.buy_retrofit(a, 0) and near(a.stats().range, 144.0), "Wide Aura: 144 px")

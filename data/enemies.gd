@@ -48,13 +48,13 @@ const ENEMIES := {
 		"role": "special", "tier": 0,
 		"name": "Phantom", "hp": 85.0, "speed": 72.0, "armor": 0.0, "bounty": 7, "lives": 1, "radius": 10.0, "flying": true,
 		"cloaked": true, "track": true,
-		"blurb": "Cloaked flying infiltrator that follows the track. Towers that hit air can only target it inside a Sensor Array field, or for a moment after it takes damage from a blast, field or arc.",
+		"blurb": "Cloaked flying infiltrator that follows the track. Towers that hit air can only target it when a Radar Tower ping reveals it, or for a moment after damage hits it while hidden.",
 	},
 	"aegis": {
 		"role": "special", "tier": 0,
 		"name": "Aegis Walker", "hp": 150.0, "speed": 44.0, "armor": 2.0, "bounty": 12, "lives": 2, "radius": 13.0,
 		"shield": 130.0, "shield_regen": 0.25, "shield_delay": 2.5,
-		"blurb": "Energy barrier absorbs damage before the hull (armor doesn't apply) and recharges when left alone. Arc Coils deal double damage to barriers.",
+		"blurb": "Energy barrier absorbs damage before the hull (armor doesn't apply) and recharges when left alone. Tesla Tower arcs deal double damage to barriers.",
 	},
 	"hydra": {
 		"role": "special", "tier": 0,
@@ -106,7 +106,7 @@ const ENEMIES := {
 		"role": "support", "tier": 3,
 		"name": "Bulwark", "hp": 200.0, "speed": 42.0, "armor": 3.0, "bounty": 13, "lives": 2, "radius": 13.0,
 		"grant_interval": 6.0, "grant_radius": 100.0, "grant_pct": 0.25,
-		"blurb": "Every 6 s projects a barrier worth 25% of their health onto enemies within 100 px (not itself). Arc Coils hit barriers twice as hard.",
+		"blurb": "Every 6 s projects a barrier worth 25% of their health onto enemies within 100 px (not itself). Tesla Tower arcs hit barriers twice as hard.",
 	},
 	"rampart": {
 		"role": "tank", "tier": 2,

@@ -106,9 +106,10 @@ Logs go to `out/`.
   - A turret's animated parts go between `Draw.dyn(true)` and `dyn(false)`, and everything else in
     its drawer must be static. `check` and `compare` enforce both. See README, "Performance probe".
 - **Renderer:** keep `gl_compatibility`. The owner plays over Remote Desktop at times.
-- **Upgrade data:** edit `design/upgrade_trees.md`, then regenerate:
-  - `node tools/tree_data.mjs` writes `data/tower_trees.gd`;
-  - `node tools/tree_page.mjs` and `node tools/super_page.mjs` write the design pages.
+- **Upgrade data:** edit `design/tower_stats.md` (the numbers) and `design/upgrade_trees_rework.md` (names, prices,
+  blurbs), then regenerate:
+  - `node tools/tree_rework_data.mjs` writes `data/rework_trees.gd`;
+  - `node tools/tree_rework_page.mjs` and `node tools/super_page.mjs` write the design pages.
 
   Commit the outputs too; `check` fails if they're stale. The editable design pages are pulled back
   with `tools/design_pull.mjs` before regenerating.

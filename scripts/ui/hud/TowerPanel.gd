@@ -21,7 +21,7 @@ var screen
 var tower
 ## "right" or "left": the side away from the tower (side_for).
 var side := "right"
-## Card key ("trunk", "a", "b", "c") -> its Button (the screenshot tour clicks these).
+## Card key ("retrofit", "a", "b", "c") -> its Button (the screenshot tour clicks these).
 var cards := {}
 var _content: VBoxContainer
 ## Sandbox: the live DPS / damage / kills line under the stats.
@@ -36,7 +36,7 @@ func _init(owner_hud, t, on_side := "right") -> void:
 	hud = owner_hud
 	screen = owner_hud.screen
 	tower = t
-	title_color = Draw.accent(t.type, t.shown_spec) if t.shown_spec != "" else UiKit.TEXT
+	title_color = UiKit.TEXT
 
 
 ## The side of the screen away from tower `t`, so the panel never covers it: a tower on the left
@@ -121,11 +121,10 @@ func refresh(_delta: float) -> void:
 	# affordable or not), prices. Credits alone change with every kill; rebuilding then would swap
 	# the card under the mouse mid-hover.
 	var states := UpgradeRules.card_keys(t).map(func(k): return str(UpgradeRules.card(t, k, screen.game.gold).state))
-	var key := "%d:%d:%s:%s:%s:%s:%s:%.3f:%s" % [t.trunk, t.retrofit, str(t.depth), str(t.started), t.mastered, t.mastery_unlocked(), ",".join(PackedStringArray(states)), t.discount, t.shell + t.loadout]
+	var key := "%d:%d:%s:%s:%s:%s:%s:%.3f:%s" % [0, t.retrofit, str(t.depth), str(t.started), t.mastered, t.mastery_unlocked(), ",".join(PackedStringArray(states)), t.discount, t.shell + t.loadout]
 	if key != _key:
 		_key = key
 		_rebuild()
-		_rehover.call_deferred()
 
 
 func _rebuild() -> void:
@@ -134,14 +133,11 @@ func _rebuild() -> void:
 		c.queue_free()
 	cards.clear()
 	var t = tower
-	# The title follows the tower: its stock name until the primary locks in, then the branch name.
+	# The title follows the tower: its name, then its mastery's once mastered.
 	var title_label := header.get_child(0) as Label
 	title_label.text = str(t.display_name()).to_upper()
-	title_label.add_theme_color_override("font_color", Draw.accent(t.type, t.shown_spec) if t.shown_spec != "" else UiKit.TEXT)
 	# Where it is in its tree, then what it does now.
-	var level := Tower.trunk_name(t.trunk)
-	if t.is_rework:
-		level = str(t.retrofit_options()[t.retrofit].name) if t.retrofit >= 0 else "Stock"
+	var level: String = str(t.retrofit_options()[t.retrofit].name) if t.retrofit >= 0 else "Stock"
 	if not t.started.is_empty():
 		level = " + ".join(PackedStringArray(t.started.map(func(b): return "%s · T%d" % [b.to_upper(), t.depth[b]])))
 	if t.mastered:
@@ -164,18 +160,17 @@ func _rebuild() -> void:
 		var btn := _card(c)
 		cards[k] = btn
 		_content.add_child(btn)
-		if screen.game.sandbox and not (k in ["trunk", "retrofit"]) and c.state == "buy":
+		if screen.game.sandbox and k != "retrofit" and c.state == "buy":
 			var mx := UiKit.button("Max this branch", Callable(screen, "max_branch").bind(k), Vector2(W - 34, 26))
 			mx.tooltip_text = "Sandbox: buy this branch as far as the rules allow."
 			_content.add_child(mx)
-	_content.add_child(UiKit.button("View upgrade tree  [E]", Callable(screen, "open_tree"), Vector2(W - 34, 34)))
 
 
 func _card(c: Dictionary) -> Button:
 	var t = tower
 	var key: String = c.key
 	var state: String = c.state
-	var mastery: bool = not (key in ["trunk", "retrofit"]) and c.node == t.branch(key).mastery
+	var mastery: bool = key != "retrofit" and c.node == t.branch(key).mastery
 	var col: Color = UiKit.GOLD if mastery else BRANCH_COLORS.get(key, UiKit.ACCENT)
 	var live := state == "buy"
 	var btn := Button.new()
@@ -195,7 +190,7 @@ func _card(c: Dictionary) -> Button:
 	# Name, then cost and hotkey.
 	var head := UiKit.hbox(6)
 	head.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	var tag := "RETROFIT" if key in ["trunk", "retrofit"] else ("%s · MASTERY" % key.to_upper() if mastery else "%s · T%d" % [key.to_upper(), mini(int(t.depth[key]) + 1, Tower.BRANCH_STEPS)])
+	var tag := "RETROFIT" if key == "retrofit" else ("%s · MASTERY" % key.to_upper() if mastery else "%s · T%d" % [key.to_upper(), mini(int(t.depth[key]) + 1, Tower.BRANCH_STEPS)])
 	var name_l := UiKit.label(str(c.node.get("name", "")), 15, Color(col, dim))
 	name_l.clip_text = true
 	name_l.custom_minimum_size = Vector2(140, 0)
@@ -206,7 +201,7 @@ func _card(c: Dictionary) -> Button:
 	box.add_child(head)
 	box.add_child(UiKit.label(tag, 10, Color(UiKit.DIM, dim)))
 	if state in ["buy", "short", "research"] and key != "retrofit":
-		var nxt: Dictionary = t.next_stats("" if key == "trunk" else key) if state != "research" else {}
+		var nxt: Dictionary = t.next_stats(key) if state != "research" else {}
 		if not nxt.is_empty():
 			var grid := TowerInfo.stats_grid(t.stats(), nxt, t.is_beam(), 11, 8)
 			grid.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -224,20 +219,8 @@ func _card(c: Dictionary) -> Button:
 	# The button grows to fit its contents once they're laid out.
 	box.resized.connect(func(): btn.custom_minimum_size.y = box.size.y + 16)
 	btn.pressed.connect(func(): _buy(c))
-	btn.mouse_entered.connect(func(): _highlight(c))
-	btn.mouse_exited.connect(func(): _highlight({}))
 	btn.tooltip_text = str(c.reason) if c.reason != "" else ""
 	return btn
-
-
-## After a rebuild, the card under a still mouse is re-highlighted in the tree.
-func _rehover() -> void:
-	var m := get_global_mouse_position()
-	for k in cards:
-		var b: Button = cards[k]
-		if is_instance_valid(b) and b.get_global_rect().has_point(m):
-			_highlight(UpgradeRules.card(tower, k, screen.game.gold))
-			return
 
 
 func _buy(c: Dictionary) -> void:
@@ -248,20 +231,5 @@ func _buy(c: Dictionary) -> void:
 	if c.key == "retrofit":
 		screen.open_retrofit()
 		return
-	screen.upgrade_selected(0 if c.key == "trunk" else Tower.BRANCHES.find(c.key))
+	screen.upgrade_selected(Tower.BRANCHES.find(c.key))
 	_key = ""
-
-
-## Lights up the card's node in the upgrade tree, if it's open.
-func _highlight(c: Dictionary) -> void:
-	var tree = hud.popout("tree")
-	if tree == null or tower.is_rework:
-		return
-	if c.is_empty():
-		tree.highlight("")
-		return
-	var id := "t2"
-	if c.key != "trunk":
-		var d: int = tower.depth[c.key]
-		id = "%sm" % c.key if (d >= Tower.BRANCH_STEPS or c.state == "research" or (c.state == "done" and tower.mastered)) else "%s%d" % [c.key, mini(d + (0 if c.state in ["capped", "done"] else 1), Tower.BRANCH_STEPS)]
-	tree.highlight(id)

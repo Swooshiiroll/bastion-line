@@ -19,7 +19,7 @@ enum State { BUILD, WAVE, GAMEOVER }
 
 const TICK := 1.0 / 60.0
 const SELL_REFUND := 0.7
-const SAVE_VERSION := 9
+const SAVE_VERSION := 10
 ## Credits every run starts with, on every sector and mode (before research).
 const START_GOLD := 500
 ## Sandbox runs keep the credit balance pinned here (see sandbox).
@@ -62,7 +62,7 @@ var ability_cd := {}
 var strikes: Array = []
 var warp_timer := 0.0
 var pools: Array = []
-## Short-lived damage zones (an Ion Storm secondary on a chaining Arc Coil).
+## Short-lived damage zones (the Tesla Tower's storms).
 var storms: Array = []
 ## Railgun ion trails: {a, b, w, dps, t, source}. Everything on the line burns while one lasts, targeted or not, cloaked included.
 var trails: Array = []
@@ -71,7 +71,6 @@ var mines: Array = []
 var _boost_sig := 0
 
 ## Nested mini-nova depth, so a chain of kills can't recurse forever.
-var _nova_depth := 0
 var wave := 0
 var endless := false
 ## This run has cleared its mode's last round (the sector's medal for the mode is earned).
@@ -247,9 +246,7 @@ func is_boss_round(n: int) -> bool:
 
 
 func tower_cost(type: String) -> int:
-	if Towers.is_rework(type):
-		return Research.discounted(int(Towers.Rework.TREES[type].cost), tower_mods[type])
-	return Research.discounted(int(Tower.tree(type).tiers[0].cost), tower_mods[type])
+	return Research.discounted(int(Towers.Rework.TREES[type].cost), tower_mods[type])
 
 
 func sell_value(t) -> int:
@@ -258,21 +255,9 @@ func sell_value(t) -> int:
 	return int(floor(t.spent * maxf(sell_refund, t.refund_field)))
 
 
-## A tower level's stats as they'd be in this run (research applied). Tier 1-2 is the trunk; tier 3
-## is the branch of `spec` (a specialization id or branch key) at `depth` upgrades; tier 4 is its mastery.
-func level_stats(type: String, tier: int, spec := "", depth := 1) -> Dictionary:
-	if Towers.is_rework(type):
-		return Research.apply(Tower.rework_base(type), tower_mods[type])
-	var ln := Tower.lines(type)
-	var base: Dictionary = ln.t1 if tier <= 1 else ln.t2
-	if tier >= Tower.SPEC_TIER:
-		var key := ""
-		for b in Tower.tree(type).branches:
-			if b.key == spec or b.id == spec:
-				key = b.key
-		if key != "":
-			base = ln[key + "_m"] if tier >= Tower.MASTERY_TIER else ln[key][clampi(depth, 1, Tower.BRANCH_STEPS)]
-	return Research.apply(base, tower_mods[type])
+## A tower type's stock stats as they'd be in this run (research applied).
+func level_stats(type: String, _tier := 1, _spec := "", _depth := 1) -> Dictionary:
+	return Research.apply(Tower.rework_base(type), tower_mods[type])
 
 
 func mastery_unlocked(type: String) -> bool:
@@ -439,34 +424,11 @@ func place_tower(type: String, cell: Vector2i):
 	return t
 
 
-## Tier 1 -> 2 needs no spec. Tier 2 -> 3 needs one of the tower's spec ids.
-## Tier 3 -> 4 (the spec's mastery) needs no spec, but needs that tower's Mastery research.
-## Buys the next upgrade on a tower. At tier 1 that's Tier 2. After that `key` picks the branch (a
-## branch key or its specialization id); without one it continues the primary branch.
+## Buys the next step on path `key` (the primary when empty).
 func upgrade_tower(t, key := "") -> bool:
 	if is_over():
 		return false
-	if t.is_rework:
-		return _upgrade_path(t, key)
-	var branch := ""
-	if t.trunk >= 2:
-		branch = t.resolve_key(key)
-		if branch == "" or not t.can_buy(branch):
-			return false
-	var cost: int = t.upgrade_cost(branch)
-	if cost <= 0 or gold < cost:
-		return false
-	var was_mastered: bool = t.tier >= 4
-	gold -= cost
-	t.spent += cost
-	if t.trunk < 2:
-		t.trunk = 2
-	else:
-		t.buy(branch)
-	_recompute_buffs()
-	# "mastery" is only for the purchase that reaches the mastery, not later secondary upgrades.
-	_emit({"type": "upgrade", "pos": t.pos, "tier": t.tier, "spec": t.spec, "branch": branch, "depth": int(t.depth.get(branch, 0)) if branch != "" else 0, "mastery": not was_mastered and t.tier >= 4})
-	return true
+	return _upgrade_path(t, key)
 
 
 ## Reworked towers: buys the next step on path `key` (the primary when empty).
@@ -488,7 +450,7 @@ func _upgrade_path(t, key: String) -> bool:
 
 ## Reworked towers: buys Retrofit option `option`; the choice is locked.
 func buy_retrofit(t, option: int) -> bool:
-	if is_over() or not t.is_rework:
+	if is_over():
 		return false
 	var cost: int = t.retrofit_cost(option)
 	if cost <= 0 or gold < cost:
@@ -776,7 +738,7 @@ func spawn_enemy(type: String, path_idx: int, start_dist := 0.0, hp_mult := 1.0,
 
 
 ## Deals damage after vulnerability, energy barrier and armor. Returns the damage actually dealt.
-## A barrier soaks damage before armor applies; Arc Coils hit barriers twice as hard.
+## A barrier soaks damage before armor applies; Tesla Tower arcs hit barriers twice as hard.
 ## `kind` overrides the hit's damage kind ("energy" for burns, acid and shock strips); by default a tower's hits are its own kind
 ## and everything else is physical. An energy-only enemy (the Wraith) takes nothing from physical hits.
 func damage_enemy(e, amount: float, pierce: bool, source, flash := true, bypass_shield := false, reach_burrowed := false, no_aug := false, kind := "") -> float:
@@ -806,7 +768,7 @@ func damage_enemy(e, amount: float, pierce: bool, source, flash := true, bypass_
 	if e.shield > 0.0 and not bypass_shield:
 		var mult := 1.0
 		if source is Tower:
-			mult = (SHIELD_EMP_MULT if source.type == "tesla" or source.type == "tesla_tower" else 1.0) * float(source.stats().get("shield_mult", 1.0))
+			mult = (SHIELD_EMP_MULT if source.type == "tesla_tower" else 1.0) * float(source.stats().get("shield_mult", 1.0))
 		absorbed = minf(e.shield, amt * mult)
 		e.shield -= absorbed
 		e.shield_timer = float(e.def.get("shield_delay", 0.0))
@@ -843,7 +805,7 @@ func damage_enemy(e, amount: float, pierce: bool, source, flash := true, bypass_
 ## An enemy's armour as a source sees it: a tower with armour piercing ignores a flat amount and a share of it.
 func _armor_vs(e, source) -> float:
 	var a: float = e.effective_armor()
-	if source is Tower and source.is_rework:
+	if source is Tower:
 		var s: Dictionary = source.stats()
 		a = maxf(0.0, a - float(s.get("armor_flat", 0.0))) * (1.0 - clampf(float(s.get("armor_pct", 0.0)), 0.0, 1.0))
 	return a
@@ -899,7 +861,7 @@ func _pick_target(t, exclude: Array, air: bool, ground: bool, preferred := false
 	var r2 := r * r
 	var best = null
 	var best_score := Vector3(-INF, -INF, -INF)
-	var swivel: bool = t.is_rework and bool(t.stats().get("swivel", false))
+	var swivel: bool = bool(t.stats().get("swivel", false))
 	for e in enemies:
 		if not e.alive or (e.flying and not air) or (not e.flying and not ground) or (e.is_hidden() and not _burrow_visible(t, e)) or exclude.has(e):
 			continue
@@ -1172,14 +1134,8 @@ func _update_tower(t, dt: float) -> void:
 	if t.is_economy():
 		return
 	var s: Dictionary = t.stats()
-	if t.is_sensor():
-		_sensor_sweep(t)
-		return
 	if t.is_support():
 		_support_field(t, s)
-		return
-	if t.type == "drones":
-		_update_drones(t, s, dt)
 		return
 	if t.type == "drone_bay":
 		_update_drone_bay(t, s, dt)
@@ -1207,15 +1163,8 @@ func _update_tower(t, dt: float) -> void:
 		_update_shockwave(t, s, dt)
 		return
 	if t.is_beam():
-		if t.is_rework:
-			_update_laser_rework(t, s, dt)
-		elif t.spec == "sweeper":
-			_update_sweeper(t, s, dt)
-		else:
-			_update_laser(t, dt)
+		_update_laser_rework(t, s, dt)
 		return
-	if t.type == "nova" and float(s.get("aura_dps", 0.0)) > 0.0:
-		_nova_aura(t, s, dt)
 	if t.target != null and not t.can_target(t.target):
 		t.target = null
 	t.cooldown -= dt
@@ -1229,34 +1178,12 @@ func _update_tower(t, dt: float) -> void:
 		"cryo_tower":
 			_cryo_wave(t, s)
 			return
-		"frost":
-			_frost_pulse(t, s)
-			return
-		"gravity":
-			if t.spec == "well":
-				_gravity_well(t, s)
-			else:
-				_gravity_pulse(t, s)
-			return
-		"missile":
-			_fire_missiles(t, s)
-			return
 		"rocket_salvo":
 			_fire_salvo(t, s)
 			return
 		"artillery_cannon":
 			_fire_artillery(t, s)
 			return
-		"nullifier":
-			_null_pulse(t, s)
-			return
-		"nova":
-			_nova_pulse(t, s)
-			return
-		"tesla":
-			if t.spec == "ionstorm":
-				_ion_storm(t, s)
-				return
 
 	var target = pick_target(t)
 	t.target = target
@@ -1278,21 +1205,6 @@ func _update_tower(t, dt: float) -> void:
 		"anti_aircraft_turret":
 			t.pulse_count += 1
 			_fire_projectile(t, target, s)
-		"arrow":
-			if t.spec == "flechette":
-				_flechette(t, float(s.get("pellets", 6.0)), float(s.get("cone", 45.0)), bool(s.get("bypass_shield", false)))
-				return
-			_fire_volley(t, target, s)
-			var every := int(s.get("flechette_every", 0))
-			t.pulse_count += 1
-			if every > 0 and t.pulse_count % every == 0:
-				_flechette(t, float(s.flechette_pellets), float(s.flechette_cone), false)
-		"cannon", "flak":
-			_fire_volley(t, target, s)
-		"sniper":
-			_fire_rail(t, target, s)
-		"tesla":
-			_chain(t, target, s)
 
 
 ## The point on any lane nearest to `pos`.
@@ -1316,12 +1228,12 @@ func aim_artillery(t, pos: Vector2) -> void:
 
 
 ## Loads a shell type, if the cannon has unlocked it. Takes effect from the next shell.
-## Augmentation Tower: every attacking tower in range (not Support, Economy or Sensor towers) takes the strongest of each effect: crit chance and
+## Augmentation Tower: every attacking tower in range (not Support or Economy towers) takes the strongest of each effect: crit chance and
 ## multiplier, energy conversion, ricochet. Remote Link extends the reach to twice the radius at half strength.
 func _apply_augmentation(a, s: Dictionary, r: float) -> void:
 	var remote := bool(s.get("remote_link", false))
 	for t in towers:
-		if t == a or t.is_support() or t.is_economy() or t.is_sensor() or not t.stats().has("damage"):
+		if t == a or t.is_support() or t.is_economy() or not t.stats().has("damage"):
 			continue
 		var d2: float = a.pos.distance_squared_to(t.pos)
 		var f := 1.0
@@ -2041,19 +1953,17 @@ func _update_smokes(dt: float) -> void:
 	smokes = smokes.filter(func(c): return c.t > 0.0)
 
 
-## True if a burrowed enemy at `pos` is inside a sensor's field (the stand-in for the Radar Tower until it exists), so a
+## True if a burrowed enemy at `pos` is inside a pinging (or constant) Radar Tower's range, so a
 ## tower with burrow sight may target it.
 func _radar_covers(pos: Vector2) -> bool:
 	for o in towers:
 		if o.type == "radar_tower" and o.disabled <= 0.0 and o.pos.distance_squared_to(pos) <= o.get_range() * o.get_range() and (float(o.gun_cds.get("ping", 0.0)) > 0.0 or bool(o.stats().get("constant", false))):
 			return true
-		if (o.is_sensor() or bool(o.def.get("radar", false))) and o.pos.distance_squared_to(pos) <= o.get_range() * o.get_range():
-			return true
 	return false
 
 
 func _burrow_visible(t, e) -> bool:
-	return e.burrowed and t.is_rework and float(t.stats().get("burrow_sight", 0.0)) > 0.0 and _radar_covers(e.pos)
+	return e.burrowed and float(t.stats().get("burrow_sight", 0.0)) > 0.0 and _radar_covers(e.pos)
 
 
 ## Gun Turret: a round at the target; Multi-Target adds a side gun (a second target at part damage) or extra barrels
@@ -2088,18 +1998,6 @@ func _weakest_target(t, exclude: Array):
 	return best
 
 
-## One volley of projectiles, plus Multishot's extra targets (Storm Gatling).
-func _fire_volley(t, target, s: Dictionary) -> void:
-	_fire_projectile(t, target, s)
-	var shots: Array = [target]
-	for k in int(s.get("multishot", 1)) - 1:
-		var extra = pick_target(t, shots)
-		if extra == null:
-			break
-		shots.append(extra)
-		_fire_projectile(t, extra, s)
-
-
 # --- v3.1 attacks ------------------------------------------------------------------------------
 
 ## Enemies within `r` of `p` that an attack can reach (living; hidden and burrowed ones only when asked).
@@ -2120,19 +2018,7 @@ func _boss_factor(e) -> float:
 	return BOSS_STUN_FACTOR if e.boss else 1.0
 
 
-## Flechette: every enemy in a cone in front of the tower takes half the flechettes.
-func _flechette(t, pellets: float, cone_deg: float, bypass: bool) -> void:
-	var r: float = t.get_range()
-	var half := deg_to_rad(cone_deg) * 0.5
-	var dmg: float = t.eff_damage() * float(ceili(pellets / 2.0))
-	for e in _enemies_near(t.pos, r, t.hits_air(), t.hits_ground()):
-		if absf(angle_difference(t.aim, (e.pos - t.pos).angle())) <= half:
-			var d := damage_enemy(e, dmg, false, t, true, bypass)
-			_emit({"type": "hit", "pos": e.pos, "amount": d, "kind": "arrow"})
-	_emit({"type": "flechette", "pos": t.pos, "aim": t.aim, "cone": cone_deg, "range": r, "tier": t.tier, "pellets": int(round(pellets))})
-
-
-## Amplifier Pylon branch C: jams enemy support (and at the mastery, everything) inside its field.
+## A support tower's field: jams enemy support and slows, when its stats give it a jam or a field slow.
 func _support_field(t, s: Dictionary) -> void:
 	var jam := int(s.get("jam", 0))
 	var slow := float(s.get("field_slow", 0.0))
@@ -2170,156 +2056,7 @@ func _rail_effects(t, e, s: Dictionary) -> void:
 	_emit({"type": "suppress", "pos": e.pos, "radius": maxf(spread, 20.0)})
 
 
-## Moves `e` along its route toward the point nearest `p`, by at most `amount` px. Pulling it
-## backwards counts against its shove budget.
-func _pull(e, p: Vector2, amount: float) -> void:
-	var goal: float = e.curve.get_closest_offset(p)
-	var move := clampf(goal - e.distance, -amount, amount)
-	if move < 0.0:
-		e.shove(-move)
-	else:
-		e.distance = minf(e.distance + move, e.path_len)
-		e.pos = e.curve.sample_baked(e.distance)
-
-
-## Graviton Projector branch C: pulls enemies together, holds them slower, and implodes.
-func _gravity_well(t, s: Dictionary) -> void:
-	var r: float = t.get_range()
-	var targets := _enemies_near(t.pos, r, false, true)
-	if targets.is_empty():
-		t.cooldown = RETARGET_DELAY
-		return
-	t.pulse_count += 1
-	var every := int(s.get("implode_every", 0))
-	var implode: bool = every > 0 and t.pulse_count % every == 0
-	var push := float(s.get("push", 0.0))
-	var shove_turn: bool = push > 0.0 and t.pulse_count % 2 == 1
-	var pull := float(s.get("pull", 50.0))
-	var stun := float(s.get("stun", 0.0))
-	var hold := float(s.get("slow", 0.0))
-	for e in targets:
-		var f := BOSS_PUSH_FACTOR if e.boss else 1.0
-		if shove_turn:
-			e.shove(push * f)
-		else:
-			_pull(e, t.pos, pull * f)
-		if hold > 0.0:
-			e.apply_slow(hold, 1.0 / t.eff_rate() + 0.2)
-		if stun > 0.0:
-			e.apply_stun(stun * _boss_factor(e))
-		damage_enemy(e, t.eff_damage(), false, t)
-		if implode and e.alive:
-			damage_enemy(e, e.max_hp * float(s.implode_pct) * (0.25 if e.boss else 1.0), true, t)
-	t.cooldown = 1.0 / t.eff_rate()
-	t.fire_flash = 0.35
-	_emit({"type": "gravity", "pos": t.pos, "radius": r, "tier": t.tier, "spec": t.spec, "pull": true, "implode": implode})
-
-
-## Nullifier: strips barriers (and at deeper upgrades armor, immunities and abilities) in its field.
-func _null_pulse(t, s: Dictionary) -> void:
-	var r: float = t.get_range()
-	var targets := _enemies_near(t.pos, r, true, true, true)
-	if targets.is_empty():
-		t.cooldown = RETARGET_DELAY
-		return
-	var dur: float = 1.0 / t.eff_rate() + 0.3
-	var strip := float(s.get("strip", 0.0))
-	var feedback := float(s.get("feedback", 0.0))
-	var cascade := float(s.get("cascade", 0.0))
-	var cascade_r := float(s.get("cascade_radius", 60.0))
-	var armor_field := float(s.get("armor_field", 0.0))
-	var dampen := bool(s.get("dampen", false))
-	var linger := float(s.get("linger", 0.0))
-	var boss_sup := float(s.get("suppress_boss", 0.0))
-	for e in targets:
-		if not e.alive:
-			continue
-		if strip > 0.0 and e.shield > 0.0:
-			var taken: float = e.shield * minf(strip, 1.0)
-			e.shield -= taken
-			if e.shield <= 0.01:
-				e.shield = 0.0
-				_emit({"type": "shield_break", "pos": e.pos})
-			if feedback > 0.0:
-				damage_enemy(e, taken * feedback, true, t, true, true, true)
-			if cascade > 0.0:
-				for o in _enemies_near(e.pos, cascade_r):
-					if o != e:
-						damage_enemy(o, taken * cascade, true, t, false)
-				_emit({"type": "cascade", "pos": e.pos, "radius": cascade_r})
-		if not e.alive:
-			continue
-		if bool(s.get("expose", false)):
-			e.expose_timer = maxf(e.expose_timer, dur)
-		if armor_field > 0.0:
-			e.apply_armor_break(armor_field, dur)
-		if bool(s.get("block_barrier", false)):
-			e.barrier_block = maxf(e.barrier_block, dur)
-			e.grant_block = maxf(e.grant_block, dur)
-		if dampen and (not e.boss or boss_sup > 0.0):
-			e.suppress_timer = maxf(e.suppress_timer, (dur + linger) * (boss_sup if e.boss else 1.0))
-		damage_enemy(e, t.eff_damage(), false, t, false, false, true)
-	t.cooldown = 1.0 / t.eff_rate()
-	t.fire_flash = 0.3
-	_emit({"type": "null_pulse", "pos": t.pos, "radius": r, "spec": t.spec})
-
-
-## Nova Reactor: a shockwave that hits everything around it, air and ground.
-func _nova_pulse(t, s: Dictionary) -> void:
-	var r: float = t.get_range()
-	var targets := _enemies_near(t.pos, r, true, true, true)
-	if targets.is_empty():
-		t.cooldown = RETARGET_DELAY
-		return
-	var strip := float(s.get("strip", 0.0))
-	var dmg: float = t.eff_damage()
-	for e in targets:
-		if not e.alive:
-			continue
-		if strip > 0.0 and e.shield > 0.0:
-			e.shield *= 1.0 - strip
-		damage_enemy(e, dmg, false, t)
-	var burn := float(s.get("burn_dps", 0.0))
-	if burn > 0.0:
-		pools.append({"pos": t.pos, "r": r, "dps": burn, "t": float(s.get("burn_time", 2.0)), "source": t})
-	t.cooldown = 1.0 / t.eff_rate()
-	t.fire_flash = 0.35
-	_emit({"type": "nova", "pos": t.pos, "radius": r, "spec": t.spec, "burn": burn > 0.0})
-
-
-## Corona: a constant burning aura around the reactor.
-func _nova_aura(t, s: Dictionary, dt: float) -> void:
-	var dps: float = float(s.aura_dps) * (1.0 + t.buff_dmg)
-	for e in _enemies_near(t.pos, t.get_range(), true, true, true):
-		damage_enemy(e, dps * dt, true, t, false)
-
-
-## Arc Coil branch C: a storm field that damages everything inside it several times a second.
-func _ion_storm(t, s: Dictionary) -> void:
-	var r: float = t.get_range()
-	var targets := _enemies_near(t.pos, r)
-	if targets.is_empty():
-		t.cooldown = RETARGET_DELAY
-		return
-	var interval: float = 1.0 / t.eff_rate()
-	var stun := float(s.get("stun", 0.0))
-	var vuln := float(s.get("static_vuln", 0.0))
-	for e in targets:
-		e.storm_time = e.storm_time + interval if e.storm_until >= time else 0.0
-		e.storm_until = time + interval + 0.1
-		if vuln > 0.0 and e.storm_time >= 2.0:
-			e.apply_vuln(vuln, interval + 0.2)
-		if bool(s.get("block_grants", false)):
-			e.grant_block = maxf(e.grant_block, interval + 0.2)
-		if stun > 0.0:
-			e.apply_stun(stun * _boss_factor(e))
-		damage_enemy(e, t.eff_damage(), false, t, false)
-	t.cooldown = interval
-	t.fire_flash = 0.2
-	_emit({"type": "storm_tick", "pos": t.pos, "radius": r})
-
-
-## Short-lived storm zones (an Ion Storm secondary on a chaining Arc Coil).
+## Short-lived storm zones (the Tesla Tower's storms).
 func _update_storms(dt: float) -> void:
 	if storms.is_empty():
 		return
@@ -2332,92 +2069,6 @@ func _update_storms(dt: float) -> void:
 		if z.t > 0.0:
 			keep.append(z)
 	storms = keep
-
-
-## Laser Lance branch C: beams sweep back and forth across an arc, burning everything they cross.
-func _update_sweeper(t, s: Dictionary, dt: float) -> void:
-	var r: float = t.get_range()
-	if t.target == null or not t.can_target(t.target):
-		t.target = pick_target(t)
-	if t.target == null:
-		t.sweep_angles = []
-		return
-	var center: float = (t.target.pos - t.pos).angle()
-	t.aim = center
-	var beams := maxi(1, int(s.get("beams", 1)))
-	var arc := deg_to_rad(float(s.get("sweep", 70.0)))
-	t.sweep_t += dt * 1.6 * (1.0 + float(s.get("sweep_speed", 0.0)))
-	var angles: Array = []
-	for i in beams:
-		var dir := 1.0 if i % 2 == 0 else -1.0
-		angles.append(center + sin(t.sweep_t * dir + float(i) * PI / float(beams)) * arc * 0.5)
-	t.sweep_angles = angles
-	t.fire_flash = 0.05
-	var dps: float = t.eff_damage()
-	var burn := float(s.get("burn_dps", 0.0))
-	for e in _enemies_near(t.pos, r, t.hits_air(), t.hits_ground()):
-		var rel: Vector2 = e.pos - t.pos
-		for a in angles:
-			var off := absf(rel.rotated(-float(a)).y)
-			if off <= e.radius + 4.0 and rel.dot(Vector2.from_angle(float(a))) > 0.0:
-				damage_enemy(e, dps * dt, true, t, false)
-				if burn > 0.0:
-					e.apply_burn(burn, float(s.get("burn_time", 1.0)))
-				break
-
-
-## Drone Bay: keeps its wing at strength and flies every drone.
-func _update_drones(t, s: Dictionary, dt: float) -> void:
-	var want := {"gun": int(s.get("drones", 0)), "bomber": int(s.get("bombers", 0))}
-	for kind in want:
-		var have: Array = t.wing.filter(func(d): return d.kind == kind)
-		for k in range(have.size(), int(want[kind])):
-			t.wing.append({"kind": kind, "pos": t.pos, "target": null, "cd": 0.3 * float(k)})
-		for k in range(int(want[kind]), have.size()):
-			t.wing.erase(have[k])
-	var speed := float(s.get("drone_speed", 170.0))
-	var dmg: float = t.eff_damage()
-	var air_mult := float(s.get("air_mult", 1.0))
-	var reach_burrowed := bool(s.get("hits_burrowed", false))
-	for i in t.wing.size():
-		var d: Dictionary = t.wing[i]
-		var bomber: bool = d.kind == "bomber"
-		var tg = d.target
-		if tg == null or not tg.alive or (tg.is_hidden() and not (bomber and reach_burrowed and tg.burrowed)) or (bomber and tg.flying):
-			d["target"] = _drone_target(t, s, bomber)
-			tg = d.target
-		var goal: Vector2
-		if tg == null:
-			goal = t.pos + Vector2.from_angle(time * 1.4 + float(i) * TAU / maxf(1.0, float(t.wing.size()))) * 34.0
-		elif bomber:
-			goal = tg.pos
-		else:
-			goal = tg.pos + Vector2.from_angle(time * 2.0 + float(i)) * 44.0
-		var v: float = speed * (0.75 if bomber else 1.0) * dt
-		var to: Vector2 = goal - d.pos
-		d["pos"] = goal if to.length() <= v else d.pos + to.normalized() * v
-		d["cd"] = float(d.cd) - dt
-		if tg == null or float(d.cd) > 0.0:
-			continue
-		if bomber:
-			if d.pos.distance_to(tg.pos) > 20.0:
-				continue
-			var splash := float(s.get("bomb_splash", s.get("splash", 40.0)))
-			for e in _enemies_near(d.pos, splash, false, true, reach_burrowed):
-				damage_enemy(e, float(s.get("bomb_damage", 60.0)) * (1.0 + t.buff_dmg), false, t, true, false, reach_burrowed)
-			d["cd"] = 2.2 / (1.0 + float(s.get("rate_pct", 0.0)))
-			_emit({"type": "drone_bomb", "pos": d.pos, "radius": splash})
-		else:
-			if d.pos.distance_to(tg.pos) > 80.0:
-				continue
-			damage_enemy(tg, dmg * (air_mult if tg.flying else 1.0), false, t)
-			var mark := float(s.get("mark", 0.0))
-			if mark > 0.0:
-				tg.apply_vuln(mark, 1.2)
-			if bool(s.get("suppress_hit", false)) and not tg.boss:
-				tg.suppress_timer = maxf(tg.suppress_timer, 1.0)
-			d["cd"] = 1.0 / t.eff_rate()
-			_emit({"type": "drone_shot", "from": d.pos, "to": tg.pos})
 
 
 const HUNTED := ["stalker", "rally", "bulwark", "mender", "jammer", "shaman"]
@@ -2455,76 +2106,6 @@ func _drone_target(t, s: Dictionary, bomber: bool):
 	return best
 
 
-func _frost_pulse(t, s: Dictionary) -> void:
-	var r: float = t.get_range()
-	var hit := false
-	var vuln := float(s.get("vuln", 0.0))
-	for e in enemies:
-		if e.alive and e.pos.distance_squared_to(t.pos) <= r * r:
-			e.apply_slow(float(s.slow), float(s.slow_time))
-			if bool(s.get("block_repair", false)):
-				e.repair_block = maxf(e.repair_block, 1.0 / t.eff_rate() + 0.2 + float(s.get("linger", 0.0)))
-			if bool(s.get("block_barrier", false)):
-				e.barrier_block = maxf(e.barrier_block, 1.0 / t.eff_rate() + 0.2)
-			if vuln > 0.0:
-				e.apply_vuln(vuln, float(s.slow_time))
-			damage_enemy(e, t.eff_damage(), false, t)
-			hit = true
-	if hit:
-		t.cooldown = 1.0 / t.eff_rate()
-		t.fire_flash = 0.3
-		_emit({"type": "frost", "pos": t.pos, "radius": r, "tier": t.tier, "spec": t.spec})
-	else:
-		t.cooldown = RETARGET_DELAY
-
-
-## Sensor Array: reveals cloaked enemies in its field and marks everything there (as vulnerability).
-func _sensor_sweep(t) -> void:
-	var r: float = t.get_range()
-	var s: Dictionary = t.stats()
-	var mark := float(s.get("mark", 0.0))
-	var hold := REVEAL_TIME + float(s.get("linger", 0.0))
-	var disrupt := bool(s.get("disrupt", false))
-	var expose := bool(s.get("expose", false))
-	for e in enemies:
-		if e.alive and e.pos.distance_squared_to(t.pos) <= r * r:
-			e.reveal_timer = maxf(e.reveal_timer, hold)
-			if disrupt:
-				e.disrupt_timer = maxf(e.disrupt_timer, hold)
-			if expose:
-				e.expose_timer = maxf(e.expose_timer, REVEAL_TIME)
-			if mark > 0.0:
-				e.apply_vuln(mark, hold)
-
-
-## Graviton Projector: shoves ground enemies in range back along their route, then crushes them.
-func _gravity_pulse(t, s: Dictionary) -> void:
-	var r: float = t.get_range()
-	var push := float(s.push)
-	var alt := float(s.get("pull_alternate", 0.0))
-	t.pulse_count += 1
-	var pull_turn: bool = alt > 0.0 and t.pulse_count % 2 == 0
-	var stun := float(s.get("stun", 0.0))
-	var hit := false
-	for e in enemies:
-		if not e.alive or e.flying or e.pos.distance_squared_to(t.pos) > r * r:
-			continue
-		if pull_turn:
-			_pull(e, t.pos, alt * (BOSS_PUSH_FACTOR if e.boss else 1.0))
-		else:
-			e.shove(push * (BOSS_PUSH_FACTOR if e.boss else 1.0))
-		if stun > 0.0:
-			e.apply_stun(stun * (BOSS_STUN_FACTOR if e.boss else 1.0))
-		damage_enemy(e, t.eff_damage(), false, t)
-		hit = true
-	if hit:
-		t.cooldown = 1.0 / t.eff_rate()
-		t.fire_flash = 0.35
-		_emit({"type": "gravity", "pos": t.pos, "radius": r, "tier": t.tier, "spec": t.spec})
-	else:
-		t.cooldown = RETARGET_DELAY
-
-
 func _fire_projectile(t, target, s: Dictionary, dmg_mult := 1.0) -> void:
 	var p = Projectile.new()
 	p.kind = t.type
@@ -2537,8 +2118,7 @@ func _fire_projectile(t, target, s: Dictionary, dmg_mult := 1.0) -> void:
 	if float(s.get("crit", 0.0)) > 0.0 and _roll(float(s.get("crit", 0.0))):
 		p.damage *= CRIT_MULT
 		p.crit = true
-	if t.is_rework:
-		p.look = t.look_key()
+	p.look = t.look_key()
 	p.splash = float(s.get("splash", 0.0))
 	p.shred = float(s.get("shred", 0.0))
 	p.shred_max = float(s.get("shred_max", 0.0))
@@ -2583,42 +2163,6 @@ func _fire_rail(t, target, s: Dictionary) -> void:
 		_kill(target, t)
 	_emit({"type": "tracer", "from": muzzle, "to": target.pos, "tier": t.tier, "spec": t.spec})
 	_emit({"type": "hit", "pos": target.pos, "amount": dealt, "kind": "sniper"})
-
-
-func _fire_missiles(t, s: Dictionary) -> void:
-	var cands: Array = []
-	for e in enemies:
-		if t.can_target(e):
-			cands.append(e)
-	if cands.is_empty():
-		t.target = null
-		t.cooldown = RETARGET_DELAY
-		return
-	_rank_targets(t, cands, t.pos)
-	t.target = cands[0]
-	t.cooldown = 1.0 / t.eff_rate()
-	t.fire_flash = 0.15
-	t.aim = (cands[0].pos - t.pos).angle()
-	var n := int(s.missiles)
-	var dir := Vector2.from_angle(t.aim)
-	for i in n:
-		var tgt = cands[i % cands.size()]
-		var side := 1.0 if i % 2 == 0 else -1.0
-		var p = Projectile.new()
-		p.kind = "missile"
-		p.pos = t.pos + dir.orthogonal() * side * 7.0
-		p.start = p.pos
-		p.vel = dir.orthogonal() * side * (150.0 + 15.0 * float(i)) + dir * 60.0
-		p.target = tgt
-		p.target_pos = tgt.pos
-		p.speed = float(s.proj_speed)
-		p.damage = t.eff_damage()
-		p.splash = float(s.splash)
-		p.air_mult = float(s.air_mult)
-		p.tier = t.tier
-		p.source = t
-		projectiles.append(p)
-	_emit({"type": "fire", "tower": "missile", "pos": t.pos, "tier": t.tier, "spec": t.spec, "count": n})
 
 
 ## Rocket Salvo: one salvo, each rocket at a different enemy (best first); when there are more rockets than enemies the spares
@@ -2725,45 +2269,6 @@ func _update_laser_rework(t, s: Dictionary, dt: float) -> void:
 	t.fire_flash = 0.05
 
 
-func _update_laser(t, dt: float) -> void:
-	var s: Dictionary = t.stats()
-	var beams := int(s.get("beams", 1))
-	var keep: Array = []
-	for e in t.beam_targets:
-		if keep.size() < beams and t.can_target(e):
-			keep.append(e)
-	while keep.size() < beams:
-		var nt = pick_target(t, keep)
-		if nt == null:
-			break
-		keep.append(nt)
-	t.beam_targets = keep
-	if keep.is_empty():
-		t.target = null
-		t.ramp = 0.0
-		t.ramp_mult = 1.0
-		return
-	if keep[0] != t.target:
-		t.target = keep[0]
-		t.ramp = 0.0
-		_emit({"type": "laser_lock", "pos": t.pos})
-	t.ramp += dt
-	var ramp_max := float(s.ramp)
-	var frac := clampf(t.ramp / float(s.ramp_time), 0.0, 1.0)
-	t.ramp_mult = 1.0 + (ramp_max - 1.0) * frac
-	t.aim = (keep[0].pos - t.pos).angle()
-	t.fire_flash = 0.05
-	var dps: float = t.eff_damage() * t.ramp_mult
-	var second := float(s.get("secondary_beam", LASER_SECONDARY))
-	for i in keep.size():
-		damage_enemy(keep[i], dps * dt * (1.0 if i == 0 else second), true, t, false)
-	var wobble := deg_to_rad(float(s.get("sweep_wobble", 0.0))) * 0.5
-	if wobble > 0.0:
-		for e in _enemies_near(t.pos, t.get_range(), t.hits_air(), t.hits_ground()):
-			if not keep.has(e) and absf(angle_difference(t.aim, (e.pos - t.pos).angle())) <= wobble:
-				damage_enemy(e, dps * dt * 0.5, true, t, false)
-
-
 func _update_projectile(p, dt: float) -> void:
 	if p.hold > 0.0 and p.kind != "rocket_salvo":
 		p.hold -= dt
@@ -2849,29 +2354,6 @@ func _update_missile(p, dt: float) -> void:
 func _projectile_hit(p) -> void:
 	var s: Dictionary = p.source.stats() if p.source != null else {}
 	match p.kind:
-		"cannon":
-			var r: float = p.splash
-			var burrowed := bool(s.get("hits_burrowed", false))
-			var armor_break := float(s.get("armor_break", 0.0))
-			var unearth := float(s.get("unearth", 0.0))
-			for e in enemies:
-				if e.alive and not e.flying and e.pos.distance_squared_to(p.pos) <= r * r:
-					if e.burrowed and not burrowed:
-						continue
-					if unearth > 0.0 and e.burrowed:
-						e.burrowed = false
-						e.burrow_timer = float(e.def.burrow_interval) - float(e.def.burrow_time)
-						e.no_dig = maxf(e.no_dig, unearth)
-						_emit({"type": "burrow", "pos": e.pos, "down": false})
-					if armor_break > 0.0:
-						e.apply_armor_break(armor_break, float(s.get("armor_break_time", 4.0)))
-					if p.stun > 0.0:
-						e.apply_stun(p.stun * (BOSS_STUN_FACTOR if e.boss else 1.0))
-					var dealt := damage_enemy(e, p.damage, false, p.source, true, false, burrowed)
-					_emit({"type": "hit", "pos": e.pos, "amount": dealt, "kind": "cannon"})
-			if p.burn_dps > 0.0:
-				pools.append({"pos": p.pos, "r": r * 0.8, "dps": p.burn_dps, "t": p.burn_time, "source": p.source})
-			_emit({"type": "splash", "pos": p.pos, "radius": r, "burn": p.burn_dps > 0.0, "stun": p.stun > 0.0})
 		"artillery_cannon":
 			# Artillery Cannon: a blast on every ground enemy. Shrapnel widens it at part damage, incendiary leaves burning
 			# ground, concussion stuns what it hits; the combined shell does all three.
@@ -2941,21 +2423,6 @@ func _projectile_hit(p) -> void:
 				smokes.append({"pos": p.pos, "r": r, "t": float(s.get("smoke_time", 3.0)), "slow": float(s.get("smoke_slow", 0.15))})
 				_emit({"type": "smoke", "pos": p.pos, "radius": r})
 			_emit({"type": "splash", "pos": p.pos, "radius": r, "burn": false, "stun": false})
-		"flak":
-			# Airburst: every flyer in the blast; with timed fuses (Dual Purpose) ground units too.
-			var r: float = p.splash
-			var ground := float(s.get("ground_mult", 0.0))
-			var shred := float(s.get("shred", 0.0))
-			for e in enemies:
-				if not e.alive or e.pos.distance_squared_to(p.pos) > r * r or (not e.flying and ground <= 0.0):
-					continue
-				if p.stun > 0.0 and e.flying:
-					e.apply_stun(p.stun)
-				if shred > 0.0:
-					e.shred(shred, float(s.get("shred_max", shred * 6.0)))
-				var dealt := damage_enemy(e, p.damage * (1.0 if e.flying else ground), false, p.source)
-				_emit({"type": "hit", "pos": e.pos, "amount": dealt, "kind": "flak"})
-			_emit({"type": "flak_hit", "pos": p.pos, "radius": r})
 		"missile":
 			var r: float = p.splash
 			for e in enemies:
@@ -2978,7 +2445,7 @@ func _projectile_hit(p) -> void:
 				if p.shred > 0.0:
 					p.target.shred(p.shred, p.shred_max)
 				damage_enemy(p.target, p.damage, false, p.source)
-				if p.source != null and p.source.is_rework:
+				if p.source != null:
 					_rework_hit_effects(p, s)
 					_ricochet(p.source, p.target, p.damage)
 				_emit({"type": "arrow_hit", "pos": p.pos, "shred": p.shred > 0.0, "crit": p.crit, "look": p.look})
@@ -3097,7 +2564,7 @@ func _recompute_buffs() -> void:
 		t.aug_ricochet_str = 0.5
 		t.aug_bounce_again = false
 	for a in towers:
-		if not a.is_support() or a.is_sensor() or a.is_economy() or a.disabled > 0.0:
+		if not a.is_support() or a.is_economy() or a.disabled > 0.0:
 			continue
 		var s: Dictionary = a.stats()
 		var r: float = a.get_range()
@@ -3200,19 +2667,9 @@ func _kill(e, source) -> void:
 	stats["kills"] += 1
 	if source != null:
 		source.kills += 1
-		if source is Tower and source.is_rework and bool(source.stats().get("swivel", false)):
+		if source is Tower and bool(source.stats().get("swivel", false)):
 			source.cooldown = 0.0   # Swivel Mount: a new target at once after a kill
 	_emit({"type": "kill", "pos": e.pos, "enemy": e.type, "bounty": gain, "boss": e.boss})
-	# Chain Reactor: a Nova kill sets off a small shockwave (limited depth so chains stay finite).
-	if source is Tower and source.type == "nova" and _nova_depth < 2:
-		var mn := float(source.stats().get("mini_nova", 0.0))
-		if mn > 0.0:
-			_nova_depth += 1
-			for o in _enemies_near(e.pos, mn, true, true, true):
-				if o != e:
-					damage_enemy(o, source.eff_damage() * 0.5, false, source, false)
-			_nova_depth -= 1
-			_emit({"type": "mini_nova", "pos": e.pos, "radius": mn})
 	if e.has_trait("split"):
 		# Hydra Frame: the pieces keep walking from where it fell. Added after this tick's loops.
 		var n := int(e.def.split_count)
@@ -3307,7 +2764,7 @@ func to_save() -> Dictionary:
 	var tl: Array = []
 	for t in towers:
 		tl.append({
-			"type": t.type, "col": t.cell.x, "row": t.cell.y, "trunk": t.trunk, "depth": t.depth.duplicate(),
+			"type": t.type, "col": t.cell.x, "row": t.cell.y, "depth": t.depth.duplicate(),
 			"aim_x": t.aim_point.x, "aim_y": t.aim_point.y, "shell": t.shell, "loadout": t.loadout, "masteries": t.mastered_paths.duplicate(),
 			"retrofit": t.retrofit, "started": t.started.duplicate(), "mastery": t.mastered, "mode": t.mode, "priority": t.priority, "kills": t.kills, "spent": t.spent,
 		})
@@ -3344,17 +2801,11 @@ func _restore_upgrades(t, entry: Dictionary) -> String:
 		t.aim_point = Vector2(float(entry.aim_x), float(entry.aim_y))
 		t.aim_set = true
 		t.shell = str(entry.get("shell", "he"))
-	var trunk := int(entry.get("trunk", 1))
-	if t.is_rework:
-		# The reworked towers have no trunk: an optional Retrofit (one of its options, -1 for none) and three open paths.
-		var ro := int(entry.get("retrofit", -1))
-		if ro < -1 or ro >= t.retrofit_options().size():
-			return "invalid Retrofit option %d." % ro
-		t.retrofit = ro
-		trunk = 2
-	elif trunk < 1 or trunk > 2:
-		return "invalid trunk tier %d." % trunk
-	t.trunk = trunk
+	# An optional Retrofit (one of its options, -1 for none) and three open paths.
+	var ro := int(entry.get("retrofit", -1))
+	if ro < -1 or ro >= t.retrofit_options().size():
+		return "invalid Retrofit option %d." % ro
+	t.retrofit = ro
 	var dep = entry.get("depth", {})
 	var st = entry.get("started", [])
 	if not (dep is Dictionary) or not (st is Array):
@@ -3373,7 +2824,7 @@ func _restore_upgrades(t, entry: Dictionary) -> String:
 		if not (str(b) in Tower.BRANCHES) or int(t.depth[str(b)]) == 0:
 			return "invalid started branch list."
 		t.started.append(str(b))
-	if not t.is_uncapped() and (t.started.size() > 2 or deep > 1 or (trunk < 2 and not t.started.is_empty())):
+	if not t.is_uncapped() and (t.started.size() > 2 or deep > 1):
 		return "upgrades break the branch rules."
 	if t.is_uncapped():
 		var ms = entry.get("masteries", [])

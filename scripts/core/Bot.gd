@@ -1,23 +1,15 @@
 extends RefCounted
 ## A simple heuristic player. Used by the headless balance tests, the balance and perf probes, and
-## the screenshot tour. It builds on the tiles that see the most path, then upgrades. It plays the
-## reworked towers (issue #59) unless `roster` is "old".
+## the screenshot tour. It builds on the tiles that see the most path, then upgrades.
 
 const Game = preload("res://scripts/core/Game.gd")
 const Towers = preload("res://data/towers.gd")
 const Tower = preload("res://scripts/entities/Tower.gd")
 const Grid = preload("res://scripts/core/Grid.gd")
 
-## The old roster's build order (`roster = "old"`, kept for comparison until the final swap).
-const BUILD_ORDER := [
-	"arrow", "arrow", "cannon", "scrap", "frost", "arrow", "tesla", "sniper", "missile", "sensor",
-	"laser", "nova", "cannon", "amp", "flak", "scrap", "nullifier", "gravity", "tesla", "drones", "arrow",
-	"sniper", "missile", "frost", "laser", "nova", "amp", "flak", "sensor", "cannon", "drones",
-	"tesla", "nullifier", "gravity",
-]
-## The reworked roster's build order: the strongest damage per credit (Mortar, Rocket Salvo, Gun Turret) first, anti-air and a
+## The build order: the strongest damage per credit (Mortar, Rocket Salvo, Gun Turret) first, anti-air and a
 ## Radar before the first cloaked flyer (round 13), energy that hits air (Laser, Tesla) well before the Wraith, then the rest.
-const NEW_ORDER := [
+const BUILD_ORDER := [
 	"gun_turret", "mortar_tower", "rocket_salvo", "gun_turret", "anti_aircraft_turret", "mortar_tower", "laser_tower",
 	"rocket_salvo", "radar_tower", "gun_turret", "scrapyard", "mortar_tower", "anti_aircraft_turret", "rocket_salvo",
 	"laser_tower", "boost_tower", "mortar_tower", "rocket_salvo", "tesla_tower", "railgun", "drone_bay", "radar_tower",
@@ -57,8 +49,6 @@ const Abilities = preload("res://data/abilities.gd")
 var game
 var use_abilities := true
 var use_gates := true
-## "new" (the reworked towers) or "old" (today's roster).
-var roster := "new"
 var order_idx := 0
 var ground_samples := PackedVector2Array()
 var air_samples := PackedVector2Array()
@@ -166,7 +156,7 @@ func _step() -> bool:
 
 
 func build_order() -> Array:
-	return BUILD_ORDER if roster == "old" else NEW_ORDER
+	return BUILD_ORDER
 
 
 func _try_build(type: String) -> bool:
@@ -283,40 +273,15 @@ func _rework_key(t) -> String:
 	return p
 
 
-## Which upgrade to buy next on a tower: its specialization at tier 2, then two upgrades on a
-## secondary branch once the primary has two, then the rest of the primary ("" = primary).
-## Reworked towers follow `_rework_key`.
+## Which upgrade to buy next on a tower: a path key, `RETROFIT`, or "" when it's done (see `_rework_key`).
 func next_key(t) -> String:
-	if t.is_rework:
-		return _rework_key(t)
-	if t.trunk < 2:
-		return ""
-	if t.needs_spec():
-		return choose_spec(t)
-	var p: String = t.primary()
-	if t.started.size() == 1 and int(t.depth[p]) == 2:
-		var others: Array = Tower.BRANCHES.filter(func(b): return b != p)
-		return others[(t.cell.x * 3 + t.cell.y) % others.size()]
-	if t.started.size() == 2 and not t.locked_in():
-		var s: String = t.secondary()
-		if int(t.depth[s]) < Tower.SECONDARY_CAP:
-			return s
-		return p
-	return ""
+	return _rework_key(t)
 
 
-## Deterministic but varied: the tower's tile picks which of the three specializations it gets.
-func choose_spec(t) -> String:
-	if not t.needs_spec():
-		return ""
-	var ids: Array = t.spec_ids()
-	return ids[(t.cell.x + t.cell.y) % ids.size()]
-
-
-## Amplifier-style support (boosts neighbours) rather than a sensor, which is placed for coverage.
+## A support tower that boosts its neighbours (Boost, Augmentation), placed where it boosts the most.
 static func is_pylon(type: String) -> bool:
 	var d: Dictionary = Towers.def(type)
-	return bool(d.get("support", false)) and not bool(d.get("sensor", false)) and not bool(d.get("economy", false))
+	return bool(d.get("support", false)) and not bool(d.get("economy", false))
 
 
 ## What a Radar at c would reveal to the towers already built: every stretch of flight path (and, for less, of lane) inside its
@@ -507,9 +472,7 @@ func coverage(type: String) -> Dictionary:
 
 ## A tower type's stock range (`fallback` when it has none: towers that work anywhere on the field).
 static func reach(type: String, fallback: float) -> float:
-	if Towers.is_rework(type):
-		return float(Tower.rework_base(type).get("range", fallback))
-	return float(Tower.lines(type).t1.get("range", fallback))
+	return float(Tower.rework_base(type).get("range", fallback))
 
 
 static func _sample_routes(curves: Array) -> PackedVector2Array:

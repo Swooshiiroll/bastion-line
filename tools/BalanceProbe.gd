@@ -4,8 +4,7 @@ extends Node
 ##   godot --headless --path <project> res://tools/BalanceProbe.tscn [-- --factors=1.0,1.5,2.0]
 ## Other flags: --difficulty=hard (easy|medium|hard|nightmare|cataclysm), --no-abilities, --seeds=1,2,
 ## --maps=delta,foundry, --lives=1000 (override shields, e.g. to measure Cataclysm by rounds survived),
-## --endless=20 (endless rounds to play past a medal), --research=all (every Research Lab node),
-## --roster=old (the bot plays the old towers instead of the reworked ones).
+## --endless=20 (endless rounds to play past a medal), --research=all (every Research Lab node).
 ## A round that runs past STALL_TIME of game time ends the sector as STALLED, naming the enemies left.
 
 const Game = preload("res://scripts/core/Game.gd")
@@ -33,7 +32,6 @@ func _ready() -> void:
 	var research: Array = []
 	var maps: Array = Maps.ORDER
 	var detail := false
-	var roster := "new"
 	for a in OS.get_cmdline_user_args():
 		if a.begins_with("--difficulty="):
 			diff = a.substr(13)
@@ -51,8 +49,6 @@ func _ready() -> void:
 			lives = int(a.substr(8))
 		if a.begins_with("--maps="):
 			maps = Array(a.substr(7).split(","))
-		if a.begins_with("--roster="):
-			roster = a.substr(9)
 		if a == "--detail":
 			detail = true
 		if a == "--no-abilities":
@@ -64,11 +60,11 @@ func _ready() -> void:
 	for f in factors:
 		for id in maps:
 			for sd in seeds:
-				_probe(id, f, sd, diff, abilities, research, lives, endless, detail, roster)
+				_probe(id, f, sd, diff, abilities, research, lives, endless, detail)
 	get_tree().quit()
 
 
-## "all", or comma-separated node ids, tree names ("command", "arrow"...), "towers" (every tower
+## "all", or comma-separated node ids, tree names ("command", "gun_turret"...), "towers" (every tower
 ## tree) or "nomastery" (every tower tree except its Mastery). Prerequisites are added as needed.
 static func _research_set(spec: String) -> Array:
 	var want: Array = []
@@ -92,7 +88,7 @@ static func _research_set(spec: String) -> Array:
 	return Research.sanitize(want)
 
 
-func _probe(map_id: String, factor: float, seed_v: int, diff: String, abilities: bool, research: Array, lives_override: int, endless_extra: int, detail := false, roster := "new") -> void:
+func _probe(map_id: String, factor: float, seed_v: int, diff: String, abilities: bool, research: Array, lives_override: int, endless_extra: int, detail := false) -> void:
 	var g = Game.new(map_id, seed_v, diff, research)
 	g.emit_events = false
 	g.hp_factor = factor
@@ -101,7 +97,6 @@ func _probe(map_id: String, factor: float, seed_v: int, diff: String, abilities:
 		g.max_lives = lives_override
 	var bot = Bot.new(g)
 	bot.use_abilities = abilities
-	bot.roster = roster
 	var final: int = g.final_round()
 	var checkpoints := {}
 	var medal_lives := -1
@@ -168,7 +163,7 @@ static func _detail(g, bot) -> void:
 		if t.mastered:
 			mastered += 1
 		var k: String = bot.next_key(t)
-		if bot.cost_of(t, k) <= 0 or (not t.is_rework and t.trunk >= 2 and not t.can_buy(t.resolve_key(k))):
+		if bot.cost_of(t, k) <= 0:
 			maxed += 1
 	print("    r%-3d towers %2d (maxed %2d, mastered %2d) | free tiles %3d, near a lane %3d | bank %6d, spent on towers %7d, avg %5d/tower" % [
 		g.wave, g.towers.size(), maxed, mastered, free, useful, g.gold, spent, spent / maxi(1, g.towers.size())])

@@ -26,12 +26,8 @@ func _draw() -> void:
 	for tw in g.towers:
 		if tw.is_support():
 			_pylon(tw, g, t)
-		elif tw.is_beam() and not tw.sweep_angles.is_empty():
-			_sweeps(tw, t)
-		elif tw.is_beam() and tw.is_rework and not tw.beam_targets.is_empty():
-			_laser_beams(tw, t)
 		elif tw.is_beam() and not tw.beam_targets.is_empty():
-			_beams(tw, t)
+			_laser_beams(tw, t)
 	for z in g.storms:
 		_storm(z, t)
 	for z in g.trails:
@@ -71,42 +67,6 @@ func _laser_beams(tw, t: float) -> void:
 	Draw.disc(self, LaserTowerArt.beam_origin(tw.pos, tw.aim, k, tw.spec, 0), 3.0 + tw.ramp_mult * 0.5, Color(acc, 0.4))
 
 
-func _beams(tw, t: float) -> void:
-	var acc := Draw.accent(tw.type, tw.spec)
-	var d := Vector2.from_angle(tw.aim)
-	var src: Vector2 = tw.pos + d * Draw.laser_barrel_length(tw.tier, 1.0 if tw.size <= 1 else 1.8)
-	var ramp: float = tw.ramp_mult
-	for i in tw.beam_targets.size():
-		var e = tw.beam_targets[i]
-		if e == null or not e.alive:
-			continue
-		var w := (1.5 + 1.1 * ramp) * (1.0 if i == 0 else 0.6)
-		var flick := 0.85 + 0.15 * sin(t * 50.0 + float(i))
-		draw_line(src, e.pos, Color(acc, 0.18 * flick), w * 4.0, true)
-		draw_line(src, e.pos, Color(acc, 0.6 * flick), w * 1.6, true)
-		draw_line(src, e.pos, Color(1, 1, 1, 0.8 * flick), maxf(1.0, w * 0.45), true)
-		Draw.disc(self, e.pos, w * 2.2, Color(acc, 0.35))
-		Draw.disc(self, e.pos, w * 0.9, Color(1, 1, 1, 0.7))
-	Draw.disc(self, src, 3.0 + ramp, Color(acc, 0.4))
-
-
-## Laser Lance branch C: beams sweeping across their arc out to full range.
-func _sweeps(tw, t: float) -> void:
-	var acc := Draw.accent(tw.type, tw.spec)
-	var r: float = tw.get_range()
-	# Beams leave the tip of the barrel (which points at the sweep's centre line), not the hull.
-	var tip: Vector2 = tw.pos + Vector2.from_angle(tw.aim) * Draw.laser_barrel_length(tw.tier, 1.0 if tw.size <= 1 else 1.8)
-	for a in tw.sweep_angles:
-		var d := Vector2.from_angle(float(a))
-		var src: Vector2 = tip
-		var end: Vector2 = tw.pos + d * r
-		var flick := 0.85 + 0.15 * sin(t * 45.0 + float(a))
-		draw_line(src, end, Color(acc, 0.16 * flick), 9.0, true)
-		draw_line(src, end, Color(acc, 0.55 * flick), 3.0, true)
-		draw_line(src, end, Color(1, 1, 1, 0.7 * flick), 1.2, true)
-		Draw.disc(self, end, 4.0, Color(acc, 0.3))
-
-
 ## The Tractor Tower's focus beam: a bright line to the held enemy with rings sliding back down it, afterimages of the enemy gliding backward.
 func _tractor_beam(tw, t: float) -> void:
 	var acc: Color = Draw.ACCENT.tractor_tower
@@ -135,7 +95,7 @@ func _magneto_field(tw, t: float) -> void:
 ## A Railgun ion trail: a lingering, crackling line of ion-blue (gold at the Power mastery) that fades with its time.
 func _trail(z: Dictionary, t: float) -> void:
 	var col: Color = Draw.ACCENT.railgun
-	if z.source != null and z.source.is_rework and z.source.mastered and z.source.primary() == "a":
+	if z.source != null and z.source.mastered and z.source.primary() == "a":
 		col = Draw.GOLD
 	var k := clampf(float(z.t) / 2.0, 0.0, 1.0)
 	var a: Vector2 = z.a
@@ -154,11 +114,9 @@ func _trail(z: Dictionary, t: float) -> void:
 
 ## A short-lived storm zone (an Ion Storm secondary).
 func _storm(z: Dictionary, t: float) -> void:
-	var col: Color = Draw.SPEC_ALT.ionstorm
-	if z.get("pierce", false):
-		col = Draw.ACCENT.tesla_tower
-		if z.source != null and z.source.is_rework and z.source.mastered and z.source.primary() == "b":
-			col = Draw.GOLD
+	var col: Color = Draw.ACCENT.tesla_tower
+	if z.source != null and z.source.mastered and z.source.primary() == "b":
+		col = Draw.GOLD
 	var r := float(z.r)
 	var k := clampf(float(z.t) / 0.5, 0.0, 1.0)
 	Draw.disc(self, z.pos, r, Color(col, 0.07 * k))

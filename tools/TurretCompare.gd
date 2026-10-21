@@ -1,5 +1,5 @@
 extends Node
-## --perf-compare: draws every tower's stock model and each branch at its mastery, at two aims,
+## --perf-compare: draws every tower's stock model and three mastered builds, at two aims,
 ## twice into identical offscreen images: once in full vector drawing and once through Draw's
 ## turret cache. Compares them tower by tower, saves both (full above, cached below) to
 ## res://screenshots/turret_compare.png and exits 1 if any tower differs by more than MAX_DIFF
@@ -7,14 +7,7 @@ extends Node
 
 const Draw = preload("res://scripts/view/Draw.gd")
 const DrawNode = preload("res://scripts/view/DrawNode.gd")
-const BRANCHES := {
-	"arrow": ["gatling", "shredder", "flechette"], "cannon": ["siege", "napalm", "buster"], "frost": ["stasis", "shatter", "cryolock"],
-	"sniper": ["deadeye", "lance", "nullslug"], "tesla": ["storm", "overload", "ionstorm"], "laser": ["prism", "focus", "sweeper"],
-	"missile": ["swarm", "hellfire", "cluster"], "amp": ["overclock", "array", "suppression"], "flak": ["skyshred", "burst", "dualpurpose"],
-	"sensor": ["deepscan", "painter", "disruptor"], "gravity": ["repulsor", "crush", "well"], "nullifier": ["purge", "dampener", "feedback"],
-	"nova": ["supernova", "pulsereactor", "solarflare"], "drones": ["interceptors", "bombers", "hunters"], "scrap": ["mint", "collector", "depot"],
-}
-## The reworked towers (issue #59) show their look as a key; four looks each: stock, then three mastered builds.
+## Each tower's look is a key ("retrofit|a|b|c"); four looks each: stock, then three mastered builds.
 const REWORK_LOOKS := {
 	"gun_turret": [["", "-1|0|0|0"], ["", "0|5|2|0"], ["", "1|2|5|0"], ["", "2|0|2|5"]],
 	"mortar_tower": [["", "-1|0|0|0"], ["", "0|2|3|1"], ["", "1|5|2|3"], ["", "2|3|5|5"]],
@@ -71,17 +64,6 @@ func _process(_delta: float) -> void:
 func _cells() -> Array:
 	var out := []
 	var row := 0
-	for type in BRANCHES:
-		var looks: Array = [[1, ""]]
-		for sp in BRANCHES[type]:
-			looks.append([6, sp])
-		var col := 0
-		for look in looks:
-			for aim in AIMS:
-				out.append({"type": type, "tier": look[0], "spec": look[1], "aim": aim,
-					"pos": Vector2(CELL * 0.5 + float(col) * CELL * 2.0 + float(row % 2) * CELL, CELL * 0.5 + float(row) * CELL)})
-				col += 1
-		row += 1
 	for type in REWORK_LOOKS:
 		var col2 := 0
 		for look in REWORK_LOOKS[type]:
@@ -96,7 +78,7 @@ func _cells() -> Array:
 func _draw_grid(ci: CanvasItem, cached: bool) -> void:
 	ci.draw_rect(Rect2(Vector2.ZERO, Vector2(SIZE)), Color(0.07, 0.09, 0.11))
 	for cell in _cells():
-		var s := 0.9 if cell.type == "drones" or cell.type == "scrap" else 1.0
+		var s := 0.9 if cell.type == "scrapyard" else 1.0
 		Draw.turret_cache = cached
 		Draw.tower(ci, cell.type, cell.tier, cell.pos, cell.aim, s, 1.234, 0.05, cell.spec, cell.spec)
 		Draw.turret_cache = false

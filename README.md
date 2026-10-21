@@ -2,8 +2,9 @@
 
 A sci-fi tower defense game built in Godot 4.7 (GDScript).
 
-- **Towers:** 15 (including the Scrapyard, an economy tower), each with a two-tier trunk and three upgrade branches of four upgrades plus a
-  mastery. You climb one branch as the primary and can take up to two upgrades on a secondary.
+- **Towers:** 20 (including the Scrapyard, an economy tower), each with a Retrofit (a choice of three) and three upgrade paths
+  of four upgrades plus a mastery, open from the start. You climb one path as the primary and can take up to two upgrades on a
+  secondary.
 - **Research Lab:** a persistent skill tree (a Command tree plus one tree per tower) bought with
   research points earned from your sector records. Mastery research unlocks each tower's masteries.
 - **Enemies:** 22 robotic types, including four bosses. Some are cloaked, shielded, burrowing or
@@ -72,20 +73,18 @@ Workflow).
 | Input | Action |
 |---|---|
 | `B` or the Shop button | Open the tower shop. Picking a tower closes it while you place it; it reopens once the tower is placed. Clicking the field with nothing picked up closes it |
-| `1`-`9`, `0`, `-`, `=`, `[`, `]`, `\` | Pick a tower to deploy directly (the shop stays closed) |
 | Left-click a tile | Build (Shift+click to keep building) |
 | Left-click rubble / a switch gate | Clear the rubble (40 cr) / switch which branch arriving enemies take |
-| Left-click a tower | Select it: its **tower panel** opens on the right (in the shop's place) with its combat stats and the next upgrade on each branch as cards to buy; cards that can't be bought say why. The bottom bar shows its tier, kills, upgrade path, actions and any boosts (pylon, high ground, power node, Supply Depot) as percentages. Double-click opens its upgrade tree |
+| Left-click a tower | Select it: its **tower panel** opens on the right (in the shop's place) with its combat stats, its Retrofit and the next upgrade on each path as cards to buy; cards that can't be bought say why. The bottom bar shows its Retrofit, kills, paths, actions and any boosts (Boost Tower, high ground, power node, Scrapyard) as percentages |
 | Right-click | Cancel build mode, targeting or selection |
-| `U` | Retrofit the selected tower, then buy the next upgrade on branch A (the mastery after its T4) |
-| `I` / `O` | Buy the next upgrade on branch B / branch C |
+| `Y`, then `1`-`3` | Fit one of the selected tower's three Retrofits (the choice is locked) |
+| `U` / `I` / `O` | Buy the next upgrade on path A / B / C (the mastery after its T4) |
 | `X` | Sell the selected tower (refunds 70% of everything spent on it) |
 | `T` | Cycle the selected tower's targeting: First, Last, Strongest (by strength, then health left), Closest |
 | `G` | Target priority: Any, Air, Ground (towers that hit both) or Support (Support enemies first); it still shoots the rest when none of those are in range |
 | Mouse wheel, middle-drag, arrow keys, `Home` | Zoom the battlefield (up to 2.5×), pan it, reset the view |
 | `F3` | Show or hide the FPS counter |
 | `K` or `F1`, or the Codex button | The Codex: every tower, enemy, effect and rule. In battle it pauses and opens on the selected tower (or the enemy under the cursor) |
-| `E` | Upgrade tree for the selected tower, for reading and planning: the trunk, all three branches and their masteries. Hover a node for its details and stat changes; click one to watch a **live preview** of it fighting enemies picked to show it off. Upgrades are bought in the tower panel |
 | `R` | Research Lab in battle (pauses; purchases and resets apply at once) |
 | `N` or click NEXT | Intel on the next round: enemies, counts, traits, HP and speed scale, bonuses |
 | `Space` or the Launch button (bottom right) | Launch the next round, or call it early for bonus credits once the current round has finished spawning |
@@ -98,68 +97,48 @@ Workflow).
 
 ### Towers and upgrade trees
 
-Every tower has the same tree shape (the full design, with every node's stats and description,
-lives in `design/upgrade_trees.md` and its rendered view `design/upgrade_trees.html`):
+Every tower has the same tree shape (the full design, with every node's stats and description, lives in
+`design/upgrade_trees_rework.md` and `design/tower_stats.md`, and its rendered view `design/upgrade_trees_rework.html`):
 
-- **Trunk:** the **Stock** tower as built, then its **Retrofit**.
-- **Three branches (A, B, C)** from the Retrofit, each **T1 to T4** plus a mastery. T1 is the branch's
-  **specialization**, which changes how the tower works; the mastery needs that tower's Mastery research.
-- A tower keeps its stock name and colour until its primary locks in at T3 (its model already shows the
-  branch from T1).
-- The **Scrapyard and Drone Bay take 2×2 tiles**; the build preview centres the block on the cursor. A
-  2×2 tower gets a high-ground or power-node bonus if any of its four tiles has one.
-- **A primary and a secondary.** You can climb two branches freely until one of them gets its
-  **3rd** upgrade. That branch becomes the primary; the other is capped where it is (at most 2),
-  and the third branch is locked as soon as two are started.
-- **A secondary keeps its effects.** Its upgrades add on top of the primary (downsides included).
-  An attack-style secondary (Flechette, Ion Storm, Sweeper, Gravity Well, Bomber Wing) adds its
-  attack alongside the primary's instead of replacing it.
+- **Stock:** the tower as built.
+- **Retrofit:** a choice of three (one for the Drone Bay), fitted with `Y` then `1`-`3`. The choice is locked.
+- **Three paths (A, B, C)**, open from the start, each **T1 to T4** plus a mastery; the mastery needs that tower's Mastery
+  research.
+- **A primary and a secondary.** You can climb two paths freely until one of them gets its **3rd** upgrade. That path becomes
+  the primary; the other is capped where it is (at most 2), and the third path is locked as soon as two are started. A
+  secondary keeps its effects. The **CAS Gunship** is the exception: every path takes every upgrade and its own mastery.
+- **Physical or energy.** Every hit counts as one or the other; the Laser, Tesla, Chemical Plant, Cryo, Radar, Magneto and
+  Tractor towers deal energy, and the Augmentation Tower can convert a nearby tower's damage.
+- The **Scrapyard takes 2×2 tiles**; the build preview centres the block on the cursor, and it gets a high-ground or
+  power-node bonus if any of its four tiles has one.
+- **Aiming:** click the track to aim an Artillery Cannon (and pick its shell in its panel) or to set a CAS Gunship's orbit;
+  the Drone Bay's loadout is picked in its panel.
 
-| Key | Tower | Cost | Role | Branch A | Branch B | Branch C |
-|---|---|---|---|---|---|---|
-| 1 | Pulse Turret | 50 | Rapid single-target bolts; hits flyers | Gatling Pulse → Storm Gatling | Shredder → Disintegrator | Flechette → Hailstorm |
-| 2 | Plasma Mortar | 90 | Splash, ground only | Siege Mortar → Earthshaker | Plasma Burn → Inferno Mortar | Bunker Buster → Seismic Charge |
-| 3 | Cryo Emitter | 70 | Area slow plus light damage | Stasis Field → Absolute Zero | Shatter Field → Cryo Fracture | Cryo Lock → Permafrost |
-| 4 | Railgun | 120 | Huge range, ignores armor | Deadeye → Executioner | Piercing Rail → Ion Lance | Null Slug → Void Round |
-| 5 | Arc Coil | 130 | Chain lightning | Storm Coil → Tempest Coil | Overload → Supercharger | Ion Storm → Maelstrom |
-| 6 | Laser Lance | 140 | Continuous ramping beam, ignores armor | Prism Array → Refraction Grid | Focus Lens → Singularity Lens | Sweeper → Scythe Array |
-| 7 | Missile Battery | 110 | Homing salvos, double damage to flyers | Swarm Pods → Locust Swarm | Hellfire → Doomsday Warheads | Cluster Munitions → Carpet Bomber |
-| 8 | Amplifier Pylon | 100 | Support: boosts towers in its field | Overclock Pylon → Hypercore Pylon | Targeting Array → Command Array | Suppression Pylon → Silence Pylon |
-| 9 | Flak Battery | 80 | Anti-air airbursts | Sky Shredder → Aerial Denial | Proximity Burst → Thunderhead | Dual Purpose → Flak Curtain |
-| 0 | Sensor Array | 75 | Support: reveals cloaked enemies, marks them | Deep Scan → Omniscient Grid | Target Painter → Kill Beacon | Disruptor → Blackout Grid |
-| - | Graviton Projector | 150 | Gravity pulses shove the lane back | Repulsor → Singularity Engine | Crush Field → Event Horizon | Gravity Well → Collapse Point |
-| = | Nullifier | 120 | Dampening pulses strip barriers and immunities | Purge Emitter → Absolute Null | Dampener → Silence Engine | Feedback Loop → Overload Cascade |
-| [ | Nova Reactor | 160 | Radial energy waves around itself | Supernova → Hypernova | Pulse Reactor → Chain Reactor | Solar Flare → Corona |
-| ] | Drone Bay | 180 | Drones that fly anywhere on the map | Interceptor Wing → Swarm Carrier | Bomber Wing → Strike Wing | Hunter-Killer → Assassin Protocol |
-| \ | Scrapyard | 150 | Economy: pays credits at every round clear, never attacks | Credit Mint → Reserve Bank | Scrap Collector → Reclamation Plant | Supply Depot → Forward Command |
-|  | Scrapyard | 150 | Economy: pays credits at every round clear, never attacks | Credit Mint → Reserve Bank | Scrap Collector → Reclamation Plant | Supply Depot → Forward Command |
+| Tower | Cost | Class | Hits | Retrofit (one of) | Path A | Path B | Path C |
+|---|---|---|---|---|---|---|---|
+| Gun Turret | 75 | Assault | air and ground | Water-Cooled Barrel / Shock Rounds / Incendiary Rounds | Power → Sabot Rounds | Range/Visibility → Targeting Computer | Multi-Target → Triple Mount |
+| Mortar Tower | 150 | Assault | ground | Field Kit / Bunker Sight / Smoke Shells | Power/Penetration → Bunker Buster | Speed/Range → Barrage Battery | Blast Radius/Multi-Target → Carpet Shells |
+| Rocket Salvo | 200 | Assault | air and ground | Proximity Fuses / Smoke Trails / Incendiary Warheads | Power → Thermobaric Rockets | Range/Target Acquisition → Hunter Seekers | Reload/Payload → Ripple Salvo |
+| Laser Tower | 250 | Assault | air and ground, energy | Capacitor Bank / Heat Sinks / Ramp Memory | Power → Annihilator | Multi-Target → Prism Array | Range/Targeting → Deep Lance |
+| Anti-Aircraft Turret | 150 | Assault | air | Fire-Control Radar / Ammo Drum / Armoured Mount | Range → Sky Wall | Power/Blast Radius → Flak Curtain | Speed → Quad Mount |
+| Artillery Cannon | 300 | Assault | ground | Shell Magazine / Stabilised Mount / Wide Charge | Power → Siege Shells | Speed → Rolling Barrage | Special Effects → Combined Payload |
+| Railgun | 500 | Assault | air and ground | Capacitor Coils / Longer Rails / Penetrator Tips | Power → Kingslayer | Range/Speed → Twin Rails | Special Effects → Ion Cannon |
+| Tesla Tower | 250 | Assault | air and ground, energy | Bigger Disk / Grounding Rods / Insulated Coils | Power/Damage → Lightning Rod | Range/Chaining → Tempest | Speed → Continuous Discharge |
+| Drone Bay | 300 | Assault | air and ground | Second Hangar | Power → Elite Drones | Weaponry → Full Kit | Speed → Storm Drones |
+| CAS Gunship | 650 | Assault | air and ground | Radar / Extra Ammo / Wide Orbit | Light gun → Twin Gatlings | built in → Autocannon Battery | Medium gun → Hellfire Volley |
+| Mine Layer | 450 | Defense | ground | Adhesive Mines / Shaped Charges / Long Arm | Power/Damage → Anti-Tank Mines | Production Speed → Mine Factory | Range → Minefield Launcher |
+| Chemical Plant | 250 | Support | air and ground, energy | Pressure Pump / Mist Nozzle / Bigger Tanks | Damage/Armor stripping → Dissolver | Speed → Twin Nozzles | Slowing → Quick-Set Foam |
+| Cryo Tower | 150 | Support | air and ground, energy | Coolant Tank / Compressor / Deep Cold | Slowing → Deep Freeze | Power/Range → Blizzard | Speed → Cold Front |
+| Boost Tower | 400 | Support | - | Signal Booster / Crit Link / Wide Mast | Damage boost → Battle Network | Speed boost → Rapid Network | Range boost → Overwatch Network |
+| Radar Tower | 575 | Utility | air and ground, energy | Bigger Dish / Signal Processor / Early Warning | Power/Range → Microwave Array | Speed/Frequency → Constant Track | Special Targeting → Total Exposure |
+| Shockwave Generator | 450 | Assault | air and ground | Wave Focus / Containment Coils / Reactor Venting | Power/Range → Megaton Wave | Speed → Chain Pulse | Effect → Shatter Shock |
+| Scrapyard | 875 | Utility | - | Hammer Mill / Faster Loading / Surplus | Passive Income → Gold Foundry | Kill Income → Breaker's Yard | Discounts → Parts Exchange |
+| Magneto Tower | 525 | Defense | air and ground, energy | Superconducting Coil / Field Stabiliser / Pole Shoes | Pull Strength → Absolute Pull | Field Size → Magnetosphere | Polarity → Reverse Polarity |
+| Tractor Tower | 575 | Defense | air and ground, energy | Beam Sweep / Longer Hold / Faster Recharge | Pull Distance → Undo | Recharge → Supercapacitor | Grip → Gravity Hammer |
+| Augmentation Tower | 650 | Support | - | Wide Aura / Amplified Bonus / Remote Link | Energy Conversion → Overcharge | Critical Hits → Executioner Link | Ricochet → Pinball |
 
-The C branches are counters to the v3 roster:
-- **Pulse Turret, Flechette:** a cone that hits a whole group.
-- **Plasma Mortar, Bunker Buster:** breaks armor and hits (and unearths) Burrowers.
-- **Cryo Emitter, Cryo Lock:** stops Mender repair and barrier recharge.
-- **Railgun, Null Slug:** suppresses the target's abilities.
-- **Arc Coil, Ion Storm:** leaves lingering storm zones.
-- **Laser Lance, Sweeper:** sweeping beams that burn barriers.
-- **Missile Battery, Cluster Munitions:** bomblets.
-- **Amplifier Pylon, Suppression Pylon:** jams enemy support in its field.
-- **Flak Battery, Dual Purpose:** also hits ground targets.
-- **Sensor Array, Disruptor:** stops burrowing and blinking, and exposes Ramparts.
-- **Graviton Projector, Gravity Well:** pulls enemies together and implodes them.
-
-**The Scrapyard** is the only tower that doesn't fight. Every Scrapyard pays its credits per round
-when a round is cleared, scaled the same way as kill credits (so one built early still matters late).
-Its branches:
-- **A, Credit Mint:** the most income. The Reserve Bank mastery also pays 3% interest on banked credits
-  at each round clear, up to 300. Only the best bank's interest counts.
-- **B, Scrap Collector:** enemies destroyed in its field pay +25% credits (up to +60%, and double for
-  bosses on the Reclamation Plant).
-- **C, Supply Depot:** towers in its field upgrade for 10% less (up to 25%). On Forward Command they also
-  sell back for everything spent on them.
-
-Collector and depot bonuses don't stack: the best Scrapyard in range applies. Depots don't discount
-other Scrapyards. Scrapyards cost more on the harder modes like every tower, so an economy is a
-bigger bet on Nightmare and Cataclysm.
+The **Scrapyard** is the only tower that doesn't fight: it pays its credits when a round is cleared, and its paths add
+kill credits, discounts and sell-backs in its field.
 
 A mastered tower has a gold ring around its pad.
 
@@ -195,7 +174,8 @@ branch gets that Mastery's RP refunded on load, to spend again once both branche
   - 1 RP per sector for each of rounds 20, 40, 60, 80 and 100 reached (on any mode)
   - 1 RP per 10 endless rounds past a mode's last round, up to 5 per sector
 
-  That's 150 RP across the 6 sectors. The whole lab costs 130, so you can max it without every medal.
+  That's 150 RP across the 6 sectors. The whole lab costs 170 with the twenty tower trees, so it can't all be bought
+  yet; the research pass of the tower rework (#59) sets the final tree sizes and prices.
   Profiles from before v3.0 keep the RP their old records earned as **legacy RP** (shown in the lab);
   the old records themselves are cleared, since they were 25-wave runs under different rules.
 - **Command tree** (10 RP):
@@ -204,23 +184,8 @@ branch gets that Mastery's RP refunded on load, to spend again once both branche
   - Reinforced Core: +10% shields, rounded down (Cataclysm stays at 1)
   - Bounty Contracts: +8% kill credits
   - Orbital Uplink: abilities recharge 20% faster
-- **Tower trees** (8 RP each, 15 trees). Each has a root bonus (+6% damage, or field size for Cryo and
-  Amplifier), a range branch and a signature branch, then the Mastery. The signature branches:
-  - Pulse Turret: fire rate
-  - Plasma Mortar: blast radius
-  - Cryo Emitter: stronger, longer slow
-  - Railgun: recharge
-  - Arc Coil: +1 chain target
-  - Laser Lance: faster ramp
-  - Missile Battery: blast radius
-  - Amplifier Pylon: 20% cheaper pylons
-  - Flak Battery: burst radius
-  - Sensor Array: 20% cheaper sensors (its branch adds +3% mark)
-  - Graviton Projector: 12% longer shove
-  - Nullifier: +10% pulse rate (its root adds +6% barrier strip)
-  - Nova Reactor: +10% pulse rate
-  - Drone Bay: +1 drone (its range branch is +10% drone speed)
-  - Scrapyard: Scrapyards and their upgrades cost 20% less (its root adds +10% income, its range branch +10% field)
+- **Tower trees** (8 RP each, 20 trees, a minimal tree each until the research pass). Each has a root bonus (usually +6%
+  damage), two branch nodes (usually range and fire rate), then the Mastery.
 
   A tower's Mastery research unlocks all three of its masteries.
 
@@ -238,9 +203,9 @@ Every enemy's health and speed scale with the round number, the same on every se
 | Siege Mech | 7 | 6 flat armor per hit (minimum 20% of damage gets through) |
 | Jammer | 9 | EMP every 5 s knocks towers within 95 px offline for 2 s |
 | Blink Stalker | 11 | Teleports 80 px down the lane every 4 s. A slow or stun resets the charge |
-| Phantom | 13 | Cloaked flyer that follows the track. Towers that hit air can only target it inside a Sensor Array field, or for 0.5 s after a blast, field or arc hits it while hidden |
+| Phantom | 13 | Cloaked flyer that follows the track. Towers that hit air can only target it when a Radar Tower ping reveals it, or for 0.5 s after damage hits it while hidden |
 | Locust | 15 | Tiny, fast flyer in dense swarms. Flak's favourite target |
-| Aegis Walker | 17 | Energy barrier (scales with HP) soaks damage before armor applies and recharges after 2.5 s untouched. Arc Coils hit barriers twice as hard |
+| Aegis Walker | 17 | Energy barrier (scales with HP) soaks damage before armor applies and recharges after 2.5 s untouched. Tesla Tower arcs hit barriers twice as hard |
 | Needle | 19 | Very fast, light; always in pairs on one lane |
 | Rally Beacon | 21 | Other non-boss enemies within 100 px move 25% faster (doesn't stack). Kill it first |
 | Mirage | 23 | Every 6 s projects two 1-HP holograms that soak shots, never leak and vanish with it |
@@ -271,8 +236,7 @@ elite); a boss costs its introduction round. After an EMP wears off a tower can'
 1 s.
 
 Bosses get half the round speed bonus and resist slows and shoves. After a stun wears off, an enemy
-can't be stunned again for 1 s, and Graviton shoves can push any one enemy back at most 320 px in
-total, so nothing can be pinned in place forever.
+can't be stunned again for 1 s, and shoves can push any one enemy back at most 320 px in total.
 
 
 ### Abilities
@@ -300,11 +264,11 @@ hard, and Cataclysm brutal:
 
 | Mode | Rounds | Shields | Tower prices | Medal RP |
 |---|---|---|---|---|
-| Easy | 40 | 200 | ×1.0 | 1 |
-| Medium | 60 | 100 | ×1.0 | 2 |
-| Hard | 80 | 50 | ×1.1 | 3 |
-| Nightmare | 100 | 25 | ×1.5 | 4 |
-| Cataclysm | 120 | 1 | ×2.0 | 5 |
+| 40 | 200 | ×1.0 | 1 |
+| 60 | 100 | ×1.0 | 2 |
+| 80 | 50 | ×1.1 | 3 |
+| 100 | 25 | ×1.5 | 4 |
+| 120 | 1 | ×2.0 | 5 |
 
 - Clearing a mode's last round earns that sector's **medal** for the mode (a banner announces it and
   it's recorded at once), and **endless mode** begins straight away: the rounds keep coming until the
@@ -365,22 +329,7 @@ Hovering any special tile explains it in the bottom bar.
   - If you quit mid-round, you resume from the start of that round.
 - Writes are atomic: the game writes a `.tmp` file, verifies it, then renames it. A leftover `.tmp` is recovered on load.
 - Saves carry a format `version`, and corrupted or incompatible files are reported in the menu instead of crashing.
-  Saves migrate forward automatically:
-  - v2 added difficulty and ability cooldowns (v1 saves load as Normal).
-  - v3 added tier-3 specializations (a v2 tier-3 tower becomes its first specialization).
-  - v4 added the run's research snapshot and tier-4 towers (older runs load with no research).
-  - v5 added cleared rubble, switch-gate states and route counters. A v4 tower that now stands on
-    rubble clears it; one on a new wall is refunded.
-  - v6 grew every sector to 32 × 16 and rerouted the lanes. A tower that now stands on a lane or
-    wall is refunded, and cleared rubble that no longer exists is dropped.
-  - v7 (game v3.0) replaced Casual/Normal/Veteran with the five modes: Casual becomes Easy, Normal
-    Medium, Veteran Hard, and the run keeps its share of shields rescaled to the new mode's total.
-  - v8 (game v3.1) stores each tower's upgrade state as trunk, per-branch depth, the order the branches
-    were started, and whether it's mastered. A v7 tier-3 tower becomes the first upgrade of its branch;
-    a tier-4 tower is mastered at the end of that branch.
-  - v9 (game v3.4) made the Scrapyard and Drone Bay 2×2 (a tower's col/row is its top-left tile) and
-    added each tower's target priority. Loading an older save keeps a 1×1 Scrapyard or Drone Bay if its
-    2×2 block fits and refunds it otherwise.
+  - v10 (game 4.0) replaced every tower with the reworked roster. Saves from before it can't be loaded; the menu says so.
 - `profile.json` in the same folder holds:
   - per-sector, per-mode records (best round, medal, best endless round)
   - legacy RP carried over from pre-v3.0 records
@@ -434,7 +383,7 @@ from PowerShell. The commands are `import`, `check`, `test`, `tour`, `compare`, 
 ### Printable codex
 
 `design/BastionLine-Codex.pdf` lists every enemy, tower and upgrade tree with its stats. Rebuild it after
-changing enemies or `design/upgrade_trees.md`:
+changing enemies or the tower data (`design/tower_stats.md`, `design/upgrade_trees_rework.md`):
 
 ```
 godot_console --path . -- --codex="%CD%\design\codex"
@@ -464,9 +413,9 @@ The commands below assume the console build is on PATH as `godot_console` (winge
      share their route up to the gate and diverge after it
    - high ground, power nodes, rubble clearing, sludge, shock strips and switch gates (including
      rerouting before the fork only, the cooldown, and saving gate state)
-   - v4 to v5, v5 to v6 and v6 to v7 save migration (reworked layouts, then the new modes)
-   - cloaking and reveal, barriers (including the Arc Coil bonus and recharge), splitting, EMP,
-     flak air-only bursts, and graviton shoves (including boss resistance and Crush stuns)
+   - saves from before the tower rework are rejected with a clear message
+   - cloaking and Radar reveal, barriers (including the Tesla bonus and recharge), splitting and EMP
+   - every one of the twenty towers: its Retrofits, paths, masteries and what it does to enemies
    - every v3 enemy: burrowing, blinking (and its reset), regeneration, the rally aura, Bulwark
      barriers, Rampart immunities, Leviathan launches, Colossus phases, and the new flyers
    - v1 through v4 save migration, and rejection of tier-4 towers without research
@@ -505,8 +454,7 @@ The commands below assume the console build is on PATH as `godot_console` (winge
 
    Other flags: `--endless=N` (endless rounds to play past a medal, default 20), `--lives=N` (override
    the shields, e.g. to measure Cataclysm by rounds survived), `--growth=F` (late HP compounding rate),
-   `--seeds=`, `--no-abilities`, `--roster=old` (the bot plays the old towers, for comparison until the
-   final swap). A round that runs past 600 s of game time ends the sector as `STALLED rN`, naming the
+   `--seeds=`, `--no-abilities`. A round that runs past 600 s of game time ends the sector as `STALLED rN`, naming the
    enemies left (enemies no tower can kill, held in place by stuns, would otherwise keep it running
    for hours).
 
@@ -565,19 +513,8 @@ The commands below assume the console build is on PATH as `godot_console` (winge
    The art is procedural (`scripts/view/Draw.gd`) and each design follows its name. Tower tiers
    and paths add visible hardware, and masteries get gold trim:
 
-   | Tower | Look |
-   |---|---|
-   | Pulse Turret | Round turret head with coil-ringed emitters (two from tier 2); Gatling spins a barrel cluster, Shredder fires saw discs |
-   | Plasma Mortar | A tube pointing skyward with a glowing plasma mouth and side canisters; Siege braces on four legs, Burn carries green tanks |
-   | Cryo Emitter | A rotating snowflake crystal over a coolant core with frost vents; Stasis adds a halo, Shatter ice shards |
-   | Railgun | Twin rails wrapped in magnetic coils, fed by capacitors; Deadeye adds a scope |
-   | Arc Coil | A Tesla coil: toroid rings around a charged spire; Storm adds satellite coils |
-   | Laser Lance | A long lance with focusing rings and a crystal tip; Prism splits, Focus has one big lens |
-   | Missile Battery | A launcher box whose tubes show their warheads; Hellfire carries two finned heavies |
-   | Amplifier Pylon | A tripod mast broadcasting waves; Overclock spins a gear, Targeting Array a dish |
-   | Flak Battery | An anti-air mount with shrouded autocannons fed by an ammo box, plus a tracking radar; Sky Shredder adds barrels, Proximity Burst mounts one heavy gun |
-   | Sensor Array | A turning radar dish on a braced mast sweeping a scan wedge; Deep Scan fits a bigger dish, Target Painter adds laser designators |
-   | Graviton Projector | A containment ring of emitters around a pinned singularity with space spiralling in; Repulsor pushes chevrons outward, Crush Field bristles with inward spikes |
+   Each tower's look is its confirmed art (`scripts/view/towers/<Tower>Art.gd`, the design in `design/tower_art.md`):
+   every Retrofit and path step adds visible hardware, and masteries turn gold.
 
    Enemies:
    - Drone: a hover drone with one red optic.
