@@ -4365,3 +4365,20 @@ func _balance_rows(marker: String) -> Array:
 				row[head[k]] = c[k]
 			out.append(row)
 	return out
+
+
+## The balance master's Waves section agrees with data/waves.gd's own functions.
+func test_balance_master_waves() -> void:
+	var rows := _balance_rows("<!-- generated: round_table -->")
+	check(rows.size() >= 10, "the round table has its sample rounds")
+	for r in rows:
+		var w := int(r.Round)
+		check(is_equal_approx(snappedf(Waves.hp_scale(w), 0.01), float(r["=HP ×"])), "round %d: =HP × matches Waves.hp_scale" % w)
+		check(is_equal_approx(snappedf(Waves.speed_scale(w), 0.01), float(r["=Speed ×"])), "round %d: =Speed × matches" % w)
+		check(absf(Waves.threat_budget(w) - float(r["=Budget"])) < 0.06, "round %d: =Budget matches" % w)
+		check(roundi(Waves.elite_share(w) * 100.0) == int(str(r["=Elite share"]).trim_suffix("%")), "round %d: =Elite share matches" % w)
+		check(Waves.clear_bonus(w) == int(r["=Clear bonus"]) and Waves.early_call_bonus(w) == int(r["=Early-call bonus"]), "round %d: the bonuses match" % w)
+	for r in _balance_rows("<!-- table: round_makeup -->"):
+		var id: String = r.Id
+		check((r.Intro == "-") != Waves.INTRO.has(id) and (r.Intro == "-" or int(r.Intro) == int(Waves.INTRO[id])), "%s: Intro is the game's" % id)
+		check(is_equal_approx(float(r.Threat), float(Waves.COST[id])), "%s: Threat is the game's" % id)
