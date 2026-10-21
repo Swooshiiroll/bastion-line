@@ -98,7 +98,7 @@ Workflow).
 ### Towers and upgrade trees
 
 Every tower has the same tree shape (the full design, with every node's stats and description, lives in
-`design/upgrade_trees_rework.md` and `design/tower_stats.md`, and its rendered view `design/upgrade_trees_rework.html`):
+`design/upgrade_trees_rework.md` and `design/balance.md`, and its rendered view `design/upgrade_trees_rework.html`):
 
 - **Stock:** the tower as built.
 - **Retrofit:** a choice of three (one for the Drone Bay), fitted with `Y` then `1`-`3`. The choice is locked.
@@ -385,7 +385,7 @@ from PowerShell. The commands are `import`, `check`, `test`, `tour`, `compare`, 
 `design/BastionLine-Codex.pdf` lists every enemy (role, tier, strength, abilities, the modifiers it can roll), the
 elite modifiers, and every tower with its Retrofits, paths and masteries, all taken from the game's own data and the
 in-game Codex's text (`tools/Codex.gd` exports it, `tools/codex.mjs` lays it out). Rebuild it after changing enemies
-or the tower data (`design/tower_stats.md`, `design/upgrade_trees_rework.md`):
+or the tower data (`design/balance.md`, `design/upgrade_trees_rework.md`):
 
 ```
 godot_console --path . -- --codex="%CD%\design\codex"

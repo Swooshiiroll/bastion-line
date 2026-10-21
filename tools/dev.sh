@@ -69,7 +69,9 @@ case "$cmd" in
       echo "Regenerated files differ: run the generators and commit their output with the .md change."
       fail=1
     else echo "ok"; fi
-    echo "== reworked tower data in sync with design/tower_stats.md"
+    echo "== balance master current (design/balance.md derived columns, prices on the trees page)"
+    if node tools/balance.mjs --check; then echo ok; else fail=1; fi
+    echo "== reworked tower data in sync with design/balance.md"
     if node tools/tree_rework_data.mjs --check; then echo ok; else fail=1; fi
     echo "== version consistent"
     v=$(sed -n 's/^config\/version="\(.*\)"/\1/p' project.godot)
