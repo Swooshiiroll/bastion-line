@@ -205,11 +205,45 @@ static func line(a: Vector2, b: Vector2, col: Color, w := 1.0) -> void:
 static func polyline(pts: PackedVector2Array, col: Color, w := 1.0) -> void:
 	if pts.size() < 2:
 		return
-	Draw.polyline(ci, _map(pts), _c(col), (w if w > 0.0 else 1.0) * _k())
+	_lines(_map(pts), _c(col), (w if w > 0.0 else 1.0) * _k())
 
 
 static func poly(pts: PackedVector2Array, col: Color) -> void:
-	Draw.poly(ci, _map(pts), _c(col))
+	_fill(_map(pts), _c(col))
+
+
+## Battlefield-space line strip as separate segments (Draw.polyline's long-line path is a slow call).
+static func _lines(p: PackedVector2Array, col: Color, w: float) -> void:
+	for i in p.size() - 1:
+		Draw.line(ci, p[i], p[i + 1], col, w)
+
+
+## A battlefield-space polygon: convex ones as Draw.poly's quads, others triangulated (Draw.poly's fallback for a
+## concave shape is a slow call).
+static func _fill(p: PackedVector2Array, col: Color) -> void:
+	var n := p.size()
+	if n < 3:
+		return
+	if n == 3 or _convex(p):
+		Draw.poly(ci, p, col)
+		return
+	var tri := Geometry2D.triangulate_polygon(p)
+	for i in range(0, tri.size(), 3):
+		Draw.poly(ci, PackedVector2Array([p[tri[i]], p[tri[i + 1]], p[tri[i + 2]]]), col)
+
+
+static func _convex(p: PackedVector2Array) -> bool:
+	var n := p.size()
+	var turn := 0.0
+	for i in n:
+		var cr := (p[(i + 1) % n] - p[i]).cross(p[(i + 2) % n] - p[(i + 1) % n])
+		if absf(cr) < 1e-6:
+			continue
+		if turn == 0.0:
+			turn = signf(cr)
+		elif signf(cr) != turn:
+			return false
+	return true
 
 
 static func fill(c: Vector2, pts: PackedVector2Array, col: Color, r := 0.0, s := 1.0) -> void:
@@ -254,7 +288,7 @@ static func plate(c: Vector2, pts: PackedVector2Array, col: Color, r := 0.0, s :
 	var p := _map(xform(c, pts, r, s))
 	var n := p.size()
 	var k := _k()
-	Draw.poly(ci, p, _c(dk(col, 0.22)))
+	_fill(p, _c(dk(col, 0.22)))
 	var ce := Vector2.ZERO
 	for q in p:
 		ce += q
@@ -263,7 +297,7 @@ static func plate(c: Vector2, pts: PackedVector2Array, col: Color, r := 0.0, s :
 	inner.resize(n)
 	for i in n:
 		inner[i] = ce + (p[i] - ce) * 0.8
-	Draw.poly(ci, inner, _c(col))
+	_fill(inner, _c(col))
 	var ew := maxf(0.8, lw * 0.8) * k
 	for i in n:
 		var a := p[i]
@@ -274,7 +308,7 @@ static func plate(c: Vector2, pts: PackedVector2Array, col: Color, r := 0.0, s :
 		elif d < -0.15:
 			Draw.line(ci, a + (ce - a) * 0.1, b + (ce - b) * 0.1, _c(dk(col, 0.5)), ew)
 	p.append(p[0])
-	Draw.polyline(ci, p, _c(OUTLINE), lw * k)
+	_lines(p, _c(OUTLINE), lw * k)
 
 
 static func rivets(c: Vector2, pts: PackedVector2Array, r: float, s: float, inset := 0.72, rr := 0.9) -> void:
