@@ -43,6 +43,8 @@ const GATE_COOLDOWN := 6.0
 const SLUDGE_SLOW := 0.3
 const SHOCK_PCT := 0.04
 const SHOCK_BOSS_PCT := 0.01
+## Seconds after an EMP wears off before a tower can be knocked offline again (every Disruptor, design/new_enemies.md).
+const DISABLE_GUARD := 1.0
 const BOSS_PUSH_FACTOR := 0.25
 const REVEAL_TIME := 0.25
 const HIT_REVEAL_TIME := 0.5
@@ -232,7 +234,7 @@ func enemies_remaining() -> int:
 
 
 func preview_wave(n: int) -> Array:
-	return Waves.get_wave(n, _wave_rng(n), final_round())
+	return Waves.get_wave(n)
 
 
 ## True if round `n` contains a boss.
@@ -354,7 +356,7 @@ func cycle_gate(gi: int) -> bool:
 		var open_route: int = grid.groups[gi].routes[st - 1]
 		var fork_dist: float = grid.groups[gi].fork_dist
 		for e in enemies:
-			if e.alive and not e.flying and grid.route_group[e.path_index] == gi and e.path_index != open_route and e.distance < fork_dist:
+			if e.alive and e.on_track() and grid.route_group[e.path_index] == gi and e.path_index != open_route and e.distance < fork_dist:
 				_move_to_route(e, open_route)
 	_emit({"type": "gate", "group": gi, "state": st, "pos": Grid.cell_center(grid.groups[gi].fork)})
 	return true
@@ -481,6 +483,9 @@ func cycle_mode(t) -> void:
 ## Any -> Air -> Ground. Only matters for towers that hit both.
 func cycle_priority(t) -> void:
 	t.priority = (t.priority + 1) % Tower.PRIORITY_NAMES.size()
+	# Air and Ground only mean something to a tower that hits both.
+	while (t.priority == 1 or t.priority == 2) and not (t.hits_air() and t.hits_ground()):
+		t.priority = (t.priority + 1) % Tower.PRIORITY_NAMES.size()
 
 
 func start_wave() -> bool:
@@ -515,17 +520,22 @@ func _queue_round(n: int, wave_id: int) -> Dictionary:
 		if is_boss:
 			boss = true
 		var speed_mult := speed_mult_for(n, is_boss)
+		var pack := 1 if g.has("m") else int(Enemies.ENEMIES[etype].get("pack", 1))
+		var gap := float(Enemies.ENEMIES[etype].get("pack_gap", 0.0))
 		for k in count:
-			spawn_queue.append({
-				"time": time + delay + k * interval,
-				"type": etype,
-				"wave": wave_id,
-				"group": _spawn_counter % n_groups,
-				"hp_mult": hp_mult,
-				"speed_mult": speed_mult,
-			})
+			var lane: int = _spawn_counter % n_groups
 			_spawn_counter += 1
-			total += 1
+			for p in pack:
+				spawn_queue.append({
+					"time": time + delay + k * interval + p * gap,
+					"type": etype,
+					"wave": wave_id,
+					"group": lane,
+					"hp_mult": hp_mult,
+					"speed_mult": speed_mult,
+					"mods": g.get("m", []),
+				})
+				total += 1
 	spawn_queue.sort_custom(func(a, b): return a.time < b.time)
 	return {"total": total, "boss": boss}
 
@@ -675,7 +685,7 @@ func tick(dt: float) -> void:
 
 	while not spawn_queue.is_empty() and float(spawn_queue[0].time) <= time:
 		var s: Dictionary = spawn_queue.pop_front()
-		enemies.append(spawn_enemy(s.type, _pick_route(int(s.get("group", 0))), 0.0, float(s.hp_mult), int(s.wave), float(s.get("speed_mult", 1.0))))
+		enemies.append(spawn_enemy(s.type, _pick_route(int(s.get("group", 0))), 0.0, float(s.hp_mult), int(s.wave), float(s.get("speed_mult", 1.0)), s.get("mods", [])))
 
 	_update_abilities(dt)
 	_update_pools(dt)
@@ -713,11 +723,13 @@ func tick(dt: float) -> void:
 
 
 ## Creates an enemy on a path at a distance. Does not add it to `enemies` (callers decide).
-func spawn_enemy(type: String, path_idx: int, start_dist := 0.0, hp_mult := 1.0, wave_id := -1, speed_mult := 1.0):
+func spawn_enemy(type: String, path_idx: int, start_dist := 0.0, hp_mult := 1.0, wave_id := -1, speed_mult := 1.0, mods: Array = []):
 	var e = Enemy.new()
-	var flying := bool(Enemies.ENEMIES[type].get("flying", false))
-	var route: Curve2D = grid.air_paths[path_idx] if flying else grid.ground_paths[path_idx]
-	e.setup(type, route, hp_mult, wave_id, path_idx, start_dist, speed_mult)
+	# Flyers take the straight flight line, except those that fly along the track (the Phantom).
+	var d: Dictionary = Enemies.ENEMIES[type]
+	var air_line := bool(d.get("flying", false)) and not bool(d.get("track", false))
+	var route: Curve2D = grid.air_paths[path_idx] if air_line else grid.ground_paths[path_idx]
+	e.setup(type, route, hp_mult, wave_id, path_idx, start_dist, speed_mult, mods)
 	e.id = _next_enemy_id
 	_next_enemy_id += 1
 	if e.boss:
@@ -727,11 +739,12 @@ func spawn_enemy(type: String, path_idx: int, start_dist := 0.0, hp_mult := 1.0,
 
 ## Deals damage after vulnerability, energy barrier and armor. Returns the damage actually dealt.
 ## A barrier soaks damage before armor applies; Tesla Tower arcs hit barriers twice as hard.
-func damage_enemy(e, amount: float, pierce: bool, source, flash := true, bypass_shield := false, reach_burrowed := false, no_aug := false) -> float:
+## `kind` overrides the hit's damage kind ("energy" for burns, acid and shock strips); by default a tower's hits are its own kind
+## and everything else is physical. An energy-only enemy (the Wraith) takes nothing from physical hits.
+func damage_enemy(e, amount: float, pierce: bool, source, flash := true, bypass_shield := false, reach_burrowed := false, no_aug := false, kind := "") -> float:
 	if not e.alive or (e.burrowed and not reach_burrowed):
 		return 0.0
-	e.since_hit = 0.0
-	e.last_hit_kind = source.damage_kind() if source is Tower else "physical"
+	e.last_hit_kind = kind if kind != "" else (source.damage_kind() if source is Tower else "physical")
 	var amt := amount
 	if source is Tower and not no_aug:
 		# The Augmentation Tower and the Boost Tower's Crit Link: a crit chance on every hit (continuous damage gets the average), and a share
@@ -746,6 +759,9 @@ func damage_enemy(e, amount: float, pierce: bool, source, flash := true, bypass_
 			e.last_hit_kind = "energy"
 			if source.aug_energy_bonus > 0.0 and source.aug_energy >= 1.0:
 				amt *= 1.0 + source.aug_energy_bonus
+	if e.has_trait("energy_only") and e.last_hit_kind != "energy":
+		return 0.0
+	e.since_hit = 0.0
 	if e.vuln_timer > 0.0:
 		amt *= 1.0 + e.vuln_amount
 	var absorbed := 0.0
@@ -779,8 +795,10 @@ func damage_enemy(e, amount: float, pierce: bool, source, flash := true, bypass_
 		source.damage_dealt += dealt
 	if e.hp <= 0.0:
 		_kill(e, source)
-	elif e.def.has("phases"):
-		_check_phase(e)
+	else:
+		if e.has_trait("phases"):
+			_check_phase(e)
+		_check_thresholds(e)
 	return dealt + absorbed
 
 
@@ -806,23 +824,48 @@ func _incoming(e) -> float:
 func pick_target(t, exclude: Array = []):
 	var air: bool = t.hits_air()
 	var ground: bool = t.hits_ground()
-	# A tower that hits both can prefer one kind; with none of that kind in range it takes the other.
-	if air and ground and t.priority != 0:
-		var want_air: bool = t.priority == 1
-		var pick = _pick_target(t, exclude, want_air, not want_air)
+	# A tower can prefer flyers or walkers (if it hits both) or Support enemies; with none of those in range it takes the rest.
+	if t.priority == 3 or (air and ground and t.priority != 0):
+		var pick = _pick_target(t, exclude, air, ground, true)
 		if pick != null:
 			return pick
 	return _pick_target(t, exclude, air, ground)
 
 
-func _pick_target(t, exclude: Array, air: bool, ground: bool):
+## Whether `e` is what the tower's priority asks for: Air flyers, Ground walkers, Support the Support role (Any takes all).
+func _prefers(t, e) -> bool:
+	match t.priority:
+		1:
+			return e.flying
+		2:
+			return not e.flying
+		3:
+			return e.shown_role() == "support"
+	return true
+
+
+## Sorts `cands` best first: the tower's priority first, then its targeting mode (distances measured from `from`).
+func _rank_targets(t, cands: Array, from: Vector2) -> void:
+	var scores := {}
+	for e in cands:
+		scores[e] = _score(t, e, from.distance_squared_to(e.pos))
+	var pref := {}
+	if t.priority != 0:
+		for e in cands:
+			pref[e] = _prefers(t, e)
+	cands.sort_custom(func(a, b): return pref.get(a, false) and not pref.get(b, false) or (pref.get(a, false) == pref.get(b, false) and scores[a] > scores[b]))
+
+
+func _pick_target(t, exclude: Array, air: bool, ground: bool, preferred := false):
 	var r: float = t.get_range()
 	var r2 := r * r
 	var best = null
-	var best_score := -INF
+	var best_score := Vector3(-INF, -INF, -INF)
 	var swivel: bool = bool(t.stats().get("swivel", false))
 	for e in enemies:
 		if not e.alive or (e.flying and not air) or (not e.flying and not ground) or (e.is_hidden() and not _burrow_visible(t, e)) or exclude.has(e):
+			continue
+		if preferred and not _prefers(t, e):
 			continue
 		var d2: float = t.pos.distance_squared_to(e.pos)
 		if d2 > r2:
@@ -836,99 +879,192 @@ func _pick_target(t, exclude: Array, air: bool, ground: bool):
 	return best
 
 
-func _score(t, e, d2: float) -> float:
+## How good a target `e` is for the tower's mode (higher is better; Vector3s compare x, then y, then z). Strongest goes by
+## strength rank, then current HP, then progress.
+func _score(t, e, d2: float) -> Vector3:
 	if t.mode == Tower.Mode.FIRST:
-		return e.progress()
+		return Vector3(e.progress(), 0.0, 0.0)
 	if t.mode == Tower.Mode.LAST:
-		return -e.progress()
+		return Vector3(-e.progress(), 0.0, 0.0)
 	if t.mode == Tower.Mode.STRONG:
-		return e.hp
-	return -d2
+		return strength_key(e)
+	return Vector3(-d2, 0.0, 0.0)
+
+
+## Orders enemies for Strongest: strength rank (bosses above all), then current HP, then progress along the route.
+static func strength_key(e) -> Vector3:
+	return Vector3(e.rank, e.hp, e.progress())
 
 
 func _update_enemy(e, dt: float) -> void:
 	e.step(dt)
 	var d: Dictionary = e.def
-	if d.has("burrow_interval"):
-		# Burrower: dives for burrow_time, then surfaces for the rest of the interval.
-		var grounded: bool = e.silenced() or e.no_dig > 0.0 or e.disrupt_timer > 0.0
-		if grounded and e.burrowed:
-			e.burrowed = false
-			e.burrow_timer = float(d.burrow_interval) - float(d.burrow_time)
-			_emit({"type": "burrow", "pos": e.pos, "down": false})
-		if not grounded:
-			e.burrow_timer -= dt
-		if not grounded and e.burrow_timer <= 0.0:
-			e.burrowed = not e.burrowed
-			e.burrow_timer = float(d.burrow_time) if e.burrowed else float(d.burrow_interval) - float(d.burrow_time)
-			_emit({"type": "burrow", "pos": e.pos, "down": e.burrowed})
+	if e.has_trait("burrow"):
+		_trait_burrow(e, d, dt)
 	if not e.flying and not e.burrowed and not grid.hazards.is_empty():
 		match grid.hazards.get(Grid.world_to_cell(e.pos), ""):
 			"sludge":
 				e.apply_slow(SLUDGE_SLOW, 0.2)
 			"shock":
-				damage_enemy(e, e.max_hp * (SHOCK_BOSS_PCT if e.boss else SHOCK_PCT) * dt, true, null, false)
+				damage_enemy(e, e.max_hp * (SHOCK_BOSS_PCT if e.boss else SHOCK_PCT) * dt, true, null, false, false, false, false, "energy")
 				if not e.alive:
 					return
 	if e.dot_timer > 0.0:
-		damage_enemy(e, e.dot_dps * dt, true, null, false)
+		damage_enemy(e, e.dot_dps * dt, true, null, false, false, false, false, "energy")
 		if not e.alive:
 			return
-	if d.has("blink_interval") and e.stun_timer <= 0.0 and not e.silenced() and e.disrupt_timer <= 0.0:
-		# Blink Stalker: jumps ahead along its route (a slow or stun resets the charge, in Enemy).
-		e.blink_timer -= dt
-		if e.blink_timer <= 0.0:
-			e.blink_timer = float(d.blink_interval)
-			var from: Vector2 = e.pos
-			e.distance = minf(e.distance + float(d.blink_distance), e.path_len)
-			e.pos = e.curve.sample_baked(e.distance)
-			_emit({"type": "blink", "from": from, "pos": e.pos})
-	if d.has("heal_pct") and not e.silenced():
-		e.ability_timer -= dt
-		if e.ability_timer <= 0.0:
-			e.ability_timer = float(d.heal_interval)
-			var heal_r: float = d.heal_radius
-			var healed := false
-			for o in enemies:
-				if o.alive and not o.boss and o.hp < o.max_hp and o.repair_block <= 0.0 and o.jam_timer <= 0.0 and o.pos.distance_squared_to(e.pos) <= heal_r * heal_r:
-					o.hp = minf(o.max_hp, o.hp + o.max_hp * float(d.heal_pct))
-					healed = true
-			_emit({"type": "heal", "pos": e.pos, "radius": heal_r, "active": healed})
-	if d.has("spawn_type") and not e.silenced(2):
-		e.ability_timer -= dt
-		if e.ability_timer <= 0.0:
-			e.ability_timer = float(d.spawn_interval)
-			_spawn_minions(e, str(d.spawn_type), int(d.spawn_count))
-			_emit({"type": "minions", "pos": e.pos, "enemy": e.type})
-	if d.has("emp_interval") and not e.silenced(2):
-		e.ability_timer -= dt
-		if e.ability_timer <= 0.0:
-			e.ability_timer = float(d.emp_interval)
-			var er := float(d.emp_radius)
-			var hit := 0
-			for t in towers:
-				if t.pos.distance_squared_to(e.pos) <= er * er or (t.type == "drone_bay" and t.wing.any(func(dr): return dr.pos.distance_squared_to(e.pos) <= er * er)) or (t.type == "cas_gunship" and t.aim_point.distance_to(e.pos) <= er + float(t.stats().get("orbit", 90.0))):
-					t.disabled = maxf(t.disabled, float(d.emp_duration))
-					hit += 1
-			_emit({"type": "emp", "pos": e.pos, "radius": er, "hit": hit})
-	if d.has("grant_interval") and not e.silenced():
-		# Bulwark: projects a barrier onto nearby non-boss enemies (not itself).
-		e.ability_timer -= dt
-		if e.ability_timer <= 0.0:
-			e.ability_timer = float(d.grant_interval)
-			var gr := float(d.grant_radius)
-			var n := 0
-			for o in enemies:
-				if o == e or not o.alive or o.boss or o.grant_block > 0.0 or o.jam_timer > 0.0 or o.pos.distance_squared_to(e.pos) > gr * gr:
-					continue
-				var b: float = o.max_hp * float(d.grant_pct)
-				if o.shield < b:
-					o.shield = b
-					o.max_shield = maxf(o.max_shield, b)
-					n += 1
-			_emit({"type": "bulwark", "pos": e.pos, "radius": gr, "count": n})
+	# Timed traits (EnemyTraits), each on its own timer. A silenced trait's timer holds.
+	for tr in e.traits:
+		match tr:
+			"blink":
+				if e.stun_timer <= 0.0 and not e.silenced() and e.disrupt_timer <= 0.0 and e.tick_trait("blink", dt):
+					_trait_blink(e, d)
+			"heal":
+				if not e.silenced() and e.tick_trait("heal", dt):
+					_trait_heal(e, d)
+			"summon":
+				if not e.silenced(2) and e.tick_trait("summon", dt):
+					_spawn_minions(e, str(d.spawn_type), int(d.spawn_count))
+					_emit({"type": "minions", "pos": e.pos, "enemy": e.type})
+			"emp":
+				if e.charge_timer > 0.0:
+					# Capacitor: the telegraphed charge. A stun or silence cancels it; when it runs out, the pulse.
+					if e.silenced(2) or e.stun_timer > 0.0:
+						_cancel_charge(e)
+					else:
+						e.charge_timer = maxf(0.0, e.charge_timer - dt)
+						if e.charge_timer <= 0.0:
+							_trait_emp(e, d)
+				elif not e.silenced(2) and e.tick_trait("emp", dt):
+					if d.has("emp_charge"):
+						e.charge_timer = float(d.emp_charge)
+						_emit({"type": "charge", "pos": e.pos, "radius": float(d.emp_radius), "time": e.charge_timer})
+					else:
+						_trait_emp(e, d)
+			"grant":
+				if not e.silenced() and e.tick_trait("grant", dt):
+					_trait_grant(e, d)
+			"holo":
+				if not e.silenced() and e.tick_trait("holo", dt):
+					_trait_holo(e, d)
 	if e.reached_end():
-		_leak(e)
+		if e.hologram:
+			_vanish(e)
+		else:
+			_leak(e)
+
+
+## Burrower: dives for burrow_time, then surfaces for the rest of the interval.
+func _trait_burrow(e, d: Dictionary, dt: float) -> void:
+	var grounded: bool = e.silenced() or e.no_dig > 0.0 or e.disrupt_timer > 0.0
+	if grounded and e.burrowed:
+		e.burrowed = false
+		e.burrow_timer = float(d.burrow_interval) - float(d.burrow_time)
+		_emit({"type": "burrow", "pos": e.pos, "down": false})
+	if not grounded:
+		e.burrow_timer -= dt
+	if not grounded and e.burrow_timer <= 0.0:
+		e.burrowed = not e.burrowed
+		e.burrow_timer = float(d.burrow_time) if e.burrowed else float(d.burrow_interval) - float(d.burrow_time)
+		_emit({"type": "burrow", "pos": e.pos, "down": e.burrowed})
+
+
+## Blink Stalker: jumps ahead along its route (a slow or stun resets the charge, in Enemy).
+func _trait_blink(e, d: Dictionary) -> void:
+	var from: Vector2 = e.pos
+	e.distance = minf(e.distance + float(d.blink_distance), e.path_len)
+	e.pos = e.curve.sample_baked(e.distance)
+	_emit({"type": "blink", "from": from, "pos": e.pos})
+	if e.has_trait("wake"):
+		# Shifter: where it lands, other non-boss enemies get a burst of speed (refreshed, never added).
+		var wr := float(d.wake_radius)
+		for o in enemies:
+			if o != e and o.alive and not o.boss and o.pos.distance_squared_to(e.pos) <= wr * wr:
+				o.wake = float(d.wake_haste)
+				o.wake_timer = float(d.wake_time)
+		_emit({"type": "wake", "pos": e.pos, "radius": wr})
+
+
+## Repair Bot: repairs every damaged non-boss enemy nearby.
+func _trait_heal(e, d: Dictionary) -> void:
+	var heal_r: float = d.heal_radius
+	var healed := false
+	for o in enemies:
+		if o.alive and not o.boss and o.hp < o.max_hp and o.repair_block <= 0.0 and o.jam_timer <= 0.0 and o.pos.distance_squared_to(e.pos) <= heal_r * heal_r:
+			o.hp = minf(o.max_hp, o.hp + o.max_hp * float(d.heal_pct))
+			healed = true
+	_emit({"type": "heal", "pos": e.pos, "radius": heal_r, "active": healed})
+
+
+## Jammer: an EMP that knocks nearby towers offline (a Drone Bay's wing and a CAS Gunship's orbit count as nearby).
+func _trait_emp(e, d: Dictionary) -> void:
+	var er := float(d.emp_radius)
+	var hit := 0
+	for t in towers:
+		if t.disable_guard > 0.0 and t.disabled <= 0.0:
+			continue
+		if t.pos.distance_squared_to(e.pos) <= er * er or (t.type == "drone_bay" and t.wing.any(func(dr): return dr.pos.distance_squared_to(e.pos) <= er * er)) or (t.type == "cas_gunship" and t.aim_point.distance_to(e.pos) <= er + float(t.stats().get("orbit", 90.0))):
+			t.disabled = maxf(t.disabled, float(d.emp_duration))
+			hit += 1
+	_emit({"type": "emp", "pos": e.pos, "radius": er, "hit": hit})
+
+
+## Bulwark: projects a barrier onto nearby non-boss enemies (not itself).
+func _trait_grant(e, d: Dictionary) -> void:
+	var gr := float(d.grant_radius)
+	var n := 0
+	for o in enemies:
+		if o == e or not o.alive or o.boss or o.grant_block > 0.0 or o.jam_timer > 0.0 or o.pos.distance_squared_to(e.pos) > gr * gr:
+			continue
+		var b: float = o.max_hp * float(d.grant_pct)
+		if o.shield < b:
+			o.shield = b
+			o.max_shield = maxf(o.max_shield, b)
+			n += 1
+	_emit({"type": "bulwark", "pos": e.pos, "radius": gr, "count": n})
+
+
+## Capacitor: its charge is cancelled (a stun, a silence, or an Overload Circuits arc); the next one comes a full interval later.
+func _cancel_charge(e) -> void:
+	if e.charge_timer <= 0.0:
+		return
+	e.charge_timer = 0.0
+	_emit({"type": "charge_cancel", "pos": e.pos})
+
+
+## Mirage: projects translucent 1-HP copies just behind it. They walk to the core and vanish there (never leaking, never paying),
+## vanish with their Mirage, and count toward its round.
+func _trait_holo(e, d: Dictionary) -> void:
+	var n := int(d.holo_count)
+	for k in n:
+		var h = spawn_enemy(e.type, e.path_index, maxf(0.0, e.distance - 14.0 * (k + 1)), 1.0, e.wave_id, speed_mult_for(e.wave_id) if e.wave_id > 0 else 1.0)
+		h.make_hologram(e)
+		_new_enemies.append(h)
+	if wave_remaining.has(e.wave_id):
+		wave_remaining[e.wave_id] += n
+	_emit({"type": "holograms", "pos": e.pos, "count": n})
+
+
+## Health thresholds, each crossed once: the Fury Drone's adrenaline, the Titan's plate shed, the Masquerade dropping its disguise.
+func _check_thresholds(e) -> void:
+	var d: Dictionary = e.def
+	if e.has_trait("adrenaline") and e.rush <= 1.0 and e.hp < e.max_hp * float(d.adrenaline_at):
+		e.rush = 1.0 + float(d.adrenaline)
+		_emit({"type": "adrenaline", "pos": e.pos})
+	if e.has_trait("shed") and not e.shed and e.hp < e.max_hp * float(d.shed_at):
+		e.shed = true
+		e.armor = maxf(0.0, e.armor - (float(Enemies.ENEMIES[e.type].armor) - float(d.shed_armor)))
+		e.speed *= float(d.shed_speed)
+		_emit({"type": "shed", "pos": e.pos, "enemy": e.type})
+	if e.disguised and e.hp < e.max_hp * float(d.reveal_at):
+		e.reveal_disguise()
+		_emit({"type": "unmask", "pos": e.pos, "enemy": e.type})
+
+
+## A hologram leaves the field: no leak, no bounty.
+func _vanish(e) -> void:
+	e.alive = false
+	_enemy_removed(e)
 
 
 ## Rally Beacons: every other non-boss enemy near one moves faster. Recomputed each tick.
@@ -936,7 +1072,7 @@ func _update_auras() -> void:
 	var beacons: Array = []
 	for e in enemies:
 		e.haste = 0.0
-		if e.alive and e.def.has("aura_radius") and not e.silenced():
+		if e.alive and e.has_trait("aura") and not e.silenced():
 			beacons.append(e)
 	for b in beacons:
 		var r := float(b.def.aura_radius)
@@ -944,6 +1080,18 @@ func _update_auras() -> void:
 		for o in enemies:
 			if o != b and o.alive and not o.boss and o.jam_timer <= 0.0 and o.pos.distance_squared_to(b.pos) <= r * r:
 				o.haste = maxf(o.haste, h)
+	# Siphons: towers inside the aura fire slower and reach less far; the strongest Siphon applies.
+	for t in towers:
+		t.debuff_rate = 0.0
+		t.debuff_range = 0.0
+	for e in enemies:
+		if not e.alive or not e.has_trait("siphon") or e.silenced() or e.hologram:
+			continue
+		var sr := float(e.def.siphon_radius)
+		for t in towers:
+			if t.pos.distance_squared_to(e.pos) <= sr * sr:
+				t.debuff_rate = maxf(t.debuff_rate, float(e.def.siphon_rate))
+				t.debuff_range = maxf(t.debuff_range, float(e.def.siphon_range))
 
 
 ## Colossus: passing a health threshold sheds armor, speeds it up and drops escorts.
@@ -971,8 +1119,11 @@ func _spawn_minions(e, type: String, n: int) -> void:
 
 func _update_tower(t, dt: float) -> void:
 	t.fire_flash = maxf(0.0, t.fire_flash - dt)
+	t.disable_guard = maxf(0.0, t.disable_guard - dt)
 	if t.disabled > 0.0:
 		t.disabled = maxf(0.0, t.disabled - dt)
+		if t.disabled <= 0.0:
+			t.disable_guard = DISABLE_GUARD
 		t.target = null
 		t.beam_targets.clear()
 		t.beam_ramps.clear()
@@ -1363,7 +1514,7 @@ func _update_mines(_dt: float) -> void:
 	for m in mines:
 		var trig = null
 		for e in enemies:
-			if e.alive and not e.flying and not bool(e.def.get("hologram", false)) and e.pos.distance_squared_to(m.pos) <= 14.0 * 14.0:
+			if e.alive and not e.flying and not e.hologram and e.pos.distance_squared_to(m.pos) <= 14.0 * 14.0:
 				trig = e
 				break
 		if trig == null:
@@ -1386,16 +1537,13 @@ func _update_mines(_dt: float) -> void:
 func _spray(t, s: Dictionary) -> void:
 	var cands: Array = []
 	for e in enemies:
-		if t.can_target(e) and e.soak_timer <= 0.0 and not bool(e.def.get("hologram", false)):
+		if t.can_target(e) and e.soak_timer <= 0.0 and not e.hologram:
 			cands.append(e)
 	if cands.is_empty():
 		t.target = null
 		t.cooldown = RETARGET_DELAY
 		return
-	var scores := {}
-	for e in cands:
-		scores[e] = _score(t, e, t.pos.distance_squared_to(e.pos))
-	cands.sort_custom(func(a, b): return scores[a] > scores[b])
+	_rank_targets(t, cands, t.pos)
 	t.target = cands[0]
 	t.cooldown = 1.0 / t.eff_rate()
 	t.fire_flash = 0.15
@@ -1440,7 +1588,7 @@ func _update_soaks(dt: float) -> void:
 			continue
 		if e.soak_timer > 0.0:
 			if e.soak_dps > 0.0 and e.soak_source != null:
-				damage_enemy(e, e.soak_dps * dt, true, e.soak_source, false)
+				damage_enemy(e, e.soak_dps * dt, true, e.soak_source, false, false, false, false, "energy")
 			if e.soak_slow > 0.0:
 				e.apply_slow(e.soak_slow, 0.25)
 		if e.perm_slow > 0.0:
@@ -1541,14 +1689,9 @@ func _cas_targets(t, radius: float, plane: Vector2) -> Array:
 	for e in enemies:
 		if e.alive and not e.is_hidden() and e.pos.distance_squared_to(t.aim_point) <= radius * radius:
 			out.append(e)
-	if t.priority == 1 and out.any(func(e): return e.flying):
-		out = out.filter(func(e): return e.flying)
-	elif t.priority == 2 and out.any(func(e): return not e.flying):
-		out = out.filter(func(e): return not e.flying)
-	var scores := {}
-	for e in out:
-		scores[e] = _score(t, e, plane.distance_squared_to(e.pos))
-	out.sort_custom(func(a, b): return scores[a] > scores[b])
+	if t.priority != 0 and out.any(func(e): return _prefers(t, e)):
+		out = out.filter(func(e): return _prefers(t, e))
+	_rank_targets(t, out, plane)
 	return out
 
 
@@ -1706,6 +1849,8 @@ func _chain_rework(t, first, s: Dictionary) -> void:
 		_emit({"type": "storm_zone", "pos": first.pos, "radius": float(s.storm_radius), "time": float(s.get("storm_time", 2.0)), "look": t.look_key()})
 	for k in n:
 		var hit_dmg: float = dmg * (2.0 if overload and cur.role() == "disruptor" else 1.0)
+		if overload:
+			_cancel_charge(cur)
 		var dealt := damage_enemy(cur, hit_dmg, true, t)
 		if stun > 0.0 and cur.alive:
 			cur.apply_stun(stun * _boss_factor(cur))
@@ -1808,7 +1953,7 @@ func _update_smokes(dt: float) -> void:
 	smokes = smokes.filter(func(c): return c.t > 0.0)
 
 
-## True if a burrowed enemy at `pos` is inside a sensor's field (the stand-in for the Radar Tower until it exists), so a
+## True if a burrowed enemy at `pos` is inside a pinging (or constant) Radar Tower's range, so a
 ## tower with burrow sight may target it.
 func _radar_covers(pos: Vector2) -> bool:
 	for o in towers:
@@ -1952,7 +2097,7 @@ func _drone_target(t, s: Dictionary, bomber: bool):
 			score += 10.0
 		if interceptor and e.flying:
 			score += 5.0
-		if t.priority != 0 and e.flying == (t.priority == 1):
+		if t.priority != 0 and _prefers(t, e):
 			score += 8.0
 		score -= float(taken.get(e, 0)) * 3.0
 		if score > best_score:
@@ -2031,13 +2176,10 @@ func _fire_salvo(t, s: Dictionary) -> void:
 		t.target = null
 		t.cooldown = RETARGET_DELAY
 		return
-	var scores := {}
-	for e in cands:
-		scores[e] = _score(t, e, t.pos.distance_squared_to(e.pos))
-	cands.sort_custom(func(a, b): return scores[a] > scores[b])
+	_rank_targets(t, cands, t.pos)
 	var strongest = cands[0]
 	for e in cands:
-		if e.hp > strongest.hp:
+		if strength_key(e) > strength_key(strongest):
 			strongest = e
 	t.target = cands[0]
 	t.cooldown = 1.0 / t.eff_rate()
@@ -2506,8 +2648,17 @@ func _salvage_mult(e) -> float:
 
 
 func _kill(e, source) -> void:
+	if e.hologram:
+		e.hp = 0.0
+		_vanish(e)
+		_emit({"type": "hologram_pop", "pos": e.pos})
+		return
 	e.alive = false
 	e.hp = 0.0
+	if e.has_trait("holo"):
+		for h in enemies + _new_enemies:
+			if h.alive and h.hologram and h.holo_owner == e:
+				_vanish(h)
 	# Kill credits scale with the round's HP, and bounty research pays fractional credits; the remainder carries over to the next kill.
 	bounty_carry += float(e.bounty) * Waves.bounty_scale(e.wave_id) * (1.0 + float(run_mods.bounty)) * _salvage_mult(e)
 	var gain := int(floor(bounty_carry + 1e-6))
@@ -2519,7 +2670,7 @@ func _kill(e, source) -> void:
 		if source is Tower and bool(source.stats().get("swivel", false)):
 			source.cooldown = 0.0   # Swivel Mount: a new target at once after a kill
 	_emit({"type": "kill", "pos": e.pos, "enemy": e.type, "bounty": gain, "boss": e.boss})
-	if e.def.has("split_type"):
+	if e.has_trait("split"):
 		# Hydra Frame: the pieces keep walking from where it fell. Added after this tick's loops.
 		var n := int(e.def.split_count)
 		var hp_mult := hp_mult_for(e.wave_id) if e.wave_id > 0 else 1.0
@@ -2605,12 +2756,6 @@ func _add_gold(n: int) -> void:
 func _emit(ev: Dictionary) -> void:
 	if emit_events:
 		events.append(ev)
-
-
-func _wave_rng(n: int) -> RandomNumberGenerator:
-	var r := RandomNumberGenerator.new()
-	r.seed = seed_value * 1000 + n
-	return r
 
 
 # --- Persistence ---------------------------------------------------------------------------

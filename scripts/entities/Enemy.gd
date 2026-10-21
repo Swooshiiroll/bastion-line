@@ -5,6 +5,8 @@ extends RefCounted
 ## burrowing, auras, boss phases) run in Game._update_enemy; this class only keeps their state.
 
 const Enemies = preload("res://data/enemies.gd")
+const EnemyTraits = preload("res://scripts/core/EnemyTraits.gd")
+const Modifiers = preload("res://data/modifiers.gd")
 
 const MIN_DAMAGE_FRACTION := 0.2
 const SLOW_CAP := 0.7
@@ -24,6 +26,29 @@ var speed := 0.0
 var armor := 0.0
 var flying := false
 var boss := false
+## Its strength rank score (Enemies.rank_of): what Strongest targeting compares first.
+var rank := 0.0
+## An elite carries modifiers (data/modifiers.gd), merged into its `def`; it pays double bounty and costs a shield more.
+var elite := false
+var mods: Array = []
+## Its modifiers' names in capitals, for the label over an elite ("HASTY PLATED").
+var elite_label := ""
+## The round's speed multiplier it spawned with (a speed change from its data is scaled by it).
+var spd_mult := 1.0
+## Fury Drone: its adrenaline speed multiplier (1 until it drops below half health). Titan: whether its plates have shed.
+var rush := 1.0
+var shed := false
+## A Shifter's wake on this enemy: extra speed (multiplies with every other boost) and seconds left.
+var wake := 0.0
+var wake_timer := 0.0
+## Capacitor: seconds left in its telegraphed charge (0 when not charging).
+var charge_timer := 0.0
+## Masquerade: disguised as its `disguise` enemy (look, speed, rank and role) until below half health; then it flees.
+var disguised := false
+var flee_timer := 0.0
+## Mirage hologram: a 1-HP copy that never leaks or pays, and vanishes with the Mirage that projected it.
+var hologram := false
+var holo_owner = null
 ## The kind ("physical" or "energy") of the last hit it took.
 var last_hit_kind := ""
 var radius := 10.0
@@ -38,7 +63,20 @@ var pos := Vector2.ZERO
 var facing := Vector2.RIGHT
 var slow_amount := 0.0
 var slow_timer := 0.0
-var ability_timer := 0.0
+## Its traits (EnemyTraits), and a countdown per timed trait to its next firing.
+var traits: Array = []
+var trait_timers := {}
+## The old shared ability timer: setting it sets every timed ability's timer (heal, summon, EMP, barrier grant).
+var ability_timer: float:
+	get:
+		for n in EnemyTraits.ABILITIES:
+			if trait_timers.has(n):
+				return float(trait_timers[n])
+		return 0.0
+	set(v):
+		for n in EnemyTraits.ABILITIES:
+			if trait_timers.has(n):
+				trait_timers[n] = v
 var alive := true
 var wave_id := 0
 var hit_flash := 0.0
@@ -65,9 +103,17 @@ var reveal_timer := 0.0
 ## Burrower: under the lane (untargetable, can't be hurt) while `burrowed`; `burrow_timer` counts
 ## down to the next change.
 var burrowed := false
-var burrow_timer := 0.0
+var burrow_timer: float:
+	get:
+		return float(trait_timers.get("burrow", 0.0))
+	set(v):
+		trait_timers["burrow"] = v
 ## Blink Stalker: counts down to the next teleport; a slow or stun resets it.
-var blink_timer := 0.0
+var blink_timer: float:
+	get:
+		return float(trait_timers.get("blink", 0.0))
+	set(v):
+		trait_timers["blink"] = v
 ## Mender Hulk: seconds since it last took damage.
 var since_hit := 0.0
 ## Rally Beacon overdrive on this enemy (fraction of extra speed), refreshed every tick.
@@ -101,18 +147,25 @@ var in_storm := false
 var storm_until := -99.0
 
 
-func setup(enemy_type: String, route: Curve2D, hp_mult: float, wave: int, path_idx: int, start_distance := 0.0, speed_mult := 1.0) -> void:
+func setup(enemy_type: String, route: Curve2D, hp_mult: float, wave: int, path_idx: int, start_distance := 0.0, speed_mult := 1.0, modifiers: Array = []) -> void:
 	type = enemy_type
 	def = Enemies.ENEMIES[enemy_type]
+	mods = modifiers.duplicate()
+	elite = not mods.is_empty()
+	if elite:
+		def = Modifiers.apply(def, enemy_type, mods)
+		elite_label = Modifiers.label(mods).to_upper()
 	max_hp = float(def.hp) * hp_mult
 	hp = max_hp
 	speed = float(def.speed) * speed_mult
+	spd_mult = speed_mult
 	armor = float(def.get("armor", 0.0))
 	flying = bool(def.get("flying", false))
 	boss = bool(def.get("boss", false))
+	rank = Enemies.rank_of(def)
 	radius = float(def.radius)
-	bounty = int(def.bounty)
-	lives_cost = int(def.lives)
+	bounty = int(def.bounty) * (2 if elite else 1)
+	lives_cost = int(def.lives) + (1 if elite else 0)
 	slow_resist = float(def.get("slow_resist", 0.0))
 	max_shield = float(def.get("shield", 0.0)) * hp_mult
 	shield = max_shield
@@ -126,9 +179,71 @@ func setup(enemy_type: String, route: Curve2D, hp_mult: float, wave: int, path_i
 	if ahead.distance_squared_to(pos) > 0.0001:
 		facing = (ahead - pos).normalized()
 	wave_id = wave
-	ability_timer = float(def.get("heal_interval", def.get("spawn_interval", def.get("emp_interval", def.get("grant_interval", 0.0)))))
-	burrow_timer = float(def.get("burrow_interval", 0.0))
-	blink_timer = float(def.get("blink_interval", 0.0))
+	set_traits(EnemyTraits.of_def(def) if elite else EnemyTraits.of(enemy_type))
+	if def.has("disguise"):
+		var look: Dictionary = Enemies.ENEMIES[def.disguise]
+		disguised = true
+		speed = float(look.speed) * speed_mult
+		rank = Enemies.rank_of(look)
+	if def.has("fake_rank"):
+		# Decoy Beacon: ranks above every non-boss and below every boss, for good.
+		rank = Enemies.BOSS_RANK - 1.0
+
+
+## What it shows itself as: the Masquerade's disguise while disguised, otherwise itself.
+func look_type() -> String:
+	return str(def.disguise) if disguised else type
+
+
+## The Masquerade drops its disguise: its true rank and role, and a burst of speed before it settles at its own.
+func reveal_disguise() -> void:
+	disguised = false
+	rank = Enemies.rank_of(def)
+	speed = float(def.flee_speed) * spd_mult
+	flee_timer = float(def.flee_time)
+
+
+## Turns it into a Mirage's hologram: 1 HP, no armor, barrier or abilities, no bounty or leak cost, and its Mirage's rank.
+func make_hologram(owner) -> void:
+	hologram = true
+	holo_owner = owner
+	max_hp = 1.0
+	hp = 1.0
+	armor = 0.0
+	max_shield = 0.0
+	shield = 0.0
+	bounty = 0
+	lives_cost = 0
+	rank = owner.rank
+	set_traits([])
+
+
+## Gives it the traits `list` (read from `def`), each timed one starting a full interval from now.
+func set_traits(list: Array) -> void:
+	traits = list
+	trait_timers = {}
+	for n in traits:
+		if EnemyTraits.timed(n):
+			trait_timers[n] = EnemyTraits.interval(def, n)
+
+
+## Its tier in its role (1 to 4; 0 for special and boss).
+func tier() -> int:
+	return int(def.get("tier", 0))
+
+
+func has_trait(name: String) -> bool:
+	return traits.has(name)
+
+
+## Counts timed trait `name` down by `dt`; when it runs out, restarts it and returns true (fire now).
+func tick_trait(name: String, dt: float) -> bool:
+	var left: float = float(trait_timers.get(name, 0.0)) - dt
+	if left <= 0.0:
+		trait_timers[name] = EnemyTraits.interval(def, name)
+		return true
+	trait_timers[name] = left
+	return false
 
 
 static func mitigate(amount: float, armor_value: float, pierce: bool) -> float:
@@ -140,6 +255,18 @@ static func mitigate(amount: float, armor_value: float, pierce: bool) -> float:
 ## Its role (swarm, rusher, evader, support, disruptor, special, tank or boss), from its data.
 func role() -> String:
 	return str(def.get("role", "rusher"))
+
+
+## The role it shows (what the Support priority and labels read): a Masquerade's disguise, a Decoy Beacon's heavy hull.
+func shown_role() -> String:
+	if disguised:
+		return str(Enemies.ENEMIES[def.disguise].role)
+	return str(def.get("shown_role", role()))
+
+
+## The data it shows (name, blurb, role and tier): its disguise's while disguised.
+func shown_def() -> Dictionary:
+	return Enemies.ENEMIES[def.disguise] if disguised else def
 
 
 ## The share of a slow or pull it resists, by role.
@@ -211,7 +338,12 @@ func apply_vuln(amount: float, duration: float) -> void:
 		vuln_timer = maxf(vuln_timer, duration)
 
 
-## Towers can't pick it as a target: burrowed, or cloaked and not revealed by a Sensor Array.
+## Moves along the track (ground enemies, and flyers that follow it, like the Phantom) rather than a straight flight line.
+func on_track() -> bool:
+	return not flying or bool(def.get("track", false))
+
+
+## Towers can't pick it as a target: burrowed, or cloaked and not revealed (a Radar Tower ping).
 func is_hidden() -> bool:
 	return burrowed or (cloaked and reveal_timer <= 0.0 and disrupt_timer <= 0.0)
 
@@ -244,7 +376,7 @@ func apply_stun(duration: float) -> void:
 
 
 func _reset_blink() -> void:
-	if def.has("blink_interval"):
+	if has_trait("blink"):
 		blink_timer = float(def.blink_interval)
 
 
@@ -271,7 +403,7 @@ func step(dt: float) -> void:
 		dot_timer = maxf(0.0, dot_timer - dt)
 		if dot_timer <= 0.0:
 			dot_dps = 0.0
-	if def.has("regen_pct") and since_hit >= float(def.regen_delay) and hp < max_hp and repair_block <= 0.0 and not silenced():
+	if has_trait("regen") and since_hit >= float(def.regen_delay) and hp < max_hp and repair_block <= 0.0 and not silenced():
 		hp = minf(max_hp, hp + max_hp * float(def.regen_pct) * dt)
 	if max_shield > 0.0 and shield < max_shield and def.has("shield_regen") and barrier_block <= 0.0:
 		shield_timer -= dt
@@ -287,13 +419,21 @@ func step(dt: float) -> void:
 		if vuln_timer <= 0.0:
 			vuln_timer = 0.0
 			vuln_amount = 0.0
+	if wake_timer > 0.0:
+		wake_timer = maxf(0.0, wake_timer - dt)
+		if wake_timer <= 0.0:
+			wake = 0.0
+	if flee_timer > 0.0:
+		flee_timer = maxf(0.0, flee_timer - dt)
+		if flee_timer <= 0.0:
+			speed = float(def.speed) * spd_mult
 	stun_guard = maxf(0.0, stun_guard - dt)
 	if stun_timer > 0.0:
 		stun_timer = maxf(0.0, stun_timer - dt)
 		if stun_timer <= 0.0:
 			stun_guard = STUN_GUARD
 		return
-	distance += speed * (1.0 - slow_amount) * (1.0 + haste) * dt
+	distance += speed * (1.0 - slow_amount) * (1.0 + haste) * rush * (1.0 + wake) * dt
 	var np := curve.sample_baked(minf(distance, path_len))
 	var d := np - pos
 	if d.length_squared() > 0.0001:

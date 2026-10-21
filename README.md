@@ -80,8 +80,8 @@ Workflow).
 | `Y`, then `1`-`3` | Fit one of the selected tower's three Retrofits (the choice is locked) |
 | `U` / `I` / `O` | Buy the next upgrade on path A / B / C (the mastery after its T4) |
 | `X` | Sell the selected tower (refunds 70% of everything spent on it) |
-| `T` | Cycle the selected tower's targeting: First, Last, Strongest, Closest |
-| `G` | Target priority for towers that hit air and ground: Any, Air or Ground (it still shoots the other kind when that's all that's in range) |
+| `T` | Cycle the selected tower's targeting: First, Last, Strongest (by strength, then health left), Closest |
+| `G` | Target priority: Any, Air, Ground (towers that hit both) or Support (Support enemies first); it still shoots the rest when none of those are in range |
 | Mouse wheel, middle-drag, arrow keys, `Home` | Zoom the battlefield (up to 2.5×), pan it, reset the view |
 | `F3` | Show or hide the FPS counter |
 | `K` or `F1`, or the Codex button | The Codex: every tower, enemy, effect and rule. In battle it pauses and opens on the selected tower (or the enemy under the cursor) |
@@ -197,27 +197,43 @@ Every enemy's health and speed scale with the round number, the same on every se
 | Enemy | From | Traits |
 |---|---|---|
 | Drone | 1 | Basic |
+| Nanite | 2 | Tiny, comes in swarms |
 | Skitter | 3 | Fast, fragile |
-| Nanite | 6 | Tiny, comes in swarms |
+| Repair Bot | 5 | Heals nearby non-boss enemies |
 | Siege Mech | 7 | 6 flat armor per hit (minimum 20% of damage gets through) |
-| Strike Drone | 8 | Quad-rotor flyer; flies straight from the warp gate to the core, ignoring the lane |
-| Phantom | 8 | Cloaked. Towers can only target it when a Radar Tower ping reveals it, or for 0.5 s after damage hits it while hidden |
-| Repair Bot | 9 | Heals nearby non-boss enemies |
-| Aegis Walker | 9 | Energy barrier (scales with HP) soaks damage before armor applies and recharges after 2.5 s untouched. Tesla Tower arcs hit barriers twice as hard |
-| Hydra Frame | 11 | Armored walker that splits into three Skitters when destroyed |
-| Jammer | 13 | EMP every 5 s knocks towers within 95 px offline for 2 s |
-| Locust | 26 | Tiny, fast flyer in dense swarms. Flak's favourite target |
-| Rally Beacon | 28 | Other non-boss enemies within 100 px move 25% faster (doesn't stack). Kill it first |
-| Burrower | 30 | Tunnels under the lane for 2.5 s every 5 s: untargetable, unhurt and immune to lane hazards while under |
-| Gunship | 32 | Armored heavy flyer (5 armor) |
-| Blink Stalker | 34 | Teleports 80 px down the lane every 4 s. A slow or stun resets the charge |
-| Mender Hulk | 36 | Regenerates 4% of its health per second after 1.5 s without taking damage |
-| Bulwark | 38 | Every 6 s gives nearby non-boss enemies (not itself) a barrier worth 25% of their health |
-| Rampart | 40 | Immune to slows, stuns and shoves; 8 armor |
-| **Dreadnought** (boss) | 5 | Every 5th round, more of them later. Armored, half-immune to slows, costs 6 shields if it leaks |
-| **Leviathan** (boss) | 35 | Flying carrier that launches 6 Locusts every 6 s. From round 35, then every 20. Costs 15 shields |
-| **Overmind** (boss) | 40 / 50 | Spawns Nanites as it advances. Rounds 50, 75 and 100, plus the finales. Costs 20 shields |
-| **Colossus** (boss) | 60 | Can't be stunned. At 66% and 33% health it sheds 5 armor, speeds up 20% and drops two Siege Mechs. From round 60, then every 20. Costs 25 shields |
+| Jammer | 9 | EMP every 5 s knocks towers within 95 px offline for 2 s |
+| Blink Stalker | 11 | Teleports 80 px down the lane every 4 s. A slow or stun resets the charge |
+| Phantom | 13 | Cloaked flyer that follows the track. Towers that hit air can only target it when a Radar Tower ping reveals it, or for 0.5 s after damage hits it while hidden |
+| Locust | 15 | Tiny, fast flyer in dense swarms. Flak's favourite target |
+| Aegis Walker | 17 | Energy barrier (scales with HP) soaks damage before armor applies and recharges after 2.5 s untouched. Tesla Tower arcs hit barriers twice as hard |
+| Needle | 19 | Very fast, light; always in pairs on one lane |
+| Rally Beacon | 21 | Other non-boss enemies within 100 px move 25% faster (doesn't stack). Kill it first |
+| Mirage | 23 | Every 6 s projects two 1-HP holograms that soak shots, never leak and vanish with it |
+| Strike Drone | 25 | Quad-rotor flyer; flies straight from the warp gate to the core, ignoring the lane |
+| Siphon | 27 | Towers within 100 px fire 20% slower and reach 15% less far (the strongest Siphon applies) |
+| Hydra Frame | 29 | Armored walker that splits into three Skitters when destroyed |
+| Burrower | 31 | Tunnels under the lane for 2.5 s every 5 s: untargetable, unhurt and immune to lane hazards while under |
+| Bulwark | 33 | Every 6 s gives nearby non-boss enemies (not itself) a barrier worth 25% of their health |
+| Rampart | 35 | Immune to slows, stuns and shoves; 8 armor |
+| Decoy Beacon | 37 | Ranks above every non-boss so Strongest towers aim at it; does nothing else |
+| Blackout Rig | 39 | A bigger Jammer: EMP radius 130, towers offline 2.5 s every 4 s |
+| Shifter | 41 | Blinks 60 px every 5 s; others where it lands get +20% speed for 2 s |
+| Gunship | 43 | Armored heavy flyer (5 armor) |
+| Masquerade | 45 | Looks, moves and ranks like a Drone (purple eye) until below half health, then flees |
+| Shrike | 47 | Flying clusters of five |
+| Fury Drone | 49 | +30% speed below half health (multiplies with other boosts) |
+| Mender Hulk | 51 | Regenerates 4% of its health per second after 1.5 s without taking damage |
+| Wraith | 53 | Cloaked flyer that only energy damage hurts (beams, chains, fields, burns, Tesla arcs) |
+| Capacitor | 55 | Charges 2 s, then blacks out towers within 160 px for 3 s, every 8 s; a stun, silence or Overload Circuits arc cancels the charge |
+| Titan | 57 | 9 armor, half resists slows; at half health sheds to 5 armor and speeds up 20% |
+| **Dreadnought** (boss) | 20 | Boss of round 20, back in every later boss round. Armored, half-immune to slows, costs 20 shields if it leaks |
+| **Leviathan** (boss) | 60 | Flying carrier that launches 6 Locusts every 6 s. Boss of round 60. Costs 60 shields |
+| **Overmind** (boss) | 40 | Spawns Nanites as it advances. Boss of round 40. Costs 40 shields |
+| **Colossus** (boss) | 80 | Can't be stunned. At 66% and 33% health it sheds 5 armor, speeds up 20% and drops two Siege Mechs. Boss of round 80. Costs 80 shields |
+
+A leak costs shields by the enemy's strength: 1 below 50, 2 below 150, 3 below 400, else 4 (one more for an
+elite); a boss costs its introduction round. After an EMP wears off a tower can't be knocked offline again for
+1 s.
 
 Bosses get half the round speed bonus and resist slows and shoves. After a stun wears off, an enemy
 can't be stunned again for 1 s, and shoves can push any one enemy back at most 320 px in total.
@@ -257,22 +273,25 @@ hard, and Cataclysm brutal:
 - Clearing a mode's last round earns that sector's **medal** for the mode (a banner announces it and
   it's recorded at once), and **endless mode** begins straight away: the rounds keep coming until the
   core falls. There are 30 medals in all; each sector card shows its row of five.
-- The last round of each mode is a **finale** with a boss line-up (Easy: Overmind and Leviathan;
-  Cataclysm: two of every boss and four Dreadnoughts).
+- Every 20th round is a **boss round**, so each mode's last round is one (Easy: the Overmind and a
+  Dreadnought; Cataclysm: two Colossi, a Leviathan, two Overminds and three Dreadnoughts).
 - On Cataclysm a single leak ends the run.
 
 ### Rounds and scaling
 
-- **Rounds 1-25** are hand-authored. From round 26 a seeded generator spends a threat budget that
-  grows every round on the enemies unlocked so far, favouring recent ones. Rounds 26-40 each introduce
-  one of the eight newer enemies.
-- **Bosses** follow a schedule on top: Dreadnoughts every 5 rounds, Leviathans from 35 (every 20),
-  the Overmind at 50/75/100, Colossi from 60 (every 20).
-- **HP** grows every round (about 7× base by round 40), and from round 40 it also compounds by 4%
+- **One generator** makes every round, seeded by the round number alone, so a round is the same on
+  every playthrough, sector and mode. It spends a threat budget that grows every round on the enemies
+  met so far, favouring recent ones. A new enemy leads its round every two rounds (`Waves.INTRO`).
+- **Elites** (from round 10): single enemies with modifiers, a gold ring and a label. Their share of
+  the budget grows from 10% to 30% by round 60 (design/enemies.md, section 4).
+- **Bosses**: every 20th round has a boss line-up, each bigger than the last: the Dreadnought at 20,
+  the Overmind at 40, the Leviathan at 60, the Colossus at 80, then mixes. A boss met once can recur
+  alone in later rounds.
+- **HP** grows every round (about 4.8× base by round 40), and from round 60 it also compounds by 3%
   per round, so a map full of maxed towers eventually breaks.
 - **Speed** grows 0.45% per round up to +50% (bosses +25%).
 - **Kill credits** grow with enemy HP: a kill pays its base bounty × (the round's HP multiplier)^0.3,
-  about ×1.8 at round 40, ×2.7 at round 60 and ×5.2 at round 95. Without this, income fell so far
+  about ×1.6 at round 40, ×1.9 at round 60 and ×3.2 at round 95. Without this, income fell so far
   behind late HP that a full map of towers could only afford to master about one in six.
 - A round never spawns more than 250 regular enemies; past that, it gets tougher through HP and speed.
 
@@ -402,7 +421,8 @@ The commands below assume the console build is on PATH as `godot_console` (winge
    - v1 through v4 save migration, and rejection of tier-4 towers without research
    - generated music (length, level, clipping, seamless loop)
    - full bot playthroughs of Easy (40 rounds) on every map into endless mode, and a full-research
-     Medium run
+     Medium run, the bot playing the reworked towers (these fail on the 4.0.0 line until the new roster's
+     balance lands; see Current tuning below)
 
    ```
    godot_console --headless --path . res://tests/TestRunner.tscn
@@ -420,7 +440,10 @@ The commands below assume the console build is on PATH as `godot_console` (winge
 
 3. **Balance probe**. It replays the heuristic bot (`scripts/core/Bot.gd`) on every map at several
    enemy-HP multipliers and reports shields and tower counts every 10 rounds, whether it earned the
-   medal, and how far endless mode got.
+   medal, and how far endless mode got. The bot plays the reworked towers: it buys a Retrofit and two
+   paths per tower within the path rules, aims Artillery Cannons and CAS Gunships at the busiest choke,
+   flies each Drone Bay's newest loadout, and places Radars where the most air-hitting towers would see
+   what they reveal.
 
    ```
    godot_console --headless --path . res://tools/BalanceProbe.tscn -- --factors=1.0 --difficulty=easy
@@ -431,10 +454,26 @@ The commands below assume the console build is on PATH as `godot_console` (winge
 
    Other flags: `--endless=N` (endless rounds to play past a medal, default 20), `--lives=N` (override
    the shields, e.g. to measure Cataclysm by rounds survived), `--growth=F` (late HP compounding rate),
-   `--seeds=`, `--no-abilities`.
+   `--seeds=`, `--no-abilities`. A round that runs past 600 s of game time ends the sector as `STALLED rN`, naming the
+   enemies left (enemies no tower can kill, held in place by stuns, would otherwise keep it running
+   for hours).
 
    `--research=` takes `all`, node ids, tree names (`command`, `arrow`, ...), `towers` or
    `nomastery`. Any missing prerequisites are added automatically.
+
+   **The 4.0.0 line (in progress, #68),** the generated rounds with the twelve new enemies, the bot
+   playing the reworked towers:
+   - Easy, no research: medal on Meadow (51 of 200 left) and Canyon (94); lost on Delta (round 19),
+     Crossroads (35), Foundry and Singularity (40).
+   - Medium, no research: lost on every sector, between rounds 15 and 40.
+   - Hard, full research: lost on every sector, between rounds 14 and 53.
+   - The old roster's bot on the same rounds: Medium medal on Meadow, Delta and Crossroads with 100 of
+     100 shields until round 50, then down to 13 by round 60 as the Wraiths arrive (no old tower deals
+     energy damage).
+   - What leaks: Phantoms most (40 to 100 a run from round 13; the Radar reveals for 1 s in every 3),
+     early crowds on Delta (Shamans, Locusts, Brutes by round 15), and the boss rounds' shield costs.
+     The new roster's best damage per credit is the Mortar's and the Rocket Salvo's, about 45-50,
+     against 70-80 for the old Sniper and Drones.
 
    Current tuning (v3.0), with the bot using abilities, specializations and all 11 towers:
    - Easy, no research: it earns the medal on all six sectors (194-200 of 200 shields left).

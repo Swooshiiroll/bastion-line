@@ -7,8 +7,12 @@ const DrawControl = preload("res://scripts/ui/DrawControl.gd")
 const Draw = preload("res://scripts/view/Draw.gd")
 const Enemies = preload("res://data/enemies.gd")
 const Waves = preload("res://data/waves.gd")
+const Modifiers = preload("res://data/modifiers.gd")
 
 const ROW_H := 56.0
+const ELITE_H := 28.0
+const ELITE_COLOR := Color(1.0, 0.82, 0.30)
+const MOD_COLOR := Color(0.85, 0.65, 1.0)
 
 var hud
 var screen
@@ -67,14 +71,34 @@ static func traits(ed: Dictionary) -> Array:
 		out.append(["UNSTOPPABLE" if ed.get("cc_immune", false) else "STUN IMMUNE", Color(1.0, 0.5, 0.4)])
 	if ed.has("phases"):
 		out.append(["PHASES", UiKit.BAD])
+	if ed.has("pack"):
+		out.append(["PACKS OF %d" % int(ed.pack), Color(1.0, 0.8, 0.3)])
+	if ed.has("adrenaline"):
+		out.append(["ADRENALINE", Color(1.0, 0.5, 0.3)])
+	if ed.has("shed_at"):
+		out.append(["SHEDS PLATES", Color(1.0, 0.65, 0.25)])
+	if ed.has("siphon_radius"):
+		out.append(["DRAINS TOWERS", Color(0.7, 0.45, 1.0)])
+	if ed.has("emp_charge"):
+		out.append(["CHARGES", Color(0.9, 1.0, 0.3)])
+	if ed.has("wake_radius"):
+		out.append(["SPEED WAKE", Color(1.0, 0.6, 0.3)])
+	if ed.has("energy_only"):
+		out.append(["ENERGY ONLY", Color(0.55, 0.95, 1.0)])
+	if ed.has("disguise"):
+		out.append(["DISGUISED", Color(0.75, 0.35, 1.0)])
+	if ed.has("fake_rank"):
+		out.append(["DECOY", Color(0.75, 0.35, 1.0)])
+	if ed.has("holo_interval"):
+		out.append(["HOLOGRAMS", Color(0.55, 0.95, 1.0)])
 	if float(ed.get("armor", 0.0)) >= 4.0:
 		out.append(["ARMOR %d" % int(ed.armor), UiKit.DIM])
 	return out
 
 
-## True when round `wave` is the first time `etype` appears in a run whose last round is `final`.
-static func is_new(etype: String, wave: int, final := 0) -> bool:
-	return Waves.first_round(etype, final) == wave
+## True when round `wave` is the first time `etype` appears (rounds are the same on every mode).
+static func is_new(etype: String, wave: int, _final := 0) -> bool:
+	return Waves.first_round(etype) == wave
 
 
 func _fill() -> void:
@@ -91,14 +115,22 @@ func _fill() -> void:
 		return
 	var counts := {}
 	var order: Array = []
+	var elites := {}
+	var elite_order: Array = []
+	var total := 0
 	for grp in g.preview_wave(next):
+		total += int(grp.n)
+		if grp.has("m"):
+			var ek: String = "%s|%s" % [grp.t, ",".join(grp.m)]
+			if not elites.has(ek):
+				elites[ek] = {"t": grp.t, "m": grp.m, "n": 0}
+				elite_order.append(ek)
+			elites[ek].n += int(grp.n)
+			continue
 		if not counts.has(grp.t):
 			counts[grp.t] = 0
 			order.append(grp.t)
 		counts[grp.t] += int(grp.n)
-	var total := 0
-	for et in counts:
-		total += int(counts[et])
 	var summary := UiKit.hbox(16)
 	summary.position = Vector2(16, 8)
 	var title := "FINAL ROUND %d" % next if (not g.endless and next == g.final_round()) else "ROUND %d" % next
@@ -121,6 +153,7 @@ func _fill() -> void:
 		head.add_child(UiKit.label("×%d" % counts[et], 16, UiKit.BAD if boss else UiKit.TEXT))
 		head.add_child(UiKit.label(ed.name, 15, Draw.ENEMY_COLOR.get(etype, UiKit.TEXT)))
 		var tags: Array = traits(ed)
+		tags.push_front([Enemies.role_label(ed).to_upper(), UiKit.DIM])
 		if is_new(etype, next, g.final_round()):
 			tags.push_front(["NEW", UiKit.GOLD])
 		for tg in tags:
@@ -132,6 +165,27 @@ func _fill() -> void:
 		bl.size = Vector2(400, 30)
 		_list.add_child(bl)
 		y += ROW_H
+	# Elites: one compact line each (type and modifiers); a modifier's tag explains it on hover.
+	for ek in elite_order:
+		var el: Dictionary = elites[ek]
+		var ed2: Dictionary = Enemies.ENEMIES[el.t]
+		var et2: String = el.t
+		var icon2 := DrawControl.new(func(ci): Draw.enemy(ci, et2, ci.size / 2.0, Vector2.RIGHT, float(ed2.radius), Time.get_ticks_msec() / 1000.0, false, 0.0, 0.7), Vector2(24, 24), true)
+		icon2.position = Vector2(30, y + 2)
+		_list.add_child(icon2)
+		var row := UiKit.hbox(6)
+		row.position = Vector2(62, y + 4)
+		row.add_child(UiKit.label("×%d" % el.n, 13, UiKit.TEXT))
+		row.add_child(UiKit.label(ed2.name, 13, Draw.ENEMY_COLOR.get(et2, UiKit.TEXT)))
+		row.add_child(_tag("ELITE", ELITE_COLOR))
+		for m in el.m:
+			var md: Dictionary = Modifiers.MODIFIERS[m]
+			var mt := _tag(str(md.name).to_upper() + ("  NEW" if int(md.intro) == next else ""), MOD_COLOR)
+			mt.tooltip_text = "%s: %s" % [md.name, md.blurb]
+			mt.mouse_filter = Control.MOUSE_FILTER_PASS
+			row.add_child(mt)
+		_list.add_child(row)
+		y += ELITE_H
 	_resize(y + 8.0)
 
 

@@ -104,6 +104,18 @@ const ENEMY_COLOR := {
 	"rampart": Color(1.00, 0.45, 0.35),
 	"leviathan": Color(0.40, 0.85, 1.00),
 	"colossus": Color(1.00, 0.50, 0.20),
+	"needle": Color(1.00, 0.85, 0.35),
+	"fury": Color(1.00, 0.40, 0.25),
+	"shrike": Color(0.60, 1.00, 0.40),
+	"titan": Color(1.00, 0.50, 0.20),
+	"siphon": Color(0.70, 0.45, 1.00),
+	"blackout": Color(0.85, 1.00, 0.25),
+	"capacitor": Color(1.00, 0.95, 0.35),
+	"shifter": Color(0.80, 0.55, 1.00),
+	"wraith": Color(0.55, 0.95, 1.00),
+	"masquerade": Color(0.75, 0.35, 1.00),
+	"decoy": Color(1.00, 0.55, 0.35),
+	"mirage": Color(0.55, 0.95, 1.00),
 }
 
 
@@ -975,7 +987,7 @@ static func enemy(ci: CanvasItem, type: String, c: Vector2, facing: Vector2, r: 
 			line(ci, ant, ant - facing * rr * 0.6 + n * rr * 0.3, METAL_L, 1.2 * s, true)
 			glow_dot(ci, ant - facing * rr * 0.6 + n * rr * 0.3, 1.3 * s, glow)
 		"phantom":
-			# Cloaked: only a faint heat-shimmer outline until a Sensor Array reveals it.
+			# Cloaked: only a faint heat-shimmer outline until a Radar Tower ping reveals it.
 			var a := 0.2 + 0.08 * sin(t * 7.0) if hidden else 1.0
 			var blade := PackedVector2Array([Vector2(1.4, 0), Vector2(0.1, 0.55), Vector2(-0.9, 1.0), Vector2(-0.5, 0), Vector2(-0.9, -1.0), Vector2(0.1, -0.55)])
 			if hidden:

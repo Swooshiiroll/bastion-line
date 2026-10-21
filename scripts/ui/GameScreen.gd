@@ -500,7 +500,7 @@ func cycle_target() -> void:
 		game.cycle_mode(t)
 
 
-## Only for towers that hit both air and ground (G).
+## For towers that pick targets (G): Any, Support, and Air and Ground for towers that hit both.
 func cycle_priority() -> void:
 	var t = world.selected_tower
 	if t != null and has_priority(t):
@@ -508,7 +508,7 @@ func cycle_priority() -> void:
 
 
 static func has_priority(t) -> bool:
-	return t.hits_air() and t.hits_ground() and not t.is_support()
+	return not t.is_support() and not t.is_economy() and not (t.type in ["cryo_tower", "magneto_tower", "radar_tower"])
 
 
 func use_ability(id: String) -> void:

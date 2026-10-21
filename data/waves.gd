@@ -1,87 +1,77 @@
 extends RefCounted
-## Round compositions. Each round is a list of groups:
-##   t = enemy type, n = count, i = seconds between spawns, d = delay from round start.
-## Rounds 1-25 are hand-authored. From round 26 on, a seeded generator spends a threat budget that
-## grows each round on the enemies unlocked so far, and a fixed schedule adds new-enemy
-## introductions, recurring bosses and each mode's finale on its last round. Endless mode is
-## the same generator continuing past the last round.
+## Round compositions (enemy rework, issue #68; design/enemies.md section 4). One generator makes every round, from round 1
+## on through Endless, and it is seeded by the round number alone, so a round is the same on every playthrough and every
+## mode. Each round is a list of groups:
+##   t = enemy type, n = count, i = seconds between spawns, d = delay from round start, m = an elite's modifiers (then n is 1).
+## A round spends a threat budget that grows with the round number: new enemies lead their introduction round, the rest
+## goes on groups of enemies already met, and from round 8 a share goes on elites (single enemies with modifiers,
+## data/modifiers.gd). Every 20th round adds a boss line-up; a boss met once can recur in later rounds.
 
+const Enemies = preload("res://data/enemies.gd")
+const Modifiers = preload("res://data/modifiers.gd")
 
-const AUTHORED := 25
 const MAX_SPAWNS := 250
+const MAX_ELITES := 12
 
-const WAVES := [
-	[{"t": "grunt", "n": 8, "i": 1.2}],
-	[{"t": "grunt", "n": 12, "i": 1.0}],
-	[{"t": "grunt", "n": 10, "i": 0.9}, {"t": "runner", "n": 5, "i": 0.8, "d": 4.0}],
-	[{"t": "runner", "n": 12, "i": 0.55}, {"t": "grunt", "n": 8, "i": 1.0, "d": 3.0}],
-	[{"t": "grunt", "n": 10, "i": 0.8}, {"t": "juggernaut", "n": 1, "i": 1.0, "d": 6.0}],
-	[{"t": "swarmling", "n": 24, "i": 0.25}, {"t": "grunt", "n": 8, "i": 1.0, "d": 4.0}],
-	[{"t": "brute", "n": 5, "i": 2.0}, {"t": "grunt", "n": 12, "i": 0.8, "d": 1.0}],
-	[{"t": "bat", "n": 10, "i": 0.9}, {"t": "runner", "n": 10, "i": 0.5, "d": 3.0}, {"t": "phantom", "n": 4, "i": 1.5, "d": 6.0}],
-	[{"t": "shaman", "n": 3, "i": 3.0}, {"t": "grunt", "n": 16, "i": 0.6}, {"t": "aegis", "n": 3, "i": 2.5, "d": 6.0}],
-	[{"t": "brute", "n": 6, "i": 1.6}, {"t": "swarmling", "n": 20, "i": 0.25, "d": 3.0}, {"t": "juggernaut", "n": 1, "i": 1.0, "d": 10.0}],
-	[{"t": "bat", "n": 14, "i": 0.7}, {"t": "grunt", "n": 12, "i": 0.6, "d": 2.0}, {"t": "hydra", "n": 3, "i": 2.5, "d": 5.0}],
-	[{"t": "runner", "n": 24, "i": 0.35}, {"t": "shaman", "n": 3, "i": 3.0, "d": 2.0}, {"t": "phantom", "n": 6, "i": 1.2, "d": 5.0}],
-	[{"t": "brute", "n": 8, "i": 1.2}, {"t": "shaman", "n": 3, "i": 3.0, "d": 4.0}, {"t": "jammer", "n": 2, "i": 4.0, "d": 3.0}],
-	[{"t": "swarmling", "n": 40, "i": 0.18}, {"t": "bat", "n": 10, "i": 0.8, "d": 4.0}, {"t": "aegis", "n": 4, "i": 2.0, "d": 6.0}],
-	[{"t": "juggernaut", "n": 2, "i": 8.0}, {"t": "brute", "n": 6, "i": 1.5, "d": 3.0}, {"t": "shaman", "n": 2, "i": 4.0, "d": 5.0}],
-	[{"t": "grunt", "n": 24, "i": 0.35}, {"t": "runner", "n": 16, "i": 0.3, "d": 4.0}, {"t": "hydra", "n": 4, "i": 2.0, "d": 2.0}, {"t": "phantom", "n": 6, "i": 1.0, "d": 7.0}],
-	[{"t": "bat", "n": 24, "i": 0.5}, {"t": "brute", "n": 6, "i": 1.2, "d": 3.0}, {"t": "jammer", "n": 3, "i": 3.0, "d": 5.0}],
-	[{"t": "shaman", "n": 6, "i": 2.0}, {"t": "brute", "n": 10, "i": 1.0}, {"t": "swarmling", "n": 30, "i": 0.2, "d": 5.0}, {"t": "aegis", "n": 5, "i": 1.8, "d": 7.0}],
-	[{"t": "runner", "n": 30, "i": 0.25}, {"t": "bat", "n": 16, "i": 0.5, "d": 3.0}, {"t": "brute", "n": 6, "i": 1.2, "d": 6.0}, {"t": "phantom", "n": 10, "i": 0.8, "d": 8.0}],
-	[{"t": "juggernaut", "n": 3, "i": 6.0}, {"t": "shaman", "n": 4, "i": 3.0, "d": 2.0}, {"t": "bat", "n": 16, "i": 0.5, "d": 6.0}],
-	[{"t": "brute", "n": 12, "i": 0.8}, {"t": "swarmling", "n": 40, "i": 0.15, "d": 3.0}, {"t": "hydra", "n": 6, "i": 1.5, "d": 5.0}, {"t": "jammer", "n": 2, "i": 3.0, "d": 8.0}],
-	[{"t": "bat", "n": 30, "i": 0.4}, {"t": "runner", "n": 24, "i": 0.3, "d": 2.0}, {"t": "phantom", "n": 10, "i": 0.7, "d": 5.0}],
-	[{"t": "shaman", "n": 8, "i": 1.5}, {"t": "brute", "n": 12, "i": 0.9, "d": 2.0}, {"t": "grunt", "n": 24, "i": 0.3, "d": 4.0}, {"t": "aegis", "n": 7, "i": 1.5, "d": 6.0}],
-	[{"t": "juggernaut", "n": 4, "i": 4.0}, {"t": "brute", "n": 10, "i": 1.0, "d": 2.0}, {"t": "bat", "n": 20, "i": 0.5, "d": 6.0}, {"t": "jammer", "n": 3, "i": 3.0, "d": 4.0}],
-	[{"t": "juggernaut", "n": 2, "i": 5.0, "d": 4.0}, {"t": "brute", "n": 12, "i": 1.0}, {"t": "shaman", "n": 6, "i": 2.0, "d": 6.0}, {"t": "bat", "n": 20, "i": 0.5, "d": 8.0}, {"t": "aegis", "n": 5, "i": 2.0, "d": 3.0}, {"t": "phantom", "n": 8, "i": 0.8, "d": 10.0}],
-]
-
-## Round each v3 enemy is introduced (its own group leads that round), one every two rounds.
+## Round each regular enemy is introduced (its own group leads that round): one every two rounds, by tier (every role's T1,
+## then the Specials and higher tiers).
 const INTRO := {
-	"locust": 26, "rally": 28, "burrower": 30, "gunship": 32,
-	"stalker": 34, "mender": 36, "bulwark": 38, "rampart": 40,
+	"grunt": 1, "swarmling": 2, "runner": 3, "shaman": 5, "brute": 7, "jammer": 9, "stalker": 11, "phantom": 13,
+	"locust": 15, "aegis": 17, "needle": 19, "rally": 21, "mirage": 23, "bat": 25, "siphon": 27, "hydra": 29,
+	"burrower": 31, "bulwark": 33, "rampart": 35, "decoy": 37, "blackout": 39, "shifter": 41, "gunship": 43,
+	"masquerade": 45, "shrike": 47, "fury": 49, "mender": 51, "wraith": 53, "capacitor": 55, "titan": 57,
 }
 
-## Threat each regular enemy costs the generator (roughly its round-1 toughness in Drones).
-## Only these types are picked for generated groups; bosses come from the schedule.
+## Boss rounds (owner, 2026-10-20): every 20 rounds, each bigger than the last; 100 and 120 mix the bosses met so far.
+const BOSS_ROUNDS := {
+	20: [["juggernaut", 1]],
+	40: [["warlord", 1], ["juggernaut", 1]],
+	60: [["leviathan", 1], ["warlord", 1], ["juggernaut", 1]],
+	80: [["colossus", 1], ["leviathan", 1], ["juggernaut", 2]],
+	100: [["colossus", 1], ["leviathan", 1], ["warlord", 1], ["juggernaut", 2]],
+	120: [["colossus", 2], ["leviathan", 1], ["warlord", 2], ["juggernaut", 3]],
+}
+
+## Threat each enemy costs the generator (roughly its round-1 toughness in Drones), per enemy: a Needle pair or a Shrike cluster
+## costs its pack times this. Bosses only count when one recurs in a regular round; their own rounds come from BOSS_ROUNDS.
 const COST := {
-	"grunt": 1.0, "runner": 0.7, "brute": 3.8, "swarmling": 0.35, "bat": 0.9, "shaman": 1.8,
-	"phantom": 1.2, "aegis": 4.0, "hydra": 3.0, "jammer": 2.1, "locust": 0.3, "rally": 2.4,
-	"burrower": 2.3, "gunship": 6.0, "stalker": 1.6, "mender": 5.4, "bulwark": 2.9, "rampart": 7.4,
+	"grunt": 1.0, "runner": 0.7, "brute": 3.8, "swarmling": 0.35, "bat": 1.4, "shaman": 1.8,
+	"phantom": 1.2, "aegis": 4.0, "hydra": 3.0, "jammer": 2.1, "locust": 0.25, "rally": 2.4,
+	"burrower": 2.3, "gunship": 8.6, "stalker": 1.6, "mender": 5.4, "bulwark": 2.9, "rampart": 7.4,
+	"needle": 0.6, "fury": 1.9, "shrike": 1.0, "titan": 12.0, "siphon": 3.0, "blackout": 4.5, "capacitor": 7.5,
+	"shifter": 3.8, "wraith": 6.0, "masquerade": 5.5, "decoy": 4.0, "mirage": 2.2,
+	"juggernaut": 20.0, "warlord": 45.0, "leviathan": 60.0, "colossus": 95.0,
 }
 
-## Seconds between spawns within a generated group.
+## Seconds between spawns within a group (between packs, for the Needle and the Shrike).
 const SPACING := {
 	"grunt": 0.35, "runner": 0.3, "brute": 0.9, "swarmling": 0.14, "bat": 0.45, "shaman": 1.8,
 	"phantom": 0.5, "aegis": 1.2, "hydra": 1.1, "jammer": 2.0, "locust": 0.1, "rally": 1.6,
 	"burrower": 0.8, "gunship": 1.5, "stalker": 0.6, "mender": 1.4, "bulwark": 1.6, "rampart": 1.8,
+	"needle": 0.6, "fury": 0.5, "shrike": 1.2, "titan": 2.2, "siphon": 2.0, "blackout": 2.4, "capacitor": 3.0,
+	"shifter": 1.0, "wraith": 1.0, "masquerade": 1.2, "decoy": 2.5, "mirage": 2.0,
+	"juggernaut": 6.0, "warlord": 6.0, "leviathan": 6.0, "colossus": 6.0,
 }
 
-## Support enemies stop being fun in bulk, so generated groups of them are capped.
-const MAX_COUNT := {"shaman": 8, "jammer": 5, "rally": 6, "bulwark": 6}
+## Support enemies stop being fun in bulk, so groups of them are capped; a boss recurs alone.
+const MAX_COUNT := {"shaman": 8, "jammer": 5, "rally": 6, "bulwark": 6, "siphon": 5, "blackout": 4, "capacitor": 3, "decoy": 3, "mirage": 5,
+	"juggernaut": 1, "warlord": 1, "leviathan": 1, "colossus": 1}
 
-## Each mode's last round (by round number): the boss line-up on top of the generated groups.
-const FINALES := {
-	40: [["juggernaut", 2], ["leviathan", 1], ["warlord", 1]],
-	60: [["juggernaut", 2], ["warlord", 1], ["colossus", 1]],
-	80: [["juggernaut", 3], ["leviathan", 1], ["warlord", 1], ["colossus", 1]],
-	100: [["juggernaut", 3], ["leviathan", 1], ["warlord", 1], ["colossus", 1]],
-	120: [["juggernaut", 4], ["leviathan", 2], ["warlord", 2], ["colossus", 2]],
-}
+## A recurring boss turns up less often than a regular enemy.
+const BOSS_WEIGHT := 0.4
 
 
 ## Past LATE_START, enemy HP also compounds by `late_growth` per round, so even a map full of
 ## maxed towers eventually breaks (the balance probe can override it with --growth=).
-const LATE_START := 40
-static var late_growth := 0.04
+const LATE_START := 60
+static var late_growth := 0.03
 
 
-## Enemy HP multiplier for a round (the same on every mode).
+## Enemy HP multiplier for a round (the same on every mode). Lowered in the rework: late difficulty comes from the tier mix
+## and the elites.
 static func hp_scale(wave: int) -> float:
 	var w := float(maxi(wave, 1) - 1)
-	var base := 1.0 + 0.06 * w + 0.0025 * w * w
+	var base := 1.0 + 0.05 * w + 0.0012 * w * w
 	return base * pow(1.0 + late_growth, float(maxi(0, wave - LATE_START)))
 
 
@@ -91,9 +81,17 @@ static func speed_scale(wave: int, boss := false) -> float:
 	return 1.0 + bonus * (0.5 if boss else 1.0)
 
 
-## Threat the generator spends on a round's regular groups.
+## Threat a round spends, in Drone-equivalents (round 1: 8, round 25: about 106, round 60: about 290).
 static func threat_budget(wave: int) -> float:
-	return 100.0 + 2.4 * float(maxi(0, wave - AUTHORED))
+	var w := float(maxi(wave, 1) - 1)
+	return 8.0 + 3.6 * w + 0.02 * w * w
+
+
+## The share of a round's budget that goes on elites: none before round 8, then 10% rising to 30% by round 60.
+static func elite_share(wave: int) -> float:
+	if wave < 8:
+		return 0.0
+	return 0.10 + 0.20 * clampf(float(wave - 8) / 52.0, 0.0, 1.0)
 
 
 ## Kill credits grow with the round's enemy HP (raised to `bounty_exp`), so income keeps up with
@@ -113,93 +111,124 @@ static func early_call_bonus(wave: int) -> int:
 	return 10 + 2 * wave
 
 
-## The groups for `wave` in a run whose last round is `final` (0: no finale anywhere).
-static func get_wave(wave: int, rng: RandomNumberGenerator, final := 0) -> Array:
-	if wave >= 1 and wave <= WAVES.size():
-		return WAVES[wave - 1]
-	return generated_round(wave, rng, final)
+## The groups for round `wave`.
+static func get_wave(wave: int) -> Array:
+	return generated_round(wave)
 
 
-## First round a regular enemy can appear in (authored waves, then v3 introductions).
-static func unlock_round(etype: String) -> int:
+## The round's own random numbers: seeded by the round number alone.
+static func round_rng(wave: int) -> RandomNumberGenerator:
+	var r := RandomNumberGenerator.new()
+	r.seed = 7919 * maxi(wave, 1) + 104729
+	return r
+
+
+## Whether `etype` is in the enemy table.
+static func exists(etype: String) -> bool:
+	return Enemies.ENEMIES.has(etype)
+
+
+## How many enemies one spawn of `etype` sends (a Needle pair, a Shrike cluster).
+static func pack(etype: String) -> int:
+	return int(Enemies.ENEMIES[etype].get("pack", 1))
+
+
+## How many enemies a group sends (an elite comes alone, whatever its pack).
+static func units(grp: Dictionary) -> int:
+	return int(grp.n) * (1 if grp.has("m") else pack(str(grp.t)))
+
+
+## First round enemy `etype` can appear in (999 if never): its introduction, or its first boss round.
+static func first_round(etype: String) -> int:
 	if INTRO.has(etype):
 		return int(INTRO[etype])
-	for i in WAVES.size():
-		for grp in WAVES[i]:
-			if grp.t == etype:
-				return i + 1
+	for w in BOSS_ROUNDS:
+		for entry in BOSS_ROUNDS[w]:
+			if entry[0] == etype:
+				return mini(first_boss_round(etype), int(w))
 	return 999
 
 
-## The scheduled boss groups for a round (none in the authored rounds).
-static func boss_groups(wave: int, final := 0) -> Array:
+static func first_boss_round(etype: String) -> int:
+	var best := 999
+	for w in BOSS_ROUNDS:
+		for entry in BOSS_ROUNDS[w]:
+			if entry[0] == etype:
+				best = mini(best, int(w))
+	return best
+
+
+## The boss line-up for a round: BOSS_ROUNDS, and past round 120 every 20th round brings the 120 line-up with one more of
+## each boss for every 20 rounds beyond it.
+static func boss_line(wave: int) -> Array:
+	if BOSS_ROUNDS.has(wave):
+		return BOSS_ROUNDS[wave]
+	if wave > 120 and wave % 20 == 0:
+		var extra := (wave - 120) / 20
+		var line: Array = []
+		for entry in BOSS_ROUNDS[120]:
+			line.append([entry[0], int(entry[1]) + extra])
+		return line
+	return []
+
+
+static func boss_groups(wave: int) -> Array:
 	var out: Array = []
-	if wave <= AUTHORED:
-		return out
-	var line: Array = []
-	if final > 0 and wave == final and FINALES.has(final):
-		line = FINALES[final]
-	else:
-		if wave % 5 == 0:
-			line.append(["juggernaut", 1 + (wave - AUTHORED) / 20])
-		if wave >= 50 and wave % 25 == 0:
-			line.append(["warlord", 1 + (wave - 50) / 75])
-		if wave >= 35 and (wave - 35) % 20 == 0:
-			line.append(["leviathan", 1 + (wave - 35) / 60])
-		if wave >= 60 and (wave - 60) % 20 == 0:
-			line.append(["colossus", 1 + (wave - 60) / 60])
+	var line := boss_line(wave)
 	for k in line.size():
 		var entry: Array = line[k]
 		out.append({"t": entry[0], "n": int(entry[1]), "i": 6.0, "d": 4.0 + 7.0 * k})
 	return out
 
 
-## First round `etype` appears in a run whose last round is `final` (999 if never).
-static func first_round(etype: String, final := 0) -> int:
-	if COST.has(etype):
-		return unlock_round(etype)
-	var authored := unlock_round(etype)
-	if authored < 999:
-		return authored
-	for w in range(AUTHORED + 1, maxi(final, 150) + 1):
-		for grp in boss_groups(w, final):
-			if grp.t == etype:
-				return w
-	return 999
+## The modifiers that can appear on round `wave`.
+static func open_modifiers(wave: int) -> Array:
+	return Modifiers.ORDER.filter(func(m): return int(Modifiers.MODIFIERS[m].intro) <= wave)
 
 
-static func generated_round(wave: int, rng: RandomNumberGenerator, final := 0) -> Array:
+static func generated_round(wave: int) -> Array:
+	var rng := round_rng(wave)
 	var groups: Array = []
 	var budget := threat_budget(wave)
+	var elite_budget := budget * elite_share(wave) if not open_modifiers(wave).is_empty() else 0.0
+	budget -= elite_budget
+	var pool: Array = []
+	for t in INTRO:
+		if exists(t) and int(INTRO[t]) < wave:
+			pool.append(t)
+	var bosses: Array = []
+	for t in COST:
+		if bool(Enemies.ENEMIES[t].get("boss", false)) and first_boss_round(t) < wave and float(COST[t]) <= budget * 0.5:
+			bosses.append(t)
 	var delay := 0.0
 	for t in INTRO:
-		if int(INTRO[t]) == wave:
-			groups.append(_group(t, budget * 0.3, 0.0))
-			budget *= 0.7
+		if exists(t) and int(INTRO[t]) == wave:
+			var share := 0.3 if not pool.is_empty() else 1.0
+			groups.append(_group(t, budget * share, 0.0))
+			budget *= 1.0 - share
 			delay = 3.0
-	var pool: Array = []
-	for t in COST:
-		if unlock_round(t) < wave:
-			pool.append(t)
-	var n_groups := 3 + clampi((wave - 26) / 20, 0, 3)
+	var choices: Array = pool + bosses
+	var n_groups := 1 if wave <= 2 else (2 if wave < 10 else (3 if wave < 30 else mini(6, 4 + (wave - 30) / 20)))
 	var picks: Array = []
 	for g in n_groups:
+		if budget <= 0.0:
+			break
 		var total := 0.0
 		var weights: Array = []
-		for t in pool:
+		for t in choices:
 			var wt := 0.0
 			if not picks.has(t):
-				# Newer enemies turn up more often while they're fresh.
-				wt = 2.5 if unlock_round(t) >= wave - 12 else 1.0
+				# Newer enemies turn up more often while they're fresh; a recurring boss less often.
+				wt = BOSS_WEIGHT if bosses.has(t) else (2.5 if int(INTRO[t]) >= wave - 12 else 1.0)
 			weights.append(wt)
 			total += wt
 		if total <= 0.0:
 			break
 		var roll := rng.randf() * total
-		for k in pool.size():
+		for k in choices.size():
 			roll -= float(weights[k])
 			if roll <= 0.0 and float(weights[k]) > 0.0:
-				picks.append(pool[k])
+				picks.append(choices[k])
 				break
 	var shares: Array = []
 	var share_sum := 0.0
@@ -210,18 +239,60 @@ static func generated_round(wave: int, rng: RandomNumberGenerator, final := 0) -
 	for k in picks.size():
 		groups.append(_group(picks[k], budget * float(shares[k]) / share_sum, delay))
 		delay += rng.randf_range(2.0, 5.0)
-	# Cap the spawn count for performance; beyond it, rounds get tougher through HP and speed.
+	groups.append_array(_elites(wave, rng, elite_budget, pool, maxf(delay, 6.0)))
+	# Cap the spawn count for performance; beyond it, rounds get tougher through HP, speed and elites.
 	var count := 0
 	for grp in groups:
-		count += int(grp.n)
+		count += units(grp)
 	if count > MAX_SPAWNS:
 		var f := float(MAX_SPAWNS) / float(count)
+		count = 0
 		for grp in groups:
 			grp["n"] = maxi(1, int(float(grp.n) * f))
-	groups.append_array(boss_groups(wave, final))
+			count += units(grp)
+		# Single enemies (elites) can't shrink, so trim the biggest group for what they add.
+		while count > MAX_SPAWNS:
+			var big: Dictionary = groups[0]
+			for grp in groups:
+				if units(grp) > units(big):
+					big = grp
+			big["n"] = int(big.n) - 1
+			count -= pack(str(big.t)) if not big.has("m") else 1
+	groups.append_array(boss_groups(wave))
 	return groups
 
 
+## Spends `budget` on single elites from `pool`, each with one or more modifiers open on this round. A modifier on its
+## introduction round goes on the first elite, so it always shows up when the schedule says.
+static func _elites(wave: int, rng: RandomNumberGenerator, budget: float, pool: Array, span: float) -> Array:
+	var out: Array = []
+	var open := open_modifiers(wave)
+	if budget <= 0.0 or pool.is_empty() or open.is_empty():
+		return out
+	var debut: Array = open.filter(func(m): return int(Modifiers.MODIFIERS[m].intro) == wave)
+	var tries := 0
+	while budget > 0.0 and out.size() < MAX_ELITES and tries < 40:
+		tries += 1
+		var t: String = pool[rng.randi() % pool.size()]
+		var want := 1 + rng.randi() % Modifiers.max_per_elite(wave)
+		var mods: Array = []
+		if out.is_empty() and not debut.is_empty() and Modifiers.allowed(t, debut[0]):
+			mods.append(debut[0])
+		var options: Array = open.filter(func(m): return Modifiers.allowed(t, m) and not mods.has(m))
+		while mods.size() < want and not options.is_empty():
+			var m: String = options[rng.randi() % options.size()]
+			mods.append(m)
+			options.erase(m)
+		if mods.is_empty() or (out.is_empty() and not debut.is_empty() and not mods.has(debut[0])):
+			continue
+		var cost := float(COST[t]) * Modifiers.cost_mult(mods)
+		if cost > budget and not out.is_empty():
+			break
+		budget -= cost
+		out.append({"t": t, "n": 1, "i": 1.0, "d": rng.randf_range(2.0, span + 4.0), "m": mods})
+	return out
+
+
 static func _group(etype: String, threat: float, delay: float) -> Dictionary:
-	var n := clampi(int(round(threat / float(COST[etype]))), 1, int(MAX_COUNT.get(etype, 999)))
+	var n := clampi(int(round(threat / (float(COST[etype]) * pack(etype)))), 1, int(MAX_COUNT.get(etype, 999)))
 	return {"t": etype, "n": n, "i": float(SPACING[etype]), "d": delay}

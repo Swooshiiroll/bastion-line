@@ -173,6 +173,12 @@ func _refresh_next(g) -> void:
 		next_box.add_child(item)
 	if order.size() > NEXT_TYPES:
 		next_box.add_child(UiKit.label("+%d" % (order.size() - NEXT_TYPES), 12, UiKit.DIM))
+	var elites := 0
+	for grp in g.preview_wave(next):
+		if grp.has("m"):
+			elites += int(grp.n)
+	if elites > 0:
+		next_box.add_child(UiKit.label("★%d" % elites, 12, Color(1.0, 0.82, 0.30)))
 
 
 ## Spans the whole window width at its top edge (the layout itself is centred).

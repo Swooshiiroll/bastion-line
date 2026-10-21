@@ -13,6 +13,8 @@ const Abilities = preload("res://data/abilities.gd")
 const Research = preload("res://scripts/core/Research.gd")
 const Game = preload("res://scripts/core/Game.gd")
 const Waves = preload("res://data/waves.gd")
+const Enemies = preload("res://data/enemies.gd")
+const Modifiers = preload("res://data/modifiers.gd")
 
 const HEIGHT := 92.0
 const CTX_X := 190.0
@@ -383,7 +385,7 @@ func _tower_card(t) -> void:
 		row.add_child(tb)
 	if screen.has_priority(t):
 		var pb := UiKit.button("Priority: %s  [G]" % Tower.PRIORITY_NAMES[t.priority], Callable(screen, "cycle_priority"), Vector2(0, 34))
-		pb.tooltip_text = "Prefer flyers or ground enemies when both are in range (it still shoots the other kind when that's all there is)"
+		pb.tooltip_text = "Prefer flyers, ground enemies or Support enemies (it still shoots the rest when none of those are in range)"
 		row.add_child(pb)
 	_sell_btn = UiKit.button("Sell +%d  [X]" % g.sell_value(t), Callable(screen, "sell_selected"), Vector2(0, 34))
 	row.add_child(_sell_btn)
@@ -493,17 +495,29 @@ func _enemy_card() -> void:
 	var e = screen.world.hover_enemy
 	var etype: String = e.type
 	var r: float = e.radius
-	var icon := DrawControl.new(func(ci): Draw.enemy(ci, etype, ci.size / 2.0, Vector2.RIGHT, r, Time.get_ticks_msec() / 1000.0, false, 0.0, minf(1.0, 22.0 / r)), Vector2(58, 58), true)
+	var look: String = e.look_type()
+	var icon := DrawControl.new(func(ci): Draw.enemy(ci, look, ci.size / 2.0, Vector2.RIGHT, r, Time.get_ticks_msec() / 1000.0, false, 0.0, minf(1.0, 22.0 / r)), Vector2(58, 58), true)
 	icon.position = Vector2(0, 18)
 	ctx.add_child(icon)
 	var id_box := UiKit.vbox(0)
 	id_box.position = Vector2(64, 8)
-	id_box.add_child(UiKit.label(str(e.def.name).to_upper(), 20, Draw.ENEMY_COLOR.get(etype, UiKit.TEXT)))
+	# A disguised enemy shows its disguise; a hologram shows as its Mirage.
+	var sd: Dictionary = e.shown_def()
+	var name_row := UiKit.hbox(10)
+	name_row.add_child(UiKit.label(str(sd.name).to_upper(), 20, Draw.ENEMY_COLOR.get(e.look_type(), UiKit.TEXT)))
+	name_row.add_child(UiKit.label(Enemies.role_label(sd) if not sd.has("shown_role") else str(sd.shown_role).capitalize(), 13, UiKit.DIM))
+	if e.elite:
+		name_row.add_child(UiKit.label("ELITE: " + Modifiers.label(e.mods), 13, Color(1.0, 0.82, 0.30)))
+	id_box.add_child(name_row)
 	var stats := UiKit.label("", 13, UiKit.TEXT)
 	id_box.add_child(stats)
 	_live_labels["enemy"] = stats
-	var bl := UiKit.label(e.def.blurb, 12, UiKit.DIM)
+	var blurb: String = sd.blurb
+	for m in e.mods:
+		blurb += "  " + str(Modifiers.MODIFIERS[m].name) + ": " + str(Modifiers.MODIFIERS[m].blurb)
+	var bl := UiKit.label(blurb, 12, UiKit.DIM)
 	bl.clip_text = true
+	bl.tooltip_text = blurb
 	bl.custom_minimum_size = Vector2(1320, 0)
 	id_box.add_child(bl)
 	ctx.add_child(id_box)
