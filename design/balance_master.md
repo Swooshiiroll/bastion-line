@@ -93,7 +93,7 @@ are generated and are overwritten on every run.
 - Unit tests that pin a number read it from the balance data instead of a typed literal, so a tuning edit doesn't
   break them. Tests that check a rule (e.g. "a Titan sheds at half health") stay.
 
-## Phasing (one PR each, into the v4-dev line)
+## Phasing (one PR each, into the v4-dev line; all four built 2026-10-21)
 
 1. **The file and the towers:** `balance.md` with Formulas and Towers (from `tower_stats.md`, plus prices),
    `tools/balance.mjs`, the derived tower columns, `check`.
