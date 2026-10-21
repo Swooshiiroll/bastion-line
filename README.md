@@ -287,7 +287,7 @@ hard, and Cataclysm brutal:
 - **Bosses**: every 20th round has a boss line-up, each bigger than the last: the Dreadnought at 20,
   the Overmind at 40, the Leviathan at 60, the Colossus at 80, then mixes. A boss met once can recur
   alone in later rounds.
-- **HP** grows every round (about 4.8× base by round 40), and from round 60 it also compounds by 3%
+- **HP** grows every round (about 4.8× base by round 40), and from round 60 it also compounds by 1%
   per round, so a map full of maxed towers eventually breaks.
 - **Speed** grows 0.45% per round up to +50% (bosses +25%).
 - **Kill credits** grow with enemy HP: a kill pays its base bounty × (the round's HP multiplier)^0.3,

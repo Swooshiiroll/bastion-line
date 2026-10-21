@@ -64,7 +64,7 @@ const BOSS_WEIGHT := 0.4
 ## Past LATE_START, enemy HP also compounds by `late_growth` per round, so even a map full of
 ## maxed towers eventually breaks (the balance probe can override it with --growth=).
 const LATE_START := 60
-static var late_growth := 0.03
+static var late_growth := 0.01
 
 
 ## Enemy HP multiplier for a round (the same on every mode). Lowered in the rework: late difficulty comes from the tier mix
