@@ -42,7 +42,7 @@ const TABLES = {
   difficulty: { kind: "rows", file: "Difficulty", dict: "DIFFICULTIES", cols: { Rounds: "rounds", Shields: "lives", "Medal RP": "medal_rp", Price: "price" }, skip: [] },
   research: { kind: "rows", file: "Research", dict: "NODES", cols: { RP: "cost" }, tokens: "Effects", prefix: "effects.", skip: [] },
   abilities: { kind: "rows", file: "Abilities", dict: "ABILITIES", tokens: "Numbers", skip: [] },
-  rules: { kind: "consts" }, wave_rules: { kind: "consts" }, economy: { kind: "consts" }, enemy_rules: { kind: "consts" },
+  rules: { kind: "consts" }, wave_rules: { kind: "consts" }, economy: { kind: "consts" }, enemy_rules: { kind: "consts" }, research_rules: { kind: "consts" },
 };
 
 // Every bound table in balance.md: { name: { start, head (column index), rows: [{ line, cells }] } }.

@@ -4382,3 +4382,24 @@ func test_balance_master_waves() -> void:
 		var id: String = r.Id
 		check((r.Intro == "-") != Waves.INTRO.has(id) and (r.Intro == "-" or int(r.Intro) == int(Waves.INTRO[id])), "%s: Intro is the game's" % id)
 		check(is_equal_approx(float(r.Threat), float(Waves.COST[id])), "%s: Threat is the game's" % id)
+
+
+## The balance master's economy, difficulty and research sections agree with the game.
+func test_balance_master_economy() -> void:
+	var modes := _balance_rows("<!-- table: difficulty -->")
+	check(modes.size() == Difficulty.ORDER.size(), "every mode has a row")
+	for r in modes:
+		var d: Dictionary = Difficulty.DIFFICULTIES[r.Id]
+		check(int(r.Rounds) == int(d.rounds) and int(r.Shields) == int(d.lives) and is_equal_approx(float(r.Price), float(d.price)), "%s: its row is the game's" % r.Id)
+	for r in _balance_rows("<!-- generated: mode_prices -->"):
+		var type := ""
+		for t in Towers.ORDER:
+			if str(Towers.def(t).name) == str(r.Tower):
+				type = t
+		for m in Difficulty.ORDER:
+			var want := Research.discounted(int(Towers.Rework.TREES[type].cost), {"price": Difficulty.price(m)})
+			check(int(r["=" + str(Difficulty.DIFFICULTIES[m].name)]) == want, "%s on %s: =price is what the game charges" % [type, m])
+	var nodes := _balance_rows("<!-- table: research -->")
+	check(nodes.size() == ResearchData.NODES.size(), "every research node has a row")
+	for r in nodes:
+		check(int(r.RP) == int(ResearchData.NODES[r.Id].cost), "%s: its RP cost is the game's" % r.Id)

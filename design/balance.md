@@ -1,14 +1,15 @@
 # Bastion Line balance master
 
 Every balance number in the game, the math behind them, and the source the game's data is generated from (issue #75,
-spec in `design/balance_master.md`). It holds the towers, enemies, modifiers, and waves and scaling; the economy, difficulty,
-research and rules follow in the last phase.
+spec in `design/balance_master.md`). It holds the towers, enemies and modifiers, waves and scaling, the economy, difficulty,
+research, abilities and the global rules.
 
 ## How to use this file
 
-1. Edit the input columns: **Cost** and **Tokens** in the tower tables (and the meta line above each table).
-2. Run `node tools/balance.mjs`. It rewrites every column headed `=` and the summary tables, and copies the prices
-   into `design/upgrade_trees_rework.md` (the trees page shows them).
+1. Edit any column whose header doesn't start with `=`: the tower tables' **Cost** and **Tokens** (and the meta line
+   above each), and every other table's numbers and `key value` tokens.
+2. Run `node tools/balance.mjs`. It writes the numbers into the game's scripts, rewrites every column headed `=` and
+   the generated tables, and copies the tower prices into `design/upgrade_trees_rework.md` (the trees page shows them).
 3. Run `node tools/tree_rework_data.mjs` to regenerate the game data (`data/rework_trees.gd`).
 4. Run `tools/dev.sh check` and `tools/dev.sh test`, then the balance probe to see the effect.
 
@@ -845,3 +846,200 @@ The round formulas at sample rounds:
 | 160 | 106.26 | 1.50 | 1.25 | 1086.0 | 30% | 4.05 | 500 | 330 |
 
 <!-- /generated: round_table -->
+
+## Economy
+
+<!-- table: economy -->
+| Constant | Value | Meaning |
+|---|---|---|
+| `Game.START_GOLD` | 500 | Credits at the start of a run (research can raise it) |
+| `Game.SELL_REFUND` | 0.7 | Share of what a tower cost that selling it refunds |
+| `Game.RUBBLE_COST` | 40 | Credits to clear a rubble tile |
+| `Waves.bounty_exp` | 0.3 | Kill credits grow with the round's HP multiplier to this power |
+| `Waves.CLEAR_BASE` | 20 | Round-clear bonus: this ... |
+| `Waves.CLEAR_PER_ROUND` | 3 | ... + this × the round |
+| `Waves.CALL_BASE` | 10 | Calling a round early pays this ... |
+| `Waves.CALL_PER_ROUND` | 2 | ... + this × the round |
+
+## Difficulty
+
+Each mode's length, core shields, medal research points, and tower price multiplier (every build and upgrade price).
+Names, blurbs and colours stay in `data/difficulty.gd`.
+
+<!-- table: difficulty -->
+| Id | =Name | Rounds | Shields | Medal RP | Price |
+|---|---|---|---|---|---|
+| easy | Easy | 40 | 200 | 1 | 1 |
+| medium | Medium | 60 | 100 | 2 | 1 |
+| hard | Hard | 80 | 50 | 3 | 1.1 |
+| nightmare | Nightmare | 100 | 25 | 4 | 1.5 |
+| cataclysm | Cataclysm | 120 | 1 | 5 | 2 |
+
+Every tower's stock price on each mode (price × multiplier, rounded):
+
+<!-- generated: mode_prices -->
+
+| Tower | =Easy | =Medium | =Hard | =Nightmare | =Cataclysm |
+|---|---|---|---|---|---|
+| Gun Turret | 75 | 75 | 83 | 113 | 150 |
+| Mortar Tower | 150 | 150 | 165 | 225 | 300 |
+| Rocket Salvo | 200 | 200 | 220 | 300 | 400 |
+| Laser Tower | 250 | 250 | 275 | 375 | 500 |
+| Anti-Aircraft Turret | 150 | 150 | 165 | 225 | 300 |
+| Artillery Cannon | 300 | 300 | 330 | 450 | 600 |
+| Railgun | 500 | 500 | 550 | 750 | 1000 |
+| Tesla Tower | 250 | 250 | 275 | 375 | 500 |
+| Drone Bay | 300 | 300 | 330 | 450 | 600 |
+| CAS Gunship | 650 | 650 | 715 | 975 | 1300 |
+| Mine Layer | 450 | 450 | 495 | 675 | 900 |
+| Chemical Plant | 250 | 250 | 275 | 375 | 500 |
+| Cryo Tower | 150 | 150 | 165 | 225 | 300 |
+| Boost Tower | 400 | 400 | 440 | 600 | 800 |
+| Radar Tower | 575 | 575 | 633 | 863 | 1150 |
+| Shockwave Generator | 450 | 450 | 495 | 675 | 900 |
+| Scrapyard | 875 | 875 | 963 | 1313 | 1750 |
+| Magneto Tower | 525 | 525 | 578 | 788 | 1050 |
+| Tractor Tower | 575 | 575 | 633 | 863 | 1150 |
+| Augmentation Tower | 650 | 650 | 715 | 975 | 1300 |
+
+<!-- /generated: mode_prices -->
+
+## Research
+
+Every Research Lab node's cost in research points (**RP**) and its effects (`key value`, as fractions: 0.1 is +10%).
+Names, blurbs, the tree layout and the prerequisites stay in `data/research.gd`.
+
+<!-- table: research_rules -->
+| Constant | Value | Meaning |
+|---|---|---|
+| `Research.RP_ROUND_MILESTONES.0` | 20 | Reaching this round on a sector (any mode) earns 1 RP ... |
+| `Research.RP_ROUND_MILESTONES.1` | 40 | ... and this one another |
+| `Research.RP_ROUND_MILESTONES.2` | 60 | ... |
+| `Research.RP_ROUND_MILESTONES.3` | 80 | ... |
+| `Research.RP_ROUND_MILESTONES.4` | 100 | ... |
+| `Research.RP_ENDLESS_STEP` | 10 | In endless, 1 RP for every this many rounds past the mode's last round ... |
+| `Research.RP_ENDLESS_MAX_PER_SECTOR` | 5 | ... up to this many per sector |
+
+<!-- table: research -->
+| Id | =Name | RP | Effects |
+|---|---|---|---|
+| cmd_funds | Reserve Funds | 1 | start_gold 0.10 |
+| cmd_salvage | Salvage Protocols | 2 | sell_refund 0.15 |
+| cmd_core | Reinforced Core | 2 | lives 0.1 |
+| cmd_bounty | Bounty Contracts | 3 | bounty 0.08 |
+| cmd_uplink | Orbital Uplink | 2 | ability_cd 0.20 |
+| gun_turret_1 | Hardened Barrels | 1 | mult.damage 0.06 |
+| gun_turret_2a | Ranging Optics | 2 | mult.range 0.07 |
+| gun_turret_2b | Quick Feed | 2 | mult.rate 0.07 |
+| gun_turret_m | Gun Turret Mastery | 3 | - |
+| mortar_tower_1 | Heavy Charges | 1 | mult.damage 0.06 |
+| mortar_tower_2a | Long Tubes | 2 | mult.range 0.07 |
+| mortar_tower_2b | Autoloaders | 2 | mult.rate 0.07 |
+| mortar_tower_m | Mortar Tower Mastery | 3 | - |
+| rocket_salvo_1 | Warhead Casings | 1 | mult.damage 0.06 |
+| rocket_salvo_2a | Booster Fuel | 2 | mult.range 0.07 |
+| rocket_salvo_2b | Quick Racks | 2 | mult.rate 0.07 |
+| rocket_salvo_m | Rocket Salvo Mastery | 3 | - |
+| laser_tower_1 | Cleaner Optics | 1 | mult.damage 0.06 |
+| laser_tower_2a | Focusing Mirrors | 2 | mult.range 0.07 |
+| laser_tower_2b | Capacitor Tuning | 2 | mult.rate 0.07 |
+| laser_tower_m | Laser Tower Mastery | 3 | - |
+| anti_aircraft_turret_1 | Heavy Rounds | 1 | mult.damage 0.06 |
+| anti_aircraft_turret_2a | Radar Sights | 2 | mult.range 0.07 |
+| anti_aircraft_turret_2b | Fast Feed | 2 | mult.rate 0.07 |
+| anti_aircraft_turret_m | Anti-Aircraft Turret Mastery | 3 | - |
+| artillery_cannon_1 | Heavy Charges | 1 | mult.damage 0.06 |
+| artillery_cannon_2a | Wide Charges | 2 | mult.splash 0.06 |
+| artillery_cannon_2b | Autoloaders | 2 | mult.rate 0.07 |
+| artillery_cannon_m | Artillery Cannon Mastery | 3 | - |
+| railgun_1 | Dense Slugs | 1 | mult.damage 0.06 |
+| railgun_2a | Long Rails | 2 | mult.range 0.07 |
+| railgun_2b | Fast Capacitors | 2 | mult.rate 0.07 |
+| railgun_m | Railgun Mastery | 3 | - |
+| tesla_tower_1 | High Voltage | 1 | mult.damage 0.06 |
+| tesla_tower_2a | Taller Coils | 2 | mult.range 0.07 |
+| tesla_tower_2b | Quick Discharge | 2 | mult.rate 0.07 |
+| tesla_tower_m | Tesla Tower Mastery | 3 | - |
+| drone_bay_1 | Heavier Guns | 1 | mult.damage 0.06 |
+| drone_bay_2a | Fast Cycling | 2 | mult.rate 0.07 |
+| drone_bay_2b | Spare Parts | 2 | mult.rate 0.04 |
+| drone_bay_m | Drone Bay Mastery | 3 | - |
+| cas_gunship_1 | Heavier Rounds | 1 | mult.damage 0.06 |
+| cas_gunship_2a | Wide Orbit | 2 | mult.orbit 0.07 |
+| cas_gunship_2b | Faster Spin | 2 | mult.rate 0.07 |
+| cas_gunship_m | CAS Gunship Mastery | 3 | - |
+| mine_layer_1 | Heavier Charges | 1 | mult.damage 0.06 |
+| mine_layer_2a | Longer Arms | 2 | mult.range 0.07 |
+| mine_layer_2b | Faster Presses | 2 | mult.rate 0.07 |
+| mine_layer_m | Mine Layer Mastery | 3 | - |
+| chemical_plant_1 | Wider Spray | 1 | mult.range 0.07 |
+| chemical_plant_2a | Quick Valves | 2 | mult.rate 0.07 |
+| chemical_plant_2b | Long-Lasting Mix | 2 | mult.soak_time 0.1 |
+| chemical_plant_m | Chemical Plant Mastery | 3 | - |
+| cryo_tower_1 | Wider Vents | 1 | mult.range 0.07 |
+| cryo_tower_2a | Colder Gas | 2 | mult.slow 0.07 |
+| cryo_tower_2b | Quick Vents | 2 | mult.rate 0.07 |
+| cryo_tower_m | Cryo Tower Mastery | 3 | - |
+| boost_tower_1 | Wider Field | 1 | mult.range 0.07 |
+| boost_tower_2a | Stronger Signal | 2 | mult.buff_dmg 0.1 |
+| boost_tower_2b | Faster Sync | 2 | mult.buff_rate 0.1 |
+| boost_tower_m | Boost Tower Mastery | 3 | - |
+| radar_tower_1 | Wider Dish | 1 | mult.range 0.07 |
+| radar_tower_2a | Fast Sweep | 2 | mult.ping_every -0.08 |
+| radar_tower_2b | Long Hold | 2 | mult.reveal_time 0.1 |
+| radar_tower_m | Radar Tower Mastery | 3 | - |
+| shockwave_generator_1 | Hotter Core | 1 | mult.damage 0.06 |
+| shockwave_generator_2a | Wave Focus | 2 | mult.range 0.07 |
+| shockwave_generator_2b | Fast Cycle | 2 | mult.rate 0.07 |
+| shockwave_generator_m | Shockwave Generator Mastery | 3 | - |
+| scrapyard_1 | Better Linings | 1 | mult.income 0.06 |
+| scrapyard_2a | Wider Yard | 2 | mult.range 0.07 |
+| scrapyard_2b | Hard Bargains | 2 | mult.bounty_bonus 0.1 |
+| scrapyard_m | Scrapyard Mastery | 3 | - |
+| magneto_tower_1 | Wider Coil | 1 | mult.range 0.07 |
+| magneto_tower_2a | Stronger Coil | 2 | mult.slow 0.07 |
+| magneto_tower_2b | Cold Windings | 2 | mult.slow 0.04 |
+| magneto_tower_m | Magneto Tower Mastery | 3 | - |
+| tractor_tower_1 | Long Dish | 1 | mult.range 0.07 |
+| tractor_tower_2a | Quick Release | 2 | mult.recharge -0.07 |
+| tractor_tower_2b | Steady Beam | 2 | mult.hold 0.08 |
+| tractor_tower_m | Tractor Tower Mastery | 3 | - |
+| augmentation_tower_1 | Wider Aura | 1 | mult.range 0.07 |
+| augmentation_tower_2a | Sharper Crits | 2 | mult.aug_crit 0.1 |
+| augmentation_tower_2b | Lucky Bounces | 2 | mult.ricochet 0.1 |
+| augmentation_tower_m | Augmentation Tower Mastery | 3 | - |
+
+## Abilities
+
+The Orbital Strike and Chrono Field. Names, keys and blurbs stay in `data/abilities.gd`.
+
+<!-- table: abilities -->
+| Id | =Name | Numbers |
+|---|---|---|
+| meteor | Orbital Strike | cooldown 45 · damage 110 · radius 85 · delay 0.9 |
+| warp | Chrono Field | cooldown 70 · slow 0.6 · duration 5 |
+
+## Rules
+
+The global rules every tower and enemy follows.
+
+<!-- table: rules -->
+| Constant | Value | Meaning |
+|---|---|---|
+| `Enemy.MIN_DAMAGE_FRACTION` | 0.2 | Armour can't cut a hit below this share of its damage |
+| `Enemy.SLOW_CAP` | 0.7 | The strongest slow an enemy can be under |
+| `Enemy.STUN_GUARD` | 1 | Seconds after a stun ends before it can be stunned again |
+| `Enemy.SHOVE_BUDGET` | 320 | The most an enemy can be pushed back along the track in all (px) |
+| `Game.BOSS_STUN_FACTOR` | 0.3 | Bosses are stunned this share as long |
+| `Game.BOSS_PUSH_FACTOR` | 0.25 | Bosses are pushed this share as far |
+| `Game.CRIT_MULT` | 2 | A critical hit deals this many times the damage |
+| `Game.SHIELD_EMP_MULT` | 2 | Tesla Tower arcs hit barriers this many times as hard |
+| `Game.DISABLE_GUARD` | 1 | Seconds after an EMP wears off before a tower can be knocked offline again |
+| `Game.HIT_REVEAL_TIME` | 0.5 | Seconds a cloaked enemy stays revealed after damage hits it |
+| `Game.GATE_COOLDOWN` | 6 | Seconds between switches of a switch gate |
+| `Game.SLUDGE_SLOW` | 0.3 | Sludge tiles slow walkers by this much |
+| `Game.SHOCK_PCT` | 0.04 | Shock strips deal this share of an enemy's max health per second ... |
+| `Game.SHOCK_BOSS_PCT` | 0.01 | ... and this share of a boss's |
+| `Tower.SECONDARY_CAP` | 2 | Steps a secondary path can take |
+| `Tower.SITE_RANGE` | 0.15 | High ground: + this share of range |
+| `Tower.SITE_DAMAGE` | 0.15 | Power node: + this share of damage |

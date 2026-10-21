@@ -393,6 +393,15 @@ node tools/codex.mjs
 msedge --headless=new --no-pdf-header-footer --print-to-pdf="%CD%\design\BastionLine-Codex.pdf" design/codex/codex.html
 ```
 
+### Balance master
+
+`design/balance.md` holds every balance number in the game: tower stats and prices, enemy stats and abilities, the
+elite modifiers, the round formulas and round makeup, the economy, the difficulty modes, research, the abilities and
+the global rules. Generated columns (headed `=`) show the math: paper DPS and DPS per credit, enemy strength and leak
+cost, health and credits by round, the round formulas by round, and tower prices per mode; its Formulas section explains
+each. Edit a number there and run `node tools/balance.mjs` (it writes the number into the game's scripts) and
+`node tools/tree_rework_data.mjs` (the tower data); `tools/dev.sh check` fails if anything disagrees.
+
 ### Checks
 
 The commands below assume the console build is on PATH as `godot_console` (winget adds this alias; open a new shell after installing).
