@@ -25,6 +25,8 @@ const Abilities = preload("res://data/abilities.gd")
 const Research = preload("res://scripts/core/Research.gd")
 const ResearchData = preload("res://data/research.gd")
 const Difficulty = preload("res://data/difficulty.gd")
+const EnemyArt = preload("res://scripts/view/enemies/EnemyArt.gd")
+const EnemyMoves = preload("res://scripts/entities/EnemyMoves.gd")
 
 const SANDBOX := "user://test_sandbox/"
 const SIM_DT := 1.0 / 60.0
@@ -4139,3 +4141,108 @@ func test_rework_augmentation_tower() -> void:
 	rem.disabled = 3.0
 	g._update_boost_state()
 	check(far2.buff_crit == 0.0, "an offline Augmentation Tower gives nothing")
+
+
+## Enemy art (enemy rework phase 5): every enemy has its confirmed look and identity colour.
+func test_enemy_art_covers_every_enemy() -> void:
+	for type in Enemies.ENEMIES:
+		check(EnemyArt.has(type), "%s has a look" % type)
+		check(Draw.ENEMY_COLOR.has(type) and Draw.ENEMY_BODY.has(type), "%s has its palette colours" % type)
+		check(EnemyArt.anim(type, 1.3, {}).size() == 7, "%s has an animation" % type)
+
+
+## Movement patterns: a pace that keeps the average speed, an offset that stays on the lane, and the facing along the
+## track, not the weave.
+func test_enemy_moves() -> void:
+	var g = new_game()
+	for type in ["brute", "hydra", "bulwark", "blackout", "masquerade"]:
+		var e = put(g, type, 100.0)
+		e.disguised = false
+		var sum := 0.0
+		var n := 0
+		var tt := 0.0
+		while tt < 120.0:
+			sum += EnemyMoves.pace(e, tt)
+			n += 1
+			tt += 0.01
+		check(absf(sum / float(n) - 1.0) < 0.02, "%s's pace averages 1 (%.3f)" % [type, sum / float(n)])
+	var widest := 0.0
+	for type in Enemies.ENEMIES:
+		for i in 5:
+			var e = put(g, type, 100.0)
+			e.disguised = false
+			for k in 300:
+				widest = maxf(widest, absf(EnemyMoves.side(e, float(k) * 0.1)))
+	check(widest <= 20.0, "every pattern stays on the 40 px lane (widest %.1f px)" % widest)
+	# A Skitter swerves off the track line but keeps its heading along it, and covers the same ground as before.
+	var sk = put(g, "runner", 200.0)
+	var swerve := 0.0
+	var aligned := true
+	for i in 240:
+		sk.step(SIM_DT)
+		var tp: Vector2 = sk.curve.sample_baked(sk.distance)
+		swerve = maxf(swerve, sk.pos.distance_to(tp))
+		var ahead: Vector2 = sk.curve.sample_baked(minf(sk.distance + 4.0, sk.path_len)) - tp
+		if ahead.length() > 1.0 and sk.facing.dot(ahead.normalized()) < 0.9:
+			aligned = false
+	check(swerve > 2.0 and swerve <= 20.0, "a Skitter swerves on the lane (%.1f px)" % swerve)
+	check(aligned, "it faces along the track while it swerves")
+	check(near(sk.distance, 200.0 + float(sk.speed) * 240.0 * SIM_DT, 0.5), "a steady-paced enemy covers its usual ground")
+	# A Siege Mech surges and slows step by step, but over a minute it covers its usual ground.
+	var sm = put(g, "brute", 100.0)
+	for i in 3600:
+		sm.step(SIM_DT)
+	var want := 100.0 + float(sm.speed) * 60.0
+	check(absf(sm.distance - want) < want * 0.02, "a Siege Mech's trudge keeps its average speed (%.0f of %.0f)" % [sm.distance, want])
+	# A Bulwark holds still while its barriers go out.
+	var bw = put(g, "bulwark", 300.0)
+	bw.mark("grant")
+	var d0: float = bw.distance
+	for i in 60:
+		bw.step(SIM_DT)
+	check(near(bw.distance, d0), "a Bulwark braces for its barrier grant")
+	# A Shrike cluster spreads across the lane, one slot each.
+	var slots := {}
+	for i in 5:
+		var e = put(g, "shrike", 100.0)
+		slots[snappedf(EnemyMoves.side(e, 0.0), 0.1)] = true
+	check(slots.size() == 5, "a Shrike cluster flies in five slots")
+
+
+## The art's game state: abilities stamp when they fire, and each look's effects take their timing from it.
+func test_enemy_art_state() -> void:
+	var g = new_game()
+	var j = put(g, "jammer", 150.0)
+	check(j.since("emp") > 1e5, "an ability that never fired is long ago")
+	check(EnemyArt.state(j).emp > 1e5, "so the Jammer's EMP ring isn't showing")
+	g._trait_emp(j, j.def)
+	j.step(0.25)
+	check(near(j.since("emp"), 0.25) and near(EnemyArt.state(j).emp, 0.25), "an EMP stamps the moment it fires")
+	var b = put(g, "burrower", 150.0)
+	check(near(EnemyArt.state(b).under, 0.0), "a Burrower on the surface shows")
+	b.burrowed = true
+	b.mark("burrow")
+	b.step(0.15)
+	check(near(EnemyArt.state(b).under, 0.5, 0.01), "it sinks out of sight as it burrows")
+	b.step(0.3)
+	check(near(EnemyArt.state(b).under, 1.0), "then it's gone")
+	var m = put(g, "masquerade", 150.0)
+	check(m.disguised and near(EnemyArt.state(m).uncover, 0.0), "a disguised Masquerade looks like a Drone")
+	m.reveal_disguise()
+	m.step(0.6)
+	check(near(EnemyArt.state(m).uncover, 1.0), "uncovered, it unfolds over 0.6 s")
+	var ph = put(g, "phantom", 150.0)
+	var hidden_st := EnemyArt.state(ph)
+	check(near(hidden_st.reveal, 0.0) and hidden_st.lock, "a hidden Phantom is camouflaged")
+	ph.reveal_timer = 1.0
+	check(near(EnemyArt.state(ph).reveal, 1.0), "a revealed one shows in full")
+	var ti = put(g, "titan", 150.0)
+	check(near(EnemyArt.state(ti).shed, 0.0), "a Titan wears its plates")
+	g.damage_enemy(ti, ti.max_hp * 0.6, true, null)
+	ti.step(1.0)
+	check(ti.shed and near(EnemyArt.state(ti).shed, 1.0), "below half health its plates come away")
+	var ae = put(g, "aegis", 150.0)
+	check(near(EnemyArt.state(ae).barrier, 1.0), "an Aegis Walker's barrier is full")
+	var holo = put(g, "mirage", 150.0)
+	holo.make_hologram(put(g, "mirage", 160.0))
+	check(EnemyArt.state(holo).hologram, "a Mirage's hologram draws as a flickering copy")

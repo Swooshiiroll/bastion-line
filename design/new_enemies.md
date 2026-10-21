@@ -326,7 +326,7 @@ trick is revealed.
   priority uses displayed identity.
 - **Sandbox Spawner:** new enemies appear in its grid once registered.
 - **Saves:** enemies aren't saved, so there is no save bump.
-- **Codex:** entries and the Codex PDF are regenerated in phase 5.
+- **Codex:** entries and the Codex PDF are regenerated in phase 6 (issue #68).
 
 ## Decided while building (owner, 2026-10-20)
 
