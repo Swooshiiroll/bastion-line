@@ -7,6 +7,7 @@ const Glossary = preload("res://data/glossary.gd")
 const Enemies = preload("res://data/enemies.gd")
 const Towers = preload("res://data/towers.gd")
 const Waves = preload("res://data/waves.gd")
+const Modifiers = preload("res://data/modifiers.gd")
 const Abilities = preload("res://data/abilities.gd")
 const Game = preload("res://scripts/core/Game.gd")
 const Enemy = preload("res://scripts/entities/Enemy.gd")
@@ -32,6 +33,7 @@ static func values() -> Dictionary:
 			"meteor_damage": roundi(float(m.damage)), "meteor_radius": roundi(float(m.radius)), "meteor_delay": _num(float(m.delay)),
 			"meteor_cd": roundi(float(m.cooldown)), "warp_slow": roundi(float(w.slow) * 100.0), "warp_time": _num(float(w.duration)),
 			"warp_cd": roundi(float(w.cooldown)),
+			"leak_1": roundi(float(Enemies.LEAK_BANDS[0])), "leak_2": roundi(float(Enemies.LEAK_BANDS[1])), "leak_3": roundi(float(Enemies.LEAK_BANDS[2])),
 		}
 	return _values
 
@@ -51,21 +53,44 @@ static func enemy_abilities(d: Dictionary) -> Array:
 	var pct := func(v) -> String: return "%d%%" % roundi(float(v) * 100.0)
 	var ename := func(id) -> String: return str(Enemies.ENEMIES[id].name)
 	if d.get("flying", false):
-		out.append("Flies straight at the core on the air lane. Only towers that hit air can hit it.")
+		if d.get("track", false):
+			out.append("Flies along the track. Only towers that hit air can hit it.")
+		else:
+			out.append("Flies straight at the core on the air lane. Only towers that hit air can hit it.")
+	if int(d.get("pack", 1)) > 1:
+		out.append("Always arrives as a pair on one lane." if int(d.pack) == 2 else "Flies in clusters of %d; each one is its own enemy." % int(d.pack))
 	if d.get("cloaked", false):
 		out.append("Cloaked: towers can only target it when a Radar Tower ping reveals it, or briefly after damage hits it.")
+	if d.get("energy_only", false):
+		out.append("Only energy damage hurts it (beams, chains, fields, burns, Tesla arcs); physical hits do nothing.")
+	if d.has("disguise"):
+		out.append("Looks, moves and ranks like a %s until it drops below %s health; then it runs at %s px/s for %s s, as itself." % [ename.call(d.disguise), pct.call(d.reveal_at), _num(float(d.flee_speed)), _num(float(d.flee_time))])
+	if d.get("fake_rank", false):
+		out.append("Ranks above every non-boss (and shows as a %s), so Strongest towers aim at it, but it does nothing else." % str(d.get("shown_role", "tank")).capitalize())
+	if d.has("holo_interval"):
+		out.append("Every %s s projects %d holograms with 1 health that soak shots and walk to the core; they never leak and vanish when it dies." % [_num(float(d.holo_interval)), int(d.holo_count)])
+	if d.has("siphon_radius"):
+		out.append("Towers within %s px fire %s slower and reach %s less far (the strongest Siphon applies)." % [_num(float(d.siphon_radius)), pct.call(d.siphon_rate), pct.call(d.siphon_range)])
+	if d.has("adrenaline"):
+		out.append("Below %s health it runs %s faster." % [pct.call(d.adrenaline_at), pct.call(d.adrenaline)])
+	if d.has("shed_at"):
+		out.append("Below %s health its plates come away: its armor drops to %s and it speeds up x%s." % [pct.call(d.shed_at), _num(float(d.shed_armor)), _num(float(d.shed_speed))])
 	if d.has("shield"):
 		out.append("Energy barrier of %s that absorbs damage before the hull (armor doesn't apply) and recharges after %s s without damage." % [_num(float(d.shield)), _num(float(d.shield_delay))])
 	if d.has("heal_pct"):
 		out.append("Repairs %s of max health to non-boss enemies within %s px every %s s." % [pct.call(d.heal_pct), _num(float(d.heal_radius)), _num(float(d.heal_interval))])
 	if d.has("split_type"):
 		out.append("Splits into %d %ss when destroyed." % [int(d.split_count), ename.call(d.split_type)])
-	if d.has("emp_radius"):
+	if d.has("emp_charge"):
+		out.append("Every %s s it charges for %s s, then blacks out towers within %s px for %s s. A stun, silence or Overload Circuits arc during the charge cancels it." % [_num(float(d.emp_interval)), _num(float(d.emp_charge)), _num(float(d.emp_radius)), _num(float(d.emp_duration))])
+	elif d.has("emp_radius"):
 		out.append("EMP every %s s knocks towers within %s px offline for %s s." % [_num(float(d.emp_interval)), _num(float(d.emp_radius)), _num(float(d.emp_duration))])
 	if d.has("burrow_interval"):
 		out.append("Burrows for %s s every %s s: it can't be targeted or hurt, and hazards don't touch it." % [_num(float(d.burrow_time)), _num(float(d.burrow_interval))])
 	if d.has("blink_interval"):
 		out.append("Teleports %s px down the lane every %s s. A slow or stun resets the charge." % [_num(float(d.blink_distance)), _num(float(d.blink_interval))])
+	if d.has("wake_radius"):
+		out.append("Where it lands, other non-boss enemies within %s px move %s faster for %s s." % [_num(float(d.wake_radius)), pct.call(d.wake_haste), _num(float(d.wake_time))])
 	if d.has("regen_pct"):
 		out.append("Regenerates %s of max health per second after %s s without taking damage." % [pct.call(d.regen_pct), _num(float(d.regen_delay))])
 	if d.has("aura_radius"):
@@ -83,6 +108,43 @@ static func enemy_abilities(d: Dictionary) -> Array:
 		out.append("Can't be stunned.")
 	if d.has("slow_resist"):
 		out.append("Resists %s of every slow." % pct.call(d.slow_resist))
+	return out
+
+
+## The line under an enemy's name: role and tier, strength, how it moves, and the round it's first seen.
+static func enemy_line(type: String) -> String:
+	var d: Dictionary = Enemies.ENEMIES[type]
+	var cls := ("Flying boss" if d.get("flying", false) else "Boss") if d.get("boss", false) else ("Flyer" if d.get("flying", false) else "Ground")
+	return "%s  ·  strength %s  ·  %s  ·  first seen in round %d" % [Enemies.role_label(d), _num(roundf(Enemies.strength(type))), cls, Waves.first_round(type)]
+
+
+## The modifiers enemy `type` can arrive with as an elite (none for bosses and tricks).
+static func enemy_mods(type: String) -> Array:
+	return Modifiers.ORDER.filter(func(m): return Modifiers.allowed(type, m))
+
+
+## Every modifier as {id, name, intro, blurb}, in order.
+static func modifier_rows() -> Array:
+	return Modifiers.ORDER.map(func(m):
+		var md: Dictionary = Modifiers.MODIFIERS[m]
+		return {"id": m, "name": str(md.name), "intro": int(md.intro), "blurb": str(md.blurb)})
+
+
+## The roster by role: [{role, tiers: [[type...] for T1..T4], other: [type...]}]. Tier-0 members (specials, bosses) go in `other`.
+static func role_rows() -> Array:
+	var out: Array = []
+	for role in ["swarm", "rusher", "tank", "support", "disruptor", "evader", "special", "boss"]:
+		var row := {"role": role, "tiers": [[], [], [], []], "other": []}
+		for t in Enemies.ORDER:
+			var d: Dictionary = Enemies.ENEMIES[t]
+			if str(d.get("role", "")) != role:
+				continue
+			var tier := int(d.get("tier", 0))
+			if tier >= 1 and tier <= 4:
+				(row.tiers[tier - 1] as Array).append(t)
+			else:
+				(row.other as Array).append(t)
+		out.append(row)
 	return out
 
 

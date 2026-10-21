@@ -382,8 +382,10 @@ from PowerShell. The commands are `import`, `check`, `test`, `tour`, `compare`, 
 
 ### Printable codex
 
-`design/BastionLine-Codex.pdf` lists every enemy, tower and upgrade tree with its stats. Rebuild it after
-changing enemies or the tower data (`design/tower_stats.md`, `design/upgrade_trees_rework.md`):
+`design/BastionLine-Codex.pdf` lists every enemy (role, tier, strength, abilities, the modifiers it can roll), the
+elite modifiers, and every tower with its Retrofits, paths and masteries, all taken from the game's own data and the
+in-game Codex's text (`tools/Codex.gd` exports it, `tools/codex.mjs` lays it out). Rebuild it after changing enemies
+or the tower data (`design/tower_stats.md`, `design/upgrade_trees_rework.md`):
 
 ```
 godot_console --path . -- --codex="%CD%\design\codex"
@@ -454,11 +456,12 @@ The commands below assume the console build is on PATH as `godot_console` (winge
 
    Other flags: `--endless=N` (endless rounds to play past a medal, default 20), `--lives=N` (override
    the shields, e.g. to measure Cataclysm by rounds survived), `--growth=F` (late HP compounding rate),
-   `--seeds=`, `--no-abilities`. A round that runs past 600 s of game time ends the sector as `STALLED rN`, naming the
+   `--seeds=`, `--no-abilities`, `--mods=none` (no elites) or `--mods=hasty,plated` (elites carry only those
+   modifiers). A round that runs past 600 s of game time ends the sector as `STALLED rN`, naming the
    enemies left (enemies no tower can kill, held in place by stuns, would otherwise keep it running
    for hours).
 
-   `--research=` takes `all`, node ids, tree names (`command`, `arrow`, ...), `towers` or
+   `--research=` takes `all`, node ids, tree names (`command`, `gun_turret`, ...), `towers` or
    `nomastery`. Any missing prerequisites are added automatically.
 
    **The 4.0.0 line (in progress, #68),** the generated rounds with the twelve new enemies, the bot

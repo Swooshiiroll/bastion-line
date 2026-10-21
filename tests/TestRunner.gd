@@ -4246,3 +4246,75 @@ func test_enemy_art_state() -> void:
 	var holo = put(g, "mirage", 150.0)
 	holo.make_hologram(put(g, "mirage", 160.0))
 	check(EnemyArt.state(holo).hologram, "a Mirage's hologram draws as a flickering copy")
+
+
+## The Codex (enemy rework phase 6): role, tier and strength, a line for every trait, the modifiers it can roll, and the
+## roles and elites pages.
+func test_codex_enemy_rework() -> void:
+	check(Lore.enemy_line("grunt").begins_with("Swarm T3  ·  strength "), "an enemy's line leads with its role, tier and strength")
+	check(Lore.enemy_line("juggernaut").begins_with("Boss  ·  "), "a boss is just a Boss")
+	var says := func(type: String, bit: String) -> bool:
+		return Lore.enemy_abilities(Enemies.ENEMIES[type]).any(func(l): return str(l).contains(bit))
+	check(says.call("wraith", "Only energy damage hurts it"), "the Wraith's energy-only line")
+	check(says.call("capacitor", "charges for 2 s") and not says.call("capacitor", "EMP every"), "the Capacitor charges instead of a plain EMP")
+	check(says.call("siphon", "fire 20% slower"), "the Siphon's drain")
+	check(says.call("shifter", "move 20% faster for 2 s"), "the Shifter's wake")
+	check(says.call("fury", "runs 30% faster"), "the Fury Drone's adrenaline")
+	check(says.call("titan", "armor drops to 5"), "the Titan sheds")
+	check(says.call("masquerade", "like a Drone"), "the Masquerade's disguise")
+	check(says.call("decoy", "Strongest towers aim at it"), "the Decoy Beacon's false rank")
+	check(says.call("mirage", "holograms"), "the Mirage's holograms")
+	check(says.call("needle", "pair") and says.call("shrike", "clusters of 5"), "pairs and clusters")
+	check(says.call("phantom", "along the track"), "the Phantom flies along the track")
+	check(Lore.enemy_mods("juggernaut").is_empty() and Lore.enemy_mods("masquerade").is_empty() and Lore.enemy_mods("decoy").is_empty(), "bosses and tricks are never elites")
+	check(not Lore.enemy_mods("aegis").has("shielded") and Lore.enemy_mods("grunt").size() == Modifiers.ORDER.size(), "an enemy rolls only the modifiers it can take")
+	check(Lore.modifier_rows().size() == Modifiers.ORDER.size() and int(Lore.modifier_rows()[0].intro) == int(Modifiers.MODIFIERS[Modifiers.ORDER[0]].intro), "the elites page lists every modifier with its first round")
+	var roles := Lore.role_rows()
+	var listed := 0
+	for r in roles:
+		for c in r.tiers:
+			listed += (c as Array).size()
+		listed += (r.other as Array).size()
+	check(listed == Enemies.ORDER.size(), "the roles page places every enemy once")
+	check(Glossary.ENTRIES.has("roles") and not Lore.text("roles").contains("{") and Lore.text("roles").contains(str(roundi(float(Enemies.LEAK_BANDS[0])))), "the roles entry quotes the leak bands from the data")
+
+
+## The Sandbox Spawner's modifiers: cards spawn elites with the toggled modifiers the enemy can take.
+func test_sandbox_spawn_modifiers() -> void:
+	var g = sandbox_game()
+	var skipped: Array = g.sandbox_spawn("aegis", 2, ["shielded", "hasty"])
+	check(skipped == ["shielded"], "a modifier it already has is skipped and named")
+	check(g.spawn_queue.size() == 2 and g.spawn_queue.all(func(s): return s.mods == ["hasty"]), "the rest go on every one spawned")
+	check(run_until(g, func(): return not g.enemies.is_empty(), 10.0), "it arrives")
+	check(g.enemies[0].elite and g.enemies[0].mods == ["hasty"], "as an elite")
+	var plain: Array = g.sandbox_spawn("grunt", 1)
+	check(plain.is_empty() and g.spawn_queue.filter(func(s): return s.type == "grunt").all(func(s): return (s.mods as Array).is_empty()), "no toggles: a plain enemy")
+	check(g.sandbox_spawn("juggernaut", 1, ["plated"]) == ["plated"], "a boss is never an elite")
+
+
+## The balance probe's --mods switch: no elites, or only the listed modifiers.
+func test_probe_mods_switch() -> void:
+	var count := func(wave: int) -> Dictionary:
+		var seen := {}
+		for grp in Waves.get_wave(wave):
+			for m in grp.get("m", []):
+				seen[m] = true
+		return seen
+	var any := false
+	for w in range(40, 61):
+		any = any or not count.call(w).is_empty()
+	check(any, "rounds 40-60 have elites by default")
+	Waves.mods_only = []
+	var none := true
+	for w in range(40, 61):
+		none = none and count.call(w).is_empty()
+	check(none, "--mods=none: no elites")
+	Waves.mods_only = ["hasty"]
+	var only := true
+	var some := false
+	for w in range(40, 61):
+		var seen: Dictionary = count.call(w)
+		some = some or not seen.is_empty()
+		only = only and seen.keys().all(func(m): return m == "hasty")
+	Waves.mods_only = null
+	check(some and only, "--mods=hasty: elites carry only Hasty")

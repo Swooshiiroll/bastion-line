@@ -14,6 +14,7 @@ const Towers = preload("res://data/towers.gd")
 const Tower = preload("res://scripts/entities/Tower.gd")
 const Research = preload("res://scripts/core/Research.gd")
 const Enemies = preload("res://data/enemies.gd")
+const Modifiers = preload("res://data/modifiers.gd")
 const Waves = preload("res://data/waves.gd")
 const Difficulty = preload("res://data/difficulty.gd")
 
@@ -34,6 +35,8 @@ var shop_return := false
 ## Sandbox Spawner state: enemies per click, the round "Call" sends, and the research switch.
 var spawn_count := 1
 var call_round := 1
+## Sandbox Spawner: the modifiers its cards spawn elites with (empty: plain enemies).
+var spawn_mods: Array = []
 var sandbox_research_mode := "mine"
 
 ## RP the medal paid this run (shown again on the end screen).
@@ -271,8 +274,17 @@ func step_call_round(d: int) -> void:
 	call_round = clampi(call_round + d, 1, 999)
 
 
+func toggle_spawn_mod(m: String) -> void:
+	if spawn_mods.has(m):
+		spawn_mods.erase(m)
+	else:
+		spawn_mods.append(m)
+
+
 func sandbox_spawn(type: String) -> void:
-	game.sandbox_spawn(type, spawn_count)
+	var skipped: Array = game.sandbox_spawn(type, spawn_count, spawn_mods)
+	if not skipped.is_empty():
+		hud.toast("%s can't be %s" % [Enemies.ENEMIES[type].name, Modifiers.label(skipped)], UiKit.DIM)
 	Sfx.play("wave", -8.0, 0.0)
 
 

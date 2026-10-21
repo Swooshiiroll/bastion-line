@@ -15,12 +15,15 @@ const Glossary = preload("res://data/glossary.gd")
 const Towers = preload("res://data/towers.gd")
 const Enemies = preload("res://data/enemies.gd")
 const Waves = preload("res://data/waves.gd")
+const Modifiers = preload("res://data/modifiers.gd")
 
 const LEFT_W := 190.0
 const LIST_W := 250.0
 const GAP := 12.0
 const ROW_H := 34.0
 const SAMPLE_ROUNDS := [20, 40, 60, 80, 100, 120]
+## An elite's gold, as on the field (EntityLayer.ELITE_COLOR).
+const ELITE_COLOR := Color(1.0, 0.82, 0.30)
 
 var panel_size := Vector2(1552, 552)
 var category := "towers"
@@ -337,8 +340,7 @@ func _show_enemy(type: String) -> void:
 	var d: Dictionary = Enemies.ENEMIES[type]
 	var r := float(d.radius)
 	var icon := DrawControl.new(func(ci): Draw.enemy(ci, type, ci.size / 2.0, Vector2.RIGHT.rotated(-0.3), r, Time.get_ticks_msec() / 1000.0, false, 0.0, clampf(40.0 / r, 1.0, 5.0)), Vector2(110, 110), true)
-	var cls := ("Flying boss" if d.get("flying", false) else "Boss") if d.get("boss", false) else ("Flyer" if d.get("flying", false) else "Ground")
-	_header(icon, str(d.name), Draw.ENEMY_COLOR.get(type, UiKit.TEXT), "%s  ·  first seen in round %d" % [cls, Waves.first_round(type)], str(d.blurb))
+	_header(icon, str(d.name), Draw.ENEMY_COLOR.get(type, UiKit.TEXT), Lore.enemy_line(type), str(d.blurb))
 	var grid := GridContainer.new()
 	grid.columns = 6
 	grid.add_theme_constant_override("h_separation", 18)
@@ -352,6 +354,7 @@ func _show_enemy(type: String) -> void:
 		_section("Abilities")
 		for a in ab:
 			_para("•  " + str(a), 13)
+	_mod_strip(type)
 	_section("Health and credits by round")
 	var table := GridContainer.new()
 	table.columns = SAMPLE_ROUNDS.size() + 1
@@ -368,12 +371,60 @@ func _show_enemy(type: String) -> void:
 	_detail.add_child(table)
 	_links("Hit by", Lore.hitters(d).map(func(t): return "tower:" + t))
 	_links("How to deal with it", Lore.enemy_topics(d).map(func(g): return "g:" + g))
+	_links("See also", ["g:roles", "g:elites"])
+
+
+## The modifiers an enemy can arrive with as an elite, as chips (hover for what each does).
+func _mod_strip(type: String) -> void:
+	_section("As an elite")
+	var mods := Lore.enemy_mods(type)
+	if mods.is_empty():
+		_para("Never arrives as an elite.", 13, UiKit.DIM)
+		return
+	var flow := HFlowContainer.new()
+	flow.add_theme_constant_override("h_separation", 6)
+	flow.add_theme_constant_override("v_separation", 6)
+	flow.custom_minimum_size = Vector2(_detail.custom_minimum_size.x, 0)
+	for m in mods:
+		var md: Dictionary = Modifiers.MODIFIERS[m]
+		var chip := UiKit.button("%s  ·  r%d" % [str(md.name), int(md.intro)], func(): open_entry("g:elites"), Vector2(0, 28))
+		chip.add_theme_color_override("font_color", ELITE_COLOR)
+		chip.tooltip_text = str(md.blurb)
+		flow.add_child(chip)
+	_detail.add_child(flow)
 
 
 func _show_glossary(id: String) -> void:
 	var ge: Dictionary = Glossary.ENTRIES[id]
 	_header(null, str(ge.title), UiKit.ACCENT, str(Glossary.CATEGORY_NAMES[ge.category]), "")
 	_para(Lore.text(id), 15)
+	match id:
+		"elites":
+			_section("Modifiers")
+			for r in Lore.modifier_rows():
+				var row := UiKit.hbox(10)
+				var n := UiKit.label(str(r.name), 13, ELITE_COLOR)
+				n.custom_minimum_size = Vector2(110, 0)
+				row.add_child(n)
+				var i := UiKit.label("from round %d" % int(r.intro), 12, UiKit.DIM)
+				i.custom_minimum_size = Vector2(110, 0)
+				row.add_child(i)
+				row.add_child(UiKit.wrap_label(str(r.blurb), _detail.custom_minimum_size.x - 240, 12, UiKit.TEXT))
+				_detail.add_child(row)
+		"roles":
+			_section("The roster")
+			var grid := GridContainer.new()
+			grid.columns = 6
+			grid.add_theme_constant_override("h_separation", 16)
+			grid.add_theme_constant_override("v_separation", 4)
+			for h in ["Role", "T1", "T2", "T3", "T4", "Others"]:
+				grid.add_child(UiKit.label(h, 12, UiKit.DIM))
+			for row in Lore.role_rows():
+				grid.add_child(UiKit.label(str(row.role).capitalize(), 13, UiKit.ACCENT))
+				for cell in (row.tiers as Array) + [row.other]:
+					var names := (cell as Array).map(func(t): return str(Enemies.ENEMIES[t].name))
+					grid.add_child(UiKit.label(", ".join(PackedStringArray(names)) if not names.is_empty() else "-", 12, UiKit.TEXT))
+			_detail.add_child(grid)
 	_links("See also", (ge.see as Array).map(func(g): return "g:" + g))
 
 

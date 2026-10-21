@@ -181,9 +181,13 @@ static func boss_groups(wave: int) -> Array:
 	return out
 
 
+## Balance probe switch (--mods): null plays the game's modifiers; a list allows only those (empty: no elites at all).
+static var mods_only = null
+
+
 ## The modifiers that can appear on round `wave`.
 static func open_modifiers(wave: int) -> Array:
-	return Modifiers.ORDER.filter(func(m): return int(Modifiers.MODIFIERS[m].intro) <= wave)
+	return Modifiers.ORDER.filter(func(m): return int(Modifiers.MODIFIERS[m].intro) <= wave and (mods_only == null or (mods_only as Array).has(m)))
 
 
 static func generated_round(wave: int) -> Array:

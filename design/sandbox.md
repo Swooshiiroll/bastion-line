@@ -16,8 +16,10 @@ the way. Confirmed with the owner in the design question rounds.
 - **Research:** an All / Mine / None switch in the Spawner applies at once. The save is never touched,
   and the Research Lab button is disabled.
 - **Spawner** (key S, top-bar button; doesn't pause):
-  - a grid of every enemy, bosses grouped; clicking one spawns it at base strength (round-1 scaling
-    times the difficulty factor);
+  - a grid of every enemy by role (rows) and tier (columns T1-T4), with the Specials and bosses in rows
+    of their own; clicking one spawns it at base strength (round-1 scaling times the difficulty factor);
+  - nine elite modifier toggles (enemy rework, issue #68): with any on, each spawn arrives as an elite
+    carrying the toggled modifiers it can take; the ones it can't are named in a toast;
   - a count stepper (1 / 5 / 10 / 25); lanes alternate as in normal waves;
   - Call round N: sends that round's real composition and scaling, without changing the round
     counter;

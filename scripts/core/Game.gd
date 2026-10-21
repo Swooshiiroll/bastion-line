@@ -5,6 +5,7 @@ extends RefCounted
 
 const Towers = preload("res://data/towers.gd")
 const Enemies = preload("res://data/enemies.gd")
+const Modifiers = preload("res://data/modifiers.gd")
 const Waves = preload("res://data/waves.gd")
 const Maps = preload("res://data/maps.gd")
 const Abilities = preload("res://data/abilities.gd")
@@ -551,11 +552,13 @@ func make_sandbox() -> void:
 
 ## Sends `n` of one enemy at round-1 strength (times the mode's factors), 0.4 s apart, alternating
 ## lanes. Stacks with whatever is on the field.
-func sandbox_spawn(type: String, n: int) -> void:
+## With `mods`, each arrives as an elite carrying the ones it can take; returns the ones it can't (Modifiers.allowed).
+func sandbox_spawn(type: String, n: int, mods: Array = []) -> Array:
 	if not sandbox or is_over():
-		return
+		return []
 	var is_boss := bool(Enemies.ENEMIES[type].get("boss", false))
 	var n_groups: int = grid.groups.size()
+	var ok := mods.filter(func(m): return Modifiers.allowed(type, m))
 	for k in n:
 		spawn_queue.append({
 			"time": time + k * 0.4,
@@ -564,10 +567,12 @@ func sandbox_spawn(type: String, n: int) -> void:
 			"group": _spawn_counter % n_groups,
 			"hp_mult": hp_mult_for(1),
 			"speed_mult": speed_mult_for(1, is_boss),
+			"mods": ok.duplicate(),
 		})
 		_spawn_counter += 1
 	spawn_queue.sort_custom(func(a, b): return a.time < b.time)
 	state = State.WAVE
+	return mods.filter(func(m): return not ok.has(m))
 
 
 ## Sends round `n`'s real wave without touching the round counter. Stacks with the field.
