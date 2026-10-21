@@ -106,8 +106,9 @@ Logs go to `out/`.
   - A turret's animated parts go between `Draw.dyn(true)` and `dyn(false)`, and everything else in
     its drawer must be static. `check` and `compare` enforce both. See README, "Performance probe".
 - **Renderer:** keep `gl_compatibility`. The owner plays over Remote Desktop at times.
-- **Upgrade data:** edit `design/tower_stats.md` (the numbers) and `design/upgrade_trees_rework.md` (names, prices,
-  blurbs), then regenerate:
+- **Balance and upgrade data:** every tower number and price is in `design/balance.md` (the balance master, issue #75);
+  names and blurbs are in `design/upgrade_trees_rework.md`. After an edit, regenerate:
+  - `node tools/balance.mjs` rewrites balance.md's derived (`=`) columns and copies the prices to the trees doc;
   - `node tools/tree_rework_data.mjs` writes `data/rework_trees.gd`;
   - `node tools/tree_rework_page.mjs` and `node tools/super_page.mjs` write the design pages.
 

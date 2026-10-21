@@ -1,6 +1,6 @@
 extends RefCounted
 ## Tower definitions. The towers (issue #59) and their Retrofits, paths and stats live in data/rework_trees.gd (generated from
-## design/tower_stats.md and design/upgrade_trees_rework.md by tools/tree_rework_data.mjs); `def` gives each one a flat
+## design/balance.md and design/upgrade_trees_rework.md by tools/tree_rework_data.mjs); `def` gives each one a flat
 ## definition: name, blurb, flags (air, ground, support, economy, beam, uncapped), `size` (tiles per side; the Scrapyard is
 ## 2x2), class, weapon and damage kind. Ranges are pixels (one tile = 48 px); `rate` is attacks per second.
 

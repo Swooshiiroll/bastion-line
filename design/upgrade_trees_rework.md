@@ -9,7 +9,7 @@ come back here with `tools/design_pull.mjs`; carry them into `design/tower_roste
 - Each tower has three paths of four upgrades and a mastery. Climb up to two paths, up to two upgrades each; the 3rd upgrade on either makes it the primary, which goes on to its mastery, and the other is capped at 2 with its full effects. The third path is locked. Masteries need the tower's Mastery research.
 - The CAS Gunship is the exception: each path is one gun (its step 1 unlocks it; the light gun is built in), and all three paths are uncapped to their masteries.
 - The Retrofit is an optional upgrade off to the side: the player picks one of three options when buying it, and the choice is locked. The Drone Bay has a single Retrofit.
-- Prices come from the value formula in `design/towers.md` (Pricing), rounded to 5s and 0s, with the owner's overrides. Every number is a first pass for the balance probe.
+- Prices come from the value formula in `design/towers.md` (Pricing), rounded to 5s and 0s, with the owner's overrides. Every number is a first pass for the balance probe. **The prices here are copied from `design/balance.md` by `tools/balance.mjs`: change them there.**
 
 ## Gun Turret
 id: gun_turret · class: Assault · weapon: Ballistic · build: 75 cr · status: new · branches: Power (armour-piercing), Range/Visibility (precision), Multi-Target

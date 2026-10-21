@@ -68,6 +68,11 @@ for (const p of paths) {
     const at = sec ? findRow(sec, trees ? node.code : node.tier, node.path) : -1;
     if (at < 0) { skipped.push(`${p}: row not found`); continue; }
     const c = cellsOf(lines[at]);
+    if (trees && mm[3] === "cost" && data.kind === "trees_rework") {
+      // Tower prices live in design/balance.md (issue #75); the trees page only shows them.
+      skipped.push(`${p}: prices are set in design/balance.md: ${owner.name} ${node.code} ${node.path}, ${was} -> ${now}`);
+      continue;
+    }
     const col = COL[mm[3]];
     const cur = mm[3] === "stats" ? c[col].split("·").map((s) => s.trim()).filter(Boolean).join(" · ") : c[col];
     if (cur !== shown(was) && !(mm[3] === "cost" && parseInt(cur, 10) === was)) { skipped.push(`${p}: the markdown now says "${cur}", not "${shown(was)}"`); continue; }
