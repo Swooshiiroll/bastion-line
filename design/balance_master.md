@@ -78,9 +78,13 @@ are generated and are overwritten on every run.
 ## How it becomes game data
 
 - `tools/balance.mjs` reads `design/balance.md` (names and blurbs still come from their own files) and:
-  - writes `data/balance.gd`: every number, as constants and dictionaries the game reads. `data/enemies.gd`,
-    `data/waves.gd`, `data/modifiers.gd`, `data/difficulty.gd`, `data/research.gd`, `data/abilities.gd` and the rule
-    constants in `Game.gd`, `Enemy.gd` and `Tower.gd` take their numbers from it, keeping their names and text;
+  - writes every number it owns into the game's scripts **in place** (`data/enemies.gd`, `data/waves.gd`,
+    `data/modifiers.gd`, `data/difficulty.gd`, `data/research.gd`, `data/abilities.gd`, and the rule constants in
+    `Game.gd`, `Enemy.gd` and `Tower.gd`), so the scripts keep their structure, names and text and the game reads
+    them as before. (Built this way instead of a separate `data/balance.gd`: same single source and the same check,
+    with no change to how the game loads its data.) A bound table checks completeness both ways: every number in
+    those dictionaries must have a cell, and every row an entry. A new key or entry is added in the script first;
+    the leak cost (`lives`) is derived, not typed;
   - feeds the tower sections to the existing tree generator, so `data/rework_trees.gd` is generated from `balance.md`
     plus the names in `upgrade_trees_rework.md` (`tower_stats.md` is retired);
   - rewrites the `=` columns in `balance.md`.

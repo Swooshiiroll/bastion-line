@@ -4318,3 +4318,50 @@ func test_probe_mods_switch() -> void:
 		only = only and seen.keys().all(func(m): return m == "hasty")
 	Waves.mods_only = null
 	check(some and only, "--mods=hasty: elites carry only Hasty")
+
+
+## The balance master (issue #75): design/balance.md's generated columns agree with the game's own formulas.
+func test_balance_master() -> void:
+	var enemies := _balance_rows("<!-- table: enemies -->")
+	check(enemies.size() == Enemies.ORDER.size(), "every enemy has a row in balance.md")
+	for r in enemies:
+		var id: String = r.Id
+		check(absf(float(r["=Strength"]) - Enemies.strength(id)) < 0.06, "%s: =Strength matches Enemies.strength" % id)
+		check(int(r["=Leak"]) == int(Enemies.ENEMIES[id].lives), "%s: =Leak is its leak cost" % id)
+		check(is_equal_approx(float(r.HP), float(Enemies.ENEMIES[id].hp)), "%s: its health is the game's" % id)
+	var scaling := _balance_rows("<!-- generated: enemy_scaling -->")
+	for r in scaling:
+		var id := ""
+		for t in Enemies.ORDER:
+			if str(Enemies.ENEMIES[t].name) == str(r.Enemy):
+				id = t
+		for w in [20, 60, 100, 120]:
+			check(int(r["=HP r%d" % w]) == roundi(float(Enemies.ENEMIES[id].hp) * Waves.hp_scale(w)), "%s: =HP r%d matches Waves.hp_scale" % [id, w])
+	var mods := _balance_rows("<!-- table: modifiers -->")
+	check(mods.size() == Modifiers.ORDER.size(), "every modifier has a row")
+
+
+## The rows of the balance.md table after `marker`, as {column header: cell}.
+func _balance_rows(marker: String) -> Array:
+	var text := FileAccess.get_file_as_string("res://design/balance.md").replace("\r\n", "\n")
+	var at := text.find(marker)
+	if at < 0:
+		return []
+	var lines := text.substr(at).split("\n")
+	var head: Array = []
+	var out: Array = []
+	for i in range(1, lines.size()):
+		var l: String = lines[i]
+		if not l.begins_with("|"):
+			if head.is_empty():
+				continue
+			break
+		var c := Array(l.split("|")).slice(1, -1).map(func(x): return str(x).strip_edges())
+		if head.is_empty():
+			head = c
+		elif not str(c[0]).begins_with("---"):
+			var row := {}
+			for k in head.size():
+				row[head[k]] = c[k]
+			out.append(row)
+	return out

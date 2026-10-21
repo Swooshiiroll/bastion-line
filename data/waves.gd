@@ -67,31 +67,50 @@ const LATE_START := 60
 static var late_growth := 0.01
 
 
+## The round formulas' numbers (design/balance.md owns them; tools/balance.mjs writes them here).
+## HP multiplier: 1 + HP_LINEAR·w + HP_QUAD·w², w = round - 1, compounding late_growth a round past LATE_START.
+const HP_LINEAR := 0.05
+const HP_QUAD := 0.0012
+## Speed: +SPEED_PER_ROUND a round, capped at SPEED_CAP; bosses get BOSS_SPEED_SHARE of it.
+const SPEED_PER_ROUND := 0.0045
+const SPEED_CAP := 0.5
+const BOSS_SPEED_SHARE := 0.5
+## Threat budget: BUDGET_BASE + BUDGET_LINEAR·w + BUDGET_QUAD·w².
+const BUDGET_BASE := 8.0
+const BUDGET_LINEAR := 3.6
+const BUDGET_QUAD := 0.02
+## Elite share of the budget: none before ELITE_FROM, then ELITE_START rising by ELITE_RISE until ELITE_FULL_AT.
+const ELITE_FROM := 8
+const ELITE_START := 0.10
+const ELITE_RISE := 0.20
+const ELITE_FULL_AT := 60
+
+
 ## Enemy HP multiplier for a round (the same on every mode). Lowered in the rework: late difficulty comes from the tier mix
 ## and the elites.
 static func hp_scale(wave: int) -> float:
 	var w := float(maxi(wave, 1) - 1)
-	var base := 1.0 + 0.05 * w + 0.0012 * w * w
+	var base := 1.0 + HP_LINEAR * w + HP_QUAD * w * w
 	return base * pow(1.0 + late_growth, float(maxi(0, wave - LATE_START)))
 
 
-## Enemy speed multiplier for a round: +0.45% per round, capped at +50%. Bosses get half.
+## Enemy speed multiplier for a round. Bosses get a share of it.
 static func speed_scale(wave: int, boss := false) -> float:
-	var bonus := minf(0.5, 0.0045 * float(maxi(wave, 1) - 1))
-	return 1.0 + bonus * (0.5 if boss else 1.0)
+	var bonus := minf(SPEED_CAP, SPEED_PER_ROUND * float(maxi(wave, 1) - 1))
+	return 1.0 + bonus * (BOSS_SPEED_SHARE if boss else 1.0)
 
 
-## Threat a round spends, in Drone-equivalents (round 1: 8, round 25: about 106, round 60: about 290).
+## Threat a round spends, in Drone-equivalents.
 static func threat_budget(wave: int) -> float:
 	var w := float(maxi(wave, 1) - 1)
-	return 8.0 + 3.6 * w + 0.02 * w * w
+	return BUDGET_BASE + BUDGET_LINEAR * w + BUDGET_QUAD * w * w
 
 
-## The share of a round's budget that goes on elites: none before round 8, then 10% rising to 30% by round 60.
+## The share of a round's budget that goes on elites.
 static func elite_share(wave: int) -> float:
-	if wave < 8:
+	if wave < ELITE_FROM:
 		return 0.0
-	return 0.10 + 0.20 * clampf(float(wave - 8) / 52.0, 0.0, 1.0)
+	return ELITE_START + ELITE_RISE * clampf(float(wave - ELITE_FROM) / float(ELITE_FULL_AT - ELITE_FROM), 0.0, 1.0)
 
 
 ## Kill credits grow with the round's enemy HP (raised to `bounty_exp`), so income keeps up with
@@ -103,12 +122,19 @@ static func bounty_scale(wave: int) -> float:
 	return pow(hp_scale(maxi(wave, 1)), bounty_exp)
 
 
+## Credits for clearing a round: CLEAR_BASE + CLEAR_PER_ROUND × round; for calling it early, CALL_BASE + CALL_PER_ROUND × round.
+const CLEAR_BASE := 20
+const CLEAR_PER_ROUND := 3
+const CALL_BASE := 10
+const CALL_PER_ROUND := 2
+
+
 static func clear_bonus(wave: int) -> int:
-	return 20 + 3 * wave
+	return CLEAR_BASE + CLEAR_PER_ROUND * wave
 
 
 static func early_call_bonus(wave: int) -> int:
-	return 10 + 2 * wave
+	return CALL_BASE + CALL_PER_ROUND * wave
 
 
 ## The groups for round `wave`.
