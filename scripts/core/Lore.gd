@@ -6,7 +6,6 @@ extends RefCounted
 const Glossary = preload("res://data/glossary.gd")
 const Enemies = preload("res://data/enemies.gd")
 const Towers = preload("res://data/towers.gd")
-const Trees = preload("res://data/tower_trees.gd")
 const Waves = preload("res://data/waves.gd")
 const Abilities = preload("res://data/abilities.gd")
 const Game = preload("res://scripts/core/Game.gd")
@@ -54,7 +53,7 @@ static func enemy_abilities(d: Dictionary) -> Array:
 	if d.get("flying", false):
 		out.append("Flies straight at the core on the air lane. Only towers that hit air can hit it.")
 	if d.get("cloaked", false):
-		out.append("Cloaked: towers can only target it inside a Sensor Array field, or briefly after area damage.")
+		out.append("Cloaked: towers can only target it when a Radar Tower ping reveals it, or briefly after damage hits it.")
 	if d.has("shield"):
 		out.append("Energy barrier of %s that absorbs damage before the hull (armor doesn't apply) and recharges after %s s without damage." % [_num(float(d.shield)), _num(float(d.shield_delay))])
 	if d.has("heal_pct"):
@@ -106,24 +105,31 @@ static func enemy_topics(d: Dictionary) -> Array:
 static func hitters(d: Dictionary) -> Array:
 	var flying: bool = d.get("flying", false)
 	return Towers.ORDER.filter(func(t):
-		var td: Dictionary = Towers.TOWERS[t]
-		return not td.get("support", false) and (bool(td.get("air", false)) if flying else bool(td.get("ground", true))))
+		var td: Dictionary = Towers.def(t)
+		if td.support or td.economy:
+			return false
+		return bool(td.air) if flying else bool(td.ground))
 
 
-## A tower's whole upgrade path as rows: {label, name, cost, blurb, stats, prev}. `stats` are the
-## composed stats at that step (what the game uses before research); `prev` the step before.
+## A tower's whole upgrade tree as rows: {label, name, cost, blurb, stats, prev, branch}. `stats` are the composed stats at
+## that step (what the game uses before research); `prev` the step before. The stock tower, each Retrofit option (on the
+## stock tower), then each path's four steps and its mastery (on the stock tower).
 static func tower_rows(type: String) -> Array:
-	var tr: Dictionary = Trees.TREES[type]
-	var ln := Tower.lines(type)
+	var tr: Dictionary = Towers.Rework.TREES[type]
+	var base: Dictionary = Tower.rework_base(type)
 	var rows: Array = []
-	rows.append({"label": Tower.trunk_name(1), "name": tr.tiers[0].name, "cost": int(tr.tiers[0].cost), "blurb": tr.tiers[0].blurb, "stats": ln.t1, "prev": {}, "branch": ""})
-	rows.append({"label": Tower.trunk_name(2), "name": tr.tiers[1].name, "cost": int(tr.tiers[1].cost), "blurb": tr.tiers[1].blurb, "stats": ln.t2, "prev": ln.t1, "branch": ""})
-	for b in tr.branches:
-		var key: String = b.key
-		for i in b.nodes.size():
-			var nd: Dictionary = b.nodes[i]
-			rows.append({"label": "%s T%d" % [key.to_upper(), i + 1], "name": nd.name, "cost": int(nd.cost), "blurb": nd.blurb,
-				"stats": ln[key][i + 1], "prev": ln.t2 if i == 0 else ln[key][i], "branch": str(b.id)})
-		rows.append({"label": "%s Mastery" % key.to_upper(), "name": b.mastery.name, "cost": int(b.mastery.cost), "blurb": b.mastery.blurb,
-			"stats": ln[key + "_m"], "prev": ln[key][b.nodes.size()], "branch": str(b.id)})
+	rows.append({"label": "Stock", "name": tr.name, "cost": int(tr.cost), "blurb": tr.base.get("blurb", tr.blurb), "stats": base, "prev": {}, "branch": ""})
+	for r in tr.retrofits:
+		rows.append({"label": "Retrofit", "name": r.name, "cost": int(r.cost), "blurb": r.blurb, "stats": Tower._apply_node(base, r), "prev": base, "branch": ""})
+	for p in tr.paths:
+		var key: String = p.key
+		var cur: Dictionary = base
+		for n in p.nodes.size():
+			var nd: Dictionary = p.nodes[n]
+			var nxt: Dictionary = Tower._apply_node(cur, nd)
+			rows.append({"label": "%s T%d" % [key.to_upper(), n + 1], "name": nd.name, "cost": int(nd.cost), "blurb": nd.blurb,
+				"stats": nxt, "prev": cur, "branch": key})
+			cur = nxt
+		rows.append({"label": "%s Mastery" % key.to_upper(), "name": p.mastery.name, "cost": int(p.mastery.cost), "blurb": p.mastery.blurb,
+			"stats": Tower._apply_node(cur, p.mastery), "prev": cur, "branch": key})
 	return rows

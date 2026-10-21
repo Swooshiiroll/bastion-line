@@ -205,7 +205,7 @@ static func tower_mods(owned: Array, tower_type: String) -> Dictionary:
 
 
 ## A tower level's stats with research applied. Multipliers and additions only touch stats the
-## level already has, so e.g. +blast radius never gives a Pulse Turret splash.
+## level already has, so e.g. +blast radius never gives a Gun Turret splash.
 static func apply(level: Dictionary, mods: Dictionary) -> Dictionary:
 	var mult: Dictionary = mods.get("mult", {})
 	var add: Dictionary = mods.get("add", {})

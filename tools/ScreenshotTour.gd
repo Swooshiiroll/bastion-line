@@ -50,22 +50,22 @@ func _run() -> void:
 	# Staged combat on Meadow: every tower type, every enemy type.
 	var g = Game.new("meadow", 99)
 	g.gold = 20000
+	# Each entry: [type, cell, upgrades] (see _grow: 0-2 fit that Retrofit, a/b/c buy a path step).
 	var layout := [
-		["arrow", Vector2i(2, 3), 3, "gatling"], ["cannon", Vector2i(5, 5), 3, "napalm"], ["frost", Vector2i(7, 7), 3, "shatter"],
-		["sniper", Vector2i(7, 4), 3, "lance"], ["tesla", Vector2i(10, 5), 3, "overload"], ["laser", Vector2i(8, 9), 2, ""],
-		["missile", Vector2i(12, 4), 3, "swarm"], ["amp", Vector2i(11, 5), 3, "overclock"], ["laser", Vector2i(13, 7), 3, "focus"],
-		["frost", Vector2i(15, 6), 1, ""], ["arrow", Vector2i(16, 8), 3, "shredder"], ["missile", Vector2i(11, 1), 1, ""],
-		["amp", Vector2i(3, 4), 1, ""], ["sniper", Vector2i(10, 2), 3, "deadeye"],
+		["gun_turret", Vector2i(2, 3), "0aaa"], ["mortar_tower", Vector2i(5, 5), "1aa"], ["cryo_tower", Vector2i(7, 7), "bb"],
+		["railgun", Vector2i(7, 4), "0aa"], ["tesla_tower", Vector2i(10, 5), "aa"], ["laser_tower", Vector2i(8, 9), ""],
+		["rocket_salvo", Vector2i(12, 4), "0aaa"], ["boost_tower", Vector2i(11, 5), "a"], ["laser_tower", Vector2i(13, 7), "1aa"],
+		["anti_aircraft_turret", Vector2i(15, 6), ""], ["gun_turret", Vector2i(16, 8), "bb"], ["rocket_salvo", Vector2i(11, 1), ""],
+		["radar_tower", Vector2i(3, 4), ""], ["railgun", Vector2i(10, 2), "2a"],
 	]
 	var sniper = null
 	var spec_pick = null
 	for entry in layout:
 		var t = g.place_tower(entry[0], entry[1])
-		for k in int(entry[2]) - 1:
-			g.upgrade_tower(t, entry[3] if t.tier == 2 else "")
-		if entry[0] == "missile" and entry[2] == 3:
+		_grow(g, t, entry[2])
+		if entry[0] == "rocket_salvo" and entry[2] != "":
 			sniper = t
-		if entry[0] == "laser" and entry[2] == 2:
+		if entry[0] == "laser_tower" and entry[2] == "":
 			spec_pick = t
 	g.gold = 1250
 	g.events.clear()
@@ -106,7 +106,7 @@ func _run() -> void:
 	await _shot("04b_spec_choice")
 
 	screen.world.selected_tower = null
-	screen.select_build("tesla")
+	screen.select_build("tesla_tower")
 	screen.world.force_hover = Vector2i(11, 6)
 	await _wait(0.4)
 	await _shot("05_build_preview")
@@ -167,24 +167,21 @@ func _run() -> void:
 
 	# Staged tier-4 masteries on Meadow with everything researched.
 	var mg4 = Game.new("meadow", 99, "medium", Research.node_ids())
-	mg4.gold = 30000
+	mg4.gold = 300000
 	var mlayout := [
-		["arrow", Vector2i(2, 3), 4, "gatling"], ["cannon", Vector2i(5, 5), 4, "siege"], ["frost", Vector2i(7, 7), 4, "shatter"],
-		["sniper", Vector2i(7, 4), 4, "lance"], ["tesla", Vector2i(10, 5), 4, "storm"], ["laser", Vector2i(8, 9), 4, "prism"],
-		["missile", Vector2i(12, 4), 4, "hellfire"], ["amp", Vector2i(11, 5), 4, "array"], ["laser", Vector2i(13, 7), 4, "focus"],
-		["arrow", Vector2i(16, 8), 3, "shredder"], ["sniper", Vector2i(10, 2), 4, "deadeye"], ["tesla", Vector2i(3, 4), 4, "overload"],
+		["gun_turret", Vector2i(2, 3), "0aaaaa"], ["mortar_tower", Vector2i(5, 5), "1bbaaaaa"], ["cryo_tower", Vector2i(7, 7), "2ccccc"],
+		["railgun", Vector2i(7, 4), "1aaaaa"], ["tesla_tower", Vector2i(10, 5), "0bbbbb"], ["laser_tower", Vector2i(8, 9), "2aaaaa"],
+		["rocket_salvo", Vector2i(12, 4), "0ccccc"], ["boost_tower", Vector2i(11, 5), "1aaaaa"], ["laser_tower", Vector2i(13, 7), "0ccbbbbb"],
+		["gun_turret", Vector2i(16, 8), "2bbbb"], ["railgun", Vector2i(10, 2), "0bbbbb"], ["tesla_tower", Vector2i(3, 4), "1aacccccc"],
 	]
 	var t3 = null
 	var t4 = null
 	for entry in mlayout:
 		var t = mg4.place_tower(entry[0], entry[1])
-		while t.tier < int(entry[2]):
-			if not mg4.upgrade_tower(t, entry[3] if t.tier == 2 else ""):
-				break
-		if t.tier == 3:
-			_grow(mg4, t, "bbb")
+		_grow(mg4, t, entry[2])
+		if entry[2] == "2bbbb":
 			t3 = t
-		if entry[0] == "sniper" and entry[3] == "lance":
+		if entry[0] == "railgun" and t4 == null:
 			t4 = t
 	mg4.gold = 1400
 	mg4.events.clear()
@@ -208,7 +205,7 @@ func _run() -> void:
 	await _wait(0.4)
 	await _shot("14c_mastery_offer")
 	await _key(KEY_I)
-	_expect(t3.tier == 4 and t3.display_name() == "Disintegrator", "I on a fully upgraded branch B buys its mastery")
+	_expect(t3.tier == 4 and t3.display_name() == str(t3.branch("b").mastery.name), "I on a finished path B buys its mastery")
 	await _wait(0.5)
 	await _shot("14d_mastery_bought")
 
@@ -216,21 +213,19 @@ func _run() -> void:
 	var ng = Game.new("meadow", 99, "medium")
 	ng.gold = 30000
 	var nlayout := [
-		["sensor", Vector2i(3, 4), 3, "painter"], ["flak", Vector2i(2, 3), 3, "burst"], ["gravity", Vector2i(5, 5), 3, "repulsor"],
-		["tesla", Vector2i(5, 3), 2, ""], ["arrow", Vector2i(7, 7), 3, "gatling"], ["flak", Vector2i(10, 5), 1, ""],
-		["gravity", Vector2i(8, 9), 3, "crush"], ["sensor", Vector2i(13, 7), 1, ""], ["sniper", Vector2i(10, 2), 2, ""],
-		["arrow", Vector2i(3, 9), 2, ""], ["cannon", Vector2i(12, 4), 2, ""],
+		["radar_tower", Vector2i(3, 4), "1bb"], ["anti_aircraft_turret", Vector2i(2, 3), "0aa"], ["magneto_tower", Vector2i(5, 5), "aa"],
+		["tesla_tower", Vector2i(5, 3), "0"], ["gun_turret", Vector2i(7, 7), "0aa"], ["anti_aircraft_turret", Vector2i(10, 5), ""],
+		["tractor_tower", Vector2i(8, 9), "aa"], ["radar_tower", Vector2i(13, 7), ""], ["railgun", Vector2i(10, 2), "0"],
+		["gun_turret", Vector2i(3, 9), "0"], ["mortar_tower", Vector2i(12, 4), "0"],
 	]
 	var sensor_t = null
 	var jam_victim = null
 	for entry in nlayout:
 		var t = ng.place_tower(entry[0], entry[1])
-		while t.tier < int(entry[2]):
-			if not ng.upgrade_tower(t, entry[3] if t.tier == 2 else ""):
-				break
-		if entry[0] == "sensor" and sensor_t == null:
+		_grow(ng, t, entry[2])
+		if entry[0] == "radar_tower" and sensor_t == null:
 			sensor_t = t
-		if entry[0] == "arrow" and entry[2] == 2:
+		if entry[0] == "gun_turret" and entry[2] == "0":
 			jam_victim = t
 	ng.gold = 900
 	ng.events.clear()
@@ -254,36 +249,24 @@ func _run() -> void:
 	await _shot("15_new_threats")
 	ns.world.selected_tower = sensor_t
 	await _wait(0.3)
-	await _shot("15b_sensor_selected")
+	await _shot("15b_radar_selected")
 	ns.world.selected_tower = null
-	await _key(KEY_0)
-	_expect(ns.world.build_type == "sensor", "key 0 selects the Sensor Array")
-	await _key(KEY_MINUS)
-	_expect(ns.world.build_type == "gravity", "key - selects the Graviton Projector")
+	ns.select_build("mine_layer")
 	ns.world.force_hover = Vector2i(15, 6)
 	await _wait(0.3)
-	await _shot("15c_build_graviton")
+	await _shot("15c_build_mine_layer")
 	ns.world.force_hover = Vector2i(-99, -99)
-	await _key(KEY_EQUAL)
-	_expect(ns.world.build_type == "nullifier", "key = selects the Nullifier")
-	await _key(KEY_BRACKETLEFT)
-	_expect(ns.world.build_type == "nova", "key [ selects the Nova Reactor")
-	await _key(KEY_BRACKETRIGHT)
-	_expect(ns.world.build_type == "drones", "key ] selects the Drone Bay")
-	await _key(KEY_BACKSLASH)
-	_expect(ns.world.build_type == "scrap", "key \\ selects the Scrapyard")
 	ns.cancel()
 	ns.cancel()
 
 	# The v3 roster: all eight new regulars and both new bosses on one field.
 	var vg = Game.new("foundry", 99, "hard")
 	vg.gold = 30000
-	for entry in [["flak", Vector2i(4, 3), 3, "burst"], ["tesla", Vector2i(2, 6), 3, "storm"], ["laser", Vector2i(13, 8), 3, "focus"],
-			["sniper", Vector2i(10, 6), 3, "deadeye"], ["frost", Vector2i(18, 12), 3, "stasis"], ["missile", Vector2i(21, 8), 3, "hellfire"]]:
+	for entry in [["anti_aircraft_turret", Vector2i(4, 3), "0aa"], ["tesla_tower", Vector2i(2, 6), "0aa"], ["laser_tower", Vector2i(13, 8), "1aa"],
+			["railgun", Vector2i(10, 6), "0aa"], ["cryo_tower", Vector2i(18, 12), "0bb"], ["rocket_salvo", Vector2i(21, 8), "0aa"]]:
 		var t = vg.place_tower(entry[0], entry[1])
-		while t != null and t.tier < int(entry[2]):
-			if not vg.upgrade_tower(t, entry[3] if t.tier == 2 else ""):
-				break
+		if t != null:
+			_grow(vg, t, entry[2])
 	vg.gold = 900
 	vg.events.clear()
 	app.start_game_with(vg)
@@ -301,28 +284,25 @@ func _run() -> void:
 	await _wait(1.2)
 	await _shot("15d_v3_threats")
 
-	# v3.1: the three new towers and the new C branches, with secondaries, against the v3 roster.
+	# The special, support and economy towers, built up with secondaries, against the v3 roster.
 	var wg = Game.new("foundry", 99, "hard", Research.node_ids())
-	wg.gold = 60000
+	wg.gold = 300000
 	var wlayout := [
-		["nullifier", Vector2i(4, 3), "Taaaaa"], ["nova", Vector2i(2, 6), "Tbbbbb"], ["drones", Vector2i(13, 8), "Taabbbb"],
-		["drones", Vector2i(10, 6), "Tbbccc"], ["laser", Vector2i(18, 12), "Tccccc"], ["arrow", Vector2i(21, 8), "Tcccc"],
-		["tesla", Vector2i(7, 9), "Taacccc"], ["gravity", Vector2i(18, 4), "Tccccc"], ["missile", Vector2i(12, 3), "Tccccc"],
-		["nova", Vector2i(19, 3), "Tccaa"], ["nullifier", Vector2i(9, 12), "Tccbb"],
-		["scrap", Vector2i(9, 9), "Tccbb"], ["scrap", Vector2i(14, 12), "Taaaaa"],
+		["tractor_tower", Vector2i(4, 3), "0aaaaa"], ["shockwave_generator", Vector2i(2, 6), "1bbbbb"], ["drone_bay", Vector2i(13, 8), "aabbbbb"],
+		["cas_gunship", Vector2i(10, 6), "0aabbcc"], ["chemical_plant", Vector2i(18, 12), "0ccccc"], ["mine_layer", Vector2i(21, 8), "1cccc"],
+		["magneto_tower", Vector2i(7, 9), "0aacccc"], ["augmentation_tower", Vector2i(18, 4), "1ccccc"], ["artillery_cannon", Vector2i(12, 3), "0ccccc"],
+		["shockwave_generator", Vector2i(19, 3), "2ccaa"], ["tractor_tower", Vector2i(9, 12), "2ccbb"],
+		["scrapyard", Vector2i(9, 9), "0ccbb"], ["scrapyard", Vector2i(14, 12), "1aaaaa"],
 	]
 	var sel_t = null
-	var tree_t = null
 	for entry in wlayout:
 		var t = wg.place_tower(entry[0], entry[1])
 		if t == null:
 			_expect(false, "placed %s at %s" % [entry[0], entry[1]])
 			continue
 		_expect(_grow(wg, t, entry[2]), "%s grows along %s" % [entry[0], entry[2]])
-		if entry[0] == "drones" and sel_t == null:
+		if entry[0] == "drone_bay" and sel_t == null:
 			sel_t = t
-		if entry[0] == "tesla":
-			tree_t = t
 	wg.gold = 1500
 	wg.events.clear()
 	app.start_game_with(wg)
@@ -338,16 +318,11 @@ func _run() -> void:
 	for d in [150.0, 165.0, 180.0, 195.0, 210.0, 225.0, 480.0, 495.0]:
 		wg.enemies.append(wg.spawn_enemy("locust", 0, d, 8.0, -1))
 	await _wait(1.5)
-	await _shot("30_v31_towers")
+	await _shot("30_special_towers")
 	ws.world.selected_tower = sel_t
 	await _wait(0.3)
 	await _shot("30b_drone_bay_selected")
-	ws.world.selected_tower = tree_t
-	await _wait(0.2)
-	await _key(KEY_E)
-	await _wait(0.4)
-	await _shot("30c_tree_locked_in")
-	await _key(KEY_ESCAPE)
+	ws.world.selected_tower = null
 
 	await _sandbox_checks()
 
@@ -374,31 +349,37 @@ func _interaction_checks() -> void:
 	var cell_pos: Vector2 = screen.world.base_pos + Vector2((cell.x + 0.5) * 48.0, (cell.y + 0.5) * 48.0)
 
 	await _key(KEY_1)
-	fails += _expect(screen.world.build_type == "arrow", "key 1 selects Arrow Tower")
+	fails += _expect(screen.world.build_type == "", "number keys don't pick towers (there are no build hotkeys)")
+	await _key(KEY_B)
+	await _wait(0.2)
+	await _click(screen.hud.popout("shop").cards["gun_turret"].get_global_rect().get_center())
+	fails += _expect(screen.world.build_type == "gun_turret", "picking the Gun Turret in the shop starts building it")
 	await _click(cell_pos)
 	fails += _expect(g.tower_at.has(cell), "click on a tile builds the tower")
-	fails += _expect(g.gold == Game.START_GOLD - 50, "building costs 50 gold (%d)" % g.gold)
-	fails += _expect(screen.world.selected_tower == g.tower_at.get(cell), "new tower is selected")
+	fails += _expect(g.gold == Game.START_GOLD - 75, "building costs 75 credits (%d)" % g.gold)
+	await _key(KEY_ESCAPE)
+	await _click(cell_pos)
+	fails += _expect(screen.world.selected_tower == g.tower_at.get(cell), "clicking the new tower selects it")
 	await _key(KEY_U)
-	fails += _expect(g.tower_at[cell].tier == 2, "U upgrades the selected tower")
+	fails += _expect(int(g.tower_at[cell].depth.a) == 1, "U buys a step on path A")
 	g.gold = 20
 	await _key(KEY_I)
-	fails += _expect(g.tower_at[cell].tier == 2, "I without enough credits leaves the tower at tier 2")
+	fails += _expect(int(g.tower_at[cell].depth.b) == 0, "I without enough credits buys nothing")
 	g.gold += 500
 	await _key(KEY_I)
-	fails += _expect(g.tower_at[cell].spec == "shredder", "I picks the second specialization (Shredder)")
+	fails += _expect(int(g.tower_at[cell].depth.b) == 1, "I buys a step on path B")
 	await _key(KEY_T)
 	fails += _expect(g.tower_at[cell].mode == 1, "T cycles targeting")
 	await _key(KEY_ESCAPE)
 	fails += _expect(screen.world.selected_tower == null, "Esc clears the selection")
 	await _click(cell_pos)
 	fails += _expect(screen.world.selected_tower != null, "clicking a tower selects it")
-	await _key(KEY_2)
+	screen.select_build("mortar_tower")
 	await _click(cell_pos + Vector2(0, 48), MOUSE_BUTTON_RIGHT)
 	fails += _expect(screen.world.build_type == "", "right-click cancels build mode")
 	await _click(cell_pos + Vector2(-96, -48))
 	fails += _expect(g.towers.size() == 1, "clicking the road with nothing selected builds nothing")
-	await _key(KEY_3)
+	screen.select_build("rocket_salvo")
 	await _click(cell_pos + Vector2(-96, -48))
 	fails += _expect(g.towers.size() == 1, "can't build on the road")
 	await _key(KEY_ESCAPE)
@@ -442,9 +423,6 @@ func _field_checks() -> void:
 		mg.start_wave()
 		await _wait(4.0)
 		await _shot("17_sector_%s" % id)
-	# A flechette volley: one trace per flechette (7, as after Dense Pack), scattered over the cone.
-	app.current.world._visual({"type": "flechette", "pos": Grid.cell_center(Vector2i(8, 6)), "aim": 0.0, "cone": 50.0, "range": 130.0, "tier": 3, "pellets": 7})
-	await _shot("17z_flechette_volley")
 	app.start_game("delta")
 	await _wait(0.4)
 	var screen = app.current
@@ -475,7 +453,7 @@ func _field_checks() -> void:
 	fails += _expect(screen.world.terrain.cleared.has(rub), "the terrain stops drawing cleared rubble")
 	await _wait(0.2)
 	await _shot("18b2_rubble_cleared")
-	await _key(KEY_1)
+	screen.select_build("gun_turret")
 	await _hover(screen.world.base_pos + Grid.cell_center(Vector2i(11, 5)))
 	await _wait(0.3)
 	await _shot("18c_build_high_ground")
@@ -495,7 +473,7 @@ func _hover(canvas_pos: Vector2) -> void:
 
 
 ## The pop-out HUD through real input: shop pick/place/reopen, Esc as master close, hotkeys,
-## upgrade tree buying (and a locked mastery), in-battle research pausing, intel.
+## tower panel buying (and a locked mastery), in-battle research pausing, intel.
 func _popout_checks() -> void:
 	var fails := 0
 	app.start_game("meadow")
@@ -518,13 +496,13 @@ func _popout_checks() -> void:
 	fails += _expect(is_equal_approx(screen.world.zoom, 1.0) and screen.world.pan == Vector2.ZERO, "Home resets the view")
 	# A 2x2 Scrapyard builds on the block centred on the cursor.
 	g.gold += 2000
-	await _key(KEY_BACKSLASH)
+	screen.select_build("scrapyard")
 	await _click(screen.world.base_pos + Vector2(3 * 48, 6 * 48))
 	var yard = g.tower_at.get(Vector2i(2, 5))
-	fails += _expect(yard != null and yard.type == "scrap" and g.tower_at.get(Vector2i(3, 6)) == yard, "a Scrapyard takes the 2x2 block under the cursor")
+	fails += _expect(yard != null and yard.type == "scrapyard" and g.tower_at.get(Vector2i(3, 6)) == yard, "a Scrapyard takes the 2x2 block under the cursor")
 	await _key(KEY_ESCAPE)
 	# Target priority on a tower that hits both.
-	var coil = g.place_tower("tesla", Vector2i(6, 3))
+	var coil = g.place_tower("tesla_tower", Vector2i(6, 3))
 	screen.world.selected_tower = coil
 	await _wait(0.2)
 	fails += _expect(_button_in(hud.bottom, "Priority: Any  [G]") != null, "a tower that hits air and ground shows a Priority button")
@@ -534,12 +512,13 @@ func _popout_checks() -> void:
 	await _shot("16i_priority")
 	await _key(KEY_ESCAPE)
 	# K opens the Codex on the selected tower and pauses the battle.
-	var rail = g.place_tower("sniper", Vector2i(7, 4))
+	g.gold += 1000
+	var rail = g.place_tower("railgun", Vector2i(7, 4))
 	screen.world.selected_tower = rail
 	await _wait(0.1)
 	await _key(KEY_K)
 	await _wait(0.5)
-	fails += _expect(hud.is_open("codex") and screen.paused and hud.popout("codex").panel.current == "tower:sniper", "K opens the Codex on the selected Railgun and pauses")
+	fails += _expect(hud.is_open("codex") and screen.paused and hud.popout("codex").panel.current == "tower:railgun", "K opens the Codex on the selected Railgun and pauses")
 	await _shot("19d_codex_battle")
 	await _key(KEY_ESCAPE)
 	fails += _expect(not hud.is_open("codex") and not screen.paused, "Esc closes the Codex and resumes")
@@ -557,9 +536,9 @@ func _popout_checks() -> void:
 	await _shot("16c_shop")
 	fails += _expect(hud.popout("shop").cards.size() == Towers.all_types().size(), "the shop lists all %d towers" % Towers.all_types().size())
 	await _rework_checks(g)
-	var card: Button = hud.popout("shop").cards["arrow"]
+	var card: Button = hud.popout("shop").cards["gun_turret"]
 	await _click(card.get_global_rect().get_center())
-	fails += _expect(screen.world.build_type == "arrow" and not hud.is_open("shop"), "picking a card closes the shop and starts building")
+	fails += _expect(screen.world.build_type == "gun_turret" and not hud.is_open("shop"), "picking a card closes the shop and starts building")
 	var cell := Vector2i(2, 3)
 	var cell_pos: Vector2 = screen.world.base_pos + Vector2((cell.x + 0.5) * 48.0, (cell.y + 0.5) * 48.0)
 	await _click(cell_pos)
@@ -569,40 +548,31 @@ func _popout_checks() -> void:
 	await _key(KEY_B)
 	await _key(KEY_ESCAPE)
 	fails += _expect(not hud.any_open() and screen.world.build_type == "" and not screen.paused, "Esc closes every pop-out (and doesn't pause)")
-	await _key(KEY_2)
+	screen.select_build("mortar_tower")
 	var c2 := Vector2i(5, 5)
 	await _click(screen.world.base_pos + Vector2((c2.x + 0.5) * 48.0, (c2.y + 0.5) * 48.0))
-	fails += _expect(g.tower_at.has(c2) and not hud.is_open("shop"), "a hotkey build never opens the shop")
-	g.place_tower("amp", Vector2i(3, 3))
+	fails += _expect(g.tower_at.has(c2) and not hud.is_open("shop"), "a build not picked from the shop never opens the shop")
+	g.place_tower("boost_tower", Vector2i(3, 3))
 	await _click(cell_pos)
 	await _wait(0.2)
-	fails += _expect(screen.hud.bottom._boosts(g.tower_at[cell]).has("+15% dmg (pylon)"), "the tower card lists the pylon boost as a percentage")
+	fails += _expect(screen.hud.bottom._boosts(g.tower_at[cell]).any(func(b): return str(b).contains("% dmg")), "the tower card lists the Boost Tower's boost as a percentage (%s)" % str(screen.hud.bottom._boosts(g.tower_at[cell])))
 	await _shot("16b_hud_selected")
 	# The tower panel (design/upgrade_rework.md): selecting a tower opens it in the shop's slot.
 	var tw = g.tower_at[cell]
 	fails += _expect(hud.is_open("tower") and hud.popout("tower").tower == tw, "selecting a tower opens its tower panel")
-	fails += _expect(hud.popout("tower").cards.keys() == ["trunk"], "a stock tower's panel offers the Retrofit")
-	await _key(KEY_E)
-	fails += _expect(hud.is_open("tree"), "E opens the upgrade tree")
-	var tree = hud.popout("tree")
-	await _wait(0.3)
-	await _click(tree.node_buttons["t2"].get_global_rect().get_center())
-	fails += _expect(tw.tier == 1 and tree.selected == "t2", "clicking a tree node selects it and doesn't buy")
-	fails += _expect(tree.preview.game != null, "a selected node plays its preview")
-	await _card("trunk")
-	fails += _expect(tw.tier == 2, "the panel's Retrofit card upgrades")
+	fails += _expect(hud.popout("tower").cards.keys() == ["retrofit", "a", "b", "c"], "its panel offers the Retrofit and three paths")
 	g.gold += 3000
 	await _card("b")
-	fails += _expect(tw.tier == 3 and tw.spec == "shredder", "a branch card buys the specialization")
+	fails += _expect(int(tw.depth.b) == 1, "a path card buys its first step")
 	await _card("a")
-	fails += _expect(int(tw.depth.a) == 1 and tw.secondary() == "a", "another card starts a secondary branch")
-	fails += _expect(hud.popout("tower").cards.has("c"), "the third branch keeps a card")
+	fails += _expect(int(tw.depth.a) == 1 and tw.started.size() == 2, "another card starts a second path")
+	fails += _expect(hud.popout("tower").cards.has("c"), "the third path keeps a card")
 	await _card("c")
-	fails += _expect(int(tw.depth.c) == 0, "the locked third branch's card buys nothing")
+	fails += _expect(int(tw.depth.c) == 0, "the locked third path's card buys nothing")
 	await _card("b")
 	await _card("a")
 	await _card("b")
-	fails += _expect(int(tw.depth.b) == 3 and tw.locked_in() and tw.primary() == "b", "a third upgrade locks the primary in")
+	fails += _expect(int(tw.depth.b) == 3 and tw.locked_in() and tw.primary() == "b", "a third step locks the primary in")
 	await _card("a")
 	fails += _expect(int(tw.depth.a) == 2, "the capped secondary's card buys nothing")
 	g.gold += 2000
@@ -611,21 +581,10 @@ func _popout_checks() -> void:
 	fails += _expect(int(tw.depth.b) == 4 and not tw.mastered, "a mastery without research can't be bought")
 	await _wait(0.2)
 	await _shot("16c_tower_panel")
-	# The tree previews reachable nodes only.
-	await _click(tree.node_buttons["b4"].get_global_rect().get_center())
-	await _wait(1.6)
-	fails += _expect(tree.selected == "b4" and tree.preview.game != null and tree.preview.tower.depth.b == 4, "the preview shows the clicked upgrade")
-	await _shot("16d_tree")
-	await _wait(3.0)
-	await _shot("16d4_preview_combat")
-	await _click(tree.node_buttons["c1"].get_global_rect().get_center())
-	fails += _expect(tree.preview.game == null, "an unreachable node shows a note instead of a preview")
-	await _key(KEY_E)
-	fails += _expect(not hud.is_open("tree"), "E closes the tree")
 	# The playtest case: the primary locks in while the secondary has only one upgrade.
 	g.gold += 3000
-	var sa = g.place_tower("sensor", Vector2i(12, 1))
-	_grow(g, sa, "Tacaa")
+	var sa = g.place_tower("radar_tower", Vector2i(12, 1))
+	_grow(g, sa, "acaa")
 	screen.world.selected_tower = sa
 	await _wait(0.4)
 	fails += _expect(hud.popout("tower") != null and hud.popout("tower").tower == sa, "the panel follows the selection")
@@ -633,11 +592,6 @@ func _popout_checks() -> void:
 	fails += _expect(int(sa.depth.c) == 2 and sa.locked_in(), "the secondary takes its second upgrade after the primary locks in")
 	await _card("c")
 	fails += _expect(int(sa.depth.c) == 2, "the secondary stops at 2")
-	await _key(KEY_E)
-	await _wait(0.6)
-	await _shot("16d2_tree_secondary")
-	await _key(KEY_ESCAPE)
-	fails += _expect(not hud.is_open("tree") and screen.world.selected_tower == sa, "Esc closes the tree first")
 	await _key(KEY_B)
 	await _wait(0.2)
 	fails += _expect(hud.is_open("shop") and not hud.is_open("tower") and screen.world.selected_tower == null, "B swaps the tower panel for the shop")
@@ -668,24 +622,14 @@ func _popout_checks() -> void:
 	var zp: float = screen.world.zoom
 	await _wheel(hud.popout("tower").get_global_rect().get_center(), true)
 	fails += _expect(is_equal_approx(screen.world.zoom, zp), "the wheel over the tower panel doesn't zoom the battlefield")
-	var far = g.place_tower("arrow", Vector2i(28, 1))
+	var far = g.place_tower("gun_turret", Vector2i(28, 1))
 	screen.world.selected_tower = far
 	await _wait(0.4)
 	fails += _expect(far != null and hud.popout("tower") != null and hud.popout("tower").side == "left" and hud.popout("tower").rect.position.x < 400.0, "a tower on the right opens its panel on the left")
 	await _shot("16c2_panel_left")
 	screen.world.selected_tower = tw
-	await _key(KEY_E)
-	await _wait(0.3)
-	tree = hud.popout("tree")
-	var hover := InputEventMouseMotion.new()
-	hover.position = get_viewport().get_final_transform() * (tree.node_buttons["bm"].get_global_rect().get_center() + UiKit.view_offset())
-	hover.global_position = hover.position
-	Input.parse_input_event(hover)
-	await _wait(0.3)
-	await _shot("16d3_tree_hover")
+	await _wait(0.2)
 	var z0: float = screen.world.zoom
-	await _wheel(fpos, true)
-	fails += _expect(is_equal_approx(screen.world.zoom, z0), "the wheel doesn't zoom the battlefield while the tree is open")
 	await _key(KEY_R)
 	fails += _expect(hud.is_open("research") and screen.paused, "R opens research and pauses the battle")
 	await _wheel(fpos, true)
@@ -754,8 +698,7 @@ func _sandbox_checks() -> void:
 	screen.sandbox_call()
 	await _wait(1.0)
 	await _shot("40_sandbox_spawner")
-	var t = g.place_tower("arrow", Vector2i(2, 3))
-	g.upgrade_tower(t)
+	var t = g.place_tower("gun_turret", Vector2i(2, 3))
 	screen.world.selected_tower = t
 	await _wait(0.4)
 	var max_btn: Button = null
@@ -780,7 +723,7 @@ func _research_checks() -> void:
 	SaveManager.record_run("meadow", "easy", 40, true, false)
 	SaveManager.record_run("crossroads", "medium", 60, true, false)
 	SaveManager.record_run("canyon", "nightmare", 100, true, false)
-	for id in ["cmd_funds", "cmd_core", "arrow_1", "arrow_2a", "arrow_2b", "arrow_m", "sniper_1", "sniper_2b", "tesla_1", "laser_1"]:
+	for id in ["cmd_funds", "cmd_core", "gun_turret_1", "gun_turret_2a", "gun_turret_2b", "gun_turret_m", "railgun_1", "railgun_2b", "tesla_tower_1", "laser_tower_1"]:
 		SaveManager.buy_research(id)
 	app.show_menu()
 	await _wait(0.6)
@@ -799,26 +742,26 @@ func _research_checks() -> void:
 	fails += _expect(not SaveManager.research_owned().has("cmd_salvage"), "first click only selects a node")
 	await _click(node_btn.get_global_rect().get_center())
 	fails += _expect(SaveManager.research_owned().has("cmd_salvage") and SaveManager.research_available() == avail - 2, "second click researches it (-2 RP)")
-	var locked: Button = lab.panel.node_buttons["cannon_m"]
+	var locked: Button = lab.panel.node_buttons["mortar_tower_m"]
 	await _click(locked.get_global_rect().get_center())
 	await _key(KEY_ENTER)
-	fails += _expect(not SaveManager.research_owned().has("cannon_m"), "Enter can't buy a locked node")
+	fails += _expect(not SaveManager.research_owned().has("mortar_tower_m"), "Enter can't buy a locked node")
 	var f0: int = lab.panel.focus
 	await _key(KEY_RIGHT)
 	fails += _expect(lab.panel.focus == f0 + 1, "Right moves the lab to the next tree")
 	await _key(KEY_LEFT)
 	fails += _expect(lab.panel.focus == f0, "Left moves back")
-	lab.panel.focus_tree("laser")
+	lab.panel.focus_tree("laser_tower")
 	await _wait(0.3)
 	await _key(KEY_DOWN)
 	await _key(KEY_UP)
 	await _key(KEY_DOWN)
 	await _key(KEY_ENTER)
-	fails += _expect(SaveManager.research_owned().has("laser_2b") and not SaveManager.research_owned().has("laser_2a"), "Up/Down pick a node in the focused tree and Enter researches it")
-	lab.panel.focus_tree("sniper")
+	fails += _expect(SaveManager.research_owned().has("laser_tower_2b") and not SaveManager.research_owned().has("laser_tower_2a"), "Up/Down pick a node in the focused tree and Enter researches it")
+	lab.panel.focus_tree("railgun")
 	await _wait(0.4)
-	# Hover the Railgun Mastery node so the detail panel shows its two tier-4 upgrades.
-	var hover_at: Vector2 = get_viewport().get_final_transform() * (lab.panel.node_buttons["sniper_m"].get_global_rect().get_center() + UiKit.view_offset())
+	# Hover the Railgun Mastery node so the detail panel shows its masteries.
+	var hover_at: Vector2 = get_viewport().get_final_transform() * (lab.panel.node_buttons["railgun_m"].get_global_rect().get_center() + UiKit.view_offset())
 	var motion := InputEventMouseMotion.new()
 	motion.position = hover_at
 	motion.global_position = hover_at
@@ -835,7 +778,7 @@ func _research_checks() -> void:
 	Input.parse_input_event(gun_motion)
 	await _wait(0.5)
 	await _shot("13b_research_gun_turret")
-	lab.panel.focus_tree("sniper")
+	lab.panel.focus_tree("railgun")
 	await _wait(0.3)
 	var sp_layer := CanvasLayer.new()
 	sp_layer.layer = 40
@@ -900,10 +843,11 @@ func _mouse_away() -> void:
 	await _wait(0.2)
 
 
-## Buys a path of upgrades: T = trunk, a/b/c = the next node on that branch. False on any failure.
+## Buys a run of upgrades: 0, 1 or 2 fits that Retrofit, a/b/c buys the next step on that path. False on any failure.
 func _grow(g, t, path: String) -> bool:
 	for ch in path:
-		if not g.upgrade_tower(t, "" if ch == "T" else ch):
+		var ok: bool = g.buy_retrofit(t, int(ch)) if ch in ["0", "1", "2"] else g.upgrade_tower(t, ch)
+		if not ok:
 			return false
 	return true
 
@@ -916,7 +860,7 @@ func _button_in(root: Node, text: String) -> Button:
 			return b
 	return null
 
-## Clicks the selected tower's upgrade card for `key` ("trunk", "a", "b", "c") in the tower panel.
+## Clicks the selected tower's upgrade card for `key` ("retrofit", "a", "b", "c") in the tower panel.
 func _card(key: String) -> void:
 	var panel = app.current.hud.popout("tower")
 	if panel == null or not panel.cards.has(key):
@@ -953,7 +897,7 @@ func _rework_checks(g) -> void:
 	var cell: Vector2i = free[0]
 	var cell2: Vector2i = free[free.size() / 2]
 	await _click(screen.world.base_pos + Vector2((cell.x + 0.5) * 48.0, (cell.y + 0.5) * 48.0))
-	fails += _expect(g.tower_at.has(cell) and g.tower_at[cell].is_rework, "the Gun Turret is placed")
+	fails += _expect(g.tower_at.has(cell) and g.tower_at[cell].type == "gun_turret", "the Gun Turret is placed")
 	await _key(KEY_ESCAPE)
 	var t = g.tower_at[cell]
 	screen.world.selected_tower = t
@@ -1037,7 +981,7 @@ func _rework_fire_check(g, type: String) -> int:
 		return _expect(false, "%s: a free cell exists" % type)
 	g.gold += 20000
 	var t = g.place_tower(type, free[0])
-	fails += _expect(t != null and t.is_rework, "%s is placed" % type)
+	fails += _expect(t != null, "%s is placed" % type)
 	if t == null:
 		return fails
 	fails += _expect(g.buy_retrofit(t, 0), "%s: the first Retrofit is fitted" % type)

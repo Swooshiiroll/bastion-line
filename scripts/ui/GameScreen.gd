@@ -30,8 +30,6 @@ var _modal_layer: CanvasLayer
 var _ended := false
 ## Set when a tower was picked from the shop, so the shop reopens once it is placed.
 var shop_return := false
-var _last_click_ms := -100000
-const DOUBLE_CLICK_MS := 350
 
 ## Sandbox Spawner state: enemies per click, the round "Call" sends, and the research switch.
 var spawn_count := 1
@@ -76,7 +74,7 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	world.damage_numbers = bool(SaveManager.setting("damage_numbers"))
 	# Arrow keys pan the battlefield unless a menu is using them.
-	world.keys_enabled = modal == null and not hud.pausing_open() and not hud.is_open("tree")
+	world.keys_enabled = modal == null and not hud.pausing_open()
 	if not paused:
 		for ev in world.simulate(delta, speed):
 			_handle_event(ev)
@@ -88,9 +86,9 @@ func _handle_event(ev: Dictionary) -> void:
 	match ev.type:
 		"fire":
 			match ev.tower:
-				"arrow":
+				"gun_turret", "anti_aircraft_turret":
 					Sfx.play("arrow", -12.0)
-				"missile":
+				"rocket_salvo":
 					Sfx.play("missile", -8.0)
 				_:
 					Sfx.play("cannon", -10.0)
@@ -106,8 +104,6 @@ func _handle_event(ev: Dictionary) -> void:
 			Sfx.play("sniper", -8.0)
 		"frost":
 			Sfx.play("frost", -14.0)
-		"gravity":
-			Sfx.play("boom", -12.0)
 		"gate":
 			Sfx.play("upgrade", -8.0, 0.0)
 			hud.toast("Switch gate: %s" % game.gate_label(int(ev.group)), UiKit.GOLD)
@@ -240,18 +236,6 @@ func toggle_shop() -> void:
 		hud.open("shop")
 
 
-func open_tree() -> void:
-	if world.selected_tower != null and world.selected_tower.is_rework:
-		hud.toast("The upgrade tree for the reworked towers comes later", UiKit.DIM)
-		return
-	if hud.is_open("tree"):
-		hud.close("tree")
-	elif world.selected_tower != null:
-		hud.open("tree")
-	else:
-		hud.toast("Select a tower first", UiKit.DIM)
-
-
 func toggle_intel() -> void:
 	if hud.is_open("intel"):
 		hud.close("intel")
@@ -314,8 +298,6 @@ func max_branch(key: String) -> void:
 	var t = world.selected_tower
 	if t == null or not game.sandbox:
 		return
-	if t.trunk < 2:
-		game.upgrade_tower(t)
 	if game.sandbox_max_branch(t, key) > 0:
 		Sfx.play("upgrade", -6.0, 0.0)
 
@@ -325,7 +307,6 @@ func toggle_codex() -> void:
 		close_popout("codex")
 	elif not _ended:
 		# Open on what the player is looking at: the selected tower, else the enemy under the cursor.
-		hud.close("tree")
 		var entry := ""
 		if world.selected_tower != null:
 			entry = "tower:" + str(world.selected_tower.type)
@@ -449,25 +430,16 @@ func _on_field_clicked(cell: Vector2i, button: int, shift: bool, pos: Vector2) -
 		Sfx.play("click", -8.0, 0.0)
 		return
 	if game.tower_at.has(cell):
-		var t = game.tower_at[cell]
-		var now := Time.get_ticks_msec()
-		# Double-click a tower to open its upgrade tree.
-		if world.selected_tower == t and now - _last_click_ms < DOUBLE_CLICK_MS:
-			if not hud.is_open("tree"):
-				hud.open("tree")
-		world.selected_tower = t
-		_last_click_ms = now
+		world.selected_tower = game.tower_at[cell]
 		Sfx.play("click", -8.0, 0.0)
 	else:
 		world.selected_tower = null
 
 
-## U, I and O: at tier 1, U upgrades to tier 2. After that they buy the next upgrade on branch A, B or
-## C (the branch's specialization first, its mastery last).
-## Opens the Retrofit pop-out for the selected reworked tower (Y, or its card).
+## Opens the Retrofit pop-out for the selected tower (Y, or its card).
 func open_retrofit() -> void:
 	var t = world.selected_tower
-	if t == null or not t.is_rework:
+	if t == null:
 		return
 	if t.retrofit >= 0:
 		hud.toast("%s is already fitted" % str(t.retrofit_options()[t.retrofit].name), UiKit.DIM)
@@ -481,7 +453,7 @@ func open_retrofit() -> void:
 ## Buys Retrofit option `option` on the selected tower and closes the pop-out.
 func buy_retrofit(option: int) -> void:
 	var t = world.selected_tower
-	if t == null or not t.is_rework:
+	if t == null:
 		return
 	if not game.buy_retrofit(t, option):
 		hud.toast("Not enough credits for that Retrofit", UiKit.BAD)
@@ -494,13 +466,6 @@ func buy_retrofit(option: int) -> void:
 func upgrade_selected(choice := 0) -> void:
 	var t = world.selected_tower
 	if t == null:
-		return
-	if t.trunk < 2:
-		if choice != 0:
-			return
-		if not game.upgrade_tower(t):
-			hud.toast("Not enough credits to upgrade", UiKit.BAD)
-			Sfx.play("error", -6.0, 0.0)
 		return
 	var key: String = Tower.BRANCHES[clampi(choice, 0, 2)]
 	var why: String = t.block_reason(key)
@@ -531,7 +496,7 @@ func sell_selected() -> void:
 
 func cycle_target() -> void:
 	var t = world.selected_tower
-	if t != null and not t.is_support() and not (t.type in ["frost", "gravity"]):
+	if t != null and not t.is_support() and not (t.type in ["cryo_tower", "magneto_tower"]):
 		game.cycle_mode(t)
 
 
@@ -725,28 +690,12 @@ func _unhandled_input(event: InputEvent) -> void:
 			toggle_shop()
 		KEY_S:
 			toggle_spawner()
-		KEY_E:
-			open_tree()
 		KEY_R:
 			toggle_research()
 		KEY_K, KEY_F1:
 			toggle_codex()
 		KEY_N:
 			toggle_intel()
-		KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6, KEY_7, KEY_8, KEY_9:
-			select_build(Towers.ORDER[event.keycode - KEY_1])
-		KEY_0:
-			select_build(Towers.ORDER[9])
-		KEY_MINUS:
-			select_build(Towers.ORDER[10])
-		KEY_EQUAL:
-			select_build(Towers.ORDER[11])
-		KEY_BRACKETLEFT:
-			select_build(Towers.ORDER[12])
-		KEY_BRACKETRIGHT:
-			select_build(Towers.ORDER[13])
-		KEY_BACKSLASH:
-			select_build(Towers.ORDER[14])
 		KEY_SPACE:
 			start_wave()
 		KEY_Q:

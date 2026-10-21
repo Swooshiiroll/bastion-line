@@ -263,17 +263,9 @@ func _visual(ev: Dictionary) -> void:
 	var acc := Draw.accent(str(ev.get("tower", "")), str(ev.get("spec", "")))
 	match ev.type:
 		"fire":
-			match ev.tower:
-				"cannon":
-					fx.flash(ev.pos, 12.0, acc, 0.1)
-					ground_fx.burst(ev.pos, SMOKE, 5, 40.0, 3.0, 0.5)
-				"missile":
-					fx.flash(ev.pos, 10.0, Color(1.0, 0.7, 0.3), 0.12)
-					ground_fx.burst(ev.pos, SMOKE, 6, 50.0, 3.5, 0.7)
-				_:
-					fx.flash(ev.pos, 6.0, acc, 0.06)
+			fx.flash(ev.pos, 6.0, acc, 0.06)
 		"arrow_hit":
-			fx.burst(ev.pos, Color(1.0, 0.35, 0.35) if ev.get("shred", false) else Draw.ACCENT.arrow, 4, 60.0, 1.6, 0.25)
+			fx.burst(ev.pos, Color(1.0, 0.35, 0.35) if ev.get("shred", false) else Draw.ACCENT.gun_turret, 4, 60.0, 1.6, 0.25)
 			if ev.get("look", "") != "":
 				_gun_hit(ev)
 		"stun_hit":
@@ -315,7 +307,7 @@ func _visual(ev: Dictionary) -> void:
 			if str(ev.get("look", "")) != "":
 				_salvo_hit(ev)
 		"chain":
-			var ccol := Draw.ACCENT.tesla if str(ev.get("spec", "")) != "overload" else Draw.SPEC_ALT.overload
+			var ccol: Color = Draw.ACCENT.tesla_tower
 			var cwidth := 2.0 + float(ev.tier) * 0.5
 			var tl: Dictionary = {}
 			if str(ev.get("look", "")) != "":
@@ -332,7 +324,7 @@ func _visual(ev: Dictionary) -> void:
 				if not tl.is_empty() and tl.P >= 3:
 					fx.ring(p, 4.0, 12.0, ccol, 0.3, 1.4)
 		"tracer":
-			var rcol := Draw.SPEC_ALT.lance if str(ev.get("spec", "")) == "lance" else Draw.ACCENT.sniper
+			var rcol: Color = Draw.ACCENT.railgun
 			var tw := 3.0 + maxf(0.0, float(ev.get("width", 10.0)) - 10.0) * 0.45
 			# The slug keeps going past what it hits, off the edge of the screen (visual only).
 			var shot: Vector2 = ev.to - ev.from
@@ -343,7 +335,7 @@ func _visual(ev: Dictionary) -> void:
 			fx.flash(ev.to, 9.0, rcol, 0.1)
 			fx.flash(ev.from, 8.0, Color(1, 1, 1), 0.06)
 		"frost":
-			var fcol := Draw.SPEC_ALT.shatter if str(ev.get("spec", "")) == "shatter" else Draw.ACCENT.frost
+			var fcol: Color = Draw.ACCENT.cryo_tower
 			if str(ev.get("look", "")) != "":
 				# The Cryo Tower's wave of creeping mist (confirmed art): pale ice, gold at a mastery, a white shock when a wave freezes.
 				fcol = CryoTowerArt.tint(CryoTowerArt.levels(str(ev.look)))
@@ -361,44 +353,14 @@ func _visual(ev: Dictionary) -> void:
 		"flak_hit":
 			fx.flash(ev.pos, 12.0, Color(1.0, 0.9, 0.6), 0.08)
 			fx.burst(ev.pos, Color(0.35, 0.36, 0.34, 0.9), 8, 60.0, 3.0, 0.5)
-			fx.ring(ev.pos, 4.0, float(ev.radius), Color(Draw.ACCENT.flak, 0.8), 0.22, 1.6)
+			fx.ring(ev.pos, 4.0, float(ev.radius), Color(Draw.ACCENT.anti_aircraft_turret, 0.8), 0.22, 1.6)
 			if str(ev.get("look", "")) != "" and AntiAircraftArt.levels(str(ev.look)).P >= 4:
 				fx.burst(ev.pos, Color(0.9, 0.8, 0.6), 8, float(ev.radius) * 2.0, 1.0, 0.25)
-		"flechette":
-			# One trace per flechette, scattered across the cone at random lengths.
-			var fcone := deg_to_rad(float(ev.cone)) * 0.5
-			var faim := float(ev.aim)
-			for k in int(ev.get("pellets", 6)):
-				var fa := faim + randf_range(-fcone, fcone)
-				var fend: Vector2 = ev.pos + Vector2.from_angle(fa) * float(ev.range) * randf_range(0.55, 1.0)
-				fx.tracer(ev.pos + Vector2.from_angle(fa) * randf_range(6.0, 12.0), fend, Color(Draw.SPEC_ALT.flechette, 0.8), 0.12, 1.4)
-			fx.flash(ev.pos + Vector2.from_angle(faim) * 12.0, 9.0, Draw.SPEC_ALT.flechette, 0.08)
 		"suppress":
 			fx.ring(ev.pos, 6.0, float(ev.radius), Color(0.75, 0.55, 1.0), 0.35, 1.8)
-		"null_pulse":
-			var ncol := Draw.accent("nullifier", str(ev.get("spec", "")))
-			fx.ring(ev.pos, 8.0, float(ev.radius), ncol, 0.45, 3.0, true)
-			fx.ring(ev.pos, float(ev.radius) * 0.4, float(ev.radius), Color(1, 1, 1, 0.5), 0.3, 1.2)
-			fx.flash(ev.pos, 14.0, ncol, 0.12)
-		"cascade":
-			fx.ring(ev.pos, 4.0, float(ev.radius), Color(0.55, 0.8, 1.0), 0.3, 1.6)
-			fx.burst(ev.pos, Color(0.55, 0.8, 1.0), 8, 90.0, 2.0, 0.3)
-		"nova":
-			var vcol := Color(0.55, 1.0, 0.3) if ev.get("burn", false) else Draw.accent("nova", str(ev.get("spec", "")))
-			fx.flash(ev.pos, 22.0, Color(1.0, 0.95, 0.8), 0.12)
-			fx.ring(ev.pos, 10.0, float(ev.radius), vcol, 0.4, 4.0, true)
-			fx.ring(ev.pos, 6.0, float(ev.radius) * 0.7, Color(1.0, 0.9, 0.6), 0.3, 2.0)
-			fx.burst(ev.pos, vcol, 14, 160.0, 2.6, 0.4)
-			shake = maxf(shake, 0.05)
-		"mini_nova":
-			fx.flash(ev.pos, 12.0, Draw.ACCENT.nova, 0.1)
-			fx.ring(ev.pos, 4.0, float(ev.radius), Draw.ACCENT.nova, 0.3, 2.0, true)
-		"storm_tick":
-			fx.ring(ev.pos, float(ev.radius) * 0.85, float(ev.radius), Color(Draw.SPEC_ALT.ionstorm, 0.5), 0.25, 1.4)
 		"storm_zone":
-			var scol: Color = Draw.SPEC_ALT.ionstorm
+			var scol: Color = Draw.ACCENT.tesla_tower
 			if str(ev.get("look", "")) != "":
-				scol = Draw.ACCENT.tesla_tower
 				if TeslaTowerArt.levels(str(ev.look)).C >= 5:
 					scol = TeslaTowerArt.GOLD
 			fx.flash(ev.pos, 18.0, scol, 0.15)
@@ -497,26 +459,13 @@ func _visual(ev: Dictionary) -> void:
 							fx.tracer(ev.from, ev.to, Color(1, 1, 1, 0.8), 0.06, ds.w * 0.4)
 				fx.flash(ev.to, 5.0, ds.col, 0.06)
 			else:
-				fx.tracer(ev.from, ev.to, Color(Draw.ACCENT.drones, 0.9), 0.08, 1.4)
-				fx.flash(ev.to, 5.0, Draw.ACCENT.drones, 0.06)
+				fx.tracer(ev.from, ev.to, Color(Draw.ACCENT.drone_bay, 0.9), 0.08, 1.4)
+				fx.flash(ev.to, 5.0, Draw.ACCENT.drone_bay, 0.06)
 		"drone_bomb", "bomblet":
 			fx.flash(ev.pos, 12.0, Color(1.0, 0.65, 0.3), 0.1)
 			fx.ring(ev.pos, 4.0, float(ev.radius), Color(1.0, 0.6, 0.25), 0.28, 2.0, true)
 			fx.burst(ev.pos, Color(1.0, 0.55, 0.2), 8, 100.0, 2.2, 0.35)
 			ground_fx.scorch(ev.pos, float(ev.radius) * 0.35)
-		"gravity":
-			var gcol := Draw.accent("gravity", str(ev.get("spec", "")))
-			if ev.get("pull", false):
-				fx.ring(ev.pos, 8.0, float(ev.radius), Color(gcol, 0.5), 0.45, 2.0)
-				if ev.get("implode", false):
-					fx.flash(ev.pos, 26.0, Color(1, 1, 1), 0.15)
-					fx.burst(ev.pos, gcol, 20, 140.0, 2.6, 0.45)
-					shake = maxf(shake, 0.2)
-				return
-			fx.ring(ev.pos, float(ev.radius), 8.0, gcol, 0.45, 3.0)
-			fx.ring(ev.pos, float(ev.radius) * 0.6, 4.0, Color(gcol, 0.6), 0.35, 2.0)
-			fx.flash(ev.pos, 16.0, gcol, 0.15)
-			shake = maxf(shake, 0.08)
 		"emp":
 			var ecol := Draw.ENEMY_COLOR.jammer
 			fx.ring(ev.pos, 6.0, float(ev.radius), ecol, 0.35, 2.5, true)
@@ -532,7 +481,7 @@ func _visual(ev: Dictionary) -> void:
 			fx.ring(ev.pos, 18.0, 4.0, Color(1.0, 0.3, 0.3), 0.25, 2.5)
 			fx.text(ev.pos + Vector2(0, -22), "EXECUTED", Color(1.0, 0.4, 0.35), 12, 0.8, 24.0)
 		"laser_lock":
-			fx.flash(ev.pos, 10.0, Draw.ACCENT.laser, 0.1)
+			fx.flash(ev.pos, 10.0, Draw.ACCENT.laser_tower, 0.1)
 		"hit":
 			if damage_numbers and float(ev.amount) >= 1.0:
 				fx.text(ev.pos + Vector2(randf_range(-6.0, 6.0), -12.0), str(roundi(ev.amount)), Color(0.8, 0.95, 1.0), 12, 0.6, 26.0)

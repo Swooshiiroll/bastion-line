@@ -1,6 +1,5 @@
 // Builds design/upgrade_trees_rework.html (the editable trees page for the tower rework) from
 // design/upgrade_trees_rework.md. Run: node tools/tree_rework_page.mjs   (from the project folder)
-// Today's trees page (tools/tree_page.mjs, design/upgrade_trees.md) and the game's data are untouched.
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";

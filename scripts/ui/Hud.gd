@@ -7,7 +7,6 @@ const UiKit = preload("res://scripts/ui/UiKit.gd")
 const TopBar = preload("res://scripts/ui/hud/TopBar.gd")
 const BottomBar = preload("res://scripts/ui/hud/BottomBar.gd")
 const ShopPanel = preload("res://scripts/ui/hud/ShopPanel.gd")
-const UpgradeTreePanel = preload("res://scripts/ui/hud/UpgradeTreePanel.gd")
 const TowerPanel = preload("res://scripts/ui/hud/TowerPanel.gd")
 const IntelPanel = preload("res://scripts/ui/hud/IntelPanel.gd")
 const ResearchPopOut = preload("res://scripts/ui/hud/ResearchPopOut.gd")
@@ -109,14 +108,9 @@ func open(kind: String, arg := "") -> void:
 				# The Spawner lives on the left edge too; the tower you picked wins that slot.
 				close("spawner")
 			p = TowerPanel.new(self, st, tower_side)
-		"tree":
-			var t = screen.world.selected_tower
-			if t == null:
-				return
-			p = UpgradeTreePanel.new(self, t)
 		"retrofit":
 			var rt = screen.world.selected_tower
-			if rt == null or not rt.is_rework or rt.retrofit >= 0:
+			if rt == null or rt.retrofit >= 0:
 				return
 			p = RetrofitPanel.new(self, rt)
 		"intel":
@@ -208,10 +202,6 @@ func refresh(delta: float) -> void:
 		var rp = popouts.retrofit
 		if screen.world.selected_tower != rp.tower or not screen.game.towers.has(rp.tower):
 			screen.close_popout("retrofit")
-	if is_open("tree"):
-		var tp = popouts.tree
-		if screen.world.selected_tower != tp.tower or not screen.game.towers.has(tp.tower):
-			screen.close_popout("tree")
 	for kind in popouts:
 		popouts[kind].refresh(delta)
 	banner_t = maxf(0.0, banner_t - delta)
