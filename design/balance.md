@@ -1,8 +1,8 @@
 # Bastion Line balance master
 
 Every balance number in the game, the math behind them, and the source the game's data is generated from (issue #75,
-spec in `design/balance_master.md`). It holds the towers, enemies and modifiers; waves and scaling, and the economy,
-difficulty, research and rules follow in later phases.
+spec in `design/balance_master.md`). It holds the towers, enemies, modifiers, and waves and scaling; the economy, difficulty,
+research and rules follow in the last phase.
 
 ## How to use this file
 
@@ -47,6 +47,12 @@ side_gun 0.5, c3 sets multishot 2 and side_gun 0, so =DPS = 16 × 1.2 × 2 = 38.
 
 **=Strength** (enemies) = (speed / 100)² × max(1, armor) × health, from round-1 stats. It orders Strongest targeting
 (every boss above every non-boss) and sets the leak cost.
+
+**Round table** (Waves): **=HP ×** as above; **=Speed ×** = 1 + min(SPEED_CAP, SPEED_PER_ROUND × w) (bosses get
+BOSS_SPEED_SHARE of the bonus); **=Budget** = BUDGET_BASE + BUDGET_LINEAR·w + BUDGET_QUAD·w²; **=Elite share** = 0 before
+ELITE_FROM, then ELITE_START + ELITE_RISE × (round - ELITE_FROM) / (ELITE_FULL_AT - ELITE_FROM), capped; **=Bounty ×** =
+HP multiplier^bounty_exp; **=Clear bonus** = CLEAR_BASE + CLEAR_PER_ROUND × round; **=Early-call bonus** = CALL_BASE +
+CALL_PER_ROUND × round.
 
 **=Leak** = 1 shield below the first leak band, 2 below the second, 3 below the third, else 4; a boss costs the first
 round it appears in a boss line-up (Waves). An elite costs one shield more in the game.
@@ -729,3 +735,113 @@ The nine elite modifiers: the round each first appears (**Intro**), what it mult
 | jamming | Jamming | 24 | 1.6 | keys.emp_radius 80 · keys.emp_duration 1.5 · keys.emp_interval 6 |
 | resolute | Resolute | 28 | 1.4 | slow_resist_add 0.5 |
 | commanding | Commanding | 32 | 1.5 | keys.aura_radius 90 · keys.aura_haste 0.15 |
+
+## Waves and scaling
+
+One generator makes every round, the same on every playthrough, sector and mode. Each round has a threat budget (in
+Drone-equivalents) that it spends on groups of enemies, part of it on elites. A boss round adds its boss line-up. How
+the generator splits a round into groups and spaces them in time is its own mechanics, in `data/waves.gd`.
+
+<!-- table: wave_rules -->
+| Constant | Value | Meaning |
+|---|---|---|
+| `Waves.HP_LINEAR` | 0.05 | HP multiplier: + this × w (w = round - 1) |
+| `Waves.HP_QUAD` | 0.0012 | HP multiplier: + this × w² |
+| `Waves.LATE_START` | 60 | From this round, HP also compounds |
+| `Waves.late_growth` | 0.01 | ... by this much a round (1%) |
+| `Waves.SPEED_PER_ROUND` | 0.0045 | Speed: + this a round |
+| `Waves.SPEED_CAP` | 0.5 | ... up to this much in all |
+| `Waves.BOSS_SPEED_SHARE` | 0.5 | Bosses get this share of the speed growth |
+| `Waves.BUDGET_BASE` | 8 | Threat budget: this at round 1 |
+| `Waves.BUDGET_LINEAR` | 3.6 | ... + this × w |
+| `Waves.BUDGET_QUAD` | 0.02 | ... + this × w² |
+| `Waves.ELITE_FROM` | 8 | No elites before this round |
+| `Waves.ELITE_START` | 0.10 | Elites' share of the budget from then |
+| `Waves.ELITE_RISE` | 0.20 | ... rising by this much |
+| `Waves.ELITE_FULL_AT` | 60 | ... reached at this round |
+| `Waves.MAX_ELITES` | 12 | Most elites in one round |
+| `Modifiers.TWO_MODS_AT` | 40 | An elite carries 2 modifiers from this round |
+| `Modifiers.THREE_MODS_AT` | 80 | ... and 3 from this round |
+| `Waves.MAX_SPAWNS` | 250 | Most enemies in one round |
+| `Waves.BOSS_WEIGHT` | 0.4 | How often a recurring boss is picked (a regular enemy is 1) |
+| `Waves.RECUR_BOSS_SHARE` | 0.5 | A boss recurs only if it costs at most this share of the budget |
+| `Waves.DEBUT_SHARE` | 0.3 | A new enemy's own group gets this share of the budget on its round |
+| `Waves.NEW_WEIGHT` | 2.5 | A recently introduced enemy is picked this many times as often |
+| `Waves.NEW_ROUNDS` | 12 | ... for this many rounds after its introduction |
+
+Each enemy's round makeup: the round it's introduced (its own group leads that round), its threat cost (a Needle pair or
+a Shrike cluster costs its pack times this), the seconds between spawns in its group, and the most in one group. A
+blank cell means none (bosses aren't introduced in regular rounds).
+
+<!-- table: round_makeup -->
+| Id | =Name | Intro | Threat | Spacing | Max |
+|---|---|---|---|---|---|
+| grunt | Drone | 1 | 1 | 0.35 | - |
+| runner | Skitter | 3 | 0.7 | 0.3 | - |
+| brute | Siege Mech | 7 | 3.8 | 0.9 | - |
+| swarmling | Nanite | 2 | 0.35 | 0.14 | - |
+| bat | Strike Drone | 25 | 1.4 | 0.45 | - |
+| shaman | Repair Bot | 5 | 1.8 | 1.8 | 8 |
+| phantom | Phantom | 13 | 1.2 | 0.5 | - |
+| aegis | Aegis Walker | 17 | 4 | 1.2 | - |
+| hydra | Hydra Frame | 29 | 3 | 1.1 | - |
+| jammer | Jammer | 9 | 2.1 | 2 | 5 |
+| locust | Locust | 15 | 0.25 | 0.1 | - |
+| gunship | Gunship | 43 | 8.6 | 1.5 | - |
+| burrower | Burrower | 31 | 2.3 | 0.8 | - |
+| stalker | Blink Stalker | 11 | 1.6 | 0.6 | - |
+| mender | Mender Hulk | 51 | 5.4 | 1.4 | - |
+| rally | Rally Beacon | 21 | 2.4 | 1.6 | 6 |
+| bulwark | Bulwark | 33 | 2.9 | 1.6 | 6 |
+| rampart | Rampart | 35 | 7.4 | 1.8 | - |
+| needle | Needle | 19 | 0.6 | 0.6 | - |
+| fury | Fury Drone | 49 | 1.9 | 0.5 | - |
+| shrike | Shrike | 47 | 1 | 1.2 | - |
+| titan | Titan | 57 | 12 | 2.2 | - |
+| siphon | Siphon | 27 | 3 | 2 | 5 |
+| blackout | Blackout Rig | 39 | 4.5 | 2.4 | 4 |
+| capacitor | Capacitor | 55 | 7.5 | 3 | 3 |
+| shifter | Shifter | 41 | 3.8 | 1 | - |
+| wraith | Wraith | 53 | 6 | 1 | - |
+| masquerade | Masquerade | 45 | 5.5 | 1.2 | - |
+| decoy | Decoy Beacon | 37 | 4 | 2.5 | 3 |
+| mirage | Mirage | 23 | 2.2 | 2 | 5 |
+| juggernaut | Dreadnought | - | 20 | 6 | 1 |
+| warlord | Overmind | - | 45 | 6 | 1 |
+| leviathan | Leviathan | - | 60 | 6 | 1 |
+| colossus | Colossus | - | 95 | 6 | 1 |
+
+The boss line-ups (count per boss; which bosses, and their order, are set in `data/waves.gd`):
+
+<!-- table: boss_rounds -->
+| Round | Line-up |
+|---|---|
+| 20 | juggernaut 1 |
+| 40 | warlord 1 · juggernaut 1 |
+| 60 | leviathan 1 · warlord 1 · juggernaut 1 |
+| 80 | colossus 1 · leviathan 1 · juggernaut 2 |
+| 100 | colossus 1 · leviathan 1 · warlord 1 · juggernaut 2 |
+| 120 | colossus 2 · leviathan 1 · warlord 2 · juggernaut 3 |
+
+The round formulas at sample rounds:
+
+<!-- generated: round_table -->
+
+| Round | =HP × | =Speed × | =Boss speed × | =Budget | =Elite share | =Bounty × | =Clear bonus | =Early-call bonus |
+|---|---|---|---|---|---|---|---|---|
+| 1 | 1.00 | 1.00 | 1.00 | 8.0 | 0% | 1.00 | 23 | 12 |
+| 10 | 1.55 | 1.04 | 1.02 | 42.0 | 11% | 1.14 | 50 | 30 |
+| 20 | 2.38 | 1.09 | 1.04 | 83.6 | 15% | 1.30 | 80 | 50 |
+| 30 | 3.46 | 1.13 | 1.07 | 129.2 | 18% | 1.45 | 110 | 70 |
+| 40 | 4.78 | 1.18 | 1.09 | 178.8 | 22% | 1.60 | 140 | 90 |
+| 50 | 6.33 | 1.22 | 1.11 | 232.4 | 26% | 1.74 | 170 | 110 |
+| 60 | 8.13 | 1.27 | 1.13 | 290.0 | 30% | 1.87 | 200 | 130 |
+| 70 | 11.23 | 1.31 | 1.16 | 351.6 | 30% | 2.07 | 230 | 150 |
+| 80 | 15.18 | 1.36 | 1.18 | 417.2 | 30% | 2.26 | 260 | 170 |
+| 90 | 20.16 | 1.40 | 1.20 | 486.8 | 30% | 2.46 | 290 | 190 |
+| 100 | 26.37 | 1.45 | 1.22 | 560.4 | 30% | 2.67 | 320 | 210 |
+| 120 | 43.50 | 1.50 | 1.25 | 719.6 | 30% | 3.10 | 380 | 250 |
+| 140 | 69.02 | 1.50 | 1.25 | 894.8 | 30% | 3.56 | 440 | 290 |
+| 160 | 106.26 | 1.50 | 1.25 | 1086.0 | 30% | 4.05 | 500 | 330 |
+
+<!-- /generated: round_table -->

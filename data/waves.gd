@@ -57,8 +57,14 @@ const SPACING := {
 const MAX_COUNT := {"shaman": 8, "jammer": 5, "rally": 6, "bulwark": 6, "siphon": 5, "blackout": 4, "capacitor": 3, "decoy": 3, "mirage": 5,
 	"juggernaut": 1, "warlord": 1, "leviathan": 1, "colossus": 1}
 
-## A recurring boss turns up less often than a regular enemy.
+## A recurring boss turns up less often than a regular enemy, and only when it costs at most RECUR_BOSS_SHARE of the round's
+## budget. A new enemy's own group gets DEBUT_SHARE of the budget on its round, and for NEW_ROUNDS rounds after its introduction
+## an enemy is picked NEW_WEIGHT times as often.
 const BOSS_WEIGHT := 0.4
+const RECUR_BOSS_SHARE := 0.5
+const DEBUT_SHARE := 0.3
+const NEW_WEIGHT := 2.5
+const NEW_ROUNDS := 12
 
 
 ## Past LATE_START, enemy HP also compounds by `late_growth` per round, so even a map full of
@@ -228,12 +234,12 @@ static func generated_round(wave: int) -> Array:
 			pool.append(t)
 	var bosses: Array = []
 	for t in COST:
-		if bool(Enemies.ENEMIES[t].get("boss", false)) and first_boss_round(t) < wave and float(COST[t]) <= budget * 0.5:
+		if bool(Enemies.ENEMIES[t].get("boss", false)) and first_boss_round(t) < wave and float(COST[t]) <= budget * RECUR_BOSS_SHARE:
 			bosses.append(t)
 	var delay := 0.0
 	for t in INTRO:
 		if exists(t) and int(INTRO[t]) == wave:
-			var share := 0.3 if not pool.is_empty() else 1.0
+			var share := DEBUT_SHARE if not pool.is_empty() else 1.0
 			groups.append(_group(t, budget * share, 0.0))
 			budget *= 1.0 - share
 			delay = 3.0
@@ -249,7 +255,7 @@ static func generated_round(wave: int) -> Array:
 			var wt := 0.0
 			if not picks.has(t):
 				# Newer enemies turn up more often while they're fresh; a recurring boss less often.
-				wt = BOSS_WEIGHT if bosses.has(t) else (2.5 if int(INTRO[t]) >= wave - 12 else 1.0)
+				wt = BOSS_WEIGHT if bosses.has(t) else (NEW_WEIGHT if int(INTRO[t]) >= wave - NEW_ROUNDS else 1.0)
 			weights.append(wt)
 			total += wt
 		if total <= 0.0:

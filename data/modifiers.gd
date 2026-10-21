@@ -62,11 +62,14 @@ const MODIFIERS := {
 
 ## The most slow resist a modifier can give.
 const SLOW_RESIST_CAP := 0.9
+## An elite carries one modifier, two from round TWO_MODS_AT and three from round THREE_MODS_AT.
+const TWO_MODS_AT := 40
+const THREE_MODS_AT := 80
 
 
 ## How many modifiers one elite can carry on round `wave`: one, two from round 40, three from round 80.
 static func max_per_elite(wave: int) -> int:
-	return 3 if wave >= 80 else (2 if wave >= 40 else 1)
+	return 3 if wave >= THREE_MODS_AT else (2 if wave >= TWO_MODS_AT else 1)
 
 
 ## Whether enemy `etype` can take modifier `mod`: never a boss or a trick (Masquerade, Decoy Beacon), and never a trait it already has.
