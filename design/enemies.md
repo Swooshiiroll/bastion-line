@@ -374,8 +374,9 @@ they exist.
     10% of it from round 8, rising to 30% by round 60; with no modifier open yet (rounds 8 and 9) that share stays with
     the regular groups, so the first elite is round 10's Shielded one. A modifier's introduction round always has an
     elite carrying it.
-  - **HP scaling:** 1 + 0.05w + 0.0012w² (w = round - 1), compounding 3% a round after round 60 (was
-    1 + 0.06w + 0.0025w² and 4% after 40).
+  - **HP scaling:** 1 + 0.05w + 0.0012w² (w = round - 1), compounding 1% a round after round 60 (was
+    1 + 0.06w + 0.0025w² and 4% after 40; 3% after 60 until the owner lowered it on 2026-10-20, so endless
+    doesn't outrun every defence: a Drone has about 3,850 HP at round 130 instead of 15,200).
   - **Introductions:** one new enemy every two rounds (odd rounds, so never on a boss round), every role's T1 first,
     then the Specials and higher tiers, in `Waves.INTRO`; the new enemies of phase 4 already have their slots
     (Needle 19, Mirage 23, Siphon 27, Decoy Beacon 37, Blackout Rig 39, Shifter 41, Masquerade 45, Shrike 47,

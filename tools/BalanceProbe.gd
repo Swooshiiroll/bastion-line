@@ -4,7 +4,8 @@ extends Node
 ##   godot --headless --path <project> res://tools/BalanceProbe.tscn [-- --factors=1.0,1.5,2.0]
 ## Other flags: --difficulty=hard (easy|medium|hard|nightmare|cataclysm), --no-abilities, --seeds=1,2,
 ## --maps=delta,foundry, --lives=1000 (override shields, e.g. to measure Cataclysm by rounds survived),
-## --endless=20 (endless rounds to play past a medal), --research=all (every Research Lab node).
+## --endless=20 (endless rounds to play past a medal), --research=all (every Research Lab node),
+## --mods=none (no elites) or --mods=hasty,plated (elites carry only those modifiers).
 ## A round that runs past STALL_TIME of game time ends the sector as STALLED, naming the enemies left.
 
 const Game = preload("res://scripts/core/Game.gd")
@@ -12,6 +13,7 @@ const Bot = preload("res://scripts/core/Bot.gd")
 const Maps = preload("res://data/maps.gd")
 const Research = preload("res://scripts/core/Research.gd")
 const Waves = preload("res://data/waves.gd")
+const Modifiers = preload("res://data/modifiers.gd")
 const Grid = preload("res://scripts/core/Grid.gd")
 const Difficulty = preload("res://data/difficulty.gd")
 
@@ -43,6 +45,8 @@ func _ready() -> void:
 			Waves.bounty_exp = float(a.substr(9))
 		if a.begins_with("--price="):
 			Difficulty.price_override = float(a.substr(8))
+		if a.begins_with("--mods="):
+			Waves.mods_only = _mods_set(a.substr(7))
 		if a.begins_with("--endless="):
 			endless = int(a.substr(10))
 		if a.begins_with("--lives="):
@@ -167,3 +171,16 @@ static func _detail(g, bot) -> void:
 			maxed += 1
 	print("    r%-3d towers %2d (maxed %2d, mastered %2d) | free tiles %3d, near a lane %3d | bank %6d, spent on towers %7d, avg %5d/tower" % [
 		g.wave, g.towers.size(), maxed, mastered, free, useful, g.gold, spent, spent / maxi(1, g.towers.size())])
+
+
+## The --mods switch: "none" for no elites, or comma-separated modifier ids (unknown ones are named and skipped).
+func _mods_set(arg: String) -> Array:
+	if arg == "none":
+		return []
+	var out: Array = []
+	for m in arg.split(","):
+		if Modifiers.MODIFIERS.has(m):
+			out.append(m)
+		else:
+			print("unknown modifier %s (known: %s)" % [m, ", ".join(PackedStringArray(Modifiers.ORDER))])
+	return out

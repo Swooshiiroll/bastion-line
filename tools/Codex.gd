@@ -1,7 +1,8 @@
 extends Node
-## Exports the data and art for the printable codex (tools/codex.mjs builds the PDF from it):
-## codex.json with every enemy's stats and round scaling plus tower metadata, and one PNG per
-## sprite (each tower at T1, T2 and every specialization and mastery; each enemy).
+## Exports the data and art for the printable codex (tools/codex.mjs builds the PDF from it): codex.json with every
+## enemy (stats, role and tier, strength, round scaling, the Codex's ability lines, the modifiers it can roll), every
+## tower's whole tree as the Codex shows it (Lore.tower_rows), the modifiers, roles, boss rounds and modes; and one PNG
+## per sprite (each tower stock, retrofitted, at the end of each path and at each mastery; each enemy).
 ## Launch with:  godot --path <project> -- --codex=<absolute output dir>
 
 const Draw = preload("res://scripts/view/Draw.gd")
@@ -11,6 +12,11 @@ const Enemies = preload("res://data/enemies.gd")
 const Waves = preload("res://data/waves.gd")
 const Difficulty = preload("res://data/difficulty.gd")
 const DrawNode = preload("res://scripts/view/DrawNode.gd")
+const Lore = preload("res://scripts/core/Lore.gd")
+const Modifiers = preload("res://data/modifiers.gd")
+const KnowledgePanel = preload("res://scripts/ui/KnowledgePanel.gd")
+const Tower = preload("res://scripts/entities/Tower.gd")
+const Game = preload("res://scripts/core/Game.gd")
 
 const TILE := 360
 const BG := Color(0.07, 0.09, 0.12)
@@ -48,6 +54,12 @@ func _write_data() -> void:
 		d["id"] = type
 		d["color"] = Draw.ENEMY_COLOR.get(type, Color.WHITE).to_html(false)
 		d["first_round"] = Waves.first_round(type)
+		# The Codex's own lines (Lore), so the PDF says exactly what the game does.
+		d["role_label"] = Enemies.role_label(d)
+		d["strength"] = roundi(Enemies.strength(type))
+		d["abilities"] = Lore.enemy_abilities(Enemies.ENEMIES[type])
+		d["mods"] = Lore.enemy_mods(type).map(func(m): return str(Modifiers.MODIFIERS[m].name))
+		d["hitters"] = Lore.hitters(Enemies.ENEMIES[type]).map(func(t): return str(Towers.def(t).name))
 		var hp := {}
 		var credits := {}
 		for w in SAMPLE_ROUNDS:
@@ -61,14 +73,35 @@ func _write_data() -> void:
 	for i in Towers.ORDER.size():
 		var type: String = Towers.ORDER[i]
 		var td: Dictionary = Towers.def(type)
+		var tr: Dictionary = Towers.Rework.TREES[type]
+		var beam := bool(td.get("beam", false))
 		var branches: Array = []
-		for p in Towers.Rework.TREES[type].paths:
-			branches.append({"id": p.key, "color": Draw.accent(type).to_html(false)})
+		for p in tr.paths:
+			branches.append({"id": p.key, "name": str(p.name), "color": Draw.accent(type, str(p.key)).to_html(false)})
+		# Every row of its tree (Lore.tower_rows), with the stat line the Codex shows: full stats for the stock tower,
+		# the changes for every step after.
+		var rows: Array = []
+		for r in Lore.tower_rows(type):
+			var stats := TowerInfo.summary(r.stats, beam) if (r.prev as Dictionary).is_empty() else KnowledgePanel._changes(r.stats, r.prev, beam)
+			rows.append({"label": str(r.label), "name": str(r.name), "cost": int(r.cost), "blurb": str(r.blurb), "stats": stats, "branch": str(r.branch)})
 		towers.append({
-			"id": type, "name": td.name, "key": "",
+			"id": type, "name": td.name, "class": str(td.get("class", "")), "cost": int(tr.cost), "blurb": str(td.blurb),
+			"reach": TowerInfo.reach_text(type), "uncapped": bool(tr.get("uncapped", false)),
 			"color": Draw.accent(type).to_html(false), "air": bool(td.get("air", false)),
-			"ground": bool(td.get("ground", true)), "support": bool(td.get("support", false)), "economy": bool(td.get("economy", false)), "size": int(td.get("size", 1)), "branches": branches,
+			"ground": bool(td.get("ground", true)), "support": bool(td.get("support", false)), "economy": bool(td.get("economy", false)), "size": int(td.get("size", 1)),
+			"branches": branches, "rows": rows,
 		})
+	var mods: Array = Lore.modifier_rows()
+	var roles: Array = []
+	for row in Lore.role_rows():
+		var names := func(ids: Array) -> Array: return ids.map(func(t): return str(Enemies.ENEMIES[t].name))
+		roles.append({"role": str(row.role).capitalize(), "tiers": (row.tiers as Array).map(func(c): return names.call(c)), "other": names.call(row.other)})
+	var boss_rounds: Array = []
+	for w in Waves.BOSS_ROUNDS:
+		boss_rounds.append({"round": int(w), "line": (Waves.BOSS_ROUNDS[w] as Array).map(func(p): return "%s%s" % [Enemies.ENEMIES[p[0]].name, "" if int(p[1]) == 1 else " ×%d" % int(p[1])])})
+	var hp_curve := {}
+	for w in [1, 20, 40, 60, 80, 100, 120]:
+		hp_curve[str(w)] = snappedf(Waves.hp_scale(w), 0.01)
 	var modes: Array = []
 	for m in Difficulty.ORDER:
 		var md: Dictionary = Difficulty.DIFFICULTIES[m]
@@ -77,6 +110,9 @@ func _write_data() -> void:
 	var data := {
 		"enemies": enemies, "towers": towers, "modes": modes, "sample_rounds": SAMPLE_ROUNDS,
 		"bounty_exp": Waves.bounty_exp, "late_start": Waves.LATE_START, "late_growth": Waves.late_growth,
+		"modifiers": mods, "roles": roles, "boss_rounds": boss_rounds, "hp_curve": hp_curve,
+		"leak_bands": Enemies.LEAK_BANDS, "secondary_cap": Tower.SECONDARY_CAP, "start_gold": Game.START_GOLD,
+		"version": str(ProjectSettings.get_setting("application/config/version", "")),
 	}
 	var f := FileAccess.open(out_dir + "/codex.json", FileAccess.WRITE)
 	f.store_string(JSON.stringify(data, "\t"))

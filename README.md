@@ -287,7 +287,7 @@ hard, and Cataclysm brutal:
 - **Bosses**: every 20th round has a boss line-up, each bigger than the last: the Dreadnought at 20,
   the Overmind at 40, the Leviathan at 60, the Colossus at 80, then mixes. A boss met once can recur
   alone in later rounds.
-- **HP** grows every round (about 4.8× base by round 40), and from round 60 it also compounds by 3%
+- **HP** grows every round (about 4.8× base by round 40), and from round 60 it also compounds by 1%
   per round, so a map full of maxed towers eventually breaks.
 - **Speed** grows 0.45% per round up to +50% (bosses +25%).
 - **Kill credits** grow with enemy HP: a kill pays its base bounty × (the round's HP multiplier)^0.3,
@@ -382,8 +382,10 @@ from PowerShell. The commands are `import`, `check`, `test`, `tour`, `compare`, 
 
 ### Printable codex
 
-`design/BastionLine-Codex.pdf` lists every enemy, tower and upgrade tree with its stats. Rebuild it after
-changing enemies or the tower data (`design/tower_stats.md`, `design/upgrade_trees_rework.md`):
+`design/BastionLine-Codex.pdf` lists every enemy (role, tier, strength, abilities, the modifiers it can roll), the
+elite modifiers, and every tower with its Retrofits, paths and masteries, all taken from the game's own data and the
+in-game Codex's text (`tools/Codex.gd` exports it, `tools/codex.mjs` lays it out). Rebuild it after changing enemies
+or the tower data (`design/tower_stats.md`, `design/upgrade_trees_rework.md`):
 
 ```
 godot_console --path . -- --codex="%CD%\design\codex"
@@ -454,11 +456,12 @@ The commands below assume the console build is on PATH as `godot_console` (winge
 
    Other flags: `--endless=N` (endless rounds to play past a medal, default 20), `--lives=N` (override
    the shields, e.g. to measure Cataclysm by rounds survived), `--growth=F` (late HP compounding rate),
-   `--seeds=`, `--no-abilities`. A round that runs past 600 s of game time ends the sector as `STALLED rN`, naming the
+   `--seeds=`, `--no-abilities`, `--mods=none` (no elites) or `--mods=hasty,plated` (elites carry only those
+   modifiers). A round that runs past 600 s of game time ends the sector as `STALLED rN`, naming the
    enemies left (enemies no tower can kill, held in place by stuns, would otherwise keep it running
    for hours).
 
-   `--research=` takes `all`, node ids, tree names (`command`, `arrow`, ...), `towers` or
+   `--research=` takes `all`, node ids, tree names (`command`, `gun_turret`, ...), `towers` or
    `nomastery`. Any missing prerequisites are added automatically.
 
    **The 4.0.0 line (in progress, #68),** the generated rounds with the twelve new enemies, the bot
