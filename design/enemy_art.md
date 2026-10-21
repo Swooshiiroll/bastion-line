@@ -637,8 +637,32 @@ Siege Mech's and Titan's).
   tracked excavator with a turning bucket wheel on a long boom), I Gun-fortress walker (a six-legged platform under a
   massive double-barrelled turret). **Animations:** G Tower lean, H Hydraulic hiss, I Crushing step.
 
+## Implementation (enemy rework phase 5, issue #68, 2026-10-20)
+
+The confirmed picks are ported one to one from the pages into `scripts/view/enemies/`: `EnemyKit.gd` (the pages'
+drawing helpers), one script per role (`SwarmArt.gd` ... `BossArt.gd`) and `EnemyArt.gd` (which look and animation
+each enemy uses, and the game state its effects follow). The movement patterns are in
+`scripts/entities/EnemyMoves.gd`. Choices made in the port:
+
+- **Effects follow the game.** What the pages show on a demo clock (an EMP, a heal pulse, barrier grants, a blink, a
+  burrow, a shed, a print or launch, the Aegis barrier cracking and breaking, a Capacitor's charge, the Masquerade
+  unfolding) is timed by the enemy's own state on the field. Previews away from the field (the Codex, panels, the
+  spawner) run the pages' clocks, uncloaked and unmasked.
+- **Size and light.** Each look is drawn at its page radius. The light stays fixed on the screen (upper left) as the
+  enemy turns.
+- **Movement.** Offsets scale from the pages' 48 px lane to the game's 40 px one and ease in at up to 90 px/s, so a
+  side-step slides. Paces average 1, so average speeds are unchanged; the Bulwark holds still for the first 30% of
+  each barrier grant and the Blackout Rig for the first 35% of each blackout. A Needle pair and a Nanite stream
+  alternate sides by unit; a Shrike takes one of the cluster's five slots by unit. Enemies face along the track,
+  not the weave.
+- **Hidden enemies.** The Burrower draws nothing underground except the doppler ping inside a Radar Tower's ping;
+  the Phantom and Wraith keep their camouflage until revealed, then show lock-on corners; a Cloaked elite of any
+  other kind is a faint copy until revealed. A Mirage's holograms are faint, flickering copies of it.
+- **Colours.** Each enemy's identity colour (its name in panels, its effects) is now its art's glow colour, and the
+  Siphon's drain field is its lime green.
+- The Codex entries and the Codex PDF follow in phase 6.
+
 ## Open questions
 
-1. **Sign-off.** All eight roles are confirmed (2026-10-08), so the art direction is complete. Implementation
-   (Process, step 3) waits on the owner's confirmation of the full spec; `design/enemies.md` has its own open
-   questions.
+1. **Sign-off.** All eight roles are confirmed (2026-10-08) and implemented (2026-10-20); `design/enemies.md` has
+   its own open questions.

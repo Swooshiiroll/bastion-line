@@ -7,6 +7,7 @@ extends RefCounted
 const Enemies = preload("res://data/enemies.gd")
 const EnemyTraits = preload("res://scripts/core/EnemyTraits.gd")
 const Modifiers = preload("res://data/modifiers.gd")
+const EnemyMoves = preload("res://scripts/entities/EnemyMoves.gd")
 
 const MIN_DAMAGE_FRACTION := 0.2
 const SLOW_CAP := 0.7
@@ -66,6 +67,16 @@ var slow_timer := 0.0
 ## Its traits (EnemyTraits), and a countdown per timed trait to its next firing.
 var traits: Array = []
 var trait_timers := {}
+## Seconds it has been on the field, and the `age` at which things last happened to it (see `mark`).
+var age := 0.0
+var fired := {}
+## Its movement pattern (EnemyMoves): seconds it has moved (not stunned), its point on the track, and how far it
+## stands to the right of it (px).
+var move_time := 0.0
+var track_pos := Vector2.INF
+var side := 0.0
+## How fast the sideways offset can change (px per second).
+const SIDE_SLEW := 90.0
 ## The old shared ability timer: setting it sets every timed ability's timer (heal, summon, EMP, barrier grant).
 var ability_timer: float:
 	get:
@@ -195,9 +206,20 @@ func look_type() -> String:
 	return str(def.disguise) if disguised else type
 
 
+## Notes that something just happened to it (an ability fired, it burrowed, shed...), for its art and movement.
+func mark(what: String) -> void:
+	fired[what] = age
+
+
+## Seconds since `mark(what)`, or a large number if it never happened.
+func since(what: String) -> float:
+	return age - float(fired.get(what, -1e6))
+
+
 ## The Masquerade drops its disguise: its true rank and role, and a burst of speed before it settles at its own.
 func reveal_disguise() -> void:
 	disguised = false
+	mark("uncover")
 	rank = Enemies.rank_of(def)
 	speed = float(def.flee_speed) * spd_mult
 	flee_timer = float(def.flee_time)
@@ -381,6 +403,7 @@ func _reset_blink() -> void:
 
 
 func step(dt: float) -> void:
+	age += dt
 	hit_flash = maxf(0.0, hit_flash - dt)
 	reveal_timer = maxf(0.0, reveal_timer - dt)
 	since_hit += dt
@@ -433,12 +456,20 @@ func step(dt: float) -> void:
 		if stun_timer <= 0.0:
 			stun_guard = STUN_GUARD
 		return
-	distance += speed * (1.0 - slow_amount) * (1.0 + haste) * rush * (1.0 + wake) * dt
-	var np := curve.sample_baked(minf(distance, path_len))
-	var d := np - pos
+	# Its movement pattern (EnemyMoves): a pace along the track and a sideways offset from it, eased toward so a
+	# side-step slides rather than jumps. It faces along the track.
+	move_time += dt
+	var mt := move_time + float(id) * 0.37
+	distance += speed * (1.0 - slow_amount) * (1.0 + haste) * rush * (1.0 + wake) * EnemyMoves.pace(self, mt) * dt
+	var np := curve.sample_baked(clampf(distance + EnemyMoves.ahead(self), 0.0, path_len))
+	if track_pos == Vector2.INF:
+		track_pos = np
+	var d := np - track_pos
 	if d.length_squared() > 0.0001:
 		facing = d.normalized()
-	pos = np
+	track_pos = np
+	side = move_toward(side, EnemyMoves.side(self, mt), SIDE_SLEW * dt)
+	pos = np + Vector2(-facing.y, facing.x) * side
 
 
 func reached_end() -> bool:

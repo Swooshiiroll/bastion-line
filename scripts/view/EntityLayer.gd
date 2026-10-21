@@ -4,6 +4,7 @@ extends Node2D
 
 const Draw = preload("res://scripts/view/Draw.gd")
 const Grid = preload("res://scripts/core/Grid.gd")
+const EnemyArt = preload("res://scripts/view/enemies/EnemyArt.gd")
 const GunTurretArt = preload("res://scripts/view/towers/GunTurretArt.gd")
 const MortarTowerArt = preload("res://scripts/view/towers/MortarTowerArt.gd")
 const RocketSalvoArt = preload("res://scripts/view/towers/RocketSalvoArt.gd")
@@ -20,9 +21,8 @@ const ShockwaveGeneratorArt = preload("res://scripts/view/towers/ShockwaveGenera
 
 ## The ring and label colour of an elite (an enemy with modifiers).
 const ELITE_COLOR := Color(1.0, 0.82, 0.30)
-## A Siphon's drain (its aura, and the tint on towers inside it), and the Masquerade's purple eye.
-const SIPHON_COLOR := Color(0.70, 0.45, 1.0)
-const MASQUERADE_EYE := Color(0.75, 0.35, 1.0)
+## A Siphon's drain (its aura, and the tint on towers inside it).
+const SIPHON_COLOR := Color(0.72, 1.0, 0.25)
 
 var world
 ## Microseconds spent per section of _draw, summed; tools/PerfProbe.gd reads and resets it.
@@ -161,24 +161,15 @@ func _pool(pool, t: float) -> void:
 
 func _enemy(e, t: float) -> void:
 	var hidden: bool = e.is_hidden()
-	if e.hologram:
-		# A Mirage's hologram: a flickering translucent copy (its own art comes with the enemy art port).
-		var col: Color = Draw.ENEMY_COLOR.get(e.type, Color.WHITE)
-		var a := 0.22 + 0.1 * sin(t * 11.0 + float(e.id))
-		Draw.disc(self, e.pos, e.radius, Color(col, a))
-		Draw.ring(self, e.pos, e.radius, Color(col, a + 0.3), 1.2)
-		return
-	Draw.enemy(self, e.look_type(), e.pos, e.facing, e.radius, t + float(e.id) * 0.37, e.slow_amount > 0.0, e.hit_flash, 1.0, hidden)
-	if hidden:
+	# Its look reacts to the game (an EMP, a heal, a blink, its cloak...); a Mirage's hologram is a flickering copy,
+	# a disguised Masquerade a Drone with a purple eye, and a burrowed Burrower shows only inside a Radar ping.
+	var st := EnemyArt.state(e)
+	if e.burrowed:
+		st.pinged = world.game._radar_covers(e.pos)
+	Draw.enemy(self, e.type, e.pos, e.facing, e.radius, t + float(e.id) * 0.37, e.slow_amount > 0.0, e.hit_flash, 1.0, hidden, st)
+	if hidden or e.hologram:
 		return
 	var d: Dictionary = e.def
-	if e.disguised:
-		# The Masquerade's tell: a purple eye where the Drone's is red.
-		Draw.glow_dot(self, e.pos + e.facing * e.radius * 0.12, e.radius * 0.22, MASQUERADE_EYE)
-	if e.charge_timer > 0.0:
-		# Capacitor: the telegraph ring closes in on it as the charge builds.
-		var k: float = 1.0 - e.charge_timer / maxf(0.01, float(d.emp_charge))
-		Draw.ring(self, e.pos, float(d.emp_radius) * (1.0 - 0.6 * k), Color(Draw.ENEMY_COLOR.get(e.type, Color.WHITE), 0.25 + 0.5 * k), 2.0)
 	if d.has("siphon_radius") and not e.silenced():
 		Draw.arc(self, e.pos, float(d.siphon_radius), 0.0, TAU, 48, Color(SIPHON_COLOR, 0.14 + 0.06 * sin(t * 3.0)), 1.5, true)
 	if e.elite:
@@ -186,7 +177,7 @@ func _enemy(e, t: float) -> void:
 		Draw.ring(self, e.pos, e.radius + 4.0, Color(ELITE_COLOR, 0.55 + 0.25 * sin(t * 3.0 + float(e.id))), 1.6)
 	if d.has("aura_radius"):
 		Draw.arc(self, e.pos, float(d.aura_radius), 0.0, TAU, 48, Color(Draw.ENEMY_COLOR.rally, 0.16 + 0.08 * sin(t * 4.0)), 1.5, true)
-	if d.has("regen_pct") and e.since_hit >= float(d.regen_delay) and e.hp < e.max_hp:
+	if d.has("regen_pct") and e.type != "mender" and e.since_hit >= float(d.regen_delay) and e.hp < e.max_hp:
 		Draw.arc_segments(self, e.pos, e.radius + 5.0, 3, 0.8, t * 3.0, Color(Draw.ENEMY_COLOR.mender, 0.85), 1.6)
 	if e.haste > 0.0:
 		for k in 3:

@@ -924,6 +924,7 @@ func _update_enemy(e, dt: float) -> void:
 					_trait_heal(e, d)
 			"summon":
 				if not e.silenced(2) and e.tick_trait("summon", dt):
+					e.mark("summon")
 					_spawn_minions(e, str(d.spawn_type), int(d.spawn_count))
 					_emit({"type": "minions", "pos": e.pos, "enemy": e.type})
 			"emp":
@@ -959,12 +960,14 @@ func _trait_burrow(e, d: Dictionary, dt: float) -> void:
 	var grounded: bool = e.silenced() or e.no_dig > 0.0 or e.disrupt_timer > 0.0
 	if grounded and e.burrowed:
 		e.burrowed = false
+		e.mark("burrow")
 		e.burrow_timer = float(d.burrow_interval) - float(d.burrow_time)
 		_emit({"type": "burrow", "pos": e.pos, "down": false})
 	if not grounded:
 		e.burrow_timer -= dt
 	if not grounded and e.burrow_timer <= 0.0:
 		e.burrowed = not e.burrowed
+		e.mark("burrow")
 		e.burrow_timer = float(d.burrow_time) if e.burrowed else float(d.burrow_interval) - float(d.burrow_time)
 		_emit({"type": "burrow", "pos": e.pos, "down": e.burrowed})
 
@@ -972,6 +975,7 @@ func _trait_burrow(e, d: Dictionary, dt: float) -> void:
 ## Blink Stalker: jumps ahead along its route (a slow or stun resets the charge, in Enemy).
 func _trait_blink(e, d: Dictionary) -> void:
 	var from: Vector2 = e.pos
+	e.mark("blink")
 	e.distance = minf(e.distance + float(d.blink_distance), e.path_len)
 	e.pos = e.curve.sample_baked(e.distance)
 	_emit({"type": "blink", "from": from, "pos": e.pos})
@@ -987,6 +991,7 @@ func _trait_blink(e, d: Dictionary) -> void:
 
 ## Repair Bot: repairs every damaged non-boss enemy nearby.
 func _trait_heal(e, d: Dictionary) -> void:
+	e.mark("heal")
 	var heal_r: float = d.heal_radius
 	var healed := false
 	for o in enemies:
@@ -998,6 +1003,7 @@ func _trait_heal(e, d: Dictionary) -> void:
 
 ## Jammer: an EMP that knocks nearby towers offline (a Drone Bay's wing and a CAS Gunship's orbit count as nearby).
 func _trait_emp(e, d: Dictionary) -> void:
+	e.mark("emp")
 	var er := float(d.emp_radius)
 	var hit := 0
 	for t in towers:
@@ -1011,6 +1017,7 @@ func _trait_emp(e, d: Dictionary) -> void:
 
 ## Bulwark: projects a barrier onto nearby non-boss enemies (not itself).
 func _trait_grant(e, d: Dictionary) -> void:
+	e.mark("grant")
 	var gr := float(d.grant_radius)
 	var n := 0
 	for o in enemies:
@@ -1035,6 +1042,7 @@ func _cancel_charge(e) -> void:
 ## Mirage: projects translucent 1-HP copies just behind it. They walk to the core and vanish there (never leaking, never paying),
 ## vanish with their Mirage, and count toward its round.
 func _trait_holo(e, d: Dictionary) -> void:
+	e.mark("holo")
 	var n := int(d.holo_count)
 	for k in n:
 		var h = spawn_enemy(e.type, e.path_index, maxf(0.0, e.distance - 14.0 * (k + 1)), 1.0, e.wave_id, speed_mult_for(e.wave_id) if e.wave_id > 0 else 1.0)
@@ -1053,6 +1061,7 @@ func _check_thresholds(e) -> void:
 		_emit({"type": "adrenaline", "pos": e.pos})
 	if e.has_trait("shed") and not e.shed and e.hp < e.max_hp * float(d.shed_at):
 		e.shed = true
+		e.mark("shed")
 		e.armor = maxf(0.0, e.armor - (float(Enemies.ENEMIES[e.type].armor) - float(d.shed_armor)))
 		e.speed *= float(d.shed_speed)
 		_emit({"type": "shed", "pos": e.pos, "enemy": e.type})
@@ -1099,6 +1108,7 @@ func _check_phase(e) -> void:
 	var th: Array = e.def.phases
 	while e.phase < th.size() and e.hp <= e.max_hp * float(th[e.phase]):
 		e.phase += 1
+		e.mark("phase%d" % e.phase)
 		e.armor = maxf(0.0, e.armor - float(e.def.phase_armor))
 		e.speed *= float(e.def.phase_speed)
 		_spawn_minions(e, str(e.def.phase_spawn), int(e.def.phase_spawn_count))

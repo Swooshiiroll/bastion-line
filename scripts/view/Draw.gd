@@ -24,6 +24,7 @@ const MagnetoTowerArt = preload("res://scripts/view/towers/MagnetoTowerArt.gd")
 const TractorTowerArt = preload("res://scripts/view/towers/TractorTowerArt.gd")
 const AugmentationTowerArt = preload("res://scripts/view/towers/AugmentationTowerArt.gd")
 const Difficulty = preload("res://data/difficulty.gd")
+const EnemyArt = preload("res://scripts/view/enemies/EnemyArt.gd")
 
 const OUTLINE := Color(0.03, 0.04, 0.06, 0.95)
 const METAL_D := Color(0.10, 0.115, 0.14)
@@ -56,66 +57,78 @@ const ACCENT := {
 	"augmentation_tower": Color(0.32, 0.62, 1.00),
 }
 
-## Enemy chassis color and the glow color of its lights.
+## Each enemy's hull colour and the glow of its lights, from its confirmed art (design/enemy_art.md).
 const ENEMY_BODY := {
-	"grunt": Color(0.40, 0.42, 0.48),
-	"runner": Color(0.30, 0.30, 0.32),
-	"brute": Color(0.40, 0.37, 0.33),
-	"swarmling": Color(0.12, 0.30, 0.16),
-	"bat": Color(0.30, 0.32, 0.38),
-	"shaman": Color(0.72, 0.78, 0.82),
-	"phantom": Color(0.16, 0.20, 0.26),
-	"aegis": Color(0.30, 0.36, 0.46),
-	"hydra": Color(0.36, 0.30, 0.22),
-	"jammer": Color(0.26, 0.28, 0.24),
-	"juggernaut": Color(0.34, 0.12, 0.14),
-	"warlord": Color(0.16, 0.08, 0.20),
-	"locust": Color(0.30, 0.36, 0.22),
-	"gunship": Color(0.30, 0.33, 0.30),
-	"burrower": Color(0.40, 0.33, 0.24),
-	"stalker": Color(0.22, 0.20, 0.30),
-	"mender": Color(0.30, 0.38, 0.34),
-	"rally": Color(0.40, 0.30, 0.22),
-	"bulwark": Color(0.26, 0.32, 0.42),
-	"rampart": Color(0.36, 0.34, 0.30),
-	"leviathan": Color(0.22, 0.26, 0.32),
-	"colossus": Color(0.30, 0.22, 0.18),
+	"grunt": Color(0.30, 0.38, 0.52),
+	"runner": Color(0.78, 0.72, 0.58),
+	"brute": Color(0.86, 0.68, 0.16),
+	"swarmling": Color(0.68, 0.48, 0.32),
+	"bat": Color(0.24, 0.48, 0.48),
+	"shaman": Color(0.45, 0.80, 0.60),
+	"phantom": Color(0.32, 0.46, 0.47),
+	"aegis": Color(0.90, 0.86, 0.74),
+	"hydra": Color(0.55, 0.22, 0.18),
+	"jammer": Color(0.15, 0.16, 0.18),
+	"juggernaut": Color(0.26, 0.27, 0.30),
+	"warlord": Color(0.55, 0.38, 0.26),
+	"locust": Color(0.44, 0.50, 0.26),
+	"gunship": Color(0.22, 0.27, 0.42),
+	"burrower": Color(0.45, 0.32, 0.20),
+	"stalker": Color(0.24, 0.25, 0.28),
+	"mender": Color(0.10, 0.40, 0.31),
+	"rally": Color(0.50, 0.32, 0.74),
+	"bulwark": Color(0.88, 0.85, 0.76),
+	"rampart": Color(0.58, 0.58, 0.55),
+	"leviathan": Color(0.30, 0.36, 0.22),
+	"colossus": Color(0.86, 0.68, 0.16),
+	"needle": Color(0.90, 0.93, 0.96),
+	"fury": Color(0.20, 0.12, 0.14),
+	"shrike": Color(0.90, 0.90, 0.92),
+	"titan": Color(0.70, 0.50, 0.27),
+	"siphon": Color(0.22, 0.18, 0.44),
+	"blackout": Color(0.38, 0.40, 0.44),
+	"capacitor": Color(0.88, 0.88, 0.84),
+	"shifter": Color(0.72, 0.75, 0.79),
+	"wraith": Color(0.14, 0.13, 0.18),
+	"masquerade": Color(0.42, 0.20, 0.40),
+	"decoy": Color(0.33, 0.35, 0.37),
+	"mirage": Color(0.80, 0.82, 0.87),
 }
 const ENEMY_COLOR := {
-	"grunt": Color(1.00, 0.28, 0.22),
-	"runner": Color(1.00, 0.80, 0.20),
-	"brute": Color(1.00, 0.55, 0.15),
-	"swarmling": Color(0.40, 1.00, 0.50),
-	"bat": Color(1.00, 0.35, 0.25),
-	"shaman": Color(0.30, 1.00, 0.60),
-	"phantom": Color(0.55, 0.95, 1.00),
-	"aegis": Color(0.40, 0.70, 1.00),
-	"hydra": Color(1.00, 0.65, 0.25),
-	"jammer": Color(0.90, 1.00, 0.30),
+	"grunt": Color(0.95, 0.97, 1.00),
+	"runner": Color(1.00, 0.60, 0.30),
+	"brute": Color(1.00, 0.45, 0.15),
+	"swarmling": Color(1.00, 0.72, 0.25),
+	"bat": Color(1.00, 0.70, 0.35),
+	"shaman": Color(0.35, 1.00, 0.55),
+	"phantom": Color(0.55, 1.00, 0.92),
+	"aegis": Color(1.00, 0.78, 0.35),
+	"hydra": Color(1.00, 0.55, 0.30),
+	"jammer": Color(0.35, 0.65, 1.00),
 	"juggernaut": Color(1.00, 0.25, 0.20),
-	"warlord": Color(1.00, 0.30, 0.80),
-	"locust": Color(0.75, 1.00, 0.35),
-	"gunship": Color(1.00, 0.45, 0.30),
-	"burrower": Color(1.00, 0.70, 0.35),
-	"stalker": Color(0.75, 0.55, 1.00),
-	"mender": Color(0.35, 1.00, 0.60),
-	"rally": Color(1.00, 0.60, 0.25),
-	"bulwark": Color(0.45, 0.75, 1.00),
-	"rampart": Color(1.00, 0.45, 0.35),
-	"leviathan": Color(0.40, 0.85, 1.00),
-	"colossus": Color(1.00, 0.50, 0.20),
-	"needle": Color(1.00, 0.85, 0.35),
-	"fury": Color(1.00, 0.40, 0.25),
-	"shrike": Color(0.60, 1.00, 0.40),
-	"titan": Color(1.00, 0.50, 0.20),
-	"siphon": Color(0.70, 0.45, 1.00),
-	"blackout": Color(0.85, 1.00, 0.25),
-	"capacitor": Color(1.00, 0.95, 0.35),
-	"shifter": Color(0.80, 0.55, 1.00),
-	"wraith": Color(0.55, 0.95, 1.00),
-	"masquerade": Color(0.75, 0.35, 1.00),
-	"decoy": Color(1.00, 0.55, 0.35),
-	"mirage": Color(0.55, 0.95, 1.00),
+	"warlord": Color(1.00, 0.72, 0.25),
+	"locust": Color(1.00, 0.92, 0.30),
+	"gunship": Color(1.00, 0.25, 0.20),
+	"burrower": Color(1.00, 0.72, 0.25),
+	"stalker": Color(1.00, 0.50, 0.15),
+	"mender": Color(0.40, 1.00, 0.62),
+	"rally": Color(1.00, 0.82, 0.30),
+	"bulwark": Color(0.55, 0.80, 1.00),
+	"rampart": Color(1.00, 0.70, 0.20),
+	"leviathan": Color(1.00, 0.92, 0.30),
+	"colossus": Color(1.00, 0.45, 0.15),
+	"needle": Color(0.50, 0.75, 1.00),
+	"fury": Color(1.00, 0.25, 0.75),
+	"shrike": Color(0.35, 0.95, 1.00),
+	"titan": Color(0.35, 0.95, 1.00),
+	"siphon": Color(0.72, 1.00, 0.25),
+	"blackout": Color(0.72, 0.42, 1.00),
+	"capacitor": Color(1.00, 0.95, 0.60),
+	"shifter": Color(0.30, 0.95, 0.85),
+	"wraith": Color(0.85, 0.82, 1.00),
+	"masquerade": Color(0.85, 0.50, 1.00),
+	"decoy": Color(1.00, 0.30, 0.70),
+	"mirage": Color(0.40, 0.95, 1.00),
 }
 
 
@@ -863,454 +876,15 @@ static func limb(ci: CanvasItem, pts: PackedVector2Array, w: float, col: Color) 
 		disc(ci, pts[i], w * 0.75, col.lightened(0.25))
 
 
-static func enemy(ci: CanvasItem, type: String, c: Vector2, facing: Vector2, r: float, t: float, slowed := false, flash := 0.0, s := 1.0, hidden := false) -> void:
-	var body: Color = ENEMY_BODY.get(type, METAL)
-	var glow: Color = ENEMY_COLOR.get(type, Color.WHITE)
+## One enemy, in its confirmed art (scripts/view/enemies). `r` is its hit radius (the size of the slow and hit
+## overlays); the look itself is drawn at its design size times `s`. `st` is EnemyArt.state(e) for an enemy on the
+## field (it times the look's effects); leave it empty for a preview.
+static func enemy(ci: CanvasItem, type: String, c: Vector2, facing: Vector2, r: float, t: float, slowed := false, flash := 0.0, s := 1.0, hidden := false, st := {}) -> void:
+	if not EnemyArt.has(type):
+		disc(ci, c, r * s, ENEMY_BODY.get(type, METAL))
+		return
+	EnemyArt.draw(ci, type, c, facing, t, s, st)
 	var rr := r * s
-	var ang := facing.angle()
-	var n := facing.orthogonal()
-	if not (type in ["bat", "locust", "gunship", "leviathan"]) and not hidden:
-		ellipse(ci, c + Vector2(0, rr * 0.75), rr * 1.1, rr * 0.45, Color(0, 0, 0, 0.3))
-	match type:
-		"grunt":
-			# Drone: a hovering combat disc with side thrusters, an armour ring, a gun and one red optic.
-			disc(ci, c, rr * 1.2, Color(glow, 0.07))
-			for side in [-1.0, 1.0]:
-				var pod: Vector2 = c + n * side * rr * 0.95
-				plate(ci, pod, rect_pts(0.5, 0.24), METAL_D.lightened(0.1), ang, rr, 1.0)
-				strip(ci, pod - facing * rr * 0.55 - n * rr * 0.12, pod - facing * rr * 0.55 + n * rr * 0.12, 0.8 * s, Color(0.4, 0.8, 1.0))
-			bar(ci, c + facing * rr * 0.3, c + facing * rr * 1.3, 2.0 * s, METAL_L)
-			disc(ci, c + facing * rr * 1.3, 1.1 * s, Color(0.05, 0.05, 0.05))
-			orb(ci, c, rr * 0.86, body, s)
-			arc_segments(ci, c, rr * 0.64, 6, 0.35, ang, body.darkened(0.35), 1.4 * s)
-			disc(ci, c + facing * rr * 0.12, rr * 0.4, OUTLINE)
-			disc(ci, c + facing * rr * 0.12, rr * 0.33, Color(0.15, 0.03, 0.03))
-			glow_dot(ci, c + facing * rr * 0.12, rr * 0.2, glow)
-			disc(ci, c + facing * rr * 0.12 + LIGHT * rr * 0.15, rr * 0.07, Color(1, 1, 1, 0.8))
-		"runner":
-			# Skitter: a fast spider-bot on six jointed legs, with an armoured abdomen and mandibles.
-			for i in 3:
-				for side in [-1.0, 1.0]:
-					var ph := t * 20.0 + float(i) * 2.1 + (PI if side > 0.0 else 0.0)
-					var root: Vector2 = c + facing * (1.0 - float(i)) * rr * 0.35 + n * side * rr * 0.28
-					var knee: Vector2 = root + n * side * rr * 0.7 + facing * ((1.0 - float(i)) * 0.35 + 0.22 * sin(ph)) * rr
-					var foot: Vector2 = knee + n * side * rr * 0.3 + facing * ((1.0 - float(i)) * 0.45) * rr
-					limb(ci, PackedVector2Array([root, knee, foot]), 1.0 * s, METAL_L)
-			shaded_oval(ci, c - facing * rr * 0.35, rr * 0.56, rr * 0.43, ang, body, s)
-			for k in 2:
-				var sp := c - facing * rr * (0.2 + 0.25 * float(k))
-				line(ci, sp - n * rr * 0.35, sp + n * rr * 0.35, Color(0, 0, 0, 0.45), 1.0 * s, true)
-			strip(ci, c - facing * rr * 0.65, c - facing * rr * 0.1, 0.8 * s, glow)
-			orb(ci, c + facing * rr * 0.35, rr * 0.35, body.lightened(0.15), s)
-			for side in [-1.0, 1.0]:
-				line(ci, c + facing * rr * 0.6 + n * side * rr * 0.12, c + facing * rr * 0.85 + n * side * rr * 0.04, METAL_L, 1.0 * s, true)
-				glow_dot(ci, c + facing * rr * 0.5 + n * side * rr * 0.14, rr * 0.08, glow)
-		"brute":
-			# Siege Mech: a stomping biped with hydraulic legs, riveted armour and two shoulder cannons.
-			for side in [-1.0, 1.0]:
-				var step := sin(t * 5.0 + (PI if side > 0.0 else 0.0)) * rr * 0.35
-				var hip: Vector2 = c + n * side * rr * 0.45
-				var knee: Vector2 = hip + n * side * rr * 0.2 + facing * step * 0.5
-				var foot: Vector2 = hip + n * side * rr * 0.15 + facing * step
-				limb(ci, PackedVector2Array([hip, knee, foot]), 3.0 * s, METAL_D.lightened(0.1))
-				plate(ci, foot, rect_pts(0.32, 0.2), METAL_L, ang, rr, 1.0)
-			var hull := ngon(6, 1.0)
-			plate(ci, c, hull, body, ang, rr * 0.84, 1.6)
-			rivets(ci, c, hull, ang, rr * 0.84, 0.78, 0.6 * s)
-			fill(ci, c, rect_pts(0.3, 0.42), body.darkened(0.15), ang, rr)
-			for side in [-1.0, 1.0]:
-				var sh: Vector2 = c + n * side * rr * 0.78
-				plate(ci, sh, rect_pts(0.34, 0.3), METAL_L, ang, rr, 1.2)
-				bar(ci, sh + facing * rr * 0.2, sh + facing * rr * 1.15, 2.4 * s, METAL_L)
-				disc(ci, sh + facing * rr * 1.15, 1.4 * s, Color(0.05, 0.05, 0.05))
-				disc(ci, sh + facing * rr * 1.15, 0.8 * s, Color(glow, 0.9))
-			var visor := c + facing * rr * 0.42
-			strip(ci, visor - n * rr * 0.28, visor + n * rr * 0.28, 1.6 * s, glow)
-		"swarmling":
-			# Nanite: a tiny cloud of machines orbiting a glowing core.
-			disc(ci, c, rr * 1.7, Color(glow, 0.13))
-			for k in 4:
-				var p := c + Vector2.from_angle(t * 7.0 + TAU * float(k) / 4.0) * rr * 0.78
-				var dia := PackedVector2Array([Vector2(0.5, 0), Vector2(0, 0.35), Vector2(-0.5, 0), Vector2(0, -0.35)])
-				solid(ci, p, dia, body.lightened(0.35), t * 7.0, rr, 0.8)
-				disc(ci, p, rr * 0.11, glow)
-			orb(ci, c, rr * 0.34, body.lightened(0.2), s)
-			glow_dot(ci, c, rr * 0.18, glow)
-		"bat":
-			# Strike Drone: a quad-rotor attack drone: X-frame arms, four spinning rotors, a gimballed
-			# camera up front, twin weapon pods and blinking navigation lights.
-			ellipse(ci, c + Vector2(0, rr * 2.4), rr * 1.3, rr * 0.4, Color(0, 0, 0, 0.2))
-			for k in 4:
-				var a := ang + PI / 4.0 + TAU * float(k) / 4.0
-				var tip := c + Vector2.from_angle(a) * rr * 1.2
-				bar(ci, c, tip, 1.8 * s, METAL_D.lightened(0.15))
-				disc(ci, tip, rr * 0.62, Color(0.8, 0.86, 0.95, 0.12))
-				arc(ci, tip, rr * 0.62, 0.0, TAU, 16, Color(0.8, 0.86, 0.95, 0.35), 0.8 * s, true)
-				var spin := t * 38.0 * (1.0 if k % 2 == 0 else -1.0)
-				for b in 2:
-					var bd := Vector2.from_angle(spin + float(b) * PI)
-					line(ci, tip, tip + bd * rr * 0.58, Color(0.85, 0.9, 1.0, 0.55), 1.2 * s, true)
-				orb(ci, tip, rr * 0.17, METAL_L, s)
-				var nav := Color(1.0, 0.25, 0.25) if k < 2 else Color(0.3, 1.0, 0.45)
-				if fmod(t * 1.5 + float(k) * 0.25, 1.0) < 0.35:
-					glow_dot(ci, c + Vector2.from_angle(a) * rr * 0.72, rr * 0.08, nav)
-			var fuselage := PackedVector2Array([Vector2(0.62, 0), Vector2(0.35, 0.36), Vector2(-0.5, 0.3), Vector2(-0.62, 0), Vector2(-0.5, -0.3), Vector2(0.35, -0.36)])
-			plate(ci, c, fuselage, body, ang, rr, 1.2)
-			for side in [-1.0, 1.0]:
-				var pod: Vector2 = c + n * side * rr * 0.34 + facing * rr * 0.1
-				bar(ci, pod, pod + facing * rr * 0.45, 1.6 * s, METAL_L)
-			var cam := c + facing * rr * 0.42
-			orb(ci, cam, rr * 0.2, METAL, s)
-			glow_dot(ci, cam + facing * rr * 0.06, rr * 0.09, glow)
-			strip(ci, c - facing * rr * 0.35 - n * rr * 0.12, c - facing * rr * 0.35 + n * rr * 0.12, 0.7 * s, glow)
-		"shaman":
-			# Repair Bot: a tracked medic unit with two welding arms and an emissive repair cross.
-			arc(ci, c, rr * 2.0 + sin(t * 3.0) * 2.0, 0.0, TAU, 28, Color(glow, 0.25), 2.0, true)
-			for side in [-1.0, 1.0]:
-				var tr: Vector2 = c + n * side * rr * 0.82
-				plate(ci, tr, rect_pts(0.66, 0.2), METAL_D.lightened(0.1), ang, rr, 1.0)
-				for k in 3:
-					var lp: Vector2 = tr + facing * (fmod(t * 8.0 + float(k) * 0.45, 1.3) - 0.65) * rr
-					line(ci, lp - n * rr * 0.16, lp + n * rr * 0.16, Color(0, 0, 0, 0.45), 0.9 * s)
-				var sh: Vector2 = c + facing * rr * 0.35 + n * side * rr * 0.5
-				var elbow: Vector2 = sh + facing * rr * 0.55 + n * side * rr * 0.45
-				var claw: Vector2 = elbow + facing * rr * 0.55 - n * side * rr * 0.12 + facing * sin(t * 6.0 + side) * rr * 0.08
-				limb(ci, PackedVector2Array([sh, elbow, claw]), 1.6 * s, METAL_L)
-				arc(ci, claw, rr * 0.16, ang - 1.2, ang + 1.2, 6, METAL_L, 1.4 * s, true)
-				if fmod(t * 2.0 + (0.5 if side > 0.0 else 0.0), 1.0) < 0.15:
-					glow_dot(ci, claw + facing * rr * 0.12, rr * 0.12, glow)
-			orb(ci, c, rr * 0.8, body, s)
-			rect(ci, Rect2(c - Vector2(rr * 0.4, rr * 0.13), Vector2(rr * 0.8, rr * 0.26)), Color(glow, 0.3).lerp(glow, 0.8))
-			rect(ci, Rect2(c - Vector2(rr * 0.13, rr * 0.4), Vector2(rr * 0.26, rr * 0.8)), glow)
-			rect(ci, Rect2(c - Vector2(rr * 0.05, rr * 0.3), Vector2(rr * 0.1, rr * 0.6)), Color(1, 1, 1, 0.55))
-			var ant := c - facing * rr * 0.6 + n * rr * 0.55
-			line(ci, ant, ant - facing * rr * 0.6 + n * rr * 0.3, METAL_L, 1.2 * s, true)
-			glow_dot(ci, ant - facing * rr * 0.6 + n * rr * 0.3, 1.3 * s, glow)
-		"phantom":
-			# Cloaked: only a faint heat-shimmer outline until a Radar Tower ping reveals it.
-			var a := 0.2 + 0.08 * sin(t * 7.0) if hidden else 1.0
-			var blade := PackedVector2Array([Vector2(1.4, 0), Vector2(0.1, 0.55), Vector2(-0.9, 1.0), Vector2(-0.5, 0), Vector2(-0.9, -1.0), Vector2(0.1, -0.55)])
-			if hidden:
-				var ripple := fmod(t * 1.3, 1.0)
-				arc(ci, c, rr * (1.0 + 0.8 * ripple), 0.0, TAU, 18, Color(0.8, 0.95, 1.0, 0.22 * (1.0 - ripple)), 1.0 * s, true)
-				outline(ci, c, blade, Color(glow, a), 1.2 * s, ang, rr)
-				outline(ci, c + n * sin(t * 11.0) * 1.5 * s, blade, Color(glow, a * 0.5), 1.0 * s, ang, rr * 1.08)
-			else:
-				plate(ci, c, blade, body, ang, rr, 1.2)
-				line(ci, c - facing * rr * 0.4, c + facing * rr * 1.1, Color(glow, 0.5), 1.0 * s, true)
-				for side in [-1.0, 1.0]:
-					glow_dot(ci, c + facing * rr * 0.35 + n * side * rr * 0.28, rr * 0.13, glow)
-					strip(ci, c - facing * rr * 0.75 + n * side * rr * 0.55, c - facing * rr * 0.55 + n * side * rr * 0.4, 0.8 * s, glow)
-				ring(ci, c, rr * 1.3, Color(glow, 0.35 + 0.2 * sin(t * 5.0)), 1.0 * s)
-		"aegis":
-			# Aegis Walker: a four-legged walker behind a curved shield plate (its barrier projector).
-			for k in 4:
-				var la := ang + PI / 4.0 + float(k) * PI / 2.0
-				var ld := Vector2.from_angle(la)
-				var step := sin(t * 6.0 + float(k) * PI / 2.0) * rr * 0.18
-				var knee := c + ld * rr * 0.75 + facing * step
-				var foot := knee + ld * rr * 0.35
-				limb(ci, PackedVector2Array([c + ld * rr * 0.3, knee, foot]), 2.0 * s, METAL_L)
-			var hull3 := ngon(6, 1.0, PI / 6.0)
-			plate(ci, c, hull3, body, ang, rr * 0.74, 1.4)
-			rivets(ci, c, hull3, ang, rr * 0.74, 0.75, 0.55 * s)
-			orb(ci, c - facing * rr * 0.25, rr * 0.2, glow.darkened(0.3), s)
-			glow_dot(ci, c - facing * rr * 0.25, rr * 0.12, glow)
-			var sc := c + facing * rr * 0.2
-			arc(ci, sc, rr * 0.95, ang - 0.95, ang + 0.95, 16, OUTLINE, 5.6 * s, true)
-			arc(ci, sc, rr * 0.95, ang - 0.95, ang + 0.95, 16, METAL_L, 3.8 * s, true)
-			arc(ci, sc, rr * 0.88, ang - 0.8, ang + 0.1, 10, METAL_L.lightened(0.35), 1.0 * s, true)
-			for k in 3:
-				var hp := sc + Vector2.from_angle(ang + (float(k) - 1.0) * 0.55) * rr * 0.95
-				disc(ci, hp, 0.9 * s, Color(glow, 0.9))
-			arc(ci, sc, rr * 1.04, ang - 0.9, ang + 0.9, 16, Color(glow, 0.8), 1.2 * s, true)
-		"hydra":
-			# Hydra Frame: an armoured body with three swaying serpent heads (it splits apart when killed).
-			shaded_oval(ci, c - facing * rr * 0.3, rr * 0.52, rr * 0.48, ang, body, s)
-			ring(ci, c - facing * rr * 0.3, rr * 0.3, body.darkened(0.35), 1.3 * s)
-			glow_dot(ci, c - facing * rr * 0.3, rr * 0.1, glow)
-			for k in 3:
-				var base_a := ang + (float(k) - 1.0) * 0.7
-				var pts := PackedVector2Array()
-				for i in 5:
-					var f := float(i) / 4.0
-					var sway := sin(t * 4.0 + float(k) * 1.7 - f * 2.0) * rr * 0.22 * f
-					pts.append(c + Vector2.from_angle(base_a) * rr * (0.05 + 1.05 * f) + Vector2.from_angle(base_a + PI / 2.0) * sway)
-				polyline(ci, pts, OUTLINE, 5.0 * s, true)
-				polyline(ci, pts, body.lightened(0.15), 3.2 * s, true)
-				for i in range(1, 4):
-					disc(ci, pts[i], 1.0 * s, body.darkened(0.25))
-				var hd := (pts[4] - pts[3]).normalized()
-				var headp := pts[4] + hd * rr * 0.12
-				var skull := PackedVector2Array([Vector2(0.6, 0), Vector2(0.05, 0.38), Vector2(-0.4, 0.3), Vector2(-0.4, -0.3), Vector2(0.05, -0.38)])
-				plate(ci, headp, skull, body.lightened(0.1), hd.angle(), rr * 0.5, 1.0)
-				var jaw := hd.orthogonal() * rr * 0.1 * (1.0 + sin(t * 8.0 + float(k)))
-				line(ci, headp + hd * rr * 0.28 + jaw, headp + hd * rr * 0.1, METAL_L, 1.0 * s, true)
-				glow_dot(ci, headp + hd * rr * 0.06, rr * 0.1, glow)
-		"jammer":
-			# Jammer: a tracked electronic-warfare rig with a spinning dish, a mast and EMP rings.
-			var ping := fmod(t * 0.9, 1.0)
-			arc(ci, c, rr * (1.2 + 1.4 * ping), 0.0, TAU, 24, Color(glow, 0.35 * (1.0 - ping)), 1.5 * s, true)
-			for side in [-1.0, 1.0]:
-				var tr: Vector2 = c + n * side * rr * 0.72
-				plate(ci, tr, rect_pts(0.8, 0.22), METAL_D.lightened(0.08), ang, rr, 1.0)
-				for k in 3:
-					var lp: Vector2 = tr + facing * (fmod(t * 6.0 + float(k) * 0.5, 1.5) - 0.75) * rr
-					line(ci, lp - n * rr * 0.16, lp + n * rr * 0.16, Color(0, 0, 0, 0.45), 0.9 * s)
-			orb(ci, c, rr * 0.72, body, s)
-			var dir := Vector2.from_angle(t * 2.5)
-			arc(ci, c, rr * 0.55, t * 2.5 - 0.9, t * 2.5 + 0.9, 8, OUTLINE, 3.6 * s, true)
-			arc(ci, c, rr * 0.55, t * 2.5 - 0.9, t * 2.5 + 0.9, 8, METAL_L, 2.2 * s, true)
-			bar(ci, c, c + dir * rr * 0.9, 1.2 * s, METAL_L)
-			glow_dot(ci, c + dir * rr * 0.9, rr * 0.14, glow)
-			glow_dot(ci, c, rr * 0.18, glow)
-		"juggernaut":
-			# Dreadnought: a super-heavy tank: wheeled treads, armour skirts, a riveted hull and a
-			# twin-cannon turret with muzzle brakes.
-			var roll := fmod(t * 20.0, 6.0)
-			for side in [-1.0, 1.0]:
-				var tread: Vector2 = c + n * side * rr * 0.8
-				plate(ci, tread, rect_pts(1.2, 0.3), METAL_D.lightened(0.05), ang, rr, 1.4)
-				for k in 6:
-					var lp := tread + facing * (-rr * 1.1 + fmod(float(k) * rr * 0.4 + roll, rr * 2.3))
-					line(ci, lp - n * rr * 0.26, lp + n * rr * 0.26, METAL_L, 1.1 * s)
-				for k in 4:
-					var wp := tread + facing * (float(k) - 1.5) * rr * 0.6
-					disc(ci, wp, rr * 0.12, Color(0, 0, 0, 0.35))
-			var hull2 := PackedVector2Array([Vector2(1.05, -0.45), Vector2(1.05, 0.45), Vector2(0.6, 0.62), Vector2(-0.95, 0.62), Vector2(-1.05, 0.4), Vector2(-1.05, -0.4), Vector2(-0.95, -0.62), Vector2(0.6, -0.62)])
-			plate(ci, c, hull2, body, ang, rr * 0.82, 1.8)
-			rivets(ci, c, hull2, ang, rr * 0.82, 0.85, 0.7 * s)
-			for side in [-1.0, 1.0]:
-				var bp: Vector2 = c + n * side * rr * 0.16
-				bar(ci, bp, bp + facing * rr * 1.25, 3.2 * s, METAL_L)
-				plate(ci, bp + facing * rr * 1.22, rect_pts(0.12, 0.1), METAL_L, ang, rr, 1.0)
-			orb(ci, c, rr * 0.44, body.lightened(0.15), s)
-			ring(ci, c, rr * 0.28, body.darkened(0.35), 1.4 * s)
-			for side in [-1.0, 1.0]:
-				glow_dot(ci, c - facing * rr * 0.62 + n * side * rr * 0.45, 1.6 * s, glow)
-		"warlord":
-			# Overmind: a hive-mind brain with glowing folds and veins, trailing control tentacles.
-			for i in 6:
-				var a := ang + PI + (float(i) - 2.5) * 0.45
-				var wave := sin(t * 3.0 + float(i)) * 0.35
-				var tp := PackedVector2Array([c + Vector2.from_angle(a) * rr * 0.75, c + Vector2.from_angle(a + wave) * rr * 1.3, c + Vector2.from_angle(a + wave * 2.0) * rr * 1.75])
-				polyline(ci, tp, OUTLINE, 4.5 * s, true)
-				polyline(ci, tp, body.lightened(0.3), 2.8 * s, true)
-				for p in tp:
-					disc(ci, p, 1.1 * s, body.lightened(0.45))
-				glow_dot(ci, tp[2], 1.4 * s, glow)
-			var pulse := 0.5 + 0.5 * sin(t * 3.0)
-			disc(ci, c, rr * (1.12 + 0.08 * pulse), Color(glow, 0.12))
-			for side in [-1.0, 1.0]:
-				shaded_oval(ci, c + n * side * rr * 0.36, rr * 0.9, rr * 0.5, ang, body.lightened(0.12), s)
-			line(ci, c - facing * rr * 0.85, c + facing * rr * 0.85, OUTLINE, 2.4 * s, true)
-			for side in [-1.0, 1.0]:
-				for k in 3:
-					var fc: Vector2 = c + n * side * rr * 0.38 + facing * (float(k) - 1.0) * rr * 0.5
-					arc(ci, fc, rr * 0.22, ang + (0.3 if side > 0.0 else PI + 0.3), ang + (2.8 if side > 0.0 else PI + 2.8), 8, Color(glow, 0.35 + 0.4 * pulse), 1.4 * s, true)
-				var vein := PackedVector2Array([c + n * side * rr * 0.1 - facing * rr * 0.6, c + n * side * rr * 0.5 - facing * rr * 0.1, c + n * side * rr * 0.3 + facing * rr * 0.55])
-				polyline(ci, vein, Color(glow, 0.3 + 0.3 * pulse), 0.8 * s, true)
-			orb(ci, c + facing * rr * 0.9, rr * 0.2, glow.darkened(0.4), s)
-			glow_dot(ci, c + facing * rr * 0.9, rr * 0.13, glow)
-		"locust":
-			# Locust: a tiny winged micro-drone: two pairs of flickering wings over a slim body.
-			ellipse(ci, c + Vector2(0, rr * 2.6), rr * 0.9, rr * 0.3, Color(0, 0, 0, 0.18))
-			var flap := 0.55 + 0.45 * sin(t * 60.0)
-			for side in [-1.0, 1.0]:
-				for k in 2:
-					var root: Vector2 = c + facing * rr * (0.25 - 0.45 * float(k))
-					var tip: Vector2 = root + n * side * rr * (1.5 * flap + 0.3) - facing * rr * 0.35
-					line(ci, root, tip, Color(0.85, 0.95, 0.8, 0.45), 1.6 * s, true)
-			shaded_oval(ci, c - facing * rr * 0.1, rr * 0.9, rr * 0.42, ang, body, s)
-			glow_dot(ci, c + facing * rr * 0.6, rr * 0.3, glow)
-		"gunship":
-			# Gunship: an armored heavy flyer: twin ducted fans, a plated hull, a chin turret with twin
-			# barrels and a tail boom with a stabilizer.
-			ellipse(ci, c + Vector2(0, rr * 2.0), rr * 1.4, rr * 0.4, Color(0, 0, 0, 0.22))
-			bar(ci, c - facing * rr * 0.4, c - facing * rr * 1.35, 2.4 * s, METAL_D.lightened(0.12))
-			plate(ci, c - facing * rr * 1.35, rect_pts(0.1, 0.42), METAL, ang, rr, 1.0)
-			for side in [-1.0, 1.0]:
-				var fan: Vector2 = c + n * side * rr * 0.95 - facing * rr * 0.1
-				disc(ci, fan, rr * 0.5, OUTLINE)
-				disc(ci, fan, rr * 0.44, METAL_D)
-				var spin: float = t * 30.0 * side
-				for b in 3:
-					var bd := Vector2.from_angle(spin + TAU * float(b) / 3.0)
-					line(ci, fan, fan + bd * rr * 0.4, Color(0.8, 0.85, 0.95, 0.5), 1.4 * s, true)
-				ring(ci, fan, rr * 0.47, METAL_L, 1.6 * s)
-				glow_dot(ci, fan - facing * rr * 0.5, rr * 0.08, Color(1.0, 0.25, 0.25) if side < 0.0 else Color(0.3, 1.0, 0.45))
-			var hullg := PackedVector2Array([Vector2(0.95, 0), Vector2(0.55, 0.5), Vector2(-0.6, 0.55), Vector2(-0.85, 0.2), Vector2(-0.85, -0.2), Vector2(-0.6, -0.55), Vector2(0.55, -0.5)])
-			plate(ci, c, hullg, body, ang, rr * 0.8, 1.6)
-			rivets(ci, c, hullg, ang, rr * 0.8, 0.72, 0.6 * s)
-			line(ci, c - facing * rr * 0.4, c + facing * rr * 0.45, Color(0, 0, 0, 0.35), 1.0 * s, true)
-			var tur := c + facing * rr * 0.55
-			for side in [-1.0, 1.0]:
-				bar(ci, tur + n * side * rr * 0.1, tur + n * side * rr * 0.1 + facing * rr * 0.6, 1.8 * s, METAL_L)
-			orb(ci, tur, rr * 0.22, METAL, s)
-			glow_dot(ci, c + facing * rr * 0.2, rr * 0.1, glow)
-		"burrower":
-			# Burrower: a drill-nosed mole bot on treads. Underground, only a moving mound of earth
-			# and the drill tip show.
-			if hidden:
-				var dirt := Color(0.42, 0.33, 0.24)
-				shaded_oval(ci, c, rr * 1.15, rr * 0.8, ang, dirt, s)
-				for k in 5:
-					var a := ang + TAU * float(k) / 5.0 + t * 0.5
-					disc(ci, c + Vector2.from_angle(a) * rr * (0.85 + 0.15 * sin(t * 9.0 + float(k))), 1.4 * s, dirt.lightened(0.2))
-				line(ci, c + facing * rr * 0.6, c + facing * rr * 1.05, METAL_L, 2.0 * s, true)
-				glow_dot(ci, c + facing * rr * 0.2, rr * 0.12, Color(glow, 0.6))
-			else:
-				for side in [-1.0, 1.0]:
-					var tr: Vector2 = c + n * side * rr * 0.72
-					plate(ci, tr, rect_pts(0.7, 0.2), METAL_D.lightened(0.08), ang, rr, 1.0)
-					for k in 3:
-						var lp: Vector2 = tr + facing * (fmod(t * 7.0 + float(k) * 0.45, 1.35) - 0.68) * rr
-						line(ci, lp - n * rr * 0.15, lp + n * rr * 0.15, Color(0, 0, 0, 0.45), 0.9 * s)
-				shaded_oval(ci, c - facing * rr * 0.15, rr * 0.7, rr * 0.58, ang, body, s)
-				for k in 2:
-					var sp := c - facing * rr * (0.05 + 0.3 * float(k))
-					line(ci, sp - n * rr * 0.5, sp + n * rr * 0.5, Color(0, 0, 0, 0.35), 1.0 * s, true)
-				var drill := PackedVector2Array([Vector2(1.45, 0), Vector2(0.5, 0.42), Vector2(0.5, -0.42)])
-				plate(ci, c, drill, METAL_L, ang, rr, 1.2)
-				for k in 3:
-					var f := fmod(t * 5.0 + float(k) / 3.0, 1.0)
-					var x := 0.55 + 0.8 * f
-					var hw := 0.42 * (1.45 - x) / 0.95
-					line(ci, c + facing * rr * x - n * rr * hw, c + facing * rr * (x + 0.12) + n * rr * hw, Color(0, 0, 0, 0.45), 1.0 * s, true)
-				glow_dot(ci, c - facing * rr * 0.2, rr * 0.14, glow)
-		"stalker":
-			# Blink Stalker: a lean digitigrade biped with a blade-shaped head and a shimmering
-			# teleport afterimage trailing behind it.
-			var echo := fmod(t * 1.1, 1.0)
-			var ghost := PackedVector2Array([Vector2(1.1, 0), Vector2(0.2, 0.45), Vector2(-0.7, 0.3), Vector2(-0.7, -0.3), Vector2(0.2, -0.45)])
-			outline(ci, c - facing * rr * (0.6 + 1.2 * echo), ghost, Color(glow, 0.45 * (1.0 - echo)), 1.0 * s, ang, rr)
-			for side in [-1.0, 1.0]:
-				var ph := t * 12.0 + (PI if side > 0.0 else 0.0)
-				var hip: Vector2 = c + n * side * rr * 0.3
-				var knee: Vector2 = hip + n * side * rr * 0.45 + facing * rr * (0.45 + 0.25 * sin(ph))
-				var foot: Vector2 = knee + n * side * rr * 0.1 - facing * rr * (0.55 - 0.3 * sin(ph))
-				limb(ci, PackedVector2Array([hip, knee, foot]), 1.3 * s, METAL_L)
-			plate(ci, c, ghost, body, ang, rr * 0.8, 1.1)
-			strip(ci, c - facing * rr * 0.45, c + facing * rr * 0.55, 0.8 * s, glow)
-			glow_dot(ci, c + facing * rr * 0.6, rr * 0.16, glow)
-		"mender":
-			# Mender Hulk: a hulking repair frame with a nanite core; green seams pulse as it mends.
-			var pulse := 0.5 + 0.5 * sin(t * 4.0)
-			for side in [-1.0, 1.0]:
-				var sh: Vector2 = c + n * side * rr * 0.72 + facing * rr * 0.1
-				var fist: Vector2 = sh + facing * rr * (0.55 + 0.1 * sin(t * 3.0 + side)) + n * side * rr * 0.15
-				limb(ci, PackedVector2Array([sh, fist]), 3.0 * s, METAL_L)
-				orb(ci, fist, rr * 0.2, METAL, s)
-			shaded_oval(ci, c, rr * 0.85, rr * 0.75, ang, body, s)
-			var plates := ngon(8, 1.0, PI / 8.0)
-			outline(ci, c, plates, body.darkened(0.35), 1.4 * s, ang, rr * 0.6)
-			for k in 4:
-				var a := ang + PI / 4.0 + float(k) * PI / 2.0
-				line(ci, c + Vector2.from_angle(a) * rr * 0.25, c + Vector2.from_angle(a) * rr * 0.7, Color(glow, 0.35 + 0.5 * pulse), 1.2 * s, true)
-			orb(ci, c, rr * 0.3, glow.darkened(0.45), s)
-			glow_dot(ci, c, rr * (0.14 + 0.05 * pulse), glow)
-		"rally":
-			# Rally Beacon: a wheeled signal mast with a rotating siren and overdrive pulses.
-			var ping := fmod(t * 1.4, 1.0)
-			arc(ci, c, rr * (1.1 + 1.6 * ping), 0.0, TAU, 24, Color(glow, 0.4 * (1.0 - ping)), 1.6 * s, true)
-			for k in 4:
-				var wp: Vector2 = c + Vector2.from_angle(ang + PI / 4.0 + float(k) * PI / 2.0) * rr * 0.72
-				disc(ci, wp, rr * 0.22, OUTLINE)
-				disc(ci, wp, rr * 0.16, METAL_D.lightened(0.15))
-			var hexr := ngon(6, 1.0, 0.0)
-			plate(ci, c, hexr, body, ang, rr * 0.62, 1.3)
-			bar(ci, c, c - facing * rr * 0.1 + Vector2(0, -rr * 0.9), 1.6 * s, METAL_L)
-			var top := c - facing * rr * 0.1 + Vector2(0, -rr * 0.9)
-			orb(ci, top, rr * 0.22, METAL, s)
-			var beam := Vector2.from_angle(t * 6.0)
-			line(ci, top, top + beam * rr * 0.9, Color(glow, 0.5), 2.0 * s, true)
-			glow_dot(ci, top, rr * 0.16, glow)
-		"bulwark":
-			# Bulwark: a squat projector with three emitter prongs spinning barrier shards around it.
-			for k in 3:
-				var a := ang + TAU * float(k) / 3.0
-				var pr: Vector2 = c + Vector2.from_angle(a) * rr * 0.85
-				bar(ci, c, pr, 2.2 * s, METAL_L)
-				orb(ci, pr, rr * 0.16, METAL, s)
-				glow_dot(ci, pr, rr * 0.08, glow)
-			orb(ci, c, rr * 0.62, body, s)
-			ring(ci, c, rr * 0.4, body.darkened(0.35), 1.3 * s)
-			glow_dot(ci, c, rr * 0.18, glow)
-			var shard := ngon(6, 1.0, PI / 6.0)
-			for k in 3:
-				var a := t * 1.4 + TAU * float(k) / 3.0 + PI / 3.0
-				var sp: Vector2 = c + Vector2.from_angle(a) * rr * 1.2
-				fill(ci, sp, shard, Color(glow, 0.2), a, rr * 0.3)
-				outline(ci, sp, shard, Color(glow, 0.8), 1.0 * s, a, rr * 0.3)
-		"rampart":
-			# Rampart: a siege fortress on wide treads: a crenellated bastion hull, a battering ram and
-			# armor spikes. Nothing moves it off course.
-			var roll := fmod(t * 14.0, 5.0)
-			for side in [-1.0, 1.0]:
-				var tread: Vector2 = c + n * side * rr * 0.82
-				plate(ci, tread, rect_pts(1.05, 0.26), METAL_D.lightened(0.05), ang, rr, 1.3)
-				for k in 5:
-					var lp := tread + facing * (-rr * 0.95 + fmod(float(k) * rr * 0.42 + roll, rr * 2.0))
-					line(ci, lp - n * rr * 0.22, lp + n * rr * 0.22, METAL_L, 1.0 * s)
-			var hullr := rect_pts(0.78, 0.66)
-			plate(ci, c, hullr, body, ang, rr, 1.8)
-			for cx in [-1.0, 1.0]:
-				for cy in [-1.0, 1.0]:
-					plate(ci, c + facing * cx * rr * 0.62 + n * cy * rr * 0.5, rect_pts(0.16, 0.16), body.lightened(0.12), ang, rr, 1.1)
-			rivets(ci, c, hullr, ang, rr, 0.7, 0.7 * s)
-			bar(ci, c + facing * rr * 0.7, c + facing * rr * 1.25, 4.0 * s, METAL_L)
-			var ram := PackedVector2Array([Vector2(0.2, 0), Vector2(-0.05, 0.3), Vector2(-0.05, -0.3)])
-			plate(ci, c + facing * rr * 1.2, ram, METAL_L.lightened(0.1), ang, rr, 1.0)
-			orb(ci, c, rr * 0.28, body.darkened(0.2), s)
-			glow_dot(ci, c, rr * 0.13, glow)
-		"leviathan":
-			# Leviathan: a colossal flying carrier: a long armored hull with swept fins, launch bays
-			# that light up, a turning radar mast and a bank of engines.
-			ellipse(ci, c + Vector2(0, rr * 1.6), rr * 1.5, rr * 0.45, Color(0, 0, 0, 0.25))
-			for side in [-1.0, 1.0]:
-				var fin := PackedVector2Array([Vector2(0.2, 0.3 * side), Vector2(-0.55, 1.15 * side), Vector2(-0.85, 1.05 * side), Vector2(-0.6, 0.3 * side)])
-				plate(ci, c, fin, body.darkened(0.15), ang, rr, 1.4)
-			var hulll := PackedVector2Array([Vector2(1.25, 0), Vector2(0.85, 0.36), Vector2(-0.95, 0.42), Vector2(-1.15, 0.2), Vector2(-1.15, -0.2), Vector2(-0.95, -0.42), Vector2(0.85, -0.36)])
-			plate(ci, c, hulll, body, ang, rr, 2.0)
-			rivets(ci, c, hulll, ang, rr, 0.8, 0.8 * s)
-			for k in 3:
-				var bay: Vector2 = c + facing * rr * (0.45 - 0.42 * float(k))
-				var lit := fmod(t * 0.8 + float(k) * 0.33, 1.0) < 0.3
-				plate(ci, bay, rect_pts(0.12, 0.22), glow if lit else METAL_D, ang, rr, 1.0)
-			for side in [-1.0, 0.0, 1.0]:
-				var eng: Vector2 = c - facing * rr * 1.15 + n * side * rr * 0.22
-				glow_dot(ci, eng, rr * (0.08 + 0.02 * sin(t * 20.0 + side)), Color(0.4, 0.8, 1.0))
-			var mast := c + facing * rr * 0.75
-			orb(ci, mast, rr * 0.13, METAL_L, s)
-			var dish := Vector2.from_angle(t * 2.2)
-			line(ci, mast - dish * rr * 0.2, mast + dish * rr * 0.2, METAL_L, 2.0 * s, true)
-			glow_dot(ci, c + facing * rr * 1.1, rr * 0.07, glow)
-		"colossus":
-			# Colossus: a four-legged walking fortress with layered armor, a molten core and twin
-			# shoulder cannons.
-			for k in 4:
-				var la := ang + PI / 4.0 + float(k) * PI / 2.0
-				var ld := Vector2.from_angle(la)
-				var step := sin(t * 2.5 + float(k) * PI / 2.0) * rr * 0.14
-				var knee := c + ld * rr * 0.85 + facing * step
-				var foot := knee + ld * rr * 0.35
-				limb(ci, PackedVector2Array([c + ld * rr * 0.4, knee, foot]), 5.0 * s, METAL_L)
-				orb(ci, knee, rr * 0.12, METAL, s)
-				ellipse(ci, foot, rr * 0.16, rr * 0.1, METAL_D)
-			var core := 0.5 + 0.5 * sin(t * 2.0)
-			var hullc := ngon(8, 1.0, PI / 8.0)
-			plate(ci, c, hullc, body, ang, rr * 0.72, 2.0)
-			outline(ci, c, hullc, body.darkened(0.4), 2.0 * s, ang, rr * 0.52)
-			rivets(ci, c, hullc, ang, rr * 0.72, 0.82, 0.9 * s)
-			for side in [-1.0, 1.0]:
-				var gun: Vector2 = c + n * side * rr * 0.5
-				bar(ci, gun, gun + facing * rr * 0.95, 4.0 * s, METAL_L)
-				orb(ci, gun, rr * 0.18, body.lightened(0.15), s)
-			disc(ci, c, rr * 0.36, OUTLINE)
-			disc(ci, c, rr * 0.3, Color(glow.darkened(0.5), 1.0))
-			glow_dot(ci, c, rr * (0.18 + 0.04 * core), glow)
-		_:
-			disc(ci, c, rr, body)
 	if slowed and not hidden:
 		disc(ci, c, rr * 1.12, Color(0.55, 0.85, 1.0, 0.28))
 		ring(ci, c, rr * 1.12, Color(0.7, 0.95, 1.0, 0.6), 1.0 * s)
