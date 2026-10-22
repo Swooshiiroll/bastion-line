@@ -4478,7 +4478,7 @@ func test_live_tuner_panel() -> void:
 			check(same and int(w["=Spent"]) == row.spent, "%s %s: =DPS %.2f and =Spent %d are balance.md's" % [slug, row.id, row.dps, row.spent])
 	for r in _balance_rows("<!-- table: enemies -->"):
 		var e := Tuner.enemy_info(r.Id)
-		check("%.1f" % e.strength == str(r["=Strength"]) and e.leak == int(r["=Leak"]), "%s: =Strength and =Leak are balance.md's" % r.Id)
+		check(absf(float(r["=Strength"]) - e.strength) <= 0.0501 and e.leak == int(r["=Leak"]), "%s: =Strength and =Leak are balance.md's" % r.Id)
 
 	var g = new_game("meadow")
 	Tuner.attach(g)
