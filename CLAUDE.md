@@ -75,6 +75,8 @@ with the owner before writing any code.
        `2026-10-22 v4-dev.1 (Build 2)`), with a BUILD.txt naming the branch and commit. Older builds are kept.
        - `<version>` is the `v*-dev.*` line the build belongs to; a feature branch uses the dev branch it targets.
        - `<n>` counts that version's builds that day on any machine (ledger: `out/builds.txt`).
+     - **Bug reports:** each build also gets `\\Anode-FS\Anode\Bastion Line\<build name> Bugs`, where the
+       owner files bug reports for it. Read them from there when working on fixes.
      - **Brimstone only when the owner asks:**
        `LX_HOST=chrisg@10.101.249.12 LX_DIR="/home/chrisg/Documents/BastionLine v4" tools/dev.sh lx`.
      - **If LX is off,** it says so, and nothing else changes.
