@@ -28,6 +28,7 @@ const Difficulty = preload("res://data/difficulty.gd")
 const EnemyArt = preload("res://scripts/view/enemies/EnemyArt.gd")
 const EnemyMoves = preload("res://scripts/entities/EnemyMoves.gd")
 const Tuner = preload("res://scripts/dev/Tuner.gd")
+const TunerPanel = preload("res://scripts/dev/TunerPanel.gd")
 
 const SANDBOX := "user://test_sandbox/"
 const SIM_DT := 1.0 / 60.0
@@ -4461,4 +4462,53 @@ func test_live_tuner() -> void:
 	check(Tuner.changes().is_empty() and int(Enemies.ENEMIES.grunt.hp) == hp0 and int(Enemies.ENEMIES.grunt.lives) == 1, "revert puts balance.md's values back")
 	check(is_equal_approx(e.max_hp, hp0 * 2.0) and is_equal_approx(elite.armor, armor0), "and the field follows")
 	check(is_equal_approx(t.stats().damage, dmg0) and g.tower_cost("gun_turret") == cost0, "and the towers and prices")
+	Tuner.attach(null)
+
+
+## Live tuner (issue #80): its derived values are balance.md's = columns, and its panel lists, edits, reverts and exports.
+func test_live_tuner_panel() -> void:
+	for slug in Towers.Rework.ORDER:
+		var want := {}
+		for r in _balance_rows("### %s\n" % slug):
+			want[r.Node] = r
+		for row in Tuner.tower_rows(slug):
+			var w: Dictionary = want.get(row.id, {})
+			var dps := "-" if row.dps < 0.0 else "%.1f" % row.dps
+			check(not w.is_empty() and str(w["=DPS"]) == dps and int(w["=Spent"]) == row.spent, "%s %s: =DPS %s and =Spent %d are balance.md's" % [slug, row.id, dps, row.spent])
+	for r in _balance_rows("<!-- table: enemies -->"):
+		var e := Tuner.enemy_info(r.Id)
+		check("%.1f" % e.strength == str(r["=Strength"]) and e.leak == int(r["=Leak"]), "%s: =Strength and =Leak are balance.md's" % r.Id)
+
+	var g = new_game("meadow")
+	Tuner.attach(g)
+	put(g, "grunt", 40.0)
+	var p = TunerPanel.new()
+	add_child(p)
+	check(p._areas.enemies.groups.size() == Enemies.ENEMIES.size() and p._areas.towers.groups.size() == Towers.Rework.ORDER.size(), "every enemy and tower has a group")
+	p._search.text = "proj_speed"
+	p._fill_lists()
+	check(p._areas.towers.groups.size() > 0 and p._areas.enemies.groups.is_empty(), "the search keeps groups with a matching number")
+	p._search.text = ""
+	p._fill_lists()
+	p._refresh_readout()
+	check("Round 0" in p._readout.text and "Drone ×1" in p._field.text, "the readout shows the round and the field")
+	var edit := LineEdit.new()
+	edit.text = "90"
+	p._commit("Enemies:ENEMIES.grunt.hp", edit)
+	check(int(Enemies.ENEMIES.grunt.hp) == 90 and Tuner.changes().size() == 1, "a value typed in is applied")
+	p._nudge("Enemies:ENEMIES.grunt.hp", 1.0)
+	check(int(Enemies.ENEMIES.grunt.hp) == 91, "+ steps a whole number by 1")
+	p._nudge("Waves:HP_LINEAR", -1.0)
+	check(Tuner.changed("Waves:HP_LINEAR"), "− steps a decimal")
+	p._tabs.current_tab = p.TABS.size()
+	check(p._changes.get_child_count() == 3, "the Changes tab lists them")
+	var dir := SANDBOX + "tweaks"
+	var path := Tuner.export_changes(dir)
+	var data = JSON.parse_string(FileAccess.get_file_as_string(path))
+	check(data is Dictionary and data.changes.size() == 2 and str(data.changes[0].key) == "Enemies:ENEMIES.grunt.hp" and int(data.changes[0].new) == 91, "export writes the changes")
+	p._revert_all()
+	check(Tuner.changes().is_empty() and int(Enemies.ENEMIES.grunt.hp) == 70, "revert all")
+	check(Tuner.export_changes(dir) == "", "nothing to export once reverted")
+	edit.free()
+	p.free()
 	Tuner.attach(null)

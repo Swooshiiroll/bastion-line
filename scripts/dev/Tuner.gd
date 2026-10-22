@@ -12,6 +12,8 @@ const Modifiers = preload("res://data/modifiers.gd")
 const Difficulty = preload("res://data/difficulty.gd")
 const EnemyTraits = preload("res://scripts/core/EnemyTraits.gd")
 const Rework = preload("res://data/rework_trees.gd")
+const Tower = preload("res://scripts/entities/Tower.gd")
+const Lore = preload("res://scripts/core/Lore.gd")
 
 ## The scripts balance.md writes into, by the names tools/balance.mjs uses.
 const SCRIPTS := {
@@ -76,20 +78,57 @@ static func fields() -> Array:
 		for slug in Rework.ORDER:
 			for id in node_ids(slug):
 				var n := _node(slug, id)
-				_fields.append({"key": "Towers:%s.%s.cost" % [slug, id], "area": "towers", "group": "%s %s" % [slug, id], "label": "cost"})
+				_fields.append({"key": "Towers:%s.%s.cost" % [slug, id], "area": "towers", "group": slug, "node": id, "label": "cost"})
 				for part in ["set", "add"]:
 					for k in n.get(part, {}):
 						if n[part][k] is int or n[part][k] is float:
-							_fields.append({"key": "Towers:%s.%s.%s" % [slug, id, k], "area": "towers", "group": "%s %s" % [slug, id], "label": k})
+							_fields.append({"key": "Towers:%s.%s.%s" % [slug, id, k], "area": "towers", "group": slug, "node": id,
+								"label": ("+" if part == "add" else "") + k})
 	return _fields
 
 
-## A script field: an entry's numbers group under the entry (`ENEMIES.grunt`), anything else under its script.
+## A script field's group and label: an entry's numbers group under the entry (`ENEMIES.grunt`: hp, speed...), a flat
+## dictionary's under it (`INTRO`: grunt, runner...), anything else under its script (`Game`: SELL_REFUND, LEAK_BANDS.0).
 static func _field(key: String, area: String) -> Dictionary:
+	var file := key.get_slice(":", 0)
 	var path := key.get_slice(":", 1).split(".")
 	if path.size() > 2:
 		return {"key": key, "area": area, "group": "%s.%s" % [path[0], path[1]], "label": ".".join(path.slice(2))}
-	return {"key": key, "area": area, "group": key.get_slice(":", 0), "label": ".".join(path)}
+	if path.size() == 2 and not path[1].is_valid_int():
+		return {"key": key, "area": area, "group": path[0], "label": path[1]}
+	return {"key": key, "area": area, "group": file, "label": ".".join(path)}
+
+
+## A group's name for the tuner's list: the enemy, modifier, tower, research node or mode's own name where it has one.
+static func group_name(group: String) -> String:
+	var p := group.split(".")
+	if Rework.TREES.has(group):
+		return str(Rework.TREES[group].name)
+	if p.size() == 2:
+		if p[0] == "BOSS_ROUNDS":
+			return "Boss round %s" % p[1]
+		var d = SCRIPTS[_file_of(p[0])].get(p[0]).get(p[1]) if _file_of(p[0]) != "" else null
+		if d is Dictionary and d.has("name"):
+			return "%s (%s)" % [d.name, p[1]]
+		return p[1]
+	return {"INTRO": "Introduction round", "COST": "Threat cost", "SPACING": "Spacing (s)", "MAX_COUNT": "Group cap",
+		"ROLE_RESIST": "Role resistance", "Game": "Game rules", "Enemy": "Enemy rules", "Tower": "Tower rules",
+		"Enemies": "Leak bands", "Waves": "Formulas", "Modifiers": "Modifier rules", "Research": "RP milestones"}.get(group, group)
+
+
+## The script a static var lives on ("" if none of the tuned ones).
+static func _file_of(name: String) -> String:
+	for f in FIELDS:
+		if f[2].has(name):
+			return f[1]
+	return ""
+
+
+## A field's label for the tuner: a tower node's stat, or an enemy's name in a per-enemy dictionary (INTRO, COST...).
+static func field_name(f: Dictionary) -> String:
+	if Enemies.ENEMIES.has(f.label) and f.group in ["INTRO", "COST", "SPACING", "MAX_COUNT"]:
+		return "%s (%s)" % [Enemies.ENEMIES[f.label].name, f.label]
+	return str(f.label)
 
 
 ## Appends the path of every number in `v`; `skip` names an entry's keys to leave out. Dictionaries are walked, arrays
@@ -235,6 +274,11 @@ static func changed(key: String) -> bool:
 	return _orig.has(key)
 
 
+## A changed field's value in balance.md (null if unchanged).
+static func original(key: String):
+	return _orig.get(key)
+
+
 ## Each live enemy's data before an edit (its `def`, copied), so `Enemy.retune` can see what changed.
 static func _snapshot() -> Dictionary:
 	var out := {}
@@ -248,6 +292,7 @@ static func _snapshot() -> Dictionary:
 ## follow the mode's multiplier (research refresh: Game.apply_research), and the run is marked tuned.
 static func _refresh(before: Dictionary) -> void:
 	EnemyTraits._cache = {}
+	Lore._values = {}
 	_derive_leaks()
 	if game == null:
 		return
@@ -273,3 +318,128 @@ static func _derive_leaks() -> void:
 				lives = int(r)
 				break
 		d["lives"] = lives
+
+
+# --- Derived values: balance.md's = columns, from the game's own functions -------------------------------------------
+
+## An enemy's strength, leak cost, and health and credits at rounds 20, 60 and 100.
+static func enemy_info(id: String) -> Dictionary:
+	var d: Dictionary = Enemies.ENEMIES[id]
+	var w = SCRIPTS.Waves
+	var out := {"strength": Enemies.strength_of(d), "leak": int(d.lives), "hp": {}, "credits": {}}
+	for r in [20, 60, 100]:
+		out.hp[r] = float(d.hp) * w.hp_scale(r)
+		out.credits[r] = float(d.bounty) * w.bounty_scale(r)
+	return out
+
+
+## Round `r`'s multipliers and budgets (balance.md's round table).
+static func round_info(r: int) -> Dictionary:
+	var w = SCRIPTS.Waves
+	return {"hp": w.hp_scale(r), "speed": w.speed_scale(r), "boss_speed": w.speed_scale(r, true), "budget": w.threat_budget(r),
+		"elite": w.elite_share(r), "bounty": w.bounty_scale(r), "clear": w.clear_bonus(r), "call": w.early_call_bonus(r)}
+
+
+## A tower's nodes in table order with balance.md's =DPS, =Spent and =DPS/100cr: [{id, name, cost, spent, dps}]. A
+## Retrofit is counted on the base alone, a path step with the steps before it (dps is -1 where a node deals none).
+static func tower_rows(slug: String) -> Array:
+	var b := _node(slug, "base")
+	var base: Dictionary = Tower._apply_node({}, b)
+	var out: Array = [_row("base", b, base, int(b.cost))]
+	var s := base
+	var spent := int(b.cost)
+	for id in node_ids(slug):
+		var n := _node(slug, id)
+		if id == "base":
+			continue
+		if id.begins_with("r"):
+			out.append(_row(id, n, Tower._apply_node(base, n), int(b.cost) + int(n.cost)))
+			continue
+		if id.ends_with("1"):
+			s = base
+			spent = int(b.cost)
+		s = Tower._apply_node(s, n)
+		spent += int(n.cost)
+		out.append(_row(id, n, s, spent))
+	return out
+
+
+static func _row(id: String, n: Dictionary, stats: Dictionary, spent: int) -> Dictionary:
+	return {"id": id, "name": str(n.get("name", id)), "cost": int(n.cost), "spent": spent, "dps": paper_dps(stats)}
+
+
+## Paper DPS (balance.md, Formulas; tools/balance.mjs paperDps): damage × rate × hits per attack, armor ignored; beams
+## ramp, chains fall off, the CAS Gunship adds its other two guns. -1 for a tower that deals no damage.
+static func paper_dps(s: Dictionary) -> float:
+	if s.has("orbit"):
+		var d := _n(s, "damage") * _n(s, "rate") + _n(s, "ac_damage") * _n(s, "ac_rate")
+		var volley := _n(s, "ms_volley") if _n(s, "ms_volley") != 0.0 else 1.0
+		return d + _n(s, "ms_damage") * _n(s, "ms_rate") * (volley + 2.0) / 3.0
+	if _n(s, "damage") == 0.0:
+		return -1.0
+	if s.has("ramp"):
+		var beams := _n(s, "beams") if _n(s, "beams") != 0.0 else 1.0
+		return _n(s, "damage") * _n(s, "ramp") * (1.0 + _n(s, "beam_power", 0.4) * (beams - 1.0))
+	if _n(s, "rate") == 0.0:
+		return -1.0
+	var shots := 1.0
+	if s.has("jumps"):
+		var keep := 1.0 - _n(s, "falloff", 0.15)
+		shots = 0.0
+		for k in int(_n(s, "jumps")) + 1:
+			shots += pow(keep, k)
+	elif _n(s, "missiles") != 0.0:
+		shots = _n(s, "missiles")
+	elif _n(s, "multishot", 1.0) > 1.0:
+		shots = _n(s, "multishot")
+	elif _n(s, "side_gun") != 0.0:
+		shots = 1.0 + _n(s, "side_gun")
+	elif _n(s, "drones") != 0.0:
+		shots = _n(s, "drones")
+	return _n(s, "damage") * _n(s, "rate") * shots
+
+
+static func _n(s: Dictionary, k: String, dflt := 0.0) -> float:
+	return float(s.get(k, dflt))
+
+
+# --- Export --------------------------------------------------------------------------------------------------------
+
+## Saves the changes as a tweaks file for `node tools/balance.mjs --apply` and returns its path ("" if nothing changed).
+static func export_changes(dir := "user://tweaks") -> String:
+	var ch := changes()
+	if ch.is_empty():
+		return ""
+	DirAccess.make_dir_recursive_absolute(dir)
+	var stamp := Time.get_datetime_string_from_system().replace(":", "").replace("T", "-")
+	var path := "%s/tweaks-%s.json" % [dir, stamp]
+	var f := FileAccess.open(path, FileAccess.WRITE)
+	if f == null:
+		return ""
+	f.store_string(JSON.stringify({"game": str(ProjectSettings.get_setting("application/config/version")), "made": stamp, "changes": ch}, "\t"))
+	f.close()
+	return path
+
+
+## Whether this is a run from the repo (not an exported build), where an export can be applied to balance.md at once.
+static func in_repo() -> bool:
+	return OS.has_feature("editor") and FileAccess.file_exists("res://tools/balance.mjs")
+
+
+## Applies a tweaks file to design/balance.md and regenerates the tower data (repo runs). Returns [ok, output]. Once
+## applied, the values are balance.md's own, so the change list starts again (the run stays tuned).
+static func apply_in_repo(path: String) -> Array:
+	var root := ProjectSettings.globalize_path("res://")
+	var lines: Array = []
+	var out: Array = []
+	var code := OS.execute("node", [root.path_join("tools/balance.mjs"), "--apply", ProjectSettings.globalize_path(path)], out, true)
+	lines.append_array(out)
+	if code == -1:
+		return [false, "node wasn't found: the tweaks file is saved; apply it with node tools/balance.mjs --apply <file>"]
+	if code == 0:
+		out = []
+		code = OS.execute("node", [root.path_join("tools/tree_rework_data.mjs")], out, true)
+		lines.append_array(out)
+	if code == 0:
+		_orig.clear()
+	return [code == 0, "\n".join(lines).strip_edges()]
