@@ -146,10 +146,12 @@ case "$cmd" in
     name="$(date '+%Y-%m-%d %H%M') ${branch//\//-} ($commit)"
     rm -rf out/lx && mkdir -p out/lx
     cp build/linux/BastionLine.x86_64 out/lx/ && cp fonts/OFL.txt out/lx/FONT-LICENSE-Barlow.txt
-    printf 'Bastion Line test build\nBranch:  %s\nCommit:  %s%s\nVersion: %s\nBuilt:   %s\n\nRun ./BastionLine.x86_64\n' \
+    printf 'Bastion Line test build\nBranch:  %s\nCommit:  %s%s\nVersion: %s\nBuilt:   %s\n\nRun ./BastionLine.x86_64, or "./Bastion Line (dev).sh" for the live tuner beside it (F8 hides it; design/live_tuner.md).\n' \
       "$branch" "$commit" "$dirty" "$v" "$(date '+%Y-%m-%d %H:%M')" > out/lx/BUILD.txt
+    # The live tuner (issue #80) opens when the game is launched with --dev.
+    printf '#!/bin/sh\n# Bastion Line with the live tuner beside it (F8 hides it). Exports go to\n# ~/.local/share/godot/app_userdata/Bastion Line/tweaks/\ncd "$(dirname "$0")" && exec ./BastionLine.x86_64 -- --dev\n' > "out/lx/Bastion Line (dev).sh"
     # tar over ssh copes with the spaces in the folder names.
-    tar -C out/lx -cf - . | ssh "$host" "mkdir -p \"$root/$name\" && cd \"$root/$name\" && tar --no-same-owner -xf - && chmod +x BastionLine.x86_64" \
+    tar -C out/lx -cf - . | ssh "$host" "mkdir -p \"$root/$name\" && cd \"$root/$name\" && tar --no-same-owner -xf - && chmod +x BastionLine.x86_64 'Bastion Line (dev).sh'" \
       || { echo "copy to Corundum-LX failed"; exit 1; }
     echo "On Corundum-LX: $root/$name"
     sed 's/^/  /' out/lx/BUILD.txt | head -5 ;;

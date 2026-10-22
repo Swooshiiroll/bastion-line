@@ -117,6 +117,10 @@ Logs go to `out/`.
 
   Commit the outputs too; `check` fails if they're stale. The editable design pages are pulled back
   with `tools/design_pull.mjs` before regenerating.
+- **Live tuner exports** (issue #80, README "Live tuner"): the owner tunes numbers in the `--dev` window and exports a
+  tweaks file. Apply it with `node tools/balance.mjs --apply <file>` (then `tree_rework_data.mjs`, `check`, `test`).
+  Pull files from LX's `~/.local/share/godot/app_userdata/Bastion Line/tweaks/`. Those numbers are static vars so
+  the tuner can write them; a new balance number must be one too, or the tuner can't reach it.
 - **Playtest folder:** builds include `playtest/`, the owner's notes. The folder itself isn't
   committed.
 - **Backups:** before editing a critical file outside this repo, copy it to

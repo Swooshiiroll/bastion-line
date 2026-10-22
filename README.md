@@ -402,6 +402,25 @@ cost, health and credits by round, the round formulas by round, and tower prices
 each. Edit a number there and run `node tools/balance.mjs` (it writes the number into the game's scripts) and
 `node tools/tree_rework_data.mjs` (the tower data); `tools/dev.sh check` fails if anything disagrees.
 
+### Live tuner
+
+Launch the game with `--dev` (`godot --path . -- --dev`, or `./Bastion Line (dev).sh` in an LX build folder) and the
+live tuner opens in its own window beside the game's, following it (its Dock switch frees it; F8 hides it). It edits
+every number `design/balance.md` owns while the game runs (design/live_tuner.md, issue #80):
+
+- a tab per area (enemies, modifiers, towers, waves, economy, difficulty, research, abilities, rules) lists its groups;
+  type a value and press Enter, or use − and +. Search finds a group by name or by a number's key;
+- enemies already on the field take the change (health keeps its share), placed towers and prices follow at once,
+  and wave and round changes apply from the next round queued;
+- the derived values sit beside the numbers (strength, leak cost, health and credits by round, each tower node's paper
+  DPS and credits spent, the round formulas), and a readout shows the round, its multipliers, credits, shields and the
+  enemies on the field;
+- the Changes tab lists every change against balance.md's value, with revert, Revert all and Export. Export saves
+  `user://tweaks/tweaks-<date>.json`; `node tools/balance.mjs --apply <file>` writes it into balance.md (a number edited
+  there since is skipped and reported). A run from the repo applies it straight away.
+
+A run with changed numbers is marked TUNED: it's never saved and earns no medals or RP.
+
 ### Checks
 
 The commands below assume the console build is on PATH as `godot_console` (winget adds this alias; open a new shell after installing).

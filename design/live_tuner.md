@@ -70,7 +70,21 @@ Confirmed by the owner (2026-10-21).
 - It prints a summary of what was applied.
 - When LX builds produce a tweaks file, I can pull it over SSH from LX's `~/.local/share/godot/app_userdata/Bastion Line/tweaks/`.
 
-## Phases (PRs into v4-dev.1, branch `feat/<issue>-live-tuner-*`)
+## As built (2026-10-21)
+- **Where things live:**
+  - `scripts/dev/Tuner.gd` is the data side: fields, set and revert, refresh, derived values and export.
+  - `scripts/dev/TunerPanel.gd` is the content.
+  - `scripts/dev/TunerWindow.gd` is the native window and docking.
+  - `Boot.tuner` holds the window. Boot opens it on `--dev`, and F8 toggles it.
+- **Field count:** 1,578, the same keys `balance.mjs --keys` lists. Two kinds of number aren't fields:
+  - leak costs, which are derived;
+  - arrays inside an entry, such as the Colossus's phases, which `balance.md` doesn't own either.
+- **Docking:** when the game window leaves no room on its right, the tuner docks inside the screen's right edge.
+- **Editing:** numbers are typed into a box, with − and + buttons (a step of the number's own size).
+- **Exports:** `tweaks-<date>-<time>.json`, saved as `{game, made, changes: [{key, old, new}]}`.
+- **Tests:** `test_live_tuner` and `test_live_tuner_panel`. The panel test holds the derived values to balance.md's `=` cells.
+
+## Phases (built as three commits in one PR into v4-dev.1, branch `feat/80-live-tuner-core`)
 1. **Data and core:**
    - the `static var` conversion;
    - `Tuner.gd` with set, revert, refresh and the tuned-run flag;
