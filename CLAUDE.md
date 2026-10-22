@@ -71,8 +71,14 @@ with the owner before writing any code.
    - **After every build, run `tools/dev.sh lx`.** It puts the build on Corundum-LX, where the owner
      playtests.
      - **Where:** each build gets its own folder inside
-       `/home/swooshii/Documents/Bastion Line Testing`, named `<date> <time> <branch> (<commit>)`,
-       with a BUILD.txt saying what it is. Older builds are kept.
+       `/home/swooshii/Documents/Bastion Line Testing`, named `<date> <version> (Build <n>)` (e.g.
+       `2026-10-22 v4-dev.1 (Build 2)`), with a BUILD.txt naming the branch and commit. Older builds are kept.
+       - `<version>` is the `v*-dev.*` line the build belongs to; a feature branch uses the dev branch it targets.
+       - `<n>` counts that version's builds that day on any machine (ledger: `out/builds.txt`).
+     - **Bug reports:** each build also gets `\\Anode-FS\Anode\Bastion Line\<build name> Bugs`, where the
+       owner files bug reports for it. Read them from there when working on fixes.
+     - **Brimstone only when the owner asks:**
+       `LX_HOST=chrisg@10.101.249.12 LX_DIR="/home/chrisg/Documents/BastionLine v4" tools/dev.sh lx`.
      - **If LX is off,** it says so, and nothing else changes.
 6. **Merge only when the owner says so:** `gh pr merge --squash --delete-branch`.
 
