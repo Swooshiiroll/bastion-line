@@ -10,9 +10,9 @@ const ORDER := ["grunt", "runner", "brute", "swarmling", "bat", "shaman", "phant
 ## What share of a slow or pull each role resists (the Magneto and Tractor towers, design/tower_roster.md). Every enemy has a
 ## `role`: swarm, rusher, evader, support, disruptor, special, tank or boss, and a `tier`: 1 to 4 in its role, 0 for special
 ## and boss (the role and tier grid in design/enemy_roster.md, issue #68).
-const ROLE_RESIST := {"swarm": 0.0, "rusher": 0.10, "evader": 0.20, "support": 0.30, "disruptor": 0.30, "special": 0.30, "tank": 0.50, "boss": 0.75}
+static var ROLE_RESIST := {"swarm": 0.0, "rusher": 0.10, "evader": 0.20, "support": 0.30, "disruptor": 0.30, "special": 0.30, "tank": 0.50, "boss": 0.75}
 
-const ENEMIES := {
+static var ENEMIES := {
 	"grunt": {
 		"role": "swarm", "tier": 3,
 		"name": "Drone", "hp": 70.0, "speed": 55.0, "armor": 0.0, "bounty": 4, "lives": 1, "radius": 11.0,
@@ -219,7 +219,7 @@ const ENEMIES := {
 const BOSS_RANK := 100000.0
 ## Leak cost bands for non-bosses (owner, 2026-10-20): strength below 50 costs 1 shield, below 150 costs 2, below 400 costs 3, else 4.
 ## A boss costs its introduction round; an elite one shield more.
-const LEAK_BANDS := [50.0, 150.0, 400.0]
+static var LEAK_BANDS := [50.0, 150.0, 400.0]
 
 
 ## The shields a non-boss of strength `str_score` costs when it leaks.

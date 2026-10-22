@@ -3,6 +3,9 @@
 // It writes every number design/balance.md owns into the game's scripts (each in place, so their text stays as it is),
 // rewrites balance.md's generated (=) columns and tables, and copies the tower prices into design/upgrade_trees_rework.md
 // (the trees page shows them). --check changes nothing and exits non-zero if anything is out of date (tools/dev.sh check).
+// --apply <tweaks.json> first writes a live tuner export (issue #80, design/live_tuner.md) into balance.md's cells: each
+// change { key, old, new } is applied only if its cell still holds `old` (a stale one is reported and skipped); an unknown
+// key fails the run. Add --dry to only check the keys.
 import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { root, BALANCE, TREES, read, parseTowers, parseTrees, cells, rowLine, nodeId, applyNode, NODE_IDS,
@@ -10,7 +13,10 @@ import { root, BALANCE, TREES, read, parseTowers, parseTrees, cells, rowLine, no
 
 const errors = [];
 const CHECK = process.argv.includes("--check");
-const balance = read(BALANCE);
+const APPLY = process.argv.includes("--apply") ? process.argv[process.argv.indexOf("--apply") + 1] : null;
+const DRY = process.argv.includes("--dry");
+const source = read(BALANCE);
+let balance = source;
 const trees = read(TREES);
 
 // The scripts balance.md writes into, by the short name a Rules row uses (`Game.SELL_REFUND`).
@@ -23,8 +29,11 @@ const orig = {}, gd = {};
 for (const k in FILES) orig[k] = gd[k] = read(join(root, FILES[k]));
 // Write a file back with its own line endings (Windows checkouts have CRLF; the repo and CI have LF).
 const save = (file, text) => writeFileSync(file, readFileSync(file, "utf8").includes("\r\n") ? text.replace(/\n/g, "\r\n") : text);
+// Every number balance.md owns, as live tuner keys (--keys prints them).
+const owned = [];
 const set = (file, path, raw, where) => {
   if (!gdSpan(gd[file], path)) { errors.push(`${where}: ${FILES[file]} has no number at ${path} (add a new key there first)`); return; }
+  if (!/^ENEMIES\.\w+\.lives$/.test(path)) owned.push(`${file}:${path}`);
   gd[file] = gdWrite(gd[file], path, raw);
 };
 const isNum = (s) => /^-?\d+(?:\.\d+)?$/.test(s);
@@ -61,6 +70,99 @@ function findTables(text) {
   }
   return out;
 }
+// --- --apply: a live tuner export into balance.md's cells. ----------------------------------------------------------
+const fmt = (v) => String(+(+v).toFixed(6));
+const near = (a, b) => Math.abs(parseFloat(a) - parseFloat(b)) < 1e-6;
+// Where a key's number sits: { line, col } (a whole cell) or { line, col, tok } (the tok-th `key value` token in it).
+function locate(lines, tbls, key) {
+  const [file, rest] = [key.slice(0, key.indexOf(":")), key.slice(key.indexOf(":") + 1)];
+  const p = rest.split(".");
+  if (file === "Towers") {
+    const [slug, node, stat] = p;
+    let i = lines.indexOf("## Towers");
+    i = i < 0 ? -1 : lines.findIndex((l, k) => k > i && l.trim().split(/\s/)[0] === "###" && l.slice(4).trim().split(/\s/)[0] === slug);
+    if (i < 0) return null;
+    let col = null;
+    for (let k = i + 1; k < lines.length && !lines[k].startsWith("### ") && !lines[k].startsWith("## "); k++) {
+      if (/^\| Node \|/.test(lines[k])) { col = Object.fromEntries(cells(lines[k]).map((h, n) => [h, n])); continue; }
+      const c = cells(lines[k]);
+      if (!col || !lines[k].startsWith("|") || c[col.Node] !== node) continue;
+      if (stat === "cost") return { line: k, col: col.Cost };
+      const tok = c[col.Tokens].split(" · ").findIndex((t) => t.trim().split(" ")[0] === stat);
+      return tok < 0 ? null : { line: k, col: col.Tokens, tok };
+    }
+    return null;
+  }
+  for (const [name, tb] of Object.entries(tbls)) {
+    const spec = TABLES[name];
+    if (!spec) continue;
+    const row = (id, h = "Id") => tb.rows.find((r) => r.cells[tb.head[h]] === id);
+    if (spec.kind === "rows" && spec.file === file && spec.dict === p[0] && p.length > 2) {
+      const r = row(p[1]);
+      if (!r) return null;
+      const sub = p.slice(2).join(".");
+      const h = Object.keys(spec.cols || {}).find((k) => spec.cols[k] === sub);
+      if (h) return { line: r.line, col: tb.head[h] };
+      if (!spec.tokens || (spec.prefix && !sub.startsWith(spec.prefix))) return null;
+      const tk = sub.slice((spec.prefix || "").length);
+      const tok = r.cells[tb.head[spec.tokens]].split(" · ").findIndex((t) => t.trim().split(" ")[0] === tk);
+      return tok < 0 ? null : { line: r.line, col: tb.head[spec.tokens], tok };
+    }
+    if (spec.kind === "dicts" && spec.file === file && p.length === 2) {
+      const h = Object.keys(spec.cols).find((k) => spec.cols[k] === p[0]);
+      const r = h && row(p[1]);
+      if (r) return { line: r.line, col: tb.head[h] };
+    }
+    if (spec.kind === "bosses" && file === "Waves" && p[0] === "BOSS_ROUNDS" && p.length === 4 && p[3] === "1") {
+      const r = row(p[1], "Round");
+      return r ? { line: r.line, col: tb.head["Line-up"], tok: +p[2] } : null;
+    }
+    if (spec.kind === "consts") {
+      const r = tb.rows.find((x) => x.cells[tb.head.Constant].replace(/`/g, "") === `${file}.${rest}`);
+      if (r) return { line: r.line, col: tb.head.Value };
+    }
+  }
+  return null;
+}
+function applyTweaks(text, data) {
+  const lines = text.split("\n");
+  const tbls = findTables(text);
+  const list = Array.isArray(data) ? data : data.changes || [];
+  let applied = 0;
+  for (const ch of list) {
+    const at = locate(lines, tbls, ch.key);
+    if (!at) { errors.push(`--apply: ${ch.key} isn't a number balance.md owns`); continue; }
+    if (DRY) continue;
+    const c = cells(lines[at.line]);
+    let cur, put;
+    if (at.tok === undefined) { cur = c[at.col]; put = () => { c[at.col] = fmt(ch.new); }; }
+    else {
+      const toks = c[at.col].split(" · ");
+      const m = (toks[at.tok] || "").trim().match(/^(\S+) ([+-]?)(\d+(?:\.\d+)?)$/);
+      if (!m) { errors.push(`--apply: ${ch.key}: can't read its token "${toks[at.tok]}"`); continue; }
+      cur = (m[2] === "-" ? "-" : "") + m[3];
+      put = () => { toks[at.tok] = `${m[1]} ${m[2] && ch.new >= 0 ? "+" : ""}${fmt(ch.new)}`; c[at.col] = toks.join(" · "); };
+    }
+    if (!near(cur, ch.old)) { console.log(`skipped ${ch.key}: balance.md has ${cur}, the export expected ${ch.old}`); continue; }
+    if (near(cur, ch.new)) continue;
+    put();
+    lines[at.line] = rowLine(c);
+    applied++;
+    console.log(`${ch.key}: ${fmt(ch.old)} -> ${fmt(ch.new)}`);
+  }
+  if (DRY) {
+    if (errors.length) { console.error(errors.join("\n")); process.exit(1); }
+    console.log(`all ${list.length} keys are numbers balance.md owns`);
+    process.exit(0);
+  }
+  console.log(`applied ${applied} of ${list.length} changes`);
+  return lines.join("\n");
+}
+if (APPLY) {
+  if (CHECK) { console.error("--apply and --check don't go together"); process.exit(1); }
+  balance = applyTweaks(balance, JSON.parse(readFileSync(APPLY, "utf8")));
+}
+
 const tables = findTables(balance);
 for (const name in tables) if (!TABLES[name]) errors.push(`balance.md: unknown table "${name}"`);
 
@@ -143,7 +245,7 @@ for (const [name, tb] of Object.entries(tables)) {
 // BOSS_ROUNDS as { "20": [["juggernaut", 1]], ... } from the script's text.
 function bossRounds(src) {
   const out = {};
-  const block = src.slice(src.indexOf("const BOSS_ROUNDS"), src.indexOf("\n}", src.indexOf("const BOSS_ROUNDS")));
+  const block = src.slice(src.indexOf("var BOSS_ROUNDS"), src.indexOf("\n}", src.indexOf("var BOSS_ROUNDS")));
   for (const m of block.matchAll(/^\t(\d+): \[(.*)\],?$/gm)) out[m[1]] = [...m[2].matchAll(/\["(\w+)", (\d+)\]/g)].map((x) => [x[1], +x[2]]);
   return out;
 }
@@ -291,8 +393,16 @@ const newTrees = trees.split("\n").map((line) => {
 }).join("\n");
 
 if (errors.length) { console.error(errors.join("\n")); process.exit(1); }
+if (process.argv.includes("--keys")) {
+  for (const s in towers) for (const [id, n] of Object.entries(towers[s].nodes)) {
+    owned.push(`Towers:${s}.${id}.cost`);
+    for (const k of [...Object.keys(n.add), ...Object.keys(n.set)]) if (typeof (n.set[k] ?? n.add[k]) === "number") owned.push(`Towers:${s}.${id}.${k}`);
+  }
+  console.log(owned.join("\n"));
+  process.exit(0);
+}
 const changed = [];
-if (out !== balance) changed.push(["design/balance.md", BALANCE, out]);
+if (out !== source) changed.push(["design/balance.md", BALANCE, out]);
 if (newTrees !== trees) changed.push(["design/upgrade_trees_rework.md", TREES, newTrees]);
 for (const k in FILES) if (gd[k] !== orig[k]) changed.push([FILES[k], join(root, FILES[k]), gd[k]]);
 if (CHECK) {

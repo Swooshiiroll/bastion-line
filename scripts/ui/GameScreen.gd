@@ -17,6 +17,7 @@ const Enemies = preload("res://data/enemies.gd")
 const Modifiers = preload("res://data/modifiers.gd")
 const Waves = preload("res://data/waves.gd")
 const Difficulty = preload("res://data/difficulty.gd")
+const Tuner = preload("res://scripts/dev/Tuner.gd")
 
 var app
 var game
@@ -55,6 +56,7 @@ func setup_with(g) -> void:
 
 
 func _ready() -> void:
+	Tuner.attach(game)
 	var back := CanvasLayer.new()
 	back.layer = -1
 	add_child(back)
@@ -72,6 +74,11 @@ func _ready() -> void:
 	add_child(_modal_layer)
 	if game.wave > 0:
 		hud.show_banner("Welcome back", "Round %d cleared. Core %d, credits %d." % [game.wave, game.lives, game.gold], UiKit.TEXT)
+
+
+func _exit_tree() -> void:
+	if Tuner.game == game:
+		Tuner.attach(null)
 
 
 func _process(delta: float) -> void:
@@ -152,7 +159,7 @@ func _handle_event(ev: Dictionary) -> void:
 			hud.toast("Early call bonus   +%d cr" % ev.bonus, UiKit.GOLD)
 		"field_clear":
 			# Progress counts toward round milestones even if the run is quit later.
-			if not game.sandbox:
+			if not game.sandbox and not game.tuned:
 				SaveManager.record_run(game.map_id, game.difficulty, game.wave, false, game.endless)
 			_autosave()
 		"medal":
@@ -644,15 +651,17 @@ func _on_gameover() -> void:
 	world.build_type = ""
 	Sfx.play("gameover", -2.0, 0.0)
 	var rp_before: int = SaveManager.research_earned()
-	SaveManager.record_run(game.map_id, game.difficulty, game.wave, game.medal, game.endless)
-	SaveManager.delete_run()
+	if not game.tuned:
+		SaveManager.record_run(game.map_id, game.difficulty, game.wave, game.medal, game.endless)
+		SaveManager.delete_run()
 	_show_modal(EndScreen.new(self, game.medal, SaveManager.research_earned() - rp_before + _medal_rp))
 
 
 ## The mode's last round is held: record the medal now, then play straight on into endless mode.
 func _on_medal() -> void:
 	var rp_before: int = SaveManager.research_earned()
-	SaveManager.record_run(game.map_id, game.difficulty, game.wave, true, false)
+	if not game.tuned:
+		SaveManager.record_run(game.map_id, game.difficulty, game.wave, true, false)
 	_medal_rp = SaveManager.research_earned() - rp_before
 	Sfx.play("victory", -2.0, 0.0)
 	var dd: Dictionary = Difficulty.DIFFICULTIES[game.difficulty]

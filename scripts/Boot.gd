@@ -6,6 +6,7 @@ extends Node
 ##   --sprite-sheet      render every tower and enemy sprite to res://screenshots/sprite_sheet.png
 ##   --codex=<dir>       export data and sprites for the printable codex (tools/codex.mjs)
 ##   --perf[=map,difficulty,round]  measure frame times per render layer (tools/PerfProbe.gd)
+##   --dev               open the live tuner beside the game (scripts/dev/TunerWindow.gd, design/live_tuner.md); F8 hides it
 
 const MainMenu = preload("res://scripts/ui/MainMenu.gd")
 const MapSelect = preload("res://scripts/ui/MapSelect.gd")
@@ -13,8 +14,11 @@ const GameScreen = preload("res://scripts/ui/GameScreen.gd")
 const ResearchLab = preload("res://scripts/ui/ResearchLab.gd")
 const ScreenshotTour = preload("res://tools/ScreenshotTour.gd")
 const UiKit = preload("res://scripts/ui/UiKit.gd")
+const TunerWindow = preload("res://scripts/dev/TunerWindow.gd")
 
 var current: Node = null
+## The live tuner's window (--dev only).
+var tuner: Window = null
 
 
 func _ready() -> void:
@@ -44,7 +48,15 @@ func _ready() -> void:
 		add_child(tour)
 		return
 	SaveManager.apply_window()
+	if "--dev" in args:
+		tuner = TunerWindow.new()
+		add_child(tuner)
 	show_menu()
+
+
+func _input(event: InputEvent) -> void:
+	if tuner != null and event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F8:
+		tuner.visible = not tuner.visible
 
 
 ## Centres the 1600×900 layout in the window: shifts the world canvas and every CanvasLayer.

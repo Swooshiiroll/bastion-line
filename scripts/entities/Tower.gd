@@ -19,13 +19,13 @@ const MODE_NAMES := ["First", "Last", "Strongest", "Closest"]
 const PRIORITY_NAMES := ["Any", "Air", "Ground", "Support"]
 const BRANCHES := ["a", "b", "c"]
 const BRANCH_STEPS := 4
-const SECONDARY_CAP := 2
+static var SECONDARY_CAP := 2
 ## Tiers: 1 stock, 2 retrofitted, 3 on a path, 4 mastered.
 const SPEC_TIER := 3
 const MASTERY_TIER := 4
 ## Terrain bonuses: high ground (H) +range, power node (P) +damage.
-const SITE_RANGE := 0.15
-const SITE_DAMAGE := 0.15
+static var SITE_RANGE := 0.15
+static var SITE_DAMAGE := 0.15
 
 var type := ""
 var def: Dictionary

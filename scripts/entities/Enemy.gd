@@ -9,14 +9,14 @@ const EnemyTraits = preload("res://scripts/core/EnemyTraits.gd")
 const Modifiers = preload("res://data/modifiers.gd")
 const EnemyMoves = preload("res://scripts/entities/EnemyMoves.gd")
 
-const MIN_DAMAGE_FRACTION := 0.2
-const SLOW_CAP := 0.7
+static var MIN_DAMAGE_FRACTION := 0.2
+static var SLOW_CAP := 0.7
 ## After a stun wears off, the enemy can't be stunned again for this long, so chained stuns can't
 ## pin it in place forever.
-const STUN_GUARD := 1.0
+static var STUN_GUARD := 1.0
 ## Total distance Graviton shoves can push one enemy back over its life; after that it can't be
 ## shoved. Together with STUN_GUARD this guarantees every enemy keeps making progress.
-const SHOVE_BUDGET := 320.0
+static var SHOVE_BUDGET := 320.0
 
 var id := 0
 var type := ""
@@ -199,6 +199,35 @@ func setup(enemy_type: String, route: Curve2D, hp_mult: float, wave: int, path_i
 	if def.has("fake_rank"):
 		# Decoy Beacon: ranks above every non-boss and below every boss, for good.
 		rank = Enemies.BOSS_RANK - 1.0
+
+
+## Live tuner (issue #80): its type's data was edited; `was` is its `def` from before. Health and barrier keep their
+## share and scale by the change, speed scales by it, armor moves by it, and bounty, leak cost, radius, slow resistance
+## and rank follow the new data. Ability numbers are read from `def` as they're used.
+func retune(was: Dictionary) -> void:
+	def = Modifiers.apply(Enemies.ENEMIES[type], type, mods) if elite else Enemies.ENEMIES[type]
+	if hologram:
+		return
+	if float(def.hp) != float(was.hp):
+		var mult := max_hp / maxf(0.001, float(was.hp))
+		var share := hp / maxf(0.001, max_hp)
+		max_hp = float(def.hp) * mult
+		hp = max_hp * share
+		max_shield *= float(def.hp) / maxf(0.001, float(was.hp))
+		shield = minf(shield, max_shield)
+	if float(def.get("shield", 0.0)) != float(was.get("shield", 0.0)):
+		var share := shield / max_shield if max_shield > 0.0 else 1.0
+		max_shield = float(def.get("shield", 0.0)) * max_hp / maxf(0.001, float(def.hp))
+		shield = max_shield * share
+	if not disguised and float(def.speed) != float(was.speed) and float(was.speed) > 0.0:
+		speed *= float(def.speed) / float(was.speed)
+	armor = maxf(0.0, armor + float(def.get("armor", 0.0)) - float(was.get("armor", 0.0)))
+	radius = float(def.radius)
+	bounty = int(def.bounty) * (2 if elite else 1)
+	lives_cost = int(def.lives) + (1 if elite else 0)
+	slow_resist = float(def.get("slow_resist", 0.0))
+	if not disguised and not def.has("fake_rank"):
+		rank = Enemies.rank_of(def)
 
 
 ## What it shows itself as: the Masquerade's disguise while disguised, otherwise itself.

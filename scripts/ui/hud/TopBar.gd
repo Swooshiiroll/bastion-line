@@ -21,6 +21,8 @@ var next_box: HBoxContainer
 var speed_btn: Button
 var auto_btn: Button
 var fps_label: Label
+## Live tuner (issue #80): shown once balance numbers were changed this run.
+var tuned_label: Label
 
 ## Enemy types shown in the NEXT strip before it collapses the rest into "+N".
 const NEXT_TYPES := 4
@@ -66,6 +68,10 @@ func _ready() -> void:
 	who.add_child(UiKit.label("·", 19, UiKit.DIM))
 	var dd: Dictionary = Difficulty.DIFFICULTIES[g.difficulty]
 	who.add_child(UiKit.label("SANDBOX" if g.sandbox else str(dd.name).to_upper(), 19, dd.color))
+	tuned_label = UiKit.label("TUNED", 19, UiKit.GOLD)
+	tuned_label.tooltip_text = "Balance numbers were changed in the live tuner: this run isn't saved and earns nothing."
+	tuned_label.mouse_filter = Control.MOUSE_FILTER_PASS
+	who.add_child(tuned_label)
 	row.add_child(who)
 	row.add_child(_icon_value(func(ci): Draw.shield(ci, ci.size / 2.0, 8.0, UiKit.ACCENT), "lives"))
 	row.add_child(_icon_value(func(ci): Draw.coin(ci, ci.size / 2.0, 8.0), "gold"))
@@ -124,6 +130,7 @@ func refresh(_delta: float) -> void:
 	fps_label.visible = bool(SaveManager.setting("show_fps"))
 	if fps_label.visible:
 		fps_label.text = "%d FPS" % roundi(Engine.get_frames_per_second())
+	tuned_label.visible = g.tuned
 	lives_label.text = "∞" if g.sandbox else str(g.lives)
 	lives_label.modulate = Color(1, 1, 1).lerp(Color(1, 0.3, 0.3), clampf(hud.lives_flash / 0.3, 0.0, 1.0))
 	gold_label.text = "∞" if g.sandbox else str(g.gold)

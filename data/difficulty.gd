@@ -6,7 +6,7 @@ extends RefCounted
 
 const ORDER := ["easy", "medium", "hard", "nightmare", "cataclysm"]
 
-const DIFFICULTIES := {
+static var DIFFICULTIES := {
 	"easy": {
 		"name": "Easy", "rounds": 40, "lives": 200, "medal_rp": 1, "price": 1.0,
 		"blurb": "40 rounds, 200 core shields.",

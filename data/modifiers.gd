@@ -12,7 +12,7 @@ const Enemies = preload("res://data/enemies.gd")
 
 const ORDER := ["shielded", "hasty", "regenerating", "plated", "cloaked", "splitting", "jamming", "resolute", "commanding"]
 
-const MODIFIERS := {
+static var MODIFIERS := {
 	"shielded": {
 		"name": "Shielded", "cost": 1.5, "intro": 10, "trait": "barrier",
 		"shield_pct": 0.5, "keys": {"shield_regen": 0.25, "shield_delay": 2.5},
@@ -61,10 +61,10 @@ const MODIFIERS := {
 }
 
 ## The most slow resist a modifier can give.
-const SLOW_RESIST_CAP := 0.9
+static var SLOW_RESIST_CAP := 0.9
 ## An elite carries one modifier, two from round TWO_MODS_AT and three from round THREE_MODS_AT.
-const TWO_MODS_AT := 40
-const THREE_MODS_AT := 80
+static var TWO_MODS_AT := 40
+static var THREE_MODS_AT := 80
 
 
 ## How many modifiers one elite can carry on round `wave`: one, two from round 40, three from round 80.
