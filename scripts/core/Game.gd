@@ -19,10 +19,10 @@ const Projectile = preload("res://scripts/entities/Projectile.gd")
 enum State { BUILD, WAVE, GAMEOVER }
 
 const TICK := 1.0 / 60.0
-const SELL_REFUND := 0.7
+static var SELL_REFUND := 0.7
 const SAVE_VERSION := 10
 ## Credits every run starts with, on every sector and mode (before research).
-const START_GOLD := 500
+static var START_GOLD := 500
 ## Sandbox runs keep the credit balance pinned here (see sandbox).
 const SANDBOX_GOLD := 999999
 ## Sandbox DPS meter: seconds per bucket and buckets kept (a 5 s window).
@@ -31,24 +31,24 @@ const DPS_BUCKETS := 20
 const AUTO_START_DELAY := 5.0
 const RETARGET_DELAY := 0.1
 const STAT_KEYS := ["kills", "gold_earned", "towers_built", "leaked", "waves_cleared"]
-const BOSS_STUN_FACTOR := 0.3
+static var BOSS_STUN_FACTOR := 0.3
 ## A critical hit does double damage (the Gun Turret's Range path; the Augmentation Tower's Precision Matrix raises it).
-const CRIT_MULT := 2.0
+static var CRIT_MULT := 2.0
 const LASER_SECONDARY := 0.6
 const MISSILE_TURN := 7.0
 const MISSILE_MAX_LIFE := 3.0
 const RAIL_WIDTH := 10.0
-const SHIELD_EMP_MULT := 2.0
-const RUBBLE_COST := 40
-const GATE_COOLDOWN := 6.0
-const SLUDGE_SLOW := 0.3
-const SHOCK_PCT := 0.04
-const SHOCK_BOSS_PCT := 0.01
+static var SHIELD_EMP_MULT := 2.0
+static var RUBBLE_COST := 40
+static var GATE_COOLDOWN := 6.0
+static var SLUDGE_SLOW := 0.3
+static var SHOCK_PCT := 0.04
+static var SHOCK_BOSS_PCT := 0.01
 ## Seconds after an EMP wears off before a tower can be knocked offline again (every Disruptor, design/new_enemies.md).
-const DISABLE_GUARD := 1.0
-const BOSS_PUSH_FACTOR := 0.25
+static var DISABLE_GUARD := 1.0
+static var BOSS_PUSH_FACTOR := 0.25
 const REVEAL_TIME := 0.25
-const HIT_REVEAL_TIME := 0.5
+static var HIT_REVEAL_TIME := 0.5
 
 var map_id := ""
 var map_def: Dictionary
@@ -79,6 +79,8 @@ var medal := false
 ## Sandbox: a test bench. Infinite credits and shields, free upgrades, no ability cooldowns, nothing
 ## saved or earned. Set by the creator right after construction. See design/sandbox.md.
 var sandbox := false
+## Live tuner (issue #80, scripts/dev/Tuner.gd): balance numbers were changed during this run. Nothing is saved or earned.
+var tuned := false
 var _dps_clock := 0.0
 ## Balance-probe knob: extra enemy HP multiplier (1.0 in real games; not saved).
 var hp_factor := 1.0
@@ -210,7 +212,7 @@ func is_idle() -> bool:
 
 
 func can_save() -> bool:
-	return state == State.BUILD and is_idle() and not sandbox
+	return state == State.BUILD and is_idle() and not sandbox and not tuned
 
 
 func can_start_wave() -> bool:

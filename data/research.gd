@@ -15,11 +15,11 @@ const TREE_ORDER := ["command", "gun_turret", "mortar_tower", "rocket_salvo", "l
 
 ## RP sources, all derived from profile records so they can't be farmed and are never lost.
 ## (Medals pay their mode's medal_rp, from data/difficulty.gd.)
-const RP_ROUND_MILESTONES := [20, 40, 60, 80, 100]
-const RP_ENDLESS_STEP := 10
-const RP_ENDLESS_MAX_PER_SECTOR := 5
+static var RP_ROUND_MILESTONES := [20, 40, 60, 80, 100]
+static var RP_ENDLESS_STEP := 10
+static var RP_ENDLESS_MAX_PER_SECTOR := 5
 
-const NODES := {
+static var NODES := {
 	# --- Command ------------------------------------------------------------------------------
 	"cmd_funds": {
 		"tree": "command", "slot": Vector2i(0, 0), "cost": 1, "requires": [], "icon": "credits",

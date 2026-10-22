@@ -4,7 +4,7 @@ extends RefCounted
 
 const ORDER := ["meteor", "warp"]
 
-const ABILITIES := {
+static var ABILITIES := {
 	"meteor": {
 		"name": "Orbital Strike", "short": "Orbital", "key": "Q",
 		"cooldown": 45.0, "damage": 110.0, "radius": 85.0, "delay": 0.9,

@@ -57,7 +57,7 @@ const text = `extends RefCounted
 
 const ORDER := [${order.map(q).join(", ")}]
 
-const TREES := {
+static var TREES := {
 ${body}}
 `;
 if (errors.length) { console.error(errors.join("\n")); process.exit(1); }

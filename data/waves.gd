@@ -10,12 +10,12 @@ extends RefCounted
 const Enemies = preload("res://data/enemies.gd")
 const Modifiers = preload("res://data/modifiers.gd")
 
-const MAX_SPAWNS := 250
-const MAX_ELITES := 12
+static var MAX_SPAWNS := 250
+static var MAX_ELITES := 12
 
 ## Round each regular enemy is introduced (its own group leads that round): one every two rounds, by tier (every role's T1,
 ## then the Specials and higher tiers).
-const INTRO := {
+static var INTRO := {
 	"grunt": 1, "swarmling": 2, "runner": 3, "shaman": 5, "brute": 7, "jammer": 9, "stalker": 11, "phantom": 13,
 	"locust": 15, "aegis": 17, "needle": 19, "rally": 21, "mirage": 23, "bat": 25, "siphon": 27, "hydra": 29,
 	"burrower": 31, "bulwark": 33, "rampart": 35, "decoy": 37, "blackout": 39, "shifter": 41, "gunship": 43,
@@ -23,7 +23,7 @@ const INTRO := {
 }
 
 ## Boss rounds (owner, 2026-10-20): every 20 rounds, each bigger than the last; 100 and 120 mix the bosses met so far.
-const BOSS_ROUNDS := {
+static var BOSS_ROUNDS := {
 	20: [["juggernaut", 1]],
 	40: [["warlord", 1], ["juggernaut", 1]],
 	60: [["leviathan", 1], ["warlord", 1], ["juggernaut", 1]],
@@ -34,7 +34,7 @@ const BOSS_ROUNDS := {
 
 ## Threat each enemy costs the generator (roughly its round-1 toughness in Drones), per enemy: a Needle pair or a Shrike cluster
 ## costs its pack times this. Bosses only count when one recurs in a regular round; their own rounds come from BOSS_ROUNDS.
-const COST := {
+static var COST := {
 	"grunt": 1.0, "runner": 0.7, "brute": 3.8, "swarmling": 0.35, "bat": 1.4, "shaman": 1.8,
 	"phantom": 1.2, "aegis": 4.0, "hydra": 3.0, "jammer": 2.1, "locust": 0.25, "rally": 2.4,
 	"burrower": 2.3, "gunship": 8.6, "stalker": 1.6, "mender": 5.4, "bulwark": 2.9, "rampart": 7.4,
@@ -44,7 +44,7 @@ const COST := {
 }
 
 ## Seconds between spawns within a group (between packs, for the Needle and the Shrike).
-const SPACING := {
+static var SPACING := {
 	"grunt": 0.35, "runner": 0.3, "brute": 0.9, "swarmling": 0.14, "bat": 0.45, "shaman": 1.8,
 	"phantom": 0.5, "aegis": 1.2, "hydra": 1.1, "jammer": 2.0, "locust": 0.1, "rally": 1.6,
 	"burrower": 0.8, "gunship": 1.5, "stalker": 0.6, "mender": 1.4, "bulwark": 1.6, "rampart": 1.8,
@@ -54,42 +54,42 @@ const SPACING := {
 }
 
 ## Support enemies stop being fun in bulk, so groups of them are capped; a boss recurs alone.
-const MAX_COUNT := {"shaman": 8, "jammer": 5, "rally": 6, "bulwark": 6, "siphon": 5, "blackout": 4, "capacitor": 3, "decoy": 3, "mirage": 5,
+static var MAX_COUNT := {"shaman": 8, "jammer": 5, "rally": 6, "bulwark": 6, "siphon": 5, "blackout": 4, "capacitor": 3, "decoy": 3, "mirage": 5,
 	"juggernaut": 1, "warlord": 1, "leviathan": 1, "colossus": 1}
 
 ## A recurring boss turns up less often than a regular enemy, and only when it costs at most RECUR_BOSS_SHARE of the round's
 ## budget. A new enemy's own group gets DEBUT_SHARE of the budget on its round, and for NEW_ROUNDS rounds after its introduction
 ## an enemy is picked NEW_WEIGHT times as often.
-const BOSS_WEIGHT := 0.4
-const RECUR_BOSS_SHARE := 0.5
-const DEBUT_SHARE := 0.3
-const NEW_WEIGHT := 2.5
-const NEW_ROUNDS := 12
+static var BOSS_WEIGHT := 0.4
+static var RECUR_BOSS_SHARE := 0.5
+static var DEBUT_SHARE := 0.3
+static var NEW_WEIGHT := 2.5
+static var NEW_ROUNDS := 12
 
 
 ## Past LATE_START, enemy HP also compounds by `late_growth` per round, so even a map full of
 ## maxed towers eventually breaks (the balance probe can override it with --growth=).
-const LATE_START := 60
+static var LATE_START := 60
 static var late_growth := 0.01
 
 
 ## The round formulas' numbers (design/balance.md owns them; tools/balance.mjs writes them here).
 ## HP multiplier: 1 + HP_LINEAR·w + HP_QUAD·w², w = round - 1, compounding late_growth a round past LATE_START.
-const HP_LINEAR := 0.05
-const HP_QUAD := 0.0012
+static var HP_LINEAR := 0.05
+static var HP_QUAD := 0.0012
 ## Speed: +SPEED_PER_ROUND a round, capped at SPEED_CAP; bosses get BOSS_SPEED_SHARE of it.
-const SPEED_PER_ROUND := 0.0045
-const SPEED_CAP := 0.5
-const BOSS_SPEED_SHARE := 0.5
+static var SPEED_PER_ROUND := 0.0045
+static var SPEED_CAP := 0.5
+static var BOSS_SPEED_SHARE := 0.5
 ## Threat budget: BUDGET_BASE + BUDGET_LINEAR·w + BUDGET_QUAD·w².
-const BUDGET_BASE := 8.0
-const BUDGET_LINEAR := 3.6
-const BUDGET_QUAD := 0.02
+static var BUDGET_BASE := 8.0
+static var BUDGET_LINEAR := 3.6
+static var BUDGET_QUAD := 0.02
 ## Elite share of the budget: none before ELITE_FROM, then ELITE_START rising by ELITE_RISE until ELITE_FULL_AT.
-const ELITE_FROM := 8
-const ELITE_START := 0.10
-const ELITE_RISE := 0.20
-const ELITE_FULL_AT := 60
+static var ELITE_FROM := 8
+static var ELITE_START := 0.10
+static var ELITE_RISE := 0.20
+static var ELITE_FULL_AT := 60
 
 
 ## Enemy HP multiplier for a round (the same on every mode). Lowered in the rework: late difficulty comes from the tier mix
@@ -129,10 +129,10 @@ static func bounty_scale(wave: int) -> float:
 
 
 ## Credits for clearing a round: CLEAR_BASE + CLEAR_PER_ROUND × round; for calling it early, CALL_BASE + CALL_PER_ROUND × round.
-const CLEAR_BASE := 20
-const CLEAR_PER_ROUND := 3
-const CALL_BASE := 10
-const CALL_PER_ROUND := 2
+static var CLEAR_BASE := 20
+static var CLEAR_PER_ROUND := 3
+static var CALL_BASE := 10
+static var CALL_PER_ROUND := 2
 
 
 static func clear_bonus(wave: int) -> int:

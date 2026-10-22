@@ -8,7 +8,7 @@ extends RefCounted
 
 const ORDER := ["gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon", "railgun", "tesla_tower", "drone_bay", "cas_gunship", "mine_layer", "chemical_plant", "cryo_tower", "boost_tower", "radar_tower", "shockwave_generator", "scrapyard", "magneto_tower", "tractor_tower", "augmentation_tower"]
 
-const TREES := {
+static var TREES := {
 	"gun_turret": {
 		"name": "Gun Turret",
 		"class": "Assault",

@@ -27,6 +27,7 @@ const ResearchData = preload("res://data/research.gd")
 const Difficulty = preload("res://data/difficulty.gd")
 const EnemyArt = preload("res://scripts/view/enemies/EnemyArt.gd")
 const EnemyMoves = preload("res://scripts/entities/EnemyMoves.gd")
+const Tuner = preload("res://scripts/dev/Tuner.gd")
 
 const SANDBOX := "user://test_sandbox/"
 const SIM_DT := 1.0 / 60.0
@@ -4403,3 +4404,61 @@ func test_balance_master_economy() -> void:
 	check(nodes.size() == ResearchData.NODES.size(), "every research node has a row")
 	for r in nodes:
 		check(int(r.RP) == int(ResearchData.NODES[r.Id].cost), "%s: its RP cost is the game's" % r.Id)
+
+
+## Live tuner (issue #80): every number balance.md owns is a field; an edit reaches enemies on the field (health keeps
+## its share), placed towers and prices; revert puts balance.md's values back; a tuned run can't be saved.
+func test_live_tuner() -> void:
+	var keys := {}
+	for f in Tuner.fields():
+		keys[f.key] = true
+	var dicts := ["ENEMIES", "MODIFIERS", "DIFFICULTIES", "NODES", "ABILITIES", "INTRO", "COST", "SPACING", "MAX_COUNT", "BOSS_ROUNDS"]
+	var consts := {}
+	for t in ["rules", "wave_rules", "economy", "enemy_rules", "research_rules"]:
+		for r in _balance_rows("<!-- table: %s -->" % t):
+			var c := str(r.Constant).replace("`", "")
+			consts[c.get_slice(".", 0) + ":" + c.substr(c.find(".") + 1)] = true
+	check(consts.size() > 50, "the Rules tables are read")
+	for k in consts:
+		check(keys.has(k), "%s is tunable" % k)
+	for k in keys:
+		if not str(k).begins_with("Towers:") and not dicts.has(str(k).get_slice(":", 1).get_slice(".", 0)):
+			check(consts.has(k), "%s is a row in balance.md" % k)
+	for r in _balance_rows("<!-- table: enemies -->"):
+		check(keys.has("Enemies:ENEMIES.%s.hp" % r.Id), "%s's HP is tunable" % r.Id)
+	check(keys.has("Towers:gun_turret.a1.damage") and keys.has("Towers:gun_turret.base.cost"), "tower nodes are tunable")
+	check(not keys.has("Enemies:ENEMIES.grunt.lives") and not keys.has("Enemies:ENEMIES.colossus.phases.0"), "derived and non-balance numbers aren't")
+	check(Tuner.changes().is_empty(), "nothing is changed to start with")
+
+	var g = new_game("meadow")
+	g.gold = 5000
+	Tuner.attach(g)
+	var hp0 := int(Enemies.ENEMIES.grunt.hp)
+	var e = put(g, "grunt", 40.0, 0, 2.0)
+	e.hp = e.max_hp * 0.5
+	var elite = g.spawn_enemy("grunt", 0, 60.0, 1.0, -1, 1.0, ["plated"])
+	g.enemies.append(elite)
+	var armor0: float = elite.armor
+	var t = g.place_tower("gun_turret", Vector2i(2, 3))
+	var dmg0: float = t.stats().damage
+	var cost0: int = g.tower_cost("gun_turret")
+	check(Tuner.set_value("Enemies:ENEMIES.grunt.hp", 300.0), "an enemy's HP is set")
+	check(is_equal_approx(e.max_hp, 600.0) and is_equal_approx(e.hp, 300.0), "a Drone on the field takes it and keeps its share of health")
+	check(int(Enemies.ENEMIES.grunt.lives) == 2 and e.lives_cost == 2 and elite.lives_cost == 3, "its leak cost follows its strength")
+	check(g.tuned and not g.can_save(), "the run is tuned: it can't be saved")
+	Tuner.set_value("Enemies:ENEMIES.grunt.armor", 2.0)
+	check(is_equal_approx(elite.armor, armor0 + 2.0), "an elite's armor moves by the change")
+	Tuner.set_value("Towers:gun_turret.base.damage", 20.0)
+	check(t.stats().damage > dmg0, "a placed tower takes a damage change")
+	Tuner.set_value("Towers:gun_turret.base.cost", 100.0)
+	check(int(Tower.Rework.TREES.gun_turret.cost) == 100 and g.tower_cost("gun_turret") > cost0, "a price change reaches the shop")
+	Tuner.set_value("Difficulty:DIFFICULTIES.%s.price" % g.difficulty, 2.0)
+	check(is_equal_approx(float(g.tower_mods.gun_turret.price), 2.0), "the mode's price multiplier reaches the run")
+	check(not Tuner.set_value("Enemies:ENEMIES.grunt.nope", 1.0), "an unknown key is refused")
+	var ch: Array = Tuner.changes()
+	check(ch.size() == 5 and int(ch[0].old) == hp0 and int(ch[0].new) == 300, "the changes list old and new values")
+	Tuner.revert_all()
+	check(Tuner.changes().is_empty() and int(Enemies.ENEMIES.grunt.hp) == hp0 and int(Enemies.ENEMIES.grunt.lives) == 1, "revert puts balance.md's values back")
+	check(is_equal_approx(e.max_hp, hp0 * 2.0) and is_equal_approx(elite.armor, armor0), "and the field follows")
+	check(is_equal_approx(t.stats().damage, dmg0) and g.tower_cost("gun_turret") == cost0, "and the towers and prices")
+	Tuner.attach(null)

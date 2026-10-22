@@ -260,7 +260,7 @@ function gdDictChildren(src, path) {
 
 // The top-level keys of the dictionary const `name`.
 export function gdDictKeys(src, name) {
-  const top = new RegExp(`^const ${name}(?:\\s*:\\s*\\w+)?\\s*:?=\\s*\\{`, "m").exec(src);
+  const top = new RegExp(`^(?:const|static var) ${name}(?:\\s*:\\s*\\w+)?\\s*:?=\\s*\\{`, "m").exec(src);
   if (!top) return [];
   const open = top.index + top[0].length - 1, close = closing(src, open);
   const out = [];
