@@ -4473,8 +4473,9 @@ func test_live_tuner_panel() -> void:
 			want[r.Node] = r
 		for row in Tuner.tower_rows(slug):
 			var w: Dictionary = want.get(row.id, {})
-			var dps := "-" if row.dps < 0.0 else "%.1f" % row.dps
-			check(not w.is_empty() and str(w["=DPS"]) == dps and int(w["=Spent"]) == row.spent, "%s %s: =DPS %s and =Spent %d are balance.md's" % [slug, row.id, dps, row.spent])
+			# Compared as numbers: printf rounds a half to even on Linux (56.25 → 56.2), balance.mjs and Windows up.
+			var same: bool = not w.is_empty() and (str(w["=DPS"]) == "-" if row.dps < 0.0 else absf(float(w["=DPS"]) - row.dps) <= 0.0501)
+			check(same and int(w["=Spent"]) == row.spent, "%s %s: =DPS %.2f and =Spent %d are balance.md's" % [slug, row.id, row.dps, row.spent])
 	for r in _balance_rows("<!-- table: enemies -->"):
 		var e := Tuner.enemy_info(r.Id)
 		check("%.1f" % e.strength == str(r["=Strength"]) and e.leak == int(r["=Leak"]), "%s: =Strength and =Leak are balance.md's" % r.Id)
