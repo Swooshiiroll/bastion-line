@@ -184,10 +184,10 @@ case "$cmd" in
       || { echo "copy to $host failed"; exit 1; }
     printf '%s\t%s\t%s\t%s\n' "$day" "$version" "${host#*@}" "$commit" >> "$ledger"
     echo "On $host: $root/$name"
-    # Each build gets a folder for the owner's bug reports on the file server, "<build name> Bugs"
-    # (BUGS_DIR moves it). Skipped when the share isn't reachable.
+    # Each dev version gets one folder for the owner's bug reports on the file server, "<version> Bugs"
+    # (e.g. "v4-dev.2 Bugs"), shared by all its builds (BUGS_DIR moves it). Skipped when the share isn't reachable.
     bugs=${BUGS_DIR:-//Anode-FS/Anode/Bastion Line}
-    if [ -d "$bugs" ] && mkdir -p "$bugs/$name Bugs"; then echo "Bug reports: $bugs/$name Bugs"
+    if [ -d "$bugs" ] && mkdir -p "$bugs/$version Bugs"; then echo "Bug reports: $bugs/$version Bugs"
     else echo "Bug-report share $bugs isn't reachable: no bugs folder made"; fi
     sed 's/^/  /' out/lx/BUILD.txt | head -5 ;;
 
