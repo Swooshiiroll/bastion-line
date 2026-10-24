@@ -29,6 +29,7 @@ const EnemyArt = preload("res://scripts/view/enemies/EnemyArt.gd")
 const EnemyMoves = preload("res://scripts/entities/EnemyMoves.gd")
 const Tuner = preload("res://scripts/dev/Tuner.gd")
 const TunerPanel = preload("res://scripts/dev/TunerPanel.gd")
+const TunerWindow = preload("res://scripts/dev/TunerWindow.gd")
 
 const SANDBOX := "user://test_sandbox/"
 const SIM_DT := 1.0 / 60.0
@@ -3721,6 +3722,16 @@ func test_rework_radar_tower() -> void:
 	um.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
 	buy_steps(g, um, "c", 5)
 	check(um.mastered and um.stats().unmask_decoy and um.stats().unmask_mask and um.stats().unmask_mirage and near(um.stats().exposure, 5.0) and near(um.stats().reveal_time, 1.3), "Total Exposure: the unmasking flags and a 5 s exposure")
+
+
+## The live tuner's window starts undocked, its Dock switch off (#94).
+func test_tuner_starts_undocked() -> void:
+	var w = TunerWindow.new()
+	var dock: CheckBox = w.panel.toolbar.get_children().filter(func(c): return c is CheckBox and c.text == "Dock").front()
+	check(not w.docked and dock != null and not dock.button_pressed, "the tuner starts undocked")
+	dock.button_pressed = true
+	check(w.docked, "the Dock switch docks it")
+	w.free()
 
 
 func test_rework_shockwave_generator() -> void:
