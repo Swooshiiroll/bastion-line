@@ -1538,7 +1538,7 @@ func test_upgrade_event_mastery() -> void:
 func test_footprint() -> void:
 	var g = new_game()
 	g.gold = 100000
-	check(Game.size_of("scrapyard") == 2 and Game.size_of("drone_bay") == 1 and Game.size_of("gun_turret") == 1, "the Scrapyard is 2x2, the rest 1x1")
+	check(Game.size_of("scrapyard") == 2 and Game.size_of("drone_bay") == 2 and Game.size_of("gun_turret") == 1, "the Scrapyard and Drone Bay are 2x2, the rest 1x1")
 	var y = g.place_tower("scrapyard", Vector2i(2, 5))
 	check(y != null and y.size == 2, "a Scrapyard builds on a clear 2x2 block")
 	var covered := [Vector2i(2, 5), Vector2i(3, 5), Vector2i(2, 6), Vector2i(3, 6)]
@@ -1704,7 +1704,8 @@ func test_jammer_emp() -> void:
 			if p.source == near_t:
 				shots += 1
 	check(shots == 0, "a disabled tower doesn't fire")
-	for i in int(1.0 / SIM_DT):
+	# Back online it finishes its reload first (towers start loading, #85).
+	for i in int((1.0 + 1.0 / near_t.eff_rate()) / SIM_DT):
 		g.tick(SIM_DT)
 	check(near_t.disabled == 0.0 and near_t.target != null, "the tower comes back online and re-acquires")
 
@@ -2099,7 +2100,88 @@ func test_rework_swivel_mount() -> void:
 	check(g.pick_target(t) == strong, "Swivel Mount skips an enemy that shots in flight will already kill")
 	t.cooldown = 1.0
 	g._kill(weak, t)
-	check(near(t.cooldown, 0.0), "and a kill frees the gun to fire at once")
+	check(near(t.cooldown, 1.0), "a kill doesn't reset its reload: the fire rate stays the same when it switches (#85)")
+
+
+## Owner's Build 2 list (#85): every upgrade adds on top, so Retrofits and the secondary path stack with the primary, while
+## each path alone still ends on its old total; towers start unloaded; Mortar shells don't home; Smoke Shells leave a cloud.
+func test_upgrades_add() -> void:
+	var g = new_game()
+	g.gold = 100000
+	var a = g.place_tower("gun_turret", spot(g, "gun_turret", 70))
+	var ab: Dictionary = a.compose(-1, {"a": 4, "b": 0, "c": 0}, ["a"], true)
+	check(near(ab.damage, 44.0) and near(ab.armor_pct, 1.0), "path A alone keeps its old totals: 44 damage, all armour (%s, %s)" % [ab.damage, ab.armor_pct])
+	var bb: Dictionary = a.compose(-1, {"a": 0, "b": 4, "c": 0}, ["b"], true)
+	check(near(bb.range, 230.0) and near(bb.crit, 0.3), "and path B its range 230 and 30% crits")
+	var c = g.place_tower("gun_turret", spot(g, "gun_turret", 71))
+	g.buy_retrofit(c, 0)
+	buy_steps(g, c, "c", 4)
+	check(near(c.stats().rate, 1.8), "Water-Cooled Barrel (+0.3) and Belt Feed (+0.3) stack: 1.2 to 1.8, not overwritten (%.2f)" % c.stats().rate)
+	check(int(c.stats().multishot) == 2 and near(c.stats().side_gun, 0.0), "Twin Mount: two barrels, the side gun folded in")
+	var errors := []
+	var Rework = load("res://data/rework_trees.gd")
+	for slug in Rework.ORDER:
+		var tr: Dictionary = Rework.TREES[slug]
+		var nodes: Array = tr.retrofits.duplicate()
+		for p in tr.paths:
+			nodes.append_array(p.nodes)
+			nodes.append(p.mastery)
+		for n in nodes:
+			for k in n.set:
+				if typeof(n.set[k]) != TYPE_BOOL:
+					errors.append("%s %s %s" % [slug, n.name, k])
+	check(errors.is_empty(), "no upgrade sets a number, only flags: %s" % ", ".join(errors))
+
+
+func test_towers_start_unloaded() -> void:
+	var g = new_game()
+	g.gold = 100000
+	var t = g.place_tower("gun_turret", spot(g, "gun_turret", 72))
+	check(near(t.cooldown, 1.0 / t.eff_rate()), "a new tower has to load before its first shot")
+	var cas = g.place_tower("cas_gunship", spot(g, "cas_gunship", 73))
+	check(float(cas.gun_cds.get("gat", 0.0)) > 0.0, "a new CAS Gunship's guns load too")
+	g.buy_retrofit(t, 0)
+	t.cooldown = 0.0
+	g.start_wave()
+	check(near(t.cooldown, 1.0 / t.eff_rate()), "a round started from the build phase starts every tower loading, at its upgraded rate")
+	t.cooldown = 0.0
+	g.start_wave()
+	check(near(t.cooldown, 0.0), "an early call mid-round leaves the towers' reloads alone")
+
+
+func test_mortar_shells_dont_home() -> void:
+	var g = new_game()
+	g.gold = 100000
+	var m = g.place_tower("mortar_tower", spot(g, "mortar_tower", 74))
+	var e = put(g, "brute", 200.0)
+	g._fire_mortar(m, e, m.stats())
+	var p = g.projectiles[g.projectiles.size() - 1]
+	var aim: Vector2 = p.target_pos
+	check(p.fixed, "a mortar shell is lobbed at a fixed point")
+	e.distance += 300.0
+	e.pos = e.curve.sample_baked(e.distance)
+	g._update_projectile(p, 0.01)
+	check(p.target_pos == aim, "it keeps flying to that point when its target moves")
+	var still = put(g, "brute", 300.0)
+	still.stun_timer = 5.0
+	g._fire_mortar(m, still, m.stats())
+	var q = g.projectiles[g.projectiles.size() - 1]
+	check(q.target_pos.distance_to(still.pos) < 0.5, "a stopped enemy is aimed at where it stands")
+	var w = put(g, "grunt", 300.0)
+	g._fire_mortar(m, w, m.stats())
+	var r = g.projectiles[g.projectiles.size() - 1]
+	check(r.target_pos.distance_to(w.pos) > 1.0, "a walking one is led along its route")
+	m.pulse_count = 0
+	g.buy_retrofit(m, 2)
+	var s: Dictionary = m.stats()
+	var shot := false
+	for i in int(s.smoke_every):
+		g._fire_mortar(m, w, s)
+		shot = shot or g.projectiles[g.projectiles.size() - 1].smoke
+	check(shot, "Smoke Shells: every %dth shell carries smoke" % int(s.smoke_every))
+	var sp = g.projectiles.filter(func(x): return x.smoke)[0]
+	g._projectile_hit(sp)
+	check(g.smokes.any(func(c): return c.get("look", "") == "smoke"), "and leaves a smoke cloud the field draws")
 
 
 func test_rework_data_and_unlocks() -> void:
