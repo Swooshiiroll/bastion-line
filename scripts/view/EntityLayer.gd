@@ -23,6 +23,8 @@ const ShockwaveGeneratorArt = preload("res://scripts/view/towers/ShockwaveGenera
 const ELITE_COLOR := Color(1.0, 0.82, 0.30)
 ## A Siphon's drain (its aura, and the tint on towers inside it).
 const SIPHON_COLOR := Color(0.72, 1.0, 0.25)
+## The cross on a hologram a Radar's Illusion Filter marked as a fake.
+const FAKE_MARK := Color(1.0, 0.3, 0.3, 0.8)
 
 var world
 ## Microseconds spent per section of _draw, summed; tools/PerfProbe.gd reads and resets it.
@@ -120,8 +122,7 @@ func _draw() -> void:
 		MineLayerArt.mine(self, m.pos, 1.0, t, m.source.spec, Draw.ACCENT.mine_layer, fmod(t * 1.6 + float(i) * 0.37, 1.0) < 0.25)
 	for e in ground:
 		_enemy(e, t)
-		if e.cloaked and e.reveal_timer > 0.0:
-			RadarTowerArt.reveal_mark(self, e.pos, e.radius + 4.0, Draw.ACCENT.radar_tower, minf(1.0, e.reveal_timer * 2.0))
+		_radar_marks(e)
 		if e.soak_timer > 0.0:
 			_soak_fx(e, t)
 		if e.perm_slow > 0.0:
@@ -131,6 +132,7 @@ func _draw() -> void:
 			_projectile(p)
 	for e in air:
 		_enemy(e, t)
+		_radar_marks(e)
 	for tw in g.towers:
 		if not tw.wing.is_empty() or tw.type == "cas_gunship":
 			_wing(tw, t)
@@ -157,6 +159,18 @@ func _pool(pool, t: float) -> void:
 	for i in 4:
 		var a := t * 1.5 + float(i) * 1.7
 		Draw.disc(self, pool.pos + Vector2(cos(a), sin(a * 1.3)) * r * 0.5, 2.5, Color(col, 0.5 * k))
+
+
+## What a Radar shows on an enemy: corner brackets while a cloaked one is revealed (gold while Total Exposure holds it), and a
+## red cross on a hologram the Illusion Filter marked as a fake.
+func _radar_marks(e) -> void:
+	if e.cloaked and (e.reveal_timer > 0.0 or e.track_timer > 0.0):
+		var col: Color = RadarTowerArt.GOLD if e.track_timer > 0.0 else Draw.ACCENT.radar_tower
+		RadarTowerArt.reveal_mark(self, e.pos, e.radius + 4.0, col, minf(1.0, maxf(e.reveal_timer, e.track_timer) * 2.0))
+	if e.fake_marked:
+		var k: float = e.radius * 0.7
+		Draw.line(self, e.pos + Vector2(-k, -k), e.pos + Vector2(k, k), FAKE_MARK, 2.0)
+		Draw.line(self, e.pos + Vector2(-k, k), e.pos + Vector2(k, -k), FAKE_MARK, 2.0)
 
 
 func _enemy(e, t: float) -> void:

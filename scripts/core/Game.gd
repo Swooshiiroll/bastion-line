@@ -870,7 +870,7 @@ func _pick_target(t, exclude: Array, air: bool, ground: bool, preferred := false
 	var best_score := Vector3(-INF, -INF, -INF)
 	var swivel: bool = bool(t.stats().get("swivel", false))
 	for e in enemies:
-		if not e.alive or (e.flying and not air) or (not e.flying and not ground) or (e.is_hidden() and not _burrow_visible(t, e)) or exclude.has(e):
+		if not e.alive or (e.flying and not air) or (not e.flying and not ground) or (e.untargetable() and not _burrow_visible(t, e)) or exclude.has(e):
 			continue
 		if preferred and not _prefers(t, e):
 			continue
@@ -962,7 +962,8 @@ func _update_enemy(e, dt: float) -> void:
 			_leak(e)
 
 
-## Burrower: dives for burrow_time, then surfaces for the rest of the interval.
+## Burrower: dives for burrow_time, then surfaces for the rest of the interval. A Radar's Total Exposure keeps it from diving
+## again while it lasts.
 func _trait_burrow(e, d: Dictionary, dt: float) -> void:
 	var grounded: bool = e.silenced() or e.no_dig > 0.0 or e.disrupt_timer > 0.0
 	if grounded and e.burrowed:
@@ -972,7 +973,7 @@ func _trait_burrow(e, d: Dictionary, dt: float) -> void:
 		_emit({"type": "burrow", "pos": e.pos, "down": false})
 	if not grounded:
 		e.burrow_timer -= dt
-	if not grounded and e.burrow_timer <= 0.0:
+	if not grounded and e.burrow_timer <= 0.0 and (e.burrowed or e.track_timer <= 0.0):
 		e.burrowed = not e.burrowed
 		e.mark("burrow")
 		e.burrow_timer = float(d.burrow_time) if e.burrowed else float(d.burrow_interval) - float(d.burrow_time)
@@ -1278,7 +1279,7 @@ func _ricochet(source, from, dmg: float, depth := 0) -> void:
 	var best = null
 	var bd := 60.0 * 60.0
 	for e in enemies:
-		if e.alive and e != from and not e.is_hidden():
+		if e.alive and e != from and not e.untargetable():
 			var d2: float = e.pos.distance_squared_to(from.pos)
 			if d2 <= bd:
 				bd = d2
@@ -1421,6 +1422,8 @@ func _update_boost_state() -> void:
 ## Radar Tower: every ping_every seconds it pings, and for reveal_time seconds the cloaked enemies in range are revealed and the burrowed ones
 ## show (towers that can hit underground may target them); the Constant Track keeps everything revealed. The radiation circle (Radiation
 ## Emitter and on) burns every enemy inside it that is revealed, for as long as it is in the circle. Several radars don't stack.
+## The Special Targeting path unmasks what a ping covers (_unmask); its mastery, Total Exposure, keeps what a ping found
+## revealed while it stays in range and for `exposure` s after it leaves.
 func _update_radar(t, s: Dictionary, dt: float) -> void:
 	var constant := bool(s.get("constant", false))
 	var left := float(t.gun_cds.get("ping", 0.0)) - dt
@@ -1434,15 +1437,32 @@ func _update_radar(t, s: Dictionary, dt: float) -> void:
 	t.gun_cds["ping"] = maxf(0.0, left)
 	var r: float = t.get_range()
 	var active: bool = constant or left > 0.0
-	if active:
+	var exposure := float(s.get("exposure", 0.0))
+	if active or exposure > 0.0:
 		var hold := 0.3 if constant else left
 		for e in _enemies_near(t.pos, r, true, true, true):
-			if e.cloaked:
-				e.reveal_timer = maxf(e.reveal_timer, hold)
+			if active:
+				if e.cloaked:
+					e.reveal_timer = maxf(e.reveal_timer, hold)
+				_unmask(e, s)
+			if exposure > 0.0 and (active or e.track_timer > 0.0):
+				e.track_timer = maxf(e.track_timer, exposure)
 	var dps := float(s.get("rad_dps", 0.0))
 	if dps > 0.0:
 		for e in _enemies_near(t.pos, float(s.get("rad_range", 60.0)), true, true, false):
 			damage_enemy(e, dps * dt, true, t, false)
+
+
+## The Radar's Special Targeting path, on an enemy a ping covers: Signal Analysis sees through a Decoy Beacon's fake rank,
+## Disguise Breaker uncovers a Masquerade, and Illusion Filter marks a Mirage's holograms as fakes that towers ignore.
+func _unmask(e, s: Dictionary) -> void:
+	if s.get("unmask_decoy", false) and e.def.has("fake_rank") and not e.decoy_exposed:
+		e.expose_decoy()
+	if s.get("unmask_mask", false) and e.disguised:
+		e.reveal_disguise()
+		_emit({"type": "unmask", "pos": e.pos, "enemy": e.type})
+	if s.get("unmask_mirage", false) and e.hologram:
+		e.fake_marked = true
 
 
 ## Shockwave Generator: a wave every 1/rate seconds hits every enemy in its radius, air and ground, cloaked ones too (it needs no
@@ -1704,7 +1724,7 @@ func _update_cas(t, s: Dictionary, dt: float) -> void:
 func _cas_targets(t, radius: float, plane: Vector2) -> Array:
 	var out: Array = []
 	for e in enemies:
-		if e.alive and not e.is_hidden() and e.pos.distance_squared_to(t.aim_point) <= radius * radius:
+		if e.alive and not e.untargetable() and e.pos.distance_squared_to(t.aim_point) <= radius * radius:
 			out.append(e)
 	if t.priority != 0 and out.any(func(e): return _prefers(t, e)):
 		out = out.filter(func(e): return _prefers(t, e))
@@ -1762,7 +1782,7 @@ func _update_drone_bay(t, s: Dictionary, dt: float) -> void:
 	for i in t.wing.size():
 		var d: Dictionary = t.wing[i]
 		var tg = d.target
-		if tg == null or not tg.alive or tg.is_hidden() or (ground_only and tg.flying):
+		if tg == null or not tg.alive or tg.untargetable() or (ground_only and tg.flying):
 			d["target"] = _drone_target(t, s, ground_only)
 			tg = d.target
 		var goal: Vector2
@@ -1878,7 +1898,7 @@ func _chain_rework(t, first, s: Dictionary) -> void:
 		var nxt = null
 		var nd := jump_r * jump_r
 		for e in enemies:
-			if not e.alive or hit.has(e) or e.is_hidden() or (e.flying and not t.hits_air()) or (not e.flying and not t.hits_ground()):
+			if not e.alive or hit.has(e) or e.untargetable() or (e.flying and not t.hits_air()) or (not e.flying and not t.hits_ground()):
 				continue
 			var d2: float = e.pos.distance_squared_to(cur.pos)
 			if d2 <= nd:
@@ -2107,7 +2127,7 @@ func _drone_target(t, s: Dictionary, bomber: bool):
 	for e in enemies:
 		if not e.alive or (bomber and e.flying):
 			continue
-		if e.is_hidden() and not (bomber and reach_burrowed and e.burrowed):
+		if e.untargetable() and not (bomber and reach_burrowed and e.burrowed):
 			continue
 		var score: float = e.progress()
 		if hunt and (e.type in HUNTED or (extra and e.type in HUNTED_EXTRA)):
@@ -2344,7 +2364,7 @@ func _nearest_for(t, pos: Vector2, r: float):
 	var best = null
 	var bd := r * r
 	for e in enemies:
-		if e.alive and not e.is_hidden() and (not e.flying or t.hits_air()) and (e.flying or t.hits_ground()):
+		if e.alive and not e.untargetable() and (not e.flying or t.hits_air()) and (e.flying or t.hits_ground()):
 			var d: float = pos.distance_squared_to(e.pos)
 			if d <= bd:
 				bd = d

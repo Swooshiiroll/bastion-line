@@ -3723,6 +3723,84 @@ func test_rework_radar_tower() -> void:
 	check(um.mastered and um.stats().unmask_decoy and um.stats().unmask_mask and um.stats().unmask_mirage and near(um.stats().exposure, 5.0) and near(um.stats().reveal_time, 1.3), "Total Exposure: the unmasking flags and a 5 s exposure")
 
 
+## The Radar's Special Targeting path (#86): each step unmasks a trick for the towers, the mastery keeps it unmasked.
+func test_radar_special_targeting() -> void:
+	var g = new_game()
+	g.gold = 90000
+	var gun = g.place_tower("gun_turret", Vector2i(2, 3))
+	gun.mode = Tower.Mode.STRONG
+	var plain = g.place_tower("radar_tower", spot(g, "radar_tower", 0))
+	var um = g.place_tower("radar_tower", spot(g, "radar_tower", 20))
+	um.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, um, "c", 1)
+	# Signal Analysis: a ping sees through the Decoy Beacon's fake rank.
+	var d = put(g, "decoy", 120.0)
+	var ti = put(g, "titan", 120.0)
+	plain.pos = d.pos + Vector2(30, 0)
+	plain.cooldown = 0.0
+	g._update_radar(plain, plain.stats(), 0.05)
+	check(not d.decoy_exposed and g.pick_target(gun) == d, "a stock ping doesn't see through a Decoy Beacon")
+	um.pos = d.pos + Vector2(30, 0)
+	um.cooldown = 0.0
+	g._update_radar(um, um.stats(), 0.05)
+	check(d.decoy_exposed and near(d.rank, Enemies.rank_score("decoy")) and d.shown_role() == "special", "Signal Analysis: the ping sees through it (true rank and role)")
+	check(g.pick_target(gun) == ti, "so Strongest goes for the Titan instead")
+	# Disguise Breaker: a ping uncovers the Masquerade at once.
+	g.enemies.clear()
+	var m = put(g, "masquerade", 150.0)
+	um.pos = m.pos + Vector2(30, 0)
+	um.cooldown = 0.0
+	g._update_radar(um, um.stats(), 0.05)
+	check(m.disguised, "Signal Analysis alone leaves a Masquerade disguised")
+	buy_steps(g, um, "c", 1)
+	um.cooldown = 0.0
+	g._update_radar(um, um.stats(), 0.05)
+	check(not m.disguised and m.look_type() == "masquerade" and near(m.hp, m.max_hp), "Disguise Breaker: a ping uncovers it at full health")
+	# Illusion Filter: a ping marks holograms as fakes, and towers stop choosing them.
+	g.enemies.clear()
+	gun.mode = Tower.Mode.FIRST
+	var mi = put(g, "mirage", 110.0)
+	var h = put(g, "mirage", 125.0)
+	h.make_hologram(mi)
+	check(g.pick_target(gun) == h, "First targeting shoots a hologram ahead of its Mirage")
+	buy_steps(g, um, "c", 2)
+	um.pos = h.pos + Vector2(30, 0)
+	um.cooldown = 0.0
+	g._update_radar(um, um.stats(), 0.05)
+	check(h.fake_marked and not mi.fake_marked, "Illusion Filter: a ping marks the hologram, not the real Mirage")
+	check(g.pick_target(gun) == mi and not gun.can_target(h), "towers stop shooting the hologram")
+	# Total Exposure: what a ping found stays found while in range, and for 5 s after it leaves.
+	buy_steps(g, um, "c", 1)
+	check(um.mastered and near(um.stats().exposure, 5.0), "Total Exposure: 5 s")
+	g.enemies.clear()
+	var ghost = put(g, "grunt", 100.0, 0, 500.0)
+	ghost.cloaked = true
+	um.pos = ghost.pos + Vector2(40, 0)
+	um.cooldown = 0.0
+	g._update_radar(um, um.stats(), 0.05)
+	um.cooldown = 99.0
+	var fade := func(secs: float) -> void:
+		for i in int(secs / 0.05):
+			g._update_radar(um, um.stats(), 0.05)
+			ghost.reveal_timer = maxf(0.0, ghost.reveal_timer - 0.05)
+			ghost.track_timer = maxf(0.0, ghost.track_timer - 0.05)
+	fade.call(3.0)
+	check(not ghost.is_hidden(), "it stays revealed in range long after the ping")
+	um.pos = ghost.pos + Vector2(5000, 0)
+	fade.call(4.0)
+	check(not ghost.is_hidden(), "still revealed 4 s after leaving the range")
+	fade.call(1.5)
+	check(ghost.is_hidden(), "cloaked again after 5 s")
+	var bur = put(g, "burrower", 100.0, 0, 500.0)
+	bur.burrow_timer = 0.0
+	bur.track_timer = 2.0
+	g._trait_burrow(bur, bur.def, 0.05)
+	check(not bur.burrowed, "a Burrower it tracks can't dive")
+	bur.track_timer = 0.0
+	g._trait_burrow(bur, bur.def, 0.05)
+	check(bur.burrowed, "and dives once the exposure wears off")
+
+
 func test_rework_shockwave_generator() -> void:
 	var g = new_game()
 	g.gold = 90000
