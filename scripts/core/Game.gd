@@ -423,6 +423,7 @@ func place_tower(type: String, cell: Vector2i):
 		tower_at[c] = t
 	stats["towers_built"] += 1
 	_recompute_buffs()
+	t.load_up()
 	_emit({"type": "build", "pos": t.pos, "tower": type})
 	return t
 
@@ -498,6 +499,10 @@ func start_wave() -> bool:
 		var bonus := Waves.early_call_bonus(wave + 1)
 		_add_gold(bonus)
 		_emit({"type": "early_call", "bonus": bonus})
+	else:
+		# From the build phase every tower starts the round loading, at its current (perhaps just upgraded) rate (#85).
+		for t in towers:
+			t.load_up()
 	wave += 1
 	state = State.WAVE
 	auto_timer = 0.0
@@ -1952,9 +1957,29 @@ func _update_trails(dt: float) -> void:
 func _fire_mortar(t, target, s: Dictionary) -> void:
 	t.pulse_count += 1
 	_fire_projectile(t, target, s)
+	# A lobbed shell doesn't home (#85): it lands where the target will be when it comes down, led along its route at
+	# its current pace, and an enemy that speeds up, turns back or blinks away dodges it.
+	var p = projectiles[projectiles.size() - 1]
+	p.fixed = true
+	# The flight time depends on where it lands: a few passes settle the lead.
+	var aim: Vector2 = target.pos
+	for i in 3:
+		aim = lead_point(target, p.pos.distance_to(aim) / maxf(1.0, p.speed))
+	p.target_pos = aim
+	p.total = maxf(1.0, p.pos.distance_to(p.target_pos))
 	var every := int(s.get("smoke_every", 0))
 	if every > 0 and t.pulse_count % every == 0:
-		projectiles[projectiles.size() - 1].smoke = true
+		p.smoke = true
+
+
+## Where enemy `e` will be in `secs` seconds at its current pace along its route (flyers too).
+func lead_point(e, secs: float) -> Vector2:
+	if e.curve == null:
+		return e.pos
+	var pace: float = e.speed * (1.0 - e.slow_amount) * (1.0 + e.haste)
+	if e.stun_timer > 0.0:
+		pace = 0.0
+	return e.curve.sample_baked(clampf(e.distance + pace * secs, 0.0, e.path_len))
 
 
 ## Slows ground enemies inside each smoke cloud, and retires the spent ones.
@@ -2293,7 +2318,7 @@ func _update_projectile(p, dt: float) -> void:
 	if p.kind == "rocket_salvo":
 		_update_rocket(p, dt)
 		return
-	if p.target != null and p.target.alive:
+	if p.target != null and p.target.alive and not p.fixed:
 		p.target_pos = p.target.pos
 	if p.kind == "missile":
 		_update_missile(p, dt)
@@ -2437,7 +2462,7 @@ func _projectile_hit(p) -> void:
 						damage_enemy(e, float(s.get("bomblet_damage", 10.0)) * (1.0 + (p.source.buff_dmg if p.source != null else 0.0)), false, p.source, false)
 					_emit({"type": "bomblet", "pos": bp, "radius": br})
 			if p.smoke:
-				smokes.append({"pos": p.pos, "r": r, "t": float(s.get("smoke_time", 3.0)), "slow": float(s.get("smoke_slow", 0.15))})
+				smokes.append({"pos": p.pos, "r": r, "t": float(s.get("smoke_time", 3.0)), "slow": float(s.get("smoke_slow", 0.15)), "look": "smoke"})
 				_emit({"type": "smoke", "pos": p.pos, "radius": r})
 			_emit({"type": "splash", "pos": p.pos, "radius": r, "burn": false, "stun": false})
 		"missile":
@@ -2684,8 +2709,6 @@ func _kill(e, source) -> void:
 	stats["kills"] += 1
 	if source != null:
 		source.kills += 1
-		if source is Tower and bool(source.stats().get("swivel", false)):
-			source.cooldown = 0.0   # Swivel Mount: a new target at once after a kill
 	_emit({"type": "kill", "pos": e.pos, "enemy": e.type, "bounty": gain, "boss": e.boss})
 	if e.has_trait("split"):
 		# Hydra Frame: the pieces keep walking from where it fell. Added after this tick's loops.
@@ -2745,7 +2768,7 @@ func _on_field_clear() -> void:
 	trails.clear()
 	warp_timer = 0.0
 	for t in towers:
-		t.cooldown = 0.0
+		t.load_up()   # the next round starts unloaded (#85)
 		t.target = null
 		t.fire_flash = 0.0
 		t.ramp = 0.0

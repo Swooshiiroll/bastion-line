@@ -31,7 +31,7 @@ A basic rotating machine gun turret. "It's a machine gun, Private!"
 | 5 | b | Rifled Barrels | 170 |  | +25 range; crit chance 15% | new |
 | 6 | b | Rangefinder | 305 |  | +20 range; crit chance 20% | new |
 | M | b | Targeting Computer | 980 |  | 230 range in all (+25); crit chance 30% | new |
-| 3 | c | Swivel Mount | 15 |  | Switches to a new target instantly after a kill, and doesn't fire at enemies already about to die (no wasted rounds on swarms and holograms) | new |
+| 3 | c | Swivel Mount | 15 |  | Turns onto a new target faster, and doesn't fire at enemies already about to die (no wasted rounds on swarms and holograms) | new |
 | 4 | c | Side Gun | 165 |  | A small side gun fires at a second target at 50% damage | new |
 | 5 | c | Twin Mount | 330 |  | 2 targets at full damage | new |
 | 6 | c | Belt Feed | 660 |  | +0.3 shots/s on every barrel | new |
