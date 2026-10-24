@@ -451,8 +451,9 @@ The commands below assume the console build is on PATH as `godot_console` (winge
    - v1 through v4 save migration, and rejection of tier-4 towers without research
    - generated music (length, level, clipping, seamless loop)
    - full bot playthroughs of Easy (40 rounds) on every map into endless mode, and a full-research
-     Medium run, the bot playing the reworked towers (these fail on the 4.0.0 line until the new roster's
-     balance lands; see Current tuning below)
+     Medium run, the bot playing the reworked towers. On the 4.0.0 line their verdicts (medal, endless,
+     masteries) are paused until the rework is done (#96): the games still run, and a lost verdict prints as
+     PAUSED instead of failing. `BOT_BALANCE_PAUSED` in `tests/TestRunner.gd` turns them back on.
 
    ```
    godot_console --headless --path . res://tests/TestRunner.tscn
