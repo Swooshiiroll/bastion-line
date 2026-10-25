@@ -43,9 +43,29 @@ static func at(c: Vector2, aim: float, k: float, x: float, y: float) -> Vector2:
 	return Gun.at(c, aim, k, x, y)
 
 
-## Where a mine leaves the launcher.
-static func muzzle(c: Vector2, aim: float, k: float, look: String) -> Vector2:
-	return at(c, aim, k, rail_len(levels(look)) * 0.4, 0.0)
+## A thrown mine flies this long (s) on its arc, this high (px at k 1), then a ring marks where it lands.
+const FLIGHT := 0.6
+const LOB := 29.0
+const LAND_RING := 0.3
+
+
+## Where mine `n` leaves the launcher: the twin launchers (Twin Press) take turns.
+static func muzzle(c: Vector2, aim: float, k: float, look: String, n := 0) -> Vector2:
+	var L := levels(look)
+	return at(c, aim, k, rail_len(L) * 0.4, (4.5 if n % 2 == 1 else -4.5) if L.B >= 2 else 0.0)
+
+
+## A mine on the track, `age` seconds after it was thrown from `from`: in flight on its arc (a little smaller, not blinking),
+## then landed with a fading ring, then waiting with its blinking band.
+static func laid(ci: CanvasItem, p: Vector2, from: Vector2, age: float, t: float, look: String, acc: Color, blink: bool) -> void:
+	if age < FLIGHT:
+		var u := age / FLIGHT
+		mine(ci, from.lerp(p, u) - Vector2(0, sin(PI * u) * LOB), 0.85, t, look, acc, false)
+		return
+	if age < FLIGHT + LAND_RING:
+		var v := (age - FLIGHT) / LAND_RING
+		Draw.ring(ci, p, 9.6 * v, Color(1, 1, 1, 0.5 * (1.0 - v)), 1.0)
+	mine(ci, p, 1.0, t, look, acc, blink)
 
 
 ## A mine: a squat canister whose look follows the Power steps (a bigger canister, a charge core, a dark yellow-banded HE mine,
