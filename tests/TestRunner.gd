@@ -27,6 +27,8 @@ const ResearchData = preload("res://data/research.gd")
 const Difficulty = preload("res://data/difficulty.gd")
 const EnemyArt = preload("res://scripts/view/enemies/EnemyArt.gd")
 const EnemyMoves = preload("res://scripts/entities/EnemyMoves.gd")
+const EnemyKit = preload("res://scripts/view/enemies/EnemyKit.gd")
+const EntityLayerScript = preload("res://scripts/view/EntityLayer.gd")
 const Tuner = preload("res://scripts/dev/Tuner.gd")
 const TunerPanel = preload("res://scripts/dev/TunerPanel.gd")
 const TunerWindow = preload("res://scripts/dev/TunerWindow.gd")
@@ -116,6 +118,7 @@ func _run() -> void:
 		"test_sandbox_no_medal",
 		"test_sandbox_dps",
 		"test_leviathan",
+		"test_blink_around_corners",
 		"test_colossus",
 		"test_v3_flyers",
 		"test_crowd_control_limits",
@@ -718,6 +721,49 @@ func test_leviathan() -> void:
 	var locusts: Array = g.enemies.filter(func(e): return e.type == "locust")
 	check(locusts.size() == 6, "launches 6 Locusts every 6 s (%d)" % locusts.size())
 	check(locusts.all(func(e): return e.flying), "Locusts fly")
+	var air: Array = EntityLayerScript.draw_order(g.enemies)[1]
+	check(air.back() == lv and air.size() == 7, "drawn over the Locusts it launches")
+
+
+## A Blink Stalker or Shifter blinking around every corner of every route stays on the track, faces along it, and
+## leaves its after-image where it blinked from (issue #88: the ghost was drawn straight behind it, off the lane).
+func test_blink_around_corners() -> void:
+	var off_track := 0
+	var bad_facing := 0
+	var bad_ghost := 0
+	var corners := 0
+	for id in Maps.ORDER:
+		var g = new_game(id)
+		for pi in g.grid.ground_paths.size():
+			var c: Curve2D = g.grid.ground_paths[pi]
+			for i in range(1, c.point_count - 1):
+				var at := c.get_closest_offset(c.get_point_position(i))
+				for type in ["stalker", "shifter"]:
+					var e = put(g, type, maxf(0.0, at - float(Enemies.ENEMIES[type].blink_distance) * 0.5), pi)
+					e.step(SIM_DT)
+					var from: Vector2 = e.pos
+					g._trait_blink(e, e.def)
+					corners += 1
+					if e.blink_from != from or c.get_closest_point(e.blink_from).distance_to(e.blink_from) > 8.0:
+						bad_ghost += 1
+					for k in int(0.7 / SIM_DT):
+						e.step(SIM_DT)
+						var ahead := c.sample_baked(minf(e.distance + 4.0, e.path_len))
+						var tangent := (ahead - c.sample_baked(e.distance)).normalized()
+						if c.get_closest_point(e.pos).distance_to(e.pos) > 8.0:
+							off_track += 1
+						if e.distance < e.path_len - 8.0 and e.facing.dot(tangent) < 0.9:
+							bad_facing += 1
+					var st := EnemyArt.state(e)
+					if st.get("blink_from", Vector2.INF) != from:
+						bad_ghost += 1
+	check(corners > 40, "every corner of every route (%d blinks)" % corners)
+	check(off_track == 0, "stays on the track after a blink (%d frames off)" % off_track)
+	check(bad_facing == 0, "faces along the track after a blink, not along the jump (%d frames)" % bad_facing)
+	check(bad_ghost == 0, "the after-image stays where it blinked from (%d wrong)" % bad_ghost)
+	EnemyKit.begin(null, Vector2(100, 50), 1.1, 1.05, 0.95)
+	var p := Vector2(37, -12)
+	check(EnemyKit.W(EnemyKit.L(p)).distance_to(p) < 0.001, "the art maps a field point into its frame and back")
 
 
 func test_colossus() -> void:

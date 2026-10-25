@@ -131,6 +131,8 @@ var blink_timer: float:
 		return float(trait_timers.get("blink", 0.0))
 	set(v):
 		trait_timers["blink"] = v
+## Where it stood when it last blinked (its after-image stays there), or INF if it never has.
+var blink_from := Vector2.INF
 ## Mender Hulk: seconds since it last took damage.
 var since_hit := 0.0
 ## Rally Beacon overdrive on this enemy (fraction of extra speed), refreshed every tick.
@@ -356,6 +358,17 @@ func apply_slow(amount: float, duration: float) -> void:
 func set_distance(d: float) -> void:
 	distance = clampf(d, 0.0, path_len)
 	pos = curve.sample_baked(minf(distance, path_len))
+
+
+## A blink: it leaves an after-image where it stands and lands `dist` px further along its route, on the track and
+## facing along it (not along the jump, which cuts across a corner).
+func blink(dist: float) -> void:
+	blink_from = pos
+	set_distance(distance + dist)
+	track_pos = pos
+	var ahead := curve.sample_baked(minf(distance + 4.0, path_len))
+	if ahead.distance_squared_to(pos) > 0.0001:
+		facing = (ahead - pos).normalized()
 
 
 ## Where the enemy was `seconds` ago along its route (its distance then), or 0 if it hasn't been alive that long.
