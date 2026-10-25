@@ -983,8 +983,7 @@ func _trait_burrow(e, d: Dictionary, dt: float) -> void:
 func _trait_blink(e, d: Dictionary) -> void:
 	var from: Vector2 = e.pos
 	e.mark("blink")
-	e.distance = minf(e.distance + float(d.blink_distance), e.path_len)
-	e.pos = e.curve.sample_baked(e.distance)
+	e.blink(float(d.blink_distance))
 	_emit({"type": "blink", "from": from, "pos": e.pos})
 	if e.has_trait("wake"):
 		# Shifter: where it lands, other non-boss enemies get a burst of speed (refreshed, never added).

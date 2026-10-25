@@ -13,6 +13,7 @@ const Research = preload("res://scripts/core/Research.gd")
 const Maps = preload("res://data/maps.gd")
 const Grid = preload("res://scripts/core/Grid.gd")
 const UiKit = preload("res://scripts/ui/UiKit.gd")
+const EntityLayerScript = preload("res://scripts/view/EntityLayer.gd")
 
 const OUT_DIR := "res://screenshots/"
 
@@ -292,6 +293,33 @@ func _run() -> void:
 		vg.enemies.append(vg.spawn_enemy("locust", 0, d, 4.0, -1))
 	await _wait(1.2)
 	await _shot("15d_v3_threats")
+
+	# Issue #88: a Blink Stalker and a Shifter just after blinking round a corner (each after-image stays on the lane
+	# where it blinked from), and a Leviathan drawn over the Locusts it has just launched.
+	var bg = Game.new("foundry", 99, "hard")
+	bg.events.clear()
+	app.start_game_with(bg)
+	await _wait(0.4)
+	bg.start_wave()
+	bg.spawn_queue.clear()
+	var route: Curve2D = bg.grid.ground_paths[0]
+	var blinkers := []
+	for entry in [["stalker", 2], ["shifter", mini(4, route.point_count - 2)]]:
+		var at := route.get_closest_offset(route.get_point_position(entry[1]))
+		var e = bg.spawn_enemy(entry[0], 0, maxf(0.0, at - 30.0), 4.0, -1)
+		e.blink_timer = 0.05
+		bg.enemies.append(e)
+		blinkers.append(e)
+	var lv = bg.spawn_enemy("leviathan", 0, 600.0, 4.0, -1)
+	lv.trait_timers["summon"] = 0.05
+	bg.enemies.append(lv)
+	await _wait(0.3)
+	for e in blinkers:
+		_expect(e.blink_from != Vector2.INF and route.get_closest_point(e.blink_from).distance_to(e.blink_from) < 8.0,
+			"the %s's after-image is on the lane where it blinked from" % e.type)
+	var air: Array = EntityLayerScript.draw_order(bg.enemies)[1]
+	_expect(air.size() > 1 and air.back() == lv, "the Leviathan is drawn over its Locusts")
+	await _shot("15e_blink_corner_leviathan")
 
 	# The special, support and economy towers, built up with secondaries, against the v3 roster.
 	var wg = Game.new("foundry", 99, "hard", Research.node_ids())
