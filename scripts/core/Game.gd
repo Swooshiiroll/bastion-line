@@ -15,6 +15,8 @@ const Research = preload("res://scripts/core/Research.gd")
 const Tower = preload("res://scripts/entities/Tower.gd")
 const Enemy = preload("res://scripts/entities/Enemy.gd")
 const Projectile = preload("res://scripts/entities/Projectile.gd")
+const RailgunArt = preload("res://scripts/view/towers/RailgunArt.gd")
+const MineLayerArt = preload("res://scripts/view/towers/MineLayerArt.gd")
 
 enum State { BUILD, WAVE, GAMEOVER }
 
@@ -30,6 +32,11 @@ const DPS_BUCKET := 0.25
 const DPS_BUCKETS := 20
 const AUTO_START_DELAY := 5.0
 const RETARGET_DELAY := 0.1
+## Mines are at least this far apart (px), and land up to MINE_SPREAD to either side of the lane's middle.
+const MINE_GAP := 18.0
+const MINE_SPREAD := 7.0
+## The CAS Gunship's plane flies to a new orbit at this speed (px a second).
+static var CAS_SPEED := 180.0
 const STAT_KEYS := ["kills", "gold_earned", "towers_built", "leaked", "waves_cleared"]
 static var BOSS_STUN_FACTOR := 0.3
 ## A critical hit does double damage (the Gun Turret's Range path; the Augmentation Tower's Precision Matrix raises it).
@@ -1186,6 +1193,11 @@ func _update_tower(t, dt: float) -> void:
 		t.target = null
 	t.cooldown -= dt
 	if t.cooldown > 0.0:
+		# Reloading: keep a target to turn toward (looked for every RETARGET_DELAY), so the turret tracks between shots. The shot
+		# itself still picks afresh.
+		if t.target == null and time >= float(t.gun_cds.get("seek_t", 0.0)):
+			t.gun_cds["seek_t"] = time + RETARGET_DELAY
+			t.target = pick_target(t)
 		return
 
 	match t.type:
@@ -1491,35 +1503,60 @@ func _update_mine_layer(t, s: Dictionary, dt: float) -> void:
 	if mine_count >= int(s.get("cap", 20)):
 		t.cooldown = 0.2
 		return
-	var spot = _mine_spot(t, float(s.get("range", 120.0)))
+	var reach := float(s.get("range", 120.0))
+	# It throws at the spot it picked (and turned toward) after the last mine, if that's still free and in reach.
+	var spot = t.gun_cds.get("next")
+	if spot == null or not _mine_free(spot) or spot.distance_squared_to(t.pos) > reach * reach:
+		spot = _mine_spot(t, reach)
 	if spot == null:
 		t.cooldown = 0.3
 		return
-	mines.append({"pos": spot, "source": t})
 	t.pulse_count += 1
+	var k := 1.0 if t.size <= 1 else 1.8
+	mines.append({"pos": spot, "source": t, "t0": time, "from": MineLayerArt.muzzle(t.pos, t.aim, k, t.look_key(), t.pulse_count)})
 	t.cooldown = 1.0 / t.eff_rate()
 	t.fire_flash = 0.12
 	t.aim = (spot - t.pos).angle()
+	var nxt = _mine_spot(t, reach)
+	t.gun_cds["next"] = nxt
+	if nxt != null:
+		t.aim = (nxt - t.pos).angle()
 	_emit({"type": "mine_toss", "pos": t.pos, "to": spot, "look": t.look_key()})
 
 
-## The first free point along the lanes (nearest the entrance) inside reach of the tower; null if there is none.
+## A random free point on the lanes inside reach of the tower, shifted a little to either side of the lane's middle; null if
+## there is none. Free means no mine within MINE_GAP. The pick is seeded by the run and the tower, so a replay lays the same.
 func _mine_spot(t, reach: float):
+	var spots: Array = []
+	var n := 0
 	for curve in grid.ground_paths:
 		var length: float = curve.get_baked_length()
 		var off := 0.0
 		while off <= length:
 			var p: Vector2 = curve.sample_baked(off)
 			if p.distance_squared_to(t.pos) <= reach * reach:
-				var free := true
-				for m in mines:
-					if m.pos.distance_squared_to(p) < 18.0 * 18.0:
-						free = false
-						break
-				if free:
-					return p
+				var side: Vector2 = (curve.sample_baked(minf(off + 2.0, length)) - curve.sample_baked(maxf(off - 2.0, 0.0))).normalized().orthogonal()
+				var q: Vector2 = p + side * (_mine_noise(t, n) * 2.0 - 1.0) * MINE_SPREAD
+				if _mine_free(q):
+					spots.append(q)
+			n += 1
 			off += 10.0
-	return null
+	if spots.is_empty():
+		return null
+	return spots[mini(int(_mine_noise(t, -1) * float(spots.size())), spots.size() - 1)]
+
+
+func _mine_free(p: Vector2) -> bool:
+	for m in mines:
+		if m.pos.distance_squared_to(p) < MINE_GAP * MINE_GAP:
+			return false
+	return true
+
+
+## A number in [0, 1) from the run's seed, the tower's cell, the mines it has laid and `i` (its own stream, so laying mines
+## doesn't shift the crit rolls).
+func _mine_noise(t, i: int) -> float:
+	return float(hash([seed_value, t.cell.x, t.cell.y, t.pulse_count, i]) & 0xFFFFFF) / float(0x1000000)
 
 
 ## A mine goes off under any ground or burrowed enemy (flyers pass over; holograms aren't solid): its blast hits every ground and
@@ -1570,6 +1607,7 @@ func _spray(t, s: Dictionary) -> void:
 	var soaked: Array = []
 	for i in mini(hit_n, cands.size()):
 		soaked.append(cands[i])
+	var sprayed := soaked.size()
 	if bool(s.get("mist", false)):
 		var extra = null
 		for e in cands:
@@ -1590,7 +1628,9 @@ func _spray(t, s: Dictionary) -> void:
 		else:
 			e.armor_break = maxf(e.armor_break, strip)
 			e.armor_break_timer = maxf(e.armor_break_timer, time_s)
-		_emit({"type": "spray", "from": t.pos, "to": e.pos, "look": t.look_key()})
+		var i := soaked.find(e)
+		# The sprayer: the first nozzle, the second (Twin Nozzles) for the second enemy; the Mist Nozzle's neighbour gets a mist.
+		_emit({"type": "spray", "from": t.pos, "to": e.pos, "enemy": e, "nozzle": mini(i, 1), "mist": i >= sprayed, "look": t.look_key()})
 
 
 ## Every tick: acid burns soaked enemies, gel and chill slow them.
@@ -1637,8 +1677,40 @@ func _cryo_wave(t, s: Dictionary) -> void:
 
 ## Designates the point a CAS Gunship orbits (free, any time, anywhere on the map).
 func designate_orbit(t, pos: Vector2) -> void:
-	t.aim_point = pos.clamp(Vector2.ZERO, Grid.field_size())
+	var p := pos.clamp(Vector2.ZERO, Grid.field_size())
+	if not t.aim_set or p.distance_to(t.aim_point) > 1.0:
+		t.in_orbit = false
+	t.aim_point = p
 	t.aim_set = true
+
+
+## The CAS Gunship's plane: it takes off from the tower and flies straight to its orbit at CAS_SPEED, joining it along the
+## tangent (straight out when it starts inside the circle), then circles at 0.5 rad/s. A new orbit or a wider one sends it
+## flying again. The guns keep firing at the orbit while it flies, from wherever the plane is.
+func _fly_cas(t, radius: float, dt: float) -> void:
+	if t.plane_pos == Vector2.INF:
+		t.plane_pos = t.pos
+	if t.in_orbit and absf(t.plane_pos.distance_to(t.aim_point) - radius) > 1.0:
+		t.in_orbit = false
+	if t.in_orbit:
+		t.orbit_angle = fmod(t.orbit_angle + 0.5 * dt, TAU)
+		t.plane_pos = t.aim_point + Vector2.from_angle(t.orbit_angle) * radius
+		t.plane_heading = t.orbit_angle + PI / 2.0
+		return
+	var off: Vector2 = t.plane_pos - t.aim_point
+	var d := off.length()
+	var entry_angle: float = t.orbit_angle if d < 0.01 else off.angle() + (acos(radius / d) if d > radius else 0.0)
+	var entry: Vector2 = t.aim_point + Vector2.from_angle(entry_angle) * radius
+	var to: Vector2 = entry - t.plane_pos
+	var step := CAS_SPEED * dt
+	if to.length() <= step:
+		t.plane_pos = entry
+		t.orbit_angle = fposmod(entry_angle, TAU)
+		t.plane_heading = entry_angle + PI / 2.0
+		t.in_orbit = true
+	else:
+		t.plane_pos += to.normalized() * step
+		t.plane_heading = to.angle()
 
 
 ## CAS Gunship: the plane circles `aim_point` and its guns fire at enemies inside the orbit. The gatling takes the best target,
@@ -1648,8 +1720,8 @@ func _update_cas(t, s: Dictionary, dt: float) -> void:
 	if not t.aim_set:
 		designate_orbit(t, nearest_track_point(t.pos))
 	var radius := float(s.get("orbit", 90.0))
-	t.orbit_angle = fmod(t.orbit_angle + 0.5 * dt, TAU)
-	var plane: Vector2 = t.aim_point + Vector2.from_angle(t.orbit_angle) * radius
+	_fly_cas(t, radius, dt)
+	var plane: Vector2 = t.plane_pos
 	if bool(s.get("radar", false)):
 		for e in enemies:
 			if e.alive and e.cloaked and e.pos.distance_squared_to(t.aim_point) <= radius * radius:
@@ -1901,8 +1973,10 @@ func _fire_railgun(t, target, s: Dictionary) -> void:
 	var dir: Vector2 = (target.pos - t.pos).normalized()
 	t.aim = dir.angle()
 	t.fire_flash = 0.15
-	var from: Vector2 = t.pos + dir * 26.0
-	var to: Vector2 = t.pos + dir * t.get_range()
+	t.gun_cds["shot_t"] = time
+	# From the muzzle of the rail whose turn it is (twin rails fire in turn), straight at the target, out to the range.
+	var from: Vector2 = RailgunArt.muzzle(t.pos, t.aim, 1.0 if t.size <= 1 else 1.8, t.look_key(), t.pulse_count - 1)
+	var to: Vector2 = from + (target.pos - from).normalized() * maxf(t.get_range() - t.pos.distance_to(from), 0.0)
 	var width := 4.0
 	var on_line: Array = []
 	for e in enemies:
