@@ -29,6 +29,10 @@ const EnemyArt = preload("res://scripts/view/enemies/EnemyArt.gd")
 const EnemyMoves = preload("res://scripts/entities/EnemyMoves.gd")
 const Tuner = preload("res://scripts/dev/Tuner.gd")
 const TunerPanel = preload("res://scripts/dev/TunerPanel.gd")
+const RocketSalvoArt = preload("res://scripts/view/towers/RocketSalvoArt.gd")
+const LaserTowerArt = preload("res://scripts/view/towers/LaserTowerArt.gd")
+const ArtilleryCannonArt = preload("res://scripts/view/towers/ArtilleryCannonArt.gd")
+const EntityLayerView = preload("res://scripts/view/EntityLayer.gd")
 
 const SANDBOX := "user://test_sandbox/"
 const SIM_DT := 1.0 / 60.0
@@ -110,6 +114,11 @@ func _run() -> void:
 		"test_leviathan",
 		"test_colossus",
 		"test_v3_flyers",
+		"test_rocket_tubes",
+		"test_laser_turns_first",
+		"test_artillery_from_muzzle",
+		"test_lobbed_shells",
+		"test_turret_bake_size",
 		"test_crowd_control_limits",
 		"test_no_towers_loses",
 		"test_bot_playthroughs",
@@ -1916,6 +1925,101 @@ func spot(g, type: String, n: int) -> Vector2i:
 
 
 ## Buys `n` steps on path `key` of a reworked tower (money is no object).
+## The Rocket Salvo (#90): each rocket leaves its own tube straight out; the tubes empty with a salvo and load again.
+func test_rocket_tubes() -> void:
+	var g = new_game()
+	var e1 = put(g, "grunt", 100.0, 0, 5.0)
+	var t = g.place_tower("rocket_salvo", spot(g, "rocket_salvo", 0))
+	t.pos = e1.pos + Vector2(60, 20)
+	g.projectiles.clear()
+	g._fire_salvo(t, t.stats())
+	var rockets: Array = g.projectiles.filter(func(p): return p.kind == "rocket_salvo")
+	var dir := Vector2.from_angle(t.aim)
+	var at_mouth: bool = rockets.size() == 3
+	var straight := true
+	for i in rockets.size():
+		at_mouth = at_mouth and rockets[i].pos.distance_to(RocketSalvoArt.muzzle(t.pos, t.aim, 1.0, t.look_key(), i)) < 0.01
+		straight = straight and rockets[i].vel.normalized().dot(dir) > 0.999
+	check(at_mouth, "each rocket starts at its own tube's mouth")
+	check(straight, "and leaves straight out along the launcher")
+	var r0 = rockets[0]
+	g._update_rocket(r0, Game.ROCKET_STRAIGHT * 0.5 / maxf(r0.speed, 1.0))
+	check(r0.vel.normalized().dot(dir) > 0.999, "it doesn't steer until it's %d px out" % int(Game.ROCKET_STRAIGHT))
+	check(t.gun_cds.has("salvo_t"), "the salvo's time is kept for the tube art")
+	check(near(RocketSalvoArt.ready_of(2.5, 2.5), 0.0) and near(RocketSalvoArt.ready_of(1.25, 2.5), 0.5) and near(RocketSalvoArt.ready_of(0.5, 2.5), 1.0), "the tubes are empty after a salvo, half-loaded halfway, full for the last quarter")
+	var rip := RocketSalvoArt.levels("-1|0|0|5")
+	check(near(RocketSalvoArt.loaded(rip, 3, 0.0, 0.1), 1.0) and near(RocketSalvoArt.loaded(rip, 3, 0.0, 0.3), 0.0), "a rippling salvo empties its tubes one after another")
+
+
+## The Laser Tower (#90) turns to face a new target before its beam fires.
+func test_laser_turns_first() -> void:
+	var g = new_game()
+	var t = g.place_tower("laser_tower", spot(g, "laser_tower", 0))
+	var e = put(g, "brute", 100.0, 0, 50.0)
+	t.pos = e.pos + Vector2(30, 0)
+	t.aim = 0.0
+	var hp0: float = e.hp
+	g._update_laser_rework(t, t.stats(), 0.05)
+	check(t.target == e and not t.beam_on and near(e.hp, hp0) and near(t.ramp, 0.0), "facing away, it turns first: no beam, no damage, no ramp")
+	check(near(absf(angle_difference(0.0, t.aim)), Game.LASER_TURN * 0.05, 0.001), "it turns at %.0f rad/s" % Game.LASER_TURN)
+	var steps := 1
+	while not t.beam_on and steps < 40:
+		g._update_laser_rework(t, t.stats(), 0.05)
+		steps += 1
+	check(t.beam_on and e.hp < hp0, "facing it, the beam fires (after %d steps)" % steps)
+	check(absf(angle_difference(t.aim, PI)) <= Game.LASER_ON_ARC, "the lance points at its target")
+	check(float(steps) * 0.05 <= PI / Game.LASER_TURN + 0.1, "a half turn takes about %.2f s" % (PI / Game.LASER_TURN))
+	e.alive = false
+	g._update_laser_rework(t, t.stats(), 0.05)
+	check(not t.beam_on, "the beam stops with no target")
+
+
+## The Artillery Cannon (#90): every shell leaves the muzzle along the barrel, and each shell of a Rolling Barrage fires
+## with its own flash.
+func test_artillery_from_muzzle() -> void:
+	var g = new_game()
+	g.gold = 90000
+	var t = g.place_tower("artillery_cannon", spot(g, "artillery_cannon", 0))
+	t.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, t, "b", 5)
+	check(int(t.stats().get("barrage", 1)) == 3, "Rolling Barrage: three shells")
+	g.projectiles.clear()
+	g._fire_artillery(t, t.stats())
+	var mz := ArtilleryCannonArt.muzzle(t.pos, (t.aim_point - t.pos).angle(), 1.0)
+	var from_muzzle: bool = g.projectiles.size() == 3
+	for p in g.projectiles:
+		from_muzzle = from_muzzle and p.start.distance_to(mz) < 0.01
+	check(from_muzzle, "every shell leaves from the muzzle")
+	t.fire_flash = 0.0
+	var second = g.projectiles[1]
+	var flashed := false
+	for i in 30:
+		g._update_projectile(second, SIM_DT)
+		if t.fire_flash > 0.0:
+			flashed = true
+			break
+	check(flashed and second.hold <= 0.0, "a held barrage shell fires with its own flash")
+
+
+## Mortar and Artillery shells (#90) are drawn on an arc from where they left to where they land, pointing along it.
+func test_lobbed_shells() -> void:
+	var st := Vector2(0, 0)
+	var pos := Vector2(100, 0)
+	check(EntityLayerView.lob_point(st, pos, 1.0, 1.0, 40.0).distance_to(pos) < 0.01, "a lobbed shell comes down on its ground point")
+	check(EntityLayerView.lob_point(st, pos, 1.0, 0.5, 40.0).distance_to(Vector2(50, -40)) < 0.01, "it's highest in the middle")
+	check(EntityLayerView.lob_point(st, Vector2(30, 0), 0.3, 0.0, 40.0).distance_to(st) < 0.01, "and leaves from where it was fired")
+	var up := EntityLayerView.lob_heading(st, Vector2(10, 0), 0.1, 40.0)
+	var down := EntityLayerView.lob_heading(st, Vector2(90, 0), 0.9, 40.0)
+	check(up.x > 0.0 and up.y < 0.0 and down.x > 0.0 and down.y > 0.0, "it points up the arc, then down it")
+
+
+## The turret cache (#90) bakes each tower's static layers big enough to hold them: the Laser's longest lance isn't cut off.
+func test_turret_bake_size() -> void:
+	var lance := LaserTowerArt.tip_x(LaserTowerArt.levels("-1|0|0|5")) + 5.3
+	check(Draw.turret_half("laser_tower") >= lance, "the Laser's bake holds its Deep Lance (%.1f)" % lance)
+	check(near(Draw.turret_half("gun_turret"), 32.0) and Draw.turret_half("railgun") > 32.0 and Draw.turret_half("anti_aircraft_turret") > 32.0, "the default fits the rest; the Railgun and Anti-Aircraft barrels get more")
+
+
 func buy_steps(g, t, key: String, n: int) -> void:
 	for i in n:
 		g.gold += 10000
@@ -2688,6 +2792,7 @@ func test_rework_laser_tower() -> void:
 	var bt = g.place_tower("laser_tower", spot(g, "laser_tower", 60))
 	var brute = put(g, "brute", 100.0, 0, 50.0)
 	bt.pos = brute.pos + Vector2(30, 0)
+	bt.aim = PI   # already facing it: the turn onto a target is tested in test_laser_turns_first
 	var armor0: float = brute.armor_now() if brute.has_method("armor_now") else brute.armor
 	for i in 60:
 		g._update_laser_rework(bt, bt.stats(), 0.05)
@@ -2716,6 +2821,7 @@ func test_rework_laser_tower() -> void:
 	var e2 = put(g, "grunt", 104.0, 0, 500.0)
 	var e3 = put(g, "grunt", 108.0, 0, 500.0)
 	mt.pos = e1.pos + Vector2(30, 0)
+	mt.aim = PI
 	for i in 10:
 		g._update_laser_rework(mt, mt.stats(), 0.05)
 	check(mt.beam_targets.size() == 3 and mt.beam_ramps.size() == 3, "three enemies, three beams")
@@ -2729,6 +2835,7 @@ func test_rework_laser_tower() -> void:
 	g.enemies.clear()
 	var a = put(g, "grunt", 100.0, 0, 500.0)
 	rmem.pos = a.pos + Vector2(30, 0)
+	rmem.aim = PI
 	for i in 40:
 		g._update_laser_rework(rmem, rmem.stats(), 0.05)
 	check(near(rmem.ramp, 2.0, 0.01), "two seconds on the target")
@@ -2738,6 +2845,7 @@ func test_rework_laser_tower() -> void:
 	check(rmem.target == b and near(rmem.ramp, 1.05, 0.02), "Ramp Memory: the new target starts at half (%.2f)" % rmem.ramp)
 	var plain = g.place_tower("laser_tower", spot(g, "laser_tower", 140))
 	plain.pos = b.pos + Vector2(30, 0)
+	plain.aim = PI
 	for i in 40:
 		g._update_laser_rework(plain, plain.stats(), 0.05)
 	b.alive = false

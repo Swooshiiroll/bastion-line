@@ -23,6 +23,9 @@ const ShockwaveGeneratorArt = preload("res://scripts/view/towers/ShockwaveGenera
 const ELITE_COLOR := Color(1.0, 0.82, 0.30)
 ## A Siphon's drain (its aura, and the tint on towers inside it).
 const SIPHON_COLOR := Color(0.72, 1.0, 0.25)
+## How high Mortar and Artillery shells are lobbed at the middle of their flight, in tiles (as on the design pages, #90).
+const MORTAR_ARC := 0.85
+const ARTILLERY_ARC := 0.85
 
 var world
 ## Microseconds spent per section of _draw, summed; tools/PerfProbe.gd reads and resets it.
@@ -56,6 +59,9 @@ func _draw() -> void:
 		if tw.type == "artillery_cannon":
 			# It points at the spot it shells, not at an enemy.
 			cur = lerp_angle(cur, (tw.aim_point - tw.pos).angle(), 0.35)
+		elif tw.type == "laser_tower":
+			# The game turns it (its beams wait until it faces the target), so the lance and the beam agree (#90).
+			cur = tw.aim
 		_aim[key] = cur
 		var extra: Array = []
 		if tw.type == "gun_turret":
@@ -89,8 +95,10 @@ func _draw() -> void:
 			extra = [ArtilleryCannonArt.types(ArtilleryCannonArt.levels(tw.look_key())).find(tw.shell), tw.pulse_count]
 		elif tw.type == "anti_aircraft_turret":
 			extra = [tw.pulse_count]
+		elif tw.type == "rocket_salvo":
+			extra = [RocketSalvoArt.ready_of(tw.cooldown, 1.0 / maxf(tw.eff_rate(), 0.001)), g.time - float(tw.gun_cds.get("salvo_t", -99.0))]
 		elif tw.type == "laser_tower":
-			extra = [clampf(tw.ramp / float(tw.stats().ramp_time), 0.0, 1.0) if tw.target != null else 0.0]
+			extra = [clampf(tw.ramp / float(tw.stats().ramp_time), 0.0, 1.0) if tw.beam_on else 0.0]
 		Draw.tower(self, tw.type, tw.tier, tw.pos, cur, 1.0 if tw.size <= 1 else 1.8, t + float(tw.cell.x) * 0.3, tw.fire_flash, tw.spec, "", extra)
 		if tw.disabled > 0.0:
 			Draw.tower_offline(self, tw.pos, t)
@@ -297,46 +305,58 @@ func _gun_round(p) -> void:
 
 ## The Artillery Cannon's shell (the confirmed art): lobbed high, it changes with each Power step (bigger, dark with a yellow band, long
 ## and slim with a steel tip, gold at the mastery), and carries the mark of its type: an incendiary flame, shrapnel studs, concussion
-## rings, or all three bands for the combined shell. A heavy round (Shell Magazine) is bigger and red-ringed.
+## rings, or all three bands for the combined shell. A heavy round (Shell Magazine) is bigger with a red band.
 func _artillery_shell(p) -> void:
 	var lv := ArtilleryCannonArt.levels(str(p.look))
 	var frac := clampf(p.traveled / maxf(p.total, 1.0), 0.0, 1.0)
-	var lift: float = sin(frac * PI) * float(p.total) * 0.4
+	var h := ARTILLERY_ARC * Grid.TILE
 	var heavy: bool = p.crit
 	var z := (1.2 if lv.P >= 1 else 1.0) * (1.25 if lv.r == 2 else 1.0) * (1.35 if heavy else 1.0)
 	var r := 2.6 * z
-	Draw.ellipse(self, p.pos + Vector2(0, 3), 3.0 * z, 1.5 * z, Color(0, 0, 0, 0.3))
-	var sp: Vector2 = p.pos - Vector2(0, lift)
+	Draw.ellipse(self, p.pos, 3.0 * z, 1.5 * z, Color(0, 0, 0, 0.3))
+	# It leaves the muzzle along the barrel and is lobbed on an arc, pointing the way it flies (#90).
+	var sp := lob_point(p.start, p.pos, frac, frac, h)
+	var d := lob_heading(p.start, p.pos, frac, h)
+	var o := d.orthogonal()
 	var kind := String(p.shell)
 	var tc: Color = ArtilleryCannonArt.TYPE_COLORS.get(kind, Color(1.0, 0.55, 0.2)) if kind != "he" else (Draw.GOLD if lv.P >= 5 else Color(1.0, 0.55, 0.2))
-	var back: Vector2 = (p.start - p.pos).normalized() if p.start.distance_squared_to(p.pos) > 1.0 else Vector2.LEFT
 	if kind != "he" or lv.P >= 5:
 		for k in 4:
-			Draw.disc(self, sp + back * (3.0 + 3.0 * float(k)) + Vector2(0, float(k) * 1.5), (0.9 + float(k + 1) * 0.4) * z, Color(tc, 0.34 - 0.06 * float(k + 1)))
+			var f := frac - 0.035 * float(k + 1)
+			if f <= 0.0:
+				break
+			Draw.disc(self, lob_point(p.start, p.pos, frac, f, h), (0.9 + float(k + 1) * 0.4) * z, Color(tc, 0.34 - 0.06 * float(k + 1)))
 	var body := ArtilleryCannonArt.body_color(lv)
-	var d := Vector2.DOWN if frac > 0.5 else Vector2.UP
-	if lv.P >= 4:
+	# Long Penetrators make it a long slim round with a steel tip; its bands fit across that body.
+	var long: bool = lv.P >= 4
+	var half_w := r * 0.5 if long else r * 0.9
+	if long:
 		Draw.bar(self, sp - d * r * 1.9, sp + d * r * 0.9, r * 1.05, body)
-		Draw.poly(self, PackedVector2Array([sp + d * r * 2.4, sp + d * r * 0.9 + d.orthogonal() * r * 0.4, sp + d * r * 0.9 - d.orthogonal() * r * 0.4]), ArtilleryCannonArt.STEEL)
+		Draw.poly(self, PackedVector2Array([sp + d * r * 2.4, sp + d * r * 0.9 + o * r * 0.4, sp + d * r * 0.9 - o * r * 0.4]), ArtilleryCannonArt.STEEL)
 	else:
 		Draw.orb(self, sp, r, body)
 	if lv.P >= 5:
 		Draw.ring(self, sp, r * 0.55, Draw.GOLD, 0.8)
 	if lv.P >= 3:
-		draw_line(sp + Vector2(r * 0.9, 0), sp - Vector2(r * 0.9, 0), ArtilleryCannonArt.YEL, 1.0, true)
+		draw_line(sp + o * half_w, sp - o * half_w, ArtilleryCannonArt.YEL, 1.0, true)
 	if lv.P >= 2:
 		for i in 3:
 			draw_line(sp + Vector2.from_angle(float(i) * 1.05 + 0.5) * r * 0.3, sp + Vector2.from_angle(float(i) * 1.05 + 0.5) * r * 0.95, Color(0, 0, 0, 0.45), 0.6, true)
 	if heavy:
-		Draw.ring(self, sp, r * 1.05, ArtilleryCannonArt.RED, 1.1)
+		# A heavy round from the Shell Magazine: a red band toward its tail.
+		var bp := sp - d * r * (1.2 if long else 0.45)
+		var bw := r * 0.5 if long else r * 0.85
+		draw_line(bp + o * bw, bp - o * bw, ArtilleryCannonArt.RED, 1.1, true)
+	var imp := 1.5 if lv.X >= 4 else 1.0
 	match kind:
 		"incendiary":
-			Draw.ring(self, sp, r * 0.8, ArtilleryCannonArt.FIRE, 0.9)
+			Draw.ring(self, sp, r * 0.8, ArtilleryCannonArt.FIRE, 0.9 * imp)
+			Draw.disc(self, sp - d * r * 1.1, r * 0.5, Color(ArtilleryCannonArt.FIRE, 0.7))
 		"shrapnel":
 			for i in 6:
-				draw_line(sp + Vector2.from_angle(float(i) * TAU / 6.0 + 0.3) * r * 0.95, sp + Vector2.from_angle(float(i) * TAU / 6.0 + 0.3) * r * 1.3, ArtilleryCannonArt.SHRAP, 0.8, true)
+				draw_line(sp + Vector2.from_angle(float(i) * TAU / 6.0 + 0.3) * r * 0.95, sp + Vector2.from_angle(float(i) * TAU / 6.0 + 0.3) * r * (1.3 + 0.2 * (imp - 1.0)), ArtilleryCannonArt.SHRAP, 0.8, true)
 		"concussion":
-			Draw.ring(self, sp, r * 1.15, Color(ArtilleryCannonArt.CONC, 0.8), 0.8)
+			Draw.ring(self, sp, r * 1.15, Color(ArtilleryCannonArt.CONC, 0.8), 0.8 * imp)
 			Draw.ring(self, sp, r * 1.5, Color(ArtilleryCannonArt.CONC, 0.4), 0.7)
 		"combined":
 			Draw.ring(self, sp, r * 0.45, ArtilleryCannonArt.FIRE, 0.8)
@@ -397,8 +417,6 @@ func _salvo_rocket(p) -> void:
 	Draw.glow_dot(self, p.pos - d * 5.0 * z, 1.2 * z, Color(1.0, 0.7, 0.35))
 
 
-## The Mortar Tower's shell (the confirmed art): a lobbed shell that changes with each Power step (red-banded, pointed, dark
-## yellow-banded AP, blinking fuse, gold at the mastery), bigger with Fat Shells, banded grey with Smoke Shells.
 ## A soaked enemy (Chemical Plant): a pool of the plant's acid under it, dripping and fizzing; armour flakes fall from it (Corrosive Acid),
 ## gel coats it with the Slowing path.
 func _soak_fx(e, t: float) -> void:
@@ -418,27 +436,61 @@ func _soak_fx(e, t: float) -> void:
 		Draw.arc(self, p, e.radius + 1.0, PI * 1.1, PI * 1.9, 8, Color(ChemicalPlantArt.GELC, (0.5 + 0.1 * float(lv.G)) * a), 2.0 + float(lv.G) * 0.8)
 
 
+## The Mortar Tower's shell (the confirmed art, #90): lobbed on an arc and pointing along it, with a faint trail that follows
+## the arc. Each Power step changes it (bigger, a steel nose, dark with a yellow band, a blinking fuse, fins and a gold ring at
+## the mastery); bigger with Fat Shells, scored with Fragmentation Sleeves, gold at the Blast mastery, banded grey with Smoke Shells.
 func _mortar_shell(p) -> void:
 	var lv := MortarTowerArt.levels(str(p.look))
 	var frac := clampf(p.traveled / maxf(p.total, 1.0), 0.0, 1.0)
-	var lift := sin(frac * PI) * minf(34.0, p.total * 0.22)
-	var z := 1.2 if lv.B >= 1 else 1.0
-	Draw.ellipse(self, p.pos + Vector2(0, 3), (4.0 + 2.0 * (1.0 - lift / 34.0)) * z, 2.0 * z, Color(0, 0, 0, 0.3))
-	var sp: Vector2 = p.pos - Vector2(0, lift)
-	var back: Vector2 = (p.start - p.pos).normalized() if p.start.distance_squared_to(p.pos) > 1.0 else Vector2.LEFT
+	var h := MORTAR_ARC * Grid.TILE
+	var sp := lob_point(p.start, p.pos, frac, frac, h)
+	var d := lob_heading(p.start, p.pos, frac, h)
+	var o := d.orthogonal()
+	var a := d.angle()
+	var z := (1.2 if lv.P >= 1 else 1.0) * (1.2 if lv.B >= 1 else 1.0)
+	var r := 2.6 * z
+	Draw.ellipse(self, p.pos, 3.0 * z, 1.5 * z, Color(0, 0, 0, 0.3))
+	# A faint trail along the arc it has flown.
 	for k in 4:
-		Draw.disc(self, sp + back * (4.0 + 3.5 * float(k)) + Vector2(0, float(k) * 1.5), 3.0 - 0.6 * float(k), Color(1.0, 0.55, 0.2, 0.3 - 0.07 * float(k)))
-	var body := Color(1.0, 0.8, 0.3) if lv.B >= 5 else (Color(0.6, 0.62, 0.64) if p.smoke else (Color(0.2, 0.2, 0.22) if lv.P >= 3 else Draw.METAL_L))
-	var r := 2.6 * z * (1.2 if lv.P >= 1 else 1.0)
+		var f := frac - (4.0 + 3.5 * float(k)) / maxf(p.total, 1.0)
+		if f <= 0.0:
+			break
+		Draw.disc(self, lob_point(p.start, p.pos, frac, f, h), 2.4 - 0.45 * float(k), Color(1.0, 0.55, 0.2, 0.28 - 0.06 * float(k)))
+	var body: Color = Draw.GOLD if lv.B >= 5 else (MortarTowerArt.SMOKE if p.smoke else (MortarTowerArt.DARKSHELL if lv.P >= 3 else Draw.METAL_L))
+	if lv.P >= 5:
+		for sg in [-1.0, 1.0]:
+			Draw.poly(self, Draw.xform(sp, PackedVector2Array([Vector2(-0.6, sg * 0.8), Vector2(-1.8, sg * 1.8), Vector2(-1.8, sg * 0.8)]), a, z), MortarTowerArt.STEEL)
+	if lv.P >= 2:
+		Draw.poly(self, Draw.xform(sp + d * r * 0.7, PackedVector2Array([Vector2(1.6, 0), Vector2(0, 1), Vector2(0, -1)]), a, z), MortarTowerArt.STEEL)
 	Draw.orb(self, sp, r, body)
-	if lv.P >= 1:
-		Draw.ring(self, sp, r * 0.95, Color(0.9, 0.85, 0.3, 0.8) if lv.P >= 5 else Color(0.8, 0.8, 0.85, 0.7), 0.8)
 	if lv.P >= 3:
-		Draw.line(self, sp + Vector2(0, -r * 0.9), sp + Vector2(0, r * 0.9), Color(1, 0.85, 0.2), 0.9)
-	if p.smoke or lv.r == 2:
+		Draw.line(self, sp + o * r * 0.9, sp - o * r * 0.9, Color(0.4, 0.4, 0.4) if p.smoke else MortarTowerArt.YEL, 0.9, true)
+	if lv.P >= 5:
+		Draw.ring(self, sp, r * 0.55, Draw.GOLD, 0.8)
+	if lv.r == 2:
 		Draw.ring(self, sp, r * 0.85, Color(0.42, 0.42, 0.44), 0.9)
+	if lv.B >= 2:
+		for i in 3:
+			Draw.line(self, sp + Vector2.from_angle(float(i) * 1.05 + 0.5) * r * 0.3, sp + Vector2.from_angle(float(i) * 1.05 + 0.5) * r * 0.95, Color(0, 0, 0, 0.45), 0.6, true)
 	var blink := fmod(frac * 8.0, 1.0) < 0.5 if lv.P >= 4 else true
 	Draw.glow_dot(self, sp, 1.1, Color(1.0, 0.55, 0.2) if blink else Color(1.0, 0.55, 0.2, 0.3))
+
+
+## Where a lobbed shell is drawn at fraction `f` of its flight (0 at `start`, `frac` where its ground point `pos` is now): along
+## the ground from start through pos, lifted on an arc `h` px high at the middle.
+static func lob_point(start: Vector2, pos: Vector2, frac: float, f: float, h: float) -> Vector2:
+	var ground := start + (pos - start) * (f / frac) if frac > 0.001 else start
+	return ground - Vector2(0, sin(f * PI) * h)
+
+
+## Which way a lobbed shell is heading on screen (up the arc, then down it), for its nose and bands.
+static func lob_heading(start: Vector2, pos: Vector2, frac: float, h: float) -> Vector2:
+	var ahead := lob_point(start, pos, frac, frac, h)
+	var behind := lob_point(start, pos, frac, maxf(0.0, frac - 0.03), h)
+	if ahead.distance_squared_to(behind) > 0.0001:
+		return (ahead - behind).normalized()
+	var flat := pos - start
+	return flat.normalized() if flat.length_squared() > 0.0001 else Vector2.RIGHT
 
 
 func _hp_bar(e) -> void:

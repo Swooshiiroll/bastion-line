@@ -23,6 +23,13 @@ so write for players.
 
 ### Changed
 - **The tower swap (#59):** the fifteen old towers are gone; the shop holds the twenty new ones, and there are no build hotkeys any more (pick towers in the shop; 1 to 3 pick a Retrofit). Their Research Lab trees are gone too (research bought in them is refunded), the title screen shows the new towers at their masteries, and the Codex describes each new tower's Retrofits and paths. Saves from before the swap can't be loaded. The upgrade tree view (E) and its live preview only worked for the old towers and are gone until a version for the new towers is designed. The bot that plays the balance tests now builds the new towers.
+- **Tower art against the design pages, group 1 (#90):**
+  - **Every tower:** thick barrels and struts have round ends, as on the design pages (the Mortar's tube gets its rounded back), and the long lances and barrels of the Laser, Railgun and Anti-Aircraft Turret are no longer cut off.
+  - **Gun Turret:** the Laser Rangefinder's red ranging line shows.
+  - **Mortar Tower:** shells fly a high arc, point along it, and their trail follows it.
+  - **Rocket Salvo:** each rocket leaves its own tube, straight out; the tubes empty when it fires and load again as it reloads.
+  - **Laser Tower:** it turns to face a new target before its beam fires.
+  - **Artillery Cannon:** shells leave the muzzle and fly an arc pointing the way they go; every shell of a Rolling Barrage fires with its own recoil; the Long Penetrator's yellow band fits on the shell, and a Shell Magazine's heavy round has a red band instead of a red ring.
 
 ### Behind the scenes
 - **Balance master (#75):** `design/balance.md` holds every tower's numbers and prices, with generated columns showing each step's paper DPS, credits spent and DPS per 100 credits, a summary of every tower and mastery, and the formulas behind them. `node tools/balance.mjs` updates it and the game data is generated from it (`design/tower_stats.md` is retired). It also holds every enemy's stats and ability numbers (with generated strength, leak cost, and health and credits by round) the elite modifiers' numbers, and the waves (the round formulas, each enemy's introduction round, threat cost, spacing and group cap, the boss line-ups, and a generated table of the formulas by round), the economy, the difficulty modes, research, the abilities and the global rules, with every tower's price on each mode. Every balance number in the game is now in that one file.

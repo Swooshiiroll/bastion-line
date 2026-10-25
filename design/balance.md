@@ -1033,6 +1033,7 @@ The global rules every tower and enemy follows.
 | `Game.BOSS_STUN_FACTOR` | 0.3 | Bosses are stunned this share as long |
 | `Game.BOSS_PUSH_FACTOR` | 0.25 | Bosses are pushed this share as far |
 | `Game.CRIT_MULT` | 2 | A critical hit deals this many times the damage |
+| `Game.LASER_TURN` | 12 | The Laser Tower turns this many radians a second; its beams fire once it faces its target |
 | `Game.SHIELD_EMP_MULT` | 2 | Tesla Tower arcs hit barriers this many times as hard |
 | `Game.DISABLE_GUARD` | 1 | Seconds after an EMP wears off before a tower can be knocked offline again |
 | `Game.HIT_REVEAL_TIME` | 0.5 | Seconds a cloaked enemy stays revealed after damage hits it |

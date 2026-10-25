@@ -15,6 +15,8 @@ const Research = preload("res://scripts/core/Research.gd")
 const Tower = preload("res://scripts/entities/Tower.gd")
 const Enemy = preload("res://scripts/entities/Enemy.gd")
 const Projectile = preload("res://scripts/entities/Projectile.gd")
+## The Rocket Salvo's tube layout: each rocket leaves its own tube (#90). Pure geometry, no drawing.
+const RocketSalvoArt = preload("res://scripts/view/towers/RocketSalvoArt.gd")
 
 enum State { BUILD, WAVE, GAMEOVER }
 
@@ -37,6 +39,12 @@ static var CRIT_MULT := 2.0
 const LASER_SECONDARY := 0.6
 const MISSILE_TURN := 7.0
 const MISSILE_MAX_LIFE := 3.0
+## A Rocket Salvo rocket flies this far straight out of its tube before it steers (px).
+const ROCKET_STRAIGHT := 12.0
+## The Laser Tower turns at this many radians a second, and its beams fire only once it faces its target (#90).
+static var LASER_TURN := 12.0
+## How close (radians) the Laser Tower's aim must be to its target for the beams to fire.
+const LASER_ON_ARC := 0.15
 const RAIL_WIDTH := 10.0
 static var SHIELD_EMP_MULT := 2.0
 static var RUBBLE_COST := 40
@@ -1831,7 +1839,7 @@ func _fire_artillery(t, s: Dictionary) -> void:
 		var spot: Vector2 = t.aim_point + dir * (float(i) - float(n - 1) / 2.0) * 30.0 + _scatter(float(s.get("scatter", 30.0)))
 		var p = Projectile.new()
 		p.kind = t.type
-		p.pos = t.pos + dir * 18.0
+		p.pos = t.pos + dir * 27.0   # from the muzzle (ArtilleryCannonArt.muzzle), so it leaves along the barrel (#90)
 		p.start = p.pos
 		p.target_pos = spot
 		p.total = maxf(1.0, p.pos.distance_to(spot))
@@ -2202,17 +2210,19 @@ func _fire_salvo(t, s: Dictionary) -> void:
 	t.cooldown = 1.0 / t.eff_rate()
 	t.fire_flash = 0.15
 	t.aim = (cands[0].pos - t.pos).angle()
+	t.gun_cds["salvo_t"] = time
 	var n := int(s.get("missiles", 3))
 	var dir := Vector2.from_angle(t.aim)
 	var ripple := bool(s.get("ripple", false))
+	var look: String = t.look_key()
 	for i in n:
 		var tgt = cands[i] if i < cands.size() else strongest
-		var side := 1.0 if i % 2 == 0 else -1.0
 		var p = Projectile.new()
 		p.kind = "rocket_salvo"
-		p.pos = t.pos + dir.orthogonal() * side * 7.0
+		# Each rocket leaves its own tube's mouth, straight out along the launcher, before it steers (#90).
+		p.pos = RocketSalvoArt.muzzle(t.pos, t.aim, 1.0 if t.size <= 1 else 1.8, look, i)
 		p.start = p.pos
-		p.vel = dir.orthogonal() * side * (150.0 + 15.0 * float(i)) + dir * 60.0
+		p.vel = dir * float(s.proj_speed)
 		p.target = tgt
 		p.target_pos = tgt.pos
 		p.speed = float(s.proj_speed)
@@ -2226,8 +2236,8 @@ func _fire_salvo(t, s: Dictionary) -> void:
 		p.smoke_time = float(s.get("smoke_time", 0.0))
 		p.ground_burn = float(s.get("ground_burn", 0.0))
 		p.ground_burn_time = float(s.get("ground_burn_time", 0.0))
-		p.hold = float(i) * 0.09 if ripple else 0.0
-		p.look = t.look_key()
+		p.hold = float(i) * RocketSalvoArt.RIPPLE_GAP if ripple else 0.0
+		p.look = look
 		p.tier = t.tier
 		p.source = t
 		projectiles.append(p)
@@ -2261,12 +2271,23 @@ func _update_laser_rework(t, s: Dictionary, dt: float) -> void:
 	if keep.is_empty():
 		t.beam_ramps.clear()
 		t.target = null
+		t.beam_on = false
 		t.ramp = 0.0
 		t.ramp_mult = 1.0
 		return
 	if keep[0] != t.target:
 		t.target = keep[0]
 		_emit({"type": "laser_lock", "pos": t.pos})
+	# It turns to face its target first; the beams fire only once it does (#90). Turning, nothing ramps.
+	var want: float = (keep[0].pos - t.pos).angle()
+	var turn := LASER_TURN * (2.0 if bool(s.get("turn_fast", false)) else 1.0) * dt
+	t.aim += clampf(angle_difference(t.aim, want), -turn, turn)
+	t.beam_on = absf(angle_difference(t.aim, want)) <= LASER_ON_ARC
+	if not t.beam_on:
+		t.beam_ramps = ramps
+		t.ramp = float(ramps[0])
+		t.ramp_mult = 1.0
+		return
 	var ramp_max := float(s.ramp)
 	var ramp_time := float(s.ramp_time)
 	var power := float(s.get("beam_power", 0.4))
@@ -2282,13 +2303,14 @@ func _update_laser_rework(t, s: Dictionary, dt: float) -> void:
 			t.ramp = ramps[0]
 			t.ramp_mult = mult
 	t.beam_ramps = ramps
-	t.aim = (keep[0].pos - t.pos).angle()
 	t.fire_flash = 0.05
 
 
 func _update_projectile(p, dt: float) -> void:
 	if p.hold > 0.0 and p.kind != "rocket_salvo":
 		p.hold -= dt
+		if p.hold <= 0.0 and p.kind == "artillery_cannon" and p.source != null:
+			p.source.fire_flash = 0.15   # each shell of a Rolling Barrage fires with its own recoil and flash (#90)
 		return
 	if p.kind == "rocket_salvo":
 		_update_rocket(p, dt)
@@ -2322,7 +2344,9 @@ func _update_rocket(p, dt: float) -> void:
 		if p.target != null and p.target.alive:
 			p.target_pos = p.target.pos
 	var to: Vector2 = p.target_pos - p.pos
-	p.vel = p.vel.lerp(to.normalized() * p.speed, clampf((40.0 if p.never_miss else MISSILE_TURN) * dt, 0.0, 1.0))
+	# Out of the tube straight, then it steers.
+	if p.traveled >= ROCKET_STRAIGHT:
+		p.vel = p.vel.lerp(to.normalized() * p.speed, clampf((40.0 if p.never_miss else MISSILE_TURN) * dt, 0.0, 1.0))
 	var step: Vector2 = p.vel * dt
 	p.traveled += step.length()
 	if p.smoke_slow > 0.0:
