@@ -30,6 +30,8 @@ const EnemyMoves = preload("res://scripts/entities/EnemyMoves.gd")
 const Tuner = preload("res://scripts/dev/Tuner.gd")
 const TunerPanel = preload("res://scripts/dev/TunerPanel.gd")
 const TunerWindow = preload("res://scripts/dev/TunerWindow.gd")
+const ShopPanel = preload("res://scripts/ui/hud/ShopPanel.gd")
+const TreePopOut = preload("res://scripts/ui/hud/TreePopOut.gd")
 
 const SANDBOX := "user://test_sandbox/"
 const SIM_DT := 1.0 / 60.0
@@ -3910,6 +3912,30 @@ func test_tuner_starts_undocked() -> void:
 	dock.button_pressed = true
 	check(w.docked, "the Dock switch docks it")
 	w.free()
+
+
+## The shop lists every tower once, by class (Assault, Support, Defense, Utility), cheapest first within each (#87).
+func test_shop_by_class_then_price() -> void:
+	var g = new_game()
+	var seen: Array = []
+	for cls in ShopPanel.CLASSES:
+		var types: Array = ShopPanel.sorted_types(cls, g)
+		check(types.all(func(t): return str(Towers.def(t)["class"]) == cls), "%s holds only its own class" % cls)
+		var sorted := true
+		for i in range(1, types.size()):
+			if g.tower_cost(types[i - 1]) > g.tower_cost(types[i]):
+				sorted = false
+		check(sorted, "%s is cheapest first" % cls)
+		seen.append_array(types)
+	check(seen.size() == Towers.all_types().size() and Towers.all_types().all(func(t): return seen.has(t)), "every tower appears once")
+	check(ShopPanel.sorted_types("Assault", g)[0] == "gun_turret", "the Gun Turret (75) leads Assault")
+
+
+## The tree viewer's hover text names a step's stat changes in words (#87).
+func test_tree_changes_text() -> void:
+	check(TreePopOut.changes({"add": {"rate": 0.3, "range": -10.0}}) == "Attacks/s +0.30  ·  Range -10", "adds read as signed changes (%s)" % TreePopOut.changes({"add": {"rate": 0.3, "range": -10.0}}))
+	check(TreePopOut.changes({"set": {"homing": true}}) == "Homing", "a flag reads as its label")
+	check(TreePopOut.changes({}) == "", "no changes, no text")
 
 
 func test_rework_shockwave_generator() -> void:
