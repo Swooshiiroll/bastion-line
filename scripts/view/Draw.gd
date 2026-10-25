@@ -53,7 +53,7 @@ const ACCENT := {
 	"shockwave_generator": Color(1.00, 0.70, 0.28),
 	"scrapyard": Color(0.95, 0.72, 0.42),
 	"magneto_tower": Color(0.60, 0.45, 1.00),
-	"tractor_tower": Color(0.78, 0.71, 1.00),
+	"tractor_tower": Color(0.40, 0.95, 1.00),
 	"augmentation_tower": Color(0.32, 0.62, 1.00),
 }
 

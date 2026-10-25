@@ -4,6 +4,7 @@ extends Node2D
 
 const Draw = preload("res://scripts/view/Draw.gd")
 const LaserTowerArt = preload("res://scripts/view/towers/LaserTowerArt.gd")
+const TractorTowerArt = preload("res://scripts/view/towers/TractorTowerArt.gd")
 
 var world
 
@@ -67,19 +68,39 @@ func _laser_beams(tw, t: float) -> void:
 	Draw.disc(self, LaserTowerArt.beam_origin(tw.pos, tw.aim, k, tw.spec, 0), 3.0 + tw.ramp_mult * 0.5, Color(acc, 0.4))
 
 
-## The Tractor Tower's focus beam: a bright line to the held enemy with rings sliding back down it, afterimages of the enemy gliding backward.
+## The Tractor Tower's Focus Beam (its page): a tight bright beam from the antenna's tip to the held enemy, with focus rings sliding down
+## it toward the dish (more and bigger with each Grip step), and the hold round the enemy: a shaking ring with rings closing on it. Gold at
+## Gravity Hammer.
 func _tractor_beam(tw, t: float) -> void:
-	var acc: Color = Draw.ACCENT.tractor_tower
-	var src: Vector2 = tw.pos + Vector2.from_angle(tw.aim) * 18.0
+	var L := TractorTowerArt.levels(tw.look_key())
+	var col: Color = Draw.GOLD if L.G >= 5 else Draw.accent(tw.type, tw.spec)
 	var dst: Vector2 = tw.target.pos
-	draw_line(src, dst, Color(acc, 0.18), 7.0, true)
-	draw_line(src, dst, Color(acc, 0.7), 2.4, true)
-	draw_line(src, dst, Color(1, 1, 1, 0.8), 1.0, true)
-	for i in 4:
-		var u := fmod(t * 1.4 + float(i) / 4.0, 1.0)
-		var p := dst.lerp(src, u)
-		Draw.ring(self, p, 2.5 + 3.0 * (1.0 - u), Color(acc, 0.8 * (1.0 - u)), 1.0)
-	Draw.disc(self, dst, tw.target.radius + 4.0, Color(acc, 0.25))
+	# The beam leaves the antenna as drawn: at the aim the entity layer is showing.
+	var aim: float = world.entities.aim_of(tw)
+	var src := TractorTowerArt.muzzle(tw.pos, aim, 1.0, tw.look_key())
+	var g := float(L.G)
+	Draw.strip(self, src, dst, 1.6 + 0.15 * g, col)
+	var d := (dst - src).normalized()
+	var lb := src.distance_to(dst)
+	var nr: int = 4 + L.G
+	var rs := 1.0 + 0.12 * g
+	for i in nr:
+		var q := 1.0 - fmod(t * 0.9 + float(i) / float(nr), 1.0)
+		_ellipse(src + d * lb * q, 2.4 * rs, 6.5 * rs, d.angle(), Color(col, 0.85), 0.8 if L.G > 0 else 1.4)
+	var rr: float = clampf(float(tw.target.radius), 4.0, 11.0) + 3.0 + 0.5 * g
+	Draw.arc(self, dst + Vector2(sin(t * 40.0), 0), rr, 0.0, TAU, 24, Color(col, 0.7), 1.2, true)
+	for i in mini(L.G, 3):
+		var q2 := fmod(t * 0.8 + float(i) / 3.0, 1.0)
+		Draw.arc(self, dst, rr * (1.7 - 0.7 * q2), 0.0, TAU, 24, Color(col, 0.55 * q2), 0.75, true)
+
+
+## An outlined ellipse turned to `rot`.
+func _ellipse(c: Vector2, rx: float, ry: float, rot: float, col: Color, w: float) -> void:
+	var pts := PackedVector2Array()
+	for i in 17:
+		var a := TAU * float(i) / 16.0
+		pts.append(c + Vector2(cos(a) * rx, sin(a) * ry).rotated(rot))
+	Draw.polyline(self, pts, col, w, true)
 
 
 ## The Magneto Tower's field: a faint ring at its reach, with a ring drawn inward toward the coil (the pull).

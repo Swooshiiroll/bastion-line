@@ -70,6 +70,8 @@ func _draw() -> void:
 			extra = [g.time - float(tw.gun_cds.get("wave_t", -9.0))]
 		elif tw.type == "radar_tower":
 			extra = [3.0 if tw.stats().get("constant", false) else float(tw.stats().get("ping_every", 3.0))]
+		elif tw.type == "scrapyard":
+			extra = [g.time - float(tw.gun_cds.get("paid_t", -99.0))]
 		elif tw.type == "cryo_tower":
 			extra = [clampf(tw.fire_flash / 0.3, 0.0, 1.0)]
 		elif tw.type == "chemical_plant":
@@ -145,6 +147,11 @@ func _draw() -> void:
 	if timing_on:
 		timing.bars = int(timing.get("bars", 0)) + Time.get_ticks_usec() - t2
 		timing.frames = int(timing.get("frames", 0)) + 1
+
+
+## The angle a tower is drawn at (it eases toward its target), so beams leave the part as drawn.
+func aim_of(tw) -> float:
+	return float(_aim.get(tw.get_instance_id(), tw.aim))
 
 
 func _pool(pool, t: float) -> void:

@@ -17,6 +17,8 @@ const GameScreen = preload("res://scripts/ui/GameScreen.gd")
 const Modifiers = preload("res://data/modifiers.gd")
 const Tower = preload("res://scripts/entities/Tower.gd")
 const Projectile = preload("res://scripts/entities/Projectile.gd")
+const FxLayer = preload("res://scripts/view/FxLayer.gd")
+const TractorTowerArt = preload("res://scripts/view/towers/TractorTowerArt.gd")
 const Towers = preload("res://data/towers.gd")
 const Enemies = preload("res://data/enemies.gd")
 const Waves = preload("res://data/waves.gd")
@@ -1898,6 +1900,37 @@ func test_range_map() -> void:
 	var grid = Grid.new("range")
 	check(grid.ground_paths.size() == 1 and grid.air_paths.size() == 1, "the test range has one lane")
 	check(not Maps.ORDER.has("range"), "the test range isn't a playable sector")
+
+
+func test_scrapyard_payout_time() -> void:
+	var g = new_game()
+	g.gold = 10000
+	var y = g.place_tower("scrapyard", spot(g, "scrapyard", 0))
+	check(y != null, "a Scrapyard builds")
+	g.time = 12.5
+	var paid: Array = g._pay_income(1)
+	check(paid.size() >= 1 and near(float(y.gun_cds.get("paid_t", -1.0)), 12.5), "a payout records its time, so the art rolls the doors up and flares the furnace")
+
+
+func test_tractor_beam_origin() -> void:
+	check(TractorTowerArt.muzzle(Vector2.ZERO, 0.0, 1.0, "-1|0|0|0").distance_to(Vector2(13.0, 0)) < 0.01, "the beam leaves the stock antenna's tip")
+	check(TractorTowerArt.muzzle(Vector2(10, 10), PI / 2.0, 1.0, "-1|5|0|2").distance_to(Vector2(10, 28.2)) < 0.01, "a longer antenna moves the tip out, turned with the aim")
+	check(Draw.ACCENT.tractor_tower.is_equal_approx(Color(0.40, 0.95, 1.00)), "the Tractor Tower is cyan, as its design pages")
+
+
+func test_group3_effects() -> void:
+	var fx = FxLayer.new()
+	fx.mist(Vector2(100, 100), 110.0, Color(0.75, 0.92, 1.0))
+	fx.shock_wave(Vector2(100, 100), 100.0, Color(1, 0.7, 0.28), 1.0, [{"p": Vector2(150, 100), "d": 50.0, "r": 6.0}], false, 1.0)
+	fx.puff(Vector2(100, 100), Vector2(0, -12), 1.4, 2.0, 3.2, Color(0.4, 0.4, 0.4), Color(1, 0.7, 0.3), 0.7, 0.7, 1.0)
+	fx.fountain(Vector2(100, 92))
+	fx._process(0.5)
+	check(fx.mists.size() == 1 and fx.shocks.size() == 1 and fx.puffs.size() == 1 and fx.fountains.size() == 1, "the mist, the blast, a smoke puff and a coin fountain are live")
+	fx._process(1.2)
+	check(fx.shocks.is_empty() and fx.puffs.is_empty() and fx.mists.size() == 1, "the blast and the puff end on their own clocks; the mist creeps on")
+	fx._process(0.8)
+	check(fx.mists.is_empty() and fx.fountains.is_empty(), "the mist and the fountain fade out")
+	fx.free()
 
 
 # --- The tower rework (issue #59): the framework, through the Gun Turret ---------------------------

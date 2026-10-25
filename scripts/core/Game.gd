@@ -2641,6 +2641,8 @@ func _pay_income(w: int) -> Array:
 			cap = float(s.get("interest_cap", 0.0))
 		if amount > 0:
 			paid.append([t.pos, amount])
+			# For the art: the Scrapyard's doors roll up and its furnace flares at each payout.
+			t.gun_cds["paid_t"] = time
 	var interest := mini(int(cap), int(floor(float(gold) * rate)))
 	for p in paid:
 		_add_gold(int(p[1]))
