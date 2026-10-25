@@ -4,8 +4,9 @@ extends RefCounted
 ##
 ## `look` is the tower's look key "r|a|b|c": the Retrofit (-1 none, 0 wave focus, 1 containment coils, 2 reactor venting) and the depth of
 ## each path, 5 on the path that took its mastery. a = Power/Range (the core), b = Speed (the containment ring), c = Effect (the violet
-## band). The tower never turns; the core's rings, the ring's blades and the band are live. `extra[0]` is the time since the last wave
-## (the band stretches outward with a wave, then springs back and rings).
+## band). The tower never turns; the core's rings, the ring's blades, the band and the vents' flare are live. `extra[0]` is the time since
+## the last wave (the band stretches outward with a wave, then springs back and rings). The Retrofits are the owner's picks: Focus Collar,
+## Toroid Coils, and Stack and Blast Vents (whose smoke, like the mushroom cloud, is FxLayer's `shock_cloud`).
 
 const Draw = preload("res://scripts/view/Draw.gd")
 
@@ -13,7 +14,9 @@ const GOLD := Color(1.0, 0.78, 0.30)
 const AMB := Color(1.0, 0.70, 0.28)
 const HOT := Color(1.0, 0.95, 0.80)
 const VIOLET := Color(0.72, 0.48, 1.0)
+const STEEL := Color(0.42, 0.45, 0.50)
 const CORE_R := [0.0, 3.4, 3.9, 4.4, 4.9, 5.3]
+const VENTS := [Vector2(-1, -1), Vector2(1, -1), Vector2(1, 1), Vector2(-1, 1)]
 
 
 static func levels(look: String) -> Dictionary:
@@ -40,11 +43,15 @@ static func draw(ci: CanvasItem, c: Vector2, _aim: float, s: float, t: float, _f
 	for i in 3:
 		var a := -PI / 2.0 + float(i) * TAU / 3.0
 		Draw.plate(ci, c + Vector2.from_angle(a) * 10.0 * k, Draw.rect_pts(2.0, 3.6), Draw.METAL_D, a, k, 1.0)
-	if L.r == 0:
-		Draw.ring(ci, c, 12.6 * k, Draw.METAL_L, 1.6 * k)
+	# Reactor Venting (Stack and Blast Vents): an exhaust stack at each corner with a blast vent pointing out.
 	if L.r == 2:
-		for sg in [Vector2(-1, -1), Vector2(1, -1), Vector2(1, 1), Vector2(-1, 1)]:
-			Draw.plate(ci, c + sg * 10.8 * k, Draw.rect_pts(1.6, 1.6), Draw.METAL_D, sg.angle(), k, 0.9)
+		for sg in VENTS:
+			var vp: Vector2 = c + sg * 10.8 * k
+			var da: float = sg.angle()
+			Draw.disc(ci, vp, 2.1 * k, Draw.OUTLINE)
+			Draw.disc(ci, vp, 1.7 * k, Draw.METAL_L)
+			Draw.ring(ci, vp, 1.2 * k, STEEL, 0.8 * k)
+			Draw.fill(ci, vp + Vector2.from_angle(da) * 1.2 * k, PackedVector2Array([Vector2(0, -1.3), Vector2(2.6, -0.8), Vector2(2.6, 0.8), Vector2(0, 1.3)]), Draw.METAL, da, k)
 	Draw.disc(ci, c, 5.8 * k, Color(0.08, 0.06, 0.04))
 	# --- Live: the turbine ring, the spinning core rings, the violet band, the glow. ---
 	Draw.dyn(true)
@@ -62,6 +69,7 @@ static func draw(ci: CanvasItem, c: Vector2, _aim: float, s: float, t: float, _f
 		var nr := mini(L.P + 1, 5)
 		if g1:
 			Draw.disc(ci, c, rcore * 1.3 * k, Color(HOT, 0.16))
+			Draw.disc(ci, c, rcore * 1.05 * k, Color(HOT, 0.2))
 		for j in nr:
 			var rr := rcore * (0.3 + 0.7 * float(j + 1) / float(nr)) * k
 			var sp := t * (1.0 + float(j) * 0.6) * (-1.0 if j % 2 == 1 else 1.0)
@@ -81,16 +89,32 @@ static func draw(ci: CanvasItem, c: Vector2, _aim: float, s: float, t: float, _f
 		var el := 1.0 - pow(1.0 - age / 0.18, 3.0) if age < 0.18 else exp(-(age - 0.18) * 1.15) * cos((age - 0.18) * 21.0)
 		var el2 := exp(-age) * cos(age * 16.0 + 0.8)
 		var el3 := exp(-age * 0.9) * cos(age * 12.0 + 1.6)
+		var spor: float = [0.0, 0.0, 0.0, 0.0, 0.5, 1.1][L.E]
 		var pts := PackedVector2Array()
 		for j in 161:
 			var a4 := float(j) * TAU / 160.0
-			var rad := 10.0 + stretch * el + rip * sin(6.0 * a4 + t * 2.4) + rip * 0.4 * sin(9.0 * a4 - t * 1.9) + bend * (0.7 * sin(2.0 * a4 + 0.8) * el2 + 0.5 * sin(3.0 * a4 - 0.4) * el3)
+			var ch := 0.0
+			if spor > 0.0:
+				# Sporadic (Breaker Wave, the mastery): five harmonics drifting on their own, smooth but chaotic.
+				for h in range(1, 6):
+					var fh := float(h)
+					ch += sin((3.0 + fh * 2.7) * a4 + t * (1.7 + 0.9 * fh) + fh * 2.1 + 3.0 * sin(t * 0.9 * fh)) * (0.5 + 0.5 * sin(t * (1.3 + 0.7 * fh) + fh * 1.9)) / 3.0
+			var rad := 10.0 + spor * 1.1 * ch + stretch * el + rip * sin(6.0 * a4 + t * 2.4) + rip * 0.4 * sin(9.0 * a4 - t * 1.9) + bend * (0.7 * sin(2.0 * a4 + 0.8) * el2 + 0.5 * sin(3.0 * a4 - 0.4) * el3)
 			pts.append(c + Vector2.from_angle(a4) * rad * k)
 		var bc: Color = GOLD if g3 else Color(1, 1, 1)
 		Draw.polyline(ci, pts, Color(bc, al * 0.25), wd * 2.0 * k)
 		Draw.polyline(ci, pts, Color(bc, al), wd * k)
-	if L.r == 1:
-		for j in 6:
-			var a5 := t * 2.0 + float(j) * TAU / 6.0
-			Draw.arc(ci, c, 6.4 * k, a5, a5 + 0.5, 5, Color(1.0, 0.7, 0.3, 0.8), 1.2 * k)
+	if L.r == 2 and fl > 0.05:
+		for sg in VENTS:
+			Draw.glow_dot(ci, c + sg * 10.8 * k + Vector2.from_angle(sg.angle()) * 3.4 * k, 0.9 * k * fl, AMB)
 	Draw.dyn(false)
+	# Wave Focus (Focus Collar): a finned collar round the core. Containment Coils (Toroid Coils): two glowing toroids ring it.
+	if L.r == 0:
+		for q in 12:
+			var af := float(q) * TAU / 12.0
+			Draw.fill(ci, c + Vector2.from_angle(af) * 6.4 * k, PackedVector2Array([Vector2(0, -0.9), Vector2(-2, 0), Vector2(0, 0.9)]), Draw.METAL_L, af, k)
+		Draw.ring(ci, c, 6.4 * k, Draw.METAL, 0.9 * k)
+	if L.r == 1:
+		for q in 2:
+			Draw.ring(ci, c, (4.2 + float(q) * 1.5) * k, Draw.OUTLINE, 2.4 * k)
+			Draw.ring(ci, c, (4.2 + float(q) * 1.5) * k, Color(AMB, 0.9), 1.2 * k)
