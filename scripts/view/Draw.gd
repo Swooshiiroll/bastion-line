@@ -464,6 +464,13 @@ const AIMED := ["gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "an
 static var _extra: Array = []
 const TURRET_BUCKETS := 16
 const TURRET_SCALE := 2.5
+## How far a turret's static layers reach from its centre (in units of s), so the bake doesn't cut them off (#90). The
+## default fits most towers; the long lances and barrels are measured over every look and aim, with a little to spare.
+const TURRET_HALF := {"laser_tower": 44.0, "anti_aircraft_turret": 36.0, "railgun": 36.0}
+
+
+static func turret_half(type: String) -> float:
+	return float(TURRET_HALF.get(type, 32.0))
 
 
 ## Marks the start (true) or end (false) of a live part of a turret.
@@ -552,7 +559,7 @@ static func _new_turret(ci: CanvasItem, type: String, tier: int, base_rot: float
 	_mode = _FULL
 	_skip = false
 	_in_dyn = false
-	var half := Vector2.ONE * 32.0 * s
+	var half := Vector2.ONE * turret_half(type) * s
 	var texs := {}
 	var ready := Engine.get_frames_drawn() + 2
 	for k in used:
@@ -660,7 +667,7 @@ static func _turret(ci: CanvasItem, type: String, tier: int, c: Vector2, aim: fl
 		"mortar_tower":
 			MortarTowerArt.draw(ci, c, aim, s, t, flash, spec, acc)
 		"rocket_salvo":
-			RocketSalvoArt.draw(ci, c, aim, s, t, flash, spec, acc)
+			RocketSalvoArt.draw(ci, c, aim, s, t, flash, spec, acc, _extra)
 		"laser_tower":
 			LaserTowerArt.draw(ci, c, aim, s, t, flash, spec, acc, _extra)
 		"anti_aircraft_turret":
@@ -762,10 +769,20 @@ static func bar(ci: CanvasItem, a: Vector2, b: Vector2, w: float, col: Color) ->
 	var n := d.orthogonal()
 	if n.dot(LIGHT) < 0.0:
 		n = -n
-	line(ci, a, b, OUTLINE, w + 1.6, true)
-	line(ci, a, b, col.darkened(0.25), w, true)
-	line(ci, a + n * w * 0.18, b + n * w * 0.18, col, w * 0.55, true)
-	line(ci, a + n * w * 0.3, b + n * w * 0.3, col.lightened(0.4), maxf(0.6, w * 0.16), true)
+	# Round ends, as the design pages draw every stroke (#90): a mortar tube's rounded back, a barrel's rounded breech.
+	# Under 2 px wide they wouldn't show, and a see-through bar would darken where an end overlaps it.
+	var caps := w >= 2.0 and col.a >= 0.99
+	_cap_line(ci, a, b, OUTLINE, w + 1.6, caps)
+	_cap_line(ci, a, b, col.darkened(0.25), w, caps)
+	_cap_line(ci, a + n * w * 0.18, b + n * w * 0.18, col, w * 0.55, caps)
+	_cap_line(ci, a + n * w * 0.3, b + n * w * 0.3, col.lightened(0.4), maxf(0.6, w * 0.16), caps)
+
+
+static func _cap_line(ci: CanvasItem, a: Vector2, b: Vector2, col: Color, w: float, caps: bool) -> void:
+	line(ci, a, b, col, w, true)
+	if caps:
+		disc(ci, a, w * 0.5, col)
+		disc(ci, b, w * 0.5, col)
 
 
 ## A glowing strip light.

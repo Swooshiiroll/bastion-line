@@ -29,6 +29,13 @@ so write for players.
 - **Upgrade tree, Move target, Research in Sandbox, a tidier shop (#87):** E (or the tower panel's Tree button) opens the selected tower's whole upgrade tree and pauses: Retrofits on the left, each path a row of steps up to its mastery, every tile showing its cost and whether you own it, can buy it, can't afford it, need research or are locked out; hover for what it does, click a gold tile to buy. The Artillery Cannon and CAS Gunship get a Move target button (M): the next click sets the target, and a plain click no longer moves it. In Sandbox the Research Lab opens too (R, beside the Spawner); it's your real research, and buying switches the run to Mine. The shop is grouped by class, cheapest first, and towers you can't afford are greyed out. The Retrofit cards and the Spawner's buttons and names stay inside their borders.
 - **Blinks round corners, and the Leviathan over its swarm (#88):** after a Blink Stalker or Shifter blinks, its after-image stays on the lane where it blinked from instead of hanging off the track past a corner, and it lands facing along the track rather than along the jump. The Leviathan is drawn over the Locusts it launches.
 - **Smoother towers and circles (#89):** the three dark dashes on each side of every tower's hex deck are gone. Circles and curves stay round however big they are (the Chrono Field's ring was a polygon), and a turning tower no longer jumps every 45°: its shading now fades from one angle to the next.
+- **Tower art against the design pages, group 1 (#90):**
+  - **Every tower:** thick barrels and struts have round ends, as on the design pages (the Mortar's tube gets its rounded back), and the long lances and barrels of the Laser, Railgun and Anti-Aircraft Turret are no longer cut off.
+  - **Gun Turret:** the Laser Rangefinder's red ranging line shows.
+  - **Mortar Tower:** shells fly a high arc, point along it, and their trail follows it.
+  - **Rocket Salvo:** each rocket leaves its own tube, straight out; the tubes empty when it fires and load again as it reloads.
+  - **Laser Tower:** it turns to face a new target before its beam fires.
+  - **Artillery Cannon:** shells leave the muzzle and fly an arc pointing the way they go; every shell of a Rolling Barrage fires with its own recoil; the Long Penetrator's yellow band fits on the shell, and a Shell Magazine's heavy round has a red band instead of a red ring.
 
 ### Behind the scenes
 - **Bot balance verdicts paused for the rework (#96):** the bot still plays every test game, but whether it wins, reaches endless or buys masteries no longer fails the tests until the tower rework is done; those results print as PAUSED.
