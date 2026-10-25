@@ -359,21 +359,29 @@ static func ring(ci: CanvasItem, center: Vector2, r: float, color: Color, width 
 	_stamp(ci, _rings[key], size, center, outer, outer, color)
 
 
-## draw_arc, fast: full circles become rings, partial arcs a few antialiased line segments.
-static func arc(ci: CanvasItem, c: Vector2, r: float, a0: float, a1: float, points: int, color: Color, width := -1.0, aa := false, as_lines := false) -> void:
+## draw_arc, fast: full circles become rings, partial arcs antialiased line segments. The segment count follows the
+## radius (`_points` is ignored): each chord strays at most 1/16 px from the true curve, so a big circle stays round
+## at full zoom (issue #89).
+static func arc(ci: CanvasItem, c: Vector2, r: float, a0: float, a1: float, _points: int, color: Color, width := -1.0, aa := false, as_lines := false) -> void:
 	if _skip and not _drawing():
 		return
 	var span := a1 - a0
 	if absf(span) >= TAU - 0.001 and not as_lines:
 		ring(ci, c, r, color, width if width > 0.0 else 1.0)
 		return
-	var n := clampi(ceili(absf(span) * r / 6.0), 1, maxi(points - 1, 1))
+	var n := arc_segments_for(r, span)
 	var prev := c + Vector2(cos(a0), sin(a0)) * r
 	for i in range(1, n + 1):
 		var a := a0 + span * float(i) / float(n)
 		var p := c + Vector2(cos(a), sin(a)) * r
 		ci.draw_line(prev, p, color, width, aa)
 		prev = p
+
+
+## Line segments for an arc of radius `r` spanning `span` radians: a chord of angle θ strays r·θ²/8 from the curve,
+## so θ = 1/√(2r) keeps that to 1/16 px.
+static func arc_segments_for(r: float, span: float) -> int:
+	return clampi(ceili(absf(span) * sqrt(2.0 * maxf(r, 0.0))), 1, 256)
 
 
 ## draw_colored_polygon, fast for convex shapes (drawn as quads); others fall back to the polygon.
@@ -437,7 +445,8 @@ static func rect(ci: CanvasItem, r: Rect2, color: Color, filled := true, width :
 # A turret is drawn as alternating static and live layers. Statements between dyn(true) and
 # dyn(false) (recoil, glows, spinning parts) are live; everything else is static, baked once per
 # look into one texture per layer, and stamped rotated to the aim. Baking happens at 8 aim angles
-# so the upper-left lighting stays close; the remainder of the aim is a rotation of the stamp.
+# so the upper-left lighting stays close; the remainder of the aim is a rotation of the stamp, with the next
+# bucket's bake faded in over it.
 # Only the battlefield turns this on (turret_cache); elsewhere towers draw in full.
 
 static var turret_cache := false
@@ -453,7 +462,7 @@ static var _live := {}
 const AIMED := ["gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "railgun", "mine_layer", "tractor_tower"]
 ## The aim of each extra gun of the tower being drawn (gun 0 is the main one); set by tower().
 static var _extra: Array = []
-const TURRET_BUCKETS := 8
+const TURRET_BUCKETS := 16
 const TURRET_SCALE := 2.5
 
 
@@ -489,16 +498,22 @@ static func _drawing() -> bool:
 
 static func _cached_turret(ci: CanvasItem, type: String, tier: int, c: Vector2, aim: float, s: float, t: float, flash: float, spec: String, acc: Color) -> bool:
 	var rot := aim if AIMED.has(type) else 0.0
-	var bucket := posmod(roundi(rot / TAU * float(TURRET_BUCKETS)), TURRET_BUCKETS)
-	var base_rot := float(bucket) * TAU / float(TURRET_BUCKETS)
-	var key := "%s|%d|%s|%s|%.2f|%d" % [type, tier, spec, acc.to_html(), s, bucket]
-	var e = _turrets.get(key)
-	if e == null:
-		e = _new_turret(ci, type, tier, base_rot, s, spec, acc)
-		_turrets[key] = e
+	# Between two baked aims, the next one fades in over the one below, so a turning turret's shading changes
+	# smoothly instead of jumping at each bucket (issue #89).
+	var blend := turret_blend(rot)
+	var bucket: int = blend[0]
+	var w: float = blend[1]
+	var e = _turret_bake(ci, type, tier, bucket, s, spec, acc)
 	if Engine.get_frames_drawn() < int(e.ready_at):
 		return false
-	_live = {"ci": ci, "e": e, "c": c, "rot": rot - base_rot}
+	var e2 = null
+	var next := (bucket + 1) % TURRET_BUCKETS
+	if w > 0.01:
+		e2 = _turret_bake(ci, type, tier, next, s, spec, acc)
+		if Engine.get_frames_drawn() < int(e2.ready_at):
+			e2 = null
+	_live = {"ci": ci, "e": e, "c": c, "rot": rot - float(bucket) * TAU / float(TURRET_BUCKETS),
+		"e2": e2, "w": w, "rot2": rot - float(next) * TAU / float(TURRET_BUCKETS)}
 	_mode = _LIVE
 	_seg = 0
 	_skip = true
@@ -508,6 +523,22 @@ static func _cached_turret(ci: CanvasItem, type: String, tier: int, c: Vector2, 
 	_skip = false
 	_live = {}
 	return true
+
+
+## For a turret turned `rot`: [the baked aim just below it, how far (0..1) it is toward the next one].
+static func turret_blend(rot: float) -> Array:
+	var at := fposmod(rot / TAU * float(TURRET_BUCKETS), float(TURRET_BUCKETS))
+	return [floori(at) % TURRET_BUCKETS, at - floorf(at)]
+
+
+## The baked layers of one look at one of the TURRET_BUCKETS aims (baked on first use).
+static func _turret_bake(ci: CanvasItem, type: String, tier: int, bucket: int, s: float, spec: String, acc: Color) -> Dictionary:
+	var key := "%s|%d|%s|%s|%.2f|%d" % [type, tier, spec, acc.to_html(), s, bucket]
+	var e = _turrets.get(key)
+	if e == null:
+		e = _new_turret(ci, type, tier, float(bucket) * TAU / float(TURRET_BUCKETS), s, spec, acc)
+		_turrets[key] = e
+	return e
 
 
 static func _new_turret(ci: CanvasItem, type: String, tier: int, base_rot: float, s: float, spec: String, acc: Color) -> Dictionary:
@@ -551,6 +582,10 @@ static func _stamp_turret(seg: int) -> void:
 	var half: Vector2 = e.half
 	ci.draw_set_transform(_live.c, _live.rot, Vector2.ONE)
 	ci.draw_texture_rect(e.tex[seg], Rect2(-half, half * 2.0), false)
+	var e2 = _live.e2
+	if e2 != null and e2.tex.has(seg):
+		ci.draw_set_transform(_live.c, _live.rot2, Vector2.ONE)
+		ci.draw_texture_rect(e2.tex[seg], Rect2(-half, half * 2.0), false, Color(1, 1, 1, _live.w))
 	ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
@@ -747,10 +782,10 @@ static func rect_pts(hw: float, hh: float) -> PackedVector2Array:
 
 
 
-## The hex deck every tower stands on: bevelled armour, corner bolts, vents, status LEDs,
+## The hex deck every tower stands on: bevelled armour, corner bolts, status LEDs,
 ## an accent trim that breathes, and tier pips (gold from the specialization on).
 static func _pad(ci: CanvasItem, c: Vector2, s: float, acc: Color, tier: int, t: float) -> void:
-	# Static plating below the lit rim, the rim (a white stroke tinted live), then rivets and vents.
+	# Static plating below the lit rim, the rim (a white stroke tinted live), then the corner bolts.
 	var half := Vector2(24.0, 24.0) * s
 	var si := roundi(s * 100.0)
 	var ka := 1000000 + si
@@ -795,10 +830,6 @@ static func _pad_rivets(ci: CanvasItem, c: Vector2, s: float) -> void:
 	for q in xform(c, ngon(6, 1.0), 0.0, 17.6 * s):
 		disc(ci, q, 1.5 * s, OUTLINE)
 		disc(ci, q, 1.0 * s, METAL_L)
-	for k in 3:
-		var y := c.y - 13.0 * s + float(k) * 2.2 * s
-		line(ci, Vector2(c.x - 13.5 * s, y), Vector2(c.x - 10.0 * s, y), Color(0, 0, 0, 0.5), 1.0)
-		line(ci, Vector2(c.x + 10.0 * s, y), Vector2(c.x + 13.5 * s, y), Color(0, 0, 0, 0.5), 1.0)
 
 
 ## Distance from a Laser Lance's centre to the tip of its barrel, at drawing scale `s`.
