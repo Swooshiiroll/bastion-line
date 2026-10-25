@@ -5,7 +5,10 @@ extends "res://scripts/ui/PopOut.gd"
 const DrawControl = preload("res://scripts/ui/DrawControl.gd")
 const Draw = preload("res://scripts/view/Draw.gd")
 
-const COL_W := 262.0
+## Gaps around and between the three option cards; the cards share the rest of the width (and stay inside the border, #87).
+const EDGE := 14.0
+const GAP := 6.0
+const TOP := 40.0
 
 var hud
 var screen
@@ -25,25 +28,32 @@ func _build() -> void:
 	var t = tower
 	body.add_child(_note("One Retrofit per tower, and the choice is locked. Press 1, 2 or 3, or click an option."))
 	var opts: Array = t.retrofit_options()
+	var col_w := (rect.size.x - 2.0 * EDGE - 2.0 * GAP) / 3.0
+	var card_h := body.size.y - TOP - 12.0
 	for i in opts.size():
 		var o: Dictionary = opts[i]
 		var look: String = t.look_key(i)
-		var b := UiKit.button("", Callable(self, "_pick").bind(i), Vector2(COL_W, 330))
-		b.size = Vector2(COL_W, 330)
-		b.position = Vector2(14.0 + float(i) * (COL_W + 6.0), 40)
+		var b := UiKit.button("", Callable(self, "_pick").bind(i), Vector2(col_w, card_h))
+		b.size = Vector2(col_w, card_h)
+		b.position = Vector2(EDGE + float(i) * (col_w + GAP), TOP)
+		b.clip_contents = true
+		b.tooltip_text = "%s\n%s" % [o.name, o.blurb]
 		var icon := DrawControl.new(func(ci): Draw.tower(ci, t.type, 2, ci.size / 2.0, -PI / 2.0, 2.6, Time.get_ticks_msec() / 1000.0, 0.0, look, look), Vector2(150, 130), true)
-		icon.position = Vector2((COL_W - 150.0) / 2.0, 8)
+		icon.position = Vector2((col_w - 150.0) / 2.0, 8)
 		b.add_child(icon)
 		var name_l := UiKit.label(str(o.name), 16, UiKit.TEXT, HORIZONTAL_ALIGNMENT_CENTER)
 		name_l.position = Vector2(8, 142)
-		name_l.size = Vector2(COL_W - 16, 22)
+		name_l.size = Vector2(col_w - 16, 22)
 		b.add_child(name_l)
 		var cost_l := UiKit.label("%d cr   [%d]" % [t.retrofit_cost(i), i + 1], 14, UiKit.GOLD, HORIZONTAL_ALIGNMENT_CENTER)
 		cost_l.position = Vector2(8, 166)
-		cost_l.size = Vector2(COL_W - 16, 20)
+		cost_l.size = Vector2(col_w - 16, 20)
 		b.add_child(cost_l)
-		var blurb := UiKit.wrap_label(str(o.blurb), COL_W - 28, 12, Color(UiKit.TEXT, 0.88))
+		var blurb := UiKit.wrap_label(str(o.blurb), col_w - 28, 12, Color(UiKit.TEXT, 0.88))
 		blurb.position = Vector2(14, 196)
+		# A long effect is cut at the card's foot with "..."; the tooltip has all of it.
+		blurb.max_lines_visible = int((card_h - 196.0 - 8.0) / 18.0)
+		blurb.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
 		b.add_child(blurb)
 		body.add_child(b)
 		buttons.append(b)
