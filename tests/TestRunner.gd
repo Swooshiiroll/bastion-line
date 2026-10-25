@@ -35,6 +35,11 @@ const SANDBOX := "user://test_sandbox/"
 const SIM_DT := 1.0 / 60.0
 
 var failures: Array = []
+## The bot's balance verdicts are paused while the tower rework (#59) is in progress (owner, 2026-10-24, #96): see
+## balance_check. Turn this off before the rework goes to feat/59-tower-rework.
+const BOT_BALANCE_PAUSED := true
+## Paused balance verdicts that came out false, printed after the run.
+var paused: Array = []
 var checks := 0
 var current := ""
 var only := ""
@@ -142,6 +147,10 @@ func _run() -> void:
 	print("%d checks, %d failed, %.1f s" % [checks, failures.size(), (Time.get_ticks_msec() - t0) / 1000.0])
 	for f in failures:
 		print("  FAILED: ", f)
+	if not paused.is_empty():
+		print("%d bot balance verdicts paused until the rework is done (#96), not counted:" % paused.size())
+		for f in paused:
+			print("  PAUSED: ", f)
 	print("RESULT: ", "OK" if failures.is_empty() else "FAILURES")
 	get_tree().quit(0 if failures.is_empty() else 1)
 
@@ -150,6 +159,15 @@ func check(cond: bool, msg: String) -> void:
 	checks += 1
 	if not cond:
 		failures.append("%s: %s" % [current, msg])
+
+
+## A verdict on balance from the bot's play (does it win, reach endless, buy masteries). While BOT_BALANCE_PAUSED a false
+## one is only noted (printed as PAUSED), not a failure.
+func balance_check(cond: bool, msg: String) -> void:
+	if not BOT_BALANCE_PAUSED:
+		check(cond, msg)
+	elif not cond:
+		paused.append("%s: %s" % [current, msg])
 
 
 func near(a: float, b: float, eps := 0.001) -> bool:
@@ -1750,18 +1768,18 @@ func test_bot_playthroughs() -> void:
 			id, "MEDAL" if g.medal else "LOST", g.wave, final, g.lives, g.max_lives,
 			g.gold, g.towers.size(), tiers[0], tiers[1], tiers[2], g.stats.kills, g.stats.leaked,
 			ticks * SIM_DT, Time.get_ticks_msec() - t0])
-		check(g.medal, "%s: the bot's reasonable build earns the Easy medal" % id)
+		balance_check(g.medal, "%s: the bot's reasonable build earns the Easy medal" % id)
 		if not g.medal:
 			continue
 		# Endless mode continues on its own after the medal.
-		check(g.endless and not g.is_over(), "%s: endless mode begins after the last round" % id)
+		balance_check(g.endless and not g.is_over(), "%s: endless mode begins after the last round" % id)
 		ticks = 0
 		while not g.is_over() and g.wave < final + 3 and ticks < limit:
 			bot.update(SIM_DT)
 			g.tick(SIM_DT)
 			ticks += 1
 		print("    %-10s endless reached round %d (%s)" % [id, g.wave, "alive" if not g.is_over() else "fell"])
-		check(g.wave >= final + 3, "%s: endless mode runs several rounds" % id)
+		balance_check(g.wave >= final + 3, "%s: endless mode runs several rounds" % id)
 
 
 func test_bot_full_research() -> void:
@@ -1777,8 +1795,8 @@ func test_bot_full_research() -> void:
 	var t4: int = g.towers.filter(func(t): return t.tier == 4).size()
 	print("    crossroads full research (Medium): %s round %d lives %d/%d, %d tier-4 towers" % [
 		"MEDAL" if g.medal else "LOST", g.wave, g.lives, g.max_lives, t4])
-	check(g.medal, "bot with full research earns the Medium medal")
-	check(t4 > 0, "bot buys tier-4 masteries when researched")
+	balance_check(g.medal, "bot with full research earns the Medium medal")
+	balance_check(t4 > 0, "bot buys tier-4 masteries when researched")
 
 
 ## The bot plays the reworked towers: only new towers, Retrofits and paths within the path rules, the Artillery and the CAS
