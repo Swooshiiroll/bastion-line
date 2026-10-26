@@ -65,7 +65,7 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Tower rework · Tower art · second pass · tower 4 of 20 · round 5</div>
+    <div class="eyebrow">Bastion Line · Tower rework · Tower art · second pass · tower 4 of 20 · round 6</div>
     <h1>Tower art: Rocket Salvo paths and Retrofits</h1>
     <p class="note">Second pass for one tower: <b>every upgrade step and mastery</b> on each path, and each <b>Retrofit</b>, adds or changes a detail on the confirmed model. Each card shows the model with that path's earlier steps (your picks, or option A until you pick) plus the candidate. Pick one of three per step, add notes per path, then <b>Copy picks and notes</b>.</p>
     <ul class="rules">
@@ -615,7 +615,7 @@ const NO_BOOT = true;
 // Fuses, Smoke Trails, Incendiary Warheads.
 // Geometry (game px, x along the aim): pods from x -8 to their mouths at x 11.5; cross-frame bars at x -4 and 6;
 // a hazard-striped blast deflector at x -11.
-const PAGE = { title: "Rocket Salvo: paths and Retrofits (second pass)", store: "bl-tower-art-p2-rocket-r4" };
+const PAGE = { title: "Rocket Salvo: paths and Retrofits (second pass)", store: "bl-tower-art-p2-rocket-r6" };
 const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], RED = [0.9, 0.22, 0.2, 1], YEL = [1, 0.85, 0.2, 1], ORANGE = [1, 0.55, 0.2, 1];
 const SEEK = [0.35, 0.75, 1, 1], DARKR = [0.22, 0.22, 0.24, 1], PALE = [0.86, 0.88, 0.92, 1], SMOKEC = [0.55, 0.57, 0.6, 1];
 const Kp = (B, pi, k) => (B.lv[pi] > k ? B.key("p" + pi + "s" + k) : null);
@@ -696,7 +696,7 @@ const noseCol = (B) => (B.lv[1] >= 2 && Kp(B, 1, 1) === "A" ? SEEK : B.lv[0] >= 
 function drawRig(L, c, aim, k, fx, t, col, B) {
   const last = lastOfSalvo(fx, 8), gone = (i) => last >= 0 && i <= last, since = (i) => (fx.barrelSince ?? 9) + (last - i) * 0.09; // each rocket's time since launch
   const at = (p, a, d) => add(p, mul(fa(a), d * k)), hub = (p, r, a) => { plate(p, ngon(8, 1, Math.PI / 8), METAL_L, a, r * k, 1.3); plate(p, ngon(8, 1, Math.PI / 8), METAL_D, a, r * 0.72 * k, 0.9); ring(p, r * 0.55 * k, GOLD, 0.9 * k); };
-  if (L.rig === "cells") {                                      // D: vertical launch cells in an armoured deck; the fire-control turret turns
+  if (L.rig === "cells") {                                      // D (the owner's pick): vertical launch cells in an armoured deck
     plate(c, ngon(8, 1, Math.PI / 8), METAL_D, 0, 15 * k, 1.3); ring(c, 13.4 * k, A(GOLD, 0.85), 0.9 * k);
     L.mouths.forEach(([x, y], i) => { const a = Math.atan2(y, x), q = P(c, 0, k, x, y), sn = since(i);
       plate(q, rectPts(2.7, 2.7), METAL, a, k, 1.1); disc(q, 1.8 * k, BORE);
@@ -704,7 +704,7 @@ function drawRig(L, c, aim, k, fx, t, col, B) {
       else { plate(P(q, a, k, 3.9, 0), rectPts(1.1, 2.3), METAL_L, a, k, 0.9);                                    // the hatch flipped open outward
         if (sn < 0.25) glowDot(q, 1.9 * k * (1 - sn / 0.25), col);
         for (let j = 0; j < 3; j++) { const w = sn * 1.4 - j * 0.15; if (w > 0 && w < 1) disc(add(q, [(j - 1) * 1.2 * k, -w * 7 * k]), (1 + w * 2.4) * k, [0.62, 0.64, 0.66, 0.4 * (1 - w)]); } } });
-    hub(c, 6, aim); bar(P(c, aim, k, 2, 0), P(c, aim, k, 7.5, 0), 1.6 * k, METAL); orb(c, 2.4 * k, METAL); glowDot(c, 1 * k, col); }
+    orb(c, 2.4 * k, METAL); glowDot(c, 1 * k, col); }           // no turret in the middle (owner, round 6): nothing on it turns
   if (L.rig === "carousel") {                                   // E: a carousel turning one notch per launch, feeding each rocket onto the rail
     const turn = last >= 0 ? last + Math.min(1, (fx.barrelSince ?? 9) / 0.08) : 0;
     disc(c, 12.9 * k, OUTLINE); disc(c, 12.3 * k, METAL_D); ring(c, 12.3 * k, GOLD, 0.9 * k); ring(c, 5.4 * k, METAL, 1 * k);
@@ -895,8 +895,8 @@ const P2 = {
 };
 
 // ---- Round 2 (owner's picks and notes, 2026-10-17) ----------------------------------------------------------------
-P2.intro = "Round 5: four more Ripple Salvo ideas (your 'More ideas'), D to G, each rebuilding the launcher round a turret hub the way the other towers' masteries do: Launch Cells, Revolver Carousel, Wing Pod Turret and Rail Fan. A to C from round 4 are still here. Pick one of the seven. Round 4: the Ripple Salvo (Payload mastery) is redesigned in the flat style of the other masteries (your note: 'match the current design style of other towers'). Your other picks stay. Round 3 and earlier: your picks as one model, with your notes: seeker blue noses win over the Power mastery's gold (5/2/0); the pods are bigger than their mouths; the Ripple Salvo stacks its tubes 2 x 2 in each side bank.";
-P2.picks = { p0s0: "B", p0s1: "B", p0s2: "A", p0s3: "A", p0s4: "A", p1s0: "A", p1s1: "A", p1s2: "A", p1s3: "A", p1s4: "C", p2s0: "A", p2s1: "A", p2s2: "B", p2s3: "C", r0: "A", r1: "A", r2: "A" };
+P2.intro = "Round 6: your pick, D Launch Cells, with the turning turret in the middle removed (your note: 'Just remove the spinning part in the middle'); a small fixed light stays at the centre. Round 5: four more Ripple Salvo ideas (your 'More ideas'), D to G, each rebuilding the launcher round a turret hub the way the other towers' masteries do: Launch Cells, Revolver Carousel, Wing Pod Turret and Rail Fan. A to C from round 4 are still here. Pick one of the seven. Round 4: the Ripple Salvo (Payload mastery) is redesigned in the flat style of the other masteries (your note: 'match the current design style of other towers'). Your other picks stay. Round 3 and earlier: your picks as one model, with your notes: seeker blue noses win over the Power mastery's gold (5/2/0); the pods are bigger than their mouths; the Ripple Salvo stacks its tubes 2 x 2 in each side bank.";
+P2.picks = { p0s0: "B", p0s1: "B", p0s2: "A", p0s3: "A", p0s4: "A", p1s0: "A", p1s1: "A", p1s2: "A", p1s3: "A", p1s4: "C", p2s0: "A", p2s1: "A", p2s2: "B", p2s3: "C", p2s4: "D", r0: "A", r1: "A", r2: "A" };
 P2.paths.forEach((pa, pi) => pa.steps.forEach((st, k) => { const pk = P2.picks["p" + pi + "s" + k]; if (pk) st.options = st.options.filter((o) => o.key === pk); }));
 P2.retrofits.forEach((rf, ri) => { rf.options = rf.options.filter((o) => o.key === P2.picks["r" + ri]); });
 P2.paths[0].steps[4].options[0].desc = "Gold-nosed rockets with fuel-air blasts; with Seeker Heads fitted the noses stay seeker blue (your note).";

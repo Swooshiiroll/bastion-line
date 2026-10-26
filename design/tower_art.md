@@ -600,6 +600,12 @@ masteries do, with its rockets racked where they can be seen:
 - The page now tracks which rocket of the salvo went last from the shot count, so the ripple lights and the mouth flashes
   follow all eight rockets. Before, they wrapped after three.
 
+**Picks and notes (owner, round 5):** Payload M **D, Launch Cells**, with the note "Just remove the spinning part in the
+middle". Every other pick is unchanged: Power 1 B, 2 B, 3 A, 4 A, M A; Range 1 A, 2 A, 3 A, 4 A, M C; Payload 1 A, 2 A,
+3 B, 4 C; Retrofits A, A, A.
+- **Round 6:** the turning fire-control turret is gone. A small fixed light stays at the centre, so nothing on the
+  mastery turns: rockets rise from the cells round the deck.
+
 ### Anti-Aircraft Turret (second pass)
 
 **Retrofits kept** (owner, 2026-10-17). Claude flagged that all three overlap a path:
