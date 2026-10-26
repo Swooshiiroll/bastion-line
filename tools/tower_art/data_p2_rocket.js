@@ -5,7 +5,7 @@
 // Fuses, Smoke Trails, Incendiary Warheads.
 // Geometry (game px, x along the aim): pods from x -8 to their mouths at x 11.5; cross-frame bars at x -4 and 6;
 // a hazard-striped blast deflector at x -11.
-const PAGE = { title: "Rocket Salvo: paths and Retrofits (second pass)", store: "bl-tower-art-p2-rocket-r3d" };
+const PAGE = { title: "Rocket Salvo: paths and Retrofits (second pass)", store: "bl-tower-art-p2-rocket-r4" };
 const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], RED = [0.9, 0.22, 0.2, 1], YEL = [1, 0.85, 0.2, 1], ORANGE = [1, 0.55, 0.2, 1];
 const SEEK = [0.35, 0.75, 1, 1], DARKR = [0.22, 0.22, 0.24, 1], PALE = [0.86, 0.88, 0.92, 1], SMOKEC = [0.55, 0.57, 0.6, 1];
 const Kp = (B, pi, k) => (B.lv[pi] > k ? B.key("p" + pi + "s" + k) : null);
@@ -20,9 +20,10 @@ const homing = (B) => B.lv[1] >= 2;
 // ---- Launch tubes: layout from the Payload path; each entry is a mouth [x, y, r] plus the pod bodies -----------------
 function layoutOf(B, t) { const P3 = B.lv[2];
   if (P3 >= 5) { const st = Kp(B, 2, 4);
-    if (st === "B") return { pods: [[-7.4, 11], [7.4, 11]], tall: true, mouths: [-1, 1].flatMap((sg) => [[11.5, sg * 5, 1.4, 1], [11.5, sg * 9.8, 1.4, 1], [11.5, sg * 5, 1.4, 0], [11.5, sg * 9.8, 1.4, 0]]), gold: true }; // 2 x 2 per side: [x, y, r, upper?]
-    if (st === "C") { const sp = t * 2; return { drum: true, pods: [[0, 12]], mouths: [0, 1, 2, 3, 4, 5, 6, 7].map((i) => [11.5, Math.sin(sp + i * TAU / 8) * 4.8, 1.2]), gold: true }; }
-    return { pods: [[0, 23]], mouths: [-10.5, -7.5, -4.5, -1.5, 1.5, 4.5, 7.5, 10.5].map((y, i) => [i % 2 ? 9 : 11, y, 1.3]), gold: true }; }
+    // Round 3 (owner, 2026-10-26: "match the current design style of other towers"): three flat looks, no raised banks.
+    if (st === "B") { const sp = t * 1.6; return { drum: true, pods: [[0, 13]], mouths: [0, 1, 2, 3, 4, 5, 6, 7].map((i) => [11.5, Math.sin(sp + i * TAU / 8) * 4.8, 1.25, Math.cos(sp + i * TAU / 8)]), gold: true }; } // [x, y, r, facing up]
+    if (st === "C") return { pods: [[-7, 11], [7, 11]], mouths: [-1, 1].flatMap((sg) => [2.9, 5.6, 8.3, 11].map((y) => [11.5, sg * y, 1.15])), gold: true, rim: true, spine: true };
+    return { pods: [[0, 23]], mouths: [-10.5, -7.5, -4.5, -1.5, 1.5, 4.5, 7.5, 10.5].map((y, i) => [i % 2 ? 9 : 11, y, 1.3]), gold: true, rim: true, lights: true }; }
   if (P3 >= 3) { const st = Kp(B, 2, 2);
     if (st === "B") return { pods: [[-7.2, 11], [7.2, 11]], mouths: [-10.4, -7.2, -4, 4, 7.2, 10.4].map((y) => [11, y, 1.3]) };
     if (st === "C") return { pods: [[0, 12]], mouths: [[11, -6, 1.5], [11, 0, 1.5], [11, 6, 1.5], [8.4, -3, 1.5], [8.4, 3, 1.5], [5.8, 0, 1.5]] };
@@ -100,7 +101,15 @@ const P2 = {
     if (kp(2, 1) === "A") { const a = aim + Math.PI * 0.8 - decay(fx.barrelSince ?? 9, 0.5) * 0.8, b0 = P(c, aim, k, -7, 9); orb(b0, 1.5 * k, METAL); bar(b0, add(b0, mul(fa(a), 7 * k)), 1.2 * k, METAL_L); }
     if (kp(2, 3) === "C") bar(P(c, aim, k, -9, 12), P(c, aim, k, -9, -12), 1.6 * k, [0.3, 0.3, 0.32, 1]);
     const podLen = 11.5 + (kp(1, 0) === "B" ? 2 : 0), podCol = kp(0, 2) === "B" ? STEEL : METAL_L;
-    if (L.drum) { bar(P(c, aim, k, -8, 0), P(c, aim, k, podLen, 0), 12 * k, METAL); for (const m of L.mouths) line(P(c, aim, k, -6, m[1]), P(c, aim, k, podLen - 0.5, m[1]), [0, 0, 0, 0.35], 1.2 * k); for (const x of [-6, podLen - 1]) line(P(c, aim, k, x, -6), P(c, aim, k, x, 6), GOLD, 1.2 * k); }
+    if (L.drum) { const dw = L.pods[0][1], gear = P(c, aim, k, -9.6, 0);
+      disc(gear, 3.4 * k, OUTLINE); disc(gear, 2.8 * k, METAL_D); for (let i = 0; i < 8; i++) { const a = t * 3.2 + i * TAU / 8; disc(add(gear, mul(fa(a), 2.9 * k)), 0.7 * k, METAL_L); } disc(gear, 1.1 * k, GOLD);
+      const cx = (podLen - 8) / 2, hl = (podLen + 8) / 2;
+      plate(P(c, aim, k, cx, 0), rectPts(hl, dw / 2), METAL, aim, k, 1.2);
+      plate(P(c, aim, k, cx, -dw * 0.22), rectPts(hl - 0.6, dw * 0.13), lt(METAL, 0.18), aim, k, 0); // the drum's lit side
+      for (const m of L.mouths) if (m[3] > 0) line(P(c, aim, k, -7, m[1]), P(c, aim, k, podLen - 0.8, m[1]), [0, 0, 0, 0.18 + 0.3 * m[3]], 1.4 * k); // tube seams turning with the drum
+      for (const x of [-7, podLen - 1]) { line(P(c, aim, k, x, -dw / 2), P(c, aim, k, x, dw / 2), OUTLINE, 2.6 * k); line(P(c, aim, k, x, -dw / 2 + 0.4), P(c, aim, k, x, dw / 2 - 0.4), GOLD, 1.6 * k); } }
+    if (L.spine) { bar(P(c, aim, k, -8, 0), P(c, aim, k, 10, 0), 3.2 * k, OUTLINE); bar(P(c, aim, k, -8, 0), P(c, aim, k, 10, 0), 2.4 * k, METAL_D); line(P(c, aim, k, -7, 0), P(c, aim, k, 9, 0), A(GOLD, 0.8), 0.7 * k);
+      const run = fx.barrel != null && (fx.barrelSince ?? 9) < 0.7 ? (fx.barrel % 4) / 3 : -1; if (run >= 0) glowDot(P(c, aim, k, -6 + run * 14, 0), 0.9 * k, GOLD); } // the ripple sequencer's light runs down the spine
     else if (L.tall) { orb(P(c, aim, k, -4, 0), 2.4 * k, METAL); glowDot(P(c, aim, k, -4, 0), 1 * k, col); }
     if (L.tall) for (const [y, w] of L.pods) tallBox(c, aim, k, -8, podLen, y, w, podCol, true);
     else if (!L.drum) for (const [y, w] of L.pods) { if (w > 8) { const cx = (podLen - 8) / 2; plate(P(c, aim, k, cx, y), rectPts((podLen + 8) / 2, w / 2), podCol, aim, k, 1.2); rivets(P(c, aim, k, cx, y), rectPts((podLen + 8) / 2, w / 2), aim, k, 0.9, 0.7 * k); }
@@ -109,11 +118,11 @@ const P2 = {
     if (L.side) bar(P(c, aim, k, -2, 11.5), P(c, aim, k, 8, 11.5), 2.6 * k, METAL_L);
     // Pod bands and kit (on every pod): Power, Range, gold at the masteries, the Retrofit.
     const half = (w) => w * 0.5;
-    for (const [y, w] of L.drum ? [[0, 12]] : L.tall ? [] : L.pods) { const band = (x, c2, lw) => line(P(c, aim, k, x, y - half(w)), P(c, aim, k, x, y + half(w)), c2, lw * k);
+    for (const [y, w] of L.tall ? [] : L.pods) { const band = (x, c2, lw) => line(P(c, aim, k, x, y - half(w)), P(c, aim, k, x, y + half(w)), c2, lw * k);
       if (kp(0, 0) === "A") band(4, RED, 1.1);
       if (kp(0, 1) === "C") for (const x of [0, 2]) band(x, [0, 0, 0, 0.45], 0.8);
       if (kp(0, 2) === "B") for (const x of [-6, 9]) band(x, STEEL, 1.6);
-      if (gold && kp(0, 4) === "B" || L.gold && kp(2, 4) !== "C") for (const x of [-2, 9.5]) band(x, GOLD, 1.1);
+      if (gold && kp(0, 4) === "B" || L.gold && !L.drum) for (const x of [-2, 9.5]) band(x, GOLD, 1.1);
       if (kp(1, 2) === "A") glowDot(P(c, aim, k, -6, y), 0.6 * k, fmod(t * 2 + y, 1) < 0.5 ? SEEK : A(SEEK, 0.3));
       if (kp(1, 3) === "B") for (const sg of [-1, 1]) fill(P(c, aim, k, -7, y + sg * half(w)), [[2, 0], [-1, sg * 1.6], [-1, 0]], STEEL, aim, k);
       if (B.r === 0 && B.key("r0") === "C") band(10.5, A(col, 0.85), 0.8);
@@ -122,7 +131,9 @@ const P2 = {
     if (kp(1, 0) === "C") bar(P(c, aim, k, -8, -half(L.pods[0][1]) + L.pods[0][0] - 1.4), P(c, aim, k, podLen - 1, -half(L.pods[0][1]) + L.pods[0][0] - 1.4), 1 * k, STEEL);
     if (gold && kp(0, 4) === "C") for (const y of [-12.5, 12.5]) { bar(P(c, aim, k, -6, y), P(c, aim, k, 4, y), 2.6 * k, [0.75, 0.38, 0.12, 1]); ring(P(c, aim, k, -1, y), 1.4 * k, GOLD, 0.9 * k); }
     const frontShows = !L.tall || Math.sin(aim) > 0.08; // a tall bank's mouths are on its front face: hidden when it faces away
-    for (const [i, m] of L.mouths.entries()) { if (!frontShows) break; const q = add(P(c, aim, k, m[0] + (L.drum ? 0 : podLen - 11.5), m[1]), L.tall ? [0, (m[3] ? -TALL_H * 0.78 : -TALL_H * 0.28) * k] : [0, 0]); disc(q, (m[2] + 0.4) * k, OUTLINE); disc(q, m[2] * k, BORE);
+    for (const [i, m] of L.mouths.entries()) { if (!frontShows) break; const q = add(P(c, aim, k, m[0] + (L.drum ? 0 : podLen - 11.5), m[1]), L.tall ? [0, (m[3] ? -TALL_H * 0.78 : -TALL_H * 0.28) * k] : [0, 0]); if (L.drum && m[3] < -0.25) continue; // the drum's far tubes are out of sight
+      if (L.rim) disc(q, (m[2] + 0.95) * k, OUTLINE); disc(q, (m[2] + 0.4) * k, L.rim ? GOLD : OUTLINE); disc(q, m[2] * k, BORE);
+      if (L.lights) { const lq = P(c, aim, k, -6, m[1]), on = fx.barrel != null && i <= fx.barrel && (fx.barrelSince ?? 9) < 0.7; if (on) glowDot(lq, 0.7 * k, GOLD); else disc(lq, 0.6 * k, dk(GOLD, 0.55)); } // ripple lights fill as the salvo goes out
       const f2 = fx.barrel === i && (fx.barrelSince ?? 9) < 0.25 ? 1 - fx.barrelSince / 0.25 : 0; if (f2 > 0) glowDot(q, m[2] * k * f2, col);
       if (B.r === 2 && B.key("r2") === "C") ring(q, (m[2] + 0.2) * k, A(ORANGE, 0.8), 0.7 * k);
       if (B.r === 0 && B.key("r0") === "A") line(q, add(q, mul(fa(aim), 1.8 * k)), STEEL, 0.5 * k);
@@ -200,9 +211,9 @@ const P2 = {
         { key: "B", name: "Magazine Drum", desc: "A magazine drum behind the tubes." },
         { key: "C", name: "Conveyor", desc: "A conveyor across the back of the launcher." } ] },
       { name: "Ripple Salvo", cost: 6415, effect: "8 rockets per salvo, rippling out one after another (mastery)", options: [
-        { key: "A", name: "Eight-Tube Grid", desc: "A gold-banded block with eight staggered tubes." },
-        { key: "B", name: "Twin Four-Banks", desc: "Two gold-banded banks of four." },
-        { key: "C", name: "Rotary Launcher", desc: "Eight tubes on a turning drum." } ] },
+        { key: "A", name: "Eight-Tube Grid", desc: "One wide gold-banded block with eight staggered gold-rimmed tubes; a row of ripple lights fills as the salvo goes out." },
+        { key: "B", name: "Rotary Drum", desc: "Eight tubes on a gold-capped drum that spins on a geared drive as the salvo ripples out." },
+        { key: "C", name: "Flush Twin Banks", desc: "Two flat banks of four gold-rimmed tubes flush with the deck, a sequencer light running down the spine between them." } ] },
     ] },
   ],
   retrofits: [
@@ -222,11 +233,10 @@ const P2 = {
 };
 
 // ---- Round 2 (owner's picks and notes, 2026-10-17) ----------------------------------------------------------------
-P2.intro = "Round 2: your picks as one model, with your notes: seeker blue noses win over the Power mastery's gold (5/2/0); the pods are bigger than their mouths; the Ripple Salvo stacks its tubes 2 x 2 in each side bank.";
-P2.picks = { p0s0: "B", p0s1: "B", p0s2: "A", p0s3: "A", p0s4: "A", p1s0: "A", p1s1: "A", p1s2: "A", p1s3: "A", p1s4: "C", p2s0: "A", p2s1: "A", p2s2: "B", p2s3: "C", p2s4: "B", r0: "A", r1: "A", r2: "A" };
-P2.paths.forEach((pa, pi) => pa.steps.forEach((st, k) => { st.options = st.options.filter((o) => o.key === P2.picks["p" + pi + "s" + k]); }));
+P2.intro = "Round 4: the Ripple Salvo (Payload mastery) is redesigned in the flat style of the other masteries (your note: 'match the current design style of other towers'): pick one of the three. Your other picks stay. Round 3 and earlier: your picks as one model, with your notes: seeker blue noses win over the Power mastery's gold (5/2/0); the pods are bigger than their mouths; the Ripple Salvo stacks its tubes 2 x 2 in each side bank.";
+P2.picks = { p0s0: "B", p0s1: "B", p0s2: "A", p0s3: "A", p0s4: "A", p1s0: "A", p1s1: "A", p1s2: "A", p1s3: "A", p1s4: "C", p2s0: "A", p2s1: "A", p2s2: "B", p2s3: "C", r0: "A", r1: "A", r2: "A" };
+P2.paths.forEach((pa, pi) => pa.steps.forEach((st, k) => { const pk = P2.picks["p" + pi + "s" + k]; if (pk) st.options = st.options.filter((o) => o.key === pk); }));
 P2.retrofits.forEach((rf, ri) => { rf.options = rf.options.filter((o) => o.key === P2.picks["r" + ri]); });
 P2.paths[0].steps[4].options[0].desc = "Gold-nosed rockets with fuel-air blasts; with Seeker Heads fitted the noses stay seeker blue (your note).";
 P2.paths[2].steps[0].options[0].desc = "Four pods, each wider than its mouth (your note).";
 P2.paths[2].steps[2].options[0].desc = "Two banks of three tubes, each bank bigger than its mouths (your note).";
-P2.paths[2].steps[4].options[0].desc = "Two gold-banded banks, their tubes stacked 2 x 2 on each side (your note).";

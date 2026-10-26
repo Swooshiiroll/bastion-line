@@ -65,7 +65,7 @@
 <body>
 <div class="wrap">
   <header>
-    <div class="eyebrow">Bastion Line · Tower rework · Tower art · second pass · tower 12 of 20 · round 7</div>
+    <div class="eyebrow">Bastion Line · Tower rework · Tower art · second pass · tower 12 of 20 · round 8</div>
     <h1>Tower art: Chemical Plant paths and Retrofits</h1>
     <p class="note">Second pass for one tower: <b>every upgrade step and mastery</b> on each path, and each <b>Retrofit</b>, adds or changes a detail on the confirmed model. Each card shows the model with that path's earlier steps (your picks, or option A until you pick) plus the candidate. Pick one of three per step, add notes per path, then <b>Copy picks and notes</b>.</p>
     <ul class="rules">
@@ -703,10 +703,10 @@ const NO_BOOT = true;
 // Base: look F Distillery Columns, animation A Acid Stream. One parametric model with the lessons so far: options swap parts
 // rather than lay overlays over them; the projectile (the spray) changes with every Acid step; masteries are gold; the plant's
 // own clock drives the timing. All three Retrofits overlap a path step and are kept, their stats stacking (the carpet rule):
-// Pressure Pump adds to the Speed path's spray rate, Mist Nozzle to Twin Nozzles, Bigger Tanks to the soak length.
+// Pressure Pump adds to the Speed path's spray rate, Mist Nozzle widens Constant Spray's fan, Bigger Tanks to the soak length.
 // Geometry (game px): three columns at radius 10 round a central still (r 5) with a gooseneck nozzle that turns to spray; the
 // plant sprays one unsoaked enemy at a time; a soaked enemy drips and fizzes until the soak wears off.
-const PAGE = { title: "Chemical Plant: paths and Retrofits (second pass)", store: "bl-tower-art-p2-chem-r7" };
+const PAGE = { title: "Chemical Plant: paths and Retrofits (second pass)", store: "bl-tower-art-p2-chem-r8" };
 const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], RED = [0.85, 0.2, 0.18, 1], GELC = [0.8, 1, 0.45, 1], YEL = [1, 0.85, 0.2, 1];
 const rnd2 = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
 const Kp = (B, pi, k) => (B.lv[pi] > k ? B.key("p" + pi + "s" + k) : null);
@@ -715,7 +715,7 @@ const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
 // ---- Stats the look follows: spray gap, soak length, acid and gel strength ------------------------------------------------
 const GAP = [1.5, 1.25, 1.25, 1.0, 0.83, 0.62];
 const gapOf = (B) => Math.max(0.35, GAP[B.lv[1]] - (B.r === 0 ? 0.17 : 0));                  // Pressure Pump stacks
-const soakOf = (B) => [4, 4, 5, 6, 6, 7][B.lv[1]] + (B.r === 2 ? 1 : 0);                      // Bigger Tanks stacks
+const soakOf = (B) => [4, 4, 5, 6, 6, 4][B.lv[1]] + (B.r === 2 ? 1 : 0);                      // Bigger Tanks stacks
 const acidCol = (B, col) => (B.lv[0] >= 5 ? GOLD : B.lv[0] >= 4 ? [0.3, 0.8, 0.2, 1] : B.lv[0] >= 2 ? [0.7, 1, 0.25, 1] : col);
 
 // ---- The agent: sprays one unsoaked enemy at a time (two at the Twin Nozzles mastery; the Mist Nozzle soaks a neighbour too) ----
@@ -723,6 +723,7 @@ function soakAgent(B) { return (m, t, info, s, col) => { const k = G(s), gap = g
   if (!m.soak) { m.soak = {}; m.last = -9; m.shots = []; m.n = 0; }
   const free = info.ens.filter((e) => !(m.soak[e.i] > t)).sort((a, b) => dist(a.p, info.c) - dist(b.p, info.c));
   const dt = Math.min(0.1, Math.max(0, t - (m.tt ?? t))); m.tt = t;
+  if (B.lv[1] >= 5) { sweepSpray(m, t, info, s, ac, dt, gap, mist, B); soakLooks(m, t, info, s, ac, A1, G1); return; }
   if (free[0]) m.aimAt = free[0].p.slice();
   m.aimAt2 = twin && free[1] ? free[1].p.slice() : (m.aimAt ? m.aimAt.slice() : null);        // the second sprayer's own target (it follows the first when there is only one enemy)
   if (m.a2 === undefined) m.a2 = info.aim; if (m.aimAt2) { const want = Math.atan2(m.aimAt2[1] - info.c[1], m.aimAt2[0] - info.c[0]), dd = fmod(want - m.a2 + Math.PI, TAU) - Math.PI; m.a2 += Math.max(-9 * dt, Math.min(9 * dt, dd)); }
@@ -737,12 +738,33 @@ function soakAgent(B) { return (m, t, info, s, col) => { const k = G(s), gap = g
     for (let i = 0; i < 9; i++) { const qq = Math.min(u * 1.6, 1) - i * 0.06; if (qq < 0) continue; const p = add(lerp(f, to, qq), [0, -Math.sin(Math.PI * qq) * s * 0.25]), r = (1.4 + 0.3 * (i % 2)) * (1 + 0.14 * A1) * (G1 ? 1.15 : 1);
       disc(p, r, A(ac, 0.9 - i * 0.06)); if (G1) disc(add(p, [-0.4, -0.4]), r * 0.35, [1, 1, 1, 0.55 * (1 - i * 0.08)]); if (A1 >= 4 && i % 3 === 0) ring(add(p, [0, -2]), 1.3, A(lt(ac, 0.4), 0.5), 0.6); } }
   m.shots = m.shots.filter((q) => t - q.t0 < q.flight + 0.1);
+  soakLooks(m, t, info, s, ac, A1, G1); }; }
+
+// ---- Constant Spray (Speed mastery, round 8): one nozzle sprays without stopping and sweeps a 120° fan (160° with the Mist
+// Nozzle) centred on the nearest enemy, one pass per spray interval; every enemy the jet crosses is soaked or topped up ----
+const FAN = 120, FAN_MIST = 160;
+const angDiff = (a, b) => fmod(a - b + Math.PI, TAU) - Math.PI;
+function sweepSpray(m, t, info, s, ac, dt, gap, mist, B) { const k = G(s), half = (mist ? FAN_MIST : FAN) * Math.PI / 360, c = info.c;
+  const tgt = info.ens.slice().sort((a, b) => dist(a.p, c) - dist(b.p, c))[0];
+  if (tgt) { const want = Math.atan2(tgt.p[1] - c[1], tgt.p[0] - c[0]); if (m.cen === undefined) m.cen = want; m.cen += Math.max(-2.5 * dt, Math.min(2.5 * dt, angDiff(want, m.cen))); }
+  if (m.cen === undefined) m.cen = info.aim;
+  const prev = m.sw ?? m.cen; m.sw = m.cen - half * Math.cos(Math.PI * t / gap); m.on = !!tgt; if (m.on) m.last = t; // the head stays lit while it sprays
+  const reach = Math.min(150 * k, Math.max(s, ...info.ens.map((e) => dist(e.p, c))) + s * 0.2); m.reach = reach; m.half = half;
+  if (m.on) for (const e of info.ens) { const a = Math.atan2(e.p[1] - c[1], e.p[0] - c[0]), d0 = angDiff(a, prev), d1 = angDiff(a, m.sw);
+    if (dist(e.p, c) <= reach && Math.abs(angDiff(a, m.cen)) <= half + 0.05 && (d0 * d1 <= 0 || Math.abs(d1) < 0.08)) m.soak[e.i] = t + soakOf(B); }
+  if (m.on) arc(c, reach, m.cen - half, m.cen + half, A(ac, 0.1), 1.2);                                                 // the fan's edge, faint
+  // The jet: drops fired along the sweep over the last 0.45 s, each flying out on the angle the head had when it left.
+  if (m.on) for (let i = 0; i < 26; i++) { const g = (i + fmod(t / 0.025, 1)) / 26, t0 = t - g * 0.45, a = m.cen - half * Math.cos(Math.PI * t0 / gap) + (rnd2(Math.floor(t0 / 0.025)) - 0.5) * 0.05 * g;
+    disc(add(c, mul(fa(a), 15 * k + g * (reach - 15 * k))), (1.2 + g * 3.2) * k * 0.55, A(ac, 0.75 * (1 - g))); } }
+
+// ---- How a soaked enemy looks: drips, fizz, armour flakes, gel ------------------------------------------------------------------
+function soakLooks(m, t, info, s, ac, A1, G1) {
   for (const e of info.ens) { const left = m.soak[e.i] - t; if (!(left > 0)) continue; const p = e.p, a = Math.min(1, left * 3), n = e.i, r = Math.max(4, Math.min(11, s * 0.12));
     disc(p, s * 0.14, A(ac, 0.3 * a));
     for (let i = 0; i < 2; i++) { const d = fmod(t * 1.5 + i * 0.5 + n * 0.3, 1); disc(add(p, [(i - 0.5) * s * 0.1, d * s * 0.18]), 1.2, A(ac, (1 - d) * a)); }
     for (let i = 0; i < 3 + (A1 >= 2 ? 2 : 0); i++) { const b = fmod(t * 2 + i * 0.33 + n, 1); ring(add(p, [(rnd2(i + n) - 0.5) * s * 0.18, -b * s * 0.15]), 1 + b * 1.5, A(lt(ac, 0.4), (1 - b) * a), 0.8); }
     if (A1 >= 1) for (let i = 0; i < 3; i++) { const d = fmod(t * 0.9 + i * 0.37 + n * 0.2, 1); fill(add(p, [(i - 1) * r * 0.7, -r * 0.2 + d * s * 0.2]), rectPts(1.1, 0.7), A([0.5, 0.52, 0.55, 1], (1 - d) * a), d * 4 + i, 1); } // stripped armour flakes falling off
-    if (G1) { arc(p, r + 1, Math.PI * 1.1, Math.PI * 1.9, A(GELC, (0.5 + 0.1 * G1) * a), 2 + G1 * 0.8); for (let i = 0; i < 3; i++) { const d = fmod(t * 0.9 + i * 0.33 + n * 0.2, 1); line(add(p, [(i - 1) * r * 0.6, -r * 0.6]), add(p, [(i - 1) * r * 0.6, -r * 0.6 + d * s * 0.2 * (0.6 + 0.1 * G1)]), A(GELC, a * (1 - d)), 1.4 + 0.2 * G1); } } } }; }
+    if (G1) { arc(p, r + 1, Math.PI * 1.1, Math.PI * 1.9, A(GELC, (0.5 + 0.1 * G1) * a), 2 + G1 * 0.8); for (let i = 0; i < 3; i++) { const d = fmod(t * 0.9 + i * 0.33 + n * 0.2, 1); line(add(p, [(i - 1) * r * 0.6, -r * 0.6]), add(p, [(i - 1) * r * 0.6, -r * 0.6 + d * s * 0.2 * (0.6 + 0.1 * G1)]), A(GELC, a * (1 - d)), 1.4 + 0.2 * G1); } } } }
 
 // ---- The model ---------------------------------------------------------------------------------------------------------
 const P2 = {
@@ -808,19 +830,27 @@ const P2 = {
     // ---- The nozzle (it turns to the target) ------------------------------------------------------------------------------------------
     const neck = V1 === "C" ? 3.6 : 2.4;
     if (V3 === "A") { for (const y of [-1.6, 1.6]) bar(D(2, y), D(9, y), 1.4 * k, METAL); bar(D(9, -1.6), D(11, 0), 1.4 * k, METAL); bar(D(9, 1.6), D(11, 0), 1.4 * k, METAL); bar(D(11, 0), D(13, 0), 1.8 * k, METAL); }
-    else bar(c, D(6, 0), neck * k, METAL);
+    else if (!VM) bar(c, D(6, 0), neck * k, METAL);
     const nozzle = (y, gc, w) => { bar(D(6, y), D(13, y), (w || 1.6) * k, gc ? GOLD : METAL); glowDot(D(13.4, y), (0.7 + 1.4 * fl) * k, A(ac, 0.5 + 0.5 * fl)); };
     const a2 = mm.a2 === undefined ? aim : mm.a2, twinStills = V3 === "B", py1 = twinStills ? -3.4 : 0, py2 = twinStills ? 3.4 : 0;
     const piv1 = S(0, py1), piv2 = S(0, py2), at = (pv, ang, x) => add(pv, mul(fa(ang), x * k));
-    const sprayers = !VM ? [{ pv: c, ang: aim, len: 13 }] : twinStills ? [{ pv: piv1, ang: aim, len: VM === "C" ? 14 : 13 }, { pv: piv2, ang: a2, len: VM === "C" ? 12 : 13 }] : VM === "C" ? [{ pv: c, ang: a2, len: 12 }, { pv: c, ang: aim, len: 14 }] : [{ pv: c, ang: a2, len: 13 }, { pv: c, ang: aim, len: 13 }];
-    if (VM) {                                                      // two independent sprayers, each with its own pipe and head, turning to its own enemy; with twin stills one grows from each still
-      const spray = (pv, ang, len) => { bar(pv, at(pv, ang, 6), 2.2 * k, GOLD); bar(at(pv, ang, 6), at(pv, ang, len), 1.6 * k, METAL); glowDot(at(pv, ang, len + 0.4), (0.7 + 1.4 * fl) * k, A(ac, 0.5 + 0.5 * fl)); };
-      const hub = (pv) => { disc(pv, 2.4 * k, OUTLINE); disc(pv, 2 * k, METAL_D); ring(pv, 1.2 * k, GOLD, 0.8 * k); };
-      if (twinStills) { spray(piv1, aim, VM === "C" ? 14 : 13); spray(piv2, a2, VM === "C" ? 12 : 13); ring(piv1, 4 * k, GOLD, 1 * k); ring(piv2, 4 * k, GOLD, 1 * k); }
-      else if (VM === "A") { spray(c, a2, 13); spray(c, aim, 13); hub(c); }
-      else if (VM === "B") { spray(piv1, a2, 13); spray(piv1, aim, 13); hub(c); }
-      else { spray(c, a2, 12); spray(c, aim, 14); hub(c); ring(c, 3.2 * k, GOLD, 1 * k); } }
-    if (VM) { /* the twin sprayers are drawn above */ }
+    const sw = mm.sw === undefined ? aim : mm.sw;                  // Constant Spray: the head follows the sweep, not the aim
+    const sprayers = !VM ? [{ pv: c, ang: aim, len: 13 }] : [{ pv: c, ang: sw, len: VM === "C" ? 12 : 14 }];
+    if (VM) {                                                      // Constant Spray (round 8): one sweeping head on a gold hub, three heads to pick from
+      const hub = (pv, r) => { disc(pv, (r + 0.4) * k, OUTLINE); disc(pv, r * k, METAL_D); ring(pv, (r - 0.8) * k, GOLD, 0.8 * k); };
+      const tipGlow = (p) => glowDot(p, (0.8 + 1.2 * fl) * k, A(ac, 0.6 + 0.4 * fl));
+      if (twinStills) { ring(piv1, 4 * k, GOLD, 1 * k); ring(piv2, 4 * k, GOLD, 1 * k); }
+      if (VM === "A") {                                            // a wide gold fan nozzle on a turning head
+        bar(c, at(c, sw, 9), 2.6 * k, OUTLINE); bar(c, at(c, sw, 9), 1.8 * k, GOLD); const o = at(c, sw, 9);
+        plate(o, [[0, -1.3], [5, -3.8], [5, 3.8], [0, 1.3]], GOLD, sw, k, 1.1); line(P(o, sw, k, 4.7, -3.4), P(o, sw, k, 4.7, 3.4), BORE, 0.9 * k);
+        for (const y of [-2.4, 0, 2.4]) tipGlow(P(o, sw, k, 5.2, y)); hub(c, 2.6); }
+      else if (VM === "B") {                                       // an oscillating spray boom across the still, a row of spouts along it
+        const nrm = sw + Math.PI / 2; bar(c, at(c, sw, 4), 2.4 * k, METAL); bar(at(at(c, sw, 4), nrm, 8), at(at(c, sw, 4), nrm, -8), 3 * k, OUTLINE); bar(at(at(c, sw, 4), nrm, 8), at(at(c, sw, 4), nrm, -8), 2.2 * k, GOLD);
+        for (let j = -2; j <= 2; j++) { const p0 = at(at(c, sw, 4), nrm, j * 3.6); bar(p0, at(p0, sw, 3), 1 * k, METAL_L); tipGlow(at(p0, sw, 3.4)); } hub(c, 2.4); }
+      else {                                                       // a gold sprinkler turret with a spray bar
+        orb(c, 4.8 * k, GOLD); ring(c, 3.3 * k, METAL, 0.9 * k); for (let i = 0; i < 3; i++) line(c, add(c, mul(fa(t * 8 + i * TAU / 3), 2.8 * k)), METAL_D, 0.8 * k);
+        bar(at(c, sw, 3.4), at(c, sw, 12), 2.6 * k, OUTLINE); bar(at(c, sw, 3.4), at(c, sw, 12), 1.8 * k, METAL_L); for (const x of [6, 9]) disc(at(c, sw, x), 0.5 * k, BORE); disc(at(c, sw, 12), 1.2 * k, GOLD); tipGlow(at(c, sw, 12.6)); } }
+    if (VM) { /* the sweeping head is drawn above */ }
     else if (GM === "B") { bar(D(6, 0), D(10, 0), 2 * k, GOLD); fill(D(10, 0), [[0, -1], [4, -3.2], [4, 3.2], [0, 1]], GOLD, aim, k); glowDot(D(14, 0), (0.7 + 1.4 * fl) * k, A(ac, 0.5 + 0.5 * fl)); }
     else if (B.r === 1 && R === "B") { bar(D(6, 0), D(10, 0), 1.8 * k, METAL); for (const sg of [-1, 0, 1]) { bar(D(10, 0), D(13, sg * 2.4), 1.2 * k, METAL); glowDot(D(13.4, sg * 2.6), (0.5 + 1 * fl) * k, A(ac, 0.5 + 0.5 * fl)); } }
     else nozzle(0, false);
@@ -860,7 +890,7 @@ const P2 = {
         { key: "B", name: "Gold Plate", desc: "A gold plate by the columns; a gold mix." },
         { key: "C", name: "Gold Core", desc: "A gold core ring on the still; a gold mix." } ] },
     ] },
-    { name: "Speed", theme: "valves, pumps and finally a second nozzle: a faster spray and a longer soak", steps: [
+    { name: "Speed", theme: "valves, pumps and finally a constant sweeping spray: a faster spray and a longer soak", steps: [
       { name: "Quick Valve", cost: 100, effect: "A spray every 1.25 s", options: [
         { key: "A", name: "Big Still", desc: "The central still is rebuilt bigger, with a thick pressure rim." },
         { key: "B", name: "Direct Feed", desc: "The pipes from the columns are rebuilt thick and straight into the still." },
@@ -877,10 +907,10 @@ const P2 = {
         { key: "A", name: "Pump Hall", desc: "The still is replaced by a big square pump hall with a piston that thumps with each spray." },
         { key: "B", name: "Double Ring Main", desc: "A second, outer ring main is built round the plant." },
         { key: "C", name: "Pipe Network", desc: "Thick pipes are built linking every column to the next." } ] },
-      { name: "Twin Nozzles", cost: 7760, effect: "Sprays two enemies at once; the soak lasts 7 s (mastery)", options: [
-        { key: "A", name: "Side-by-Side Sprayers", desc: "Two independent gold sprayers on one hub; each turns to its own enemy and sprays it, so two enemies are sprayed at once." },
-        { key: "B", name: "Twin Turrets", desc: "Two independent gold sprayer turrets, one hub each; each turns to its own enemy and sprays it at the same time." },
-        { key: "C", name: "Long and Short Sprayers", desc: "Two independent gold sprayers of different lengths on one hub; each turns to its own enemy." } ] },
+      { name: "Constant Spray", cost: 8810, effect: "Sprays without stopping, sweeping a 120° fan centred on its target (160° with the Mist Nozzle); everything the jet crosses is soaked or topped up; the soak lasts 4 s (mastery)", options: [
+        { key: "A", name: "Gold Fan Nozzle", desc: "One wide gold fan nozzle on a turning head, three jets glowing at its mouth." },
+        { key: "B", name: "Spray Boom", desc: "A gold spray boom across the still with a row of five spouts, swinging with the sweep." },
+        { key: "C", name: "Sprinkler Turret", desc: "A gold sprinkler turret on the still, its impeller spinning, with a long spray bar." } ] },
     ] },
     { name: "Slowing", theme: "gel that coats soaked enemies thicker and thicker", steps: [
       { name: "Sticky Gel", cost: 250, effect: "Soaked enemies are slowed 15%", options: [
@@ -910,7 +940,7 @@ const P2 = {
         { key: "A", name: "Pump House", desc: "A pump house building with a flywheel and chimney is built on the deck, piped into the still." },
         { key: "B", name: "Pump Tower", desc: "A raised pump tower is built on the still." },
         { key: "C", name: "Pump Skid", desc: "The still is rebuilt on a pump skid with two cylinders." } ] },
-    { name: "Mist Nozzle", cost: 300, effect: "Each spray also soaks one more enemy next to the target (stacks with Twin Nozzles)", options: [
+    { name: "Mist Nozzle", cost: 300, effect: "Each spray also soaks one more enemy next to the target (with Constant Spray it widens the fan to 160°)", options: [
         { key: "A", name: "Fan Head", desc: "The nozzle opens into a wide fan head." },
         { key: "B", name: "Mist Manifold", desc: "The nozzle is rebuilt as a three-spout mist manifold." },
         { key: "C", name: "Mist Ring Head", desc: "The nozzle tip is rebuilt as a big ring head." } ] },
@@ -923,8 +953,8 @@ const P2 = {
 const TANKC = [0.3, 0.5, 0.2, 1];
 // ---- Round 2 (owner's picks and notes, 2026-10-19): picked Acid stages show only the pick; Speed, Slowing and the Retrofits are redesigned
 // so they rebuild the plant's structure rather than add small parts.
-P2.intro = "Round 7: the mist head now sits on the end of each sprayer, and the stills are rounder (a capsule base for the twin stills, an octagon for a single pump hall) so the mastery isn't blocky. Round 6: the ring pipes now run under the deck's frame (the frame is drawn over them). Round 5: the Ring Main is now a visible ring outside the columns; the Twin Nozzles' sprayers sit on stationary stills (the stills and the pump hall no longer turn, only the sprayers do); the Thick Gel is a thin pale coat; the Cooling Coil lies under the nozzle and the silos; and the Mist Nozzle's head is a refined ribbed head with a fine mist. Round 4: with the Twin Stills the two independent sprayers now grow from the two stills (one each) instead of from a hub between them, and the Pump Hall becomes the base under both stills. Round 3: your picks drawn with your notes applied: the Twin Nozzles are two independent sprayers that each turn to their own enemy, every column change (gel, glue, foam) applies to all the columns, and the pump house is a new design. High-Flow Pump shows its three options again. Round 2: your Acid picks drawn (the gold dot beside the columns is gone), and Speed, Slowing and the three Retrofits redesigned: they now rebuild the plant's structure (bigger stills and columns, a fourth column, ring mains, twin stills, a pump hall, glue towers, domes and cooling towers) instead of adding small parts here and there. Use the build preview to check combinations.";
-P2.picks = { p0s0: "B", p0s1: "C", p0s2: "C", p0s3: "A", p0s4: "C", p1s0: "B", p1s1: "C", p1s2: "B", p1s3: "A", p1s4: "B", p2s0: "B", p2s1: "A", p2s2: "B", p2s3: "C", p2s4: "A", r0: "A", r1: "A", r2: "A" };
+P2.intro = "Round 8: Constant Spray replaces Twin Nozzles (your note), as agreed on 2026-10-26: the nozzle sprays without stopping and sweeps a 120° fan centred on its target, one pass per spray interval, soaking or topping up everything the jet crosses (4 s soak). Pick one of three heads. The jet is short-lived drops, and the fan's edge shows faintly. Round 7: the mist head now sits on the end of each sprayer, and the stills are rounder (a capsule base for the twin stills, an octagon for a single pump hall) so the mastery isn't blocky. Round 6: the ring pipes now run under the deck's frame (the frame is drawn over them). Round 5: the Ring Main is now a visible ring outside the columns; the Twin Nozzles' sprayers sit on stationary stills (the stills and the pump hall no longer turn, only the sprayers do); the Thick Gel is a thin pale coat; the Cooling Coil lies under the nozzle and the silos; and the Mist Nozzle's head is a refined ribbed head with a fine mist. Round 4: with the Twin Stills the two independent sprayers now grow from the two stills (one each) instead of from a hub between them, and the Pump Hall becomes the base under both stills. Round 3: your picks drawn with your notes applied: the Twin Nozzles are two independent sprayers that each turn to their own enemy, every column change (gel, glue, foam) applies to all the columns, and the pump house is a new design. High-Flow Pump shows its three options again. Round 2: your Acid picks drawn (the gold dot beside the columns is gone), and Speed, Slowing and the three Retrofits redesigned: they now rebuild the plant's structure (bigger stills and columns, a fourth column, ring mains, twin stills, a pump hall, glue towers, domes and cooling towers) instead of adding small parts here and there. Use the build preview to check combinations.";
+P2.picks = { p0s0: "B", p0s1: "C", p0s2: "C", p0s3: "A", p0s4: "C", p1s0: "B", p1s1: "C", p1s2: "B", p1s3: "A", p2s0: "B", p2s1: "A", p2s2: "B", p2s3: "C", p2s4: "A", r0: "A", r1: "A", r2: "A" };
 P2.retrofits.forEach((rf, ri) => { const pk = P2.picks["r" + ri]; if (pk) rf.options = rf.options.filter((o) => o.key === pk); });
 P2.paths.forEach((pa, pi) => pa.steps.forEach((st, k) => { const pk = P2.picks["p" + pi + "s" + k]; if (pk) st.options = st.options.filter((o) => o.key === pk); }));
 
@@ -1194,7 +1224,7 @@ function clampBuild(lv, changed) { // two paths at most; once one reaches 3, the
 function card(id, opt, lv, r, root) {
   const p = el("div", "panel"), cv = cardCanvas(260, 180);
   const comp = () => compose(layersFor(lv, r, { id, opt }));
-  register(cv, TW, () => comp().look, () => comp().anim, 120);
+  register(cv, TW, () => comp().look, () => comp().anim, P2.sCard || 120);
   p.appendChild(cv); p.appendChild(el("div", "meta", `<span class="key">${opt.key}</span><b>${opt.name}</b>`)); p.appendChild(el("div", "desc", opt.desc));
   const b = el("button", "pick"); const sync = () => { const on = S2.picks[id] === opt.key; b.classList.toggle("on", on); b.textContent = (on ? "Picked " : "Pick ") + opt.key; };
   b.onclick = () => { S2.picks[id] = S2.picks[id] === opt.key ? null : opt.key; save2(); refresh2(); }; b._sync = sync; sync(); p.appendChild(b); root.appendChild(p);
@@ -1204,7 +1234,7 @@ function notesBox(key, label, root) { const lab = el("label", "notes", label); c
 
 function buildPreview(root) {
   const box = el("section", "build"), cv = cardCanvas(560, 360), ctrls = el("div", "ctrls");
-  register(cv, TW, () => compose(layersFor(S2.build.lv, S2.build.r)).look, () => compose(layersFor(S2.build.lv, S2.build.r)).anim, 210);
+  register(cv, TW, () => compose(layersFor(S2.build.lv, S2.build.r)).look, () => compose(layersFor(S2.build.lv, S2.build.r)).anim, P2.sBuild || 210);
   box.appendChild(cv); box.appendChild(ctrls);
   ctrls.appendChild(el("div", "combo-head", "Build preview"));
   const roles = [];
