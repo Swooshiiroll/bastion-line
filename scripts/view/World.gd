@@ -73,6 +73,9 @@ var selected_tower = null
 var hover_cell := Vector2i(-1, -1)
 var hover_pos := Vector2(-1000, -1000)
 var hover_enemy = null
+## The enemy the player clicked (#116): it keeps a ring, its card stays pinned in the bottom bar, and lines show the towers
+## firing at it. Selecting a tower clears it, and so does its death or leak.
+var selected_enemy = null
 var mouse_in_field := false
 var force_hover := Vector2i(-99, -99)
 var anim_t := 0.0
@@ -145,6 +148,13 @@ func _emit_jets() -> void:
 			fx.jet(from, d, reach, ac, k, false, ChemicalPlantArt.JET_FLIGHT)
 
 
+## The enemy whose card the bottom bar shows: the selected one while it lives, else the one under the cursor.
+func card_enemy():
+	if selected_enemy != null and selected_enemy.alive:
+		return selected_enemy
+	return hover_enemy
+
+
 ## Advances the simulation by real time `delta` at the given speed and returns the drained events.
 func simulate(delta: float, speed: int) -> Array:
 	_accum += delta * float(speed)
@@ -168,6 +178,8 @@ func _process(delta: float) -> void:
 	anim_t += delta
 	if game == null:
 		return
+	if selected_enemy != null and (not selected_enemy.alive or selected_tower != null):
+		selected_enemy = null
 	if interactive:
 		if _last_mouse != null:
 			_mouse = make_input_local(_last_mouse).position

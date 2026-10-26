@@ -14,6 +14,7 @@ come back here with `tools/design_pull.mjs`; carry them into `design/tower_roste
 ## Gun Turret
 id: gun_turret · class: Assault · weapon: Ballistic · build: 75 cr · status: new · branches: Power (armour-piercing), Range/Visibility (precision), Multi-Target
 A basic rotating machine gun turret. "It's a machine gun, Private!"
+Tagline: Rotating machine gun: fast, cheap, hits air and ground.
 
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
@@ -40,6 +41,7 @@ A basic rotating machine gun turret. "It's a machine gun, Private!"
 ## Mortar Tower
 id: mortar_tower · class: Assault · weapon: Explosive · build: 150 cr · status: new · branches: Power/Penetration, Speed/Range (more tubes, more reach), Blast Radius/Multi-Target (cluster shells)
 Lobs high-explosive shells at nearby enemies. "Toob."
+Tagline: Lobs shells over the track for splash damage on the ground.
 
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
@@ -66,6 +68,7 @@ Lobs high-explosive shells at nearby enemies. "Toob."
 ## Laser Tower
 id: laser_tower · class: Assault · weapon: Energy · build: 250 cr · status: new · branches: Power (faster, higher ramp), Multi-Target (prism split), Range/Targeting (long-range lance, shortened by the owner)
 A High-Energy Laser Emitter affixed to a rotating turret. "It does more than just blind the enemy, that's for sure."
+Tagline: A beam that ramps up the longer it holds one target.
 
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
@@ -92,6 +95,7 @@ A High-Energy Laser Emitter affixed to a rotating turret. "It does more than jus
 ## Rocket Salvo
 id: rocket_salvo · class: Assault · weapon: Explosive · build: 200 cr · status: new · branches: Power (heavier warheads), Range/Target Acquisition (homing), Reload/Payload (more rockets, faster reloads)
 Launches a volley of rockets at oncoming enemies. "Instead of shooting bullets, it shoots very angry telephone poles that hate absolutely everything."
+Tagline: Fires a salvo of rockets, each at a different enemy.
 
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
@@ -118,6 +122,7 @@ Launches a volley of rockets at oncoming enemies. "Instead of shooting bullets, 
 ## Anti-Aircraft Turret
 id: anti_aircraft_turret · class: Assault · weapon: Ballistic · build: 150 cr · status: new · branches: Range (area denial), Power/Blast Radius (flak shells), Speed (barrels and rate of fire)
 A fully automatic anti-aircraft gun. "We don't need a gun, or a nug!"
+Tagline: Flak that shreds flyers; it ignores ground enemies.
 
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
@@ -144,6 +149,7 @@ A fully automatic anti-aircraft gun. "We don't need a gun, or a nug!"
 ## Artillery Cannon
 id: artillery_cannon · class: Assault · weapon: Explosive · build: 300 cr · status: new · branches: Power (damage and blast, then armour piercing), Speed (faster reload), Special Effects (shell types)
 A large-bore cannon that fires high-explosive shells very long distances. "It's not DiGiorno..."
+Tagline: Long-range shells on a point of the track you choose.
 
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
@@ -170,6 +176,7 @@ A large-bore cannon that fires high-explosive shells very long distances. "It's 
 ## Railgun
 id: railgun · class: Assault · weapon: Ballistic · build: 500 cr · status: new · branches: Power (boss slayer and overcharge), Range/Speed (mostly recharge), Special Effects (shatter, penetration, ion trail)
 A large cannon with magnetically polarized rails that launch a large projectile extremely far, extremely fast. "Known to cause cancer in the state of California."
+Tagline: A slow, piercing shot through every enemy in a line.
 
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
@@ -196,6 +203,7 @@ A large cannon with magnetically polarized rails that launch a large projectile 
 ## Tesla Tower
 id: tesla_tower · class: Assault · weapon: Energy · build: 250 cr · status: new · branches: Power/Damage (raw voltage, stun, overload), Range/Chaining (storm field), Speed (faster discharges)
 A large metal disk mounted atop of a large tower that generates high-voltage electrical arcs that damage incoming enemies. "It was built in a cave with a box of scraps."
+Tagline: Lightning that chains from enemy to enemy.
 
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
@@ -222,6 +230,7 @@ A large metal disk mounted atop of a large tower that generates high-voltage ele
 ## Drone Bay
 id: drone_bay · class: Assault · weapon: Deployable · build: 300 cr · status: new · branches: Power (damage), Weaponry (loadouts, switchable on the bay's panel), Speed (rate of fire)
 Houses combat drones that hunt after enemies. "The military really took the idea of same-day delivery and ran with it."
+Tagline: Launches drones that hunt enemies across the map.
 
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
@@ -246,6 +255,7 @@ Houses combat drones that hunt after enemies. "The military really took the idea
 ## CAS Gunship
 id: cas_gunship · class: Assault · weapon: Deployable · build: 650 cr · status: new · branches: Light gun (gatling), built in, Medium gun (autocannon), Heavy gun (missiles)
 A large slow-flying cargo plane capable of being with with a wide range of weaponry. "You know that feeling you get when its raining outside, but then the rain suddenly goes from being water to large metal bullets being shot at you from that giant plane above you? Yeah, I hate that feeling."
+Tagline: A gunship that circles a spot you choose, guns blazing.
 
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
@@ -272,6 +282,7 @@ A large slow-flying cargo plane capable of being with with a wide range of weapo
 ## Mine Layer
 id: mine_layer · class: Defense · weapon: Explosive · build: 450 cr · status: new · branches: Power/Damage, Production Speed (faster laying, bigger cap), Range (toss distance)
 Manufactures and tosses explosive mines onto the track that explode when an enemy passes over them. "You know it's a party when the high-speed confetti start flying in every direction."
+Tagline: Throws mines onto the track that burst under enemies.
 
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
@@ -298,6 +309,7 @@ Manufactures and tosses explosive mines onto the track that explode when an enem
 ## Chemical Plant
 id: chemical_plant · class: Support · weapon: Chemical · build: 250 cr · status: new · branches: Damage/Armor stripping (acid), Speed (spray rate and soak length), Slowing (gel)
 A chemical manufacturing facility that produces and sprays chemicals on nearby enemies. "Known to cause cancer in the state of California."
+Tagline: Sprays acid that strips armour, burns and slows.
 
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
@@ -324,6 +336,7 @@ A chemical manufacturing facility that produces and sprays chemicals on nearby e
 ## Boost Tower
 id: boost_tower · class: Support · weapon: None · build: 400 cr · status: new · branches: Damage boost, Speed boost (fire rate), Range boost
 Towers in range of the Rally Beacon are amped up and given stat boosts. "Are you feeling it now Mr. Krabs?"
+Tagline: Boosts the damage, fire rate and range of nearby towers.
 
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
@@ -350,6 +363,7 @@ Towers in range of the Rally Beacon are amped up and given stat boosts. "Are you
 ## Radar Tower
 id: radar_tower · class: Utility · weapon: Energy · build: 575 cr · status: new · branches: Power/Range (range, then radiation), Speed/Frequency, Special Targeting (unmasking)
 Radar is able to detect and alert nearby towers of stealthy or otherwise hidden enemies. "I've lost the bleeps, I've lost the sweeps, and I've lost the creeps."
+Tagline: Pings to reveal cloaked and burrowed enemies.
 
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
@@ -376,6 +390,7 @@ Radar is able to detect and alert nearby towers of stealthy or otherwise hidden 
 ## Cryo Tower
 id: cryo_tower · class: Support · weapon: Field · build: 150 cr · status: new · branches: Slowing (deeper, permanent, freeze), Power/Range (frostbite and range), Speed (faster waves and travel)
 Produces a wave of sub-zero temperature gasses that stunt the mobility of enemies within range. "The military had to put restrictions on these machines after a group of soldiers got caught having a snowball fight in the middle of a heatwave."
+Tagline: Waves of cold that slow everything around it.
 
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
@@ -402,6 +417,7 @@ Produces a wave of sub-zero temperature gasses that stunt the mobility of enemie
 ## Shockwave Generator
 id: shockwave_generator · class: Assault · weapon: Field · build: 450 cr · status: new · branches: Power/Range (bigger, stronger waves), Speed (more waves), Effect (barrier shatter)
 Generates powerful shockwaves by creating small nuclear explosion. "Radioactive fallout? What radioactive fallout?"
+Tagline: Blasts that hit every enemy around it, air and ground.
 
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
@@ -428,6 +444,7 @@ Generates powerful shockwaves by creating small nuclear explosion. "Radioactive 
 ## Scrapyard
 id: scrapyard · class: Utility · weapon: None · build: 875 cr · status: new · branches: Passive Income, Kill Income (bonus field), Discounts (towers near it)
 Various collections of scrap metal sold at a profit. "One mans toxic waste is another mans potpourri"
+Tagline: Earns credits every round; its upgrades grow your economy.
 
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
@@ -454,6 +471,7 @@ Various collections of scrap metal sold at a profit. "One mans toxic waste is an
 ## Magneto Tower
 id: magneto_tower · class: Defense · weapon: Field · build: 525 cr · status: new · branches: Pull Strength (stronger slow, heavies too), Field Size, Polarity (strip, then permanent, then repel)
 A massive electromagnet that magnetically pulls against enemies in range, slowing them down and pulling off armor. "Yeah, science!"
+Tagline: A magnetic field that slows enemies and drags them back.
 
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
@@ -480,6 +498,7 @@ A massive electromagnet that magnetically pulls against enemies in range, slowin
 ## Tractor Tower
 id: tractor_tower · class: Defense · weapon: Energy · build: 575 cr · status: new · branches: Pull Distance, Recharge, Grip
 A dish-mounted emitter that locks a tractor beam onto a single enemy and hauls it back down the track before letting go. "You're my friend now."
+Tagline: Grabs one enemy and hauls it back along the track.
 
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|
@@ -506,6 +525,7 @@ A dish-mounted emitter that locks a tractor beam onto a single enemy and hauls i
 ## Augmentation Tower
 id: augmentation_tower · class: Support · weapon: None · build: 650 cr · status: new · branches: Energy Conversion, Critical Hits, Ricochet
 Neighboring towers are given special augmentations to their weaponry through mysterious means. "So my 12-guage shotgun shoots thermonuclear explosives now apparently."
+Tagline: Gives nearby towers a chance of critical hits.
 
 | Tier | Path | Name | Cost | Stats | Effect | Status |
 |---|---|---|---|---|---|---|

@@ -133,7 +133,8 @@ func _card(type: String, d: Dictionary) -> Button:
 	b.clip_contents = true
 	b.tooltip_text = "%s  (%s)\n%s" % [d.name, Enemies.role_label(d), d.blurb]
 	var r := float(d.radius)
-	var icon := DrawControl.new(func(ci): Draw.enemy(ci, type, ci.size / 2.0, Vector2.RIGHT, r, Time.get_ticks_msec() / 1000.0, false, 0.0, clampf(13.0 / r, 0.35, 1.1)), Vector2(CARD.x, 30), true)
+	# Still icons (#116): 34 animated enemies redrawn every frame slowed the game while the Spawner was open.
+	var icon := DrawControl.new(func(ci): Draw.enemy(ci, type, ci.size / 2.0, Vector2.RIGHT, r, 0.0, false, 0.0, clampf(13.0 / r, 0.35, 1.1)), Vector2(CARD.x, 30), false)
 	icon.position = Vector2(0, 1)
 	b.add_child(icon)
 	var name_l := UiKit.label(str(d.name), 9, UiKit.DIM, HORIZONTAL_ALIGNMENT_CENTER)
@@ -146,7 +147,15 @@ func _card(type: String, d: Dictionary) -> Button:
 	return b
 
 
+## The toggles' state when they were last styled.
+var _state := ""
+
 func refresh(_delta: float) -> void:
+	# Restyle the toggles only when one changes (#116): new style boxes every frame were a large share of the cost.
+	var state := "%s|%d|%s|%d" % [screen.sandbox_research_mode, screen.spawn_count, str(screen.spawn_mods), screen.call_round]
+	if state == _state:
+		return
+	_state = state
 	for mode in _research_btns:
 		_style_toggle(_research_btns[mode], screen.sandbox_research_mode == mode)
 	for c in _count_btns:

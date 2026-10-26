@@ -150,8 +150,8 @@ func refresh(_delta: float) -> void:
 		key = "t:%d:%d:%s:%s:%d:%d:%.2f%.2f%.2f%.2f%.2f" % [t.get_instance_id(), t.retrofit, str(t.depth), t.mastered, t.mode, t.priority, t.buff_dmg, t.buff_rate, t.buff_range, t.discount, t.refund_field]
 	elif build != "":
 		key = "b:" + build
-	elif w.hover_enemy != null and w.hover_enemy.alive:
-		key = "e:%d" % w.hover_enemy.id
+	elif w.card_enemy() != null and w.card_enemy().alive:
+		key = "e:%d" % w.card_enemy().id
 	elif w.mouse_in_field and g.tower_at.has(w.hover_cell):
 		key = "h:%d" % g.tower_at[w.hover_cell].get_instance_id()
 	elif w.mouse_in_field and _tile_kind(w.hover_cell) != "":
@@ -492,7 +492,7 @@ func _tile_card(c: Vector2i) -> void:
 
 
 func _enemy_card() -> void:
-	var e = screen.world.hover_enemy
+	var e = screen.world.card_enemy()
 	var etype: String = e.type
 	var r: float = e.radius
 	var look: String = e.look_type()
@@ -529,8 +529,8 @@ func _update_live() -> void:
 	var t = w.selected_tower
 	if _live_labels.has("kills") and t != null:
 		(_live_labels.kills as Label).text = "Kills %d  ·  Damage %d" % [t.kills, int(t.damage_dealt)]
-	if _live_labels.has("enemy") and w.hover_enemy != null:
-		var e = w.hover_enemy
+	if _live_labels.has("enemy") and w.card_enemy() != null:
+		var e = w.card_enemy()
 		var extra := ""
 		if e.flying:
 			extra += "  ·  flying"

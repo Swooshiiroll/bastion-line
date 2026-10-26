@@ -464,6 +464,8 @@ const AIMED := ["gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "an
 static var _extra: Array = []
 const TURRET_BUCKETS := 16
 const TURRET_SCALE := 2.5
+## How long the permanent-shred mark (a broken shield) shows after the shred last grew, fading over its last second (#116).
+const SHRED_MARK := 3.0
 ## How far a turret's static layers reach from its centre (in units of s), so the bake doesn't cut them off (#90). The
 ## default fits most towers; the long lances and barrels are measured over every look and aim, with a little to spare.
 const TURRET_HALF := {"laser_tower": 44.0, "anti_aircraft_turret": 36.0, "railgun": 36.0}
@@ -968,10 +970,19 @@ static func enemy_status(ci: CanvasItem, e, t: float) -> void:
 		var hex := ngon(6, 1.0, t * 0.6)
 		fill(ci, e.pos, hex, Color(0.4, 0.7, 1.0, 0.07 + 0.08 * f), 0.0, r + 6.0)
 		outline(ci, e.pos, hex, Color(0.55, 0.8, 1.0, 0.3 + 0.45 * f), 1.4, 0.0, r + 6.0)
-	if e.armor_shred > 0.0 and e.armor > 0.0:
+	# Permanent armour shred: a broken shield that fades away a few seconds after the shred last grew (#116).
+	if e.armor_shred > 0.0 and e.armor > 0.0 and e.shred_age < SHRED_MARK:
 		var p: Vector2 = e.pos + Vector2(r * 0.7, -r * 0.7)
-		line(ci, p + Vector2(-3, -3), p + Vector2(3, 3), Color(1.0, 0.35, 0.35), 1.6, true)
-		line(ci, p + Vector2(-1, -4), p + Vector2(4, 1), Color(1.0, 0.35, 0.35), 1.6, true)
+		var sa := clampf(SHRED_MARK - float(e.shred_age), 0.0, 1.0)
+		var sc := Color(1.0, 0.4, 0.35, 0.95 * sa)
+		var left := PackedVector2Array([Vector2(-3.0, -3.5), Vector2(-0.3, -3.5), Vector2(0.6, -1.5), Vector2(-0.6, 0.5), Vector2(0.3, 2.2), Vector2(0.0, 4.0), Vector2(-3.0, 0.5)])
+		var right := PackedVector2Array([Vector2(0.4, -3.5), Vector2(3.0, -3.5), Vector2(3.0, 0.5), Vector2(0.4, 3.6), Vector2(1.1, 2.2), Vector2(0.0, 0.5), Vector2(1.2, -1.5)])
+		for i in left.size():
+			left[i] = p + left[i] + Vector2(-0.8, 0.3)
+		for i in right.size():
+			right[i] = p + right[i] + Vector2(0.8, -0.3)
+		poly(ci, left, sc)
+		poly(ci, right, sc)
 	if e.vuln_timer > 0.0:
 		arc_segments(ci, e.pos, r + 4.0, 4, 0.9, t * 2.0, Color(0.85, 0.6, 1.0, 0.8), 1.4)
 	if e.stun_timer > 0.0:

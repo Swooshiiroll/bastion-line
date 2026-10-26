@@ -1072,9 +1072,13 @@ func _tree_and_aim_checks(g, u) -> int:
 	var before: Vector2 = art.aim_point
 	await _key(KEY_M)
 	fails += _expect(screen.world.aim_tower == art, "M starts aim mode")
+	await _wait(0.1)
+	fails += _expect(not hud.popout("tower").visible and not hud.is_open("shop"), "while aiming, the menus close and the tower panel hides (#116)")
 	await _shot("rework_u_move_target")
 	await _click(screen.world.base_pos + Vector2((c1.x + 0.5) * 48.0, (c1.y + 0.5) * 48.0))
 	fails += _expect(screen.world.aim_tower == null and art.aim_point.distance_to(Grid.cell_center(c1)) < 40.0 and art.aim_point != before, "a click sets the target and ends aim mode")
+	await _wait(0.1)
+	fails += _expect(hud.popout("tower") != null and hud.popout("tower").visible, "and the tower panel comes back")
 	screen.world.selected_tower = art
 	await _wait(0.2)
 	var set_at: Vector2 = art.aim_point
