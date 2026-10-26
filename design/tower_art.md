@@ -1091,6 +1091,17 @@ Nozzles upgrade to Constant Spray"). The rules are in #104.
 - With the Twin Stills, both stills keep their gold rings and the single head turns on the hub between them.
 - The page's store key is now `bl-tower-art-p2-chem-r8`.
 
+**Picks and notes (owner, round 8):**
+- **Speed M: C, Sprinkler Turret.** Every other pick is unchanged: Acid 1 B, 2 C, 3 C, 4 A, M C; Speed 1 B, 2 C, 3 B,
+  4 A; Slowing 1 B, 2 A, 3 B, 4 C, M A; Retrofits A, A, A.
+- **Notes:** "remove the thin line around the outside. The mist head should turn the stream into a mist cloud".
+- **Round 9:**
+  - The fan's faint edge is gone.
+  - With the Mist Nozzle (the ribbed Fan Head on the sprayer's end), Constant Spray's jet leaves the head as a mist cloud
+    instead of a stream of drops. It's soft green puffs that billow out along the sweep, spread, rise a little and thin
+    as they go. Without the Mist Nozzle the jet stays a stream.
+  - The page's store key is `bl-tower-art-p2-chem-r9`.
+
 ### Boost Tower (second pass)
 
 **Retrofits kept, stats stacking (the carpet rule).** Signal Booster (radius 168 px and +5% to all three boosts) overlaps the paths' boost steps; it is kept and the +5% stacks on top.
