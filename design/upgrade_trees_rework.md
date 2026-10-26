@@ -31,11 +31,11 @@ A basic rotating machine gun turret. "It's a machine gun, Private!"
 | 5 | b | Rifled Barrels | 170 |  | +25 range; crit chance 15% | new |
 | 6 | b | Rangefinder | 305 |  | +20 range; crit chance 20% | new |
 | M | b | Targeting Computer | 980 |  | 230 range in all (+25); crit chance 30% | new |
-| 3 | c | Swivel Mount | 30 |  | +0.1 shots/s (1.3); turns onto a new target faster, and doesn't fire at enemies already about to die (no wasted rounds on swarms and holograms) | new |
-| 4 | c | Side Gun | 220 |  | +0.1 shots/s (1.4); a small side gun fires at a second target at 50% damage | new |
-| 5 | c | Twin Mount | 495 |  | +0.1 shots/s (1.5); 2 targets at full damage | new |
-| 6 | c | Belt Feed | 660 |  | +0.3 shots/s on every barrel (1.8) | new |
-| M | c | Triple Mount | 4615 |  | +0.1 shots/s (1.9); 3 targets; the extra barrels go for the weakest enemies in range (swarms, holograms) | new |
+| 3 | c | Swivel Mount | 20 |  | +0.05 shots/s (1.25); turns onto a new target faster, and doesn't fire at enemies already about to die (no wasted rounds on swarms and holograms) | new |
+| 4 | c | Side Gun | 190 |  | +0.05 shots/s (1.3); a small side gun fires at a second target at 50% damage | new |
+| 5 | c | Twin Mount | 410 |  | +0.05 shots/s (1.35); 2 targets at full damage | new |
+| 6 | c | Belt Feed | 660 |  | +0.3 shots/s on every barrel (1.65) | new |
+| M | c | Triple Mount | 3955 |  | +0.05 shots/s (1.7); 3 targets; the extra barrels go for the weakest enemies in range (swarms, holograms) | new |
 
 ## Mortar Tower
 id: mortar_tower · class: Assault · weapon: Explosive · build: 150 cr · status: new · branches: Power/Penetration, Speed/Range (more tubes, more reach), Blast Radius/Multi-Target (cluster shells)

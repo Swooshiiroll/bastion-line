@@ -109,11 +109,11 @@ to the Pulse Turret's 18, in fewer, harder hits). Air and ground.
 
 | Step | Name | Cost | Effect (proposed) |
 |---|---|---|---|
-| 1 | Swivel Mount | 30 | +0.1 shots/s (1.3); turns onto a new target faster, and doesn't fire at enemies already about to die (no wasted rounds on swarms and holograms) |
-| 2 | Side Gun | 220 | +0.1 shots/s (1.4); a small side gun fires at a second target at 50% damage |
-| 3 (primary) | Twin Mount | 495 | +0.1 shots/s (1.5); **2 targets** at full damage |
-| 4 | Belt Feed | 660 | +0.3 shots/s on every barrel (1.8) |
-| Mastery | Triple Mount | 4,615 | +0.1 shots/s (1.9); **3 targets**; the extra barrels go for the weakest enemies in range (swarms, holograms) |
+| 1 | Swivel Mount | 20 | +0.05 shots/s (1.25); turns onto a new target faster, and doesn't fire at enemies already about to die (no wasted rounds on swarms and holograms) |
+| 2 | Side Gun | 190 | +0.05 shots/s (1.3); a small side gun fires at a second target at 50% damage |
+| 3 (primary) | Twin Mount | 410 | +0.05 shots/s (1.35); **2 targets** at full damage |
+| 4 | Belt Feed | 660 | +0.3 shots/s on every barrel (1.65) |
+| Mastery | Triple Mount | 3,955 | +0.05 shots/s (1.7); **3 targets**; the extra barrels go for the weakest enemies in range (swarms, holograms) |
 
 **Combinations (primary + secondary capped at 2):**
 - **Power + 2 Multi:** an AP main gun with a side gun for the small stuff.
