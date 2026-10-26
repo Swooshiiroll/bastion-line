@@ -21,21 +21,21 @@ A basic rotating machine gun turret. "It's a machine gun, Private!"
 | 2 | r1 | Water-Cooled Barrel | 40 |  | Fire rate 1.2 to 1.5/s. | new |
 | 2 | r2 | Shock Rounds | 5 |  | Every hit has a 5% chance to stun its target for 0.3 s. | new |
 | 2 | r3 | Incendiary Rounds | 25 |  | Hits set the target burning for 3 damage per second for 2 s. Proposed: a new hit refreshes the burn rather than stacking it, so it adds 3 damage per second to the current target. | new |
-| 3 | a | Heavier Rounds | 55 |  | +6 damage | new |
-| 4 | a | Hardened Tips | 40 |  | Its hits ignore 2 points of armour | new |
-| 5 | a | AP Rounds | 405 |  | Ignores 50% of armour; +6 damage | new |
-| 6 | a | Tungsten Core | 1085 |  | Ignores 75% of armour; +8 damage | new |
-| M | a | Sabot Rounds | 2475 |  | Ignores armour fully; 44 damage per hit | new |
+| 3 | a | Heavier Rounds | 55 |  | +6 damage (22) | new |
+| 4 | a | Hardened Tips | 165 |  | +6 damage (28); its hits ignore 2 points of armour | new |
+| 5 | a | AP Rounds | 530 |  | Ignores 50% of armour; +8 damage (36) | new |
+| 6 | a | Tungsten Core | 1365 |  | Ignores 75% of armour; +10 damage (46) | new |
+| M | a | Sabot Rounds | 3555 |  | Ignores armour fully; +12 damage (58 per hit) | new |
 | 3 | b | Long Barrel | 25 |  | +20 range | new |
 | 4 | b | Tracer Rounds | 60 |  | +10 range; 10% chance of a critical hit (double damage); visible tracer lines | new |
 | 5 | b | Rifled Barrels | 170 |  | +25 range; crit chance 15% | new |
 | 6 | b | Rangefinder | 305 |  | +20 range; crit chance 20% | new |
 | M | b | Targeting Computer | 980 |  | 230 range in all (+25); crit chance 30% | new |
-| 3 | c | Swivel Mount | 15 |  | Turns onto a new target faster, and doesn't fire at enemies already about to die (no wasted rounds on swarms and holograms) | new |
-| 4 | c | Side Gun | 165 |  | A small side gun fires at a second target at 50% damage | new |
-| 5 | c | Twin Mount | 330 |  | 2 targets at full damage | new |
-| 6 | c | Belt Feed | 660 |  | +0.3 shots/s on every barrel | new |
-| M | c | Triple Mount | 3300 |  | 3 targets; the extra barrels go for the weakest enemies in range (swarms, holograms) | new |
+| 3 | c | Swivel Mount | 30 |  | +0.1 shots/s (1.3); turns onto a new target faster, and doesn't fire at enemies already about to die (no wasted rounds on swarms and holograms) | new |
+| 4 | c | Side Gun | 220 |  | +0.1 shots/s (1.4); a small side gun fires at a second target at 50% damage | new |
+| 5 | c | Twin Mount | 495 |  | +0.1 shots/s (1.5); 2 targets at full damage | new |
+| 6 | c | Belt Feed | 660 |  | +0.3 shots/s on every barrel (1.8) | new |
+| M | c | Triple Mount | 4615 |  | +0.1 shots/s (1.9); 3 targets; the extra barrels go for the weakest enemies in range (swarms, holograms) | new |
 
 ## Mortar Tower
 id: mortar_tower · class: Assault · weapon: Explosive · build: 150 cr · status: new · branches: Power/Penetration, Speed/Range (more tubes, more reach), Blast Radius/Multi-Target (cluster shells)

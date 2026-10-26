@@ -73,7 +73,7 @@ The summary lists each tower's stock price and =DPS, and what each path's master
 
 | Tower | Stock cr | Stock =DPS | A mastery: cr / =DPS | B mastery: cr / =DPS | C mastery: cr / =DPS |
 |---|---|---|---|---|---|
-| Gun Turret | 75 | 19.2 | 4135 / 52.8 | 1615 / 19.2 | 4545 / 72.0 |
+| Gun Turret | 75 | 19.2 | 5745 / 69.6 | 1615 / 19.2 | 6095 / 91.2 |
 | Mortar Tower | 150 | 18.0 | 5500 / 38.4 | 9065 / 51.0 | 7580 / 18.0 |
 | Rocket Salvo | 200 | 22.8 | 8400 / 55.2 | 3875 / 22.8 | 9955 / 89.4 |
 | Laser Tower | 250 | 75.0 | 8145 / 200.0 | 8980 / 243.8 | 3705 / 75.0 |
@@ -107,20 +107,20 @@ air: yes · ground: yes · size: 1 · damage_kind: physical
 | r2 | Shock Rounds | 5 | stun_chance +0.05 · stun_time +0.3 | 19.2 | 80 | 24.00 |
 | r3 | Incendiary Rounds | 25 | ignite_dps +3 · ignite_time +2 | 19.2 | 100 | 19.20 |
 | a1 | Heavier Rounds | 55 | damage +6 | 26.4 | 130 | 20.31 |
-| a2 | Hardened Tips | 40 | armor_flat +2 | 26.4 | 170 | 15.53 |
-| a3 | AP Rounds | 405 | armor_pct +0.5 · damage +6 | 33.6 | 575 | 5.84 |
-| a4 | Tungsten Core | 1085 | armor_pct +0.25 · damage +8 | 43.2 | 1660 | 2.60 |
-| am | Sabot Rounds | 2475 | armor_pct +0.25 · damage +8 | 52.8 | 4135 | 1.28 |
+| a2 | Hardened Tips | 165 | armor_flat +2 · damage +6 | 33.6 | 295 | 11.39 |
+| a3 | AP Rounds | 530 | armor_pct +0.5 · damage +8 | 43.2 | 825 | 5.24 |
+| a4 | Tungsten Core | 1365 | armor_pct +0.25 · damage +10 | 55.2 | 2190 | 2.52 |
+| am | Sabot Rounds | 3555 | armor_pct +0.25 · damage +12 | 69.6 | 5745 | 1.21 |
 | b1 | Long Barrel | 25 | range +20 | 19.2 | 100 | 19.20 |
 | b2 | Tracer Rounds | 60 | range +10 · crit +0.1 · tracers | 19.2 | 160 | 12.00 |
 | b3 | Rifled Barrels | 170 | range +25 · crit +0.05 | 19.2 | 330 | 5.82 |
 | b4 | Rangefinder | 305 | range +20 · crit +0.05 | 19.2 | 635 | 3.02 |
 | bm | Targeting Computer | 980 | range +25 · crit +0.1 | 19.2 | 1615 | 1.19 |
-| c1 | Swivel Mount | 15 | swivel | 19.2 | 90 | 21.33 |
-| c2 | Side Gun | 165 | side_gun +0.5 | 28.8 | 255 | 11.29 |
-| c3 | Twin Mount | 330 | multishot +2 · side_gun -0.5 | 38.4 | 585 | 6.56 |
-| c4 | Belt Feed | 660 | rate +0.3 | 48.0 | 1245 | 3.86 |
-| cm | Triple Mount | 3300 | multishot +1 · weakest_extra | 72.0 | 4545 | 1.58 |
+| c1 | Swivel Mount | 30 | swivel · rate +0.1 | 20.8 | 105 | 19.81 |
+| c2 | Side Gun | 220 | side_gun +0.5 · rate +0.1 | 33.6 | 325 | 10.34 |
+| c3 | Twin Mount | 495 | multishot +2 · side_gun -0.5 · rate +0.1 | 48.0 | 820 | 5.85 |
+| c4 | Belt Feed | 660 | rate +0.3 | 57.6 | 1480 | 3.89 |
+| cm | Triple Mount | 4615 | multishot +1 · weakest_extra · rate +0.1 | 91.2 | 6095 | 1.50 |
 
 ### mortar_tower
 
