@@ -5,7 +5,6 @@ extends RefCounted
 ## `look` is the tower's look key "r|a|b|c": the Retrofit (-1 none, 0 signal booster, 1 crit link, 2 wide mast) and the depth of each
 ## path, 5 on the path that took its mastery. a = Damage boost, b = Speed boost, c = Range boost. A round drum with three struts and
 ## one disc-shaped module per path (orange, cyan, lime) that fades further toward gold with every step. The tower never turns.
-## Boosted towers wear a stack of chevrons per stat (`chevrons`).
 
 const Draw = preload("res://scripts/view/Draw.gd")
 
@@ -21,19 +20,6 @@ static func levels(look: String) -> Dictionary:
 	if p.size() < 4:
 		return {"r": -1, "D": 0, "S": 0, "R": 0}
 	return {"r": int(p[0]), "D": int(p[1]), "S": int(p[2]), "R": int(p[3])}
-
-
-## The chevrons a boosted tower shows for each stat: how many (by how strong the boost is) and their colour (gold at +50%).
-static func chevrons(ci: CanvasItem, p: Vector2, buffs: Array) -> void:
-	for st in 3:
-		var v: float = buffs[st]
-		if v <= 0.0:
-			continue
-		var n := 1 if v < 0.12 else (2 if v < 0.30 else (3 if v < 0.45 else 4))
-		var c1: Color = GOLD if v >= 0.495 else SCOL[st]
-		for j in n:
-			var q := p + Vector2((float(st) - 1.0) * 3.6 * 0.9, -(15.5 + float(j) * 2.6) * 0.75)
-			Draw.polyline(ci, PackedVector2Array([q + Vector2(-1.8, 1.1), q, q + Vector2(1.8, 1.1)]), c1, 1.3)
 
 
 static func draw(ci: CanvasItem, c: Vector2, _aim: float, s: float, t: float, _flash: float, look: String, acc: Color, _extra: Array) -> void:
