@@ -52,8 +52,8 @@ so write for players.
 - **Gun Turret paths (#104):** every Power step adds shot damage (+6, +6, +8, +10, +12: Sabot Rounds hit for 58, up from 44), and every Multi-Target step adds fire rate (+0.5 a step: Triple Mount fires 3.7 shots a second, up from 1.5). Their prices follow the pricing formula.
 - **Ripple Salvo's new look (#104):** the Rocket Salvo's Payload mastery is rebuilt as Launch Cells: an armoured deck of eight launch cells that never turns. The hatches slide open one after another as the salvo ripples out, each with a flash and a puff of smoke, and close again as it reloads; each rocket rises from its own cell.
 - **Constant Spray replaces Twin Nozzles (#104):**
-  - **The spray:** the Chemical Plant's Speed mastery now sprays without stopping. It sweeps a 120° fan centred on its target, one pass per spray interval (every 0.83 s), soaking every enemy the jet crosses and topping up ones already soaked. The soak lasts 4 s.
-  - **With the Mist Nozzle:** the fan widens to 160° and the jet leaves as a billowing mist cloud.
+  - **The spray:** the Chemical Plant's Speed mastery now sprays without stopping. It sweeps a 40° fan centred on its target, one pass per spray interval (every 0.83 s), soaking every enemy the jet crosses and topping up ones already soaked. The soak lasts 4 s.
+  - **With the Mist Nozzle:** the jet leaves as a billowing mist cloud.
   - **Look and price:** the plant gets a gold sprinkler turret whose spray bar follows the sweep. It costs 8,810.
 - **Tower fixes from the 26 Oct playtest (#110):**
   - **Mortar Tower:** each shell leaves the barrel that fires it (only that barrel flashes), and the tube turns to where the shell will land, so it fires in line. Leading moving targets can be switched off in the live tuner. Smoke Shells lose their outer ring.
@@ -63,6 +63,7 @@ so write for players.
   - **Tractor Tower:** the charge meter drains over a hold, and the tower turns toward its next target while it recharges.
   - **Augmentation Tower:** it takes 2×2 tiles, with the same reach.
   - **Other:** the Boost Tower (and the Tractor) no longer list stats twice. Boosted towers lose their chevrons. Artillery and CAS targets only show for the selected tower.
+- **Chemical Plant spray (#112):** the spray clears from an enemy as soon as it lands. Constant Spray narrows to a 40° sweep, and its jet and mist now fly out as their own drops and puffs, so they no longer swing with the nozzle. They also stop when the round ends instead of freezing in place.
 
 ### Behind the scenes
 - **Bot balance verdicts paused for the rework (#96):** the bot still plays every test game, but whether it wins, reaches endless or buys masteries no longer fails the tests until the tower rework is done; those results print as PAUSED.

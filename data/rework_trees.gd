@@ -2462,7 +2462,7 @@ static var TREES := {
 			{
 				"name": "Mist Nozzle",
 				"cost": 300,
-				"blurb": "Each spray also soaks one more unsoaked enemy next to the target; with Constant Spray it widens the fan to 160° and the jet becomes a mist cloud.",
+				"blurb": "Each spray also soaks one more unsoaked enemy next to the target; with Constant Spray the jet becomes a mist cloud.",
 				"set": {
 					"mist": true,
 				},
@@ -2579,7 +2579,7 @@ static var TREES := {
 				"mastery": {
 					"name": "Constant Spray",
 					"cost": 8810,
-					"blurb": "Sprays without stopping, sweeping a 120° fan centred on its target once per spray interval (every 0.83 s); every enemy the jet crosses is soaked or topped up, and the soak lasts 4 s. Replaces Twin Nozzles (#104)",
+					"blurb": "Sprays without stopping, sweeping a 40° fan centred on its target once per spray interval (every 0.83 s); every enemy the jet crosses is soaked or topped up, and the soak lasts 4 s. Replaces Twin Nozzles (#104)",
 					"set": {
 						"constant_spray": true,
 					},

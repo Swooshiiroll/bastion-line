@@ -1103,7 +1103,7 @@ length, armour stripped, damage over time, slow), using the same step multiplier
 
 **Retrofit (the player picks one; owner, 2026-10-15):**
 - **Pressure Pump, 150:** a spray every 1.33 s, and +20 range (150). Look: a pump with pressure gauges on the spray head.
-- **Mist Nozzle, 300:** each spray also soaks one more unsoaked enemy next to the target; with Constant Spray it widens the fan to 160° and the jet becomes a mist cloud. Look: a wide misting nozzle.
+- **Mist Nozzle, 300:** each spray also soaks one more unsoaked enemy next to the target; with Constant Spray the jet becomes a mist cloud. Look: a wide misting nozzle.
 - **Bigger Tanks, 60:** soaks last 5 s. Look: larger chemical tanks.
 
 **Path 1, Damage/Armor stripping (acid):**
@@ -1124,7 +1124,7 @@ length, armour stripped, damage over time, slow), using the same step multiplier
 | 2 | Long-Lasting Mix | 140 | The soak lasts 5 s |
 | 3 (primary) | Twin Valves | 990 | A spray every second; the soak lasts 6 s |
 | 4 | High-Flow Pump | 1,470 | A spray every 0.83 s |
-| Mastery | Constant Spray | 8,810 | Sprays without stopping, sweeping a 120° fan centred on its target once per spray interval (every 0.83 s); every enemy the jet crosses is soaked or topped up, and the soak lasts 4 s. Replaces Twin Nozzles (owner, 2026-10-26, #104) |
+| Mastery | Constant Spray | 8,810 | Sprays without stopping, sweeping a 40° fan centred on its target once per spray interval (every 0.83 s); every enemy the jet crosses is soaked or topped up, and the soak lasts 4 s. Replaces Twin Nozzles (owner, 2026-10-26, #104) |
 
 **Path 3, Slowing (gel):**
 

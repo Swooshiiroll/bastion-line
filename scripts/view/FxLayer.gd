@@ -22,6 +22,8 @@ var mists: Array = []
 var shocks: Array = []
 var puffs: Array = []
 var fountains: Array = []
+## Constant Spray's jet (#112): drops (or mist puffs) that keep the position and direction they left the head with.
+var jets: Array = []
 var warp_t := 0.0
 var warp_max := 1.0
 var _time := 0.0
@@ -46,7 +48,7 @@ func burst(pos: Vector2, color: Color, count: int, speed := 90.0, size := 2.5, l
 ## An acid spray (Chemical Plant): a stream of drops lobbed from `from` onto `enemy` (following it; `to` once it's gone) over
 ## `life` seconds. `size` scales the drops; `glint` adds the gel's white glints, `bubbles` the Concentrated Acid's bubbles; a
 ## `mist` is a few soft puffs drifting over instead.
-func spray(from: Vector2, enemy, to: Vector2, color: Color, size: float, glint: bool, bubbles: bool, mist := false, life := 0.5) -> void:
+func spray(from: Vector2, enemy, to: Vector2, color: Color, size: float, glint: bool, bubbles: bool, mist := false, life := 0.35) -> void:
 	sprays.append({"a": from, "e": enemy, "b": to, "c": color, "s": size, "g": glint, "bub": bubbles, "mist": mist, "life": life, "max": life})
 
 
@@ -132,6 +134,7 @@ func _process(delta: float) -> void:
 	mists = _age(mists, delta)
 	shocks = _age(shocks, delta)
 	fountains = _age(fountains, delta)
+	jets = _age(jets, delta)
 	var live: Array = []
 	for q in puffs:
 		if _time - float(q.t0) < float(q.max):
@@ -185,6 +188,8 @@ func _draw() -> void:
 		_shock(w)
 	for f in fountains:
 		_fountain(f)
+	for j in jets:
+		_jet(j)
 	for f in flashes:
 		var k: float = f.life / f.max
 		Draw.disc(self, f.p, f.r * (0.6 + 0.4 * k), Color(f.c, f.c.a * k))
@@ -226,13 +231,16 @@ func _spray(q: Dictionary) -> void:
 		for i in 4:
 			Draw.disc(self, p + Vector2.from_angle(float(i) * 1.7 + u * 7.0) * 2.0, 2.4 + u * 2.4, Color(col, 0.3))
 		return
+	# Each drop flies to the enemy and is gone just after it lands, so the stream doesn't sit on the target (#112).
 	for i in 9:
-		var f := minf(u * 1.6, 1.0) - float(i) * 0.06
-		if f < 0.0:
+		var f := u * 1.6 - float(i) * 0.06
+		if f < 0.0 or f > 1.12:
 			continue
+		var fade := 1.0 if f <= 1.0 else 1.0 - (f - 1.0) / 0.12
+		f = minf(f, 1.0)
 		var p := a.lerp(b, f) - Vector2(0, sin(PI * f) * 12.0)
 		var r: float = (1.6 + 0.4 * float(i % 2)) * q.s
-		Draw.disc(self, p, r, Color(col, 0.9 - float(i) * 0.06))
+		Draw.disc(self, p, r, Color(col, (0.9 - float(i) * 0.06) * fade))
 		if q.g:
 			Draw.disc(self, p + Vector2(-0.4, -0.4), r * 0.35, Color(1, 1, 1, 0.55 * (1.0 - float(i) * 0.08)))
 		if q.bub and i % 3 == 0:
@@ -320,6 +328,26 @@ func _shock(w: Dictionary) -> void:
 			var er: float = e.r
 			Draw.glow_dot(self, e.p, er * 0.6 * (1.0 - h / 0.3) * (0.9 + 0.2 * float(w.pw)), Color(1.0, 0.95, 0.8, 0.8))
 			Draw.arc(self, e.p, er + h * 14.0, 0.0, TAU, 20, Color(w.c, 1.0 - h / 0.3), 1.5, true)
+
+
+## One of Constant Spray's drops, or a mist puff (`mist`): it leaves `from` along `dir` and reaches `reach` px further at the end
+## of its life, whatever the head does meanwhile. A puff spreads off its line, billows, rises a little and thins as it goes.
+func jet(from: Vector2, dir: Vector2, reach: float, color: Color, size: float, mist: bool, life: float) -> void:
+	jets.append({"p": from, "d": dir, "reach": reach, "c": color, "s": size, "mist": mist, "j": randf() - 0.5, "far": 0.75 + 0.2 * randf(), "life": life, "max": life})
+
+
+func _jet(j: Dictionary) -> void:
+	var u: float = 1.0 - j.life / j.max
+	var s: float = j.s
+	if j.mist:
+		var d: Vector2 = (j.d as Vector2).rotated(float(j.j) * 0.4 * u)
+		var p: Vector2 = j.p + d * u * float(j.reach) * float(j.far) - Vector2(0, u * u * 6.0 * s)
+		var rr := (3.0 + u * 13.0) * 0.6 * s
+		Draw.disc(self, p, rr, Color(j.c, 0.16 * (1.0 - u)))
+		Draw.disc(self, p, rr * 0.55, Color((j.c as Color).lightened(0.35), 0.2 * (1.0 - u)))
+		return
+	var d2: Vector2 = (j.d as Vector2).rotated(float(j.j) * 0.05 * u)
+	Draw.disc(self, j.p + d2 * u * float(j.reach), (1.2 + u * 3.2) * 0.8 * s, Color(j.c, 0.75 * (1.0 - u)))
 
 
 ## The Scrapyard's payout (its page, Melt and Pour): a flare and a fan of six coins vented from the furnace's mouth, falling back.

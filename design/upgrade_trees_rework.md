@@ -303,7 +303,7 @@ A chemical manufacturing facility that produces and sprays chemicals on nearby e
 |---|---|---|---|---|---|---|
 | 1 | base | Chemical Plant | 250 |  | 250 credits; sprays one enemy every 1.5 s within 130 px, air and ground. The soak lasts 4 s, and the enemy loses 3 armour while soaked (it comes back when the soak ends). The plant always picks an unsoaked enemy. | new |
 | 2 | r1 | Pressure Pump | 150 |  | A spray every 1.33 s, and +20 range (150). | new |
-| 2 | r2 | Mist Nozzle | 300 |  | Each spray also soaks one more unsoaked enemy next to the target; with Constant Spray it widens the fan to 160° and the jet becomes a mist cloud. | new |
+| 2 | r2 | Mist Nozzle | 300 |  | Each spray also soaks one more unsoaked enemy next to the target; with Constant Spray the jet becomes a mist cloud. | new |
 | 2 | r3 | Bigger Tanks | 60 |  | Soaks last 5 s. | new |
 | 3 | a | Corrosive Acid | 250 |  | Stripped armour stays gone permanently, so every tower benefits for the rest of the enemy's life | new |
 | 4 | a | Etching Acid | 665 |  | 4 armour per soak; acid burns 5 damage/s | new |
@@ -314,7 +314,7 @@ A chemical manufacturing facility that produces and sprays chemicals on nearby e
 | 4 | b | Long-Lasting Mix | 140 |  | The soak lasts 5 s | new |
 | 5 | b | Twin Valves | 990 |  | A spray every second; the soak lasts 6 s | new |
 | 6 | b | High-Flow Pump | 1470 |  | A spray every 0.83 s | new |
-| M | b | Constant Spray | 8810 |  | Sprays without stopping, sweeping a 120° fan centred on its target once per spray interval (every 0.83 s); every enemy the jet crosses is soaked or topped up, and the soak lasts 4 s. Replaces Twin Nozzles (#104) | new |
+| M | b | Constant Spray | 8810 |  | Sprays without stopping, sweeping a 40° fan centred on its target once per spray interval (every 0.83 s); every enemy the jet crosses is soaked or topped up, and the soak lasts 4 s. Replaces Twin Nozzles (#104) | new |
 | 3 | c | Sticky Gel | 250 |  | Soaked enemies are slowed 15% | new |
 | 4 | c | Thick Gel | 335 |  | 25% | new |
 | 5 | c | Glue | 665 |  | 35% | new |

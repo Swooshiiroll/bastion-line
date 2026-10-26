@@ -4056,8 +4056,8 @@ func test_rework_chemical_plant() -> void:
 	check(m1.soak_timer > 0.0 and m2.soak_timer > 0.0, "Mist Nozzle soaks the one next to it")
 
 
-## Constant Spray (#104, replacing Twin Nozzles): the jet sweeps a 120° fan centred on the plant's target, one pass per spray interval,
-## soaking every enemy it crosses and topping soaked ones up; the Mist Nozzle widens the fan to 160°.
+## Constant Spray (#104, replacing Twin Nozzles): the jet sweeps a 40° fan (#112) centred on the plant's target, one pass per spray
+## interval, soaking every enemy it crosses and topping soaked ones up; the Mist Nozzle doesn't widen it. It stops with the round.
 func test_constant_spray() -> void:
 	var g = new_game()
 	g.gold = 100000
@@ -4076,23 +4076,35 @@ func test_constant_spray() -> void:
 	var wide = put(g, "grunt", 160.0, 0, 500.0)
 	tw.pos = Vector2(400, 300)
 	lead.pos = tw.pos + Vector2(40, 0)
-	side.pos = tw.pos + Vector2.from_angle(deg_to_rad(40.0)) * 60.0
+	side.pos = tw.pos + Vector2.from_angle(deg_to_rad(15.0)) * 60.0
 	back.pos = tw.pos + Vector2(-90, 0)
-	wide.pos = tw.pos + Vector2.from_angle(deg_to_rad(-72.0)) * 60.0
+	wide.pos = tw.pos + Vector2.from_angle(deg_to_rad(-30.0)) * 60.0
 	lead.soak_timer = 0.5
 	var s: Dictionary = tw.stats()
 	for i in 60:
 		g._sweep_spray(tw, s, 1.0 / 60.0)
 	check(near(float(tw.gun_cds.spray_c), 0.0, 0.01), "the fan is centred on the plant's target")
 	check(lead.soak_timer > 3.0 and side.soak_timer > 0.0, "one pass soaks everything the jet crosses, and tops a soaked enemy up")
-	check(back.soak_timer <= 0.0 and wide.soak_timer <= 0.0, "nothing outside the 120° fan is touched")
-	check(near(Game.spray_half(s), deg_to_rad(60.0)), "half the fan is 60°")
+	check(back.soak_timer <= 0.0 and wide.soak_timer <= 0.0, "nothing outside the 40° fan is touched")
+	check(near(Game.spray_half(s), deg_to_rad(20.0)), "half the fan is 20°")
+	check(near(tw.aim, float(tw.gun_cds.spray_c), 0.001), "the plant faces the fan's centre; the jet keeps its own angle")
 	g.buy_retrofit(tw, 1)
 	s = tw.stats()
-	check(bool(s.get("mist", false)) and near(Game.spray_half(s), deg_to_rad(80.0)), "the Mist Nozzle widens it to 160°")
+	check(bool(s.get("mist", false)) and near(Game.spray_half(s), deg_to_rad(20.0)), "the Mist Nozzle doesn't widen it")
 	for i in 60:
 		g._sweep_spray(tw, s, 1.0 / 60.0)
-	check(wide.soak_timer > 0.0 and back.soak_timer <= 0.0, "and the wider fan reaches the enemy at 72°")
+	check(wide.soak_timer <= 0.0, "so the enemy at 30° still isn't reached")
+	# A drop keeps the direction it left with, whatever the head does after.
+	var fx = FxLayer.new()
+	fx.jet(Vector2.ZERO, Vector2.RIGHT, 100.0, Color.WHITE, 1.0, false, 0.45)
+	tw.gun_cds["spray_a"] = PI / 2.0
+	fx._process(0.2)
+	check(fx.jets.size() == 1 and (fx.jets[0].d as Vector2).is_equal_approx(Vector2.RIGHT), "a jet drop flies on along its own direction")
+	fx.free()
+	# The round ends: the jet stops.
+	g._on_field_clear()
+	check(not tw.gun_cds.has("spray_on"), "Constant Spray stops when the round ends")
+	g.state = Game.State.WAVE
 	g.enemies.clear()
 	g._sweep_spray(tw, s, 1.0 / 60.0)
 	check(float(tw.gun_cds.spray_on) == 0.0 and tw.target == null, "with nothing in range the jet stops")
