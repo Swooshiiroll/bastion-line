@@ -37,6 +37,11 @@ const MINE_GAP := 18.0
 const MINE_SPREAD := 7.0
 ## The CAS Gunship's plane flies to a new orbit at this speed (px a second).
 static var CAS_SPEED := 180.0
+## Constant Spray (the Chemical Plant's Speed mastery, #104): the fan its jet sweeps, in degrees, and with the Mist Nozzle.
+static var SPRAY_FAN := 120.0
+static var SPRAY_FAN_MIST := 160.0
+## How fast Constant Spray's fan swings round to follow its target (rad a second).
+const SPRAY_TURN := 2.5
 const STAT_KEYS := ["kills", "gold_earned", "towers_built", "leaked", "waves_cleared"]
 static var BOSS_STUN_FACTOR := 0.3
 ## A critical hit does double damage (the Gun Turret's Range path; the Augmentation Tower's Precision Matrix raises it).
@@ -1194,6 +1199,9 @@ func _update_tower(t, dt: float) -> void:
 	if t.is_beam():
 		_update_laser_rework(t, s, dt)
 		return
+	if t.type == "chemical_plant" and bool(s.get("constant_spray", false)):
+		_sweep_spray(t, s, dt)
+		return
 	if t.target != null and not t.can_target(t.target):
 		t.target = null
 	t.cooldown -= dt
@@ -1591,8 +1599,8 @@ func _update_mines(_dt: float) -> void:
 	mines = keep
 
 
-## Chemical Plant: sprays the best unsoaked enemy in range (one, or two with the Twin Nozzles); a soaked enemy is ignored until the
-## soak wears off. The soak strips armour (back when it ends, or for good with Corrosive Acid), burns with acid and slows with gel.
+## Chemical Plant: sprays the best unsoaked enemy in range (the Mist Nozzle soaks a neighbour too); a soaked enemy is ignored
+## until the soak wears off. Constant Spray sweeps instead (_sweep_spray).
 func _spray(t, s: Dictionary) -> void:
 	var cands: Array = []
 	for e in enemies:
@@ -1607,35 +1615,81 @@ func _spray(t, s: Dictionary) -> void:
 	t.cooldown = 1.0 / t.eff_rate()
 	t.fire_flash = 0.15
 	t.aim = (cands[0].pos - t.pos).angle()
-	t.shot_targets = cands.slice(0, 2)
-	var hit_n := int(s.get("nozzles", 1))
-	var soaked: Array = []
-	for i in mini(hit_n, cands.size()):
-		soaked.append(cands[i])
-	var sprayed := soaked.size()
+	t.shot_targets = [cands[0]]
+	var soaked: Array = [cands[0]]
 	if bool(s.get("mist", false)):
-		var extra = null
 		for e in cands:
-			if not soaked.has(e) and e.pos.distance_squared_to(soaked[0].pos) <= 40.0 * 40.0:
-				extra = e
+			if e != cands[0] and e.pos.distance_squared_to(cands[0].pos) <= 40.0 * 40.0:
+				soaked.append(e)
 				break
-		if extra != null:
-			soaked.append(extra)
+	for i in soaked.size():
+		var e = soaked[i]
+		_soak(t, s, e)
+		# The spray from the nozzle; the Mist Nozzle's neighbour gets a mist.
+		_emit({"type": "spray", "from": t.pos, "to": e.pos, "enemy": e, "mist": i > 0, "look": t.look_key()})
+
+
+## Soaks `e`, or tops its soak up to full. The soak strips armour (back when it ends, or for good with Corrosive Acid), burns
+## with acid and slows with gel.
+func _soak(t, s: Dictionary, e) -> void:
 	var strip := float(s.get("armor_strip", 3.0))
 	var time_s := float(s.get("soak_time", 4.0))
-	for e in soaked:
-		e.soak_timer = time_s
-		e.soak_dps = float(s.get("acid_dps", 0.0))
-		e.soak_slow = float(s.get("gel_slow", 0.0))
-		e.soak_source = t
-		if bool(s.get("acid_perm", false)):
-			e.armor_shred = maxf(e.armor_shred, strip)
-		else:
-			e.armor_break = maxf(e.armor_break, strip)
-			e.armor_break_timer = maxf(e.armor_break_timer, time_s)
-		var i := soaked.find(e)
-		# The sprayer: the first nozzle, the second (Twin Nozzles) for the second enemy; the Mist Nozzle's neighbour gets a mist.
-		_emit({"type": "spray", "from": t.pos, "to": e.pos, "enemy": e, "nozzle": mini(i, 1), "mist": i >= sprayed, "look": t.look_key()})
+	e.soak_timer = time_s
+	e.soak_dps = float(s.get("acid_dps", 0.0))
+	e.soak_slow = float(s.get("gel_slow", 0.0))
+	e.soak_source = t
+	if bool(s.get("acid_perm", false)):
+		e.armor_shred = maxf(e.armor_shred, strip)
+	else:
+		e.armor_break = maxf(e.armor_break, strip)
+		e.armor_break_timer = maxf(e.armor_break_timer, time_s)
+
+
+## Constant Spray (the Chemical Plant's Speed mastery, #104): the nozzle sprays without stopping, sweeping a fan (SPRAY_FAN degrees,
+## SPRAY_FAN_MIST with the Mist Nozzle) centred on the enemy its targeting picks, one pass across it per spray interval. Every enemy
+## the jet crosses in range (not a hologram) is soaked, or topped up to a full soak. With nothing in range the jet stops.
+## The sweep lives in gun_cds: spray_c (the fan's centre), spray_p (the pass, 0..2), spray_a (the jet's angle), spray_on.
+func _sweep_spray(t, s: Dictionary, dt: float) -> void:
+	var cands: Array = []
+	for e in enemies:
+		if t.can_target(e) and not e.hologram:
+			cands.append(e)
+	if cands.is_empty():
+		t.target = null
+		t.gun_cds["spray_on"] = 0.0
+		return
+	_rank_targets(t, cands, t.pos)
+	t.target = cands[0]
+	var want: float = (cands[0].pos - t.pos).angle()
+	var cen := float(t.gun_cds.get("spray_c", want))
+	cen += clampf(angle_difference(cen, want), -SPRAY_TURN * dt, SPRAY_TURN * dt)
+	var half := spray_half(s)
+	var phase: float = float(t.gun_cds.get("spray_p", 0.0)) + dt * t.eff_rate()
+	var a := spray_angle(cen, half, phase)
+	var prev := float(t.gun_cds.get("spray_a", a))
+	t.gun_cds["spray_c"] = cen
+	t.gun_cds["spray_p"] = fmod(phase, 2.0)
+	t.gun_cds["spray_a"] = a
+	t.gun_cds["spray_on"] = 1.0
+	t.aim = a
+	for e in cands:
+		var b: float = (e.pos - t.pos).angle()
+		if absf(angle_difference(cen, b)) > half + 0.05:
+			continue
+		var d0 := angle_difference(prev, b)
+		var d1 := angle_difference(a, b)
+		if d0 * d1 <= 0.0 or absf(d1) < 0.08:
+			_soak(t, s, e)
+
+
+## Half of Constant Spray's fan, in radians (wider with the Mist Nozzle).
+static func spray_half(s: Dictionary) -> float:
+	return deg_to_rad(SPRAY_FAN_MIST if bool(s.get("mist", false)) else SPRAY_FAN) * 0.5
+
+
+## The jet's angle at `phase` of the sweep: one pass across the fan per unit of phase, easing at each edge.
+static func spray_angle(cen: float, half: float, phase: float) -> float:
+	return cen - half * cos(PI * phase)
 
 
 ## Every tick: acid burns soaked enemies, gel and chill slow them.

@@ -4,6 +4,7 @@ extends Node2D
 
 const Draw = preload("res://scripts/view/Draw.gd")
 const LaserTowerArt = preload("res://scripts/view/towers/LaserTowerArt.gd")
+const ChemicalPlantArt = preload("res://scripts/view/towers/ChemicalPlantArt.gd")
 
 var world
 
@@ -37,6 +38,8 @@ func _draw() -> void:
 			_tractor_beam(tw, t)
 		elif tw.type == "magneto_tower" and tw.disabled <= 0.0:
 			_magneto_field(tw, t)
+		elif tw.type == "chemical_plant" and tw.disabled <= 0.0 and float(tw.gun_cds.get("spray_on", 0.0)) > 0.0:
+			_spray_jet(tw, g, t)
 
 
 ## The Laser Tower's beams (the confirmed art): each ramps on its own target, widening and whitening with the Power path, wrapped
@@ -90,6 +93,43 @@ func _magneto_field(tw, t: float) -> void:
 	for i in 2:
 		var u := fmod(t * 0.5 + float(i) * 0.5, 1.0)
 		Draw.arc(self, tw.pos, r * (1.0 - u), 0.0, TAU, 48, Color(acc, 0.12 * (1.0 - u)), 1.5, true)
+
+
+
+## Constant Spray's jet (the Chemical Plant's Speed mastery, #104): drops fired from the head along the sweep, each flying out to
+## the range on the angle the head had when it left, so the stream curves as it sweeps. With the Mist Nozzle it leaves as a mist
+## cloud instead (owner): soft puffs that billow out along the sweep, spread, rise a little and thin as they go.
+func _spray_jet(tw, g, t: float) -> void:
+	var s: Dictionary = tw.stats()
+	var L := ChemicalPlantArt.levels(tw.look_key())
+	var ac := ChemicalPlantArt.acid_color(L, Draw.accent(tw.type, tw.spec))
+	var cen := float(tw.gun_cds.get("spray_c", tw.aim))
+	var ph := float(tw.gun_cds.get("spray_p", 0.0))
+	var half: float = g.spray_half(s)
+	var rate: float = tw.eff_rate()
+	var k := 1.0 if tw.size <= 1 else 1.8
+	var r0 := ChemicalPlantArt.JET_START * k
+	var reach: float = tw.get_range()
+	if L.r == 1:
+		for i in 40:
+			var u := (float(i) + fmod(t / 0.025, 1.0)) / 40.0
+			var n := float(floori((t - u * 0.9) / 0.025))
+			var a: float = g.spray_angle(cen, half, ph - u * 0.9 * rate) + (_rnd(n) - 0.5) * 0.4 * u
+			var p: Vector2 = tw.pos + Vector2.from_angle(a) * (r0 + u * (reach - r0) * (0.75 + 0.2 * _rnd(n + 3.0))) - Vector2(0, u * u * 6.0 * k)
+			var rr := (3.0 + u * 13.0) * 0.6 * k
+			Draw.disc(self, p, rr, Color(ac, 0.12 * (1.0 - u)))
+			Draw.disc(self, p, rr * 0.55, Color(ac.lightened(0.35), 0.15 * (1.0 - u)))
+		return
+	for i in 26:
+		var u := (float(i) + fmod(t / 0.025, 1.0)) / 26.0
+		var n := float(floori((t - u * ChemicalPlantArt.JET_FLIGHT) / 0.025))
+		var a: float = g.spray_angle(cen, half, ph - u * ChemicalPlantArt.JET_FLIGHT * rate) + (_rnd(n) - 0.5) * 0.05 * u
+		Draw.disc(self, tw.pos + Vector2.from_angle(a) * (r0 + u * (reach - r0)), (1.2 + u * 3.2) * 0.8 * k, Color(ac, 0.75 * (1.0 - u)))
+
+
+static func _rnd(x: float) -> float:
+	var v := sin(x * 12.9898) * 43758.5453
+	return v - floorf(v)
 
 
 ## A Railgun ion trail: a lingering, crackling line of ion-blue (gold at the Power mastery) that fades with its time.

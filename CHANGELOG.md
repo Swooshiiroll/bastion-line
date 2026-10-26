@@ -30,6 +30,10 @@ so write for players.
   - CAS Gunship: a slimmer fuselage; the plane takes off from the tower and flies to its orbit, and to each new one, instead of jumping there (its guns keep firing on the way).
   - Mine Layer: the launcher turns to where it throws next; each mine flies on an arc and lands with a ring; mines land at random spots along the track in reach, a little either side of the middle, instead of in a row from the entrance.
   - Chemical Plant: a lobbed stream of acid drops onto the enemy instead of a straight line (gel glints, bubbles in the Concentrated Acid, and a mist for the Mist Nozzle's neighbour); the Twin Nozzles' second sprayer sprays from its own nozzle.
+- **Constant Spray replaces Twin Nozzles (#104):**
+  - **The spray:** the Chemical Plant's Speed mastery now sprays without stopping. It sweeps a 120° fan centred on its target, one pass per spray interval (every 0.83 s), soaking every enemy the jet crosses and topping up ones already soaked. The soak lasts 4 s.
+  - **With the Mist Nozzle:** the fan widens to 160° and the jet leaves as a billowing mist cloud.
+  - **Look and price:** the plant gets a gold sprinkler turret whose spray bar follows the sweep. It costs 8,810.
 
 ### Behind the scenes
 - **Balance master (#75):** `design/balance.md` holds every tower's numbers and prices, with generated columns showing each step's paper DPS, credits spent and DPS per 100 credits, a summary of every tower and mastery, and the formulas behind them. `node tools/balance.mjs` updates it and the game data is generated from it (`design/tower_stats.md` is retired). It also holds every enemy's stats and ability numbers (with generated strength, leak cost, and health and credits by round) the elite modifiers' numbers, and the waves (the round formulas, each enemy's introduction round, threat cost, spacing and group cap, the boss line-ups, and a generated table of the formulas by round), the economy, the difficulty modes, research, the abilities and the global rules, with every tower's price on each mode. Every balance number in the game is now in that one file.

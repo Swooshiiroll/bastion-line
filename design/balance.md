@@ -84,7 +84,7 @@ The summary lists each tower's stock price and =DPS, and what each path's master
 | Drone Bay | 300 | 48.0 | 7050 / 126.0 | 4995 / 48.0 | 6520 / 112.0 |
 | CAS Gunship | 650 | 60.0 | 10315 / 171.0 | 14080 / 187.6 | 21040 / 186.7 |
 | Mine Layer | 450 | 56.7 | 10270 / 100.1 | 8925 / 121.4 | 8395 / 56.7 |
-| Chemical Plant | 250 | - | 10500 / - | 10710 / - | 5500 / - |
+| Chemical Plant | 250 | - | 10500 / - | 11760 / - | 5500 / - |
 | Cryo Tower | 150 | - | 13550 / - | 6840 / 18.0 | 2290 / - |
 | Boost Tower | 400 | - | 18120 / - | 18120 / - | 11035 / - |
 | Radar Tower | 575 | - | 12585 / - | 18375 / - | 9175 / - |
@@ -386,7 +386,7 @@ air: yes · ground: yes · size: 1 · damage_kind: energy
 
 | Node | =Name | Cost | Tokens | =DPS | =Spent | =DPS/100cr |
 |---|---|---|---|---|---|---|
-| base | Chemical Plant | 250 | range 130 · rate 0.667 · soak_time 4 · armor_strip 3 · nozzles 1 | - | 250 | - |
+| base | Chemical Plant | 250 | range 130 · rate 0.667 · soak_time 4 · armor_strip 3 | - | 250 | - |
 | r1 | Pressure Pump | 150 | rate +0.083 · range +20 | - | 400 | - |
 | r2 | Mist Nozzle | 300 | mist | - | 550 | - |
 | r3 | Bigger Tanks | 60 | soak_time +1 | - | 310 | - |
@@ -399,7 +399,7 @@ air: yes · ground: yes · size: 1 · damage_kind: energy
 | b2 | Long-Lasting Mix | 140 | soak_time +1 | - | 490 | - |
 | b3 | Twin Valves | 990 | rate +0.2 · soak_time +1 | - | 1480 | - |
 | b4 | High-Flow Pump | 1470 | rate +0.2 | - | 2950 | - |
-| bm | Twin Nozzles | 7760 | rate -0.4 · nozzles +1 · soak_time +1 | - | 10710 | - |
+| bm | Constant Spray | 8810 | constant_spray · soak_time -2 | - | 11760 | - |
 | c1 | Sticky Gel | 250 | gel_slow +0.15 | - | 500 | - |
 | c2 | Thick Gel | 335 | gel_slow +0.1 | - | 835 | - |
 | c3 | Glue | 665 | gel_slow +0.1 | - | 1500 | - |
@@ -1035,6 +1035,8 @@ The global rules every tower and enemy follows.
 | `Game.BOSS_PUSH_FACTOR` | 0.25 | Bosses are pushed this share as far |
 | `Game.CRIT_MULT` | 2 | A critical hit deals this many times the damage |
 | `Game.CAS_SPEED` | 180 | The CAS Gunship's plane flies to a new orbit at this speed (px a second); its guns keep firing on the way |
+| `Game.SPRAY_FAN` | 120 | Constant Spray's sweep covers this many degrees, centred on its target |
+| `Game.SPRAY_FAN_MIST` | 160 | ... and this many with the Mist Nozzle |
 | `Game.SHIELD_EMP_MULT` | 2 | Tesla Tower arcs hit barriers this many times as hard |
 | `Game.DISABLE_GUARD` | 1 | Seconds after an EMP wears off before a tower can be knocked offline again |
 | `Game.HIT_REVEAL_TIME` | 0.5 | Seconds a cloaked enemy stays revealed after damage hits it |

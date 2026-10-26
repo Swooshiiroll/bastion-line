@@ -302,7 +302,7 @@ static var NODES := {
 	},
 	"chemical_plant_m": {
 		"tree": "chemical_plant", "slot": Vector2i(0, 2), "cost": 3, "requires": ["chemical_plant_2a", "chemical_plant_2b"], "icon": "mastery",
-		"name": "Chemical Plant Mastery", "blurb": "Unlocks the masteries: Dissolver, Twin Nozzles and Quick-Set Foam.",
+		"name": "Chemical Plant Mastery", "blurb": "Unlocks the masteries: Dissolver, Constant Spray and Quick-Set Foam.",
 		"effects": {"mastery": true},
 	},
 	# --- Cryo Tower (the tower rework, issue #59: a minimal tree until the research pass) ----------

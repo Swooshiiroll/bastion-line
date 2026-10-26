@@ -83,10 +83,8 @@ func _draw() -> void:
 		elif tw.type == "cryo_tower":
 			extra = [clampf(tw.fire_flash / 0.3, 0.0, 1.0)]
 		elif tw.type == "chemical_plant":
-			var second: float = cur
-			if tw.shot_targets.size() > 1 and tw.shot_targets[1] != null and tw.shot_targets[1].alive:
-				second = (tw.shot_targets[1].pos - tw.pos).angle()
-			extra = [second]
+			# Constant Spray's head points where the jet is in its sweep (#104), not along the smoothed aim.
+			extra = [float(tw.gun_cds.get("spray_a", cur))]
 		elif tw.type == "mine_layer":
 			extra = [tw.pulse_count]
 		elif tw.type == "drone_bay":
