@@ -31,6 +31,8 @@ static var timing_on := false
 var _aim := {}
 ## Each extra gun's smoothed aim, per tower (the Gun Turret's flank guns turn on their own).
 var _extra_aim := {}
+## The CAS Gunship plane's eased heading, per tower.
+var _heading := {}
 var _font: Font
 
 
@@ -61,6 +63,9 @@ func _draw() -> void:
 		if tw.type == "artillery_cannon":
 			# It points at the spot it shells, not at an enemy.
 			cur = lerp_angle(cur, (tw.aim_point - tw.pos).angle(), 0.35)
+		elif tw.type == "mine_layer":
+			# It turns toward the spot it throws at next.
+			cur = lerp_angle(cur, tw.aim, 0.2)
 		_aim[key] = cur
 		var extra: Array = []
 		if tw.type == "gun_turret":
@@ -89,7 +94,7 @@ func _draw() -> void:
 		elif tw.type == "tesla_tower":
 			extra = [clampf(1.0 - tw.cooldown * tw.eff_rate(), 0.0, 1.0)]
 		elif tw.type == "railgun":
-			extra = [clampf(1.0 - tw.cooldown * tw.eff_rate(), 0.0, 1.0), tw.pulse_count]
+			extra = [clampf(1.0 - tw.cooldown * tw.eff_rate(), 0.0, 1.0), tw.pulse_count, g.time - float(tw.gun_cds.get("shot_t", -99.0))]
 		elif tw.type == "artillery_cannon":
 			extra = [ArtilleryCannonArt.types(ArtilleryCannonArt.levels(tw.look_key())).find(tw.shell), tw.pulse_count]
 		elif tw.type == "anti_aircraft_turret":
@@ -122,7 +127,7 @@ func _draw() -> void:
 	ground.sort_custom(func(a, b): return a.pos.y < b.pos.y)
 	for i in g.mines.size():
 		var m: Dictionary = g.mines[i]
-		MineLayerArt.mine(self, m.pos, 1.0, t, m.source.spec, Draw.ACCENT.mine_layer, fmod(t * 1.6 + float(i) * 0.37, 1.0) < 0.25)
+		MineLayerArt.laid(self, m.pos, m.get("from", m.pos), g.time - float(m.get("t0", -99.0)), t, m.source.spec, Draw.ACCENT.mine_layer, fmod(t * 1.6 + float(i) * 0.37, 1.0) < 0.25)
 	for e in ground:
 		_enemy(e, t)
 		if e.cloaked and e.reveal_timer > 0.0:
@@ -210,9 +215,13 @@ func _enemy(e, t: float) -> void:
 func _wing(tw, t: float) -> void:
 	var acc := Draw.accent(tw.type, tw.spec)
 	if tw.type == "cas_gunship":
-		var orbit := float(tw.stats().get("orbit", 90.0))
-		var pose := CasGunshipArt.plane_pose(tw.aim_point, orbit, tw.orbit_angle)
-		CasGunshipArt.plane(self, pose.pos, pose.heading, 1.0 if tw.size <= 1 else 1.8, t, tw.spec, acc, tw.fire_flash > 0.0 and tw.disabled <= 0.0)
+		if tw.plane_pos == Vector2.INF:
+			return
+		# The heading eases round, so the plane banks into a new course rather than snapping to it.
+		var key: int = tw.get_instance_id()
+		var hd := lerp_angle(float(_heading.get(key, tw.plane_heading)), tw.plane_heading, 0.12)
+		_heading[key] = hd
+		CasGunshipArt.plane(self, tw.plane_pos, hd, 1.0 if tw.size <= 1 else 1.8, t, tw.spec, acc, tw.fire_flash > 0.0 and tw.disabled <= 0.0)
 		return
 	if tw.disabled > 0.0:
 		return
