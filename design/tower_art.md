@@ -587,6 +587,19 @@ Their prices are formula estimates (proposed), in `design/tower_roster.md`.
 - The stats are unchanged: 8 rockets per salvo, rippling out.
 - The page's store key is now `bl-tower-art-p2-rocket-r4`.
 
+**Round 5 ("More ideas"):** four more looks. Each rebuilds the launcher round a turret hub, the way the other towers'
+masteries do, with its rockets racked where they can be seen:
+- D, Launch Cells: an armoured octagonal deck of eight vertical launch cells round a turning fire-control turret. The
+  hatches flip open one after another, with a flash and smoke as each rocket leaves.
+- E, Revolver Carousel: eight rockets on a gold-rimmed carousel that turns one notch per launch, feeding each one onto a
+  single launch rail.
+- F, Wing Pod Turret: an octagonal turret with a gold-jointed wing arm each side, each carrying a round gold-banded pod
+  of 2 x 2 tubes. The pods take turns and kick back as they fire.
+- G, Rail Fan: eight open launch rails fanned out from a turret block under a gold yoke, a rocket on each. The salvo
+  ripples across the fan.
+- The page now tracks which rocket of the salvo went last from the shot count, so the ripple lights and the mouth flashes
+  follow all eight rockets. Before, they wrapped after three.
+
 ### Anti-Aircraft Turret (second pass)
 
 **Retrofits kept** (owner, 2026-10-17). Claude flagged that all three overlap a path:
