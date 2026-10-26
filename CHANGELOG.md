@@ -48,6 +48,7 @@ so write for players.
   - CAS Gunship: a slimmer fuselage; the plane takes off from the tower and flies to its orbit, and to each new one, instead of jumping there (its guns keep firing on the way).
   - Mine Layer: the launcher turns to where it throws next; each mine flies on an arc and lands with a ring; mines land at random spots along the track in reach, a little either side of the middle, instead of in a row from the entrance.
   - Chemical Plant: a lobbed stream of acid drops onto the enemy instead of a straight line (gel glints, bubbles in the Concentrated Acid, and a mist for the Mist Nozzle's neighbour); the Twin Nozzles' second sprayer sprays from its own nozzle.
+- **Gun Turret paths (#104):** every Power step adds shot damage (+6, +6, +8, +10, +12: Sabot Rounds hit for 58, up from 44), and every Multi-Target step adds fire rate (+0.5 a step: Triple Mount fires 3.7 shots a second, up from 1.5). Their prices follow the pricing formula.
 
 ### Behind the scenes
 - **Bot balance verdicts paused for the rework (#96):** the bot still plays every test game, but whether it wins, reaches endless or buys masteries no longer fails the tests until the tower rework is done; those results print as PAUSED.
