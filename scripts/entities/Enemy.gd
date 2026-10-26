@@ -50,8 +50,8 @@ var flee_timer := 0.0
 ## Mirage hologram: a 1-HP copy that never leaks or pays, and vanishes with the Mirage that projected it.
 var hologram := false
 var holo_owner = null
-## Radar Illusion Filter: a ping marked this hologram as a fake, so towers stop choosing it as a target.
-var fake_marked := false
+## How far ahead of its Mirage (negative: behind) a hologram keeps along the track (#114).
+var holo_offset := 0.0
 ## Radar Signal Analysis: a ping saw through this Decoy Beacon, so it ranks (and shows its role) as what it really is.
 var decoy_exposed := false
 ## Radar Total Exposure: seconds left in which it can't re-cloak or re-burrow (kept full while inside that radar).
@@ -133,6 +133,8 @@ var blink_timer: float:
 		trait_timers["blink"] = v
 ## Where it stood when it last blinked (its after-image stays there), or INF if it never has.
 var blink_from := Vector2.INF
+## Which way it faced when it blinked, so its after-image stays as it was (#114).
+var blink_facing := 0.0
 ## Mender Hulk: seconds since it last took damage.
 var since_hit := 0.0
 ## Rally Beacon overdrive on this enemy (fraction of extra speed), refreshed every tick.
@@ -364,6 +366,7 @@ func set_distance(d: float) -> void:
 ## facing along it (not along the jump, which cuts across a corner).
 func blink(dist: float) -> void:
 	blink_from = pos
+	blink_facing = facing.angle()
 	set_distance(distance + dist)
 	track_pos = pos
 	var ahead := curve.sample_baked(minf(distance + 4.0, path_len))
@@ -425,10 +428,9 @@ func is_hidden() -> bool:
 	return burrowed or (cloaked and reveal_timer <= 0.0 and disrupt_timer <= 0.0 and track_timer <= 0.0)
 
 
-## Towers won't choose it as a target: hidden, or a hologram a Radar's Illusion Filter marked as a fake. Blasts and beams
-## still hit whatever is in their way.
+## Towers won't choose it as a target while it's hidden. Blasts and beams still hit whatever is in their way.
 func untargetable() -> bool:
-	return is_hidden() or fake_marked
+	return is_hidden()
 
 
 ## Can't be stunned (Rampart, Colossus).
@@ -521,7 +523,11 @@ func step(dt: float) -> void:
 	# side-step slides rather than jumps. It faces along the track.
 	move_time += dt
 	var mt := move_time + float(id) * 0.37
-	distance += speed * (1.0 - slow_amount) * (1.0 + haste) * rush * (1.0 + wake) * EnemyMoves.pace(self, mt) * dt
+	if hologram and holo_owner != null and holo_owner.alive:
+		# A Mirage's pair keeps its place ahead of or behind it (#114).
+		distance = clampf(holo_owner.distance + holo_offset, 0.0, path_len)
+	else:
+		distance += speed * (1.0 - slow_amount) * (1.0 + haste) * rush * (1.0 + wake) * EnemyMoves.pace(self, mt) * dt
 	var np := curve.sample_baked(clampf(distance + EnemyMoves.ahead(self), 0.0, path_len))
 	if track_pos == Vector2.INF:
 		track_pos = np

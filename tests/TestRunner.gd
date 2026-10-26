@@ -2121,6 +2121,35 @@ func test_tower_fixes_110() -> void:
 	check(Game.footprint("augmentation_tower", Vector2i(3, 3)).size() == 4, "the Augmentation Tower takes 2x2 tiles")
 
 
+## The owner's 26 Oct list, batch 3 (#114): the Mirage keeps a single pair, one 45 px ahead and one behind, moving with it;
+## the Wraith is 50% larger; an after-image keeps the facing it had when it blinked.
+func test_enemies_114() -> void:
+	var g = new_game()
+	g.enemies.clear()
+	var mi = put(g, "mirage", 300.0)
+	for cast in 3:
+		g._trait_holo(mi, mi.def)
+		g.enemies.append_array(g._new_enemies)
+		g._new_enemies.clear()
+	var pair: Array = g.enemies.filter(func(e): return e.alive and e.hologram and e.holo_owner == mi)
+	check(pair.size() == 2, "three casts leave one pair, not six (%d)" % pair.size())
+	var offs: Array = pair.map(func(h): return snappedf(h.distance - mi.distance, 0.1))
+	offs.sort()
+	check(offs == [-45.0, 45.0], "one 45 px ahead and one behind (%s)" % [offs])
+	mi.step(0.5)
+	var follow := true
+	for h in pair:
+		h.step(0.5)
+		follow = follow and near(h.distance - mi.distance, h.holo_offset, 0.01)
+	check(follow, "the pair moves with the Mirage")
+	check(near(float(Enemies.ENEMIES.wraith.radius), 16.5), "the Wraith is 50% larger (radius 16.5)")
+	var st = put(g, "stalker", 200.0)
+	st.facing = Vector2.DOWN
+	st.blink(40.0)
+	var look: Dictionary = EnemyArt.state(st)
+	check(look.has("blink_from") and near(float(look.blink_ang), PI / 2.0), "the after-image keeps the facing it had when it blinked")
+
+
 ## Railgun (#90): twin rails fire in turn from their own muzzles; the housing recoils (the art's live shift).
 func test_rail_muzzles() -> void:
 	var g = new_game()
@@ -2976,14 +3005,18 @@ func test_mirage_holograms() -> void:
 	var gold0: int = g.gold
 	g.damage_enemy(holos[0], 5.0, false, null)
 	check(not holos[0].alive and g.gold == gold0, "any hit pops one, for nothing")
-	holos[1].distance = holos[1].path_len
+	# The pair moves with its Mirage (#114): bring the Mirage near the core and the one ahead of it gets there first.
+	var ahead_h = holos[1] if holos[1].holo_offset > 0.0 else holos[0]
+	m.set_distance(m.path_len - 10.0)
 	g.tick(SIM_DT)
-	check(not holos[1].alive and g.lives == 50, "at the core it vanishes without leaking")
+	g.tick(SIM_DT)
+	check(not ahead_h.alive and g.lives == 50, "at the core it vanishes without leaking")
+	m.set_distance(300.0)
 	m.trait_timers.holo = 0.001
 	g.tick(SIM_DT)
 	g.tick(SIM_DT)
 	var more: Array = g.enemies.filter(func(e): return e.alive and e.hologram)
-	check(more.size() == 2, "and again")
+	check(more.size() == 2, "and again: a fresh pair replaces what was left (%d)" % more.size())
 	g.damage_enemy(m, 1e9, true, null)
 	g.tick(SIM_DT)
 	check(more.all(func(h): return not h.alive), "they vanish with their Mirage")
@@ -4381,7 +4414,7 @@ func test_radar_special_targeting() -> void:
 	um.cooldown = 0.0
 	g._update_radar(um, um.stats(), 0.05)
 	check(not m.disguised and m.look_type() == "masquerade" and near(m.hp, m.max_hp), "Disguise Breaker: a ping uncovers it at full health")
-	# Illusion Filter: a ping marks holograms as fakes, and towers stop choosing them.
+	# Illusion Filter: a ping pops holograms (#114).
 	g.enemies.clear()
 	gun.mode = Tower.Mode.FIRST
 	var mi = put(g, "mirage", 110.0)
@@ -4392,8 +4425,8 @@ func test_radar_special_targeting() -> void:
 	um.pos = h.pos + Vector2(30, 0)
 	um.cooldown = 0.0
 	g._update_radar(um, um.stats(), 0.05)
-	check(h.fake_marked and not mi.fake_marked, "Illusion Filter: a ping marks the hologram, not the real Mirage")
-	check(g.pick_target(gun) == mi and not gun.can_target(h), "towers stop shooting the hologram")
+	check(not h.alive and mi.alive, "Illusion Filter: a ping pops the hologram, not the real Mirage")
+	check(g.pick_target(gun) == mi, "so towers shoot the real Mirage")
 	# Total Exposure: what a ping found stays found while in range, and for 5 s after it leaves.
 	buy_steps(g, um, "c", 1)
 	check(um.mastered and near(um.stats().exposure, 5.0), "Total Exposure: 5 s")

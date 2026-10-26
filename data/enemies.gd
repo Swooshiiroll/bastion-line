@@ -164,7 +164,7 @@ static var ENEMIES := {
 	},
 	"wraith": {
 		"role": "evader", "tier": 4,
-		"name": "Wraith", "hp": 260.0, "speed": 74.0, "armor": 2.0, "bounty": 18, "lives": 3, "radius": 11.0, "flying": true,
+		"name": "Wraith", "hp": 260.0, "speed": 74.0, "armor": 2.0, "bounty": 18, "lives": 3, "radius": 16.5, "flying": true,
 		"cloaked": true, "energy_only": true,
 		"blurb": "Cloaked flyer immune to physical damage. Only energy hurts it: beams, chains, fields, burning and Tesla arcs. Bring something that reveals it.",
 	},
@@ -183,8 +183,8 @@ static var ENEMIES := {
 	"mirage": {
 		"role": "special", "tier": 0,
 		"name": "Mirage", "hp": 140.0, "speed": 55.0, "armor": 1.0, "bounty": 12, "lives": 1, "radius": 11.0,
-		"holo_interval": 6.0, "holo_count": 2,
-		"blurb": "Projects two translucent copies every 6 s that soak shots and walk to the core. A single hit kills one, and they vanish with the Mirage. Splash and chain towers clear them.",
+		"holo_interval": 6.0, "holo_count": 2, "holo_gap": 45.0,
+		"blurb": "Every 6 s it projects a fresh pair of translucent copies, one ahead of it and one behind, that move with it and soak shots. A single hit kills one, and they vanish with the Mirage. Splash and chain towers clear them.",
 	},
 	"juggernaut": {
 		"role": "boss", "tier": 0,

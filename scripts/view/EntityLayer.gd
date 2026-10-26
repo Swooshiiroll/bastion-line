@@ -23,7 +23,6 @@ const ELITE_COLOR := Color(1.0, 0.82, 0.30)
 ## A Siphon's drain (its aura, and the tint on towers inside it).
 const SIPHON_COLOR := Color(0.72, 1.0, 0.25)
 ## The cross on a hologram a Radar's Illusion Filter marked as a fake.
-const FAKE_MARK := Color(1.0, 0.3, 0.3, 0.8)
 ## How high Mortar and Artillery shells are lobbed at the middle of their flight, in tiles (as on the design pages, #90).
 const MORTAR_ARC := 0.85
 const ARTILLERY_ARC := 0.85
@@ -204,10 +203,6 @@ func _radar_marks(e) -> void:
 	if e.cloaked and (e.reveal_timer > 0.0 or e.track_timer > 0.0):
 		var col: Color = RadarTowerArt.GOLD if e.track_timer > 0.0 else Draw.ACCENT.radar_tower
 		RadarTowerArt.reveal_mark(self, e.pos, e.radius + 4.0, col, minf(1.0, maxf(e.reveal_timer, e.track_timer) * 2.0))
-	if e.fake_marked:
-		var k: float = e.radius * 0.7
-		Draw.line(self, e.pos + Vector2(-k, -k), e.pos + Vector2(k, k), FAKE_MARK, 2.0)
-		Draw.line(self, e.pos + Vector2(-k, k), e.pos + Vector2(k, -k), FAKE_MARK, 2.0)
 
 
 ## A Mortar's Smoke Shell cloud (#85): drifting grey puffs over the area that slows, thinning out as it ends.

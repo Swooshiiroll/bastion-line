@@ -63,7 +63,7 @@ const FLAG_ROWS := [
 	["Pulled armour is gone for good", "pull_perm"], ["Grip lock", "grip_lock"], ["Slam shatters barriers", "slam_shatter"], ["Undo once a round", "undo"],
 	["Wave halves barriers", "shatter_half"], ["Constant reveal", "constant"], ["Early warning", "early_warning"], ["Remote link", "remote_link"], ["Bounces can bounce", "bounce_again"],
 	["Radar: reveals cloaked", "radar"], ["Sees through decoys", "unmask_decoy"], ["Breaks disguises", "unmask_mask"],
-	["Marks holograms as fakes", "unmask_mirage"], ["Mist soaks a neighbour", "mist"], ["Sprays without stopping, sweeping a fan", "constant_spray"], ["Acid strips for good", "acid_perm"], ["Constant cold field", "cold_front"], ["Missiles loadout", "lo_missiles"], ["Bombs loadout", "lo_bombs"],
+	["Pings pop holograms", "unmask_mirage"], ["Mist soaks a neighbour", "mist"], ["Sprays without stopping, sweeping a fan", "constant_spray"], ["Acid strips for good", "acid_perm"], ["Constant cold field", "cold_front"], ["Missiles loadout", "lo_missiles"], ["Bombs loadout", "lo_bombs"],
 	["Laser loadout", "lo_laser"], ["Full kit loadout", "lo_full"],
 ]
 ## Short keys for the one-line summary.

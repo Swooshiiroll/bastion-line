@@ -340,6 +340,10 @@ func _visual(ev: Dictionary) -> void:
 	match ev.type:
 		"fire":
 			fx.flash(ev.pos, 6.0, acc, 0.06)
+		"hologram_pop":
+			# A Mirage hologram blinks out (hit, replaced, or popped by a Radar's Illusion Filter, #114).
+			fx.flash(ev.pos, 10.0, Color(0.7, 0.95, 1.0, 0.8), 0.12)
+			fx.burst(ev.pos, Color(0.6, 0.95, 1.0), 8, 70.0, 1.6, 0.3)
 		"arrow_hit":
 			fx.burst(ev.pos, Color(1.0, 0.35, 0.35) if ev.get("shred", false) else Draw.ACCENT.gun_turret, 4, 60.0, 1.6, 0.25)
 			if ev.get("look", "") != "":

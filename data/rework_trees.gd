@@ -3271,7 +3271,7 @@ static var TREES := {
 					{
 						"name": "Illusion Filter",
 						"cost": 2390,
-						"blurb": "Pings mark Mirage holograms as fakes: towers in range stop shooting them",
+						"blurb": "Pings pop Mirage holograms in range",
 						"set": {
 							"unmask_mirage": true,
 						},
