@@ -4,7 +4,8 @@ extends RefCounted
 ##
 ## `look` is the tower's look key "r|a|b|c": the Retrofit (-1 none, 0 pressure pump, 1 mist nozzle, 2 bigger tanks) and the depth of
 ## each path, 5 on the path that took its mastery. a = Acid, b = Speed, c = Slowing. The plant is not turned by the sprite cache: the
-## columns, pipes and domes are cached and the nozzle(s), which turn to their targets, are live. `extra` is [the second sprayer's angle].
+## columns, pipes and domes are cached and the nozzle, which turns to its target, is live. `extra` is [the jet's angle in Constant
+## Spray's sweep]: at the Speed mastery the Sprinkler Turret's spray bar follows the sweep (#104).
 
 const Draw = preload("res://scripts/view/Draw.gd")
 
@@ -15,7 +16,10 @@ const YEL := Color(1.0, 0.85, 0.20)
 const BORE := Color(0.05, 0.05, 0.06)
 
 # The owner's picks per step: Acid, Speed, Slowing.
-const PICKS := [["B", "C", "C", "A", "C"], ["B", "C", "B", "A", "B"], ["B", "A", "B", "C", "A"]]
+const PICKS := [["B", "C", "C", "A", "C"], ["B", "C", "B", "A", "C"], ["B", "A", "B", "C", "A"]]
+## Constant Spray's jet: where it leaves the head (from the centre), and how long a drop takes to reach the end of the range.
+const JET_START := 15.0
+const JET_FLIGHT := 0.45
 
 
 static func levels(look: String) -> Dictionary:
@@ -45,12 +49,11 @@ static func at(c: Vector2, aim: float, k: float, x: float, y: float) -> Vector2:
 	return c + (Vector2.from_angle(aim) * x + Vector2.from_angle(aim).orthogonal() * y) * k
 
 
-## Where a sprayer's nozzle ends (the spray starts here): the first, or the second (`second`) of the Twin Nozzles, which sits on
-## the lower still.
-static func muzzle(c: Vector2, aim: float, k: float, look: String, second := false) -> Vector2:
+## Where the nozzle ends (the spray starts here); with the Twin Stills it grows from the upper still.
+static func muzzle(c: Vector2, aim: float, k: float, look: String) -> Vector2:
 	var L := levels(look)
 	if L.S >= 3:
-		return c + Vector2(0, (3.4 if second else -3.4) * k) + Vector2.from_angle(aim) * 13.0 * k
+		return c + Vector2(0, -3.4 * k) + Vector2.from_angle(aim) * 13.0 * k
 	return at(c, aim, k, 13.5, 0.0)
 
 
@@ -142,7 +145,13 @@ static func draw(ci: CanvasItem, c: Vector2, aim: float, s: float, t: float, fla
 		Draw.ring(ci, c, 6.2 * k, Color(GOLD, 0.6), 0.8 * k)
 	if L.A >= 5:
 		Draw.ring(ci, c, 5.0 * k, GOLD, 1.0 * k)
-	# --- Live: the pipes' glow, the flywheel, and the nozzle(s) turning to their enemies. ---
+	# Constant Spray (the owner's pick C, #104): a gold sprinkler turret on the stills; its spray bar and impeller are live.
+	if L.S >= 5:
+		for yy in [-3.4, 3.4]:
+			Draw.ring(ci, c + Vector2(0, yy) * k, 4.0 * k, GOLD, 1.0 * k)
+		Draw.orb(ci, c, 4.8 * k, GOLD, k)
+		Draw.ring(ci, c, 3.3 * k, Draw.METAL, 0.9 * k)
+	# --- Live: the pipes' glow, the flywheel, and the nozzle turning to its enemy (or sweeping, at the mastery). ---
 	Draw.dyn(true)
 	for i in angs.size():
 		var q2: Vector2 = c + Vector2.from_angle(angs[i]) * 10.0 * k
@@ -158,32 +167,29 @@ static func draw(ci: CanvasItem, c: Vector2, aim: float, s: float, t: float, fla
 			Draw.line(ci, fw, fw + Vector2.from_angle((t * 12.0 if fl > 0.0 else t * 1.2) + float(i) * TAU / 3.0) * 1.3 * k, Draw.METAL_L, 0.8 * k)
 	var twin_stills: bool = L.S >= 3
 	var piv1: Vector2 = c + Vector2(0, -3.4 * k) if twin_stills else c
-	var piv2: Vector2 = c + Vector2(0, 3.4 * k) if twin_stills else c
 	if L.S >= 5:
-		# Two independent sprayers, each with its own pipe and head, growing from its own still.
-		for pr in [[piv1, aim, 13.0], [piv2, a2, 13.0]]:
-			var pv: Vector2 = pr[0]
-			var an: float = pr[1]
-			var ln: float = pr[2]
-			Draw.bar(ci, pv, pv + Vector2.from_angle(an) * 6.0 * k, 2.2 * k, GOLD)
-			Draw.bar(ci, pv + Vector2.from_angle(an) * 6.0 * k, pv + Vector2.from_angle(an) * ln * k, 1.6 * k, Draw.METAL)
-			Draw.glow_dot(ci, pv + Vector2.from_angle(an) * (ln + 0.4) * k, (0.7 + 1.4 * fl) * k, Color(ac, 0.5 + 0.5 * fl))
-		Draw.ring(ci, piv1, 4.0 * k, GOLD, 1.0 * k)
-		Draw.ring(ci, piv2, 4.0 * k, GOLD, 1.0 * k)
+		# The sprinkler's impeller spins, and its spray bar follows the jet round the sweep.
+		for i in 3:
+			Draw.line(ci, c, c + Vector2.from_angle(t * 8.0 + float(i) * TAU / 3.0) * 2.8 * k, Draw.METAL_D, 0.8 * k)
+		Draw.bar(ci, at(c, a2, k, 3.4, 0.0), at(c, a2, k, 12.0, 0.0), 2.6 * k, Draw.OUTLINE)
+		Draw.bar(ci, at(c, a2, k, 3.4, 0.0), at(c, a2, k, 12.0, 0.0), 1.8 * k, Draw.METAL_L)
+		for x in [6.0, 9.0]:
+			Draw.disc(ci, at(c, a2, k, x, 0.0), 0.5 * k, BORE)
+		Draw.disc(ci, at(c, a2, k, 12.0, 0.0), 1.2 * k, GOLD)
+		Draw.glow_dot(ci, at(c, a2, k, 12.6, 0.0), (0.8 + 1.2 * fl) * k, Color(ac, 0.6 + 0.4 * fl))
 	else:
 		var neck := 3.6 if kp(L, 1, 0) == "C" else 2.4
 		Draw.bar(ci, piv1, at(piv1, aim, k, 6.0, 0.0), neck * k, Draw.METAL)
 		Draw.bar(ci, at(piv1, aim, k, 6.0, 0.0), at(piv1, aim, k, 13.0, 0.0), 1.6 * k, Draw.METAL)
 		Draw.glow_dot(ci, at(piv1, aim, k, 13.4, 0.0), (0.7 + 1.4 * fl) * k, Color(ac, 0.5 + 0.5 * fl))
 	if L.r == 1:
-		# The refined mist head on the end of each sprayer.
-		var sprayers: Array = [[piv1, aim]] if L.S < 5 else [[piv1, aim], [piv2, a2]]
-		for sp in sprayers:
-			var ln2 := 13.2
-			var o := at(sp[0], sp[1], k, ln2, 0.0)
-			var hd := PackedVector2Array([Vector2(0, -1), Vector2(2.4, -2.4), Vector2(4, -2.9), Vector2(4, 2.9), Vector2(2.4, 2.4), Vector2(0, 1)])
-			Draw.plate(ci, o, hd, Draw.METAL_L, sp[1], k, 1.1)
-			for q in range(-2, 3):
-				Draw.disc(ci, at(o, sp[1], k, 3.7, float(q) * 1.1), 0.34 * k, BORE)
+		# The refined mist head on the end of the nozzle (the sprinkler's spray bar at the mastery).
+		var pv: Vector2 = c if L.S >= 5 else piv1
+		var an: float = a2 if L.S >= 5 else aim
+		var o := at(pv, an, k, 12.2 if L.S >= 5 else 13.2, 0.0)
+		var hd := PackedVector2Array([Vector2(0, -1), Vector2(2.4, -2.4), Vector2(4, -2.9), Vector2(4, 2.9), Vector2(2.4, 2.4), Vector2(0, 1)])
+		Draw.plate(ci, o, hd, Draw.METAL_L, an, k, 1.1)
+		for q in range(-2, 3):
+			Draw.disc(ci, at(o, an, k, 3.7, float(q) * 1.1), 0.34 * k, BORE)
 	Draw.glow_dot(ci, c, 1.1 * k, ac)
 	Draw.dyn(false)

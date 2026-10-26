@@ -3965,19 +3965,11 @@ func test_rework_chemical_plant() -> void:
 	slowed.soak_slow = 0.55
 	g._update_soaks(0.05)
 	check(slowed.slow_amount > 0.4, "a soaked enemy is slowed (%.2f)" % slowed.slow_amount)
-	# Speed path: twin nozzles soak two at once and the soak is longer.
+	# Speed path: Constant Spray (its sweep is tested in test_constant_spray).
 	var tw = g.place_tower("chemical_plant", spot(g, "chemical_plant", 120))
 	tw.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
 	buy_steps(g, tw, "b", 5)
-	check(tw.mastered and int(tw.stats().nozzles) == 2 and near(tw.stats().soak_time, 7.0) and near(tw.stats().rate, 0.8), "Twin Nozzles: two at once, a 7 s soak")
-	g.enemies.clear()
-	var x1 = put(g, "grunt", 100.0, 0, 500.0)
-	var x2 = put(g, "grunt", 130.0, 0, 500.0)
-	var x3 = put(g, "grunt", 160.0, 0, 500.0)
-	tw.pos = x2.pos + Vector2(40, 0)
-	tw.cooldown = 0.0
-	g._spray(tw, tw.stats())
-	check([x1, x2, x3].filter(func(e): return e.soak_timer > 0.0).size() == 2, "two enemies soaked by one spray")
+	check(tw.mastered and bool(tw.stats().get("constant_spray", false)) and near(tw.stats().soak_time, 4.0) and near(tw.stats().rate, 1.2), "Constant Spray: it sweeps, a 4 s soak, a pass every 0.83 s")
 	# Mist soaks a neighbour too.
 	g.enemies.clear()
 	var m1 = put(g, "grunt", 100.0, 0, 500.0)
@@ -3987,6 +3979,54 @@ func test_rework_chemical_plant() -> void:
 	mn.cooldown = 0.0
 	g._spray(mn, mn.stats())
 	check(m1.soak_timer > 0.0 and m2.soak_timer > 0.0, "Mist Nozzle soaks the one next to it")
+
+
+## Constant Spray (#104, replacing Twin Nozzles): the jet sweeps a 120° fan centred on the plant's target, one pass per spray interval,
+## soaking every enemy it crosses and topping soaked ones up; the Mist Nozzle widens the fan to 160°.
+func test_constant_spray() -> void:
+	var g = new_game()
+	g.gold = 100000
+	var tw = g.place_tower("chemical_plant", spot(g, "chemical_plant", 0))
+	tw.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, tw, "b", 5)
+	check(tw.mastered, "the Speed mastery is bought")
+	var Rework = load("res://data/rework_trees.gd")
+	var bm: Dictionary = Rework.TREES["chemical_plant"].paths[1].mastery
+	check(bm.name == "Constant Spray" and int(bm.cost) == 8810, "it's Constant Spray, 8,810 credits (%s, %d)" % [bm.name, int(bm.cost)])
+	tw.mode = Tower.Mode.CLOSE
+	g.enemies.clear()
+	var lead = put(g, "grunt", 100.0, 0, 500.0)
+	var side = put(g, "grunt", 120.0, 0, 500.0)
+	var back = put(g, "grunt", 140.0, 0, 500.0)
+	var wide = put(g, "grunt", 160.0, 0, 500.0)
+	tw.pos = Vector2(400, 300)
+	lead.pos = tw.pos + Vector2(40, 0)
+	side.pos = tw.pos + Vector2.from_angle(deg_to_rad(40.0)) * 60.0
+	back.pos = tw.pos + Vector2(-90, 0)
+	wide.pos = tw.pos + Vector2.from_angle(deg_to_rad(-72.0)) * 60.0
+	lead.soak_timer = 0.5
+	var s: Dictionary = tw.stats()
+	for i in 60:
+		g._sweep_spray(tw, s, 1.0 / 60.0)
+	check(near(float(tw.gun_cds.spray_c), 0.0, 0.01), "the fan is centred on the plant's target")
+	check(lead.soak_timer > 3.0 and side.soak_timer > 0.0, "one pass soaks everything the jet crosses, and tops a soaked enemy up")
+	check(back.soak_timer <= 0.0 and wide.soak_timer <= 0.0, "nothing outside the 120° fan is touched")
+	check(near(Game.spray_half(s), deg_to_rad(60.0)), "half the fan is 60°")
+	g.buy_retrofit(tw, 1)
+	s = tw.stats()
+	check(bool(s.get("mist", false)) and near(Game.spray_half(s), deg_to_rad(80.0)), "the Mist Nozzle widens it to 160°")
+	for i in 60:
+		g._sweep_spray(tw, s, 1.0 / 60.0)
+	check(wide.soak_timer > 0.0 and back.soak_timer <= 0.0, "and the wider fan reaches the enemy at 72°")
+	g.enemies.clear()
+	g._sweep_spray(tw, s, 1.0 / 60.0)
+	check(float(tw.gun_cds.spray_on) == 0.0 and tw.target == null, "with nothing in range the jet stops")
+	# An old save with the Speed mastery loads as Constant Spray (the node keeps its id).
+	var g2 = Game.new("meadow", 1234, "medium", ["chemical_plant_1", "chemical_plant_2a", "chemical_plant_2b", "chemical_plant_m"])
+	g2.emit_events = false
+	var err: String = g2.apply_save(g.to_save())
+	var t2 = g2.towers[0] if not g2.towers.is_empty() else null
+	check(err == "" and t2 != null and t2.mastered and bool(t2.stats().get("constant_spray", false)), "a saved Speed mastery loads as Constant Spray (%s)" % err)
 
 
 func test_rework_cryo_tower() -> void:

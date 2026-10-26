@@ -429,7 +429,7 @@ func _visual(ev: Dictionary) -> void:
 			var cl := ChemicalPlantArt.levels(str(ev.look))
 			var scol := ChemicalPlantArt.acid_color(cl, Draw.ACCENT.chemical_plant)
 			var k := 1.0
-			var nz := ChemicalPlantArt.muzzle(ev.from, (ev.to - ev.from).angle(), k, str(ev.look), int(ev.get("nozzle", 0)) == 1)
+			var nz := ChemicalPlantArt.muzzle(ev.from, (ev.to - ev.from).angle(), k, str(ev.look))
 			fx.spray(nz, ev.get("enemy"), ev.to, scol, (1.0 + 0.14 * float(cl.A)) * (1.15 if cl.G >= 1 else 1.0), cl.G >= 1, cl.A >= 4, bool(ev.get("mist", false)))
 		"radar_ping":
 			# The ping: a ring that sweeps out to the radar's reach (gold with the Frequency or Power mastery).

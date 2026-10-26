@@ -41,7 +41,7 @@ const STAT_ROWS := [
 	["Loadout boost", "loadout_mult", "x%.2f"],
 	["Mines at once", "cap", "%d"], ["Soak lasts", "soak_time", "%.0fs"], ["Armour stripped", "armor_strip", "%d"], ["Acid damage/s", "acid_dps", "%d"],
 	["Gel slow", "gel_slow", "pct"], ["Slow lasts", "slow_time", "%.1fs"], ["Permanent chill", "perm_slow", "pct"], ["Freeze every", "freeze_every", "%d waves"],
-	["Spray targets", "nozzles", "%d"], ["Damage boost", "buff_dmg", "+pct"], ["Fire-rate boost", "buff_rate", "+pct"], ["Range boost", "buff_range", "+pct"],
+	["Damage boost", "buff_dmg", "+pct"], ["Fire-rate boost", "buff_rate", "+pct"], ["Range boost", "buff_range", "+pct"],
 	["Extra boost, all stats", "buff_extra", "+pct"], ["Crit chance given", "crit_link", "pct"], ["Jump range", "jump_range", "%d"],
 	["Holds for", "hold", "%.1fs"], ["Pull", "pull", "%d"], ["Recharge", "recharge", "%.1fs"], ["Rewinds", "rewind", "%.0fs"], ["Beam slows others", "beam_slow", "pct"],
 	["Crushing damage/s", "grip_dps", "%d"], ["Slam radius", "slam_radius", "%d"], ["Slam stun", "slam_stun", "%.1fs"], ["Heavy roles resist less", "grip_relief", "pct"],
@@ -64,7 +64,7 @@ const FLAG_ROWS := [
 	["Pulled armour is gone for good", "pull_perm"], ["Grip lock", "grip_lock"], ["Slam shatters barriers", "slam_shatter"], ["Undo once a round", "undo"],
 	["Wave halves barriers", "shatter_half"], ["Constant reveal", "constant"], ["Early warning", "early_warning"], ["Remote link", "remote_link"], ["Bounces can bounce", "bounce_again"],
 	["Radar: reveals cloaked", "radar"], ["Sees through decoys", "unmask_decoy"], ["Breaks disguises", "unmask_mask"],
-	["Marks holograms as fakes", "unmask_mirage"], ["Mist soaks a neighbour", "mist"], ["Acid strips for good", "acid_perm"], ["Constant cold field", "cold_front"], ["Missiles loadout", "lo_missiles"], ["Bombs loadout", "lo_bombs"],
+	["Marks holograms as fakes", "unmask_mirage"], ["Mist soaks a neighbour", "mist"], ["Sprays without stopping, sweeping a fan", "constant_spray"], ["Acid strips for good", "acid_perm"], ["Constant cold field", "cold_front"], ["Missiles loadout", "lo_missiles"], ["Bombs loadout", "lo_bombs"],
 	["Laser loadout", "lo_laser"], ["Full kit loadout", "lo_full"],
 ]
 ## Short keys for the one-line summary.
