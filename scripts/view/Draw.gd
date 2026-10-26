@@ -494,8 +494,14 @@ static func _drawing() -> bool:
 	return false
 
 
+## Whether the cache turns this tower's static layers to its aim: the aimed towers, except a look that stays still (the
+## Rocket Salvo's Launch Cells, #104).
+static func aimed(type: String, spec: String) -> bool:
+	return AIMED.has(type) and not (type == "rocket_salvo" and RocketSalvoArt.still(spec))
+
+
 static func _cached_turret(ci: CanvasItem, type: String, tier: int, c: Vector2, aim: float, s: float, t: float, flash: float, spec: String, acc: Color) -> bool:
-	var rot := aim if AIMED.has(type) else 0.0
+	var rot := aim if aimed(type, spec) else 0.0
 	var bucket := posmod(roundi(rot / TAU * float(TURRET_BUCKETS)), TURRET_BUCKETS)
 	var base_rot := float(bucket) * TAU / float(TURRET_BUCKETS)
 	var key := "%s|%d|%s|%s|%.2f|%d" % [type, tier, spec, acc.to_html(), s, bucket]
