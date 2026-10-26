@@ -73,7 +73,7 @@ The summary lists each tower's stock price and =DPS, and what each path's master
 
 | Tower | Stock cr | Stock =DPS | A mastery: cr / =DPS | B mastery: cr / =DPS | C mastery: cr / =DPS |
 |---|---|---|---|---|---|
-| Gun Turret | 75 | 19.2 | 5745 / 69.6 | 1615 / 19.2 | 5310 / 81.6 |
+| Gun Turret | 75 | 19.2 | 5745 / 69.6 | 1615 / 19.2 | 13180 / 177.6 |
 | Mortar Tower | 150 | 18.0 | 5500 / 38.4 | 9065 / 51.0 | 7580 / 18.0 |
 | Rocket Salvo | 200 | 22.8 | 8400 / 55.2 | 3875 / 22.8 | 9955 / 89.4 |
 | Laser Tower | 250 | 75.0 | 8145 / 200.0 | 8980 / 243.8 | 3705 / 75.0 |
@@ -116,11 +116,11 @@ air: yes · ground: yes · size: 1 · damage_kind: physical
 | b3 | Rifled Barrels | 170 | range +25 · crit +0.05 | 19.2 | 330 | 5.82 |
 | b4 | Rangefinder | 305 | range +20 · crit +0.05 | 19.2 | 635 | 3.02 |
 | bm | Targeting Computer | 980 | range +25 · crit +0.1 | 19.2 | 1615 | 1.19 |
-| c1 | Swivel Mount | 20 | swivel · rate +0.05 | 20.0 | 95 | 21.05 |
-| c2 | Side Gun | 190 | side_gun +0.5 · rate +0.05 | 31.2 | 285 | 10.95 |
-| c3 | Twin Mount | 410 | multishot +2 · side_gun -0.5 · rate +0.05 | 43.2 | 695 | 6.22 |
-| c4 | Belt Feed | 660 | rate +0.3 | 52.8 | 1355 | 3.90 |
-| cm | Triple Mount | 3955 | multishot +1 · weakest_extra · rate +0.05 | 81.6 | 5310 | 1.54 |
+| c1 | Swivel Mount | 85 | swivel · rate +0.5 | 27.2 | 160 | 17.00 |
+| c2 | Side Gun | 440 | side_gun +0.5 · rate +0.5 | 52.8 | 600 | 8.80 |
+| c3 | Twin Mount | 1155 | multishot +2 · side_gun -0.5 · rate +0.5 | 86.4 | 1755 | 4.92 |
+| c4 | Belt Feed | 1100 | rate +0.5 | 102.4 | 2855 | 3.59 |
+| cm | Triple Mount | 10325 | multishot +1 · weakest_extra · rate +0.5 | 177.6 | 13180 | 1.35 |
 
 ### mortar_tower
 

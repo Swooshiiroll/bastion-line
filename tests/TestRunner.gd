@@ -1962,7 +1962,7 @@ func test_rework_paths() -> void:
 	g.gold = 10000
 	var t = g.place_tower("gun_turret", Vector2i(2, 3))
 	check(t.can_buy("a") and t.can_buy("b") and t.can_buy("c"), "the paths open from stock, no Retrofit needed")
-	check(t.upgrade_cost("a") == 55 and t.upgrade_cost("b") == 25 and t.upgrade_cost("c") == 20, "step 1 prices 55 / 25 / 20")
+	check(t.upgrade_cost("a") == 55 and t.upgrade_cost("b") == 25 and t.upgrade_cost("c") == 85, "step 1 prices 55 / 25 / 85")
 	buy_steps(g, t, "a", 1)
 	check(near(t.stats().damage, 22.0), "Heavier Rounds: +6 damage")
 	buy_steps(g, t, "a", 1)
@@ -1997,7 +1997,7 @@ func test_rework_range_path_and_multi_path() -> void:
 	buy_steps(g, m, "c", 3)
 	check(int(m.stats().multishot) == 2, "Twin Mount: 2 targets")
 	buy_steps(g, m, "c", 2)
-	check(int(m.stats().multishot) == 3 and bool(m.stats().weakest_extra) and near(m.stats().rate, 1.7), "Triple Mount: 3 targets at 1.7 shots/s (every step adds rate)")
+	check(int(m.stats().multishot) == 3 and bool(m.stats().weakest_extra) and near(m.stats().rate, 3.7), "Triple Mount: 3 targets at 3.7 shots/s (every step adds rate)")
 
 
 ## Owner's Build 2 list, batch 7 (#104): every Power step adds shot damage and every Multi-Target step adds fire rate, priced
@@ -2012,15 +2012,15 @@ func test_gun_turret_steps_add() -> void:
 		dmg.append(a.compose(-1, {"a": depth, "b": 0, "c": 0}, ["a"], d == 5).damage)
 		rate.append(a.compose(-1, {"a": 0, "b": 0, "c": depth}, ["c"], d == 5).rate)
 	check(dmg == [22.0, 28.0, 36.0, 46.0, 58.0], "Power: every step adds damage, 22 / 28 / 36 / 46 / 58 (%s)" % [dmg])
-	var want := [1.25, 1.3, 1.35, 1.65, 1.7]
-	check(range(5).all(func(i): return near(rate[i], want[i])), "Multi-Target: every step adds rate, 1.25 / 1.3 / 1.35 / 1.65 / 1.7 (%s)" % [rate])
+	var want := [1.7, 2.2, 2.7, 3.2, 3.7]
+	check(range(5).all(func(i): return near(rate[i], want[i])), "Multi-Target: every step adds rate, 1.7 / 2.2 / 2.7 / 3.2 / 3.7 (%s)" % [rate])
 	var tr: Dictionary = load("res://data/rework_trees.gd").TREES["gun_turret"]
 	var costs := []
 	for p in [tr.paths[0], tr.paths[2]]:
 		for n in p.nodes:
 			costs.append(int(n.cost))
 		costs.append(int(p.mastery.cost))
-	check(costs == [55, 165, 530, 1365, 3555, 20, 190, 410, 660, 3955], "the formula's prices (%s)" % [costs])
+	check(costs == [55, 165, 530, 1365, 3555, 85, 440, 1155, 1100, 10325], "the formula's prices (%s)" % [costs])
 
 
 func test_rework_armour_piercing() -> void:
@@ -2139,7 +2139,7 @@ func test_upgrades_add() -> void:
 	var c = g.place_tower("gun_turret", spot(g, "gun_turret", 71))
 	g.buy_retrofit(c, 0)
 	buy_steps(g, c, "c", 4)
-	check(near(c.stats().rate, 1.95), "Water-Cooled Barrel (+0.3) and path C's rate (+0.45 up to Belt Feed) stack: 1.2 to 1.95, not overwritten (%.2f)" % c.stats().rate)
+	check(near(c.stats().rate, 3.5), "Water-Cooled Barrel (+0.3) and path C's rate (+2.0 up to Belt Feed) stack: 1.2 to 3.5, not overwritten (%.2f)" % c.stats().rate)
 	check(int(c.stats().multishot) == 2 and near(c.stats().side_gun, 0.0), "Twin Mount: two barrels, the side gun folded in")
 	var errors := []
 	var Rework = load("res://data/rework_trees.gd")

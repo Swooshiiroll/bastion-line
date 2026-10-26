@@ -185,56 +185,56 @@ static var TREES := {
 				"nodes": [
 					{
 						"name": "Swivel Mount",
-						"cost": 20,
-						"blurb": "+0.05 shots/s (1.25); turns onto a new target faster, and doesn't fire at enemies already about to die (no wasted rounds on swarms and holograms)",
+						"cost": 85,
+						"blurb": "+0.5 shots/s (1.7); turns onto a new target faster, and doesn't fire at enemies already about to die (no wasted rounds on swarms and holograms)",
 						"set": {
 							"swivel": true,
 						},
 						"add": {
-							"rate": 0.05,
+							"rate": 0.5,
 						},
 					},
 					{
 						"name": "Side Gun",
-						"cost": 190,
-						"blurb": "+0.05 shots/s (1.3); a small side gun fires at a second target at 50% damage",
+						"cost": 440,
+						"blurb": "+0.5 shots/s (2.2); a small side gun fires at a second target at 50% damage",
 						"set": {},
 						"add": {
 							"side_gun": 0.5,
-							"rate": 0.05,
+							"rate": 0.5,
 						},
 					},
 					{
 						"name": "Twin Mount",
-						"cost": 410,
-						"blurb": "+0.05 shots/s (1.35); 2 targets at full damage",
+						"cost": 1155,
+						"blurb": "+0.5 shots/s (2.7); 2 targets at full damage",
 						"set": {},
 						"add": {
 							"multishot": 2.0,
 							"side_gun": -0.5,
-							"rate": 0.05,
+							"rate": 0.5,
 						},
 					},
 					{
 						"name": "Belt Feed",
-						"cost": 660,
-						"blurb": "+0.3 shots/s on every barrel (1.65)",
+						"cost": 1100,
+						"blurb": "+0.5 shots/s on every barrel (3.2)",
 						"set": {},
 						"add": {
-							"rate": 0.3,
+							"rate": 0.5,
 						},
 					},
 				],
 				"mastery": {
 					"name": "Triple Mount",
-					"cost": 3955,
-					"blurb": "+0.05 shots/s (1.7); 3 targets; the extra barrels go for the weakest enemies in range (swarms, holograms)",
+					"cost": 10325,
+					"blurb": "+0.5 shots/s (3.7); 3 targets; the extra barrels go for the weakest enemies in range (swarms, holograms)",
 					"set": {
 						"weakest_extra": true,
 					},
 					"add": {
 						"multishot": 1.0,
-						"rate": 0.05,
+						"rate": 0.5,
 					},
 				},
 			},
