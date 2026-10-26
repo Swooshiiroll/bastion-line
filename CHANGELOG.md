@@ -49,6 +49,7 @@ so write for players.
   - Mine Layer: the launcher turns to where it throws next; each mine flies on an arc and lands with a ring; mines land at random spots along the track in reach, a little either side of the middle, instead of in a row from the entrance.
   - Chemical Plant: a lobbed stream of acid drops onto the enemy instead of a straight line (gel glints, bubbles in the Concentrated Acid, and a mist for the Mist Nozzle's neighbour); the Twin Nozzles' second sprayer sprays from its own nozzle.
 - **Gun Turret paths (#104):** every Power step adds shot damage (+6, +6, +8, +10, +12: Sabot Rounds hit for 58, up from 44), and every Multi-Target step adds fire rate (+0.5 a step: Triple Mount fires 3.7 shots a second, up from 1.5). Their prices follow the pricing formula.
+- **Ripple Salvo's new look (#104):** the Rocket Salvo's Payload mastery is rebuilt as Launch Cells: an armoured deck of eight launch cells that never turns. The hatches slide open one after another as the salvo ripples out, each with a flash and a puff of smoke, and close again as it reloads; each rocket rises from its own cell.
 
 ### Behind the scenes
 - **Bot balance verdicts paused for the rework (#96):** the bot still plays every test game, but whether it wins, reaches endless or buys masteries no longer fails the tests until the tower rework is done; those results print as PAUSED.
