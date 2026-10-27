@@ -1210,6 +1210,21 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
 
 **Round 9 (owner note):** "Make the elasticity stronger, so the bands reciprocate faster". The Path 3 band now opens in under 0.2 s and then swings in and out about 2.3 times faster (a spring of about 3.3 swings a second instead of 1.4) with less than half the damping, so it reciprocates several times before settling; the expansion (3 to 14 px) and the bend are stronger too.
 
+**Round 10 (v4-dev.2 batch 7, #120):** the owner's note on the dev.2 builds: "Megaton wave smoke plume animation should
+look more like a mushroom cloud (more inline with a nuclear explosion)." A mockup first (owner, 2026-10-26).
+- **On the page:** the Megaton Wave step shows the picked White-Hot Gyro Rings with four clouds to choose from:
+  - C, the current billow (a flash, a fireball and a rolling cap), for comparison.
+  - D, Rolling Mushroom: a fireball climbs a narrow stem and opens into a cap that rolls like a smoke ring (the gas rises
+    up the middle, over the top and down the outside). It cools from white through orange to smoke, and a ring of dust
+    rolls out along the ground. It clears in about 4 s.
+  - E, Mushroom and Condensation Rings: D, plus two white condensation rings that flash out round the stem and under the
+    cap, and a wider dust surge.
+  - F, Fireball Mushroom: a lower cap that stays an orange fireball longer and sheds falling embers, clearing in about
+    3 s.
+- **Every blast fades the last cloud out** over 0.6 s, so clouds never stack: the Megaton fires every 1.4-1.75 s.
+- **The page:** the build preview is smaller on this page (110 px a tile), so a whole cloud fits above the tower. The
+  store key is now `bl-tower-art-p2-shock-r10`.
+
 ### Scrapyard (third restart: a tower of three parts)
 
 **History.** Three Scrapyard designs have been rejected: (1) the Magnet Yard base with its first upgrade designs; (2) a from-scratch Smelting Works ("didn't like the overall design"); (3) the Armoured Vault Depot, whose base look was confirmed (with the Sparks and Sale animation) before its second-pass round 1, after which the owner said "Scrap the scrapyard design and start all over again". Its files (`data_scrap_looks.js`, `data_p2_scrap.js`, the p2 page) are deleted; git keeps them. The `sBuild`/`sCard` preview-scale hook in `pass2_engine.js` stays for the 2x2 second pass.
