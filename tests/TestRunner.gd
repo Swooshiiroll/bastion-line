@@ -2662,6 +2662,61 @@ func test_upgrades_add() -> void:
 	check(errors.is_empty(), "no upgrade sets a number, only flags: %s" % ", ".join(errors))
 
 
+## Batch 5 of the 26 Oct list (#119): upgrade text reads "+x (total)", never "X to Y", and ships no design notes. The
+## damage, range and fire-rate figures in it match the data: x is the node's own add, the total its path alone from stock.
+func test_upgrade_text_119() -> void:
+	var Rework = load("res://data/rework_trees.gd")
+	var to_re := RegEx.create_from_string("\\d\\S*\\s+to\\s+×?\\d")
+	var note_re := RegEx.create_from_string("(?i)proposed|owner|to confirm|\\(#\\d|replaces |replaced ")
+	var num_re := RegEx.create_from_string("\\+([\\d.]+) (damage|range|(?:shot|shell|round|arc)s?/s) \\(([\\d.]+)\\)")
+	var wording := []
+	var notes := []
+	var sums := []
+	var checked := 0
+	for slug in Rework.ORDER:
+		var tr: Dictionary = Rework.TREES[slug]
+		if note_re.search(str(tr.base.blurb)):
+			notes.append("%s base" % slug)
+		var base := _tree_apply({}, tr.base)
+		var runs := []
+		for r in tr.retrofits:
+			runs.append([r])
+		for p in tr.paths:
+			runs.append(p.nodes + [p.mastery])
+		for run in runs:
+			var stats := base
+			for n in run:
+				stats = _tree_apply(stats, n)
+				var text := str(n.blurb)
+				if to_re.search(text):
+					wording.append("%s %s" % [slug, n.name])
+				if note_re.search(text):
+					notes.append("%s %s" % [slug, n.name])
+				for m in num_re.search_all(text):
+					# The stat itself, or a weapon's own copy of it (the CAS Gunship's ac_rate, the Mortar's bomblet_damage).
+					var want := "rate" if m.get_string(2).ends_with("/s") else m.get_string(2)
+					var stat := ""
+					for k in n.add:
+						if k == want or str(k).ends_with("_" + want):
+							stat = k
+					checked += 1
+					if stat == "" or absf(float(n.add[stat]) - float(m.get_string(1))) > 0.01 \
+							or absf(float(stats.get(stat, 0.0)) - float(m.get_string(3))) > 0.01:
+						sums.append("%s %s: %s" % [slug, n.name, m.get_string(0)])
+	check(wording.is_empty(), "no upgrade text says \"X to Y\": %s" % [wording])
+	check(notes.is_empty(), "no design notes ship in the upgrade text: %s" % [notes])
+	check(checked > 100 and sums.is_empty(), "every \"+x (total)\" damage, range and rate figure matches the data (%d checked): %s" % [checked, sums])
+
+
+func _tree_apply(stats: Dictionary, n: Dictionary) -> Dictionary:
+	var out := stats.duplicate()
+	for k in n.add:
+		out[k] = float(out.get(k, 0.0)) + float(n.add[k])
+	for k in n.set:
+		out[k] = n.set[k]
+	return out
+
+
 func test_towers_start_unloaded() -> void:
 	var g = new_game()
 	g.gold = 100000
