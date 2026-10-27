@@ -2275,8 +2275,8 @@ func test_mine_scatter() -> void:
 	check(nxt != null and absf(angle_difference(t2.aim, (nxt - t2.pos).angle())) < 0.01, "then it turns to the next spot")
 
 
-## Chemical Plant (#90): its spray event says which nozzle and whether it's the Mist Nozzle's neighbour, so the view can draw the
-## lobbed stream (no tracer).
+## Chemical Plant (#90): its spray event says whether it's the Mist Nozzle's neighbour, so the view can draw the lobbed stream
+## (no tracer). There's one nozzle since Twin Nozzles went (#104), so the event no longer names it.
 func test_chem_spray_events() -> void:
 	var g = new_game()
 	g.gold = 900000
@@ -2291,7 +2291,7 @@ func test_chem_spray_events() -> void:
 	g.events.clear()
 	g._spray(t, t.stats())
 	var sprays: Array = g.events.filter(func(ev): return ev.type == "spray")
-	check(sprays.size() == 2 and sprays[0].enemy != null and not sprays[0].mist and int(sprays[0].nozzle) == 0, "the first spray: nozzle 1 at its enemy")
+	check(sprays.size() == 2 and sprays[0].enemy != null and not sprays[0].mist, "the first spray goes at its enemy")
 	check(sprays.size() == 2 and sprays[1].mist, "the Mist Nozzle's neighbour gets a mist")
 
 
@@ -4652,6 +4652,42 @@ func test_rework_shockwave_generator() -> void:
 	ef.cooldown = 0.0
 	g._update_shockwave(ef, ef.stats(), 0.0)
 	check(ag3.shield < ag3.max_shield * 0.5 and ag3.barrier_block >= 4.9, "the wave halves the barrier and stops it regenerating (%.1f of %.1f, block %.1f)" % [ag3.shield, ag3.max_shield, ag3.barrier_block])
+
+
+## The Megaton Wave's cloud (#120, the owner's look C): the red fireball is added last, so it's drawn over the grey smoke, and
+## it climbs higher than the grey billow and rolling cap.
+func test_megaton_cloud_120() -> void:
+	var g = new_game()
+	g.gold = 90000
+	var t = g.place_tower("shockwave_generator", spot(g, "shockwave_generator", 0))
+	t.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, t, "a", 5)
+	check(t.mastered, "the Megaton Wave is bought")
+	var w = load("res://scripts/view/World.gd").new()
+	w.game = g
+	w.fx = FxLayer.new()
+	w.smoke_fx = FxLayer.new()
+	w._shockwave({"pos": t.pos, "radius": 132.0, "look": t.look_key()})
+	var ps: Array = w.smoke_fx.puffs
+	var first_fire := -1
+	var fire_last := true
+	var fire_low := INF
+	var grey_high := 0.0
+	for i in ps.size():
+		var q: Dictionary = ps[i]
+		# Where the puff is heading: its drift settles at v / drag, plus its offset (up is negative y).
+		var top: float = -(float(q.v.y) / float(q.d) + float(q.oy))
+		if q.fire:
+			first_fire = i if first_fire < 0 else first_fire
+			fire_low = minf(fire_low, top)
+		else:
+			fire_last = fire_last and first_fire < 0
+			grey_high = maxf(grey_high, top)
+	check(first_fire > 0 and fire_last, "the fireball's puffs come after every grey one, so they're drawn on top")
+	check(fire_low > grey_high, "the fireball climbs above the grey smoke (lowest fire %.1f px, highest grey %.1f px)" % [fire_low, grey_high])
+	w.fx.free()
+	w.smoke_fx.free()
+	w.free()
 
 
 func test_rework_scrapyard() -> void:

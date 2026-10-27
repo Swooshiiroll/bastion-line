@@ -1225,6 +1225,16 @@ look more like a mushroom cloud (more inline with a nuclear explosion)." A mocku
 - **The page:** the build preview is smaller on this page (110 px a tile), so a whole cloud fits above the tower. The
   store key is now `bl-tower-art-p2-shock-r10`.
 
+**Round 11 (owner's pick, 2026-10-27):** "Keep C, but have the red smoke rise higher, and put the grey smoke underneath."
+D, E and F are dropped. The other picks stand (Power C, Speed C, Effect A, Retrofits C).
+- **The red fireball:** it climbs about twice as high (rising faster, with less drag), stays red longer (it greys over
+  2 s, not 1.3 s), lives 2-2.4 s, and is drawn after the grey, so it sits on top.
+- **The grey smoke:** the billow rises only 55% as far, and the rolling cap sits lower (8 px up, times the cloud's
+  scale, not 13), so both stay under the fireball.
+- **In game:** `World._shockwave` (`MEGA_SMOKE_RISE`, `MEGA_CAP_Y`, `MEGA_FIRE_DRAG`), with `FxLayer.puff`'s `hot_t`
+  setting how long a fire puff takes to grey. Lower Power steps are unchanged.
+- **The page:** the store key is now `bl-tower-art-p2-shock-r11`.
+
 ### Scrapyard (third restart: a tower of three parts)
 
 **History.** Three Scrapyard designs have been rejected: (1) the Magnet Yard base with its first upgrade designs; (2) a from-scratch Smelting Works ("didn't like the overall design"); (3) the Armoured Vault Depot, whose base look was confirmed (with the Sparks and Sale animation) before its second-pass round 1, after which the owner said "Scrap the scrapyard design and start all over again". Its files (`data_scrap_looks.js`, `data_p2_scrap.js`, the p2 page) are deleted; git keeps them. The `sBuild`/`sCard` preview-scale hook in `pass2_engine.js` stays for the 2x2 second pass.

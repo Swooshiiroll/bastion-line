@@ -279,7 +279,8 @@ func shock_wave(pos: Vector2, radius: float, color: Color, pw: float, hits: Arra
 
 
 ## One smoke puff with its own lifetime: it flies out along `vel` slowing with `drag`, grows by `grow` px, and cools from `hot` to `col`
-## over `hot_t` s (a fire puff, `fire`, burns amber to red first). `al` is its start alpha, `f2` how much faster it fades late.
+## over `hot_t` s (a fire puff, `fire`, burns amber to red first, then cools to `col` over `hot_t`, or 1.3 s if it's 0). `al` is its
+## start alpha, `f2` how much faster it fades late.
 func puff(p0: Vector2, vel: Vector2, drag: float, r0: float, grow: float, col: Color, hot: Color, hot_t: float, al: float, life: float, delay := 0.0, oy := 0.0, f2 := 0.3, fire := false) -> void:
 	puffs.append({"p": p0, "v": vel, "d": drag, "r0": r0, "g": grow, "c": col, "h": hot, "ht": hot_t, "al": al, "t0": _time + delay, "max": life, "oy": oy, "f2": f2, "fire": fire})
 
@@ -293,7 +294,7 @@ func _puff(q: Dictionary) -> void:
 	var p: Vector2 = q.p + q.v * dr + Vector2(0, q.oy)
 	var col: Color = q.c
 	if q.fire:
-		col = Color(1.0, 0.7, 0.28).lerp(Color(0.95, 0.3, 0.1), minf(1.0, age / 0.7)).lerp(q.c, minf(1.0, age / 1.3))
+		col = Color(1.0, 0.7, 0.28).lerp(Color(0.95, 0.3, 0.1), minf(1.0, age / 0.7)).lerp(q.c, minf(1.0, age / (float(q.ht) if float(q.ht) > 0.0 else 1.3)))
 	elif float(q.ht) > 0.0:
 		col = q.c.lerp(q.h, maxf(0.0, 1.0 - age / float(q.ht)) * 0.8)
 	Draw.disc(self, p, float(q.r0) + float(q.g) * minf(1.0, u * 1.3), Color(col, float(q.al) * (1.0 - u) * (1.0 - u * float(q.f2))))

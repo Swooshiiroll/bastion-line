@@ -32,6 +32,11 @@ const TractorTowerArt = preload("res://scripts/view/towers/TractorTowerArt.gd")
 
 const MAX_STEPS_PER_FRAME := 40
 const SMOKE := Color(0.35, 0.36, 0.4, 0.7)
+## The Megaton Wave's cloud (#120): the grey billow rises this much as far, its rolling cap sits this high (px, times the cloud's
+## scale), and the red fireball's drag is lower than the smoke's 1.4, so it climbs over both.
+const MEGA_SMOKE_RISE := 0.55
+const MEGA_CAP_Y := -8.0
+const MEGA_FIRE_DRAG := 1.1
 
 signal field_clicked(cell: Vector2i, button: int, shift: bool, pos: Vector2)
 
@@ -304,7 +309,7 @@ func _salvo_hit(ev: Dictionary) -> void:
 
 
 ## The Shockwave Generator's blast (its page, Mushroom Pulse): two rings roll out and flash each enemy they reach; a mushroom cloud
-## billows up, bigger with every Power step, with a nuclear fireball and a rolling cap at the Megaton Wave; Reactor Venting throws
+## billows up, bigger with every Power step; at the Megaton Wave a red fireball climbs over a low grey billow and rolling cap. Reactor Venting throws
 ## smoke out of its four corner stacks. Every puff lives on its own clock.
 func _shockwave(ev: Dictionary) -> void:
 	var sl := ShockwaveGeneratorArt.levels(str(ev.look))
@@ -321,22 +326,25 @@ func _shockwave(ev: Dictionary) -> void:
 	fx.shock_wave(p0, radius, wc, 1.0 + 0.25 * float(sl.P) + (0.25 if sl.r == 1 else 0.0), hits, mega, sc)
 	var vfx := float(SaveManager.setting("vfx"))
 	var n := maxi(3, roundi(float(8 + 4 * sl.P) * vfx))
+	# At the Megaton Wave the grey billow and cap stay low, under the red fireball (#120, the owner's note on look C).
+	var rise := MEGA_SMOKE_RISE if mega else 1.0
 	for q in n:
 		var tone := randf()
 		var sm := Color(0.34 + 0.16 * tone, 0.31 + 0.15 * tone, 0.28 + 0.14 * tone)
 		var spread := 16.0 if float(q) > float(n) * 0.45 else 5.0
-		smoke_fx.puff(p0, Vector2((randf() - 0.5) * spread, -(12.0 + 9.0 * randf())) * sc, 1.4, (1.8 + 0.8 * randf()) * sc, 3.2 * sc, sm, wc, 0.7, 0.7, 2.4 + 1.2 * randf(), randf() * 0.04)
+		smoke_fx.puff(p0, Vector2((randf() - 0.5) * spread, -(12.0 + 9.0 * randf()) * rise) * sc, 1.4, (1.8 + 0.8 * randf()) * sc, 3.2 * sc, sm, wc, 0.7, 0.7, 2.4 + 1.2 * randf(), randf() * 0.04)
 	if mega:
-		for q in maxi(2, roundi(7.0 * vfx)):
-			var tone := randf()
-			var sm := Color(0.34 + 0.16 * tone, 0.31 + 0.15 * tone, 0.28 + 0.14 * tone)
-			smoke_fx.puff(p0, Vector2((randf() - 0.5) * 7.0, -(7.0 + 7.0 * randf())) * sc, 1.4, (3.2 + 1.4 * randf()) * sc, 3.2 * sc, sm, wc, 0.0, 0.85, 1.5 + 0.4 * randf(), randf() * 0.05, 0.0, 0.3, true)
 		var nc := maxi(4, roundi(16.0 * vfx))
 		for q in nc:
 			var tone := randf()
 			var sm := Color(0.34 + 0.16 * tone, 0.31 + 0.15 * tone, 0.28 + 0.14 * tone)
 			var fi := float(q) * TAU / float(nc) + randf() * 0.3
-			smoke_fx.puff(p0, Vector2(cos(fi) * (13.0 + 7.0 * randf()), sin(fi) * 4.0 - 2.0) * sc, 1.4, (2.6 + 1.2 * randf()) * sc, 3.2 * sc, sm, wc, 1.1, 0.7, 3.0 + 0.8 * randf(), 0.2 + randf() * 0.08, -13.0 * sc)
+			smoke_fx.puff(p0, Vector2(cos(fi) * (13.0 + 7.0 * randf()), sin(fi) * 4.0 - 2.0) * sc, 1.4, (2.6 + 1.2 * randf()) * sc, 3.2 * sc, sm, wc, 1.1, 0.7, 3.0 + 0.8 * randf(), 0.2 + randf() * 0.08, MEGA_CAP_Y * sc)
+		# The fireball last, so it's drawn over the grey: it climbs high (less drag) and stays red longer as it rises.
+		for q in maxi(2, roundi(7.0 * vfx)):
+			var tone := randf()
+			var sm := Color(0.34 + 0.16 * tone, 0.31 + 0.15 * tone, 0.28 + 0.14 * tone)
+			smoke_fx.puff(p0, Vector2((randf() - 0.5) * 7.0, -(18.0 + 8.0 * randf())) * sc, MEGA_FIRE_DRAG, (3.2 + 1.4 * randf()) * sc, 3.2 * sc, sm, wc, 2.0, 0.85, 2.0 + 0.4 * randf(), randf() * 0.05, 0.0, 0.3, true)
 	if sl.r == 2:
 		for sg in ShockwaveGeneratorArt.VENTS:
 			var a0: float = sg.angle()
