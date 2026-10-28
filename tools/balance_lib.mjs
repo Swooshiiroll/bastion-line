@@ -58,6 +58,8 @@ export function parseTowers(text, errors) {
         if (!KEYS.has(key)) { errors.push(`${slug} ${id}: unknown key "${key}"`); continue; }
         if (val === undefined) { if (!FLAGS.has(key)) errors.push(`${slug} ${id}: "${key}" needs a value`); set[key] = true; continue; }
         if (FLAGS.has(key)) { errors.push(`${slug} ${id}: "${key}" is a flag`); continue; }
+        // Upgrades add (#85): only the stock row sets a number.
+        if (id !== "base" && !/^[+-]/.test(val)) { errors.push(`${slug} ${id}: "${key} ${val}" needs a sign: upgrades add (+${val} or -${val})`); continue; }
         if (/^[+-]/.test(val)) add[key] = parseFloat(val); else set[key] = parseFloat(val);
       }
       nodes[id] = { cost, tokens: c[col.Tokens], set, add };

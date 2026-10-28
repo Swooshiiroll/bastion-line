@@ -17,6 +17,7 @@ var flashes: Array = []
 var texts: Array = []
 var meteors: Array = []
 var scorches: Array = []
+var sprays: Array = []
 var mists: Array = []
 var shocks: Array = []
 var puffs: Array = []
@@ -40,6 +41,13 @@ func burst(pos: Vector2, color: Color, count: int, speed := 90.0, size := 2.5, l
 		var v := Vector2.from_angle(randf() * TAU) * speed * randf_range(0.3, 1.0)
 		var l := life * randf_range(0.6, 1.0)
 		particles.append({"p": pos, "v": v, "life": l, "max": l, "c": color, "s": size * randf_range(0.6, 1.2), "g": gravity})
+
+
+## An acid spray (Chemical Plant): a stream of drops lobbed from `from` onto `enemy` (following it; `to` once it's gone) over
+## `life` seconds. `size` scales the drops; `glint` adds the gel's white glints, `bubbles` the Concentrated Acid's bubbles; a
+## `mist` is a few soft puffs drifting over instead.
+func spray(from: Vector2, enemy, to: Vector2, color: Color, size: float, glint: bool, bubbles: bool, mist := false, life := 0.5) -> void:
+	sprays.append({"a": from, "e": enemy, "b": to, "c": color, "s": size, "g": glint, "bub": bubbles, "mist": mist, "life": life, "max": life})
 
 
 func ring(pos: Vector2, r0: float, r1: float, color: Color, life := 0.35, width := 2.0, filled := false) -> void:
@@ -117,6 +125,10 @@ func _process(delta: float) -> void:
 	texts = _age(texts, delta)
 	meteors = _age(meteors, delta)
 	scorches = _age(scorches, delta)
+	for q in sprays:
+		if q.e != null and is_instance_valid(q.e) and q.e.alive:
+			q["b"] = q.e.pos
+	sprays = _age(sprays, delta)
 	mists = _age(mists, delta)
 	shocks = _age(shocks, delta)
 	fountains = _age(fountains, delta)
@@ -163,6 +175,8 @@ func _draw() -> void:
 		for i in 3:
 			var a := _time * 3.0 + TAU * float(i) / 3.0
 			Draw.arc(self, m.p, m.r * (0.35 + 0.1 * float(i)), a, a + 1.2, 10, Color(1.0, 0.7, 0.35, 0.6), 2.0, true)
+	for q in sprays:
+		_spray(q)
 	for m in mists:
 		_mist(m)
 	for q in puffs:
@@ -200,6 +214,29 @@ func _draw() -> void:
 		var col := Color(t.c, minf(1.0, k * 2.0))
 		draw_string_outline(_font, pos, t.t, HORIZONTAL_ALIGNMENT_LEFT, -1, size, 4, Color(0, 0, 0, 0.8 * col.a))
 		draw_string(_font, pos, t.t, HORIZONTAL_ALIGNMENT_LEFT, -1, size, col)
+
+
+func _spray(q: Dictionary) -> void:
+	var u: float = 1.0 - q.life / q.max
+	var a: Vector2 = q.a
+	var b: Vector2 = q.b
+	var col: Color = q.c
+	if q.mist:
+		var p := a.lerp(b, u)
+		for i in 4:
+			Draw.disc(self, p + Vector2.from_angle(float(i) * 1.7 + u * 7.0) * 2.0, 2.4 + u * 2.4, Color(col, 0.3))
+		return
+	for i in 9:
+		var f := minf(u * 1.6, 1.0) - float(i) * 0.06
+		if f < 0.0:
+			continue
+		var p := a.lerp(b, f) - Vector2(0, sin(PI * f) * 12.0)
+		var r: float = (1.6 + 0.4 * float(i % 2)) * q.s
+		Draw.disc(self, p, r, Color(col, 0.9 - float(i) * 0.06))
+		if q.g:
+			Draw.disc(self, p + Vector2(-0.4, -0.4), r * 0.35, Color(1, 1, 1, 0.55 * (1.0 - float(i) * 0.08)))
+		if q.bub and i % 3 == 0:
+			Draw.ring(self, p + Vector2(0, -2), 1.3, Color(col.lightened(0.4), 0.5), 0.6)
 
 
 func _mist(m: Dictionary) -> void:

@@ -69,6 +69,8 @@ var ramp_mult := 1.0
 var beam_targets: Array = []
 ## Laser Tower (reworked): seconds each beam has held its target, parallel to beam_targets.
 var beam_ramps: Array = []
+## Laser Tower: the beams are firing (it faces its main target); false while it turns onto a new one (#90).
+var beam_on := false
 ## Artillery Cannon: the spot it shells (chosen by the player; set to the nearest track point when built) and the shell type loaded.
 var aim_point := Vector2.ZERO
 var aim_set := false
@@ -77,6 +79,11 @@ var shell := "he"
 var loadout := "gun"
 ## CAS Gunship: where the plane is on its orbit (radians) and each gun's cooldown. The orbit centre is `aim_point`.
 var orbit_angle := 0.0
+## CAS Gunship: the plane's position and heading, and whether it's circling (false while it flies to a new orbit). INF until
+## it takes off from the tower.
+var plane_pos := Vector2.INF
+var plane_heading := 0.0
+var in_orbit := false
 var gun_cds := {}
 ## Seconds left knocked offline by a Jammer's EMP.
 var disabled := 0.0
@@ -420,6 +427,29 @@ func eff_rate() -> float:
 	return float(stats().get("rate", 1.0)) * (1.0 + float(stats().get("rate_pct", 0.0))) * (1.0 + buff_rate) * (1.0 - debuff_rate)
 
 
+## Starts its weapons on a full reload (#85): a new tower, and every tower at the start of a round, has to load before
+## its first shot. The Magneto's flip and the Tractor's recharge count as its reload; a Radar's ping is a sensor, not a
+## shot, so it pings at once.
+func load_up() -> void:
+	var s := stats()
+	match type:
+		"magneto_tower":
+			cooldown = float(s.get("flip_every", 0.0))
+		"tractor_tower":
+			cooldown = float(s.get("recharge", 0.0))
+		"radar_tower":
+			pass
+		_:
+			cooldown = 1.0 / maxf(0.01, eff_rate())
+	if type == "cas_gunship":
+		var mult: float = float(s.get("rate_mult", 1.0)) * (1.0 + buff_rate)
+		gun_cds["gat"] = 1.0 / maxf(0.01, float(s.get("rate", 1.0)) * mult)
+		if s.has("ac_rate"):
+			gun_cds["ac"] = 1.0 / maxf(0.01, float(s.ac_rate) * mult)
+		if s.has("ms_rate"):
+			gun_cds["ms"] = 1.0 / maxf(0.01, float(s.ms_rate) * mult)
+
+
 func get_range() -> float:
 	return float(stats().get("range", 100.0)) * (1.0 + buff_range) * (1.0 + (SITE_RANGE if site == "H" else 0.0)) * (1.0 - debuff_range)
 
@@ -462,7 +492,7 @@ func _price(cost: int) -> int:
 func can_target(e) -> bool:
 	if e == null or not e.alive:
 		return false
-	if e.is_hidden() or (e.flying and not hits_air()) or (not e.flying and not hits_ground()):
+	if e.untargetable() or (e.flying and not hits_air()) or (not e.flying and not hits_ground()):
 		return false
 	var r := get_range()
 	return pos.distance_squared_to(e.pos) <= r * r

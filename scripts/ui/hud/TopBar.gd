@@ -29,6 +29,8 @@ const NEXT_TYPES := 4
 
 var shop_btn: Button
 var research_btn: Button
+## Sandbox only: the Spawner's button, beside Research (#87).
+var spawner_btn: Button
 var _next_key := ""
 var _lit := {}
 var _lit_style: StyleBoxFlat
@@ -100,16 +102,24 @@ func _ready() -> void:
 	auto_btn.tooltip_text = "Automatically launch the next round 5 seconds after each clear"
 	shop_btn = UiKit.button("Shop  [B]", Callable(screen, "toggle_shop"), Vector2(84, 30))
 	shop_btn.tooltip_text = "Tower shop"
-	research_btn = UiKit.button("Spawner  [S]" if g.sandbox else "Research  [R]", Callable(screen, "toggle_spawner" if g.sandbox else "toggle_research"), Vector2(108, 30))
-	research_btn.tooltip_text = "Sandbox Spawner: spawn enemies, call rounds, switch research" if g.sandbox else "Research Lab (pauses the battle; purchases apply at once)"
+	research_btn = UiKit.button("Research  [R]", Callable(screen, "toggle_research"), Vector2(108, 30))
+	research_btn.tooltip_text = "Research Lab (pauses the battle; purchases apply at once)"
+	if g.sandbox:
+		research_btn.tooltip_text = "Research Lab (pauses the battle). Purchases spend your real research points and are saved; the run switches to your research (Mine)."
+		spawner_btn = UiKit.button("Spawner  [S]", Callable(screen, "toggle_spawner"), Vector2(108, 30))
+		spawner_btn.tooltip_text = "Sandbox Spawner: spawn enemies, call rounds, switch research"
 	var codex_btn := UiKit.button("Codex  [K]", Callable(screen, "toggle_codex"), Vector2(92, 30))
 	codex_btn.tooltip_text = "Codex: every tower, enemy, effect and rule (pauses the battle). Opens on your selection."
 	var menu_btn := UiKit.button("Menu  [Esc]", Callable(screen, "open_pause"), Vector2(96, 30))
-	for b in [next_btn, speed_btn, auto_btn, shop_btn, research_btn, codex_btn, menu_btn]:
+	for b in [next_btn, speed_btn, auto_btn, shop_btn, spawner_btn, research_btn, codex_btn, menu_btn]:
+		if b == null:
+			continue
 		b.add_theme_font_size_override("font_size", 14)
 		if b != next_btn:
 			row.add_child(b)
-	_lit = {"shop": shop_btn, ("spawner" if g.sandbox else "research"): research_btn, "codex": codex_btn, "intel": next_btn}
+	_lit = {"shop": shop_btn, "research": research_btn, "codex": codex_btn, "intel": next_btn}
+	if spawner_btn != null:
+		_lit["spawner"] = spawner_btn
 
 
 func _icon_value(fn: Callable, which: String) -> HBoxContainer:

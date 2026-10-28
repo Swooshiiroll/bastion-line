@@ -66,6 +66,12 @@ static func W(p: Vector2) -> Vector2:
 	return _o + Vector2(p.x * _sx, p.y * _sy).rotated(_r)
 
 
+## The inverse of W: a battlefield point in the current frame's coordinates.
+static func L(w: Vector2) -> Vector2:
+	var q := (w - _o).rotated(-_r)
+	return Vector2(q.x / _sx, q.y / _sy)
+
+
 static func _k() -> float:
 	return sqrt(absf(_sx * _sy))
 

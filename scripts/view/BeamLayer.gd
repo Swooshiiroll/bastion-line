@@ -27,7 +27,7 @@ func _draw() -> void:
 	for tw in g.towers:
 		if tw.is_support():
 			_pylon(tw, g, t)
-		elif tw.is_beam() and not tw.beam_targets.is_empty():
+		elif tw.is_beam() and tw.beam_on and not tw.beam_targets.is_empty():
 			_laser_beams(tw, t)
 	for z in g.storms:
 		_storm(z, t)

@@ -64,6 +64,9 @@ var interactive := true
 var damage_numbers := true
 var build_type := ""
 var ability_target := ""
+## Towers whose target the player places (#87), and the one in aim mode (Move target): the next field click sets it.
+const AIMABLE := ["artillery_cannon", "cas_gunship"]
+var aim_tower = null
 var selected_tower = null
 var hover_cell := Vector2i(-1, -1)
 var hover_pos := Vector2(-1000, -1000)
@@ -117,6 +120,7 @@ func setup(g, clip := Rect2i()) -> void:
 	selected_tower = null
 	build_type = ""
 	ability_target = ""
+	aim_tower = null
 
 
 ## Advances the simulation by real time `delta` at the given speed and returns the drained events.
@@ -420,11 +424,13 @@ func _visual(ev: Dictionary) -> void:
 				# Melt and Pour: the furnace flares (the art) and a fountain of coins vents from the stack's mouth.
 				smoke_fx.fountain(p[0] + Vector2(0, -8))
 		"spray":
-			# The acid spray: a lobbed stream of drops in the plant's acid colour, bigger with each Acid step (white glints from Slowing's gel).
+			# The acid spray: a lobbed stream of drops in the plant's acid colour from the nozzle to the enemy, bigger with each Acid step,
+			# white glints from Slowing's gel, bubbles in the Concentrated Acid; the Mist Nozzle's neighbour gets a drifting mist.
 			var cl := ChemicalPlantArt.levels(str(ev.look))
 			var scol := ChemicalPlantArt.acid_color(cl, Draw.ACCENT.chemical_plant)
-			fx.tracer(ev.from, ev.to, Color(scol, 0.8), 0.3, 2.0 + 0.3 * float(cl.A))
-			fx.burst(ev.to, scol, 5, 45.0, 1.8 + 0.2 * float(cl.A), 0.4)
+			var k := 1.0
+			var nz := ChemicalPlantArt.muzzle(ev.from, (ev.to - ev.from).angle(), k, str(ev.look), int(ev.get("nozzle", 0)) == 1)
+			fx.spray(nz, ev.get("enemy"), ev.to, scol, (1.0 + 0.14 * float(cl.A)) * (1.15 if cl.G >= 1 else 1.0), cl.G >= 1, cl.A >= 4, bool(ev.get("mist", false)))
 		"radar_ping":
 			# The ping: a ring that sweeps out to the radar's reach (gold with the Frequency or Power mastery).
 			var rl2 := RadarTowerArt.levels(str(ev.look))
@@ -451,10 +457,6 @@ func _visual(ev: Dictionary) -> void:
 		"ricochet":
 			fx.tracer(ev.from, ev.to, Color(0.4, 1.0, 0.5, 0.9), 0.15, 1.6)
 			fx.flash(ev.to, 6.0, Color(0.4, 1.0, 0.5), 0.08)
-		"mine_toss":
-			# A mine lobbed from the launcher to its spot: a short arc of light and a ring where it lands.
-			fx.tracer(ev.pos, ev.to, Color(1, 1, 1, 0.5), 0.25, 1.0)
-			fx.ring(ev.to, 2.0, 10.0, Color(1, 1, 1, 0.6), 0.25, 1.0)
 		"mine_blast":
 			# The confetti charge: coloured scraps fly from the blast (gold for the anti-tank mine), a shock ring at Wider Charge, a gel puddle with Adhesive Mines.
 			var ml := MineLayerArt.levels(str(ev.look))
