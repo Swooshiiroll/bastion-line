@@ -79,7 +79,7 @@ func _card(type: String, key: String) -> Button:
 	var b := UiKit.button("", Callable(screen, "shop_pick").bind(type), CARD)
 	b.size = CARD
 	b.tooltip_text = "%s%s
-%s" % [d.name, "  [%s]" % key if key != "" else "  (%s)" % d["class"], d.blurb]
+%s" % [d.name, "  [%s]" % key if key != "" else "  (%s)" % d["class"], _tagline(type, d)]
 	if d.has("class"):
 		# Reworked towers: the tile is tinted by class (Assault, Support, Defense, Utility).
 		var cc: Color = TowerInfo.CLASS_COLORS.get(d["class"], UiKit.ACCENT)
@@ -87,7 +87,7 @@ func _card(type: String, key: String) -> Button:
 			var sb := UiKit.box(Color(cc, 0.16 if s != "hover" else 0.28), Color(cc, 0.8 if s == "hover" else 0.5), 6, 1, 0.0)
 			sb.border_width_left = 4
 			b.add_theme_stylebox_override(s, sb)
-	var icon := DrawControl.new(func(ci): Draw.tower(ci, type, 1, ci.size / 2.0, -PI / 2.0, 0.68, Time.get_ticks_msec() / 1000.0, 0.0), Vector2(34, 40), true)
+	var icon := DrawControl.new(func(ci): Draw.tower(ci, type, 1, ci.size / 2.0, -PI / 2.0, 0.68, 0.0, 0.0), Vector2(34, 40), false)   # still icons (#116)
 	icon.position = Vector2(2, 6)
 	b.add_child(icon)
 	var name_l := UiKit.label(d.name, 12)
@@ -129,6 +129,13 @@ func refresh(_delta: float) -> void:
 		_show(want)
 
 
+## The one-line tagline the shop shows (#116): the full blurb, with its flavour quote, stays in the Codex.
+func _tagline(type: String, d: Dictionary) -> String:
+	var tr: Dictionary = Towers.Rework.TREES.get(type, {})
+	var tag: String = str(tr.get("tagline", ""))
+	return tag if tag != "" else str(d.get("blurb", ""))
+
+
 func _show(type: String) -> void:
 	for c in _detail.get_children():
 		_detail.remove_child(c)
@@ -140,7 +147,7 @@ func _show(type: String) -> void:
 	var d: Dictionary = Towers.def(type)
 	_detail.add_child(UiKit.label(d.name, 17, Draw.accent(type)))
 	_detail.add_child(UiKit.label("%d cr  ·  %s" % [g.tower_cost(type), TowerInfo.reach_text(type)], 12, UiKit.GOLD))
-	_detail.add_child(UiKit.wrap_label(d.blurb, rect.size.x - 28, 11, UiKit.DIM))
+	_detail.add_child(UiKit.wrap_label(_tagline(type, d), rect.size.x - 28, 11, UiKit.DIM))
 	_detail.add_child(TowerInfo.stats_grid(g.level_stats(type, 1), {}, bool(d.get("beam", false)), 11, 8))
 	var specs: Array = Towers.Rework.TREES[type].paths.map(func(p): return str(p.name))
 	_detail.add_child(UiKit.label("%s: %s" % ["Paths", ", ".join(PackedStringArray(specs))], 11, UiKit.GOLD))

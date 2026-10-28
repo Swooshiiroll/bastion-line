@@ -98,6 +98,9 @@ var alive := true
 var wave_id := 0
 var hit_flash := 0.0
 var armor_shred := 0.0
+## Seconds since its permanent shred last grew (the broken-shield mark fades over SHRED_MARK s, #116), and the shred then.
+var shred_age := 99.0
+var _shred_seen := 0.0
 ## Chemical Plant soak: time left, acid damage per second, gel slow, and the plant that soaked it. Cryo Tower permanent chill.
 var soak_timer := 0.0
 var soak_dps := 0.0
@@ -467,6 +470,11 @@ func _reset_blink() -> void:
 
 func step(dt: float) -> void:
 	age += dt
+	if armor_shred > _shred_seen:
+		shred_age = 0.0
+	else:
+		shred_age += dt
+	_shred_seen = armor_shred
 	hit_flash = maxf(0.0, hit_flash - dt)
 	reveal_timer = maxf(0.0, reveal_timer - dt)
 	since_hit += dt

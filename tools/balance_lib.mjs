@@ -78,7 +78,7 @@ export function section(text, title) {
   return text.slice(i, j < 0 ? text.length : j);
 }
 
-// upgrade_trees_rework.md: { slug: { name, cls, weapon, branches: [names], blurb, rows: [{ id, tier, path, name, effect }] } }.
+// upgrade_trees_rework.md: { slug: { name, cls, weapon, branches: [names], blurb, tagline, rows: [{ id, tier, path, name, effect }] } }.
 export function parseTrees(text) {
   const out = {};
   for (const sec of text.split(/\n## /).slice(1)) {
@@ -92,7 +92,9 @@ export function parseTrees(text) {
       const c = cells(line);
       if (c.length === 7 && /^(\d|M)$/.test(c[0])) rows.push({ id: nodeId(c[0], c[1]), tier: c[0], path: c[1], name: c[2], effect: c[5] });
     }
-    out[h.id] = { name: lines[0].trim(), cls: h.class, weapon: h.weapon, branches, blurb: (lines[2] || "").trim(), rows };
+    // The shop's one-line tagline (#116) sits under the blurb as "Tagline: ...".
+    const tag = (lines[3] || "").startsWith("Tagline: ") ? lines[3].slice(9).trim() : "";
+    out[h.id] = { name: lines[0].trim(), cls: h.class, weapon: h.weapon, branches, blurb: (lines[2] || "").trim(), tagline: tag, rows };
   }
   return out;
 }

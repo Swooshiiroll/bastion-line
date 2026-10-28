@@ -134,10 +134,17 @@ static func _thousands(n: int) -> String:
 	return ("-" if n < 0 else "") + out
 
 
-func refresh(_delta: float) -> void:
+var _since_check := 0.0
+
+func refresh(delta: float) -> void:
 	var t = tower
 	if _dps_label != null:
 		_update_dps()
+	# Looked at ten times a second, not every frame (#116): the card states cost a full upgrade check each.
+	_since_check += delta
+	if _since_check < 0.1 and _key != "":
+		return
+	_since_check = 0.0
 	# Rebuild only when something a card shows changes: the tower's upgrades, a card's state (e.g.
 	# affordable or not), prices. Credits alone change with every kill; rebuilding then would swap
 	# the card under the mouse mid-hover.

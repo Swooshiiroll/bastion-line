@@ -106,6 +106,14 @@ func _draw() -> void:
 	var he = world.hover_enemy
 	if he != null and he.alive:
 		Draw.arc(self, he.pos, he.radius + 5.0, 0.0, TAU, 32, Color(1, 1, 1, 0.85), 1.5, true)
+	# The selected enemy (#116): a gold ring that follows it, and a line from each tower firing at it.
+	var se = world.selected_enemy
+	if se != null and se.alive:
+		for t in g.towers:
+			if t.target == se or t.beam_targets.has(se):
+				draw_line(t.pos, se.pos, Color(1.0, 0.85, 0.4, 0.45), 1.2, true)
+		var pulse := 0.5 + 0.5 * sin(world.anim_t * 5.0)
+		Draw.arc(self, se.pos, se.radius + 6.0 + pulse * 1.5, 0.0, TAU, 32, Color(1.0, 0.85, 0.4, 0.95), 2.0, true)
 
 
 func _meteor_reticle(g, p: Vector2) -> void:

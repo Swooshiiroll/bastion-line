@@ -219,6 +219,8 @@ func cancel() -> void:
 		_return_to_shop()
 	elif world.selected_tower != null:
 		world.selected_tower = null
+	elif world.selected_enemy != null:
+		world.selected_enemy = null
 
 
 # --- Pop-outs --------------------------------------------------------------------------------
@@ -340,8 +342,8 @@ func toggle_codex() -> void:
 		var entry := ""
 		if world.selected_tower != null:
 			entry = "tower:" + str(world.selected_tower.type)
-		elif world.hover_enemy != null and world.hover_enemy.alive:
-			entry = "enemy:" + str(world.hover_enemy.type)
+		elif world.card_enemy() != null and world.card_enemy().alive:
+			entry = "enemy:" + str(world.card_enemy().type)
 		hud.open("codex", entry)
 		paused = true
 
@@ -377,6 +379,9 @@ func _sync_side_panel() -> void:
 		tp = null
 	if sel != null and tp == null and not _ended:
 		hud.open("tower", TowerPanel.side_for(world, sel))
+		tp = hud.popout("tower")
+	if tp != null:
+		tp.visible = world.aim_tower == null
 	_panel_tower = sel
 
 
@@ -407,6 +412,9 @@ func _on_field_clicked(cell: Vector2i, button: int, shift: bool, pos: Vector2) -
 	if hud.is_open("shop") and world.build_type == "" and world.ability_target == "":
 		hud.close("shop")
 		shop_return = false
+	# The Spawner closes on a click off it too, like the shop and the tower panel (#116).
+	if hud.is_open("spawner"):
+		hud.close("spawner")
 	if world.ability_target == "meteor":
 		if game.cast_meteor(pos):
 			world.ability_target = ""
@@ -454,9 +462,16 @@ func _on_field_clicked(cell: Vector2i, button: int, shift: bool, pos: Vector2) -
 		return
 	if game.tower_at.has(cell):
 		world.selected_tower = game.tower_at[cell]
+		world.selected_enemy = null
+		Sfx.play("click", -8.0, 0.0)
+	elif world.hover_enemy != null and world.hover_enemy.alive:
+		# Clicking an enemy selects it (#116); it and a tower are never selected together.
+		world.selected_tower = null
+		world.selected_enemy = world.hover_enemy
 		Sfx.play("click", -8.0, 0.0)
 	else:
 		world.selected_tower = null
+		world.selected_enemy = null
 
 
 ## Artillery Cannon and CAS Gunship (#87): Move target (its panel button, or M) starts aim mode for the selected one, and
@@ -466,6 +481,11 @@ func start_aim() -> void:
 	if t == null or not t.type in World.AIMABLE or game.is_over():
 		return
 	world.aim_tower = null if world.aim_tower == t else t
+	if world.aim_tower != null:
+		# The field stays clear while the new target is picked (#116): every menu closes, and the tower panel hides until
+		# the target is set or the aim is cancelled (_sync_side_panel shows it again).
+		hud.close_all()
+		shop_return = false
 
 
 ## Aim mode's click: the Artillery's point snaps to the nearest track, the Gunship circles any open spot. Setting it ends

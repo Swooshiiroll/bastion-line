@@ -43,6 +43,7 @@ const ArtilleryCannonArt = preload("res://scripts/view/towers/ArtilleryCannonArt
 const MineLayerArt = preload("res://scripts/view/towers/MineLayerArt.gd")
 const MortarTowerArt = preload("res://scripts/view/towers/MortarTowerArt.gd")
 const TowerInfo = preload("res://scripts/ui/TowerInfo.gd")
+const WorldView = preload("res://scripts/view/World.gd")
 const EntityLayerView = preload("res://scripts/view/EntityLayer.gd")
 
 const SANDBOX := "user://test_sandbox/"
@@ -2148,6 +2149,39 @@ func test_enemies_114() -> void:
 	st.blink(40.0)
 	var look: Dictionary = EnemyArt.state(st)
 	check(look.has("blink_from") and near(float(look.blink_ang), PI / 2.0), "the after-image keeps the facing it had when it blinked")
+
+
+## The owner's 26 Oct list, batch 4 (#116): the broken-shield mark's clock, the shop's taglines, the selected enemy's card.
+func test_ui_116() -> void:
+	var g = new_game()
+	g.enemies.clear()
+	var e = put(g, "brute", 100.0, 0, 50.0)
+	e.step(0.5)
+	check(e.shred_age > 3.0 or e.armor_shred == 0.0, "no shred, no mark")
+	e.armor_shred = 2.0
+	e.step(0.1)
+	check(e.shred_age < 0.2, "a shred starts the mark's clock")
+	for i in 40:
+		e.step(0.1)
+	check(e.shred_age > Draw.SHRED_MARK, "it fades out after %.0f s" % Draw.SHRED_MARK)
+	e.armor_shred = 3.0
+	e.step(0.1)
+	check(e.shred_age < 0.2, "and comes back when the shred grows")
+	var long_tags: Array = []
+	for slug in Towers.Rework.ORDER:
+		var tag: String = str(Towers.Rework.TREES[slug].get("tagline", ""))
+		if tag == "" or tag.length() > 70:
+			long_tags.append(slug)
+	check(long_tags.is_empty(), "every tower has a one-line shop tagline (missing or long: %s)" % [long_tags])
+	var w = WorldView.new()
+	var a = put(g, "grunt", 120.0, 0, 50.0)
+	w.hover_enemy = a
+	check(w.card_enemy() == a, "the card follows the cursor")
+	w.selected_enemy = e
+	check(w.card_enemy() == e, "a selected enemy's card stays pinned")
+	e.alive = false
+	check(w.card_enemy() == a, "and lets go when it dies")
+	w.free()
 
 
 ## Railgun (#90): twin rails fire in turn from their own muzzles; the housing recoils (the art's live shift).
