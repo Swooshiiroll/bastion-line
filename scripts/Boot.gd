@@ -7,6 +7,7 @@ extends Node
 ##   --codex=<dir>       export data and sprites for the printable codex (tools/codex.mjs)
 ##   --perf[=map,difficulty,round]  measure frame times per render layer (tools/PerfProbe.gd)
 ##   --dev               open the live tuner beside the game (scripts/dev/TunerWindow.gd, design/live_tuner.md); F8 hides it
+## A playtest build (BUILD.txt beside it) marks itself played in user://playtests.json on launch (scripts/dev/Playtest.gd, #123).
 
 const MainMenu = preload("res://scripts/ui/MainMenu.gd")
 const MapSelect = preload("res://scripts/ui/MapSelect.gd")
@@ -15,6 +16,7 @@ const ResearchLab = preload("res://scripts/ui/ResearchLab.gd")
 const ScreenshotTour = preload("res://tools/ScreenshotTour.gd")
 const UiKit = preload("res://scripts/ui/UiKit.gd")
 const TunerWindow = preload("res://scripts/dev/TunerWindow.gd")
+const Playtest = preload("res://scripts/dev/Playtest.gd")
 
 var current: Node = null
 ## The live tuner's window (--dev only).
@@ -47,6 +49,7 @@ func _ready() -> void:
 		tour.app = self
 		add_child(tour)
 		return
+	Playtest.on_launch()
 	SaveManager.apply_window()
 	if "--dev" in args:
 		tuner = TunerWindow.new()
