@@ -35,10 +35,13 @@ func _draw() -> void:
 		return
 	var build: String = world.build_type
 	for t in g.towers:
+		# Only the selected tower shows its target (#110).
+		if world.selected_tower != t:
+			continue
 		if t.type == "artillery_cannon" and t.aim_set:
-			_aim_marker(t, world.selected_tower == t)
+			_aim_marker(t, true)
 		if t.type == "cas_gunship" and t.aim_set:
-			_orbit_marker(t, world.selected_tower == t)
+			_orbit_marker(t, true)
 	var aiming = world.aim_tower
 	if aiming != null and world.mouse_in_field:
 		# Move target (#87): the new target follows the cursor until a click sets it.

@@ -590,7 +590,7 @@ air: yes · ground: yes · size: 1 · damage_kind: energy
 
 ### augmentation_tower
 
-air: yes · ground: yes · size: 1 · damage_kind: physical · support: yes
+air: yes · ground: yes · size: 2 · damage_kind: physical · support: yes
 
 | Node | =Name | Cost | Tokens | =DPS | =Spent | =DPS/100cr |
 |---|---|---|---|---|---|---|
@@ -1038,6 +1038,7 @@ The global rules every tower and enemy follows.
 | `Game.CAS_SPEED` | 180 | The CAS Gunship's plane flies to a new orbit at this speed (px a second); its guns keep firing on the way |
 | `Game.SPRAY_FAN` | 120 | Constant Spray's sweep covers this many degrees, centred on its target |
 | `Game.SPRAY_FAN_MIST` | 160 | ... and this many with the Mist Nozzle |
+| `Game.MORTAR_LEAD` | 1 | Mortar shells lead a moving target (1) or land where it was when fired (0); a checkbox in the live tuner |
 | `Game.SHIELD_EMP_MULT` | 2 | Tesla Tower arcs hit barriers this many times as hard |
 | `Game.DISABLE_GUARD` | 1 | Seconds after an EMP wears off before a tower can be knocked offline again |
 | `Game.HIT_REVEAL_TIME` | 0.5 | Seconds a cloaked enemy stays revealed after damage hits it |

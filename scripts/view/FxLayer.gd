@@ -291,22 +291,31 @@ func _puff(q: Dictionary) -> void:
 	Draw.disc(self, p, float(q.r0) + float(q.g) * minf(1.0, u * 1.3), Color(col, float(q.al) * (1.0 - u) * (1.0 - u * float(q.f2))))
 
 
+## How far out a blast's leading ring is (0..1 of its radius) at `age` of its `life`: easing out over the whole life, so it
+## is still moving as it fades.
+static func shock_front(age: float, life: float) -> float:
+	var x := clampf(age / maxf(life, 0.001), 0.0, 1.0)
+	return 1.0 - (1.0 - x) * (1.0 - x)
+
+
 func _shock(w: Dictionary) -> void:
 	var age: float = w.max - w.life
-	var raw := age / 0.6
-	var u := minf(1.0, raw)
-	var a := maxf(0.0, 1.0 - raw / 1.8)
+	# The rings ease out over the blast's whole life and fade as they go, so they never stop before fading (#110).
+	var x: float = age / float(w.max)
+	var u := shock_front(age, float(w.max))
+	var a := 1.0 - x
 	var r: float = w.r
 	if w.mega and age < 0.4:
 		var fu := age / 0.4
 		Draw.disc(self, w.p, 29.8 * minf(1.0, fu * 3.0) * float(w.sc), Color(1, 0.97, 0.85, 0.8 * (1.0 - fu)))
 		Draw.disc(self, w.p, 14.4 * minf(1.0, fu * 3.0), Color(1, 1, 1, 0.9 * (1.0 - fu)))
 	for j in 2:
-		var q := u - float(j) * 0.2
+		var q := u - float(j) * 0.15
 		if q > 0.0:
 			Draw.arc(self, w.p, r * q, 0.0, TAU, 48, Color(w.c, 0.7 * a * (1.0 - float(j) * 0.4)), 2.5 + float(w.pw) - float(j), true)
 	for e in w.hits:
-		var h: float = age - 0.6 * float(e.d) / maxf(r, 1.0)
+		# The moment the leading ring reaches the enemy: invert the easing.
+		var h: float = age - float(w.max) * (1.0 - sqrt(maxf(0.0, 1.0 - minf(1.0, float(e.d) / maxf(r, 1.0)))))
 		if h >= 0.0 and h < 0.3:
 			var er: float = e.r
 			Draw.glow_dot(self, e.p, er * 0.6 * (1.0 - h / 0.3) * (0.9 + 0.2 * float(w.pw)), Color(1.0, 0.95, 0.8, 0.8))

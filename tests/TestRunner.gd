@@ -40,6 +40,9 @@ const TreePopOut = preload("res://scripts/ui/hud/TreePopOut.gd")
 const RocketSalvoArt = preload("res://scripts/view/towers/RocketSalvoArt.gd")
 const LaserTowerArt = preload("res://scripts/view/towers/LaserTowerArt.gd")
 const ArtilleryCannonArt = preload("res://scripts/view/towers/ArtilleryCannonArt.gd")
+const MineLayerArt = preload("res://scripts/view/towers/MineLayerArt.gd")
+const MortarTowerArt = preload("res://scripts/view/towers/MortarTowerArt.gd")
+const TowerInfo = preload("res://scripts/ui/TowerInfo.gd")
 const EntityLayerView = preload("res://scripts/view/EntityLayer.gd")
 
 const SANDBOX := "user://test_sandbox/"
@@ -2051,6 +2054,73 @@ func spot(g, type: String, n: int) -> Vector2i:
 	return Vector2i(-1, -1)
 
 
+## The owner's 26 Oct list, batch 1 (#110): stat rows once each, the Mortar's shells from their own tube and in line (with
+## the lead switch), towers idle loaded, mines thrown where enemies will be, the shock ring moving as it fades, the Tractor's
+## meter and turning, the Augmentation Tower 2x2.
+func test_tower_fixes_110() -> void:
+	var g = new_game()
+	g.gold = 900000
+	# Stat rows: each stat once (the Boost Tower listed its boosts twice, the Tractor its pull).
+	for type in ["boost_tower", "tractor_tower"]:
+		var bt = g.place_tower(type, spot(g, type, 0))
+		var keys: Array = TowerInfo.rows_for(bt.stats(), false).map(func(r): return r[1])
+		var uniq := {}
+		for k in keys:
+			uniq[k] = true
+		check(uniq.size() == keys.size(), "%s: every stat row once (%s)" % [type, keys])
+	# The Mortar: its shell leaves the tube that fired, and lands on the point the tube faces.
+	g.enemies.clear()
+	var e = put(g, "runner", 200.0, 0, 50.0)
+	var m = g.place_tower("mortar_tower", spot(g, "mortar_tower", 3))
+	m.pos = e.pos + Vector2(0, 90)
+	g.projectiles.clear()
+	g._fire_mortar(m, e, m.stats())
+	var p = g.projectiles[g.projectiles.size() - 1]
+	check(p.pos.distance_to(MortarTowerArt.muzzle(m.pos, m.aim, 1.0, m.look_key(), m.pulse_count - 1)) < 0.01, "the shell leaves the tube that fired")
+	check(absf(angle_difference(m.aim, (p.target_pos - m.pos).angle())) < 0.01 and p.target_pos.distance_to(e.pos) > 5.0, "with the lead on, the tube faces the lead point it lands on")
+	var lead_was: int = Game.MORTAR_LEAD
+	Game.MORTAR_LEAD = 0
+	g._fire_mortar(m, e, m.stats())
+	p = g.projectiles[g.projectiles.size() - 1]
+	check(p.target_pos.distance_to(e.pos) < 0.01 and absf(angle_difference(m.aim, (e.pos - m.pos).angle())) < 0.01, "with it off, the shell lands where the enemy is")
+	Game.MORTAR_LEAD = lead_was
+	# A loaded tower with nothing in range stays loaded: its reload dial holds still.
+	g.enemies.clear()
+	var r = g.place_tower("railgun", spot(g, "railgun", 0))
+	r.cooldown = 0.0
+	var steady := true
+	for i in 30:
+		g._update_tower(r, 1.0 / 60.0)
+		steady = steady and r.cooldown == 0.0
+	check(steady, "an idle loaded Railgun keeps its cooldown at 0 (no flicker)")
+	# Mines are thrown just ahead of the enemies in reach.
+	var ml = g.place_tower("mine_layer", spot(g, "mine_layer", 0))
+	var walker = put(g, "grunt", 150.0, 0, 50.0)
+	ml.pos = walker.pos + Vector2(0, 50)
+	var ahead: Vector2 = g.lead_point(walker, Game.MINE_LEAD)
+	var near_all := true
+	for i in 5:
+		var q = g._mine_spot(ml, float(ml.stats().get("range", 120.0)))
+		near_all = near_all and q != null and q.distance_to(ahead) <= Game.MINE_NEAR + 0.01
+	check(near_all, "mine spots are picked just ahead of the enemy")
+	# The shock ring is still moving as it fades.
+	check(FxLayer.shock_front(0.6, 1.1) < 0.95 and FxLayer.shock_front(0.9, 1.1) > FxLayer.shock_front(0.6, 1.1) and near(FxLayer.shock_front(1.1, 1.1), 1.0), "the blast ring expands over its whole life")
+	# The Tractor: its meter drains over the hold, and it turns toward a target while recharging.
+	g.enemies.clear()
+	var tr = g.place_tower("tractor_tower", spot(g, "tractor_tower", 2))
+	var held = put(g, "grunt", 150.0, 0, 50.0)
+	tr.pos = held.pos + Vector2(0, 40)
+	tr.cooldown = 0.0
+	g._update_tractor(tr, tr.stats(), 0.01)
+	check(near(float(tr.gun_cds.get("hold_total", 0.0)), float(tr.gun_cds.get("hold_left", -1.0)), 0.02), "a hold records its length for the meter")
+	g._tractor_release(tr, tr.stats(), held)
+	g.time += 1.0
+	g._update_tractor(tr, tr.stats(), 0.01)
+	check(tr.cooldown > 0.0 and tr.target == held, "while recharging it keeps a target to turn toward")
+	# The Augmentation Tower is 2x2.
+	check(Game.footprint("augmentation_tower", Vector2i(3, 3)).size() == 4, "the Augmentation Tower takes 2x2 tiles")
+
+
 ## Railgun (#90): twin rails fire in turn from their own muzzles; the housing recoils (the art's live shift).
 func test_rail_muzzles() -> void:
 	var g = new_game()
@@ -2134,7 +2204,12 @@ func test_mine_scatter() -> void:
 		prev = d
 	check(not order_ok, "the spots aren't laid in order down the lane")
 	var nxt = t2.gun_cds.get("next")
-	check(nxt != null and absf(angle_difference(t2.aim, (nxt - t2.pos).angle())) < 0.01, "after a throw the launcher aims at the next spot")
+	var thrown: Vector2 = g2.mines[g2.mines.size() - 1].pos
+	check(absf(angle_difference(t2.aim, (thrown - t2.pos).angle())) < 0.01, "after a throw the launcher keeps facing the mine until it lands")
+	g2.time += MineLayerArt.FLIGHT + 0.01
+	t2.cooldown = 1.0
+	g2._update_mine_layer(t2, t2.stats(), 0.01)
+	check(nxt != null and absf(angle_difference(t2.aim, (nxt - t2.pos).angle())) < 0.01, "then it turns to the next spot")
 
 
 ## Chemical Plant (#90): its spray event says which nozzle and whether it's the Mist Nozzle's neighbour, so the view can draw the
@@ -4608,7 +4683,7 @@ func test_rework_tractor_tower() -> void:
 		g._update_tractor(tr, tr.stats(), 0.05)
 		e.step(0.05)
 	check(d0 - e.distance > 70.0 and d0 - e.distance < 95.0, "a swarm-weight enemy is hauled back about 80 px (%.1f)" % (d0 - e.distance))
-	check(tr.cooldown > 5.5 and tr.target == null, "released, then it recharges 6 s")
+	check(tr.cooldown > 5.5 and float(tr.gun_cds.hold_left) <= 0.0, "released, then it recharges 6 s (turning toward its next target, #110)")
 	# Role weight: a boss is pulled a quarter as far and held half as long.
 	var boss = put(g, "colossus", 200.0, 0, 1.0)
 	var btr = g.place_tower("tractor_tower", spot(g, "tractor_tower", 80))
@@ -4692,12 +4767,12 @@ func test_rework_augmentation_tower() -> void:
 	var s: Dictionary = a.stats()
 	check(near(s.range, 96.0) and near(s.aug_crit, 0.05) and near(s.crit_mult, 2.0), "stock: 96 px, a 5% crit chance (x2)")
 	check(g.buy_retrofit(a, 0) and near(a.stats().range, 144.0), "Wide Aura: 144 px")
-	var ab = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 20))
+	var ab = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 1))
 	check(g.buy_retrofit(ab, 1) and near(ab.stats().aug_crit, 0.10), "Amplified Bonus: 10%")
-	var rl = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 40))
+	var rl = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 2))
 	check(g.buy_retrofit(rl, 2) and rl.stats().remote_link, "Remote Link")
 	# Towers in range get the effects; Support towers and itself don't.
-	var base = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 60))
+	var base = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 3))
 	var gun = g.place_tower("gun_turret", spot(g, "gun_turret", 5))
 	var far_gun = g.place_tower("gun_turret", spot(g, "gun_turret", 150))
 	base.pos = gun.pos + Vector2(40, 0)
@@ -4716,7 +4791,7 @@ func test_rework_augmentation_tower() -> void:
 	check(near(d2, 20.0), "continuous damage takes the average (x2 at 100%% here: %.1f)" % d2)
 	gun.buff_crit = 0.0
 	# Crit path.
-	var cp = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 80))
+	var cp = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 4))
 	cp.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
 	buy_steps(g, cp, "b", 3)
 	check(near(cp.stats().aug_crit, 0.15) and near(cp.stats().crit_mult, 2.5), "Precision Matrix: 15%, crits x2.5")
@@ -4727,12 +4802,12 @@ func test_rework_augmentation_tower() -> void:
 	g._recompute_buffs()
 	check(near(gun.buff_crit, 0.22) and near(gun.aug_crit_mult, 3.0), "the tower takes the strongest crit effect")
 	# Two Augmentation Towers don't stack.
-	var cp2 = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 100))
+	var cp2 = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 5))
 	cp2.pos = gun.pos + Vector2(-40, 0)
 	g._recompute_buffs()
 	check(near(gun.buff_crit, 0.22), "overlapping Augmentation Towers don't stack")
 	# Energy conversion: a share of the damage counts as energy; full conversion tags every hit.
-	var ec = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 120))
+	var ec = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 6))
 	ec.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
 	buy_steps(g, ec, "a", 4)
 	check(near(ec.stats().energy_conv, 1.0), "Full Conversion: 100%")
@@ -4750,7 +4825,7 @@ func test_rework_augmentation_tower() -> void:
 	var dealt: float = g.damage_enemy(e, 10.0, true, gun)
 	check(ec.mastered and near(gun.aug_energy_bonus, 0.10) and dealt >= 10.9, "Overcharge: +10%% energy damage (%.1f)" % dealt)
 	# Ricochet: a single-target hit bounces to another enemy within 60 px at a share of its damage.
-	var rc = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 140))
+	var rc = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 7))
 	rc.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
 	buy_steps(g, rc, "c", 3)
 	check(near(rc.stats().ricochet, 0.30) and near(rc.stats().ricochet_str, 0.7), "Ricochet Field: 30%, bounces at 70%")
@@ -4775,12 +4850,12 @@ func test_rework_augmentation_tower() -> void:
 	gun.aug_bounce_again = true
 	g._ricochet(gun, e1, 100.0)
 	check(e4.hp < e4.max_hp, "with Pinball it does")
-	var pb = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 160))
+	var pb = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 8))
 	pb.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
 	buy_steps(g, pb, "c", 5)
 	check(pb.mastered and near(pb.stats().ricochet, 0.5) and pb.stats().bounce_again, "Pinball: 50%, a bounce can bounce again")
 	# Remote Link: twice the radius at half strength.
-	var rem = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 180))
+	var rem = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 9))
 	g.buy_retrofit(rem, 2)
 	var far2 = g.place_tower("gun_turret", spot(g, "gun_turret", 170))
 	rc.pos = Vector2(5000, 5000)

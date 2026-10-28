@@ -55,6 +55,14 @@ so write for players.
   - **The spray:** the Chemical Plant's Speed mastery now sprays without stopping. It sweeps a 120° fan centred on its target, one pass per spray interval (every 0.83 s), soaking every enemy the jet crosses and topping up ones already soaked. The soak lasts 4 s.
   - **With the Mist Nozzle:** the fan widens to 160° and the jet leaves as a billowing mist cloud.
   - **Look and price:** the plant gets a gold sprinkler turret whose spray bar follows the sweep. It costs 8,810.
+- **Tower fixes from the 26 Oct playtest (#110):**
+  - **Mortar Tower:** each shell leaves the barrel that fires it (only that barrel flashes), and the tube turns to where the shell will land, so it fires in line. Leading moving targets can be switched off in the live tuner. Smoke Shells lose their outer ring.
+  - **Railgun:** its reload dial no longer flickers while it waits for a target.
+  - **Mine Layer:** it keeps facing a mine until it lands, and throws mines just ahead of the enemies in reach.
+  - **Shockwave Generator:** the blast rings keep spreading as they fade.
+  - **Tractor Tower:** the charge meter drains over a hold, and the tower turns toward its next target while it recharges.
+  - **Augmentation Tower:** it takes 2×2 tiles, with the same reach.
+  - **Other:** the Boost Tower (and the Tractor) no longer list stats twice. Boosted towers lose their chevrons. Artillery and CAS targets only show for the selected tower.
 
 ### Behind the scenes
 - **Bot balance verdicts paused for the rework (#96):** the bot still plays every test game, but whether it wins, reaches endless or buys masteries no longer fails the tests until the tower rework is done; those results print as PAUSED.

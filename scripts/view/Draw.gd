@@ -685,7 +685,7 @@ static func _turret(ci: CanvasItem, type: String, tier: int, c: Vector2, aim: fl
 		"gun_turret":
 			GunTurretArt.draw(ci, c, aim, s, t, flash, spec, acc, _extra)
 		"mortar_tower":
-			MortarTowerArt.draw(ci, c, aim, s, t, flash, spec, acc)
+			MortarTowerArt.draw(ci, c, aim, s, t, flash, spec, acc, _extra)
 		"rocket_salvo":
 			RocketSalvoArt.draw(ci, c, aim, s, t, flash, spec, acc, _extra)
 		"laser_tower":

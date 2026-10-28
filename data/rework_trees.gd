@@ -4170,7 +4170,7 @@ static var TREES := {
 		"blurb": "Neighboring towers are given special augmentations to their weaponry through mysterious means. \"So my 12-guage shotgun shoots thermonuclear explosives now apparently.\"",
 		"air": true,
 		"ground": true,
-		"size": 1,
+		"size": 2,
 		"damage_kind": "physical",
 		"beam": false,
 		"uncapped": false,

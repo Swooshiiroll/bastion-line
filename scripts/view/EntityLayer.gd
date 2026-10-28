@@ -15,7 +15,6 @@ const CasGunshipArt = preload("res://scripts/view/towers/CasGunshipArt.gd")
 const MineLayerArt = preload("res://scripts/view/towers/MineLayerArt.gd")
 const ChemicalPlantArt = preload("res://scripts/view/towers/ChemicalPlantArt.gd")
 const CryoTowerArt = preload("res://scripts/view/towers/CryoTowerArt.gd")
-const BoostTowerArt = preload("res://scripts/view/towers/BoostTowerArt.gd")
 const RadarTowerArt = preload("res://scripts/view/towers/RadarTowerArt.gd")
 const ShockwaveGeneratorArt = preload("res://scripts/view/towers/ShockwaveGeneratorArt.gd")
 
@@ -65,7 +64,10 @@ func _draw() -> void:
 			# Fast traverse and the Swivel Mount (#85) turn quicker; neither changes the fire rate.
 			var fast: bool = bool(tw.stats().get("turn_fast", false)) or bool(tw.stats().get("swivel", false))
 			cur = lerp_angle(cur, (tw.target.pos - tw.pos).angle(), 0.6 if fast else 0.35)
-		if tw.type == "artillery_cannon":
+		if tw.type == "mortar_tower":
+			# It points where its shell will land (the lead point, #110), which the game keeps in its aim.
+			cur = lerp_angle(float(_aim.get(key, cur)), tw.aim, 0.35)
+		elif tw.type == "artillery_cannon":
 			# It points at the spot it shells, not at an enemy.
 			cur = lerp_angle(cur, (tw.aim_point - tw.pos).angle(), 0.35)
 		elif tw.type == "laser_tower":
@@ -83,7 +85,9 @@ func _draw() -> void:
 		elif tw.type == "tractor_tower":
 			var rech := float(tw.stats().get("recharge", 6.0))
 			var holding := float(tw.gun_cds.get("hold_left", 0.0)) > 0.0
-			extra = [1.0 if holding else clampf(1.0 - tw.cooldown / maxf(rech, 0.1), 0.0, 1.0), 1.0 if holding else 0.0]
+			# The charge meter drains over the hold and refills over the recharge (#110).
+			var hold_frac: float = float(tw.gun_cds.get("hold_left", 0.0)) / maxf(float(tw.gun_cds.get("hold_total", 1.0)), 0.01)
+			extra = [clampf(hold_frac, 0.0, 1.0) if holding else clampf(1.0 - tw.cooldown / maxf(rech, 0.1), 0.0, 1.0), 1.0 if holding else 0.0]
 		elif tw.type == "shockwave_generator":
 			extra = [g.time - float(tw.gun_cds.get("wave_t", -9.0))]
 		elif tw.type == "radar_tower":
@@ -95,7 +99,7 @@ func _draw() -> void:
 		elif tw.type == "chemical_plant":
 			# Constant Spray's head points where the jet is in its sweep (#104), not along the smoothed aim.
 			extra = [float(tw.gun_cds.get("spray_a", cur))]
-		elif tw.type == "mine_layer":
+		elif tw.type == "mine_layer" or tw.type == "mortar_tower":
 			extra = [tw.pulse_count]
 		elif tw.type == "drone_bay":
 			extra = [tw.available_loadouts().find(tw.loadout), tw.wing.is_empty()]
@@ -119,8 +123,7 @@ func _draw() -> void:
 			Draw.disc(self, tw.pos, 16.0, Color(SIPHON_COLOR, 0.12))
 			var ap: Vector2 = tw.pos + Vector2(-14, -14)
 			Draw.poly(self, PackedVector2Array([ap + Vector2(-3, -2), ap + Vector2(3, -2), ap + Vector2(0, 3)]), SIPHON_COLOR)
-		if tw.buff_dmg > 0.0 or tw.buff_rate > 0.0 or tw.buff_range > 0.0:
-			BoostTowerArt.chevrons(self, tw.pos, [tw.buff_dmg, tw.buff_rate, tw.buff_range])
+		# Boosted: the small boost dot (the chevrons were removed, #110).
 		if tw.buff_dmg > 0.0:
 			Draw.disc(self, tw.pos + Vector2(14, -14), 3.0, Draw.OUTLINE)
 			Draw.disc(self, tw.pos + Vector2(14, -14), 2.2, Draw.ACCENT.boost_tower)
@@ -213,10 +216,9 @@ func _smoke(c, t: float) -> void:
 	var k := clampf(float(c.t) / 0.8, 0.0, 1.0)
 	var at: Vector2 = c.pos
 	var seed_a := at.x * 0.13 + at.y * 0.07
-	Draw.disc(self, at, r, Color(0.62, 0.64, 0.66, 0.16 * k))
 	for i in 7:
 		var a := seed_a + float(i) * TAU / 7.0 + t * 0.25
-		var off := Vector2(cos(a), sin(a)) * r * (0.45 + 0.12 * sin(t * 0.9 + float(i)))
+		var off := Vector2(cos(a), sin(a)) * r * (0.32 + 0.1 * sin(t * 0.9 + float(i)))
 		var pr := r * (0.38 + 0.06 * sin(t * 1.3 + float(i) * 1.7))
 		Draw.disc(self, at + off, pr, Color(0.7, 0.72, 0.74, 0.2 * k))
 	Draw.disc(self, at, r * 0.45, Color(0.78, 0.8, 0.82, 0.22 * k))

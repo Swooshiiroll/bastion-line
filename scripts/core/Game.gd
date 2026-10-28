@@ -19,6 +19,7 @@ const Projectile = preload("res://scripts/entities/Projectile.gd")
 const RocketSalvoArt = preload("res://scripts/view/towers/RocketSalvoArt.gd")
 const RailgunArt = preload("res://scripts/view/towers/RailgunArt.gd")
 const MineLayerArt = preload("res://scripts/view/towers/MineLayerArt.gd")
+const MortarTowerArt = preload("res://scripts/view/towers/MortarTowerArt.gd")
 
 enum State { BUILD, WAVE, GAMEOVER }
 
@@ -37,9 +38,14 @@ const RETARGET_DELAY := 0.1
 ## Mines are at least this far apart (px), and land up to MINE_SPREAD to either side of the lane's middle.
 const MINE_GAP := 18.0
 const MINE_SPREAD := 7.0
+## The Mine Layer throws where ground enemies will be in this many seconds, within MINE_NEAR px of it (#110).
+const MINE_LEAD := 1.0
+const MINE_NEAR := 24.0
 ## The CAS Gunship's plane flies to a new orbit at this speed (px a second).
 static var CAS_SPEED := 180.0
 ## Constant Spray (the Chemical Plant's Speed mastery, #104): the fan its jet sweeps, in degrees, and with the Mist Nozzle.
+## Mortar shells lead a moving target (1) or land where it was when fired (0): a switch in the live tuner (#110).
+static var MORTAR_LEAD := 1
 static var SPRAY_FAN := 120.0
 static var SPRAY_FAN_MIST := 160.0
 ## How fast Constant Spray's fan swings round to follow its target (rad a second).
@@ -1212,13 +1218,16 @@ func _update_tower(t, dt: float) -> void:
 		return
 	if t.target != null and not t.can_target(t.target):
 		t.target = null
-	t.cooldown -= dt
+	t.cooldown = maxf(t.cooldown - dt, 0.0)
 	if t.cooldown > 0.0:
 		# Reloading: keep a target to turn toward (looked for every RETARGET_DELAY), so the turret tracks between shots. The shot
 		# itself still picks afresh.
 		if t.target == null and time >= float(t.gun_cds.get("seek_t", 0.0)):
 			t.gun_cds["seek_t"] = time + RETARGET_DELAY
 			t.target = pick_target(t)
+		# The Mortar's tube tracks the point its next shell would land on, so it fires in line (#110).
+		if t.type == "mortar_tower" and t.target != null:
+			t.aim = (mortar_aim_point(t, t.target, s) - t.pos).angle()
 		return
 
 	match t.type:
@@ -1235,10 +1244,14 @@ func _update_tower(t, dt: float) -> void:
 			_fire_artillery(t, s)
 			return
 
+	# Loaded with nothing in range: it stays loaded (its reload dial steady, #110) and looks again every RETARGET_DELAY.
+	if time < float(t.gun_cds.get("seek_t", 0.0)) and t.target == null:
+		return
 	var target = pick_target(t)
 	t.target = target
 	if target == null:
-		t.cooldown = RETARGET_DELAY
+		t.cooldown = 0.0
+		t.gun_cds["seek_t"] = time + RETARGET_DELAY
 		return
 	t.cooldown = 1.0 / t.eff_rate()
 	t.fire_flash = 0.12
@@ -1394,6 +1407,10 @@ func _update_tractor(t, s: Dictionary, dt: float) -> void:
 		return
 	t.cooldown -= dt
 	if t.cooldown > 0.0:
+		# Recharging: keep a target to turn toward, like the other towers while they reload (#110).
+		if (t.target == null or not t.can_target(t.target)) and time >= float(cds.get("seek_t", 0.0)):
+			cds["seek_t"] = time + RETARGET_DELAY
+			t.target = pick_target(t)
 		return
 	var target = pick_target(t)
 	if target == null:
@@ -1411,6 +1428,7 @@ func _update_tractor(t, s: Dictionary, dt: float) -> void:
 		cds["undo_wave"] = wave
 		back = maxf(back, target.distance - _segment_start(target))
 	cds["hold_left"] = hold
+	cds["hold_total"] = hold
 	cds["pull_rate"] = back / maxf(hold, 0.1)
 	t.fire_flash = 0.2
 	_emit({"type": "tractor_lock", "from": t.pos, "to": target.pos, "look": t.look_key()})
@@ -1534,6 +1552,10 @@ func build_discount_at(pos: Vector2) -> float:
 ## never within 18 px of another mine.
 func _update_mine_layer(t, s: Dictionary, dt: float) -> void:
 	t.cooldown -= dt
+	# It keeps facing the spot it threw at until the mine lands, then turns to the next one (#110).
+	var nxt0 = t.gun_cds.get("next")
+	if nxt0 != null and time >= float(t.gun_cds.get("turn_at", 0.0)):
+		t.aim = (nxt0 - t.pos).angle()
 	if t.cooldown > 0.0:
 		return
 	var mine_count := 0
@@ -1552,21 +1574,25 @@ func _update_mine_layer(t, s: Dictionary, dt: float) -> void:
 		t.cooldown = 0.3
 		return
 	t.pulse_count += 1
+	t.aim = (spot - t.pos).angle()
 	var k := 1.0 if t.size <= 1 else 1.8
 	mines.append({"pos": spot, "source": t, "t0": time, "from": MineLayerArt.muzzle(t.pos, t.aim, k, t.look_key(), t.pulse_count)})
 	t.cooldown = 1.0 / t.eff_rate()
 	t.fire_flash = 0.12
-	t.aim = (spot - t.pos).angle()
-	var nxt = _mine_spot(t, reach)
-	t.gun_cds["next"] = nxt
-	if nxt != null:
-		t.aim = (nxt - t.pos).angle()
+	t.gun_cds["next"] = _mine_spot(t, reach)
+	t.gun_cds["turn_at"] = time + MineLayerArt.FLIGHT
 	_emit({"type": "mine_toss", "pos": t.pos, "to": spot, "look": t.look_key()})
 
 
-## A random free point on the lanes inside reach of the tower, shifted a little to either side of the lane's middle; null if
-## there is none. Free means no mine within MINE_GAP. The pick is seeded by the run and the tower, so a replay lays the same.
+## A free point on the lanes inside reach of the tower, shifted a little to either side of the lane's middle; null if there is
+## none. Free means no mine within MINE_GAP. With ground enemies in reach it picks among the spots just ahead of them (where
+## they'll be in MINE_LEAD s, #110), otherwise anywhere. The pick is seeded by the run and the tower, so a replay lays the same.
 func _mine_spot(t, reach: float):
+	var ahead: Array = []
+	for e in enemies:
+		if e.alive and not e.flying and not e.hologram and e.pos.distance_squared_to(t.pos) <= (reach + 40.0) * (reach + 40.0):
+			ahead.append(lead_point(e, MINE_LEAD))
+	var near: Array = []
 	var spots: Array = []
 	var n := 0
 	for curve in grid.ground_paths:
@@ -1579,8 +1605,12 @@ func _mine_spot(t, reach: float):
 				var q: Vector2 = p + side * (_mine_noise(t, n) * 2.0 - 1.0) * MINE_SPREAD
 				if _mine_free(q):
 					spots.append(q)
+					if ahead.any(func(a): return a.distance_squared_to(q) <= MINE_NEAR * MINE_NEAR):
+						near.append(q)
 			n += 1
 			off += 10.0
+	if not near.is_empty():
+		spots = near
 	if spots.is_empty():
 		return null
 	return spots[mini(int(_mine_noise(t, -1) * float(spots.size())), spots.size() - 1)]
@@ -2111,20 +2141,33 @@ func _update_trails(dt: float) -> void:
 ## (the art shows tubes firing in succession); the rate stat already is the total across the tubes.
 func _fire_mortar(t, target, s: Dictionary) -> void:
 	t.pulse_count += 1
+	# The tube turns to the shell's aim point, and the shell leaves the tube that fires, in line with it (#110).
+	var aim := mortar_aim_point(t, target, s)
+	t.aim = (aim - t.pos).angle()
 	_fire_projectile(t, target, s)
-	# A lobbed shell doesn't home (#85): it lands where the target will be when it comes down, led along its route at
-	# its current pace, and an enemy that speeds up, turns back or blinks away dodges it.
+	# A lobbed shell doesn't home (#85): it lands on its aim point, and an enemy that speeds up, turns back or blinks away
+	# dodges it.
 	var p = projectiles[projectiles.size() - 1]
 	p.fixed = true
-	# The flight time depends on where it lands: a few passes settle the lead.
-	var aim: Vector2 = target.pos
-	for i in 3:
-		aim = lead_point(target, p.pos.distance_to(aim) / maxf(1.0, p.speed))
+	p.pos = MortarTowerArt.muzzle(t.pos, t.aim, 1.0 if t.size <= 1 else 1.8, t.look_key(), t.pulse_count - 1)
+	p.start = p.pos
 	p.target_pos = aim
 	p.total = maxf(1.0, p.pos.distance_to(p.target_pos))
 	var every := int(s.get("smoke_every", 0))
 	if every > 0 and t.pulse_count % every == 0:
 		p.smoke = true
+
+
+## Where a Mortar shell is aimed: with the lead on (MORTAR_LEAD), where the target will be when the shell comes down along
+## its route at its current pace (a few passes settle the flight time); with it off, where the target is now.
+func mortar_aim_point(t, target, s: Dictionary) -> Vector2:
+	var aim: Vector2 = target.pos
+	if MORTAR_LEAD == 0:
+		return aim
+	var spd := maxf(1.0, float(s.get("proj_speed", 420.0)))
+	for i in 3:
+		aim = lead_point(target, t.pos.distance_to(aim) / spd)
+	return aim
 
 
 ## Where enemy `e` will be in `secs` seconds at its current pace along its route (flyers too).
@@ -3111,7 +3154,7 @@ func apply_save(data: Dictionary) -> String:
 		var cell := Vector2i(int(entry.get("col", -1)), int(entry.get("row", -1)))
 		var tiles := footprint(type, cell)
 		if size_of(type) > 1 and tiles.any(func(c): return not is_buildable(c) or tower_at.has(c)):
-			# A Scrapyard or Drone Bay from before they were 2x2 whose footprint doesn't fit: refund it.
+			# A Scrapyard, Drone Bay or Augmentation Tower from before they were 2x2 whose footprint doesn't fit: refund it.
 			gold += maxi(0, int(entry.get("spent", 0)))
 			continue
 		if not is_buildable(cell):
