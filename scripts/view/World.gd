@@ -32,6 +32,12 @@ const TractorTowerArt = preload("res://scripts/view/towers/TractorTowerArt.gd")
 
 const MAX_STEPS_PER_FRAME := 40
 const SMOKE := Color(0.35, 0.36, 0.4, 0.7)
+## The Shockwave Generator's cloud, seen from above (#120): how far up the screen its smoke drifts for its height; and the Megaton's
+## Taller Cloud: how much farther it climbs, where its cap sits (px up, times the cloud's scale) and how much longer it lives.
+const SMOKE_RISE := 0.3
+const MEGA_RISE := 1.4
+const MEGA_CAP_Y := -19.0
+const MEGA_LIFE := 1.3
 
 signal field_clicked(cell: Vector2i, button: int, shift: bool, pos: Vector2)
 
@@ -306,6 +312,10 @@ func _salvo_hit(ev: Dictionary) -> void:
 ## The Shockwave Generator's blast (its page, Mushroom Pulse): two rings roll out and flash each enemy they reach; a mushroom cloud
 ## billows up, bigger with every Power step, with a nuclear fireball and a rolling cap at the Megaton Wave; Reactor Venting throws
 ## smoke out of its four corner stacks. Every puff lives on its own clock.
+## The cloud is seen from above, as the camera sees it (#120, round 16): the smoke spreads out round the tower in every direction and
+## only drifts up the screen by SMOKE_RISE of its height. The fireball is drawn over the billow and under the cap, so it glows red in
+## the middle of the grey. The Megaton's cloud is the Taller Cloud (round 17): it climbs MEGA_RISE times as far, its cap sits at
+## MEGA_CAP_Y, it lives MEGA_LIFE times as long, and the cap's puffs land at random, like the billow's.
 func _shockwave(ev: Dictionary) -> void:
 	var sl := ShockwaveGeneratorArt.levels(str(ev.look))
 	var p0: Vector2 = ev.pos
@@ -321,22 +331,25 @@ func _shockwave(ev: Dictionary) -> void:
 	fx.shock_wave(p0, radius, wc, 1.0 + 0.25 * float(sl.P) + (0.25 if sl.r == 1 else 0.0), hits, mega, sc)
 	var vfx := float(SaveManager.setting("vfx"))
 	var n := maxi(3, roundi(float(8 + 4 * sl.P) * vfx))
+	var rise := MEGA_RISE if mega else 1.0
+	var life_k := MEGA_LIFE if mega else 1.0
 	for q in n:
 		var tone := randf()
 		var sm := Color(0.34 + 0.16 * tone, 0.31 + 0.15 * tone, 0.28 + 0.14 * tone)
-		var spread := 16.0 if float(q) > float(n) * 0.45 else 5.0
-		smoke_fx.puff(p0, Vector2((randf() - 0.5) * spread, -(12.0 + 9.0 * randf())) * sc, 1.4, (1.8 + 0.8 * randf()) * sc, 3.2 * sc, sm, wc, 0.7, 0.7, 2.4 + 1.2 * randf(), randf() * 0.04)
+		var sp := 9.0 + 7.0 * randf() if float(q) > float(n) * 0.45 else 3.0 + 3.0 * randf()
+		var v := Vector2.from_angle(randf() * TAU) * sp - Vector2(0.0, (12.0 + 9.0 * randf()) * rise * SMOKE_RISE)
+		smoke_fx.puff(p0, v * sc, 1.4, (1.8 + 0.8 * randf()) * sc, 3.2 * sc, sm, wc, 0.7, 0.7, (2.4 + 1.2 * randf()) * life_k, randf() * 0.04)
 	if mega:
 		for q in maxi(2, roundi(7.0 * vfx)):
 			var tone := randf()
 			var sm := Color(0.34 + 0.16 * tone, 0.31 + 0.15 * tone, 0.28 + 0.14 * tone)
-			smoke_fx.puff(p0, Vector2((randf() - 0.5) * 7.0, -(7.0 + 7.0 * randf())) * sc, 1.4, (3.2 + 1.4 * randf()) * sc, 3.2 * sc, sm, wc, 0.0, 0.85, 1.5 + 0.4 * randf(), randf() * 0.05, 0.0, 0.3, true)
-		var nc := maxi(4, roundi(16.0 * vfx))
-		for q in nc:
+			var v := Vector2.from_angle(randf() * TAU) * (1.0 + 3.0 * randf()) - Vector2(0.0, (7.0 + 7.0 * randf()) * SMOKE_RISE)
+			smoke_fx.puff(p0, v * sc, 1.4, (3.2 + 1.4 * randf()) * 1.3 * sc, 3.2 * sc, sm, wc, 0.0, 0.85, 1.5 + 0.4 * randf(), randf() * 0.05, 0.0, 0.3, true)
+		for q in maxi(4, roundi(16.0 * vfx)):
 			var tone := randf()
 			var sm := Color(0.34 + 0.16 * tone, 0.31 + 0.15 * tone, 0.28 + 0.14 * tone)
-			var fi := float(q) * TAU / float(nc) + randf() * 0.3
-			smoke_fx.puff(p0, Vector2(cos(fi) * (13.0 + 7.0 * randf()), sin(fi) * 4.0 - 2.0) * sc, 1.4, (2.6 + 1.2 * randf()) * sc, 3.2 * sc, sm, wc, 1.1, 0.7, 3.0 + 0.8 * randf(), 0.2 + randf() * 0.08, -13.0 * sc)
+			var v := Vector2.from_angle(randf() * TAU) * (9.0 + 13.0 * randf()) * 1.4 - Vector2(0.0, 2.0 * SMOKE_RISE)
+			smoke_fx.puff(p0, v * sc, 1.4, (2.6 + 1.2 * randf()) * sc, 3.2 * sc, sm, wc, 1.1, 0.7, (3.0 + 0.8 * randf()) * life_k, 0.2 + randf() * 0.08, MEGA_CAP_Y * SMOKE_RISE * sc)
 	if sl.r == 2:
 		for sg in ShockwaveGeneratorArt.VENTS:
 			var a0: float = sg.angle()

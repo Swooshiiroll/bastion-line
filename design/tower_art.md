@@ -1308,6 +1308,15 @@ every cloud is now seen from above, as the game's camera sees it, at every Power
   are thrown out in every direction.
 - **P, Side-On (round 15):** the old side-on C, to compare. The store key is now `bl-tower-art-p2-shock-r16`.
 
+**Round 17 (the owner's picks, 2026-10-27):** the Megaton Wave is E, the Taller Cloud, seen from above. Note: "Smoke
+particle placement should be random like the previous tiers": the cap's puffs no longer go round in order on a ring;
+each lands at a random angle and distance (9-22 px/s × 1.4, times the cloud's scale), like the billow's. Every stage is
+picked.
+- **In game** (`World._shockwave`): every Power step's cloud is seen from above (`SMOKE_RISE` 0.3); the Megaton's
+  climbs `MEGA_RISE` (1.4×) as far, its cap sits at `MEGA_CAP_Y` (19 px), and it lives `MEGA_LIFE` (1.3×) as long. The
+  fireball is 1.3× bigger, spreads a little every way, and is drawn over the billow and under the cap.
+- **The page:** the store key is now `bl-tower-art-p2-shock-r17`.
+
 ### Scrapyard (third restart: a tower of three parts)
 
 **History.** Three Scrapyard designs have been rejected: (1) the Magnet Yard base with its first upgrade designs; (2) a from-scratch Smelting Works ("didn't like the overall design"); (3) the Armoured Vault Depot, whose base look was confirmed (with the Sparks and Sale animation) before its second-pass round 1, after which the owner said "Scrap the scrapyard design and start all over again". Its files (`data_scrap_looks.js`, `data_p2_scrap.js`, the p2 page) are deleted; git keeps them. The `sBuild`/`sCard` preview-scale hook in `pass2_engine.js` stays for the 2x2 second pass.
