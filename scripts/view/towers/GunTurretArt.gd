@@ -177,8 +177,11 @@ static func draw(ci: CanvasItem, c: Vector2, aim: float, s: float, t: float, fla
 	if L.R >= 4:
 		var e := at(c, aim, k, 5.0, 5.5 if n > 1 else -5.5)
 		Draw.plate(ci, e, Draw.rect_pts(1.6, 1.2), Draw.METAL, aim, k, 0.8)
+		# The ranging line reaches well past the turret's cached sprite, so it's drawn live (#90).
+		Draw.dyn(true)
 		Draw.line(ci, e, e + Vector2.from_angle(aim) * 67.0 * s, Color(1, 0.25, 0.25, 0.25), 0.8)
 		Draw.glow_dot(ci, e, 0.6 * k, Color(1.0, 0.3, 0.3))
+		Draw.dyn(false)
 	# Extra guns on their own swivel mounts (bodies bigger than their barrels), each with the main gun's kit.
 	Draw.dyn(true)
 	for i in range(1, n):
