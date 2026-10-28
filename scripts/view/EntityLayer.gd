@@ -116,12 +116,9 @@ func _draw() -> void:
 	if timing_on:
 		timing.towers = int(timing.get("towers", 0)) + t1 - t0
 
-	var ground: Array = []
-	var air: Array = []
-	for e in g.enemies:
-		if e.alive:
-			(air if e.flying else ground).append(e)
-	ground.sort_custom(func(a, b): return a.pos.y < b.pos.y)
+	var layers := draw_order(g.enemies)
+	var ground: Array = layers[0]
+	var air: Array = layers[1]
 	for i in g.mines.size():
 		var m: Dictionary = g.mines[i]
 		MineLayerArt.mine(self, m.pos, 1.0, t, m.source.spec, Draw.ACCENT.mine_layer, fmod(t * 1.6 + float(i) * 0.37, 1.0) < 0.25)
@@ -152,6 +149,20 @@ func _draw() -> void:
 	if timing_on:
 		timing.bars = int(timing.get("bars", 0)) + Time.get_ticks_usec() - t2
 		timing.frames = int(timing.get("frames", 0)) + 1
+
+
+## The living enemies in drawing order: [ground, sorted top to bottom; air, with bosses last so a Leviathan flies
+## over the Locusts it launches].
+static func draw_order(enemies: Array) -> Array:
+	var ground: Array = []
+	var air: Array = []
+	var air_bosses: Array = []
+	for e in enemies:
+		if e.alive:
+			(ground if not e.flying else (air_bosses if e.boss else air)).append(e)
+	ground.sort_custom(func(a, b): return a.pos.y < b.pos.y)
+	air.append_array(air_bosses)
+	return [ground, air]
 
 
 func _pool(pool, t: float) -> void:
