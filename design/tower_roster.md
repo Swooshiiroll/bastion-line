@@ -109,7 +109,7 @@ to the Pulse Turret's 18, in fewer, harder hits). Air and ground.
 
 | Step | Name | Cost | Effect (proposed) |
 |---|---|---|---|
-| 1 | Swivel Mount | 15 | Switches to a new target instantly after a kill, and doesn't fire at enemies already about to die (no wasted rounds on swarms and holograms) |
+| 1 | Swivel Mount | 15 | Turns onto a new target faster, and doesn't fire at enemies already about to die (no wasted rounds on swarms and holograms) |
 | 2 | Side Gun | 165 | A small side gun fires at a second target at 50% damage |
 | 3 (primary) | Twin Mount | 330 | **2 targets** at full damage |
 | 4 | Belt Feed | 660 | +0.3 shots/s on every barrel |
@@ -1322,6 +1322,15 @@ radiation circle priced as damage. This joins the Pricing section under the non-
 | 3 (primary) | Track Lock | 1,930 | Reveals last 1.3 s |
 | 4 | Illusion Filter | 2,390 | Pings mark **Mirage holograms** as fakes: towers in range stop shooting them |
 | Mastery | Total Exposure | 3,590 | Revealed enemies can't re-cloak, re-disguise or re-burrow for 5 s after leaving the radar's range |
+
+**How the game does it (#86, 2026-10-24):** each step acts on the enemies a ping covers.
+- **Signal Analysis:** the Decoy Beacon takes its true rank and role for good.
+- **Disguise Breaker:** the Masquerade drops its disguise at once, at any health, and flees as it would at half health.
+- **Illusion Filter:** holograms are marked (a red cross) for good. Towers stop choosing them as targets; blasts and beams
+  still pop the ones in their way.
+- **Total Exposure:** whatever a ping covered stays revealed while it stays in this radar's range, and for 5 s after it
+  leaves (gold brackets). A Burrower can't dive meanwhile. The Masquerade never re-disguises, so that part has nothing
+  to stop.
 
 **Combinations (primary + secondary capped at 2):**
 - **Frequency + 2 Power:** near-constant reveals over a bigger area.
