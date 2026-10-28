@@ -954,13 +954,14 @@ static func enemy_status(ci: CanvasItem, e, t: float) -> void:
 		var bp: Vector2 = e.pos + Vector2(-r * 0.75, r * 0.55)
 		rect(ci, Rect2(bp - Vector2(3, 3), Vector2(6, 6)), Color(0.55, 0.55, 0.6, 0.9))
 		polyline(ci, PackedVector2Array([bp + Vector2(-2, -3), bp + Vector2(0.5, -0.5), bp + Vector2(-1, 1), bp + Vector2(2, 3)]), Color(1.0, 0.45, 0.2), 1.1, true)
-	# Burning: flickering flame tongues.
+	# Burning: flickering flame tongues licking up from its top edge, so they show above the body (#85).
 	if e.dot_timer > 0.0 and e.dot_dps > 0.0:
 		for i in 3:
-			var fx := (float(i) - 1.0) * r * 0.45
-			var h := 4.0 + 2.0 * sin(t * 14.0 + float(i) * 2.0)
-			var fb: Vector2 = e.pos + Vector2(fx, -r * 0.3)
-			poly(ci, PackedVector2Array([fb + Vector2(-1.8, 0), fb + Vector2(0, -h), fb + Vector2(1.8, 0)]), Color(1.0, 0.55, 0.15, 0.75))
+			var fx := (float(i) - 1.0) * r * 0.5
+			var h := 7.0 + 3.0 * sin(t * 14.0 + float(i) * 2.0)
+			var fb: Vector2 = e.pos + Vector2(fx, -r * 0.55)
+			poly(ci, PackedVector2Array([fb + Vector2(-2.8, 0), fb + Vector2(0, -h), fb + Vector2(2.8, 0)]), Color(1.0, 0.45, 0.1, 0.85))
+			poly(ci, PackedVector2Array([fb + Vector2(-1.3, 0), fb + Vector2(0, -h * 0.55), fb + Vector2(1.3, 0)]), Color(1.0, 0.85, 0.3, 0.9))
 
 
 # --- HUD glyphs ------------------------------------------------------------------------------

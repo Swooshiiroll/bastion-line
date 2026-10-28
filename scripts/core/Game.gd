@@ -423,6 +423,7 @@ func place_tower(type: String, cell: Vector2i):
 		tower_at[c] = t
 	stats["towers_built"] += 1
 	_recompute_buffs()
+	t.load_up()
 	_emit({"type": "build", "pos": t.pos, "tower": type})
 	return t
 
@@ -498,6 +499,10 @@ func start_wave() -> bool:
 		var bonus := Waves.early_call_bonus(wave + 1)
 		_add_gold(bonus)
 		_emit({"type": "early_call", "bonus": bonus})
+	else:
+		# From the build phase every tower starts the round loading, at its current (perhaps just upgraded) rate (#85).
+		for t in towers:
+			t.load_up()
 	wave += 1
 	state = State.WAVE
 	auto_timer = 0.0
@@ -870,7 +875,7 @@ func _pick_target(t, exclude: Array, air: bool, ground: bool, preferred := false
 	var best_score := Vector3(-INF, -INF, -INF)
 	var swivel: bool = bool(t.stats().get("swivel", false))
 	for e in enemies:
-		if not e.alive or (e.flying and not air) or (not e.flying and not ground) or (e.is_hidden() and not _burrow_visible(t, e)) or exclude.has(e):
+		if not e.alive or (e.flying and not air) or (not e.flying and not ground) or (e.untargetable() and not _burrow_visible(t, e)) or exclude.has(e):
 			continue
 		if preferred and not _prefers(t, e):
 			continue
@@ -962,7 +967,8 @@ func _update_enemy(e, dt: float) -> void:
 			_leak(e)
 
 
-## Burrower: dives for burrow_time, then surfaces for the rest of the interval.
+## Burrower: dives for burrow_time, then surfaces for the rest of the interval. A Radar's Total Exposure keeps it from diving
+## again while it lasts.
 func _trait_burrow(e, d: Dictionary, dt: float) -> void:
 	var grounded: bool = e.silenced() or e.no_dig > 0.0 or e.disrupt_timer > 0.0
 	if grounded and e.burrowed:
@@ -972,7 +978,7 @@ func _trait_burrow(e, d: Dictionary, dt: float) -> void:
 		_emit({"type": "burrow", "pos": e.pos, "down": false})
 	if not grounded:
 		e.burrow_timer -= dt
-	if not grounded and e.burrow_timer <= 0.0:
+	if not grounded and e.burrow_timer <= 0.0 and (e.burrowed or e.track_timer <= 0.0):
 		e.burrowed = not e.burrowed
 		e.mark("burrow")
 		e.burrow_timer = float(d.burrow_time) if e.burrowed else float(d.burrow_interval) - float(d.burrow_time)
@@ -983,8 +989,7 @@ func _trait_burrow(e, d: Dictionary, dt: float) -> void:
 func _trait_blink(e, d: Dictionary) -> void:
 	var from: Vector2 = e.pos
 	e.mark("blink")
-	e.distance = minf(e.distance + float(d.blink_distance), e.path_len)
-	e.pos = e.curve.sample_baked(e.distance)
+	e.blink(float(d.blink_distance))
 	_emit({"type": "blink", "from": from, "pos": e.pos})
 	if e.has_trait("wake"):
 		# Shifter: where it lands, other non-boss enemies get a burst of speed (refreshed, never added).
@@ -1278,7 +1283,7 @@ func _ricochet(source, from, dmg: float, depth := 0) -> void:
 	var best = null
 	var bd := 60.0 * 60.0
 	for e in enemies:
-		if e.alive and e != from and not e.is_hidden():
+		if e.alive and e != from and not e.untargetable():
 			var d2: float = e.pos.distance_squared_to(from.pos)
 			if d2 <= bd:
 				bd = d2
@@ -1421,6 +1426,8 @@ func _update_boost_state() -> void:
 ## Radar Tower: every ping_every seconds it pings, and for reveal_time seconds the cloaked enemies in range are revealed and the burrowed ones
 ## show (towers that can hit underground may target them); the Constant Track keeps everything revealed. The radiation circle (Radiation
 ## Emitter and on) burns every enemy inside it that is revealed, for as long as it is in the circle. Several radars don't stack.
+## The Special Targeting path unmasks what a ping covers (_unmask); its mastery, Total Exposure, keeps what a ping found
+## revealed while it stays in range and for `exposure` s after it leaves.
 func _update_radar(t, s: Dictionary, dt: float) -> void:
 	var constant := bool(s.get("constant", false))
 	var left := float(t.gun_cds.get("ping", 0.0)) - dt
@@ -1434,15 +1441,32 @@ func _update_radar(t, s: Dictionary, dt: float) -> void:
 	t.gun_cds["ping"] = maxf(0.0, left)
 	var r: float = t.get_range()
 	var active: bool = constant or left > 0.0
-	if active:
+	var exposure := float(s.get("exposure", 0.0))
+	if active or exposure > 0.0:
 		var hold := 0.3 if constant else left
 		for e in _enemies_near(t.pos, r, true, true, true):
-			if e.cloaked:
-				e.reveal_timer = maxf(e.reveal_timer, hold)
+			if active:
+				if e.cloaked:
+					e.reveal_timer = maxf(e.reveal_timer, hold)
+				_unmask(e, s)
+			if exposure > 0.0 and (active or e.track_timer > 0.0):
+				e.track_timer = maxf(e.track_timer, exposure)
 	var dps := float(s.get("rad_dps", 0.0))
 	if dps > 0.0:
 		for e in _enemies_near(t.pos, float(s.get("rad_range", 60.0)), true, true, false):
 			damage_enemy(e, dps * dt, true, t, false)
+
+
+## The Radar's Special Targeting path, on an enemy a ping covers: Signal Analysis sees through a Decoy Beacon's fake rank,
+## Disguise Breaker uncovers a Masquerade, and Illusion Filter marks a Mirage's holograms as fakes that towers ignore.
+func _unmask(e, s: Dictionary) -> void:
+	if s.get("unmask_decoy", false) and e.def.has("fake_rank") and not e.decoy_exposed:
+		e.expose_decoy()
+	if s.get("unmask_mask", false) and e.disguised:
+		e.reveal_disguise()
+		_emit({"type": "unmask", "pos": e.pos, "enemy": e.type})
+	if s.get("unmask_mirage", false) and e.hologram:
+		e.fake_marked = true
 
 
 ## Shockwave Generator: a wave every 1/rate seconds hits every enemy in its radius, air and ground, cloaked ones too (it needs no
@@ -1704,7 +1728,7 @@ func _update_cas(t, s: Dictionary, dt: float) -> void:
 func _cas_targets(t, radius: float, plane: Vector2) -> Array:
 	var out: Array = []
 	for e in enemies:
-		if e.alive and not e.is_hidden() and e.pos.distance_squared_to(t.aim_point) <= radius * radius:
+		if e.alive and not e.untargetable() and e.pos.distance_squared_to(t.aim_point) <= radius * radius:
 			out.append(e)
 	if t.priority != 0 and out.any(func(e): return _prefers(t, e)):
 		out = out.filter(func(e): return _prefers(t, e))
@@ -1762,7 +1786,7 @@ func _update_drone_bay(t, s: Dictionary, dt: float) -> void:
 	for i in t.wing.size():
 		var d: Dictionary = t.wing[i]
 		var tg = d.target
-		if tg == null or not tg.alive or tg.is_hidden() or (ground_only and tg.flying):
+		if tg == null or not tg.alive or tg.untargetable() or (ground_only and tg.flying):
 			d["target"] = _drone_target(t, s, ground_only)
 			tg = d.target
 		var goal: Vector2
@@ -1878,7 +1902,7 @@ func _chain_rework(t, first, s: Dictionary) -> void:
 		var nxt = null
 		var nd := jump_r * jump_r
 		for e in enemies:
-			if not e.alive or hit.has(e) or e.is_hidden() or (e.flying and not t.hits_air()) or (not e.flying and not t.hits_ground()):
+			if not e.alive or hit.has(e) or e.untargetable() or (e.flying and not t.hits_air()) or (not e.flying and not t.hits_ground()):
 				continue
 			var d2: float = e.pos.distance_squared_to(cur.pos)
 			if d2 <= nd:
@@ -1952,9 +1976,29 @@ func _update_trails(dt: float) -> void:
 func _fire_mortar(t, target, s: Dictionary) -> void:
 	t.pulse_count += 1
 	_fire_projectile(t, target, s)
+	# A lobbed shell doesn't home (#85): it lands where the target will be when it comes down, led along its route at
+	# its current pace, and an enemy that speeds up, turns back or blinks away dodges it.
+	var p = projectiles[projectiles.size() - 1]
+	p.fixed = true
+	# The flight time depends on where it lands: a few passes settle the lead.
+	var aim: Vector2 = target.pos
+	for i in 3:
+		aim = lead_point(target, p.pos.distance_to(aim) / maxf(1.0, p.speed))
+	p.target_pos = aim
+	p.total = maxf(1.0, p.pos.distance_to(p.target_pos))
 	var every := int(s.get("smoke_every", 0))
 	if every > 0 and t.pulse_count % every == 0:
-		projectiles[projectiles.size() - 1].smoke = true
+		p.smoke = true
+
+
+## Where enemy `e` will be in `secs` seconds at its current pace along its route (flyers too).
+func lead_point(e, secs: float) -> Vector2:
+	if e.curve == null:
+		return e.pos
+	var pace: float = e.speed * (1.0 - e.slow_amount) * (1.0 + e.haste)
+	if e.stun_timer > 0.0:
+		pace = 0.0
+	return e.curve.sample_baked(clampf(e.distance + pace * secs, 0.0, e.path_len))
 
 
 ## Slows ground enemies inside each smoke cloud, and retires the spent ones.
@@ -2107,7 +2151,7 @@ func _drone_target(t, s: Dictionary, bomber: bool):
 	for e in enemies:
 		if not e.alive or (bomber and e.flying):
 			continue
-		if e.is_hidden() and not (bomber and reach_burrowed and e.burrowed):
+		if e.untargetable() and not (bomber and reach_burrowed and e.burrowed):
 			continue
 		var score: float = e.progress()
 		if hunt and (e.type in HUNTED or (extra and e.type in HUNTED_EXTRA)):
@@ -2293,7 +2337,7 @@ func _update_projectile(p, dt: float) -> void:
 	if p.kind == "rocket_salvo":
 		_update_rocket(p, dt)
 		return
-	if p.target != null and p.target.alive:
+	if p.target != null and p.target.alive and not p.fixed:
 		p.target_pos = p.target.pos
 	if p.kind == "missile":
 		_update_missile(p, dt)
@@ -2344,7 +2388,7 @@ func _nearest_for(t, pos: Vector2, r: float):
 	var best = null
 	var bd := r * r
 	for e in enemies:
-		if e.alive and not e.is_hidden() and (not e.flying or t.hits_air()) and (e.flying or t.hits_ground()):
+		if e.alive and not e.untargetable() and (not e.flying or t.hits_air()) and (e.flying or t.hits_ground()):
 			var d: float = pos.distance_squared_to(e.pos)
 			if d <= bd:
 				bd = d
@@ -2437,7 +2481,7 @@ func _projectile_hit(p) -> void:
 						damage_enemy(e, float(s.get("bomblet_damage", 10.0)) * (1.0 + (p.source.buff_dmg if p.source != null else 0.0)), false, p.source, false)
 					_emit({"type": "bomblet", "pos": bp, "radius": br})
 			if p.smoke:
-				smokes.append({"pos": p.pos, "r": r, "t": float(s.get("smoke_time", 3.0)), "slow": float(s.get("smoke_slow", 0.15))})
+				smokes.append({"pos": p.pos, "r": r, "t": float(s.get("smoke_time", 3.0)), "slow": float(s.get("smoke_slow", 0.15)), "look": "smoke"})
 				_emit({"type": "smoke", "pos": p.pos, "radius": r})
 			_emit({"type": "splash", "pos": p.pos, "radius": r, "burn": false, "stun": false})
 		"missile":
@@ -2684,8 +2728,6 @@ func _kill(e, source) -> void:
 	stats["kills"] += 1
 	if source != null:
 		source.kills += 1
-		if source is Tower and bool(source.stats().get("swivel", false)):
-			source.cooldown = 0.0   # Swivel Mount: a new target at once after a kill
 	_emit({"type": "kill", "pos": e.pos, "enemy": e.type, "bounty": gain, "boss": e.boss})
 	if e.has_trait("split"):
 		# Hydra Frame: the pieces keep walking from where it fell. Added after this tick's loops.
@@ -2745,7 +2787,7 @@ func _on_field_clear() -> void:
 	trails.clear()
 	warp_timer = 0.0
 	for t in towers:
-		t.cooldown = 0.0
+		t.load_up()   # the next round starts unloaded (#85)
 		t.target = null
 		t.fire_flash = 0.0
 		t.ramp = 0.0

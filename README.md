@@ -79,13 +79,15 @@ Workflow).
 | Right-click | Cancel build mode, targeting or selection |
 | `Y`, then `1`-`3` | Fit one of the selected tower's three Retrofits (the choice is locked) |
 | `U` / `I` / `O` | Buy the next upgrade on path A / B / C (the mastery after its T4) |
+| `E` or the panel's Tree button | The selected tower's whole upgrade tree (pauses): Retrofits on the left, each path a row of steps up to its mastery. Each tile shows its cost and state (owned, buyable, too expensive, needs research, locked); hover for what it does, click a gold tile to buy it |
+| `M` or the panel's Move target button | Artillery Cannon / CAS Gunship: the next click on the field sets its target (the Artillery's snaps to the track); Esc or right-click cancels |
 | `X` | Sell the selected tower (refunds 70% of everything spent on it) |
 | `T` | Cycle the selected tower's targeting: First, Last, Strongest (by strength, then health left), Closest |
 | `G` | Target priority: Any, Air, Ground (towers that hit both) or Support (Support enemies first); it still shoots the rest when none of those are in range |
 | Mouse wheel, middle-drag, arrow keys, `Home` | Zoom the battlefield (up to 2.5×), pan it, reset the view |
 | `F3` | Show or hide the FPS counter |
 | `K` or `F1`, or the Codex button | The Codex: every tower, enemy, effect and rule. In battle it pauses and opens on the selected tower (or the enemy under the cursor) |
-| `R` | Research Lab in battle (pauses; purchases and resets apply at once) |
+| `R` | Research Lab in battle (pauses; purchases and resets apply at once). In Sandbox too, beside the Spawner: it's your real research, and the run switches to Mine |
 | `N` or click NEXT | Intel on the next round: enemies, counts, traits, HP and speed scale, bonuses |
 | `Space` or the Launch button (bottom right) | Launch the next round, or call it early for bonus credits once the current round has finished spawning |
 | `Q` then click | Orbital Strike: armor-piercing blast at the clicked spot after 0.9 s (45 s cooldown) |
@@ -111,8 +113,9 @@ Every tower has the same tree shape (the full design, with every node's stats an
   Tractor towers deal energy, and the Augmentation Tower can convert a nearby tower's damage.
 - The **Scrapyard takes 2×2 tiles**; the build preview centres the block on the cursor, and it gets a high-ground or
   power-node bonus if any of its four tiles has one.
-- **Aiming:** click the track to aim an Artillery Cannon (and pick its shell in its panel) or to set a CAS Gunship's orbit;
-  the Drone Bay's loadout is picked in its panel.
+- **Aiming:** Move target (`M`, or its panel button), then click the track to aim an Artillery Cannon (and pick its shell
+  in its panel) or the field to set a CAS Gunship's orbit; a plain click doesn't move it. The Drone Bay's loadout is picked
+  in its panel.
 
 | Tower | Cost | Class | Hits | Retrofit (one of) | Path A | Path B | Path C |
 |---|---|---|---|---|---|---|---|
@@ -405,7 +408,8 @@ each. Edit a number there and run `node tools/balance.mjs` (it writes the number
 ### Live tuner
 
 Launch the game with `--dev` (`godot --path . -- --dev`, or `./Bastion Line (dev).sh` in an LX build folder) and the
-live tuner opens in its own window beside the game's, following it (its Dock switch frees it; F8 hides it). It edits
+live tuner opens in its own window beside the game's. It starts undocked, so it can be dragged anywhere; its Dock switch
+keeps it beside the game, following it (F8 hides it). It edits
 every number `design/balance.md` owns while the game runs (design/live_tuner.md, issue #80):
 
 - a tab per area (enemies, modifiers, towers, waves, economy, difficulty, research, abilities, rules) lists its groups;
@@ -451,8 +455,9 @@ The commands below assume the console build is on PATH as `godot_console` (winge
    - v1 through v4 save migration, and rejection of tier-4 towers without research
    - generated music (length, level, clipping, seamless loop)
    - full bot playthroughs of Easy (40 rounds) on every map into endless mode, and a full-research
-     Medium run, the bot playing the reworked towers (these fail on the 4.0.0 line until the new roster's
-     balance lands; see Current tuning below)
+     Medium run, the bot playing the reworked towers. On the 4.0.0 line their verdicts (medal, endless,
+     masteries) are paused until the rework is done (#96): the games still run, and a lost verdict prints as
+     PAUSED instead of failing. `BOT_BALANCE_PAUSED` in `tests/TestRunner.gd` turns them back on.
 
    ```
    godot_console --headless --path . res://tests/TestRunner.tscn
