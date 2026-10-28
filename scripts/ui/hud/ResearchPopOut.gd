@@ -1,6 +1,7 @@
 extends "res://scripts/ui/PopOut.gd"
 ## The Research Lab in battle. The game pauses while it is open; research bought or reset here
-## applies to the running game at once (Game.apply_research).
+## applies to the running game at once (Game.apply_research). In Sandbox it's the same real Lab (#87): it spends and
+## saves real research, and switches the run's research to Mine so the purchase applies.
 
 const ResearchPanel = preload("res://scripts/ui/ResearchPanel.gd")
 
@@ -25,15 +26,27 @@ func _build() -> void:
 	chip.add_theme_stylebox_override("panel", sb)
 	chip.add_child(UiKit.label("GAME PAUSED", 12, UiKit.GOLD))
 	header.add_child(chip)
-	panel = ResearchPanel.new("Research you buy or reset here applies to this run at once.")
+	var note := "Research you buy or reset here applies to this run at once."
+	if screen.game.sandbox:
+		note = "Sandbox: this is your real research. Buying or resetting spends and saves your RP, and the run switches to Mine."
+	panel = ResearchPanel.new(note)
 	panel.position = Vector2(0, 6)
 	body.add_child(panel)
 	panel.bought.connect(func(_id):
-		screen.game.apply_research(SaveManager.research_owned())
-		hud.toast("Researched. It applies now.", UiKit.GOOD))
+		_apply()
+		hud.toast("Researched. It applies now%s." % (" (the run now uses your research)" if screen.game.sandbox else ""), UiKit.GOOD))
 	panel.reset_done.connect(func():
-		screen.game.apply_research(SaveManager.research_owned())
+		_apply()
 		hud.toast("Research reset. Its boosts are gone from this run.", UiKit.GOLD))
+
+
+## Applies the profile's research to the run; in Sandbox that means switching the run to Mine.
+func _apply() -> void:
+	if screen.game.sandbox:
+		screen.sandbox_research_mode = "mine"
+		screen.game.sandbox_set_research("mine", SaveManager.research_owned())
+	else:
+		screen.game.apply_research(SaveManager.research_owned())
 
 
 func has_modal() -> bool:

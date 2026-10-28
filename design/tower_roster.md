@@ -89,11 +89,11 @@ to the Pulse Turret's 18, in fewer, harder hits). Air and ground.
 
 | Step | Name | Cost | Effect (proposed) |
 |---|---|---|---|
-| 1 | Heavier Rounds | 55 | +6 damage |
-| 2 | Hardened Tips | 40 | Its hits ignore 2 points of armour |
-| 3 (primary) | AP Rounds | 405 | Ignores 50% of armour; +6 damage |
-| 4 | Tungsten Core | 1,085 | Ignores 75% of armour; +8 damage |
-| Mastery | Sabot Rounds | 2,475 | **Ignores armour fully**; 44 damage per hit |
+| 1 | Heavier Rounds | 55 | +6 damage (22) |
+| 2 | Hardened Tips | 165 | +6 damage (28); its hits ignore 2 points of armour |
+| 3 (primary) | AP Rounds | 530 | Ignores 50% of armour; +8 damage (36) |
+| 4 | Tungsten Core | 1,365 | Ignores 75% of armour; +10 damage (46) |
+| Mastery | Sabot Rounds | 3,555 | **Ignores armour fully**; +12 damage (58 per hit) |
 
 **Path 2, Range/Visibility (precision):**
 
@@ -109,11 +109,11 @@ to the Pulse Turret's 18, in fewer, harder hits). Air and ground.
 
 | Step | Name | Cost | Effect (proposed) |
 |---|---|---|---|
-| 1 | Swivel Mount | 15 | Switches to a new target instantly after a kill, and doesn't fire at enemies already about to die (no wasted rounds on swarms and holograms) |
-| 2 | Side Gun | 165 | A small side gun fires at a second target at 50% damage |
-| 3 (primary) | Twin Mount | 330 | **2 targets** at full damage |
-| 4 | Belt Feed | 660 | +0.3 shots/s on every barrel |
-| Mastery | Triple Mount | 3,300 | **3 targets**; the extra barrels go for the weakest enemies in range (swarms, holograms) |
+| 1 | Swivel Mount | 85 | +0.5 shots/s (1.7); turns onto a new target faster, and doesn't fire at enemies already about to die (no wasted rounds on swarms and holograms) |
+| 2 | Side Gun | 440 | +0.5 shots/s (2.2); a small side gun fires at a second target at 50% damage |
+| 3 (primary) | Twin Mount | 1,155 | +0.5 shots/s (2.7); **2 targets** at full damage |
+| 4 | Belt Feed | 1,100 | +0.5 shots/s on every barrel (3.2) |
+| Mastery | Triple Mount | 10,325 | +0.5 shots/s (3.7); **3 targets**; the extra barrels go for the weakest enemies in range (swarms, holograms) |
 
 **Combinations (primary + secondary capped at 2):**
 - **Power + 2 Multi:** an AP main gun with a side gun for the small stuff.
@@ -1103,7 +1103,7 @@ length, armour stripped, damage over time, slow), using the same step multiplier
 
 **Retrofit (the player picks one; owner, 2026-10-15):**
 - **Pressure Pump, 150:** a spray every 1.33 s, and +20 range (150). Look: a pump with pressure gauges on the spray head.
-- **Mist Nozzle, 300:** each spray also soaks one more unsoaked enemy next to the target. Look: a wide misting nozzle.
+- **Mist Nozzle, 300:** each spray also soaks one more unsoaked enemy next to the target; with Constant Spray the jet becomes a mist cloud. Look: a wide misting nozzle.
 - **Bigger Tanks, 60:** soaks last 5 s. Look: larger chemical tanks.
 
 **Path 1, Damage/Armor stripping (acid):**
@@ -1124,7 +1124,7 @@ length, armour stripped, damage over time, slow), using the same step multiplier
 | 2 | Long-Lasting Mix | 140 | The soak lasts 5 s |
 | 3 (primary) | Twin Valves | 990 | A spray every second; the soak lasts 6 s |
 | 4 | High-Flow Pump | 1,470 | A spray every 0.83 s |
-| Mastery | Twin Nozzles | 7,760 | Sprays two enemies at once (about 1.6 a second); the soak lasts 7 s |
+| Mastery | Constant Spray | 8,810 | Sprays without stopping, sweeping a 40° fan centred on its target once per spray interval (every 0.83 s); every enemy the jet crosses is soaked or topped up, and the soak lasts 4 s. Replaces Twin Nozzles (owner, 2026-10-26, #104) |
 
 **Path 3, Slowing (gel):**
 
@@ -1320,8 +1320,16 @@ radiation circle priced as damage. This joins the Pricing section under the non-
 | 1 | Signal Analysis | 230 | Pings expose the **Decoy Beacon's** fake rank: towers in range rank it correctly |
 | 2 | Disguise Breaker | 460 | Pings **unmask the Masquerade** early |
 | 3 (primary) | Track Lock | 1,930 | Reveals last 1.3 s |
-| 4 | Illusion Filter | 2,390 | Pings mark **Mirage holograms** as fakes: towers in range stop shooting them |
+| 4 | Illusion Filter | 2,390 | Pings pop **Mirage holograms** in range |
 | Mastery | Total Exposure | 3,590 | Revealed enemies can't re-cloak, re-disguise or re-burrow for 5 s after leaving the radar's range |
+
+**How the game does it (#86, 2026-10-24):** each step acts on the enemies a ping covers.
+- **Signal Analysis:** the Decoy Beacon takes its true rank and role for good.
+- **Disguise Breaker:** the Masquerade drops its disguise at once, at any health, and flees as it would at half health.
+- **Illusion Filter:** a ping pops every hologram in range (the owner, #114; it used to mark them with a red cross).
+- **Total Exposure:** whatever a ping covered stays revealed while it stays in this radar's range, and for 5 s after it
+  leaves (gold brackets). A Burrower can't dive meanwhile. The Masquerade never re-disguises, so that part has nothing
+  to stop.
 
 **Combinations (primary + secondary capped at 2):**
 - **Frequency + 2 Power:** near-constant reveals over a bigger area.

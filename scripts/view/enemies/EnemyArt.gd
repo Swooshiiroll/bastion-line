@@ -43,7 +43,7 @@ const LOOKS := {
 	"stalker": [EvaderArt, "stalker", 10.0, false],
 	"burrower": [EvaderArt, "burrower", 11.0, false],
 	"shifter": [EvaderArt, "shifter", 12.0, false],
-	"wraith": [EvaderArt, "wraith", 13.0, true],
+	"wraith": [EvaderArt, "wraith", 19.5, true],   # 50% larger (the owner, #114)
 	"phantom": [SpecialArt, "phantom", 10.0, true],
 	"aegis": [SpecialArt, "aegis", 13.0, false],
 	"hydra": [SpecialArt, "hydra", 14.0, false],
@@ -89,6 +89,12 @@ static func draw(ci: CanvasItem, type: String, c: Vector2, facing: Vector2, t: f
 			var k := 1.0 - 0.35 * lift
 			Kit.Draw.ellipse(ci, c + Vector2(0, rr * 0.75), rr * 1.1 * k, rr * 0.45 * k, Color(0, 0, 0, 0.3 * vis))
 	var alpha: float = a[6]
+	# The after-image of a blink (Blink Stalker, Shifter): a still copy where it blinked from, in the pose and facing it had
+	# then, only fading (#114).
+	if st.has("blink_from") and float(st.get("blink", 99.0)) < 0.7:
+		var gst := {"ghost": true}
+		Kit.begin(ci, st.blink_from, float(st.get("blink_ang", 0.0)), s, s, 0.55 * (1.0 - float(st.blink) / 0.7))
+		(look[0] as Script).call(look[1], Vector2.ZERO, 0.0, r, gst)
 	if not (type in ["phantom", "wraith"]) and float(st.get("reveal", 1.0)) < 1.0:
 		# A Cloaked elite of another kind: a faint shimmer until revealed.
 		alpha *= 0.25
@@ -253,6 +259,9 @@ static func state(e) -> Dictionary:
 	if e.trait_timers.has("blink"):
 		st.blink_in = float(e.trait_timers.blink)
 		st.blink_dist = float(d.get("blink_distance", 0.0))
+		if e.blink_from != Vector2.INF:
+			st.blink_from = e.blink_from
+			st.blink_ang = e.blink_facing
 	if e.has_trait("burrow"):
 		var u: float = minf(1.0, e.since("burrow") / 0.3)
 		st.under = u if e.burrowed else 1.0 - u

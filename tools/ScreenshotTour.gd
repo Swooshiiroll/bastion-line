@@ -13,6 +13,7 @@ const Research = preload("res://scripts/core/Research.gd")
 const Maps = preload("res://data/maps.gd")
 const Grid = preload("res://scripts/core/Grid.gd")
 const UiKit = preload("res://scripts/ui/UiKit.gd")
+const EntityLayerScript = preload("res://scripts/view/EntityLayer.gd")
 
 const OUT_DIR := "res://screenshots/"
 
@@ -292,6 +293,33 @@ func _run() -> void:
 		vg.enemies.append(vg.spawn_enemy("locust", 0, d, 4.0, -1))
 	await _wait(1.2)
 	await _shot("15d_v3_threats")
+
+	# Issue #88: a Blink Stalker and a Shifter just after blinking round a corner (each after-image stays on the lane
+	# where it blinked from), and a Leviathan drawn over the Locusts it has just launched.
+	var bg = Game.new("foundry", 99, "hard")
+	bg.events.clear()
+	app.start_game_with(bg)
+	await _wait(0.4)
+	bg.start_wave()
+	bg.spawn_queue.clear()
+	var route: Curve2D = bg.grid.ground_paths[0]
+	var blinkers := []
+	for entry in [["stalker", 2], ["shifter", mini(4, route.point_count - 2)]]:
+		var at := route.get_closest_offset(route.get_point_position(entry[1]))
+		var e = bg.spawn_enemy(entry[0], 0, maxf(0.0, at - 30.0), 4.0, -1)
+		e.blink_timer = 0.05
+		bg.enemies.append(e)
+		blinkers.append(e)
+	var lv = bg.spawn_enemy("leviathan", 0, 600.0, 4.0, -1)
+	lv.trait_timers["summon"] = 0.05
+	bg.enemies.append(lv)
+	await _wait(0.3)
+	for e in blinkers:
+		_expect(e.blink_from != Vector2.INF and route.get_closest_point(e.blink_from).distance_to(e.blink_from) < 8.0,
+			"the %s's after-image is on the lane where it blinked from" % e.type)
+	var air: Array = EntityLayerScript.draw_order(bg.enemies)[1]
+	_expect(air.size() > 1 and air.back() == lv, "the Leviathan is drawn over its Locusts")
+	await _shot("15e_blink_corner_leviathan")
 
 	# The special, support and economy towers, built up with secondaries, against the v3 roster.
 	var wg = Game.new("foundry", 99, "hard", Research.node_ids())
@@ -733,6 +761,19 @@ func _sandbox_checks() -> void:
 		fails += _expect(t.tier >= 3 and t.depth.values().max() >= Tower.BRANCH_STEPS, "Max buys the branch (tier %d)" % t.tier)
 	await _wait(3.0)
 	await _shot("40b_sandbox_dps")
+	# The Research Lab opens in Sandbox too (#87), beside the Spawner; buying there switches the run to Mine.
+	fails += _expect(screen.hud.top.spawner_btn != null and screen.hud.top.research_btn.text.begins_with("Research"), "Sandbox has both Spawner and Research buttons")
+	screen.sandbox_research("none")
+	await _key(KEY_R)
+	await _wait(0.4)
+	fails += _expect(screen.hud.is_open("research") and screen.paused, "R opens the Research Lab in Sandbox")
+	if screen.hud.is_open("research"):
+		await _shot("40c_sandbox_research")
+		screen.hud.popout("research").panel.bought.emit("cmd_funds")
+		fails += _expect(screen.sandbox_research_mode == "mine", "buying research in Sandbox switches the run to Mine")
+	await _key(KEY_R)
+	await _wait(0.4)
+	fails += _expect(not screen.hud.is_open("research") and not screen.paused, "R closes it")
 	screen.sandbox_clear()
 	fails += _expect(g.enemies.is_empty() and g.spawn_queue.is_empty(), "Clear field empties the field")
 	fails += _expect(not g.can_save(), "a sandbox run can't be saved")
@@ -978,6 +1019,7 @@ func _rework_checks(g) -> void:
 		g.state = Game.State.BUILD
 	else:
 		fails += _expect(false, "an enemy could be put in the Gun Turret's range")
+	fails += await _tree_and_aim_checks(g, u)
 	for type in ["mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon", "railgun", "tesla_tower", "drone_bay", "cas_gunship", "mine_layer", "chemical_plant", "cryo_tower", "boost_tower", "radar_tower", "shockwave_generator", "scrapyard", "magneto_tower", "tractor_tower", "augmentation_tower"]:
 		fails += await _rework_fire_check(g, type)
 	screen.world.selected_tower = null
@@ -986,6 +1028,84 @@ func _rework_checks(g) -> void:
 		await _key(KEY_B)
 		await _wait(0.3)
 	print("REWORK CHECKS: %s" % ("ALL PASSED" if fails == 0 else "%d FAILED" % fails))
+
+
+## Batch 3 (#87): the tree viewer through E and a tile click, Move target through M and a click, and the shop greying.
+func _tree_and_aim_checks(g, u) -> int:
+	var screen = app.current
+	var hud = screen.hud
+	var fails := 0
+	screen.world.selected_tower = u
+	await _wait(0.4)
+	fails += _expect(hud.popout("tower") != null and hud.popout("tower").tree_btn != null, "the tower panel has a Tree button")
+	await _key(KEY_E)
+	await _wait(0.4)
+	var tree = hud.popout("tree")
+	fails += _expect(tree != null and screen.paused, "E opens the upgrade tree and pauses")
+	if tree != null:
+		fails += _expect(tree.tiles.size() == 3 + 15, "the tree shows 3 Retrofits and 3 paths of 5 (%d tiles)" % tree.tiles.size())
+		await _shot("rework_t_tree")
+		await _click(tree.tiles["a:0"].get_global_rect().get_center())
+		await _wait(0.2)
+		fails += _expect(int(u.depth.a) == 1, "clicking the next step in the tree buys it")
+		await _click(hud.popout("tree").tiles["a:2"].get_global_rect().get_center())
+		fails += _expect(int(u.depth.a) == 1, "a later step can't be bought out of order")
+	await _key(KEY_E)
+	await _wait(0.4)
+	fails += _expect(not hud.is_open("tree") and not screen.paused, "E closes it and the battle resumes")
+	# Move target: M arms aim mode, a click on the track sets the Artillery's target and ends it; a plain click doesn't.
+	var spot := Vector2i(-1, -1)
+	for y in 14:
+		for x in 24:
+			if spot.x < 0 and g.placement_error("artillery_cannon", Vector2i(x, y)) == "":
+				spot = Vector2i(x, y)
+	var art = g.place_tower("artillery_cannon", spot)
+	fails += _expect(art != null, "an Artillery Cannon is placed for Move target")
+	if art == null:
+		return fails
+	screen.world.selected_tower = art
+	await _wait(0.4)
+	fails += _expect(hud.popout("tower").aim_btn != null, "its panel has a Move target button")
+	var track: Array = g.grid.path_cells.keys()
+	var c1: Vector2i = track[track.size() / 3]
+	var c2: Vector2i = track[(track.size() * 2) / 3]
+	var before: Vector2 = art.aim_point
+	await _key(KEY_M)
+	fails += _expect(screen.world.aim_tower == art, "M starts aim mode")
+	await _wait(0.1)
+	fails += _expect(not hud.popout("tower").visible and not hud.is_open("shop"), "while aiming, the menus close and the tower panel hides (#116)")
+	await _shot("rework_u_move_target")
+	await _click(screen.world.base_pos + Vector2((c1.x + 0.5) * 48.0, (c1.y + 0.5) * 48.0))
+	fails += _expect(screen.world.aim_tower == null and art.aim_point.distance_to(Grid.cell_center(c1)) < 40.0 and art.aim_point != before, "a click sets the target and ends aim mode")
+	await _wait(0.1)
+	fails += _expect(hud.popout("tower") != null and hud.popout("tower").visible, "and the tower panel comes back")
+	screen.world.selected_tower = art
+	await _wait(0.2)
+	var set_at: Vector2 = art.aim_point
+	await _click(screen.world.base_pos + Vector2((c2.x + 0.5) * 48.0, (c2.y + 0.5) * 48.0))
+	fails += _expect(art.aim_point == set_at, "a plain click on the track no longer moves the target")
+	screen.world.selected_tower = art
+	await _key(KEY_M)
+	await _key(KEY_ESCAPE)
+	fails += _expect(screen.world.aim_tower == null and art.aim_point == set_at, "Esc cancels aim mode")
+	g.sell_tower(art)
+	screen.world.selected_tower = null
+	await _wait(0.3)
+	# The shop: grouped by class, cheapest first, and greyed when it can't be afforded.
+	var keep: int = g.gold
+	g.gold = 100
+	await _key(KEY_B)
+	await _wait(0.4)
+	var shop = hud.popout("shop")
+	if shop != null:
+		fails += _expect(shop.cards["gun_turret"].modulate == Color.WHITE and shop.cards["railgun"].modulate != Color.WHITE, "towers you can't afford are greyed out")
+		await _shot("rework_v_shop_by_class")
+	else:
+		fails += _expect(false, "B opens the shop")
+	g.gold = keep
+	await _key(KEY_B)
+	await _wait(0.3)
+	return fails
 
 
 ## One reworked tower: build it near the lane, fit its first Retrofit and a few path steps, put an enemy in range and watch it fire.
@@ -1027,12 +1147,16 @@ func _rework_fire_check(g, type: String) -> int:
 	if foe != null:
 		g.enemies.append(foe)
 		g.state = Game.State.WAVE
+		# A new tower loads before its first shot (#85); skip that here, or the enemy walks away from an Artillery's aim
+		# point before its first shell (4 s reload) lands.
+		t.cooldown = 0.0
 		await _wait(3.2)
 		await _shot("rework_e_" + type)
 		var worked: bool = t.damage_dealt > 0.0
 		match type:
 			"mine_layer":
-				worked = not g.mines.is_empty()
+				# Mines land just ahead of enemies now (#110), so the enemy may already have set one off: a throw counts.
+				worked = not g.mines.is_empty() or t.pulse_count > 0 or t.damage_dealt > 0.0
 			"chemical_plant":
 				worked = foe.soak_timer > 0.0 or foe.armor_shred > 0.0 or foe.armor_break_timer > 0.0
 			"cryo_tower":

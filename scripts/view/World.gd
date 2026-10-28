@@ -28,9 +28,16 @@ const CryoTowerArt = preload("res://scripts/view/towers/CryoTowerArt.gd")
 const RocketSalvoArt = preload("res://scripts/view/towers/RocketSalvoArt.gd")
 const AntiAircraftArt = preload("res://scripts/view/towers/AntiAircraftArt.gd")
 const ArtilleryCannonArt = preload("res://scripts/view/towers/ArtilleryCannonArt.gd")
+const TractorTowerArt = preload("res://scripts/view/towers/TractorTowerArt.gd")
 
 const MAX_STEPS_PER_FRAME := 40
 const SMOKE := Color(0.35, 0.36, 0.4, 0.7)
+## The Shockwave Generator's cloud, seen from above (#120): how far up the screen its smoke drifts for its height; and the Megaton's
+## Taller Cloud: how much farther it climbs, where its cap sits (px up, times the cloud's scale) and how much longer it lives.
+const SMOKE_RISE := 0.3
+const MEGA_RISE := 1.4
+const MEGA_CAP_Y := -19.0
+const MEGA_LIFE := 1.3
 
 signal field_clicked(cell: Vector2i, button: int, shift: bool, pos: Vector2)
 
@@ -40,6 +47,10 @@ var lane_fx
 var scenery
 var ground_fx
 var entities
+## Smoke that rises over the towers (normal blend, above the entities): the Shockwave Generator's mushroom cloud and vent smoke.
+var smoke_fx
+## Counts Constant Spray's ticks so mist puffs go out every other one.
+var _jet_n := 0
 var beams
 var fx
 var overlay
@@ -61,10 +72,16 @@ var interactive := true
 var damage_numbers := true
 var build_type := ""
 var ability_target := ""
+## Towers whose target the player places (#87), and the one in aim mode (Move target): the next field click sets it.
+const AIMABLE := ["artillery_cannon", "cas_gunship"]
+var aim_tower = null
 var selected_tower = null
 var hover_cell := Vector2i(-1, -1)
 var hover_pos := Vector2(-1000, -1000)
 var hover_enemy = null
+## The enemy the player clicked (#116): it keeps a ring, its card stays pinned in the bottom bar, and lines show the towers
+## firing at it. Selecting a tower clears it, and so does its death or leak.
+var selected_enemy = null
 var mouse_in_field := false
 var force_hover := Vector2i(-99, -99)
 var anim_t := 0.0
@@ -97,6 +114,8 @@ func setup(g, clip := Rect2i()) -> void:
 	entities = EntityLayer.new()
 	entities.world = self
 	add_child(entities)
+	smoke_fx = FxLayer.new()
+	add_child(smoke_fx)
 	beams = BeamLayer.new()
 	beams.world = self
 	add_child(beams)
@@ -112,6 +131,34 @@ func setup(g, clip := Rect2i()) -> void:
 	selected_tower = null
 	build_type = ""
 	ability_target = ""
+	aim_tower = null
+
+
+## Constant Spray (#112): each tick, every spraying Chemical Plant sends a drop from its head along the jet's angle at that
+## moment (with the Mist Nozzle, a mist puff every other tick, on the smoke layer); the particles then fly on by themselves.
+func _emit_jets() -> void:
+	for t in game.towers:
+		if t.type != "chemical_plant" or t.disabled > 0.0 or float(t.gun_cds.get("spray_on", 0.0)) <= 0.0:
+			continue
+		var L := ChemicalPlantArt.levels(t.look_key())
+		var k := 1.0 if t.size <= 1 else 1.8
+		var d := Vector2.from_angle(float(t.gun_cds.get("spray_a", t.aim)))
+		var from: Vector2 = t.pos + d * ChemicalPlantArt.JET_START * k
+		var reach: float = t.get_range() - ChemicalPlantArt.JET_START * k
+		var ac := ChemicalPlantArt.acid_color(L, Draw.accent(t.type, t.spec))
+		if L.r == 1:
+			_jet_n += 1
+			if _jet_n % 2 == 0:
+				smoke_fx.jet(from, d, reach, ac, k, true, 0.9)
+		else:
+			fx.jet(from, d, reach, ac, k, false, ChemicalPlantArt.JET_FLIGHT)
+
+
+## The enemy whose card the bottom bar shows: the selected one while it lives, else the one under the cursor.
+func card_enemy():
+	if selected_enemy != null and selected_enemy.alive:
+		return selected_enemy
+	return hover_enemy
 
 
 ## Advances the simulation by real time `delta` at the given speed and returns the drained events.
@@ -121,6 +168,7 @@ func simulate(delta: float, speed: int) -> Array:
 	while _accum >= Game.TICK:
 		_accum -= Game.TICK
 		game.tick(Game.TICK)
+		_emit_jets()
 		steps += 1
 		if steps >= MAX_STEPS_PER_FRAME:
 			_accum = 0.0
@@ -136,6 +184,8 @@ func _process(delta: float) -> void:
 	anim_t += delta
 	if game == null:
 		return
+	if selected_enemy != null and (not selected_enemy.alive or selected_tower != null):
+		selected_enemy = null
 	if interactive:
 		if _last_mouse != null:
 			_mouse = make_input_local(_last_mouse).position
@@ -259,11 +309,66 @@ func _salvo_hit(ev: Dictionary) -> void:
 		fx.burst(ev.pos, Color(1.0, 0.6, 0.2), 6, 40.0, 2.0, 0.5)
 
 
+## The Shockwave Generator's blast (its page, Mushroom Pulse): two rings roll out and flash each enemy they reach; a mushroom cloud
+## billows up, bigger with every Power step, with a nuclear fireball and a rolling cap at the Megaton Wave; Reactor Venting throws
+## smoke out of its four corner stacks. Every puff lives on its own clock.
+## The cloud is seen from above, as the camera sees it (#120, round 16): the smoke spreads out round the tower in every direction and
+## only drifts up the screen by SMOKE_RISE of its height. The fireball is drawn over the billow and under the cap, so it glows red in
+## the middle of the grey. The Megaton's cloud is the Taller Cloud (round 17): it climbs MEGA_RISE times as far, its cap sits at
+## MEGA_CAP_Y, it lives MEGA_LIFE times as long, and the cap's puffs land at random, like the billow's.
+func _shockwave(ev: Dictionary) -> void:
+	var sl := ShockwaveGeneratorArt.levels(str(ev.look))
+	var p0: Vector2 = ev.pos
+	var radius := float(ev.radius)
+	var mega: bool = sl.P >= 5
+	var col: Color = Draw.ACCENT.shockwave_generator
+	var wc: Color = ShockwaveGeneratorArt.HOT if mega else col
+	var sc := 1.0 + 0.28 * float(sl.P)
+	var hits: Array = []
+	for e in game.enemies:
+		if e.alive and e.pos.distance_to(p0) <= radius:
+			hits.append({"p": e.pos, "d": e.pos.distance_to(p0), "r": clampf(float(e.radius), 4.0, 11.0)})
+	fx.shock_wave(p0, radius, wc, 1.0 + 0.25 * float(sl.P) + (0.25 if sl.r == 1 else 0.0), hits, mega, sc)
+	var vfx := float(SaveManager.setting("vfx"))
+	var n := maxi(3, roundi(float(8 + 4 * sl.P) * vfx))
+	var rise := MEGA_RISE if mega else 1.0
+	var life_k := MEGA_LIFE if mega else 1.0
+	for q in n:
+		var tone := randf()
+		var sm := Color(0.34 + 0.16 * tone, 0.31 + 0.15 * tone, 0.28 + 0.14 * tone)
+		var sp := 9.0 + 7.0 * randf() if float(q) > float(n) * 0.45 else 3.0 + 3.0 * randf()
+		var v := Vector2.from_angle(randf() * TAU) * sp - Vector2(0.0, (12.0 + 9.0 * randf()) * rise * SMOKE_RISE)
+		smoke_fx.puff(p0, v * sc, 1.4, (1.8 + 0.8 * randf()) * sc, 3.2 * sc, sm, wc, 0.7, 0.7, (2.4 + 1.2 * randf()) * life_k, randf() * 0.04)
+	if mega:
+		for q in maxi(2, roundi(7.0 * vfx)):
+			var tone := randf()
+			var sm := Color(0.34 + 0.16 * tone, 0.31 + 0.15 * tone, 0.28 + 0.14 * tone)
+			var v := Vector2.from_angle(randf() * TAU) * (1.0 + 3.0 * randf()) - Vector2(0.0, (7.0 + 7.0 * randf()) * SMOKE_RISE)
+			smoke_fx.puff(p0, v * sc, 1.4, (3.2 + 1.4 * randf()) * 1.3 * sc, 3.2 * sc, sm, wc, 0.0, 0.85, 1.5 + 0.4 * randf(), randf() * 0.05, 0.0, 0.3, true)
+		for q in maxi(4, roundi(16.0 * vfx)):
+			var tone := randf()
+			var sm := Color(0.34 + 0.16 * tone, 0.31 + 0.15 * tone, 0.28 + 0.14 * tone)
+			var v := Vector2.from_angle(randf() * TAU) * (9.0 + 13.0 * randf()) * 1.4 - Vector2(0.0, 2.0 * SMOKE_RISE)
+			smoke_fx.puff(p0, v * sc, 1.4, (2.6 + 1.2 * randf()) * sc, 3.2 * sc, sm, wc, 1.1, 0.7, (3.0 + 0.8 * randf()) * life_k, 0.2 + randf() * 0.08, MEGA_CAP_Y * SMOKE_RISE * sc)
+	if sl.r == 2:
+		for sg in ShockwaveGeneratorArt.VENTS:
+			var a0: float = sg.angle()
+			for q in maxi(2, roundi(9.0 * vfx)):
+				var tone := randf()
+				var grey := Color(0.5 + 0.18 * tone, 0.5 + 0.17 * tone, 0.5 + 0.16 * tone)
+				var v := Vector2.from_angle(a0 + (randf() - 0.5) * 0.9) * (34.0 + 22.0 * randf())
+				smoke_fx.puff(p0 + sg * 10.8, v, 1.5, 2.0 + randf(), 4.0, grey, grey, 0.0, 0.6, 2.4 + 1.2 * randf(), 0.0, 0.0, 0.4)
+
+
 func _visual(ev: Dictionary) -> void:
 	var acc := Draw.accent(str(ev.get("tower", "")), str(ev.get("spec", "")))
 	match ev.type:
 		"fire":
 			fx.flash(ev.pos, 6.0, acc, 0.06)
+		"hologram_pop":
+			# A Mirage hologram blinks out (hit, replaced, or popped by a Radar's Illusion Filter, #114).
+			fx.flash(ev.pos, 10.0, Color(0.7, 0.95, 1.0, 0.8), 0.12)
+			fx.burst(ev.pos, Color(0.6, 0.95, 1.0), 8, 70.0, 1.6, 0.3)
 		"arrow_hit":
 			fx.burst(ev.pos, Color(1.0, 0.35, 0.35) if ev.get("shred", false) else Draw.ACCENT.gun_turret, 4, 60.0, 1.6, 0.25)
 			if ev.get("look", "") != "":
@@ -335,14 +440,12 @@ func _visual(ev: Dictionary) -> void:
 			fx.flash(ev.to, 9.0, rcol, 0.1)
 			fx.flash(ev.from, 8.0, Color(1, 1, 1), 0.06)
 		"frost":
-			var fcol: Color = Draw.ACCENT.cryo_tower
-			if str(ev.get("look", "")) != "":
-				# The Cryo Tower's wave of creeping mist (confirmed art): pale ice, gold at a mastery, a white shock when a wave freezes.
-				fcol = CryoTowerArt.tint(CryoTowerArt.levels(str(ev.look)))
-				if ev.get("freeze", false):
-					fx.ring(ev.pos, 8.0, float(ev.radius) * 1.05, Color(1, 1, 1), 0.5, 3.0, true)
-			fx.ring(ev.pos, 12.0, ev.radius, fcol, 0.45, 2.0, true)
-			fx.burst(ev.pos, fcol, 6, 70.0, 2.0, 0.5)
+			# The Cryo Tower's wave of creeping mist (its page): pale ice puffs creeping out to its reach, a constant field at Cold Front,
+			# and a white shock when a wave freezes (Deep Freeze).
+			var cl := CryoTowerArt.levels(str(ev.get("look", "")))
+			fx.mist(ev.pos, float(ev.radius), CryoTowerArt.ICE, cl.F >= 5)
+			if ev.get("freeze", false):
+				fx.ring(ev.pos, 8.0, float(ev.radius) * 1.05, Color(1, 1, 1), 0.5, 3.0, true)
 		"rubble_cleared":
 			terrain.refresh()
 			ground_fx.burst(ev.pos, Color(0.45, 0.4, 0.35, 0.9), 18, 90.0, 3.5, 0.7)
@@ -370,26 +473,22 @@ func _visual(ev: Dictionary) -> void:
 				if p[0].x < 0.0:
 					continue
 				fx.text(p[0] + Vector2(0, -24), "+%d" % int(p[1]), Color(1.0, 0.8, 0.3), 14, 1.4, 30.0)
-				fx.burst(p[0], Color(1.0, 0.8, 0.3), 10, 70.0, 2.0, 0.5)
+				# Melt and Pour: the furnace flares (the art) and a fountain of coins vents from the stack's mouth.
+				smoke_fx.fountain(p[0] + Vector2(0, -8))
 		"spray":
-			# The acid spray: a lobbed stream of drops in the plant's acid colour, bigger with each Acid step (white glints from Slowing's gel).
+			# The acid spray: a lobbed stream of drops in the plant's acid colour from the nozzle to the enemy, bigger with each Acid step,
+			# white glints from Slowing's gel, bubbles in the Concentrated Acid; the Mist Nozzle's neighbour gets a drifting mist.
 			var cl := ChemicalPlantArt.levels(str(ev.look))
 			var scol := ChemicalPlantArt.acid_color(cl, Draw.ACCENT.chemical_plant)
-			fx.tracer(ev.from, ev.to, Color(scol, 0.8), 0.3, 2.0 + 0.3 * float(cl.A))
-			fx.burst(ev.to, scol, 5, 45.0, 1.8 + 0.2 * float(cl.A), 0.4)
+			var k := 1.0
+			var nz := ChemicalPlantArt.muzzle(ev.from, (ev.to - ev.from).angle(), k, str(ev.look))
+			fx.spray(nz, ev.get("enemy"), ev.to, scol, (1.0 + 0.14 * float(cl.A)) * (1.15 if cl.G >= 1 else 1.0), cl.G >= 1, cl.A >= 4, bool(ev.get("mist", false)))
 		"radar_ping":
 			# The ping: a ring that sweeps out to the radar's reach (gold with the Frequency or Power mastery).
 			var rl2 := RadarTowerArt.levels(str(ev.look))
 			fx.ring(ev.pos, 6.0, float(ev.radius), Draw.GOLD if (rl2.P >= 5 or rl2.F >= 5) else Draw.ACCENT.radar_tower, 0.7, 2.0)
 		"shockwave":
-			# The nuclear shockwave: a bright ring tearing outward from the core, with a flash, a white heat (Power) or violet resonance (Effect).
-			var sl := ShockwaveGeneratorArt.levels(str(ev.look))
-			var wc: Color = Draw.GOLD if sl.P >= 5 else Color(1.0, 0.9, 0.55)
-			fx.flash(ev.pos, float(ev.radius) * 0.4, wc, 0.14)
-			fx.ring(ev.pos, 8.0, float(ev.radius), wc, 0.4, 3.5, true)
-			fx.ring(ev.pos, 4.0, float(ev.radius) * 0.7, Color(wc, 0.5), 0.3, 2.0)
-			if sl.E >= 1:
-				fx.ring(ev.pos, 6.0, float(ev.radius) * 0.9, Color(0.7, 0.4, 1.0, 0.8), 0.45, 2.0)
+			_shockwave(ev)
 			shake = maxf(shake, 0.05)
 		"magneto_flip":
 			# Reverse Polarity: the field flips to repel, a red and blue shock tearing out of the pole.
@@ -398,20 +497,18 @@ func _visual(ev: Dictionary) -> void:
 			fx.flash(ev.pos, 16.0, Draw.GOLD, 0.12)
 			shake = maxf(shake, 0.04)
 		"tractor_lock":
-			fx.tracer(ev.from, ev.to, Color(Draw.ACCENT.tractor_tower, 0.8), 0.25, 2.0)
+			# The beam itself is the beam layer's, from the antenna's tip; the lock flashes on the enemy.
 			fx.flash(ev.to, 10.0, Draw.ACCENT.tractor_tower, 0.15)
 		"tractor_slam":
-			fx.ring(ev.pos, 6.0, float(ev.radius), Color(1.0, 0.85, 0.3), 0.35, 3.0, true)
-			fx.burst(ev.pos, Color(1.0, 0.85, 0.3), 8, float(ev.radius) * 2.0, 2.0, 0.4)
+			# Lift and Drop's slam: a stunning ring in the beam's colour, gold with shards at Gravity Hammer.
+			var scol: Color = Draw.GOLD if TractorTowerArt.levels(str(ev.get("look", ""))).G >= 5 else Draw.ACCENT.tractor_tower
+			fx.ring(ev.pos, 6.0, float(ev.radius), scol, 0.5, 3.0, true)
+			fx.burst(ev.pos, scol, 8, float(ev.radius) * 2.0, 2.0, 0.4)
 			ground_fx.scorch(ev.pos, float(ev.radius) * 0.4)
 			shake = maxf(shake, 0.06)
 		"ricochet":
 			fx.tracer(ev.from, ev.to, Color(0.4, 1.0, 0.5, 0.9), 0.15, 1.6)
 			fx.flash(ev.to, 6.0, Color(0.4, 1.0, 0.5), 0.08)
-		"mine_toss":
-			# A mine lobbed from the launcher to its spot: a short arc of light and a ring where it lands.
-			fx.tracer(ev.pos, ev.to, Color(1, 1, 1, 0.5), 0.25, 1.0)
-			fx.ring(ev.to, 2.0, 10.0, Color(1, 1, 1, 0.6), 0.25, 1.0)
 		"mine_blast":
 			# The confetti charge: coloured scraps fly from the blast (gold for the anti-tank mine), a shock ring at Wider Charge, a gel puddle with Adhesive Mines.
 			var ml := MineLayerArt.levels(str(ev.look))

@@ -133,7 +133,7 @@ static func muzzle(c: Vector2, aim: float, k: float, look: String, i: int) -> Ve
 	return at(c, aim, k, q.x + tube_len(L), q.y)
 
 
-static func draw(ci: CanvasItem, c: Vector2, aim: float, s: float, t: float, flash: float, look: String, acc: Color) -> void:
+static func draw(ci: CanvasItem, c: Vector2, aim: float, s: float, t: float, flash: float, look: String, acc: Color, extra: Array = []) -> void:
 	var L := levels(look)
 	var k := s
 	var T := tubes(L)
@@ -199,7 +199,11 @@ static func draw(ci: CanvasItem, c: Vector2, aim: float, s: float, t: float, fla
 	Draw.dyn(true)
 	if flash > 0.0:
 		var fl := clampf(flash / 0.12, 0.0, 1.0)
+		# Only the tube that fired flashes: `extra[0]` is the shot count, and shot m leaves tube (m - 1) (#110).
+		var fired: int = (int(extra[0]) - 1) if extra.size() > 0 and extra[0] != null else -1
 		for i in n:
+			if fired >= 0 and i != posmod(fired, n):
+				continue
 			var mp := muzzle(c, aim, k, look, i)
 			Draw.disc(ci, mp, 4.0 * k * fl, Color(1.0, 0.85, 0.5, 0.8 * fl))
 			Draw.disc(ci, mp + Vector2(0, -3.0 * k), (2.0 + 3.0 * (1.0 - fl)) * k, Color(0.85, 0.88, 0.9, 0.35 * fl))

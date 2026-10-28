@@ -17,23 +17,44 @@ const GameScreen = preload("res://scripts/ui/GameScreen.gd")
 const Modifiers = preload("res://data/modifiers.gd")
 const Tower = preload("res://scripts/entities/Tower.gd")
 const Projectile = preload("res://scripts/entities/Projectile.gd")
+const FxLayer = preload("res://scripts/view/FxLayer.gd")
+const TractorTowerArt = preload("res://scripts/view/towers/TractorTowerArt.gd")
 const Towers = preload("res://data/towers.gd")
 const Enemies = preload("res://data/enemies.gd")
 const Waves = preload("res://data/waves.gd")
 const Maps = preload("res://data/maps.gd")
 const Abilities = preload("res://data/abilities.gd")
 const Research = preload("res://scripts/core/Research.gd")
+const RailgunArt = preload("res://scripts/view/towers/RailgunArt.gd")
 const ResearchData = preload("res://data/research.gd")
 const Difficulty = preload("res://data/difficulty.gd")
 const EnemyArt = preload("res://scripts/view/enemies/EnemyArt.gd")
 const EnemyMoves = preload("res://scripts/entities/EnemyMoves.gd")
+const EnemyKit = preload("res://scripts/view/enemies/EnemyKit.gd")
+const EntityLayerScript = preload("res://scripts/view/EntityLayer.gd")
 const Tuner = preload("res://scripts/dev/Tuner.gd")
 const TunerPanel = preload("res://scripts/dev/TunerPanel.gd")
+const TunerWindow = preload("res://scripts/dev/TunerWindow.gd")
+const ShopPanel = preload("res://scripts/ui/hud/ShopPanel.gd")
+const TreePopOut = preload("res://scripts/ui/hud/TreePopOut.gd")
+const RocketSalvoArt = preload("res://scripts/view/towers/RocketSalvoArt.gd")
+const LaserTowerArt = preload("res://scripts/view/towers/LaserTowerArt.gd")
+const ArtilleryCannonArt = preload("res://scripts/view/towers/ArtilleryCannonArt.gd")
+const MineLayerArt = preload("res://scripts/view/towers/MineLayerArt.gd")
+const MortarTowerArt = preload("res://scripts/view/towers/MortarTowerArt.gd")
+const TowerInfo = preload("res://scripts/ui/TowerInfo.gd")
+const WorldView = preload("res://scripts/view/World.gd")
+const EntityLayerView = preload("res://scripts/view/EntityLayer.gd")
 
 const SANDBOX := "user://test_sandbox/"
 const SIM_DT := 1.0 / 60.0
 
 var failures: Array = []
+## The bot's balance verdicts are paused while the tower rework (#59) is in progress (owner, 2026-10-24, #96): see
+## balance_check. Turn this off before the rework goes to feat/59-tower-rework.
+const BOT_BALANCE_PAUSED := true
+## Paused balance verdicts that came out false, printed after the run.
+var paused: Array = []
 var checks := 0
 var current := ""
 var only := ""
@@ -108,8 +129,19 @@ func _run() -> void:
 		"test_sandbox_no_medal",
 		"test_sandbox_dps",
 		"test_leviathan",
+		"test_blink_around_corners",
+		"test_smooth_drawing",
 		"test_colossus",
 		"test_v3_flyers",
+		"test_rocket_tubes",
+		"test_laser_turns_first",
+		"test_artillery_from_muzzle",
+		"test_lobbed_shells",
+		"test_turret_bake_size",
+		"test_rail_muzzles",
+		"test_turn_while_reloading",
+		"test_mine_scatter",
+		"test_chem_spray_events",
 		"test_crowd_control_limits",
 		"test_no_towers_loses",
 		"test_bot_playthroughs",
@@ -141,6 +173,10 @@ func _run() -> void:
 	print("%d checks, %d failed, %.1f s" % [checks, failures.size(), (Time.get_ticks_msec() - t0) / 1000.0])
 	for f in failures:
 		print("  FAILED: ", f)
+	if not paused.is_empty():
+		print("%d bot balance verdicts paused until the rework is done (#96), not counted:" % paused.size())
+		for f in paused:
+			print("  PAUSED: ", f)
 	print("RESULT: ", "OK" if failures.is_empty() else "FAILURES")
 	get_tree().quit(0 if failures.is_empty() else 1)
 
@@ -149,6 +185,15 @@ func check(cond: bool, msg: String) -> void:
 	checks += 1
 	if not cond:
 		failures.append("%s: %s" % [current, msg])
+
+
+## A verdict on balance from the bot's play (does it win, reach endless, buy masteries). While BOT_BALANCE_PAUSED a false
+## one is only noted (printed as PAUSED), not a failure.
+func balance_check(cond: bool, msg: String) -> void:
+	if not BOT_BALANCE_PAUSED:
+		check(cond, msg)
+	elif not cond:
+		paused.append("%s: %s" % [current, msg])
 
 
 func near(a: float, b: float, eps := 0.001) -> bool:
@@ -697,6 +742,69 @@ func test_leviathan() -> void:
 	var locusts: Array = g.enemies.filter(func(e): return e.type == "locust")
 	check(locusts.size() == 6, "launches 6 Locusts every 6 s (%d)" % locusts.size())
 	check(locusts.all(func(e): return e.flying), "Locusts fly")
+	var air: Array = EntityLayerScript.draw_order(g.enemies)[1]
+	check(air.back() == lv and air.size() == 7, "drawn over the Locusts it launches")
+
+
+## A Blink Stalker or Shifter blinking around every corner of every route stays on the track, faces along it, and
+## leaves its after-image where it blinked from (issue #88: the ghost was drawn straight behind it, off the lane).
+func test_blink_around_corners() -> void:
+	var off_track := 0
+	var bad_facing := 0
+	var bad_ghost := 0
+	var corners := 0
+	for id in Maps.ORDER:
+		var g = new_game(id)
+		for pi in g.grid.ground_paths.size():
+			var c: Curve2D = g.grid.ground_paths[pi]
+			for i in range(1, c.point_count - 1):
+				var at := c.get_closest_offset(c.get_point_position(i))
+				for type in ["stalker", "shifter"]:
+					var e = put(g, type, maxf(0.0, at - float(Enemies.ENEMIES[type].blink_distance) * 0.5), pi)
+					e.step(SIM_DT)
+					var from: Vector2 = e.pos
+					g._trait_blink(e, e.def)
+					corners += 1
+					if e.blink_from != from or c.get_closest_point(e.blink_from).distance_to(e.blink_from) > 8.0:
+						bad_ghost += 1
+					for k in int(0.7 / SIM_DT):
+						e.step(SIM_DT)
+						var ahead := c.sample_baked(minf(e.distance + 4.0, e.path_len))
+						var tangent := (ahead - c.sample_baked(e.distance)).normalized()
+						if c.get_closest_point(e.pos).distance_to(e.pos) > 8.0:
+							off_track += 1
+						if e.distance < e.path_len - 8.0 and e.facing.dot(tangent) < 0.9:
+							bad_facing += 1
+					var st := EnemyArt.state(e)
+					if st.get("blink_from", Vector2.INF) != from:
+						bad_ghost += 1
+	check(corners > 40, "every corner of every route (%d blinks)" % corners)
+	check(off_track == 0, "stays on the track after a blink (%d frames off)" % off_track)
+	check(bad_facing == 0, "faces along the track after a blink, not along the jump (%d frames)" % bad_facing)
+	check(bad_ghost == 0, "the after-image stays where it blinked from (%d wrong)" % bad_ghost)
+	EnemyKit.begin(null, Vector2(100, 50), 1.1, 1.05, 0.95)
+	var p := Vector2(37, -12)
+	check(EnemyKit.W(EnemyKit.L(p)).distance_to(p) < 0.001, "the art maps a field point into its frame and back")
+
+
+## Issue #89: arcs and thin rings follow their radius (each chord within 1/16 px of the curve, so the Chrono Field's
+## ring and range circles stay round), and a turning turret fades between its baked aims instead of jumping.
+func test_smooth_drawing() -> void:
+	var worst := 0.0
+	for r in [1.5, 6.0, 20.0, 80.0, 150.0, 560.0]:
+		for span in [0.6, PI, TAU]:
+			var n := Draw.arc_segments_for(r, span)
+			worst = maxf(worst, r * (1.0 - cos(span / float(n) / 2.0)))
+	check(worst <= 1.0 / 16.0 + 1e-6, "every chord within 1/16 px of its arc (worst %.3f px)" % worst)
+	check(Draw.arc_segments_for(560.0, TAU) > 100, "a 560 px ring has over a hundred segments (%d)" % Draw.arc_segments_for(560.0, TAU))
+	var step := TAU / float(Draw.TURRET_BUCKETS)
+	var b: Array = Draw.turret_blend(step * 2.5)
+	check(b[0] == 2 and near(b[1], 0.5), "half-way between two baked aims, both show (%s)" % [b])
+	var lo: Array = Draw.turret_blend(step * 3.0 - 0.001)
+	var hi: Array = Draw.turret_blend(step * 3.0 + 0.001)
+	check(lo[0] == 2 and lo[1] > 0.99 and hi[0] == 3 and hi[1] < 0.01, "crossing a baked aim hands over from fully faded in, not a jump")
+	var neg: Array = Draw.turret_blend(-0.1)
+	check(neg[0] == Draw.TURRET_BUCKETS - 1 and near(neg[1], 1.0 - 0.1 / step), "negative aims wrap round")
 
 
 func test_colossus() -> void:
@@ -905,7 +1013,7 @@ func test_economy() -> void:
 	check(not g.upgrade_tower(t, "b"), "upgrade needs credits")
 	g.gold = 1000
 	check(not g.upgrade_tower(t, "bogus"), "an unknown path is refused")
-	check(t.upgrade_cost("b") == 25 and t.upgrade_cost() == 40, "path costs reported (the primary's next step without a key)")
+	check(t.upgrade_cost("b") == 25 and t.upgrade_cost() == 165, "path costs reported (the primary's next step without a key)")
 	check(g.upgrade_tower(t, "b") and t.started == ["a", "b"], "a second path can be started")
 	check(not g.upgrade_tower(t, "c"), "the third path is locked once two are started")
 	check(g.gold == 1000 - 25, "the step's cost is deducted")
@@ -1538,7 +1646,7 @@ func test_upgrade_event_mastery() -> void:
 func test_footprint() -> void:
 	var g = new_game()
 	g.gold = 100000
-	check(Game.size_of("scrapyard") == 2 and Game.size_of("drone_bay") == 1 and Game.size_of("gun_turret") == 1, "the Scrapyard is 2x2, the rest 1x1")
+	check(Game.size_of("scrapyard") == 2 and Game.size_of("drone_bay") == 2 and Game.size_of("gun_turret") == 1, "the Scrapyard and Drone Bay are 2x2, the rest 1x1")
 	var y = g.place_tower("scrapyard", Vector2i(2, 5))
 	check(y != null and y.size == 2, "a Scrapyard builds on a clear 2x2 block")
 	var covered := [Vector2i(2, 5), Vector2i(3, 5), Vector2i(2, 6), Vector2i(3, 6)]
@@ -1704,7 +1812,8 @@ func test_jammer_emp() -> void:
 			if p.source == near_t:
 				shots += 1
 	check(shots == 0, "a disabled tower doesn't fire")
-	for i in int(1.0 / SIM_DT):
+	# Back online it finishes its reload first (towers start loading, #85).
+	for i in int((1.0 + 1.0 / near_t.eff_rate()) / SIM_DT):
 		g.tick(SIM_DT)
 	check(near_t.disabled == 0.0 and near_t.target != null, "the tower comes back online and re-acquires")
 
@@ -1748,18 +1857,18 @@ func test_bot_playthroughs() -> void:
 			id, "MEDAL" if g.medal else "LOST", g.wave, final, g.lives, g.max_lives,
 			g.gold, g.towers.size(), tiers[0], tiers[1], tiers[2], g.stats.kills, g.stats.leaked,
 			ticks * SIM_DT, Time.get_ticks_msec() - t0])
-		check(g.medal, "%s: the bot's reasonable build earns the Easy medal" % id)
+		balance_check(g.medal, "%s: the bot's reasonable build earns the Easy medal" % id)
 		if not g.medal:
 			continue
 		# Endless mode continues on its own after the medal.
-		check(g.endless and not g.is_over(), "%s: endless mode begins after the last round" % id)
+		balance_check(g.endless and not g.is_over(), "%s: endless mode begins after the last round" % id)
 		ticks = 0
 		while not g.is_over() and g.wave < final + 3 and ticks < limit:
 			bot.update(SIM_DT)
 			g.tick(SIM_DT)
 			ticks += 1
 		print("    %-10s endless reached round %d (%s)" % [id, g.wave, "alive" if not g.is_over() else "fell"])
-		check(g.wave >= final + 3, "%s: endless mode runs several rounds" % id)
+		balance_check(g.wave >= final + 3, "%s: endless mode runs several rounds" % id)
 
 
 func test_bot_full_research() -> void:
@@ -1775,8 +1884,8 @@ func test_bot_full_research() -> void:
 	var t4: int = g.towers.filter(func(t): return t.tier == 4).size()
 	print("    crossroads full research (Medium): %s round %d lives %d/%d, %d tier-4 towers" % [
 		"MEDAL" if g.medal else "LOST", g.wave, g.lives, g.max_lives, t4])
-	check(g.medal, "bot with full research earns the Medium medal")
-	check(t4 > 0, "bot buys tier-4 masteries when researched")
+	balance_check(g.medal, "bot with full research earns the Medium medal")
+	balance_check(t4 > 0, "bot buys tier-4 masteries when researched")
 
 
 ## The bot plays the reworked towers: only new towers, Retrofits and paths within the path rules, the Artillery and the CAS
@@ -1900,6 +2009,37 @@ func test_range_map() -> void:
 	check(not Maps.ORDER.has("range"), "the test range isn't a playable sector")
 
 
+func test_scrapyard_payout_time() -> void:
+	var g = new_game()
+	g.gold = 10000
+	var y = g.place_tower("scrapyard", spot(g, "scrapyard", 0))
+	check(y != null, "a Scrapyard builds")
+	g.time = 12.5
+	var paid: Array = g._pay_income(1)
+	check(paid.size() >= 1 and near(float(y.gun_cds.get("paid_t", -1.0)), 12.5), "a payout records its time, so the art rolls the doors up and flares the furnace")
+
+
+func test_tractor_beam_origin() -> void:
+	check(TractorTowerArt.muzzle(Vector2.ZERO, 0.0, 1.0, "-1|0|0|0").distance_to(Vector2(13.0, 0)) < 0.01, "the beam leaves the stock antenna's tip")
+	check(TractorTowerArt.muzzle(Vector2(10, 10), PI / 2.0, 1.0, "-1|5|0|2").distance_to(Vector2(10, 28.2)) < 0.01, "a longer antenna moves the tip out, turned with the aim")
+	check(Draw.ACCENT.tractor_tower.is_equal_approx(Color(0.40, 0.95, 1.00)), "the Tractor Tower is cyan, as its design pages")
+
+
+func test_group3_effects() -> void:
+	var fx = FxLayer.new()
+	fx.mist(Vector2(100, 100), 110.0, Color(0.75, 0.92, 1.0))
+	fx.shock_wave(Vector2(100, 100), 100.0, Color(1, 0.7, 0.28), 1.0, [{"p": Vector2(150, 100), "d": 50.0, "r": 6.0}], false, 1.0)
+	fx.puff(Vector2(100, 100), Vector2(0, -12), 1.4, 2.0, 3.2, Color(0.4, 0.4, 0.4), Color(1, 0.7, 0.3), 0.7, 0.7, 1.0)
+	fx.fountain(Vector2(100, 92))
+	fx._process(0.5)
+	check(fx.mists.size() == 1 and fx.shocks.size() == 1 and fx.puffs.size() == 1 and fx.fountains.size() == 1, "the mist, the blast, a smoke puff and a coin fountain are live")
+	fx._process(1.2)
+	check(fx.shocks.is_empty() and fx.puffs.is_empty() and fx.mists.size() == 1, "the blast and the puff end on their own clocks; the mist creeps on")
+	fx._process(0.8)
+	check(fx.mists.is_empty() and fx.fountains.is_empty(), "the mist and the fountain fade out")
+	fx.free()
+
+
 # --- The tower rework (issue #59): the framework, through the Gun Turret ---------------------------
 
 ## The nth free buildable tile for a tower type (so tests don't depend on hand-picked cells).
@@ -1915,7 +2055,374 @@ func spot(g, type: String, n: int) -> Vector2i:
 	return Vector2i(-1, -1)
 
 
+## The owner's 26 Oct list, batch 1 (#110): stat rows once each, the Mortar's shells from their own tube and in line (with
+## the lead switch), towers idle loaded, mines thrown where enemies will be, the shock ring moving as it fades, the Tractor's
+## meter and turning, the Augmentation Tower 2x2.
+func test_tower_fixes_110() -> void:
+	var g = new_game()
+	g.gold = 900000
+	# Stat rows: each stat once (the Boost Tower listed its boosts twice, the Tractor its pull).
+	for type in ["boost_tower", "tractor_tower"]:
+		var bt = g.place_tower(type, spot(g, type, 0))
+		var keys: Array = TowerInfo.rows_for(bt.stats(), false).map(func(r): return r[1])
+		var uniq := {}
+		for k in keys:
+			uniq[k] = true
+		check(uniq.size() == keys.size(), "%s: every stat row once (%s)" % [type, keys])
+	# The Mortar: its shell leaves the tube that fired, and lands on the point the tube faces.
+	g.enemies.clear()
+	var e = put(g, "runner", 200.0, 0, 50.0)
+	var m = g.place_tower("mortar_tower", spot(g, "mortar_tower", 3))
+	m.pos = e.pos + Vector2(0, 90)
+	g.projectiles.clear()
+	g._fire_mortar(m, e, m.stats())
+	var p = g.projectiles[g.projectiles.size() - 1]
+	check(p.pos.distance_to(MortarTowerArt.muzzle(m.pos, m.aim, 1.0, m.look_key(), m.pulse_count - 1)) < 0.01, "the shell leaves the tube that fired")
+	check(absf(angle_difference(m.aim, (p.target_pos - m.pos).angle())) < 0.01 and p.target_pos.distance_to(e.pos) > 5.0, "with the lead on, the tube faces the lead point it lands on")
+	var lead_was: int = Game.MORTAR_LEAD
+	Game.MORTAR_LEAD = 0
+	g._fire_mortar(m, e, m.stats())
+	p = g.projectiles[g.projectiles.size() - 1]
+	check(p.target_pos.distance_to(e.pos) < 0.01 and absf(angle_difference(m.aim, (e.pos - m.pos).angle())) < 0.01, "with it off, the shell lands where the enemy is")
+	Game.MORTAR_LEAD = lead_was
+	# A loaded tower with nothing in range stays loaded: its reload dial holds still.
+	g.enemies.clear()
+	var r = g.place_tower("railgun", spot(g, "railgun", 0))
+	r.cooldown = 0.0
+	var steady := true
+	for i in 30:
+		g._update_tower(r, 1.0 / 60.0)
+		steady = steady and r.cooldown == 0.0
+	check(steady, "an idle loaded Railgun keeps its cooldown at 0 (no flicker)")
+	# Mines are thrown just ahead of the enemies in reach.
+	var ml = g.place_tower("mine_layer", spot(g, "mine_layer", 0))
+	var walker = put(g, "grunt", 150.0, 0, 50.0)
+	ml.pos = walker.pos + Vector2(0, 50)
+	var ahead: Vector2 = g.lead_point(walker, Game.MINE_LEAD)
+	var near_all := true
+	for i in 5:
+		var q = g._mine_spot(ml, float(ml.stats().get("range", 120.0)))
+		near_all = near_all and q != null and q.distance_to(ahead) <= Game.MINE_NEAR + 0.01
+	check(near_all, "mine spots are picked just ahead of the enemy")
+	# The shock ring is still moving as it fades.
+	check(FxLayer.shock_front(0.6, 1.1) < 0.95 and FxLayer.shock_front(0.9, 1.1) > FxLayer.shock_front(0.6, 1.1) and near(FxLayer.shock_front(1.1, 1.1), 1.0), "the blast ring expands over its whole life")
+	# The Tractor: its meter drains over the hold, and it turns toward a target while recharging.
+	g.enemies.clear()
+	var tr = g.place_tower("tractor_tower", spot(g, "tractor_tower", 2))
+	var held = put(g, "grunt", 150.0, 0, 50.0)
+	tr.pos = held.pos + Vector2(0, 40)
+	tr.cooldown = 0.0
+	g._update_tractor(tr, tr.stats(), 0.01)
+	check(near(float(tr.gun_cds.get("hold_total", 0.0)), float(tr.gun_cds.get("hold_left", -1.0)), 0.02), "a hold records its length for the meter")
+	g._tractor_release(tr, tr.stats(), held)
+	g.time += 1.0
+	g._update_tractor(tr, tr.stats(), 0.01)
+	check(tr.cooldown > 0.0 and tr.target == held, "while recharging it keeps a target to turn toward")
+	# The Augmentation Tower is 2x2.
+	check(Game.footprint("augmentation_tower", Vector2i(3, 3)).size() == 4, "the Augmentation Tower takes 2x2 tiles")
+
+
+## The owner's 26 Oct list, batch 3 (#114): the Mirage keeps a single pair, one 45 px ahead and one behind, moving with it;
+## the Wraith is 50% larger; an after-image keeps the facing it had when it blinked.
+func test_enemies_114() -> void:
+	var g = new_game()
+	g.enemies.clear()
+	var mi = put(g, "mirage", 300.0)
+	for cast in 3:
+		g._trait_holo(mi, mi.def)
+		g.enemies.append_array(g._new_enemies)
+		g._new_enemies.clear()
+	var pair: Array = g.enemies.filter(func(e): return e.alive and e.hologram and e.holo_owner == mi)
+	check(pair.size() == 2, "three casts leave one pair, not six (%d)" % pair.size())
+	var offs: Array = pair.map(func(h): return snappedf(h.distance - mi.distance, 0.1))
+	offs.sort()
+	check(offs == [-45.0, 45.0], "one 45 px ahead and one behind (%s)" % [offs])
+	mi.step(0.5)
+	var follow := true
+	for h in pair:
+		h.step(0.5)
+		follow = follow and near(h.distance - mi.distance, h.holo_offset, 0.01)
+	check(follow, "the pair moves with the Mirage")
+	check(near(float(Enemies.ENEMIES.wraith.radius), 16.5), "the Wraith is 50% larger (radius 16.5)")
+	var st = put(g, "stalker", 200.0)
+	st.facing = Vector2.DOWN
+	st.blink(40.0)
+	var look: Dictionary = EnemyArt.state(st)
+	check(look.has("blink_from") and near(float(look.blink_ang), PI / 2.0), "the after-image keeps the facing it had when it blinked")
+
+
+## The owner's 26 Oct list, batch 4 (#116): the broken-shield mark's clock, the shop's taglines, the selected enemy's card.
+func test_ui_116() -> void:
+	var g = new_game()
+	g.enemies.clear()
+	var e = put(g, "brute", 100.0, 0, 50.0)
+	e.step(0.5)
+	check(e.shred_age > 3.0 or e.armor_shred == 0.0, "no shred, no mark")
+	e.armor_shred = 2.0
+	e.step(0.1)
+	check(e.shred_age < 0.2, "a shred starts the mark's clock")
+	for i in 40:
+		e.step(0.1)
+	check(e.shred_age > Draw.SHRED_MARK, "it fades out after %.0f s" % Draw.SHRED_MARK)
+	e.armor_shred = 3.0
+	e.step(0.1)
+	check(e.shred_age < 0.2, "and comes back when the shred grows")
+	var long_tags: Array = []
+	for slug in Towers.Rework.ORDER:
+		var tag: String = str(Towers.Rework.TREES[slug].get("tagline", ""))
+		if tag == "" or tag.length() > 70:
+			long_tags.append(slug)
+	check(long_tags.is_empty(), "every tower has a one-line shop tagline (missing or long: %s)" % [long_tags])
+	var w = WorldView.new()
+	var a = put(g, "grunt", 120.0, 0, 50.0)
+	w.hover_enemy = a
+	check(w.card_enemy() == a, "the card follows the cursor")
+	w.selected_enemy = e
+	check(w.card_enemy() == e, "a selected enemy's card stays pinned")
+	e.alive = false
+	check(w.card_enemy() == a, "and lets go when it dies")
+	w.free()
+
+
+## Railgun (#90): twin rails fire in turn from their own muzzles; the housing recoils (the art's live shift).
+func test_rail_muzzles() -> void:
+	var g = new_game()
+	g.gold = 900000
+	g.emit_events = true
+	var t = g.place_tower("railgun", spot(g, "railgun", 0))
+	var e = put(g, "grunt", 300.0, 0, 50.0)
+	e.hp = 1e9
+	e.max_hp = 1e9
+	var froms: Array = []
+	for i in 2:
+		g.events.clear()
+		g._fire_railgun(t, e, t.stats())
+		for ev in g.events:
+			if ev.type == "rail_shot":
+				froms.append(ev.from)
+	var k := 1.0 if t.size <= 1 else 1.8
+	var m0: Vector2 = RailgunArt.muzzle(t.pos, t.aim, k, t.look_key(), 0)
+	check(froms.size() == 2 and froms[0].distance_to(m0) < 0.5 and froms[0].distance_to(t.pos) > 20.0, "the slug leaves the rail's muzzle, not the centre")
+	var twin := "-1|0|5|0"
+	var a: Vector2 = RailgunArt.muzzle(t.pos, 0.0, 1.0, twin, 0)
+	var b: Vector2 = RailgunArt.muzzle(t.pos, 0.0, 1.0, twin, 1)
+	check(a.distance_to(b) > 6.0 and a.x > t.pos.x + 20.0 and b.x > t.pos.x + 20.0, "Twin Rails: the two rails' muzzles take turns, %.1f px apart" % a.distance_to(b))
+	check(near(float(t.gun_cds.get("shot_t", -1.0)), g.time), "the shot time is kept for the recoil")
+
+
+## Every turret keeps a target while it reloads, so it turns toward the next enemy between shots (#90, owner's note).
+func test_turn_while_reloading() -> void:
+	var g = new_game()
+	g.gold = 90000
+	var t = g.place_tower("railgun", spot(g, "railgun", 0))
+	g.enemies.clear()
+	t.cooldown = 2.0
+	t.target = null
+	var e = put(g, "grunt", 0.0, 0, 50.0)
+	e.pos = t.pos + Vector2(60, 0)
+	g._update_tower(t, 0.05)
+	check(t.target == e and t.cooldown > 1.5, "reloading, it takes a target to turn to (and doesn't fire)")
+	e.alive = false
+	var e2 = put(g, "grunt", 0.0, 0, 50.0)
+	e2.pos = t.pos + Vector2(0, 60)
+	g._update_tower(t, 0.05)
+	g.time += 0.2
+	g._update_tower(t, 0.05)
+	check(t.target == e2, "when its target dies mid-reload it turns to the next")
+
+
+## Mine Layer (#90): mines land at random spots along the lanes in reach, a little to either side of the middle, never in a row
+## from the entrance; the launcher turns to the next spot; each mine keeps where it was thrown from for its flight.
+func test_mine_scatter() -> void:
+	var g = new_game()
+	g.gold = 90000
+	g.enemies.clear()
+	var t = g.place_tower("mine_layer", spot(g, "mine_layer", 0))
+	var reach := float(t.stats().range)
+	for i in 30:
+		t.cooldown = 0.0
+		g._update_mine_layer(t, t.stats(), 0.01)
+	var mine_list: Array = g.mines.filter(func(m): return m.source == t)
+	var ok := mine_list.size() >= 4
+	var off_mid := 0
+	for m in mine_list:
+		var lane: Vector2 = g.nearest_track_point(m.pos)
+		ok = ok and m.pos.distance_to(lane) <= Game.MINE_SPREAD + 0.5 and m.pos.distance_to(t.pos) <= reach + Game.MINE_SPREAD + 0.5
+		ok = ok and m.has("t0") and m.has("from")
+		if m.pos.distance_to(lane) > 1.0:
+			off_mid += 1
+	check(ok, "every mine is on a lane in reach (within %d px of its middle) and remembers its throw" % int(Game.MINE_SPREAD))
+	check(off_mid * 2 >= mine_list.size(), "most land off the lane's middle (%d of %d)" % [off_mid, mine_list.size()])
+	# Not first-free from the entrance: the old rule laid them in order, each the next free 18 px along the lane.
+	var g2 = new_game()
+	g2.enemies.clear()
+	var t2 = g2.place_tower("mine_layer", spot(g2, "mine_layer", 0))
+	var order_ok := true
+	var prev := -1.0
+	for i in 4:
+		t2.cooldown = 0.0
+		g2._update_mine_layer(t2, t2.stats(), 0.01)
+		var d: float = g2.grid.ground_paths[0].get_closest_offset(g2.mines[g2.mines.size() - 1].pos)
+		order_ok = order_ok and d > prev
+		prev = d
+	check(not order_ok, "the spots aren't laid in order down the lane")
+	var nxt = t2.gun_cds.get("next")
+	var thrown: Vector2 = g2.mines[g2.mines.size() - 1].pos
+	check(absf(angle_difference(t2.aim, (thrown - t2.pos).angle())) < 0.01, "after a throw the launcher keeps facing the mine until it lands")
+	g2.time += MineLayerArt.FLIGHT + 0.01
+	t2.cooldown = 1.0
+	g2._update_mine_layer(t2, t2.stats(), 0.01)
+	check(nxt != null and absf(angle_difference(t2.aim, (nxt - t2.pos).angle())) < 0.01, "then it turns to the next spot")
+
+
+## Chemical Plant (#90): its spray event says whether it's the Mist Nozzle's neighbour, so the view can draw the lobbed stream
+## (no tracer). There's one nozzle since Twin Nozzles went (#104), so the event no longer names it.
+func test_chem_spray_events() -> void:
+	var g = new_game()
+	g.gold = 900000
+	g.emit_events = true
+	g.enemies.clear()
+	var t = g.place_tower("chemical_plant", spot(g, "chemical_plant", 0))
+	g.buy_retrofit(t, 1)
+	var a = put(g, "grunt", 0.0, 0, 50.0)
+	var b = put(g, "grunt", 0.0, 0, 50.0)
+	a.pos = t.pos + Vector2(40, 0)
+	b.pos = t.pos + Vector2(50, 10)
+	g.events.clear()
+	g._spray(t, t.stats())
+	var sprays: Array = g.events.filter(func(ev): return ev.type == "spray")
+	check(sprays.size() == 2 and sprays[0].enemy != null and not sprays[0].mist, "the first spray goes at its enemy")
+	check(sprays.size() == 2 and sprays[1].mist, "the Mist Nozzle's neighbour gets a mist")
+
+
 ## Buys `n` steps on path `key` of a reworked tower (money is no object).
+## The Rocket Salvo (#90): each rocket leaves its own tube straight out; the tubes empty with a salvo and load again.
+func test_rocket_tubes() -> void:
+	var g = new_game()
+	var e1 = put(g, "grunt", 100.0, 0, 5.0)
+	var t = g.place_tower("rocket_salvo", spot(g, "rocket_salvo", 0))
+	t.pos = e1.pos + Vector2(60, 20)
+	g.projectiles.clear()
+	g._fire_salvo(t, t.stats())
+	var rockets: Array = g.projectiles.filter(func(p): return p.kind == "rocket_salvo")
+	var dir := Vector2.from_angle(t.aim)
+	var at_mouth: bool = rockets.size() == 3
+	var straight := true
+	for i in rockets.size():
+		at_mouth = at_mouth and rockets[i].pos.distance_to(RocketSalvoArt.muzzle(t.pos, t.aim, 1.0, t.look_key(), i)) < 0.01
+		straight = straight and rockets[i].vel.normalized().dot(dir) > 0.999
+	check(at_mouth, "each rocket starts at its own tube's mouth")
+	check(straight, "and leaves straight out along the launcher")
+	var r0 = rockets[0]
+	g._update_rocket(r0, Game.ROCKET_STRAIGHT * 0.5 / maxf(r0.speed, 1.0))
+	check(r0.vel.normalized().dot(dir) > 0.999, "it doesn't steer until it's %d px out" % int(Game.ROCKET_STRAIGHT))
+	check(t.gun_cds.has("salvo_t"), "the salvo's time is kept for the tube art")
+	check(near(RocketSalvoArt.ready_of(2.5, 2.5), 0.0) and near(RocketSalvoArt.ready_of(1.25, 2.5), 0.5) and near(RocketSalvoArt.ready_of(0.5, 2.5), 1.0), "the tubes are empty after a salvo, half-loaded halfway, full for the last quarter")
+	var rip := RocketSalvoArt.levels("-1|0|0|5")
+	check(near(RocketSalvoArt.loaded(rip, 3, 0.0, 0.1), 1.0) and near(RocketSalvoArt.loaded(rip, 3, 0.0, 0.3), 0.0), "a rippling salvo empties its tubes one after another")
+
+
+## The Ripple Salvo's Launch Cells (#104, the owner's pick): eight cells set in the deck, so nothing turns; each rocket rises
+## from its own cell, wherever the tower aims.
+func test_rocket_launch_cells() -> void:
+	var cells := "-1|0|0|5"
+	check(RocketSalvoArt.still(cells) and not RocketSalvoArt.still("-1|0|0|4"), "only the Payload mastery stays still")
+	check(not Draw.aimed("rocket_salvo", cells) and Draw.aimed("rocket_salvo", "-1|0|0|4") and Draw.aimed("gun_turret", "-1|0|0|5"), "the cache turns every aimed look but the Launch Cells")
+	var c := Vector2(100, 100)
+	var spots := {}
+	var fixed := true
+	var ring := true
+	for i in 8:
+		var p := RocketSalvoArt.muzzle(c, 0.0, 1.0, cells, i)
+		fixed = fixed and p.distance_to(RocketSalvoArt.muzzle(c, 2.1, 1.0, cells, i)) < 0.01
+		ring = ring and near(p.distance_to(c), RocketSalvoArt.CELL_R, 0.01)
+		spots[Vector2i(roundi(p.x * 10.0), roundi(p.y * 10.0))] = true
+	check(fixed and ring and spots.size() == 8, "eight cells round the deck, the same at any aim")
+	var g = new_game()
+	var e1 = put(g, "grunt", 100.0, 0, 5.0)
+	var t = g.place_tower("rocket_salvo", spot(g, "rocket_salvo", 0))
+	t.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	g.gold = 100000
+	buy_steps(g, t, "c", 5)
+	t.pos = e1.pos + Vector2(60, 20)
+	g.projectiles.clear()
+	g._fire_salvo(t, t.stats())
+	var rockets: Array = g.projectiles.filter(func(p): return p.kind == "rocket_salvo")
+	var from_cells: bool = rockets.size() == 8
+	for i in rockets.size():
+		from_cells = from_cells and rockets[i].pos.distance_to(RocketSalvoArt.muzzle(t.pos, 0.0, 1.0, t.look_key(), i)) < 0.01
+	check(t.mastered and from_cells, "a salvo's eight rockets each leave their own cell")
+
+
+## The Laser Tower (#90) turns to face a new target before its beam fires.
+func test_laser_turns_first() -> void:
+	var g = new_game()
+	var t = g.place_tower("laser_tower", spot(g, "laser_tower", 0))
+	var e = put(g, "brute", 100.0, 0, 50.0)
+	t.pos = e.pos + Vector2(30, 0)
+	t.aim = 0.0
+	var hp0: float = e.hp
+	g._update_laser_rework(t, t.stats(), 0.05)
+	check(t.target == e and not t.beam_on and near(e.hp, hp0) and near(t.ramp, 0.0), "facing away, it turns first: no beam, no damage, no ramp")
+	check(near(absf(angle_difference(0.0, t.aim)), Game.LASER_TURN * 0.05, 0.001), "it turns at %.0f rad/s" % Game.LASER_TURN)
+	var steps := 1
+	while not t.beam_on and steps < 40:
+		g._update_laser_rework(t, t.stats(), 0.05)
+		steps += 1
+	check(t.beam_on and e.hp < hp0, "facing it, the beam fires (after %d steps)" % steps)
+	check(absf(angle_difference(t.aim, PI)) <= Game.LASER_ON_ARC, "the lance points at its target")
+	check(float(steps) * 0.05 <= PI / Game.LASER_TURN + 0.1, "a half turn takes about %.2f s" % (PI / Game.LASER_TURN))
+	e.alive = false
+	g._update_laser_rework(t, t.stats(), 0.05)
+	check(not t.beam_on, "the beam stops with no target")
+
+
+## The Artillery Cannon (#90): every shell leaves the muzzle along the barrel, and each shell of a Rolling Barrage fires
+## with its own flash.
+func test_artillery_from_muzzle() -> void:
+	var g = new_game()
+	g.gold = 90000
+	var t = g.place_tower("artillery_cannon", spot(g, "artillery_cannon", 0))
+	t.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, t, "b", 5)
+	check(int(t.stats().get("barrage", 1)) == 3, "Rolling Barrage: three shells")
+	g.projectiles.clear()
+	g._fire_artillery(t, t.stats())
+	var mz := ArtilleryCannonArt.muzzle(t.pos, (t.aim_point - t.pos).angle(), 1.0)
+	var from_muzzle: bool = g.projectiles.size() == 3
+	for p in g.projectiles:
+		from_muzzle = from_muzzle and p.start.distance_to(mz) < 0.01
+	check(from_muzzle, "every shell leaves from the muzzle")
+	t.fire_flash = 0.0
+	var second = g.projectiles[1]
+	var flashed := false
+	for i in 30:
+		g._update_projectile(second, SIM_DT)
+		if t.fire_flash > 0.0:
+			flashed = true
+			break
+	check(flashed and second.hold <= 0.0, "a held barrage shell fires with its own flash")
+
+
+## Mortar and Artillery shells (#90) are drawn on an arc from where they left to where they land, pointing along it.
+func test_lobbed_shells() -> void:
+	var st := Vector2(0, 0)
+	var pos := Vector2(100, 0)
+	check(EntityLayerView.lob_point(st, pos, 1.0, 1.0, 40.0).distance_to(pos) < 0.01, "a lobbed shell comes down on its ground point")
+	check(EntityLayerView.lob_point(st, pos, 1.0, 0.5, 40.0).distance_to(Vector2(50, -40)) < 0.01, "it's highest in the middle")
+	check(EntityLayerView.lob_point(st, Vector2(30, 0), 0.3, 0.0, 40.0).distance_to(st) < 0.01, "and leaves from where it was fired")
+	var up := EntityLayerView.lob_heading(st, Vector2(10, 0), 0.1, 40.0)
+	var down := EntityLayerView.lob_heading(st, Vector2(90, 0), 0.9, 40.0)
+	check(up.x > 0.0 and up.y < 0.0 and down.x > 0.0 and down.y > 0.0, "it points up the arc, then down it")
+
+
+## The turret cache (#90) bakes each tower's static layers big enough to hold them: the Laser's longest lance isn't cut off.
+func test_turret_bake_size() -> void:
+	var lance := LaserTowerArt.tip_x(LaserTowerArt.levels("-1|0|0|5")) + 5.3
+	check(Draw.turret_half("laser_tower") >= lance, "the Laser's bake holds its Deep Lance (%.1f)" % lance)
+	check(near(Draw.turret_half("gun_turret"), 32.0) and Draw.turret_half("railgun") > 32.0 and Draw.turret_half("anti_aircraft_turret") > 32.0, "the default fits the rest; the Railgun and Anti-Aircraft barrels get more")
+
+
 func buy_steps(g, t, key: String, n: int) -> void:
 	for i in n:
 		g.gold += 10000
@@ -1961,26 +2468,26 @@ func test_rework_paths() -> void:
 	g.gold = 10000
 	var t = g.place_tower("gun_turret", Vector2i(2, 3))
 	check(t.can_buy("a") and t.can_buy("b") and t.can_buy("c"), "the paths open from stock, no Retrofit needed")
-	check(t.upgrade_cost("a") == 55 and t.upgrade_cost("b") == 25 and t.upgrade_cost("c") == 15, "step 1 prices 55 / 25 / 15")
+	check(t.upgrade_cost("a") == 55 and t.upgrade_cost("b") == 25 and t.upgrade_cost("c") == 85, "step 1 prices 55 / 25 / 85")
 	buy_steps(g, t, "a", 1)
 	check(near(t.stats().damage, 22.0), "Heavier Rounds: +6 damage")
 	buy_steps(g, t, "a", 1)
-	check(near(t.stats().armor_flat, 2.0), "Hardened Tips: ignore 2 armour")
-	check(t.upgrade_cost("a") == 405, "step 3 costs 405")
+	check(near(t.stats().armor_flat, 2.0) and near(t.stats().damage, 28.0), "Hardened Tips: ignore 2 armour, +6 damage")
+	check(t.upgrade_cost("a") == 530, "step 3 costs 530")
 	buy_steps(g, t, "a", 1)
-	check(t.primary() == "a" and near(t.stats().armor_pct, 0.5) and near(t.stats().damage, 28.0), "AP Rounds: the primary locks in")
+	check(t.primary() == "a" and near(t.stats().armor_pct, 0.5) and near(t.stats().damage, 36.0), "AP Rounds: the primary locks in")
 	buy_steps(g, t, "b", 3)
 	check(t.depth.b == 2 and not t.can_buy("b") and t.block_reason("b").contains("secondary"), "the secondary stops at 2")
 	check(near(t.stats().crit, 0.10) and near(t.stats().range, 160.0), "its two steps still count (crit 10%, range +30)")
 	check(not t.can_buy("c") and t.block_reason("c").contains("two"), "the third path is locked")
 	buy_steps(g, t, "a", 1)
-	check(near(t.stats().armor_pct, 0.75) and near(t.stats().damage, 36.0), "Tungsten Core: 75% and +8")
+	check(near(t.stats().armor_pct, 0.75) and near(t.stats().damage, 46.0), "Tungsten Core: 75% and +10")
 	check(t.block_reason("a").contains("Mastery"), "the mastery needs the tower's research (%s)" % t.block_reason("a"))
 	t.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
 	t.invalidate()
-	check(t.can_buy("a") and t.upgrade_cost("a") == 2475, "with the research the mastery opens at 2,475")
+	check(t.can_buy("a") and t.upgrade_cost("a") == 3555, "with the research the mastery opens at 3,555")
 	buy_steps(g, t, "a", 1)
-	check(t.mastered and near(t.stats().armor_pct, 1.0) and near(t.stats().damage, 44.0), "Sabot Rounds: full armour piercing, 44 damage")
+	check(t.mastered and near(t.stats().armor_pct, 1.0) and near(t.stats().damage, 58.0), "Sabot Rounds: full armour piercing, 58 damage")
 	check(t.display_name() == "Sabot Rounds" and t.tier == 4, "it takes the mastery's name")
 
 
@@ -1996,7 +2503,30 @@ func test_rework_range_path_and_multi_path() -> void:
 	buy_steps(g, m, "c", 3)
 	check(int(m.stats().multishot) == 2, "Twin Mount: 2 targets")
 	buy_steps(g, m, "c", 2)
-	check(int(m.stats().multishot) == 3 and bool(m.stats().weakest_extra) and near(m.stats().rate, 1.5), "Triple Mount: 3 targets (+0.3 shots/s from Belt Feed)")
+	check(int(m.stats().multishot) == 3 and bool(m.stats().weakest_extra) and near(m.stats().rate, 3.7), "Triple Mount: 3 targets at 3.7 shots/s (every step adds rate)")
+
+
+## Owner's Build 2 list, batch 7 (#104): every Power step adds shot damage and every Multi-Target step adds fire rate, priced
+## by the value formula.
+func test_gun_turret_steps_add() -> void:
+	var g = new_game()
+	var a = g.place_tower("gun_turret", spot(g, "gun_turret", 72))
+	var dmg := []
+	var rate := []
+	for d in range(1, 6):
+		var depth := mini(d, 4)
+		dmg.append(a.compose(-1, {"a": depth, "b": 0, "c": 0}, ["a"], d == 5).damage)
+		rate.append(a.compose(-1, {"a": 0, "b": 0, "c": depth}, ["c"], d == 5).rate)
+	check(dmg == [22.0, 28.0, 36.0, 46.0, 58.0], "Power: every step adds damage, 22 / 28 / 36 / 46 / 58 (%s)" % [dmg])
+	var want := [1.7, 2.2, 2.7, 3.2, 3.7]
+	check(range(5).all(func(i): return near(rate[i], want[i])), "Multi-Target: every step adds rate, 1.7 / 2.2 / 2.7 / 3.2 / 3.7 (%s)" % [rate])
+	var tr: Dictionary = load("res://data/rework_trees.gd").TREES["gun_turret"]
+	var costs := []
+	for p in [tr.paths[0], tr.paths[2]]:
+		for n in p.nodes:
+			costs.append(int(n.cost))
+		costs.append(int(p.mastery.cost))
+	check(costs == [55, 165, 530, 1365, 3555, 85, 440, 1155, 1100, 10325], "the formula's prices (%s)" % [costs])
 
 
 func test_rework_armour_piercing() -> void:
@@ -2099,7 +2629,163 @@ func test_rework_swivel_mount() -> void:
 	check(g.pick_target(t) == strong, "Swivel Mount skips an enemy that shots in flight will already kill")
 	t.cooldown = 1.0
 	g._kill(weak, t)
-	check(near(t.cooldown, 0.0), "and a kill frees the gun to fire at once")
+	check(near(t.cooldown, 1.0), "a kill doesn't reset its reload: the fire rate stays the same when it switches (#85)")
+
+
+## Owner's Build 2 list (#85): every upgrade adds on top, so Retrofits and the secondary path stack with the primary, while
+## each path alone still ends on its old total; towers start unloaded; Mortar shells don't home; Smoke Shells leave a cloud.
+func test_upgrades_add() -> void:
+	var g = new_game()
+	g.gold = 100000
+	var a = g.place_tower("gun_turret", spot(g, "gun_turret", 70))
+	var ab: Dictionary = a.compose(-1, {"a": 4, "b": 0, "c": 0}, ["a"], true)
+	check(near(ab.damage, 58.0) and near(ab.armor_pct, 1.0), "path A alone adds up to its total: 58 damage, all armour (%s, %s)" % [ab.damage, ab.armor_pct])
+	var bb: Dictionary = a.compose(-1, {"a": 0, "b": 4, "c": 0}, ["b"], true)
+	check(near(bb.range, 230.0) and near(bb.crit, 0.3), "and path B its range 230 and 30% crits")
+	var c = g.place_tower("gun_turret", spot(g, "gun_turret", 71))
+	g.buy_retrofit(c, 0)
+	buy_steps(g, c, "c", 4)
+	check(near(c.stats().rate, 3.5), "Water-Cooled Barrel (+0.3) and path C's rate (+2.0 up to Belt Feed) stack: 1.2 to 3.5, not overwritten (%.2f)" % c.stats().rate)
+	check(int(c.stats().multishot) == 2 and near(c.stats().side_gun, 0.0), "Twin Mount: two barrels, the side gun folded in")
+	var errors := []
+	var Rework = load("res://data/rework_trees.gd")
+	for slug in Rework.ORDER:
+		var tr: Dictionary = Rework.TREES[slug]
+		var nodes: Array = tr.retrofits.duplicate()
+		for p in tr.paths:
+			nodes.append_array(p.nodes)
+			nodes.append(p.mastery)
+		for n in nodes:
+			for k in n.set:
+				if typeof(n.set[k]) != TYPE_BOOL:
+					errors.append("%s %s %s" % [slug, n.name, k])
+	check(errors.is_empty(), "no upgrade sets a number, only flags: %s" % ", ".join(errors))
+
+
+## The playtest flag (#123): a playtest build's commit comes from its BUILD.txt, and marking a build played keeps the builds
+## already in the file. Tests run on an editor build, so launching never marks anything here.
+func test_playtest_flag_123() -> void:
+	var Playtest = load("res://scripts/dev/Playtest.gd")
+	check(Playtest.commit_of("Bastion Line test build\nBranch:  fix/120\nCommit:  472cf3c\nVersion: 3.6.0\n") == "472cf3c", "the commit comes from BUILD.txt")
+	check(Playtest.commit_of("Commit:  cea99c5 + uncommitted changes\r\n") == "cea99c5", "uncommitted changes and Windows line ends are dropped")
+	check(Playtest.commit_of("Bastion Line test build\n") == "", "no Commit line, no commit")
+	var path := "user://test_playtests.json"
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+	Playtest.mark(path, "cea99c5")
+	Playtest.mark(path, "472cf3c")
+	var played = JSON.parse_string(FileAccess.get_file_as_string(path))
+	check(played is Dictionary and played.get("cea99c5") == true and played.get("472cf3c") == true and played.size() == 2, "both builds are marked played (%s)" % str(played))
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+	var before: String = FileAccess.get_file_as_string(Playtest.PATH) if FileAccess.file_exists(Playtest.PATH) else "<none>"
+	Playtest.on_launch()
+	var after: String = FileAccess.get_file_as_string(Playtest.PATH) if FileAccess.file_exists(Playtest.PATH) else "<none>"
+	check(OS.has_feature("editor") and before == after, "a launch on an editor build (tests, the editor) marks nothing")
+
+
+## Batch 5 of the 26 Oct list (#119): upgrade text reads "+x (total)", never "X to Y", and ships no design notes. The
+## damage, range and fire-rate figures in it match the data: x is the node's own add, the total its path alone from stock.
+func test_upgrade_text_119() -> void:
+	var Rework = load("res://data/rework_trees.gd")
+	var to_re := RegEx.create_from_string("\\d\\S*\\s+to\\s+×?\\d")
+	var note_re := RegEx.create_from_string("(?i)proposed|owner|to confirm|\\(#\\d|replaces |replaced ")
+	var num_re := RegEx.create_from_string("\\+([\\d.]+) (damage|range|(?:shot|shell|round|arc)s?/s) \\(([\\d.]+)\\)")
+	var wording := []
+	var notes := []
+	var sums := []
+	var checked := 0
+	for slug in Rework.ORDER:
+		var tr: Dictionary = Rework.TREES[slug]
+		if note_re.search(str(tr.base.blurb)):
+			notes.append("%s base" % slug)
+		var base := _tree_apply({}, tr.base)
+		var runs := []
+		for r in tr.retrofits:
+			runs.append([r])
+		for p in tr.paths:
+			runs.append(p.nodes + [p.mastery])
+		for run in runs:
+			var stats := base
+			for n in run:
+				stats = _tree_apply(stats, n)
+				var text := str(n.blurb)
+				if to_re.search(text):
+					wording.append("%s %s" % [slug, n.name])
+				if note_re.search(text):
+					notes.append("%s %s" % [slug, n.name])
+				for m in num_re.search_all(text):
+					# The stat itself, or a weapon's own copy of it (the CAS Gunship's ac_rate, the Mortar's bomblet_damage).
+					var want := "rate" if m.get_string(2).ends_with("/s") else m.get_string(2)
+					var stat := ""
+					for k in n.add:
+						if k == want or str(k).ends_with("_" + want):
+							stat = k
+					checked += 1
+					if stat == "" or absf(float(n.add[stat]) - float(m.get_string(1))) > 0.01 \
+							or absf(float(stats.get(stat, 0.0)) - float(m.get_string(3))) > 0.01:
+						sums.append("%s %s: %s" % [slug, n.name, m.get_string(0)])
+	check(wording.is_empty(), "no upgrade text says \"X to Y\": %s" % [wording])
+	check(notes.is_empty(), "no design notes ship in the upgrade text: %s" % [notes])
+	check(checked > 100 and sums.is_empty(), "every \"+x (total)\" damage, range and rate figure matches the data (%d checked): %s" % [checked, sums])
+
+
+func _tree_apply(stats: Dictionary, n: Dictionary) -> Dictionary:
+	var out := stats.duplicate()
+	for k in n.add:
+		out[k] = float(out.get(k, 0.0)) + float(n.add[k])
+	for k in n.set:
+		out[k] = n.set[k]
+	return out
+
+
+func test_towers_start_unloaded() -> void:
+	var g = new_game()
+	g.gold = 100000
+	var t = g.place_tower("gun_turret", spot(g, "gun_turret", 72))
+	check(near(t.cooldown, 1.0 / t.eff_rate()), "a new tower has to load before its first shot")
+	var cas = g.place_tower("cas_gunship", spot(g, "cas_gunship", 73))
+	check(float(cas.gun_cds.get("gat", 0.0)) > 0.0, "a new CAS Gunship's guns load too")
+	g.buy_retrofit(t, 0)
+	t.cooldown = 0.0
+	g.start_wave()
+	check(near(t.cooldown, 1.0 / t.eff_rate()), "a round started from the build phase starts every tower loading, at its upgraded rate")
+	t.cooldown = 0.0
+	g.start_wave()
+	check(near(t.cooldown, 0.0), "an early call mid-round leaves the towers' reloads alone")
+
+
+func test_mortar_shells_dont_home() -> void:
+	var g = new_game()
+	g.gold = 100000
+	var m = g.place_tower("mortar_tower", spot(g, "mortar_tower", 74))
+	var e = put(g, "brute", 200.0)
+	g._fire_mortar(m, e, m.stats())
+	var p = g.projectiles[g.projectiles.size() - 1]
+	var aim: Vector2 = p.target_pos
+	check(p.fixed, "a mortar shell is lobbed at a fixed point")
+	e.distance += 300.0
+	e.pos = e.curve.sample_baked(e.distance)
+	g._update_projectile(p, 0.01)
+	check(p.target_pos == aim, "it keeps flying to that point when its target moves")
+	var still = put(g, "brute", 300.0)
+	still.stun_timer = 5.0
+	g._fire_mortar(m, still, m.stats())
+	var q = g.projectiles[g.projectiles.size() - 1]
+	check(q.target_pos.distance_to(still.pos) < 0.5, "a stopped enemy is aimed at where it stands")
+	var w = put(g, "grunt", 300.0)
+	g._fire_mortar(m, w, m.stats())
+	var r = g.projectiles[g.projectiles.size() - 1]
+	check(r.target_pos.distance_to(w.pos) > 1.0, "a walking one is led along its route")
+	m.pulse_count = 0
+	g.buy_retrofit(m, 2)
+	var s: Dictionary = m.stats()
+	var shot := false
+	for i in int(s.smoke_every):
+		g._fire_mortar(m, w, s)
+		shot = shot or g.projectiles[g.projectiles.size() - 1].smoke
+	check(shot, "Smoke Shells: every %dth shell carries smoke" % int(s.smoke_every))
+	var sp = g.projectiles.filter(func(x): return x.smoke)[0]
+	g._projectile_hit(sp)
+	check(g.smokes.any(func(c): return c.get("look", "") == "smoke"), "and leaves a smoke cloud the field draws")
 
 
 func test_rework_data_and_unlocks() -> void:
@@ -2428,14 +3114,18 @@ func test_mirage_holograms() -> void:
 	var gold0: int = g.gold
 	g.damage_enemy(holos[0], 5.0, false, null)
 	check(not holos[0].alive and g.gold == gold0, "any hit pops one, for nothing")
-	holos[1].distance = holos[1].path_len
+	# The pair moves with its Mirage (#114): bring the Mirage near the core and the one ahead of it gets there first.
+	var ahead_h = holos[1] if holos[1].holo_offset > 0.0 else holos[0]
+	m.set_distance(m.path_len - 10.0)
 	g.tick(SIM_DT)
-	check(not holos[1].alive and g.lives == 50, "at the core it vanishes without leaking")
+	g.tick(SIM_DT)
+	check(not ahead_h.alive and g.lives == 50, "at the core it vanishes without leaking")
+	m.set_distance(300.0)
 	m.trait_timers.holo = 0.001
 	g.tick(SIM_DT)
 	g.tick(SIM_DT)
 	var more: Array = g.enemies.filter(func(e): return e.alive and e.hologram)
-	check(more.size() == 2, "and again")
+	check(more.size() == 2, "and again: a fresh pair replaces what was left (%d)" % more.size())
 	g.damage_enemy(m, 1e9, true, null)
 	g.tick(SIM_DT)
 	check(more.all(func(h): return not h.alive), "they vanish with their Mirage")
@@ -2688,6 +3378,7 @@ func test_rework_laser_tower() -> void:
 	var bt = g.place_tower("laser_tower", spot(g, "laser_tower", 60))
 	var brute = put(g, "brute", 100.0, 0, 50.0)
 	bt.pos = brute.pos + Vector2(30, 0)
+	bt.aim = PI   # already facing it: the turn onto a target is tested in test_laser_turns_first
 	var armor0: float = brute.armor_now() if brute.has_method("armor_now") else brute.armor
 	for i in 60:
 		g._update_laser_rework(bt, bt.stats(), 0.05)
@@ -2716,6 +3407,7 @@ func test_rework_laser_tower() -> void:
 	var e2 = put(g, "grunt", 104.0, 0, 500.0)
 	var e3 = put(g, "grunt", 108.0, 0, 500.0)
 	mt.pos = e1.pos + Vector2(30, 0)
+	mt.aim = PI
 	for i in 10:
 		g._update_laser_rework(mt, mt.stats(), 0.05)
 	check(mt.beam_targets.size() == 3 and mt.beam_ramps.size() == 3, "three enemies, three beams")
@@ -2729,6 +3421,7 @@ func test_rework_laser_tower() -> void:
 	g.enemies.clear()
 	var a = put(g, "grunt", 100.0, 0, 500.0)
 	rmem.pos = a.pos + Vector2(30, 0)
+	rmem.aim = PI
 	for i in 40:
 		g._update_laser_rework(rmem, rmem.stats(), 0.05)
 	check(near(rmem.ramp, 2.0, 0.01), "two seconds on the target")
@@ -2738,6 +3431,7 @@ func test_rework_laser_tower() -> void:
 	check(rmem.target == b and near(rmem.ramp, 1.05, 0.02), "Ramp Memory: the new target starts at half (%.2f)" % rmem.ramp)
 	var plain = g.place_tower("laser_tower", spot(g, "laser_tower", 140))
 	plain.pos = b.pos + Vector2(30, 0)
+	plain.aim = PI
 	for i in 40:
 		g._update_laser_rework(plain, plain.stats(), 0.05)
 	b.alive = false
@@ -3236,7 +3930,28 @@ func test_rework_cas_gunship() -> void:
 	for i in 20:
 		g._update_cas(gun, gun.stats(), 0.05)
 	check(e1.hp < hp and near(far.hp, fhp), "the gatling hits enemies inside the orbit only")
-	check(absf(gun.orbit_angle - 0.5) < 0.01, "the plane circles at 0.5 rad/s")
+	for i in 200:
+		if gun.in_orbit:
+			break
+		g._update_cas(gun, gun.stats(), 0.05)
+	var a0: float = gun.orbit_angle
+	for i in 20:
+		g._update_cas(gun, gun.stats(), 0.05)
+	check(gun.in_orbit and absf(angle_difference(a0, gun.orbit_angle) - 0.5) < 0.01, "the plane circles at 0.5 rad/s")
+	# A new orbit: the plane flies there at CAS_SPEED instead of jumping, and joins the circle without a jump.
+	var was: Vector2 = gun.plane_pos
+	g.designate_orbit(gun, gun.aim_point + Vector2(300, 0))
+	g._update_cas(gun, gun.stats(), 0.1)
+	check(not gun.in_orbit and near(gun.plane_pos.distance_to(was), g.CAS_SPEED * 0.1, 0.5), "a new orbit: the plane flies to it (%.1f px in 0.1 s)" % gun.plane_pos.distance_to(was))
+	var hops := 0.0
+	var steps := 0
+	while not gun.in_orbit and steps < 400:
+		var before: Vector2 = gun.plane_pos
+		g._update_cas(gun, gun.stats(), 0.05)
+		hops = maxf(hops, before.distance_to(gun.plane_pos))
+		steps += 1
+	var radius := float(gun.stats().get("orbit", 90.0))
+	check(gun.in_orbit and hops <= g.CAS_SPEED * 0.05 + 0.5 and near(gun.plane_pos.distance_to(gun.aim_point), radius, 0.5), "it joins the new orbit without a jump (largest step %.1f px)" % hops)
 	# Guns spread over targets; missiles fly as projectiles.
 	var multi = g.place_tower("cas_gunship", spot(g, "cas_gunship", 100))
 	buy_steps(g, multi, "b", 1)
@@ -3467,19 +4182,11 @@ func test_rework_chemical_plant() -> void:
 	slowed.soak_slow = 0.55
 	g._update_soaks(0.05)
 	check(slowed.slow_amount > 0.4, "a soaked enemy is slowed (%.2f)" % slowed.slow_amount)
-	# Speed path: twin nozzles soak two at once and the soak is longer.
+	# Speed path: Constant Spray (its sweep is tested in test_constant_spray).
 	var tw = g.place_tower("chemical_plant", spot(g, "chemical_plant", 120))
 	tw.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
 	buy_steps(g, tw, "b", 5)
-	check(tw.mastered and int(tw.stats().nozzles) == 2 and near(tw.stats().soak_time, 7.0) and near(tw.stats().rate, 0.8), "Twin Nozzles: two at once, a 7 s soak")
-	g.enemies.clear()
-	var x1 = put(g, "grunt", 100.0, 0, 500.0)
-	var x2 = put(g, "grunt", 130.0, 0, 500.0)
-	var x3 = put(g, "grunt", 160.0, 0, 500.0)
-	tw.pos = x2.pos + Vector2(40, 0)
-	tw.cooldown = 0.0
-	g._spray(tw, tw.stats())
-	check([x1, x2, x3].filter(func(e): return e.soak_timer > 0.0).size() == 2, "two enemies soaked by one spray")
+	check(tw.mastered and bool(tw.stats().get("constant_spray", false)) and near(tw.stats().soak_time, 4.0) and near(tw.stats().rate, 1.2), "Constant Spray: it sweeps, a 4 s soak, a pass every 0.83 s")
 	# Mist soaks a neighbour too.
 	g.enemies.clear()
 	var m1 = put(g, "grunt", 100.0, 0, 500.0)
@@ -3489,6 +4196,66 @@ func test_rework_chemical_plant() -> void:
 	mn.cooldown = 0.0
 	g._spray(mn, mn.stats())
 	check(m1.soak_timer > 0.0 and m2.soak_timer > 0.0, "Mist Nozzle soaks the one next to it")
+
+
+## Constant Spray (#104, replacing Twin Nozzles): the jet sweeps a 40° fan (#112) centred on the plant's target, one pass per spray
+## interval, soaking every enemy it crosses and topping soaked ones up; the Mist Nozzle doesn't widen it. It stops with the round.
+func test_constant_spray() -> void:
+	var g = new_game()
+	g.gold = 100000
+	var tw = g.place_tower("chemical_plant", spot(g, "chemical_plant", 0))
+	tw.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, tw, "b", 5)
+	check(tw.mastered, "the Speed mastery is bought")
+	var Rework = load("res://data/rework_trees.gd")
+	var bm: Dictionary = Rework.TREES["chemical_plant"].paths[1].mastery
+	check(bm.name == "Constant Spray" and int(bm.cost) == 8810, "it's Constant Spray, 8,810 credits (%s, %d)" % [bm.name, int(bm.cost)])
+	tw.mode = Tower.Mode.CLOSE
+	g.enemies.clear()
+	var lead = put(g, "grunt", 100.0, 0, 500.0)
+	var side = put(g, "grunt", 120.0, 0, 500.0)
+	var back = put(g, "grunt", 140.0, 0, 500.0)
+	var wide = put(g, "grunt", 160.0, 0, 500.0)
+	tw.pos = Vector2(400, 300)
+	lead.pos = tw.pos + Vector2(40, 0)
+	side.pos = tw.pos + Vector2.from_angle(deg_to_rad(15.0)) * 60.0
+	back.pos = tw.pos + Vector2(-90, 0)
+	wide.pos = tw.pos + Vector2.from_angle(deg_to_rad(-30.0)) * 60.0
+	lead.soak_timer = 0.5
+	var s: Dictionary = tw.stats()
+	for i in 60:
+		g._sweep_spray(tw, s, 1.0 / 60.0)
+	check(near(float(tw.gun_cds.spray_c), 0.0, 0.01), "the fan is centred on the plant's target")
+	check(lead.soak_timer > 3.0 and side.soak_timer > 0.0, "one pass soaks everything the jet crosses, and tops a soaked enemy up")
+	check(back.soak_timer <= 0.0 and wide.soak_timer <= 0.0, "nothing outside the 40° fan is touched")
+	check(near(Game.spray_half(s), deg_to_rad(20.0)), "half the fan is 20°")
+	check(near(tw.aim, float(tw.gun_cds.spray_c), 0.001), "the plant faces the fan's centre; the jet keeps its own angle")
+	g.buy_retrofit(tw, 1)
+	s = tw.stats()
+	check(bool(s.get("mist", false)) and near(Game.spray_half(s), deg_to_rad(20.0)), "the Mist Nozzle doesn't widen it")
+	for i in 60:
+		g._sweep_spray(tw, s, 1.0 / 60.0)
+	check(wide.soak_timer <= 0.0, "so the enemy at 30° still isn't reached")
+	# A drop keeps the direction it left with, whatever the head does after.
+	var fx = FxLayer.new()
+	fx.jet(Vector2.ZERO, Vector2.RIGHT, 100.0, Color.WHITE, 1.0, false, 0.45)
+	tw.gun_cds["spray_a"] = PI / 2.0
+	fx._process(0.2)
+	check(fx.jets.size() == 1 and (fx.jets[0].d as Vector2).is_equal_approx(Vector2.RIGHT), "a jet drop flies on along its own direction")
+	fx.free()
+	# The round ends: the jet stops.
+	g._on_field_clear()
+	check(not tw.gun_cds.has("spray_on"), "Constant Spray stops when the round ends")
+	g.state = Game.State.WAVE
+	g.enemies.clear()
+	g._sweep_spray(tw, s, 1.0 / 60.0)
+	check(float(tw.gun_cds.spray_on) == 0.0 and tw.target == null, "with nothing in range the jet stops")
+	# An old save with the Speed mastery loads as Constant Spray (the node keeps its id).
+	var g2 = Game.new("meadow", 1234, "medium", ["chemical_plant_1", "chemical_plant_2a", "chemical_plant_2b", "chemical_plant_m"])
+	g2.emit_events = false
+	var err: String = g2.apply_save(g.to_save())
+	var t2 = g2.towers[0] if not g2.towers.is_empty() else null
+	check(err == "" and t2 != null and t2.mastered and bool(t2.stats().get("constant_spray", false)), "a saved Speed mastery loads as Constant Spray (%s)" % err)
 
 
 func test_rework_cryo_tower() -> void:
@@ -3723,6 +4490,118 @@ func test_rework_radar_tower() -> void:
 	check(um.mastered and um.stats().unmask_decoy and um.stats().unmask_mask and um.stats().unmask_mirage and near(um.stats().exposure, 5.0) and near(um.stats().reveal_time, 1.3), "Total Exposure: the unmasking flags and a 5 s exposure")
 
 
+## The Radar's Special Targeting path (#86): each step unmasks a trick for the towers, the mastery keeps it unmasked.
+func test_radar_special_targeting() -> void:
+	var g = new_game()
+	g.gold = 90000
+	var gun = g.place_tower("gun_turret", Vector2i(2, 3))
+	gun.mode = Tower.Mode.STRONG
+	var plain = g.place_tower("radar_tower", spot(g, "radar_tower", 0))
+	var um = g.place_tower("radar_tower", spot(g, "radar_tower", 20))
+	um.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, um, "c", 1)
+	# Signal Analysis: a ping sees through the Decoy Beacon's fake rank.
+	var d = put(g, "decoy", 120.0)
+	var ti = put(g, "titan", 120.0)
+	plain.pos = d.pos + Vector2(30, 0)
+	plain.cooldown = 0.0
+	g._update_radar(plain, plain.stats(), 0.05)
+	check(not d.decoy_exposed and g.pick_target(gun) == d, "a stock ping doesn't see through a Decoy Beacon")
+	um.pos = d.pos + Vector2(30, 0)
+	um.cooldown = 0.0
+	g._update_radar(um, um.stats(), 0.05)
+	check(d.decoy_exposed and near(d.rank, Enemies.rank_score("decoy")) and d.shown_role() == "special", "Signal Analysis: the ping sees through it (true rank and role)")
+	check(g.pick_target(gun) == ti, "so Strongest goes for the Titan instead")
+	# Disguise Breaker: a ping uncovers the Masquerade at once.
+	g.enemies.clear()
+	var m = put(g, "masquerade", 150.0)
+	um.pos = m.pos + Vector2(30, 0)
+	um.cooldown = 0.0
+	g._update_radar(um, um.stats(), 0.05)
+	check(m.disguised, "Signal Analysis alone leaves a Masquerade disguised")
+	buy_steps(g, um, "c", 1)
+	um.cooldown = 0.0
+	g._update_radar(um, um.stats(), 0.05)
+	check(not m.disguised and m.look_type() == "masquerade" and near(m.hp, m.max_hp), "Disguise Breaker: a ping uncovers it at full health")
+	# Illusion Filter: a ping pops holograms (#114).
+	g.enemies.clear()
+	gun.mode = Tower.Mode.FIRST
+	var mi = put(g, "mirage", 110.0)
+	var h = put(g, "mirage", 125.0)
+	h.make_hologram(mi)
+	check(g.pick_target(gun) == h, "First targeting shoots a hologram ahead of its Mirage")
+	buy_steps(g, um, "c", 2)
+	um.pos = h.pos + Vector2(30, 0)
+	um.cooldown = 0.0
+	g._update_radar(um, um.stats(), 0.05)
+	check(not h.alive and mi.alive, "Illusion Filter: a ping pops the hologram, not the real Mirage")
+	check(g.pick_target(gun) == mi, "so towers shoot the real Mirage")
+	# Total Exposure: what a ping found stays found while in range, and for 5 s after it leaves.
+	buy_steps(g, um, "c", 1)
+	check(um.mastered and near(um.stats().exposure, 5.0), "Total Exposure: 5 s")
+	g.enemies.clear()
+	var ghost = put(g, "grunt", 100.0, 0, 500.0)
+	ghost.cloaked = true
+	um.pos = ghost.pos + Vector2(40, 0)
+	um.cooldown = 0.0
+	g._update_radar(um, um.stats(), 0.05)
+	um.cooldown = 99.0
+	var fade := func(secs: float) -> void:
+		for i in int(secs / 0.05):
+			g._update_radar(um, um.stats(), 0.05)
+			ghost.reveal_timer = maxf(0.0, ghost.reveal_timer - 0.05)
+			ghost.track_timer = maxf(0.0, ghost.track_timer - 0.05)
+	fade.call(3.0)
+	check(not ghost.is_hidden(), "it stays revealed in range long after the ping")
+	um.pos = ghost.pos + Vector2(5000, 0)
+	fade.call(4.0)
+	check(not ghost.is_hidden(), "still revealed 4 s after leaving the range")
+	fade.call(1.5)
+	check(ghost.is_hidden(), "cloaked again after 5 s")
+	var bur = put(g, "burrower", 100.0, 0, 500.0)
+	bur.burrow_timer = 0.0
+	bur.track_timer = 2.0
+	g._trait_burrow(bur, bur.def, 0.05)
+	check(not bur.burrowed, "a Burrower it tracks can't dive")
+	bur.track_timer = 0.0
+	g._trait_burrow(bur, bur.def, 0.05)
+	check(bur.burrowed, "and dives once the exposure wears off")
+
+
+## The live tuner's window starts undocked, its Dock switch off (#94).
+func test_tuner_starts_undocked() -> void:
+	var w = TunerWindow.new()
+	var dock: CheckBox = w.panel.toolbar.get_children().filter(func(c): return c is CheckBox and c.text == "Dock").front()
+	check(not w.docked and dock != null and not dock.button_pressed, "the tuner starts undocked")
+	dock.button_pressed = true
+	check(w.docked, "the Dock switch docks it")
+	w.free()
+
+
+## The shop lists every tower once, by class (Assault, Support, Defense, Utility), cheapest first within each (#87).
+func test_shop_by_class_then_price() -> void:
+	var g = new_game()
+	var seen: Array = []
+	for cls in ShopPanel.CLASSES:
+		var types: Array = ShopPanel.sorted_types(cls, g)
+		check(types.all(func(t): return str(Towers.def(t)["class"]) == cls), "%s holds only its own class" % cls)
+		var sorted := true
+		for i in range(1, types.size()):
+			if g.tower_cost(types[i - 1]) > g.tower_cost(types[i]):
+				sorted = false
+		check(sorted, "%s is cheapest first" % cls)
+		seen.append_array(types)
+	check(seen.size() == Towers.all_types().size() and Towers.all_types().all(func(t): return seen.has(t)), "every tower appears once")
+	check(ShopPanel.sorted_types("Assault", g)[0] == "gun_turret", "the Gun Turret (75) leads Assault")
+
+
+## The tree viewer's hover text names a step's stat changes in words (#87).
+func test_tree_changes_text() -> void:
+	check(TreePopOut.changes({"add": {"rate": 0.3, "range": -10.0}}) == "Attacks/s +0.30  ·  Range -10", "adds read as signed changes (%s)" % TreePopOut.changes({"add": {"rate": 0.3, "range": -10.0}}))
+	check(TreePopOut.changes({"set": {"homing": true}}) == "Homing", "a flag reads as its label")
+	check(TreePopOut.changes({}) == "", "no changes, no text")
+
+
 func test_rework_shockwave_generator() -> void:
 	var g = new_game()
 	g.gold = 90000
@@ -3793,6 +4672,56 @@ func test_rework_shockwave_generator() -> void:
 	ef.cooldown = 0.0
 	g._update_shockwave(ef, ef.stats(), 0.0)
 	check(ag3.shield < ag3.max_shield * 0.5 and ag3.barrier_block >= 4.9, "the wave halves the barrier and stops it regenerating (%.1f of %.1f, block %.1f)" % [ag3.shield, ag3.max_shield, ag3.barrier_block])
+
+
+## The Megaton Wave's cloud (#120, the owner's pick: the Taller Cloud, seen from above): the smoke spreads out round the tower in
+## every direction, the cap's puffs land at random (not in order round a ring) at the Taller Cloud's height, and the cap is added
+## after the fireball, so it's drawn over it.
+func test_megaton_cloud_120() -> void:
+	var g = new_game()
+	g.gold = 90000
+	var t = g.place_tower("shockwave_generator", spot(g, "shockwave_generator", 0))
+	t.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, t, "a", 5)
+	check(t.mastered, "the Megaton Wave is bought")
+	var w = load("res://scripts/view/World.gd").new()
+	w.game = g
+	w.fx = FxLayer.new()
+	w.smoke_fx = FxLayer.new()
+	w._shockwave({"pos": t.pos, "radius": 132.0, "look": t.look_key()})
+	var ps: Array = w.smoke_fx.puffs
+	var sc := 1.0 + 0.28 * 5.0
+	var last_fire := -1
+	var first_cap := -1
+	var left := 0
+	var right := 0
+	var down := 0
+	var cap_angles: Array = []
+	var cap_y := true
+	for i in ps.size():
+		var q: Dictionary = ps[i]
+		var v: Vector2 = q.v
+		if q.fire:
+			last_fire = i
+		elif float(q.oy) < 0.0:
+			first_cap = i if first_cap < 0 else first_cap
+			cap_angles.append((v + Vector2(0.0, 2.0 * w.SMOKE_RISE) * sc).angle())
+			cap_y = cap_y and is_equal_approx(float(q.oy), w.MEGA_CAP_Y * w.SMOKE_RISE * sc)
+		else:
+			left += 1 if v.x < 0.0 else 0
+			right += 1 if v.x > 0.0 else 0
+			down += 1 if v.y > 0.0 else 0
+	check(left > 0 and right > 0 and down > 0, "seen from above, the billow spreads every way, some of it down the screen (%d left, %d right, %d down)" % [left, right, down])
+	check(last_fire >= 0 and first_cap > last_fire, "the cap's puffs come after the fireball's, so they're drawn over it")
+	check(cap_y, "the cap sits at the Taller Cloud's height")
+	# The old cap was a ring: each puff a sixteenth of a turn (give or take 0.3) round from the one before.
+	var even := 0
+	for i in range(1, cap_angles.size()):
+		even += 1 if absf(fposmod(float(cap_angles[i]) - float(cap_angles[i - 1]), TAU) - TAU / 16.0) < 0.31 else 0
+	check(cap_angles.size() >= 4 and even < (cap_angles.size() - 1) / 2, "the cap's puffs land at random, not in order round a ring (%d of %d steps even)" % [even, cap_angles.size() - 1])
+	w.fx.free()
+	w.smoke_fx.free()
+	w.free()
 
 
 func test_rework_scrapyard() -> void:
@@ -3958,7 +4887,7 @@ func test_rework_tractor_tower() -> void:
 		g._update_tractor(tr, tr.stats(), 0.05)
 		e.step(0.05)
 	check(d0 - e.distance > 70.0 and d0 - e.distance < 95.0, "a swarm-weight enemy is hauled back about 80 px (%.1f)" % (d0 - e.distance))
-	check(tr.cooldown > 5.5 and tr.target == null, "released, then it recharges 6 s")
+	check(tr.cooldown > 5.5 and float(tr.gun_cds.hold_left) <= 0.0, "released, then it recharges 6 s (turning toward its next target, #110)")
 	# Role weight: a boss is pulled a quarter as far and held half as long.
 	var boss = put(g, "colossus", 200.0, 0, 1.0)
 	var btr = g.place_tower("tractor_tower", spot(g, "tractor_tower", 80))
@@ -4042,12 +4971,12 @@ func test_rework_augmentation_tower() -> void:
 	var s: Dictionary = a.stats()
 	check(near(s.range, 96.0) and near(s.aug_crit, 0.05) and near(s.crit_mult, 2.0), "stock: 96 px, a 5% crit chance (x2)")
 	check(g.buy_retrofit(a, 0) and near(a.stats().range, 144.0), "Wide Aura: 144 px")
-	var ab = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 20))
+	var ab = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 1))
 	check(g.buy_retrofit(ab, 1) and near(ab.stats().aug_crit, 0.10), "Amplified Bonus: 10%")
-	var rl = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 40))
+	var rl = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 2))
 	check(g.buy_retrofit(rl, 2) and rl.stats().remote_link, "Remote Link")
 	# Towers in range get the effects; Support towers and itself don't.
-	var base = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 60))
+	var base = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 3))
 	var gun = g.place_tower("gun_turret", spot(g, "gun_turret", 5))
 	var far_gun = g.place_tower("gun_turret", spot(g, "gun_turret", 150))
 	base.pos = gun.pos + Vector2(40, 0)
@@ -4066,7 +4995,7 @@ func test_rework_augmentation_tower() -> void:
 	check(near(d2, 20.0), "continuous damage takes the average (x2 at 100%% here: %.1f)" % d2)
 	gun.buff_crit = 0.0
 	# Crit path.
-	var cp = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 80))
+	var cp = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 4))
 	cp.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
 	buy_steps(g, cp, "b", 3)
 	check(near(cp.stats().aug_crit, 0.15) and near(cp.stats().crit_mult, 2.5), "Precision Matrix: 15%, crits x2.5")
@@ -4077,12 +5006,12 @@ func test_rework_augmentation_tower() -> void:
 	g._recompute_buffs()
 	check(near(gun.buff_crit, 0.22) and near(gun.aug_crit_mult, 3.0), "the tower takes the strongest crit effect")
 	# Two Augmentation Towers don't stack.
-	var cp2 = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 100))
+	var cp2 = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 5))
 	cp2.pos = gun.pos + Vector2(-40, 0)
 	g._recompute_buffs()
 	check(near(gun.buff_crit, 0.22), "overlapping Augmentation Towers don't stack")
 	# Energy conversion: a share of the damage counts as energy; full conversion tags every hit.
-	var ec = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 120))
+	var ec = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 6))
 	ec.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
 	buy_steps(g, ec, "a", 4)
 	check(near(ec.stats().energy_conv, 1.0), "Full Conversion: 100%")
@@ -4100,7 +5029,7 @@ func test_rework_augmentation_tower() -> void:
 	var dealt: float = g.damage_enemy(e, 10.0, true, gun)
 	check(ec.mastered and near(gun.aug_energy_bonus, 0.10) and dealt >= 10.9, "Overcharge: +10%% energy damage (%.1f)" % dealt)
 	# Ricochet: a single-target hit bounces to another enemy within 60 px at a share of its damage.
-	var rc = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 140))
+	var rc = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 7))
 	rc.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
 	buy_steps(g, rc, "c", 3)
 	check(near(rc.stats().ricochet, 0.30) and near(rc.stats().ricochet_str, 0.7), "Ricochet Field: 30%, bounces at 70%")
@@ -4125,12 +5054,12 @@ func test_rework_augmentation_tower() -> void:
 	gun.aug_bounce_again = true
 	g._ricochet(gun, e1, 100.0)
 	check(e4.hp < e4.max_hp, "with Pinball it does")
-	var pb = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 160))
+	var pb = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 8))
 	pb.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
 	buy_steps(g, pb, "c", 5)
 	check(pb.mastered and near(pb.stats().ricochet, 0.5) and pb.stats().bounce_again, "Pinball: 50%, a bounce can bounce again")
 	# Remote Link: twice the radius at half strength.
-	var rem = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 180))
+	var rem = g.place_tower("augmentation_tower", spot(g, "augmentation_tower", 9))
 	g.buy_retrofit(rem, 2)
 	var far2 = g.place_tower("gun_turret", spot(g, "gun_turret", 170))
 	rc.pos = Vector2(5000, 5000)

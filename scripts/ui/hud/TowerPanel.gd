@@ -9,6 +9,7 @@ const Tower = preload("res://scripts/entities/Tower.gd")
 const Game = preload("res://scripts/core/Game.gd")
 const Draw = preload("res://scripts/view/Draw.gd")
 const UpgradeRules = preload("res://scripts/core/UpgradeRules.gd")
+const World = preload("res://scripts/view/World.gd")
 
 const BRANCH_COLORS := {"a": Color(0.44, 0.72, 1.0), "b": Color(1.0, 0.62, 0.37), "c": Color(0.49, 1.0, 0.69)}
 const W := 302.0
@@ -72,7 +73,27 @@ func _shell_selector(t) -> void:
 		shell_buttons[kind] = b
 		row.add_child(b)
 	_content.add_child(row)
-	_content.add_child(UiKit.wrap_label("Click a spot on the track to aim. Re-aiming is free.", W - 40, 11, UiKit.DIM))
+	_content.add_child(UiKit.wrap_label("Move target (M), then click the track to aim. Re-aiming is free.", W - 40, 11, UiKit.DIM))
+
+
+## The Tree button (#87), and Move target for the towers whose target the player places.
+var tree_btn: Button
+var aim_btn: Button = null
+
+
+func _actions(t) -> HBoxContainer:
+	var row := UiKit.hbox(6)
+	tree_btn = UiKit.button("Tree  [E]", Callable(screen, "toggle_tree"), Vector2(100, 28))
+	tree_btn.tooltip_text = "The whole upgrade tree: Retrofits, paths and masteries. Buy from it too. Pauses the battle."
+	row.add_child(tree_btn)
+	aim_btn = null
+	if t.type in World.AIMABLE:
+		aim_btn = UiKit.button("Move target  [M]", Callable(screen, "start_aim"), Vector2(150, 28))
+		aim_btn.tooltip_text = "Then click the field to set where it %s. Esc or right-click cancels." % ("fires" if t.type == "artillery_cannon" else "circles")
+		row.add_child(aim_btn)
+	for b in row.get_children():
+		(b as Button).add_theme_font_size_override("font_size", 13)
+	return row
 
 
 const LOADOUT_NAMES := {"gun": "Guns", "missiles": "Missiles", "bombs": "Bombs", "laser": "Laser", "full": "Full kit"}
@@ -113,10 +134,17 @@ static func _thousands(n: int) -> String:
 	return ("-" if n < 0 else "") + out
 
 
-func refresh(_delta: float) -> void:
+var _since_check := 0.0
+
+func refresh(delta: float) -> void:
 	var t = tower
 	if _dps_label != null:
 		_update_dps()
+	# Looked at ten times a second, not every frame (#116): the card states cost a full upgrade check each.
+	_since_check += delta
+	if _since_check < 0.1 and _key != "":
+		return
+	_since_check = 0.0
 	# Rebuild only when something a card shows changes: the tower's upgrades, a card's state (e.g.
 	# affordable or not), prices. Credits alone change with every kill; rebuilding then would swap
 	# the card under the mouse mid-hover.
@@ -145,6 +173,7 @@ func _rebuild() -> void:
 	_content.add_child(UiKit.label(level, 12, UiKit.GOLD if t.tier >= 3 else UiKit.DIM))
 	_content.add_child(UiKit.label("COMBAT STATS", 11, UiKit.DIM))
 	_content.add_child(TowerInfo.stats_grid(t.stats(), {}, t.is_beam(), 12, 10))
+	_content.add_child(_actions(t))
 	if t.type == "artillery_cannon":
 		_shell_selector(t)
 	if t.type == "drone_bay":

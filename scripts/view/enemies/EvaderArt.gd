@@ -14,17 +14,22 @@ const SENS := Color(0.4, 0.92, 1)
 const LOCK := Color(0.4, 0.9, 1)
 
 
-## Before and after a blink: a ghost left `dist` behind, rings in and out, and motes gathering just before it.
+## Before and after a blink: a ghost where it blinked from (on the field, "blink_from"; in a preview, `dist` behind),
+## rings in and out, and motes gathering just before it.
 static func blink_fx(c: Vector2, t: float, r: float, st: Dictionary, period: float, dist: float, col: Color, body: Callable) -> void:
+	if st.get("ghost", false):
+		return   # this is the after-image itself (EnemyArt.draw)
 	var u: float = st.get("blink", fposmod(t, period))
 	var left: float = st.get("blink_in", period - fposmod(t, period))
 	var pre := (0.45 - left) / 0.45 if left < 0.45 else 0.0
 	if u < 0.7:
 		var a := 0.55 * (1.0 - u / 0.7)
-		var g := c + Vector2(-dist, 0)
-		push_alpha(a)
-		body.call(g)
-		pop_alpha()
+		var g: Vector2 = L(st.blink_from) if st.has("blink_from") else c + Vector2(-dist, 0)
+		if not st.has("blink_from"):
+			# A preview: the ghost drawn here. On the field EnemyArt.draw draws a still one where it blinked from (#114).
+			push_alpha(a)
+			body.call(g)
+			pop_alpha()
 		ring(g, r * (0.6 + 1.2 * u), al(col, a), 1.0)
 		ring(c, r * (1.6 - 1.4 * minf(1.0, u / 0.3)), al(col, 0.8 * (1.0 - u / 0.7)), 1.2)
 	if pre > 0.0:

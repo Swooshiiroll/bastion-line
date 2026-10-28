@@ -64,11 +64,11 @@ static func enemy_abilities(d: Dictionary) -> Array:
 	if d.get("energy_only", false):
 		out.append("Only energy damage hurts it (beams, chains, fields, burns, Tesla arcs); physical hits do nothing.")
 	if d.has("disguise"):
-		out.append("Looks, moves and ranks like a %s until it drops below %s health; then it runs at %s px/s for %s s, as itself." % [ename.call(d.disguise), pct.call(d.reveal_at), _num(float(d.flee_speed)), _num(float(d.flee_time))])
+		out.append("Looks, moves and ranks like a %s until it drops below %s health; then it runs at %s px/s for %s s, as itself. A Radar Tower with Disguise Breaker uncovers it with a ping." % [ename.call(d.disguise), pct.call(d.reveal_at), _num(float(d.flee_speed)), _num(float(d.flee_time))])
 	if d.get("fake_rank", false):
-		out.append("Ranks above every non-boss (and shows as a %s), so Strongest towers aim at it, but it does nothing else." % str(d.get("shown_role", "tank")).capitalize())
+		out.append("Ranks above every non-boss (and shows as a %s), so Strongest towers aim at it, but it does nothing else. A Radar Tower with Signal Analysis sees through it." % str(d.get("shown_role", "tank")).capitalize())
 	if d.has("holo_interval"):
-		out.append("Every %s s projects %d holograms with 1 health that soak shots and walk to the core; they never leak and vanish when it dies." % [_num(float(d.holo_interval)), int(d.holo_count)])
+		out.append("Every %s s projects %d holograms with 1 health that soak shots and walk to the core; they never leak and vanish when it dies. A Radar Tower with Illusion Filter pops them with each ping." % [_num(float(d.holo_interval)), int(d.holo_count)])
 	if d.has("siphon_radius"):
 		out.append("Towers within %s px fire %s slower and reach %s less far (the strongest Siphon applies)." % [_num(float(d.siphon_radius)), pct.call(d.siphon_rate), pct.call(d.siphon_range)])
 	if d.has("adrenaline"):

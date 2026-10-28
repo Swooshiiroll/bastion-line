@@ -35,10 +35,22 @@ func _draw() -> void:
 		return
 	var build: String = world.build_type
 	for t in g.towers:
+		# Only the selected tower shows its target (#110).
+		if world.selected_tower != t:
+			continue
 		if t.type == "artillery_cannon" and t.aim_set:
-			_aim_marker(t, world.selected_tower == t)
+			_aim_marker(t, true)
 		if t.type == "cas_gunship" and t.aim_set:
-			_orbit_marker(t, world.selected_tower == t)
+			_orbit_marker(t, true)
+	var aiming = world.aim_tower
+	if aiming != null and world.mouse_in_field:
+		# Move target (#87): the new target follows the cursor until a click sets it.
+		var at: Vector2 = g.nearest_track_point(world.hover_pos) if aiming.type == "artillery_cannon" else world.hover_pos
+		if aiming.type == "artillery_cannon":
+			_aim_marker(aiming, true, at)
+		else:
+			_orbit_marker(aiming, true, at)
+		_tag(at + Vector2(0, -34), "click: set target  (Esc cancels)", Color(1.0, 0.85, 0.4))
 	if world.ability_target == "meteor" and world.mouse_in_field:
 		_meteor_reticle(g, world.hover_pos)
 	if build != "":
@@ -94,6 +106,14 @@ func _draw() -> void:
 	var he = world.hover_enemy
 	if he != null and he.alive:
 		Draw.arc(self, he.pos, he.radius + 5.0, 0.0, TAU, 32, Color(1, 1, 1, 0.85), 1.5, true)
+	# The selected enemy (#116): a gold ring that follows it, and a line from each tower firing at it.
+	var se = world.selected_enemy
+	if se != null and se.alive:
+		for t in g.towers:
+			if t.target == se or t.beam_targets.has(se):
+				draw_line(t.pos, se.pos, Color(1.0, 0.85, 0.4, 0.45), 1.2, true)
+		var pulse := 0.5 + 0.5 * sin(world.anim_t * 5.0)
+		Draw.arc(self, se.pos, se.radius + 6.0 + pulse * 1.5, 0.0, TAU, 32, Color(1.0, 0.85, 0.4, 0.95), 2.0, true)
 
 
 func _meteor_reticle(g, p: Vector2) -> void:
@@ -110,9 +130,10 @@ func _meteor_reticle(g, p: Vector2) -> void:
 			Draw.arc(self, e.pos, e.radius + 4.0, 0.0, TAU, 24, Color(1.0, 0.5, 0.2, 0.9), 2.0, true)
 
 
-## Where an Artillery Cannon is aimed: a target marker the size of its blast (bright while it's selected, with a line to it).
-func _aim_marker(t, selected: bool) -> void:
-	var p: Vector2 = t.aim_point
+## Where an Artillery Cannon is aimed (or, at `at`, would be): a target marker the size of its blast (bright while it's
+## selected, with a line to it).
+func _aim_marker(t, selected: bool, at := Vector2.INF) -> void:
+	var p: Vector2 = t.aim_point if at == Vector2.INF else at
 	var r := float(t.stats().splash)
 	var col := Color(1.0, 0.55, 0.2)
 	var a := 0.9 if selected else 0.3
@@ -125,18 +146,19 @@ func _aim_marker(t, selected: bool) -> void:
 		draw_dashed_line(t.pos, p, Color(col, 0.4), 1.5, 8.0)
 
 
-## Where a CAS Gunship circles: its orbit as a ring (bright while selected, with a line to its centre).
-func _orbit_marker(t, selected: bool) -> void:
+## Where a CAS Gunship circles (or, at `at`, would): its orbit as a ring (bright while selected, with a line to its centre).
+func _orbit_marker(t, selected: bool, at := Vector2.INF) -> void:
+	var p: Vector2 = t.aim_point if at == Vector2.INF else at
 	var r := float(t.stats().get("orbit", 90.0))
 	var col := Color(0.62, 0.85, 1.0)
 	var a := 0.9 if selected else 0.3
-	Draw.arc(self, t.aim_point, r, 0.0, TAU, 56, Color(col, a * 0.7), 1.6, true)
-	Draw.disc(self, t.aim_point, 3.0, Color(col, a))
+	Draw.arc(self, p, r, 0.0, TAU, 56, Color(col, a * 0.7), 1.6, true)
+	Draw.disc(self, p, 3.0, Color(col, a))
 	for k in 4:
 		var d := Vector2.from_angle(float(k) * PI / 2.0)
-		draw_line(t.aim_point + d * 6.0, t.aim_point + d * 12.0, Color(col, a), 2.0, true)
+		draw_line(p + d * 6.0, p + d * 12.0, Color(col, a), 2.0, true)
 	if selected:
-		draw_dashed_line(t.pos, t.aim_point, Color(col, 0.4), 1.5, 8.0)
+		draw_dashed_line(t.pos, p, Color(col, 0.4), 1.5, 8.0)
 
 
 ## A small label with a dark backing, centred on `p`.

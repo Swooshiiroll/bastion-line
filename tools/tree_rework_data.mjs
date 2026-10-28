@@ -37,7 +37,7 @@ for (const slug of Object.keys(statTowers)) {
   for (const r of rows) if (!st.nodes[r.id]) fail(`${slug}: node ${r.id} (${r.name}) has no stats`);
   const retro = rows.filter((r) => /^r\d$/.test(r.id));
   const ind = "\t\t";
-  body += `\t${q(slug)}: {\n\t\t"name": ${q(d.name)},\n\t\t"class": ${q(d.cls)},\n\t\t"weapon": ${q(d.weapon)},\n\t\t"blurb": ${q(d.blurb)},\n`;
+  body += `\t${q(slug)}: {\n\t\t"name": ${q(d.name)},\n\t\t"class": ${q(d.cls)},\n\t\t"weapon": ${q(d.weapon)},\n\t\t"blurb": ${q(d.blurb)},\n\t\t"tagline": ${q(d.tagline || "")},\n`;
   body += `\t\t"air": ${st.meta.air === "yes"},\n\t\t"ground": ${st.meta.ground === "yes"},\n\t\t"size": ${parseInt(st.meta.size, 10)},\n\t\t"damage_kind": ${q(st.meta.damage_kind || "physical")},\n\t\t"beam": ${st.meta.beam === "yes"},\n\t\t"uncapped": ${st.meta.uncapped === "yes"},\n\t\t"support": ${st.meta.support === "yes"},\n\t\t"economy": ${st.meta.economy === "yes"},\n`;
   body += `\t\t"cost": ${st.nodes.base.cost},\n\t\t"base": ${node(byId.base, st, ind)},\n\t\t"retrofits": [\n${retro.map((r) => `\t\t\t${node(r, st, "\t\t\t")},`).join("\n")}\n\t\t],\n\t\t"paths": [\n`;
   "abc".split("").forEach((k, i) => {
@@ -52,8 +52,8 @@ const text = `extends RefCounted
 ## (names and blurbs). Edit those and re-run the generator; don't edit this file by hand.
 ##
 ## The reworked towers (issue #59). Per tower: \`base\`, \`retrofits\` (the player picks one of up to three), and \`paths\`
-## (a, b, c), each with four \`nodes\` and a \`mastery\`. A node's \`set\` values replace the stat and its \`add\` values add to it;
-## nodes apply in order on top of the base (the Retrofit, then each path's steps).
+## (a, b, c), each with four \`nodes\` and a \`mastery\`. A node's \`add\` values add to the stat and its \`set\` values replace it
+## (upgrades only set flags; issue #85); nodes apply in order on top of the base (the Retrofit, then each path's steps).
 
 const ORDER := [${order.map(q).join(", ")}]
 

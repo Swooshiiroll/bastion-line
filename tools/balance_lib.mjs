@@ -18,9 +18,9 @@ export const KEYS = new Set([
   "ramp", "ramp_time", "melt", "beams", "beam_power", "ramp_keep", "burst", "barrels", "turn_fast",
   "flight", "scatter", "heavy_every", "incendiary", "shrapnel", "concussion", "combined", "burn_dps", "burn_time", "shrap_radius", "shrap_mult", "barrage",
   "falloff", "boss_mult", "rails", "shatter", "trail_dps", "trail_time", "jumps", "jump_range", "overload", "storm_radius", "storm_dps", "storm_time",
-  "lo_missiles", "lo_bombs", "lo_laser", "lo_full", "loadout_mult", "drones", "orbit", "radar", "rate_mult", "ac_damage", "ac_rate", "ac_splash", "ms_damage", "ms_rate", "ms_splash", "ms_volley", "cap", "gel_slow", "gel_time", "soak_time", "armor_strip", "nozzles", "mist", "acid_perm", "acid_dps", "slow", "slow_time", "perm_slow", "freeze_every", "freeze_time", "cold_front", "buff_dmg", "buff_rate", "buff_range", "buff_extra", "crit_link", "ping_every", "reveal_time", "early_warning", "rad_dps", "rad_range", "constant", "unmask_decoy", "unmask_mask", "unmask_mirage", "exposure", "shield_mult", "shatter_half", "regen_block", "income", "sell_field", "interest", "interest_cap", "bounty_bonus", "boss_bounty", "discount", "build_discount", "pole_shoes", "grip_relief", "armor_pull", "pull_perm", "flip_every", "flip_damage", "hold", "pull", "recharge", "beam_slow", "rewind", "undo", "grip_dps", "slam_radius", "slam_stun", "grip_lock", "slam_shatter", "aug_crit", "crit_mult", "remote_link", "energy_conv", "energy_bonus", "ricochet", "ricochet_str", "bounce_again",
+  "lo_missiles", "lo_bombs", "lo_laser", "lo_full", "loadout_mult", "drones", "orbit", "radar", "rate_mult", "ac_damage", "ac_rate", "ac_splash", "ms_damage", "ms_rate", "ms_splash", "ms_volley", "cap", "gel_slow", "gel_time", "soak_time", "armor_strip", "constant_spray", "mist", "acid_perm", "acid_dps", "slow", "slow_time", "perm_slow", "freeze_every", "freeze_time", "cold_front", "buff_dmg", "buff_rate", "buff_range", "buff_extra", "crit_link", "ping_every", "reveal_time", "early_warning", "rad_dps", "rad_range", "constant", "unmask_decoy", "unmask_mask", "unmask_mirage", "exposure", "shield_mult", "shatter_half", "regen_block", "income", "sell_field", "interest", "interest_cap", "bounty_bonus", "boss_bounty", "discount", "build_discount", "pole_shoes", "grip_relief", "armor_pull", "pull_perm", "flip_every", "flip_damage", "hold", "pull", "recharge", "beam_slow", "rewind", "undo", "grip_dps", "slam_radius", "slam_stun", "grip_lock", "slam_shatter", "aug_crit", "crit_mult", "remote_link", "energy_conv", "energy_bonus", "ricochet", "ricochet_str", "bounce_again",
 ]);
-export const FLAGS = new Set(["tracers", "swivel", "weakest_extra", "homing", "retarget", "never_miss", "ripple", "turn_fast", "incendiary", "shrapnel", "concussion", "combined", "overload", "lo_missiles", "lo_bombs", "lo_laser", "lo_full", "radar", "mist", "acid_perm", "cold_front", "early_warning", "constant", "unmask_decoy", "unmask_mask", "unmask_mirage", "shatter_half", "pull_perm", "undo", "grip_lock", "slam_shatter", "remote_link", "bounce_again"]);
+export const FLAGS = new Set(["tracers", "swivel", "weakest_extra", "homing", "retarget", "never_miss", "ripple", "turn_fast", "incendiary", "shrapnel", "concussion", "combined", "overload", "lo_missiles", "lo_bombs", "lo_laser", "lo_full", "radar", "constant_spray", "mist", "acid_perm", "cold_front", "early_warning", "constant", "unmask_decoy", "unmask_mask", "unmask_mirage", "shatter_half", "pull_perm", "undo", "grip_lock", "slam_shatter", "remote_link", "bounce_again"]);
 // Every tower's node ids, in table order.
 export const NODE_IDS = ["base", "r1", "r2", "r3", ..."abc".split("").flatMap((k) => [k + "1", k + "2", k + "3", k + "4", k + "m"])];
 
@@ -58,6 +58,8 @@ export function parseTowers(text, errors) {
         if (!KEYS.has(key)) { errors.push(`${slug} ${id}: unknown key "${key}"`); continue; }
         if (val === undefined) { if (!FLAGS.has(key)) errors.push(`${slug} ${id}: "${key}" needs a value`); set[key] = true; continue; }
         if (FLAGS.has(key)) { errors.push(`${slug} ${id}: "${key}" is a flag`); continue; }
+        // Upgrades add (#85): only the stock row sets a number.
+        if (id !== "base" && !/^[+-]/.test(val)) { errors.push(`${slug} ${id}: "${key} ${val}" needs a sign: upgrades add (+${val} or -${val})`); continue; }
         if (/^[+-]/.test(val)) add[key] = parseFloat(val); else set[key] = parseFloat(val);
       }
       nodes[id] = { cost, tokens: c[col.Tokens], set, add };
@@ -76,7 +78,7 @@ export function section(text, title) {
   return text.slice(i, j < 0 ? text.length : j);
 }
 
-// upgrade_trees_rework.md: { slug: { name, cls, weapon, branches: [names], blurb, rows: [{ id, tier, path, name, effect }] } }.
+// upgrade_trees_rework.md: { slug: { name, cls, weapon, branches: [names], blurb, tagline, rows: [{ id, tier, path, name, effect }] } }.
 export function parseTrees(text) {
   const out = {};
   for (const sec of text.split(/\n## /).slice(1)) {
@@ -90,7 +92,9 @@ export function parseTrees(text) {
       const c = cells(line);
       if (c.length === 7 && /^(\d|M)$/.test(c[0])) rows.push({ id: nodeId(c[0], c[1]), tier: c[0], path: c[1], name: c[2], effect: c[5] });
     }
-    out[h.id] = { name: lines[0].trim(), cls: h.class, weapon: h.weapon, branches, blurb: (lines[2] || "").trim(), rows };
+    // The shop's one-line tagline (#116) sits under the blurb as "Tagline: ...".
+    const tag = (lines[3] || "").startsWith("Tagline: ") ? lines[3].slice(9).trim() : "";
+    out[h.id] = { name: lines[0].trim(), cls: h.class, weapon: h.weapon, branches, blurb: (lines[2] || "").trim(), tagline: tag, rows };
   }
   return out;
 }

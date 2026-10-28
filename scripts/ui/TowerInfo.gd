@@ -16,10 +16,9 @@ const STAT_ROWS := [
 	["Beams", "beams", "%d"], ["Flyer damage", "air_mult", "x%.0f"], ["Armor shred", "shred_max", "%d"],
 	["Boss damage", "boss_mult", "x%.1f"], ["Targets/volley", "multishot", "%d"], ["Execute below", "execute", "pct"],
 	["Channel width", "rail_width", "%d"], ["Damage mark", "mark", "+pct"], ["Pushback", "push", "%d"],
-	["Damage boost", "buff_dmg", "+pct"], ["Speed boost", "buff_rate", "+pct"], ["Range boost", "buff_range", "+pct"],
 	["Flechettes", "pellets", "%d"], ["Cone", "cone", "deg"], ["Sweep arc", "sweep", "deg"], ["Bomblets", "bomblets", "%d"],
 	["Barrier strip", "strip", "pct"], ["Feedback", "feedback", "pct"], ["Suppression", "suppress", "%.1fs"],
-	["Armor break", "armor_break", "%d"], ["Armor break", "armor_field", "%d"], ["Pull", "pull", "%d"],
+	["Armor break", "armor_break", "%d"], ["Armor break", "armor_field", "%d"],
 	["Implosion", "implode_pct", "pct"], ["Ground damage", "ground_mult", "pct"], ["Burn aura", "aura_dps", "%d"],
 	["Mini-novas", "mini_nova", "%d"], ["Drones", "drones", "%d"], ["Bombers", "bombers", "%d"],
 	["Bomb damage", "bomb_damage", "%d"], ["Drone speed", "drone_speed", "%d"], ["Lingers", "linger", "%.1fs"],
@@ -41,12 +40,13 @@ const STAT_ROWS := [
 	["Loadout boost", "loadout_mult", "x%.2f"],
 	["Mines at once", "cap", "%d"], ["Soak lasts", "soak_time", "%.0fs"], ["Armour stripped", "armor_strip", "%d"], ["Acid damage/s", "acid_dps", "%d"],
 	["Gel slow", "gel_slow", "pct"], ["Slow lasts", "slow_time", "%.1fs"], ["Permanent chill", "perm_slow", "pct"], ["Freeze every", "freeze_every", "%d waves"],
-	["Spray targets", "nozzles", "%d"], ["Damage boost", "buff_dmg", "+pct"], ["Fire-rate boost", "buff_rate", "+pct"], ["Range boost", "buff_range", "+pct"],
+	["Damage boost", "buff_dmg", "+pct"], ["Fire-rate boost", "buff_rate", "+pct"], ["Range boost", "buff_range", "+pct"],
 	["Extra boost, all stats", "buff_extra", "+pct"], ["Crit chance given", "crit_link", "pct"], ["Jump range", "jump_range", "%d"],
 	["Holds for", "hold", "%.1fs"], ["Pull", "pull", "%d"], ["Recharge", "recharge", "%.1fs"], ["Rewinds", "rewind", "%.0fs"], ["Beam slows others", "beam_slow", "pct"],
 	["Crushing damage/s", "grip_dps", "%d"], ["Slam radius", "slam_radius", "%d"], ["Slam stun", "slam_stun", "%.1fs"], ["Heavy roles resist less", "grip_relief", "pct"],
 	["Armour pulled", "armor_pull", "%d"], ["Repel every", "flip_every", "%.0fs"], ["Repel damage", "flip_damage", "%d"],
 	["Ping every", "ping_every", "%.1fs"], ["Reveal lasts", "reveal_time", "%.1fs"], ["Radiation damage/s", "rad_dps", "%d"], ["Radiation radius", "rad_range", "%d"],
+	["Stays exposed after leaving", "exposure", "%.0fs"],
 	["Build discount in field", "build_discount", "pct"], ["Barrier damage", "shield_mult", "x%.1f"], ["Crit chance given", "aug_crit", "pct"], ["Crit damage", "crit_mult", "x%.1f"],
 	["Energy conversion", "energy_conv", "pct"], ["Ricochet chance", "ricochet", "pct"], ["Bounce strength", "ricochet_str", "pct"],
 ]
@@ -56,13 +56,14 @@ const FLAG_ROWS := [
 	["Stops burrowing and blinking", "disrupt"], ["Stops repairs", "block_repair"], ["Stops barrier recharge", "block_barrier"],
 	["Blocks Bulwark barriers", "block_grants"], ["Ignores barriers", "bypass_shield"], ["Hunts specialists", "hunt"],
 	["Suppresses targets", "suppress_hit"], ["Jams support", "jam"],
-	["Tracer rounds", "tracers"], ["Instant retarget, no overkill", "swivel"], ["Extra barrels hit the weakest", "weakest_extra"],
+	["Tracer rounds", "tracers"], ["Fast turn, no overkill", "swivel"], ["Extra barrels hit the weakest", "weakest_extra"],
 	["Homing", "homing"], ["Re-targets", "retarget"], ["Never misses", "never_miss"], ["Rippling salvo", "ripple"],
 	["Overloads disruptors", "overload"], ["Incendiary shells", "incendiary"], ["Shrapnel shells", "shrapnel"],
 	["Concussion shells", "concussion"], ["Combined shell", "combined"], ["Fast traverse", "turn_fast"],
 	["Pulled armour is gone for good", "pull_perm"], ["Grip lock", "grip_lock"], ["Slam shatters barriers", "slam_shatter"], ["Undo once a round", "undo"],
 	["Wave halves barriers", "shatter_half"], ["Constant reveal", "constant"], ["Early warning", "early_warning"], ["Remote link", "remote_link"], ["Bounces can bounce", "bounce_again"],
-	["Radar: reveals cloaked", "radar"], ["Mist soaks a neighbour", "mist"], ["Acid strips for good", "acid_perm"], ["Constant cold field", "cold_front"], ["Missiles loadout", "lo_missiles"], ["Bombs loadout", "lo_bombs"],
+	["Radar: reveals cloaked", "radar"], ["Sees through decoys", "unmask_decoy"], ["Breaks disguises", "unmask_mask"],
+	["Pings pop holograms", "unmask_mirage"], ["Mist soaks a neighbour", "mist"], ["Sprays without stopping, sweeping a fan", "constant_spray"], ["Acid strips for good", "acid_perm"], ["Constant cold field", "cold_front"], ["Missiles loadout", "lo_missiles"], ["Bombs loadout", "lo_bombs"],
 	["Laser loadout", "lo_laser"], ["Full kit loadout", "lo_full"],
 ]
 ## Short keys for the one-line summary.
@@ -110,8 +111,11 @@ static func rows_for(cur: Dictionary, beam: bool) -> Array:
 		rows.append(["Range" if not cur.has("income") else "Field", "range", "%d"])
 	elif not cur.has("income"):
 		rows.append(["Range", "", "anywhere"])
+	var seen := {}
 	for cand in STAT_ROWS:
-		if cur.has(cand[1]) and float(cur[cand[1]]) != 0.0:
+		# Each stat once, even if two old lists both name it (#110: the Boost Tower showed its boosts twice).
+		if cur.has(cand[1]) and float(cur[cand[1]]) != 0.0 and not seen.has(cand[1]):
+			seen[cand[1]] = true
 			rows.append(cand)
 	for f in FLAG_ROWS:
 		if cur.get(f[1], false):

@@ -575,6 +575,37 @@ Their prices are formula estimates (proposed), in `design/tower_roster.md`.
   - the central hub sits down between the banks, drawn under them (owner: "That central ball is also visible through
     the silos").
 
+**Round 4 (v4-dev.2 batch 7, #104):**
+- The owner's note on Build 2: "Path C Mastery needs a redesign to match the current design style of other towers."
+- The raised banks are dropped. The page shows three flat Ripple Salvo looks in the gold banding and glow the other
+  masteries use, and the owner picks one:
+  - A, Eight-Tube Grid: one wide gold-banded block with eight staggered, gold-rimmed tubes, and a row of ripple lights
+    that fills as the salvo goes out.
+  - B, Rotary Drum: eight tubes on a gold-capped drum that spins on a geared drive.
+  - C, Flush Twin Banks: two flat banks of four gold-rimmed tubes, with a sequencer light running down the spine
+    between them.
+- The stats are unchanged: 8 rockets per salvo, rippling out.
+- The page's store key is now `bl-tower-art-p2-rocket-r4`.
+
+**Round 5 ("More ideas"):** four more looks. Each rebuilds the launcher round a turret hub, the way the other towers'
+masteries do, with its rockets racked where they can be seen:
+- D, Launch Cells: an armoured octagonal deck of eight vertical launch cells round a turning fire-control turret. The
+  hatches flip open one after another, with a flash and smoke as each rocket leaves.
+- E, Revolver Carousel: eight rockets on a gold-rimmed carousel that turns one notch per launch, feeding each one onto a
+  single launch rail.
+- F, Wing Pod Turret: an octagonal turret with a gold-jointed wing arm each side, each carrying a round gold-banded pod
+  of 2 x 2 tubes. The pods take turns and kick back as they fire.
+- G, Rail Fan: eight open launch rails fanned out from a turret block under a gold yoke, a rocket on each. The salvo
+  ripples across the fan.
+- The page now tracks which rocket of the salvo went last from the shot count, so the ripple lights and the mouth flashes
+  follow all eight rockets. Before, they wrapped after three.
+
+**Picks and notes (owner, round 5):** Payload M **D, Launch Cells**, with the note "Just remove the spinning part in the
+middle". Every other pick is unchanged: Power 1 B, 2 B, 3 A, 4 A, M A; Range 1 A, 2 A, 3 A, 4 A, M C; Payload 1 A, 2 A,
+3 B, 4 C; Retrofits A, A, A.
+- **Round 6:** the turning fire-control turret is gone. A small fixed light stays at the centre, so nothing on the
+  mastery turns: rockets rise from the cells round the deck.
+
 ### Anti-Aircraft Turret (second pass)
 
 **Retrofits kept** (owner, 2026-10-17). Claude flagged that all three overlap a path:
@@ -1044,6 +1075,33 @@ something else by "tower frame" (the columns, say), tell me.
   floating off the first nozzle.
 - The stills are rounder: the twin stills stand on a capsule-shaped base (it was a square plate), and a single pump hall is an octagon.
 
+**Round 8 (v4-dev.2 batch 7, #104):** Constant Spray replaces the Twin Nozzles mastery (owner, Build 2: "Replace Twin
+Nozzles upgrade to Constant Spray"). The rules are in #104.
+- **On the page:**
+  - One head sprays without stopping. It sweeps a 120° fan (160° with the Mist Nozzle) centred on the nearest enemy,
+    one pass per spray interval.
+  - The jet is a stream of short-lived drops. Each drop flies out on the angle the head had when it left, so the stream
+    curves as it sweeps.
+  - The fan's edge shows faintly.
+  - Every enemy the jet crosses is soaked or topped up, for 4 s.
+- **The heads**, for the owner to pick:
+  - A, Gold Fan Nozzle: a wide gold fan nozzle on a turning head.
+  - B, Spray Boom: a gold boom across the still with five spouts.
+  - C, Sprinkler Turret: a gold turret with a spinning impeller and a long spray bar.
+- With the Twin Stills, both stills keep their gold rings and the single head turns on the hub between them.
+- The page's store key is now `bl-tower-art-p2-chem-r8`.
+
+**Picks and notes (owner, round 8):**
+- **Speed M: C, Sprinkler Turret.** Every other pick is unchanged: Acid 1 B, 2 C, 3 C, 4 A, M C; Speed 1 B, 2 C, 3 B,
+  4 A; Slowing 1 B, 2 A, 3 B, 4 C, M A; Retrofits A, A, A.
+- **Notes:** "remove the thin line around the outside. The mist head should turn the stream into a mist cloud".
+- **Round 9:**
+  - The fan's faint edge is gone.
+  - With the Mist Nozzle (the ribbed Fan Head on the sprayer's end), Constant Spray's jet leaves the head as a mist cloud
+    instead of a stream of drops. It's soft green puffs that billow out along the sweep, spread, rise a little and thin
+    as they go. Without the Mist Nozzle the jet stays a stream.
+  - The page's store key is `bl-tower-art-p2-chem-r9`.
+
 ### Boost Tower (second pass)
 
 **Retrofits kept, stats stacking (the carpet rule).** Signal Booster (radius 168 px and +5% to all three boosts) overlaps the paths' boost steps; it is kept and the +5% stacks on top.
@@ -1151,6 +1209,113 @@ Base: look B Ring Reactor, animation B Mushroom Pulse. Every step rebuilds a par
 **Round 8 (owner note):** "The bands should expand on a blast". On every blast the Path 3 band expands outward with the wave (quickly, over about 0.3 s, by 2.5 px at the first step up to 12 px at the mastery), then springs back and rings, overshooting; the bend and stretch distortions from round 7 stay.
 
 **Round 9 (owner note):** "Make the elasticity stronger, so the bands reciprocate faster". The Path 3 band now opens in under 0.2 s and then swings in and out about 2.3 times faster (a spring of about 3.3 swings a second instead of 1.4) with less than half the damping, so it reciprocates several times before settling; the expansion (3 to 14 px) and the bend are stronger too.
+
+**Round 10 (v4-dev.2 batch 7, #120):** the owner's note on the dev.2 builds: "Megaton wave smoke plume animation should
+look more like a mushroom cloud (more inline with a nuclear explosion)." A mockup first (owner, 2026-10-26).
+- **On the page:** the Megaton Wave step shows the picked White-Hot Gyro Rings with four clouds to choose from:
+  - C, the current billow (a flash, a fireball and a rolling cap), for comparison.
+  - D, Rolling Mushroom: a fireball climbs a narrow stem and opens into a cap that rolls like a smoke ring (the gas rises
+    up the middle, over the top and down the outside). It cools from white through orange to smoke, and a ring of dust
+    rolls out along the ground. It clears in about 4 s.
+  - E, Mushroom and Condensation Rings: D, plus two white condensation rings that flash out round the stem and under the
+    cap, and a wider dust surge.
+  - F, Fireball Mushroom: a lower cap that stays an orange fireball longer and sheds falling embers, clearing in about
+    3 s.
+- **Every blast fades the last cloud out** over 0.6 s, so clouds never stack: the Megaton fires every 1.4-1.75 s.
+- **The page:** the build preview is smaller on this page (110 px a tile), so a whole cloud fits above the tower. The
+  store key is now `bl-tower-art-p2-shock-r10`.
+
+**Round 11 (owner's pick, 2026-10-27):** "Keep C, but have the red smoke rise higher, and put the grey smoke underneath."
+D, E and F are dropped. The other picks stand (Power C, Speed C, Effect A, Retrofits C).
+- **The red fireball:** it climbs about twice as high (rising faster, with less drag), stays red longer (it greys over
+  2 s, not 1.3 s), lives 2-2.4 s, and is drawn after the grey, so it sits on top.
+- **The grey smoke:** the billow rises only 55% as far, and the rolling cap sits lower (8 px up, times the cloud's
+  scale, not 13), so both stay under the fireball.
+- **In game:** `World._shockwave` (`MEGA_SMOKE_RISE`, `MEGA_CAP_Y`, `MEGA_FIRE_DRAG`), with `FxLayer.puff`'s `hot_t`
+  setting how long a fire puff takes to grey. Lower Power steps are unchanged.
+- **The page:** the store key is now `bl-tower-art-p2-shock-r11`.
+
+**Round 12 (the owner asked for "a bunch" more Megaton ideas, 2026-10-27):** the Megaton Wave step shows C (round 11, in
+the game since #122) beside seventeen more. D to Q are C plus one extra; R, S and T combine four.
+- **The cloud:** D Rising Column (a grey stem under a higher fireball), E Smoke-Ring Cap (the fireball rolls into a
+  hollow ring), F Ember Rain, G Growing Plume (one fiery column fed by every blast, building while it fires; no separate
+  fireballs).
+- **The blast:** H Double Flash, I Condensation Dome, J Field Glow (the reach and the enemies in it lit orange),
+  K Charge-Up (sparks gather into the core before each blast).
+- **The ground and after:** L Ground Scorch (under the tower, ~3 s), M Dust Sweep (dust kicked up as the ring passes),
+  N Echo Rings, O Ash Fall, P Charred Enemies (hit enemies go dark ~1.4 s), Q Ground Cracks (glowing, cooling to dark).
+- **Combinations:** R = D + H + L + M, S = E + F + I + N, T = G + K + Q + J.
+- **The page:** ground marks are drawn from the model, under the tower; the rest from the agent, under or over the
+  cloud. The store key is now `bl-tower-art-p2-shock-r12`.
+
+**Round 13 (the owner, 2026-10-27: "Remake a bunch of ideas from scratch that would fit a nuclear blast"):** round 12's
+extras are dropped. The Megaton Wave step shows C (round 11, in the game) beside ten whole blasts made from scratch.
+Each blast is one record drawn from its age; a new blast fades the last one out over 0.5 s.
+- **D Seen From Above:** the blast as the top-down camera sees it: a churning fireball spreads flat over the tower, then
+  breaks into a ring of smoke rolling outward; a scorch mark under the tower.
+- **E Wilson Cloud:** a white condensation shell swells round the fireball and burns off; the fireball rises out of it
+  on a thin dust stem.
+- **F Rising Fireball:** a churning sphere, darker underneath, climbs slowly with a dirt stem and a dust skirt.
+- **G Thermonuclear:** the biggest flash, a short stem, a very wide flat cap with a fiery underside, and a pale ice cap
+  above it.
+- **H Base Surge:** a squat steam column and a thick ring of steam and dust rolling out along the ground to most of the
+  reach.
+- **I Plasma Burst:** a white-violet sphere crackling with lightning and rays collapses to a point and pops a last cyan
+  ring, throwing sparks; no smoke, clears in under 2 s.
+- **J Flash Shadows:** the flash whites out the reach and burns a shadow behind every enemy in it, pointing away from
+  the blast; a compact fireball over a low ring of smoke.
+- **K Fire Pillar:** a column of fire shoots up, blooms into a cap and cools from the bottom up; embers rain from the
+  cap.
+- **L Vortex Ring:** a glowing ring of fire rolls upward, and dust is sucked in along the ground and up through its
+  middle.
+- **M Classic Mushroom:** a dust skirt, a stem with a white condensation collar, and a cap with a glowing underside and
+  a grey crown.
+- **The page:** `NUKE` in `data_p2_shock.js`; the store key is now `bl-tower-art-p2-shock-r13`.
+
+**Round 14 (the owner, 2026-10-27: "Reflip the red burst and the smoke again"):** round 11 is undone. C is the original
+cloud again, on the page and in the game: the red fireball stays low (it greys over 1.3 s), and the grey billow and
+rolling cap (13 px up, times the cloud's scale) rise over it and are drawn on top. D to M from round 13 stay on the page.
+The store key is now `bl-tower-art-p2-shock-r14`.
+
+**Round 15 (the owner, 2026-10-27: "Give me more ideas that are similar in idea to the original"):** round 13's blasts
+are off the page. The Megaton step shows C (the original cloud) beside twelve variations; each keeps its idea (a white
+flash, a low red fireball, a grey billow and rolling cap rising over it) and changes one thing (`CVAR` in
+`data_p2_shock.js`):
+- **D Bigger Billow:** more puffs, 1.35× the size, spreading 1.6× wider.
+- **E Taller Cloud:** the billow rises 1.4× as far, the cap sits at 19 px (not 13), and it all lives 1.3× longer.
+- **F Wide Cap:** the cap spreads 1.6× wider and half as deep.
+- **G Lingering Fireball:** the fireball greys over 2.6 s (not 1.3) and lives 1.7× longer.
+- **H Lit From Below:** each grey puff has an orange glow on its underside, fading over 1.6 s.
+- **I Dark Smoke:** charcoal puffs instead of pale grey.
+- **J White-Hot Billow:** the billow and cap stay white-hot for 1.8 s before cooling.
+- **K Rolling Cap:** the cap's puffs turn slowly round the cap as it spreads.
+- **L Flickering Fireball:** the fireball flickers brighter and dimmer under the grey, and lives 1.4× longer.
+- **M Double Billow:** a second billow (70% as many puffs) wells up 0.6 s later and climbs 1.45× as far, over the cap.
+- **N Dust Skirt:** a low ring of dust rolls out along the ground round the tower.
+- **O Rising Sparks:** ten sparks shoot up out of the fireball through the grey.
+- **Page fix:** round 14 had left the cap's spawn loop outside the blast, so the page added cap puffs every frame (a
+  denser cap than the original). The game was not affected. The store key is now `bl-tower-art-p2-shock-r15`.
+
+**Round 16 (the owner, 2026-10-27: "The angling is a little off"; asked which, they chose the camera perspective):**
+every cloud is now seen from above, as the game's camera sees it, at every Power step.
+- **The billow:** spreads out round the tower in every direction (the inner puffs 3-6 px/s, the outer 9-16, times the
+  cloud's scale) and drifts up the screen by only `RISE` (0.3) of its old climb.
+- **The cap:** a full ring round the tower, 1.4× wider than side-on, so it opens wider than the fireball; it sits
+  0.3 × 13 px up the screen.
+- **The fireball:** spreads a little in every direction, 1.3× bigger, and is still drawn over the billow and under
+  the cap, so from above it glows red in the middle of the grey, ringed by the cap.
+- **The extras follow:** the dust skirt is a full circle, the rolling cap turns round its full ring, and the sparks
+  are thrown out in every direction.
+- **P, Side-On (round 15):** the old side-on C, to compare. The store key is now `bl-tower-art-p2-shock-r16`.
+
+**Round 17 (the owner's picks, 2026-10-27):** the Megaton Wave is E, the Taller Cloud, seen from above. Note: "Smoke
+particle placement should be random like the previous tiers": the cap's puffs no longer go round in order on a ring;
+each lands at a random angle and distance (9-22 px/s × 1.4, times the cloud's scale), like the billow's. Every stage is
+picked.
+- **In game** (`World._shockwave`): every Power step's cloud is seen from above (`SMOKE_RISE` 0.3); the Megaton's
+  climbs `MEGA_RISE` (1.4×) as far, its cap sits at `MEGA_CAP_Y` (19 px), and it lives `MEGA_LIFE` (1.3×) as long. The
+  fireball is 1.3× bigger, spreads a little every way, and is drawn over the billow and under the cap.
+- **The page:** the store key is now `bl-tower-art-p2-shock-r17`.
 
 ### Scrapyard (third restart: a tower of three parts)
 

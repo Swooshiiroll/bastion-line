@@ -3,8 +3,8 @@ extends RefCounted
 ## (names and blurbs). Edit those and re-run the generator; don't edit this file by hand.
 ##
 ## The reworked towers (issue #59). Per tower: `base`, `retrofits` (the player picks one of up to three), and `paths`
-## (a, b, c), each with four `nodes` and a `mastery`. A node's `set` values replace the stat and its `add` values add to it;
-## nodes apply in order on top of the base (the Retrofit, then each path's steps).
+## (a, b, c), each with four `nodes` and a `mastery`. A node's `add` values add to the stat and its `set` values replace it
+## (upgrades only set flags; issue #85); nodes apply in order on top of the base (the Retrofit, then each path's steps).
 
 const ORDER := ["gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "artillery_cannon", "railgun", "tesla_tower", "drone_bay", "cas_gunship", "mine_layer", "chemical_plant", "cryo_tower", "boost_tower", "radar_tower", "shockwave_generator", "scrapyard", "magneto_tower", "tractor_tower", "augmentation_tower"]
 
@@ -14,6 +14,7 @@ static var TREES := {
 		"class": "Assault",
 		"weapon": "Ballistic",
 		"blurb": "A basic rotating machine gun turret. \"It's a machine gun, Private!\"",
+		"tagline": "Rotating machine gun: fast, cheap, hits air and ground.",
 		"air": true,
 		"ground": true,
 		"size": 1,
@@ -26,7 +27,7 @@ static var TREES := {
 		"base": {
 			"name": "Gun Turret",
 			"cost": 75,
-			"blurb": "75 credits; 16 damage, 130 range, 1.2 shots/s (about 19 damage per second, close to the Pulse Turret's 18, in fewer, harder hits). Air and ground.",
+			"blurb": "75 credits; 16 damage, 130 range, 1.2 shots/s (about 19 damage per second). Air and ground.",
 			"set": {
 				"damage": 16.0,
 				"range": 130.0,
@@ -39,31 +40,31 @@ static var TREES := {
 			{
 				"name": "Water-Cooled Barrel",
 				"cost": 40,
-				"blurb": "Fire rate 1.2 to 1.5/s.",
-				"set": {
-					"rate": 1.5,
+				"blurb": "+0.3 shots/s (1.5).",
+				"set": {},
+				"add": {
+					"rate": 0.3,
 				},
-				"add": {},
 			},
 			{
 				"name": "Shock Rounds",
 				"cost": 5,
 				"blurb": "Every hit has a 5% chance to stun its target for 0.3 s.",
-				"set": {
+				"set": {},
+				"add": {
 					"stun_chance": 0.05,
 					"stun_time": 0.3,
 				},
-				"add": {},
 			},
 			{
 				"name": "Incendiary Rounds",
 				"cost": 25,
-				"blurb": "Hits set the target burning for 3 damage per second for 2 s. Proposed: a new hit refreshes the burn rather than stacking it, so it adds 3 damage per second to the current target.",
-				"set": {
+				"blurb": "Hits set the target burning for 3 damage per second for 2 s.",
+				"set": {},
+				"add": {
 					"ignite_dps": 3.0,
 					"ignite_time": 2.0,
 				},
-				"add": {},
 			},
 		],
 		"paths": [
@@ -74,7 +75,7 @@ static var TREES := {
 					{
 						"name": "Heavier Rounds",
 						"cost": 55,
-						"blurb": "+6 damage",
+						"blurb": "+6 damage (22)",
 						"set": {},
 						"add": {
 							"damage": 6.0,
@@ -82,45 +83,44 @@ static var TREES := {
 					},
 					{
 						"name": "Hardened Tips",
-						"cost": 40,
-						"blurb": "Its hits ignore 2 points of armour",
-						"set": {
-							"armor_flat": 2.0,
-						},
-						"add": {},
-					},
-					{
-						"name": "AP Rounds",
-						"cost": 405,
-						"blurb": "Ignores 50% of armour; +6 damage",
-						"set": {
-							"armor_pct": 0.5,
-						},
+						"cost": 165,
+						"blurb": "+6 damage (28); hits ignore 2 points of armour",
+						"set": {},
 						"add": {
+							"armor_flat": 2.0,
 							"damage": 6.0,
 						},
 					},
 					{
-						"name": "Tungsten Core",
-						"cost": 1085,
-						"blurb": "Ignores 75% of armour; +8 damage",
-						"set": {
-							"armor_pct": 0.75,
-						},
+						"name": "AP Rounds",
+						"cost": 530,
+						"blurb": "+8 damage (36); ignores 50% of armour",
+						"set": {},
 						"add": {
+							"armor_pct": 0.5,
 							"damage": 8.0,
+						},
+					},
+					{
+						"name": "Tungsten Core",
+						"cost": 1365,
+						"blurb": "+10 damage (46); ignores +25% of armour (75%)",
+						"set": {},
+						"add": {
+							"armor_pct": 0.25,
+							"damage": 10.0,
 						},
 					},
 				],
 				"mastery": {
 					"name": "Sabot Rounds",
-					"cost": 2475,
-					"blurb": "Ignores armour fully; 44 damage per hit",
-					"set": {
-						"armor_pct": 1.0,
-						"damage": 44.0,
+					"cost": 3555,
+					"blurb": "+12 damage (58); ignores +25% of armour (100%): armour doesn't count",
+					"set": {},
+					"add": {
+						"armor_pct": 0.25,
+						"damage": 12.0,
 					},
-					"add": {},
 				},
 			},
 			{
@@ -130,7 +130,7 @@ static var TREES := {
 					{
 						"name": "Long Barrel",
 						"cost": 25,
-						"blurb": "+20 range",
+						"blurb": "+20 range (150)",
 						"set": {},
 						"add": {
 							"range": 20.0,
@@ -139,47 +139,45 @@ static var TREES := {
 					{
 						"name": "Tracer Rounds",
 						"cost": 60,
-						"blurb": "+10 range; 10% chance of a critical hit (double damage); visible tracer lines",
+						"blurb": "+10 range (160); a 10% chance of a critical hit (double damage); visible tracer lines",
 						"set": {
-							"crit": 0.1,
 							"tracers": true,
 						},
 						"add": {
 							"range": 10.0,
+							"crit": 0.1,
 						},
 					},
 					{
 						"name": "Rifled Barrels",
 						"cost": 170,
-						"blurb": "+25 range; crit chance 15%",
-						"set": {
-							"crit": 0.15,
-						},
+						"blurb": "+25 range (185); +5% crit chance (15%)",
+						"set": {},
 						"add": {
 							"range": 25.0,
+							"crit": 0.05,
 						},
 					},
 					{
 						"name": "Rangefinder",
 						"cost": 305,
-						"blurb": "+20 range; crit chance 20%",
-						"set": {
-							"crit": 0.2,
-						},
+						"blurb": "+20 range (205); +5% crit chance (20%)",
+						"set": {},
 						"add": {
 							"range": 20.0,
+							"crit": 0.05,
 						},
 					},
 				],
 				"mastery": {
 					"name": "Targeting Computer",
 					"cost": 980,
-					"blurb": "230 range in all (+25); crit chance 30%",
-					"set": {
-						"range": 230.0,
-						"crit": 0.3,
+					"blurb": "+25 range (230); +10% crit chance (30%)",
+					"set": {},
+					"add": {
+						"range": 25.0,
+						"crit": 0.1,
 					},
-					"add": {},
 				},
 			},
 			{
@@ -188,51 +186,57 @@ static var TREES := {
 				"nodes": [
 					{
 						"name": "Swivel Mount",
-						"cost": 15,
-						"blurb": "Switches to a new target instantly after a kill, and doesn't fire at enemies already about to die (no wasted rounds on swarms and holograms)",
+						"cost": 85,
+						"blurb": "+0.5 shots/s (1.7); turns onto a new target faster, and doesn't fire at enemies already about to die (no wasted rounds on swarms and holograms)",
 						"set": {
 							"swivel": true,
 						},
-						"add": {},
+						"add": {
+							"rate": 0.5,
+						},
 					},
 					{
 						"name": "Side Gun",
-						"cost": 165,
-						"blurb": "A small side gun fires at a second target at 50% damage",
-						"set": {
+						"cost": 440,
+						"blurb": "+0.5 shots/s (2.2); a small side gun fires at a second target at 50% damage",
+						"set": {},
+						"add": {
 							"side_gun": 0.5,
+							"rate": 0.5,
 						},
-						"add": {},
 					},
 					{
 						"name": "Twin Mount",
-						"cost": 330,
-						"blurb": "2 targets at full damage",
-						"set": {
+						"cost": 1155,
+						"blurb": "+0.5 shots/s (2.7); 2 targets at full damage",
+						"set": {},
+						"add": {
 							"multishot": 2.0,
-							"side_gun": 0.0,
+							"side_gun": -0.5,
+							"rate": 0.5,
 						},
-						"add": {},
 					},
 					{
 						"name": "Belt Feed",
-						"cost": 660,
-						"blurb": "+0.3 shots/s on every barrel",
+						"cost": 1100,
+						"blurb": "+0.5 shots/s on every barrel (3.2)",
 						"set": {},
 						"add": {
-							"rate": 0.3,
+							"rate": 0.5,
 						},
 					},
 				],
 				"mastery": {
 					"name": "Triple Mount",
-					"cost": 3300,
-					"blurb": "3 targets; the extra barrels go for the weakest enemies in range (swarms, holograms)",
+					"cost": 10325,
+					"blurb": "+0.5 shots/s (3.7); +1 target (3); the extra barrels go for the weakest enemies in range (swarms, holograms)",
 					"set": {
-						"multishot": 3.0,
 						"weakest_extra": true,
 					},
-					"add": {},
+					"add": {
+						"multishot": 1.0,
+						"rate": 0.5,
+					},
 				},
 			},
 		],
@@ -242,6 +246,7 @@ static var TREES := {
 		"class": "Assault",
 		"weapon": "Explosive",
 		"blurb": "Lobs high-explosive shells at nearby enemies. \"Toob.\"",
+		"tagline": "Lobs shells over the track for splash damage on the ground.",
 		"air": false,
 		"ground": true,
 		"size": 1,
@@ -254,7 +259,7 @@ static var TREES := {
 		"base": {
 			"name": "Mortar Tower",
 			"cost": 150,
-			"blurb": "150 credits; 30 damage per shell, a 60 px blast, 110 range, 0.6 shells/s; ground only. Its value matches the Gun Turret's credits per point: the Mortar does a little less single-target damage but hits a whole pack.",
+			"blurb": "150 credits; 30 damage per shell, a 60 px blast, 110 range, 0.6 shells/s; ground only. A little less single-target damage than the Gun Turret, but it hits a whole pack.",
 			"set": {
 				"damage": 30.0,
 				"splash": 60.0,
@@ -268,7 +273,7 @@ static var TREES := {
 			{
 				"name": "Field Kit",
 				"cost": 120,
-				"blurb": "A reinforced baseplate (+4 damage), a ranging sight (+10 range) and an ammo rack (+0.05 shells/s, +5 px blast).",
+				"blurb": "A reinforced baseplate, a ranging sight and an ammo rack: +4 damage (34), +10 range (120), +0.05 shells/s (0.65), +5 px blast (65).",
 				"set": {},
 				"add": {
 					"damage": 4.0,
@@ -281,21 +286,21 @@ static var TREES := {
 				"name": "Bunker Sight",
 				"cost": 15,
 				"blurb": "It can target burrowed enemies inside Radar Tower range, at half damage (the Bunker Buster mastery does it at full).",
-				"set": {
+				"set": {},
+				"add": {
 					"burrow_sight": 0.5,
 				},
-				"add": {},
 			},
 			{
 				"name": "Smoke Shells",
 				"cost": 15,
 				"blurb": "Every 4th shell leaves a smoke cloud for 3 s that slows enemies inside it by 15%.",
-				"set": {
+				"set": {},
+				"add": {
 					"smoke_every": 4.0,
 					"smoke_slow": 0.15,
 					"smoke_time": 3.0,
 				},
-				"add": {},
 			},
 		],
 		"paths": [
@@ -306,7 +311,7 @@ static var TREES := {
 					{
 						"name": "HE Charge",
 						"cost": 80,
-						"blurb": "+8 damage",
+						"blurb": "+8 damage (38)",
 						"set": {},
 						"add": {
 							"damage": 8.0,
@@ -316,30 +321,28 @@ static var TREES := {
 						"name": "Shaped Charge",
 						"cost": 95,
 						"blurb": "Shells ignore 25% of armour",
-						"set": {
+						"set": {},
+						"add": {
 							"armor_pct": 0.25,
 						},
-						"add": {},
 					},
 					{
 						"name": "AP Shells",
 						"cost": 685,
-						"blurb": "Ignore 50% of armour; +10 damage",
-						"set": {
-							"armor_pct": 0.5,
-						},
+						"blurb": "+10 damage (48); ignores +25% of armour (50%)",
+						"set": {},
 						"add": {
+							"armor_pct": 0.25,
 							"damage": 10.0,
 						},
 					},
 					{
 						"name": "Delayed Fuse",
 						"cost": 1350,
-						"blurb": "Ignore 75% of armour; +8 damage",
-						"set": {
-							"armor_pct": 0.75,
-						},
+						"blurb": "+8 damage (56); ignores +25% of armour (75%)",
+						"set": {},
 						"add": {
+							"armor_pct": 0.25,
 							"damage": 8.0,
 						},
 					},
@@ -347,13 +350,12 @@ static var TREES := {
 				"mastery": {
 					"name": "Bunker Buster",
 					"cost": 3140,
-					"blurb": "64 damage; ignores 75% of armour; shells dig in and hit burrowed enemies inside Radar Tower range",
-					"set": {
-						"damage": 64.0,
-						"armor_pct": 0.75,
+					"blurb": "+8 damage (64); shells dig in and hit burrowed enemies inside Radar Tower range",
+					"set": {},
+					"add": {
+						"damage": 8.0,
 						"burrow_sight": 1.0,
 					},
-					"add": {},
 				},
 			},
 			{
@@ -363,7 +365,7 @@ static var TREES := {
 					{
 						"name": "Quick Reload",
 						"cost": 50,
-						"blurb": "0.6 to 0.7 shells/s",
+						"blurb": "+0.1 shells/s (0.7)",
 						"set": {},
 						"add": {
 							"rate": 0.1,
@@ -381,35 +383,34 @@ static var TREES := {
 					{
 						"name": "Twin Tubes",
 						"cost": 1170,
-						"blurb": "A second tube firing in succession: 1.2 shells/s",
-						"set": {
+						"blurb": "A second tube firing in succession: +0.5 shells/s (1.2)",
+						"set": {},
+						"add": {
 							"tubes": 2.0,
-							"rate": 1.2,
+							"rate": 0.5,
 						},
-						"add": {},
 					},
 					{
 						"name": "Long Tubes",
 						"cost": 1405,
-						"blurb": "+20 range (150); 1.3 shells/s",
-						"set": {
-							"rate": 1.3,
-						},
+						"blurb": "+20 range (150); +0.1 shells/s (1.3)",
+						"set": {},
 						"add": {
 							"range": 20.0,
+							"rate": 0.1,
 						},
 					},
 				],
 				"mastery": {
 					"name": "Barrage Battery",
 					"cost": 6165,
-					"blurb": "Three tubes firing in succession: 1.7 shells/s, 165 range",
-					"set": {
-						"tubes": 3.0,
-						"rate": 1.7,
-						"range": 165.0,
+					"blurb": "A third tube: +0.4 shells/s (1.7); +15 range (165)",
+					"set": {},
+					"add": {
+						"tubes": 1.0,
+						"rate": 0.4,
+						"range": 15.0,
 					},
-					"add": {},
 				},
 			},
 			{
@@ -419,7 +420,7 @@ static var TREES := {
 					{
 						"name": "Bigger Charge",
 						"cost": 30,
-						"blurb": "Blast 60 to 70 px",
+						"blurb": "+10 px blast (70)",
 						"set": {},
 						"add": {
 							"splash": 10.0,
@@ -428,7 +429,7 @@ static var TREES := {
 					{
 						"name": "Wide Burst",
 						"cost": 60,
-						"blurb": "Blast 80 px",
+						"blurb": "+10 px blast (80)",
 						"set": {},
 						"add": {
 							"splash": 10.0,
@@ -438,21 +439,20 @@ static var TREES := {
 						"name": "Cluster Shells",
 						"cost": 1110,
 						"blurb": "Each shell also scatters 4 bomblets around the impact (10 damage, 30 px each)",
-						"set": {
+						"set": {},
+						"add": {
 							"bomblets": 4.0,
 							"bomblet_damage": 10.0,
 							"bomblet_splash": 30.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Dense Cluster",
 						"cost": 1230,
-						"blurb": "6 bomblets; blast 85 px",
-						"set": {
-							"bomblets": 6.0,
-						},
+						"blurb": "+2 bomblets (6); +5 px blast (85)",
+						"set": {},
 						"add": {
+							"bomblets": 2.0,
 							"splash": 5.0,
 						},
 					},
@@ -460,14 +460,13 @@ static var TREES := {
 				"mastery": {
 					"name": "Carpet Shells",
 					"cost": 5000,
-					"blurb": "8 bomblets of 12 damage, 35 px each, spread wider; blast 90 px",
-					"set": {
-						"bomblets": 8.0,
-						"bomblet_damage": 12.0,
-						"bomblet_splash": 35.0,
-						"bomblet_spread": 1.0,
-					},
+					"blurb": "+2 bomblets (8), each +2 damage (12) and +5 px (35), spread wider; +5 px blast (90)",
+					"set": {},
 					"add": {
+						"bomblets": 2.0,
+						"bomblet_damage": 2.0,
+						"bomblet_splash": 5.0,
+						"bomblet_spread": 1.0,
 						"splash": 5.0,
 					},
 				},
@@ -479,6 +478,7 @@ static var TREES := {
 		"class": "Assault",
 		"weapon": "Explosive",
 		"blurb": "Launches a volley of rockets at oncoming enemies. \"Instead of shooting bullets, it shoots very angry telephone poles that hate absolutely everything.\"",
+		"tagline": "Fires a salvo of rockets, each at a different enemy.",
 		"air": true,
 		"ground": true,
 		"size": 1,
@@ -506,31 +506,31 @@ static var TREES := {
 			{
 				"name": "Proximity Fuses",
 				"cost": 40,
-				"blurb": "Rockets burst beside flyers for +40% damage against air. Replaces Guidance Fins, which partly overlapped Range step 2's homing.",
-				"set": {
+				"blurb": "Rockets burst beside flyers for +40% damage against air.",
+				"set": {},
+				"add": {
 					"air_mult": 1.4,
 				},
-				"add": {},
 			},
 			{
 				"name": "Smoke Trails",
 				"cost": 20,
-				"blurb": "Rockets leave smoke along their path that slows enemies inside it by 10% for 2 s. Replaces the Autoloader, which duplicated the Payload path's reloads (Quick Loader, Auto-Loader).",
-				"set": {
+				"blurb": "Rockets leave smoke along their path that slows enemies inside it by 10% for 2 s.",
+				"set": {},
+				"add": {
 					"smoke_slow": 0.1,
 					"smoke_time": 2.0,
 				},
-				"add": {},
 			},
 			{
 				"name": "Incendiary Warheads",
 				"cost": 125,
-				"blurb": "Blasts leave burning ground, 3 damage per second for 2 s. Replaces the Long Booster, which duplicated Range step 1 (Booster Stage).",
-				"set": {
+				"blurb": "Blasts leave burning ground, 3 damage per second for 2 s.",
+				"set": {},
+				"add": {
 					"ground_burn": 3.0,
 					"ground_burn_time": 2.0,
 				},
-				"add": {},
 			},
 		],
 		"paths": [
@@ -550,7 +550,7 @@ static var TREES := {
 					{
 						"name": "Wider Burst",
 						"cost": 155,
-						"blurb": "Blast 25 to 35 px",
+						"blurb": "+10 px blast (35)",
 						"set": {},
 						"add": {
 							"splash": 10.0,
@@ -559,7 +559,7 @@ static var TREES := {
 					{
 						"name": "Heavy Warheads",
 						"cost": 985,
-						"blurb": "32 damage, 40 px blast",
+						"blurb": "+8 damage (32); +5 px blast (40)",
 						"set": {},
 						"add": {
 							"damage": 8.0,
@@ -569,7 +569,7 @@ static var TREES := {
 					{
 						"name": "Dense Payload",
 						"cost": 1245,
-						"blurb": "38 damage",
+						"blurb": "+6 damage (38)",
 						"set": {},
 						"add": {
 							"damage": 6.0,
@@ -579,7 +579,7 @@ static var TREES := {
 				"mastery": {
 					"name": "Thermobaric Rockets",
 					"cost": 5710,
-					"blurb": "46 damage, 50 px blast",
+					"blurb": "+8 damage (46); +10 px blast (50)",
 					"set": {},
 					"add": {
 						"damage": 8.0,
@@ -612,7 +612,7 @@ static var TREES := {
 					{
 						"name": "Smart Seekers",
 						"cost": 510,
-						"blurb": "Rockets re-target if their target dies; +30 range (230)",
+						"blurb": "+30 range (230); rockets re-target if their target dies",
 						"set": {
 							"retarget": true,
 						},
@@ -633,12 +633,13 @@ static var TREES := {
 				"mastery": {
 					"name": "Hunter Seekers",
 					"cost": 2315,
-					"blurb": "300 range; seekers never miss, catching fast and blinking enemies",
+					"blurb": "+40 range (300); seekers never miss, catching fast and blinking enemies",
 					"set": {
-						"range": 300.0,
 						"never_miss": true,
 					},
-					"add": {},
+					"add": {
+						"range": 40.0,
+					},
 				},
 			},
 			{
@@ -648,49 +649,50 @@ static var TREES := {
 					{
 						"name": "Extra Tube",
 						"cost": 135,
-						"blurb": "4 rockets per salvo",
-						"set": {
-							"missiles": 4.0,
+						"blurb": "+1 rocket per salvo (4)",
+						"set": {},
+						"add": {
+							"missiles": 1.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Quick Loader",
 						"cost": 265,
-						"blurb": "A salvo every 2 s",
-						"set": {
-							"rate": 0.5,
+						"blurb": "−0.5 s between salvos (2 s)",
+						"set": {},
+						"add": {
+							"rate": 0.1,
 						},
-						"add": {},
 					},
 					{
 						"name": "Six-Pack",
 						"cost": 1335,
-						"blurb": "6 rockets per salvo",
-						"set": {
-							"missiles": 6.0,
+						"blurb": "+2 rockets per salvo (6)",
+						"set": {},
+						"add": {
+							"missiles": 2.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Auto-Loader",
 						"cost": 1605,
-						"blurb": "A salvo every 1.7 s",
-						"set": {
-							"rate": 0.588,
+						"blurb": "−0.3 s between salvos (1.7 s)",
+						"set": {},
+						"add": {
+							"rate": 0.088,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Ripple Salvo",
 					"cost": 6415,
-					"blurb": "8 rockets per salvo, rippling out one after another",
+					"blurb": "+2 rockets per salvo (8), rippling out one after another",
 					"set": {
-						"missiles": 8.0,
 						"ripple": true,
 					},
-					"add": {},
+					"add": {
+						"missiles": 2.0,
+					},
 				},
 			},
 		],
@@ -700,6 +702,7 @@ static var TREES := {
 		"class": "Assault",
 		"weapon": "Energy",
 		"blurb": "A High-Energy Laser Emitter affixed to a rotating turret. \"It does more than just blind the enemy, that's for sure.\"",
+		"tagline": "A beam that ramps up the longer it holds one target.",
 		"air": true,
 		"ground": true,
 		"size": 1,
@@ -728,7 +731,7 @@ static var TREES := {
 			{
 				"name": "Capacitor Bank",
 				"cost": 160,
-				"blurb": "+8 damage per second (25 to 33).",
+				"blurb": "+8 damage per second (33).",
 				"set": {},
 				"add": {
 					"damage": 8.0,
@@ -737,20 +740,20 @@ static var TREES := {
 			{
 				"name": "Heat Sinks",
 				"cost": 60,
-				"blurb": "Ramp ceiling ×3 to ×3.5.",
-				"set": {
-					"ramp": 3.5,
+				"blurb": "+0.5 ramp ceiling (×3.5).",
+				"set": {},
+				"add": {
+					"ramp": 0.5,
 				},
-				"add": {},
 			},
 			{
 				"name": "Ramp Memory",
 				"cost": 55,
 				"blurb": "Switching targets keeps half the ramp instead of resetting it.",
-				"set": {
+				"set": {},
+				"add": {
 					"ramp_keep": 0.5,
 				},
-				"add": {},
 			},
 		],
 		"paths": [
@@ -761,50 +764,50 @@ static var TREES := {
 					{
 						"name": "Hotter Emitter",
 						"cost": 60,
-						"blurb": "Ramp ceiling ×3.5",
-						"set": {
-							"ramp": 3.5,
+						"blurb": "+0.5 ramp ceiling (×3.5)",
+						"set": {},
+						"add": {
+							"ramp": 0.5,
 						},
-						"add": {},
 					},
 					{
 						"name": "Quick Focus",
 						"cost": 60,
-						"blurb": "Ramp time 3 to 2.2 s",
-						"set": {
-							"ramp_time": 2.2,
+						"blurb": "−0.8 s ramp time (2.2 s)",
+						"set": {},
+						"add": {
+							"ramp_time": -0.8,
 						},
-						"add": {},
 					},
 					{
 						"name": "Overdrive",
 						"cost": 815,
-						"blurb": "Ramp ceiling ×5",
-						"set": {
-							"ramp": 5.0,
+						"blurb": "+1.5 ramp ceiling (×5)",
+						"set": {},
+						"add": {
+							"ramp": 1.5,
 						},
-						"add": {},
 					},
 					{
 						"name": "Thermal Lock",
 						"cost": 1425,
-						"blurb": "Ceiling ×6; ramp time 1.8 s",
-						"set": {
-							"ramp": 6.0,
-							"ramp_time": 1.8,
+						"blurb": "+1 ramp ceiling (×6); −0.4 s ramp time (1.8 s)",
+						"set": {},
+						"add": {
+							"ramp": 1.0,
+							"ramp_time": -0.4,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Annihilator",
 					"cost": 5535,
-					"blurb": "Ceiling ×8 in 1.5 s: the boss killer",
-					"set": {
-						"ramp": 8.0,
-						"ramp_time": 1.5,
+					"blurb": "+2 ramp ceiling (×8); −0.3 s ramp time (1.5 s): the boss killer",
+					"set": {},
+					"add": {
+						"ramp": 2.0,
+						"ramp_time": -0.3,
 					},
-					"add": {},
 				},
 			},
 			{
@@ -815,50 +818,47 @@ static var TREES := {
 						"name": "Beam Splitter",
 						"cost": 200,
 						"blurb": "A second beam on another target at 40% power",
-						"set": {
-							"beams": 2.0,
-							"beam_power": 0.4,
+						"set": {},
+						"add": {
+							"beams": 1.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Tuned Splitter",
 						"cost": 200,
-						"blurb": "The second beam at 60%",
-						"set": {
-							"beam_power": 0.6,
+						"blurb": "+20% second-beam power (60%)",
+						"set": {},
+						"add": {
+							"beam_power": 0.2,
 						},
-						"add": {},
 					},
 					{
 						"name": "Prism",
 						"cost": 1190,
-						"blurb": "3 beams (extras at 60%)",
-						"set": {
-							"beams": 3.0,
-							"beam_power": 0.6,
+						"blurb": "+1 beam (3); the extras at 60%",
+						"set": {},
+						"add": {
+							"beams": 1.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Clear Prism",
 						"cost": 1190,
-						"blurb": "Extra beams at 75%",
-						"set": {
-							"beam_power": 0.75,
+						"blurb": "+15% extra-beam power (75%)",
+						"set": {},
+						"add": {
+							"beam_power": 0.15,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Prism Array",
 					"cost": 5950,
-					"blurb": "4 beams (extras at 75%); each beam ramps on its own target",
-					"set": {
-						"beams": 4.0,
-						"beam_power": 0.75,
+					"blurb": "+1 beam (4); each beam ramps on its own target",
+					"set": {},
+					"add": {
+						"beams": 1.0,
 					},
-					"add": {},
 				},
 			},
 			{
@@ -905,11 +905,11 @@ static var TREES := {
 				"mastery": {
 					"name": "Deep Lance",
 					"cost": 2115,
-					"blurb": "280 range: still a mid-range tower, but with a long reach",
-					"set": {
-						"range": 280.0,
+					"blurb": "+40 range (280): still a mid-range tower, but with a long reach",
+					"set": {},
+					"add": {
+						"range": 40.0,
 					},
-					"add": {},
 				},
 			},
 		],
@@ -919,6 +919,7 @@ static var TREES := {
 		"class": "Assault",
 		"weapon": "Ballistic",
 		"blurb": "A fully automatic anti-aircraft gun. \"We don't need a gun, or a nug!\"",
+		"tagline": "Flak that shreds flyers; it ignores ground enemies.",
 		"air": true,
 		"ground": false,
 		"size": 1,
@@ -944,7 +945,7 @@ static var TREES := {
 			{
 				"name": "Fire-Control Radar",
 				"cost": 45,
-				"blurb": "+15 range and steadier aim.",
+				"blurb": "+15 range (175).",
 				"set": {},
 				"add": {
 					"range": 15.0,
@@ -953,7 +954,7 @@ static var TREES := {
 			{
 				"name": "Ammo Drum",
 				"cost": 30,
-				"blurb": "+10% fire rate (2.75 rounds/s).",
+				"blurb": "+0.25 rounds/s (2.75).",
 				"set": {},
 				"add": {
 					"rate": 0.25,
@@ -1014,11 +1015,11 @@ static var TREES := {
 				"mastery": {
 					"name": "Sky Wall",
 					"cost": 1500,
-					"blurb": "330 range: covers a big circle of sky",
-					"set": {
-						"range": 330.0,
+					"blurb": "+50 range (330): covers a big circle of sky",
+					"set": {},
+					"add": {
+						"range": 50.0,
 					},
-					"add": {},
 				},
 			},
 			{
@@ -1038,41 +1039,40 @@ static var TREES := {
 						"name": "Flak Rounds",
 						"cost": 375,
 						"blurb": "Rounds burst near their target: a 20 px airburst on every flyer nearby",
-						"set": {
+						"set": {},
+						"add": {
 							"burst": 20.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Flak Shells",
 						"cost": 795,
-						"blurb": "36 damage; 30 px airburst",
-						"set": {
-							"burst": 30.0,
-						},
+						"blurb": "+5 damage (36); +10 px airburst (30)",
+						"set": {},
 						"add": {
 							"damage": 5.0,
+							"burst": 10.0,
 						},
 					},
 					{
 						"name": "Wide Burst",
 						"cost": 865,
-						"blurb": "40 px airburst",
-						"set": {
-							"burst": 40.0,
+						"blurb": "+10 px airburst (40)",
+						"set": {},
+						"add": {
+							"burst": 10.0,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Flak Curtain",
 					"cost": 4325,
-					"blurb": "42 damage; 50 px airburst: whole flocks of Locusts and Shrikes go down together",
-					"set": {
-						"damage": 42.0,
-						"burst": 50.0,
+					"blurb": "+6 damage (42); +10 px airburst (50): whole flocks of Locusts and Shrikes go down together",
+					"set": {},
+					"add": {
+						"damage": 6.0,
+						"burst": 10.0,
 					},
-					"add": {},
 				},
 			},
 			{
@@ -1082,51 +1082,52 @@ static var TREES := {
 					{
 						"name": "Quick Cycle",
 						"cost": 35,
-						"blurb": "2.8 rounds/s",
-						"set": {
-							"rate": 2.8,
+						"blurb": "+0.3 rounds/s (2.8)",
+						"set": {},
+						"add": {
+							"rate": 0.3,
 						},
-						"add": {},
 					},
 					{
 						"name": "Fast Traverse",
 						"cost": 95,
-						"blurb": "3.2 rounds/s; turns faster onto new flyers",
+						"blurb": "+0.4 rounds/s (3.2); turns faster onto new flyers",
 						"set": {
-							"rate": 3.2,
 							"turn_fast": true,
 						},
-						"add": {},
+						"add": {
+							"rate": 0.4,
+						},
 					},
 					{
 						"name": "Twin Barrels",
 						"cost": 625,
-						"blurb": "4.5 rounds/s",
-						"set": {
-							"rate": 4.5,
+						"blurb": "Twin barrels: +1.3 rounds/s (4.5)",
+						"set": {},
+						"add": {
+							"rate": 1.3,
 							"barrels": 2.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Belt Feed",
 						"cost": 675,
-						"blurb": "5.2 rounds/s",
-						"set": {
-							"rate": 5.2,
+						"blurb": "+0.7 rounds/s (5.2)",
+						"set": {},
+						"add": {
+							"rate": 0.7,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Quad Mount",
 					"cost": 3460,
-					"blurb": "7 rounds/s from four barrels: a wall of fire",
-					"set": {
-						"rate": 7.0,
-						"barrels": 4.0,
+					"blurb": "Four barrels: +1.8 rounds/s (7), a wall of fire",
+					"set": {},
+					"add": {
+						"rate": 1.8,
+						"barrels": 2.0,
 					},
-					"add": {},
 				},
 			},
 		],
@@ -1136,6 +1137,7 @@ static var TREES := {
 		"class": "Assault",
 		"weapon": "Explosive",
 		"blurb": "A large-bore cannon that fires high-explosive shells very long distances. \"It's not DiGiorno...\"",
+		"tagline": "Long-range shells on a point of the track you choose.",
 		"air": false,
 		"ground": true,
 		"size": 1,
@@ -1168,19 +1170,19 @@ static var TREES := {
 				"name": "Shell Magazine",
 				"cost": 120,
 				"blurb": "Every third shell is a heavy round for +50% damage (about +17% on average), with no change to reload time.",
-				"set": {
+				"set": {},
+				"add": {
 					"heavy_every": 3.0,
 				},
-				"add": {},
 			},
 			{
 				"name": "Stabilised Mount",
 				"cost": 120,
-				"blurb": "Shells land within 15 px of the aimed spot instead of scattering up to 30 px, so the blast hits what you aimed at.",
-				"set": {
-					"scatter": 15.0,
+				"blurb": "−15 px scatter (15 px): shells land closer to the aimed spot, so the blast hits what you aimed at.",
+				"set": {},
+				"add": {
+					"scatter": -15.0,
 				},
-				"add": {},
 			},
 			{
 				"name": "Wide Charge",
@@ -1209,42 +1211,42 @@ static var TREES := {
 					{
 						"name": "Wide Bursting Charge",
 						"cost": 200,
-						"blurb": "Blast 70 to 85 px",
-						"set": {
-							"splash": 85.0,
+						"blurb": "+15 px blast (85)",
+						"set": {},
+						"add": {
+							"splash": 15.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "HE Shells",
 						"cost": 730,
-						"blurb": "110 damage",
-						"set": {
-							"damage": 110.0,
+						"blurb": "+20 damage (110)",
+						"set": {},
+						"add": {
+							"damage": 20.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Penetrator Shells",
 						"cost": 2930,
-						"blurb": "120 damage; ignores 50% of armour",
-						"set": {
-							"damage": 120.0,
+						"blurb": "+10 damage (120); ignores 50% of armour",
+						"set": {},
+						"add": {
+							"damage": 10.0,
 							"armor_pct": 0.5,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Siege Shells",
 					"cost": 7355,
-					"blurb": "140 damage, 90 px blast, ignores 75% of armour",
-					"set": {
-						"damage": 140.0,
-						"splash": 90.0,
-						"armor_pct": 0.75,
+					"blurb": "+20 damage (140); +5 px blast (90); ignores +25% of armour (75%)",
+					"set": {},
+					"add": {
+						"damage": 20.0,
+						"splash": 5.0,
+						"armor_pct": 0.25,
 					},
-					"add": {},
 				},
 			},
 			{
@@ -1254,49 +1256,49 @@ static var TREES := {
 					{
 						"name": "Drilled Crew",
 						"cost": 120,
-						"blurb": "A shell every 3.3 s",
-						"set": {
-							"rate": 0.303,
+						"blurb": "−0.7 s between shells (3.3 s)",
+						"set": {},
+						"add": {
+							"rate": 0.053,
 						},
-						"add": {},
 					},
 					{
 						"name": "Quick Breech",
 						"cost": 240,
-						"blurb": "Every 2.9 s",
-						"set": {
-							"rate": 0.345,
+						"blurb": "−0.4 s between shells (2.9 s)",
+						"set": {},
+						"add": {
+							"rate": 0.042,
 						},
-						"add": {},
 					},
 					{
 						"name": "Autoloader",
 						"cost": 1450,
-						"blurb": "Every 2 s",
-						"set": {
-							"rate": 0.5,
+						"blurb": "−0.9 s between shells (2 s)",
+						"set": {},
+						"add": {
+							"rate": 0.155,
 						},
-						"add": {},
 					},
 					{
 						"name": "Rapid Breech",
 						"cost": 1935,
-						"blurb": "Every 1.7 s",
-						"set": {
-							"rate": 0.588,
+						"blurb": "−0.3 s between shells (1.7 s)",
+						"set": {},
+						"add": {
+							"rate": 0.088,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Rolling Barrage",
 					"cost": 3865,
-					"blurb": "Fires in 3-shell barrages that walk across the aimed spot: an average of one shell every 1.4 s",
-					"set": {
-						"rate": 0.238,
+					"blurb": "Fires in 3-shell barrages that walk across the aimed spot: one shell every 1.4 s on average",
+					"set": {},
+					"add": {
+						"rate": -0.35,
 						"barrage": 3.0,
 					},
-					"add": {},
 				},
 			},
 			{
@@ -1333,13 +1335,13 @@ static var TREES := {
 					{
 						"name": "Improved Payloads",
 						"cost": 3505,
-						"blurb": "Every shell type stronger: burn 22/s, shrapnel at 85%, stun 0.7 s",
-						"set": {
-							"burn_dps": 22.0,
-							"shrap_mult": 0.85,
-							"stun_time": 0.7,
+						"blurb": "Every shell type stronger: +7 burn damage/s (22), +15% shrapnel damage (85%), +0.2 s stun (0.7 s)",
+						"set": {},
+						"add": {
+							"burn_dps": 7.0,
+							"shrap_mult": 0.15,
+							"stun_time": 0.2,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
@@ -1359,6 +1361,7 @@ static var TREES := {
 		"class": "Assault",
 		"weapon": "Ballistic",
 		"blurb": "A large cannon with magnetically polarized rails that launch a large projectile extremely far, extremely fast. \"Known to cause cancer in the state of California.\"",
+		"tagline": "A slow, piercing shot through every enemy in a line.",
 		"air": true,
 		"ground": true,
 		"size": 1,
@@ -1384,16 +1387,16 @@ static var TREES := {
 			{
 				"name": "Capacitor Coils",
 				"cost": 140,
-				"blurb": "Recharge 2.5 to 2.2 s.",
-				"set": {
-					"rate": 0.4545,
+				"blurb": "−0.3 s recharge (2.2 s).",
+				"set": {},
+				"add": {
+					"rate": 0.0545,
 				},
-				"add": {},
 			},
 			{
 				"name": "Longer Rails",
 				"cost": 265,
-				"blurb": "+15 damage (105) and +30 range (410).",
+				"blurb": "+15 damage (105); +30 range (410).",
 				"set": {},
 				"add": {
 					"damage": 15.0,
@@ -1403,11 +1406,11 @@ static var TREES := {
 			{
 				"name": "Penetrator Tips",
 				"cost": 65,
-				"blurb": "Falloff per enemy 40% to 30%.",
-				"set": {
-					"falloff": 0.3,
+				"blurb": "−10% damage lost per enemy pierced (30%).",
+				"set": {},
+				"add": {
+					"falloff": -0.1,
 				},
-				"add": {},
 			},
 		],
 		"paths": [
@@ -1428,42 +1431,42 @@ static var TREES := {
 						"name": "Boss Rounds",
 						"cost": 275,
 						"blurb": "×1.5 damage to bosses",
-						"set": {
+						"set": {},
+						"add": {
 							"boss_mult": 1.5,
 						},
-						"add": {},
 					},
 					{
 						"name": "Overcharge",
 						"cost": 2260,
-						"blurb": "It charges each shot longer: 200 damage, a 3 s recharge",
-						"set": {
-							"damage": 200.0,
-							"rate": 0.333,
+						"blurb": "It charges each shot longer: +80 damage (200), +0.5 s recharge (3 s)",
+						"set": {},
+						"add": {
+							"damage": 80.0,
+							"rate": -0.067,
 						},
-						"add": {},
 					},
 					{
 						"name": "Kill Charge",
 						"cost": 5125,
-						"blurb": "240 damage; ×2 to bosses",
-						"set": {
-							"damage": 240.0,
-							"boss_mult": 2.0,
+						"blurb": "+40 damage (240); +0.5 boss multiplier (×2)",
+						"set": {},
+						"add": {
+							"damage": 40.0,
+							"boss_mult": 0.5,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Kingslayer",
 					"cost": 6465,
-					"blurb": "280 damage per charged shot (3.3 s); ×2.5 to bosses",
-					"set": {
-						"damage": 280.0,
-						"rate": 0.303,
-						"boss_mult": 2.5,
+					"blurb": "+40 damage (280); +0.3 s recharge (3.3 s); +0.5 boss multiplier (×2.5)",
+					"set": {},
+					"add": {
+						"damage": 40.0,
+						"rate": -0.03,
+						"boss_mult": 0.5,
 					},
-					"add": {},
 				},
 			},
 			{
@@ -1473,11 +1476,11 @@ static var TREES := {
 					{
 						"name": "Fast Capacitors",
 						"cost": 140,
-						"blurb": "Recharge 2.2 s",
-						"set": {
-							"rate": 0.4545,
+						"blurb": "−0.3 s recharge (2.2 s)",
+						"set": {},
+						"add": {
+							"rate": 0.0545,
 						},
-						"add": {},
 					},
 					{
 						"name": "Extended Rails",
@@ -1491,31 +1494,31 @@ static var TREES := {
 					{
 						"name": "Rapid Capacitors",
 						"cost": 1930,
-						"blurb": "Recharge 1.6 s",
-						"set": {
-							"rate": 0.625,
+						"blurb": "−0.6 s recharge (1.6 s)",
+						"set": {},
+						"add": {
+							"rate": 0.1705,
 						},
-						"add": {},
 					},
 					{
 						"name": "Supercapacitors",
 						"cost": 2610,
-						"blurb": "Recharge 1.35 s",
-						"set": {
-							"rate": 0.741,
+						"blurb": "−0.25 s recharge (1.35 s)",
+						"set": {},
+						"add": {
+							"rate": 0.116,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Twin Rails",
 					"cost": 5000,
-					"blurb": "Two rails firing in turn: a slug every 1.2 s, twice the stock rate",
-					"set": {
-						"rate": 0.833,
+					"blurb": "Two rails firing in turn: −0.15 s recharge (a slug every 1.2 s), twice the stock rate",
+					"set": {},
+					"add": {
+						"rate": 0.092,
 						"rails": 2.0,
 					},
-					"add": {},
 				},
 			},
 			{
@@ -1526,52 +1529,52 @@ static var TREES := {
 						"name": "Shatter Rounds",
 						"cost": 60,
 						"blurb": "Each hit strips 2 armour permanently, so every tower benefits",
-						"set": {
+						"set": {},
+						"add": {
 							"shatter": 2.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Penetrator Core",
 						"cost": 260,
-						"blurb": "Falloff per enemy 40% to 25%",
-						"set": {
-							"falloff": 0.25,
+						"blurb": "−15% damage lost per enemy pierced (25%)",
+						"set": {},
+						"add": {
+							"falloff": -0.15,
 						},
-						"add": {},
 					},
 					{
 						"name": "Ionised Trail",
 						"cost": 1535,
 						"blurb": "The line burns for 2 s: 30 energy damage/s to every enemy on it, targeted or not (cloaked ones too)",
-						"set": {
+						"set": {},
+						"add": {
 							"trail_dps": 30.0,
 							"trail_time": 2.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Hot Rail",
 						"cost": 3685,
-						"blurb": "Shatter 4 armour; trail 45/s; falloff 15%",
-						"set": {
-							"shatter": 4.0,
-							"trail_dps": 45.0,
-							"falloff": 0.15,
+						"blurb": "+2 armour stripped (4); +15 trail damage/s (45); −10% lost per enemy (15%)",
+						"set": {},
+						"add": {
+							"shatter": 2.0,
+							"trail_dps": 15.0,
+							"falloff": -0.1,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Ion Cannon",
 					"cost": 6920,
-					"blurb": "Shatter 6; trail 50/s; no falloff: full damage to everything on the line",
-					"set": {
-						"shatter": 6.0,
-						"trail_dps": 50.0,
-						"falloff": 0.0,
+					"blurb": "+2 armour stripped (6); +5 trail damage/s (50); −15% lost per enemy (0%): full damage to everything on the line",
+					"set": {},
+					"add": {
+						"shatter": 2.0,
+						"trail_dps": 5.0,
+						"falloff": -0.15,
 					},
-					"add": {},
 				},
 			},
 		],
@@ -1581,6 +1584,7 @@ static var TREES := {
 		"class": "Assault",
 		"weapon": "Energy",
 		"blurb": "A large metal disk mounted atop of a large tower that generates high-voltage electrical arcs that damage incoming enemies. \"It was built in a cave with a box of scraps.\"",
+		"tagline": "Lightning that chains from enemy to enemy.",
 		"air": true,
 		"ground": true,
 		"size": 1,
@@ -1593,7 +1597,7 @@ static var TREES := {
 		"base": {
 			"name": "Tesla Tower",
 			"cost": 250,
-			"blurb": "250 credits; an arc every 1.25 s (0.8/s), 32 damage, jumping to 3 more enemies within 70 px and losing 15% per jump; 140 range; air and ground. It's Energy, so it ignores armour like other energy damage (to confirm), and it's a Wraith counter once the Wraith is revealed.",
+			"blurb": "250 credits; an arc every 1.25 s (0.8/s), 32 damage, jumping to 3 more enemies within 70 px and losing 15% per jump; 140 range; air and ground. It's Energy, so armour doesn't count, and it's a Wraith counter once the Wraith is revealed.",
 			"set": {
 				"damage": 32.0,
 				"range": 140.0,
@@ -1608,7 +1612,7 @@ static var TREES := {
 			{
 				"name": "Bigger Disk",
 				"cost": 120,
-				"blurb": "+4 damage (36), +15 range (155).",
+				"blurb": "+4 damage (36); +15 range (155).",
 				"set": {},
 				"add": {
 					"damage": 4.0,
@@ -1627,11 +1631,11 @@ static var TREES := {
 			{
 				"name": "Insulated Coils",
 				"cost": 70,
-				"blurb": "An arc every 1.1 s.",
-				"set": {
-					"rate": 0.909,
+				"blurb": "+0.11 arcs/s (0.91): an arc every 1.1 s.",
+				"set": {},
+				"add": {
+					"rate": 0.109,
 				},
-				"add": {},
 			},
 		],
 		"paths": [
@@ -1660,34 +1664,34 @@ static var TREES := {
 					{
 						"name": "Arc Stun",
 						"cost": 1020,
-						"blurb": "48 damage; arcs stun for 0.3 s (bosses 0.1 s)",
-						"set": {
-							"damage": 48.0,
+						"blurb": "+8 damage (48); arcs stun for 0.3 s (bosses 0.1 s)",
+						"set": {},
+						"add": {
+							"damage": 8.0,
 							"stun_time": 0.3,
 						},
-						"add": {},
 					},
 					{
 						"name": "Clean Conduction",
 						"cost": 1705,
-						"blurb": "54 damage; only 8% lost per jump",
-						"set": {
-							"damage": 54.0,
-							"falloff": 0.08,
+						"blurb": "+6 damage (54); −7% lost per jump (8%)",
+						"set": {},
+						"add": {
+							"damage": 6.0,
+							"falloff": -0.07,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Lightning Rod",
 					"cost": 4310,
-					"blurb": "60 damage; 3% lost per jump; stun 0.5 s",
-					"set": {
-						"damage": 60.0,
-						"falloff": 0.03,
-						"stun_time": 0.5,
+					"blurb": "+6 damage (60); −5% lost per jump (3%); +0.2 s stun (0.5 s)",
+					"set": {},
+					"add": {
+						"damage": 6.0,
+						"falloff": -0.05,
+						"stun_time": 0.2,
 					},
-					"add": {},
 				},
 			},
 			{
@@ -1706,46 +1710,45 @@ static var TREES := {
 					{
 						"name": "Extra Jump",
 						"cost": 155,
-						"blurb": "4 jumps",
-						"set": {
-							"jumps": 4.0,
+						"blurb": "+1 jump (4)",
+						"set": {},
+						"add": {
+							"jumps": 1.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Storm Field",
 						"cost": 2260,
-						"blurb": "5 jumps; each arc leaves a 25 px storm for 2 s (10 energy damage/s to every enemy in it)",
-						"set": {
-							"jumps": 5.0,
+						"blurb": "+1 jump (5); each arc leaves a 25 px storm for 2 s (10 energy damage/s to every enemy in it)",
+						"set": {},
+						"add": {
+							"jumps": 1.0,
 							"storm_radius": 25.0,
 							"storm_dps": 10.0,
 							"storm_time": 2.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Wide Storm",
 						"cost": 2390,
-						"blurb": "+20 range (180); 6 jumps",
-						"set": {
-							"jumps": 6.0,
-						},
+						"blurb": "+20 range (180); +1 jump (6)",
+						"set": {},
 						"add": {
 							"range": 20.0,
+							"jumps": 1.0,
 						},
 					},
 				],
 				"mastery": {
 					"name": "Tempest",
 					"cost": 8140,
-					"blurb": "7 jumps; storms of 14/s, 30 px",
-					"set": {
-						"jumps": 7.0,
-						"storm_radius": 30.0,
-						"storm_dps": 14.0,
+					"blurb": "+1 jump (7); +4 storm damage/s (14); +5 px storms (30)",
+					"set": {},
+					"add": {
+						"jumps": 1.0,
+						"storm_radius": 5.0,
+						"storm_dps": 4.0,
 					},
-					"add": {},
 				},
 			},
 			{
@@ -1755,48 +1758,48 @@ static var TREES := {
 					{
 						"name": "Quick Recharge",
 						"cost": 60,
-						"blurb": "0.9 arcs/s",
-						"set": {
-							"rate": 0.9,
+						"blurb": "+0.1 arcs/s (0.9)",
+						"set": {},
+						"add": {
+							"rate": 0.1,
 						},
-						"add": {},
 					},
 					{
 						"name": "Fast Capacitor",
 						"cost": 125,
-						"blurb": "1.0 arcs/s",
-						"set": {
-							"rate": 1.0,
+						"blurb": "+0.1 arcs/s (1)",
+						"set": {},
+						"add": {
+							"rate": 0.1,
 						},
-						"add": {},
 					},
 					{
 						"name": "Rapid Discharge",
 						"cost": 995,
-						"blurb": "1.4 arcs/s",
-						"set": {
-							"rate": 1.4,
+						"blurb": "+0.4 arcs/s (1.4)",
+						"set": {},
+						"add": {
+							"rate": 0.4,
 						},
-						"add": {},
 					},
 					{
 						"name": "Overclocked Coil",
 						"cost": 995,
-						"blurb": "1.6 arcs/s",
-						"set": {
-							"rate": 1.6,
+						"blurb": "+0.2 arcs/s (1.6)",
+						"set": {},
+						"add": {
+							"rate": 0.2,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Continuous Discharge",
 					"cost": 4980,
-					"blurb": "2.1 arcs/s: near-constant lightning",
-					"set": {
-						"rate": 2.1,
+					"blurb": "+0.5 arcs/s (2.1): near-constant lightning",
+					"set": {},
+					"add": {
+						"rate": 0.5,
 					},
-					"add": {},
 				},
 			},
 		],
@@ -1806,9 +1809,10 @@ static var TREES := {
 		"class": "Assault",
 		"weapon": "Deployable",
 		"blurb": "Houses combat drones that hunt after enemies. \"The military really took the idea of same-day delivery and ran with it.\"",
+		"tagline": "Launches drones that hunt enemies across the map.",
 		"air": true,
 		"ground": true,
-		"size": 1,
+		"size": 2,
 		"damage_kind": "physical",
 		"beam": false,
 		"uncapped": false,
@@ -1830,11 +1834,11 @@ static var TREES := {
 			{
 				"name": "Second Hangar",
 				"cost": 3200,
-				"blurb": "The owner kept it single when every other tower got a choice of three (2026-10-15). It launches the second drone, doubling the bay's firepower. The formula said 600; the owner set 3,200, since doubling the firepower is worth more than a step 1.",
-				"set": {
-					"drones": 2.0,
+				"blurb": "Launches a second drone, doubling the bay's firepower.",
+				"set": {},
+				"add": {
+					"drones": 1.0,
 				},
-				"add": {},
 			},
 		],
 		"paths": [
@@ -1845,48 +1849,48 @@ static var TREES := {
 					{
 						"name": "Heavier Guns",
 						"cost": 150,
-						"blurb": "20 damage",
-						"set": {
-							"damage": 20.0,
+						"blurb": "+4 damage (20)",
+						"set": {},
+						"add": {
+							"damage": 4.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Hot Loads",
 						"cost": 300,
-						"blurb": "24 damage",
-						"set": {
-							"damage": 24.0,
+						"blurb": "+4 damage (24)",
+						"set": {},
+						"add": {
+							"damage": 4.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Combat Firmware",
 						"cost": 900,
-						"blurb": "30 damage",
-						"set": {
-							"damage": 30.0,
+						"blurb": "+6 damage (30)",
+						"set": {},
+						"add": {
+							"damage": 6.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Assault Frames",
 						"cost": 1800,
-						"blurb": "36 damage",
-						"set": {
-							"damage": 36.0,
+						"blurb": "+6 damage (36)",
+						"set": {},
+						"add": {
+							"damage": 6.0,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Elite Drones",
 					"cost": 3600,
-					"blurb": "42 damage",
-					"set": {
-						"damage": 42.0,
+					"blurb": "+6 damage (42)",
+					"set": {},
+					"add": {
+						"damage": 6.0,
 					},
-					"add": {},
 				},
 			},
 			{
@@ -1924,10 +1928,10 @@ static var TREES := {
 						"name": "Upgraded Loadouts",
 						"cost": 865,
 						"blurb": "Every loadout 25% stronger",
-						"set": {
+						"set": {},
+						"add": {
 							"loadout_mult": 1.25,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
@@ -1947,48 +1951,48 @@ static var TREES := {
 					{
 						"name": "Fast Cycling",
 						"cost": 100,
-						"blurb": "3.5 shots/s",
-						"set": {
-							"rate": 3.5,
+						"blurb": "+0.5 shots/s (3.5)",
+						"set": {},
+						"add": {
+							"rate": 0.5,
 						},
-						"add": {},
 					},
 					{
 						"name": "Twin Feed",
 						"cost": 200,
-						"blurb": "4 shots/s",
-						"set": {
-							"rate": 4.0,
+						"blurb": "+0.5 shots/s (4)",
+						"set": {},
+						"add": {
+							"rate": 0.5,
 						},
-						"add": {},
 					},
 					{
 						"name": "Rotary Guns",
 						"cost": 800,
-						"blurb": "5 shots/s",
-						"set": {
-							"rate": 5.0,
+						"blurb": "+1 shot/s (5)",
+						"set": {},
+						"add": {
+							"rate": 1.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Overclocked Feed",
 						"cost": 1280,
-						"blurb": "5.8 shots/s",
-						"set": {
-							"rate": 5.8,
+						"blurb": "+0.8 shots/s (5.8)",
+						"set": {},
+						"add": {
+							"rate": 0.8,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Storm Drones",
 					"cost": 3840,
-					"blurb": "7 shots/s",
-					"set": {
-						"rate": 7.0,
+					"blurb": "+1.2 shots/s (7)",
+					"set": {},
+					"add": {
+						"rate": 1.2,
 					},
-					"add": {},
 				},
 			},
 		],
@@ -1998,6 +2002,7 @@ static var TREES := {
 		"class": "Assault",
 		"weapon": "Deployable",
 		"blurb": "A large slow-flying cargo plane capable of being with with a wide range of weaponry. \"You know that feeling you get when its raining outside, but then the rain suddenly goes from being water to large metal bullets being shot at you from that giant plane above you? Yeah, I hate that feeling.\"",
+		"tagline": "A gunship that circles a spot you choose, guns blazing.",
 		"air": true,
 		"ground": true,
 		"size": 1,
@@ -2010,7 +2015,7 @@ static var TREES := {
 		"base": {
 			"name": "CAS Gunship",
 			"cost": 650,
-			"blurb": "Gatling (light, built in), autocannon (medium), missiles (heavy). Research unlocks more weapons per class later (the Research Lab rework). - Attack: the tower can be placed anywhere; the gunship orbits a point you designate and side-fires on enemies inside its orbit. Re-designating is free, any time. - Targets: ground and air by default, chosen by the targeting option (the Any/Air/Ground priority). - EMPs under its orbit silence its guns, like the Drone Bay's drones. - Retrofit: Radar: it can detect cloaked enemies. - 650 credits to build. - The masteries need research, as other towers' do (owner). - The Radar reveals cloaked enemies to other towers too (owner).",
+			"blurb": "650 credits; place it anywhere. The gunship orbits a point you choose (move it any time, for free) and side-fires on enemies inside its 90 px orbit with its built-in Gatling: 12 damage, 5 rounds/s. Air and ground, by its targeting option. Its paths add an autocannon and missiles. EMPs under its orbit silence its guns.",
 			"set": {
 				"damage": 12.0,
 				"rate": 5.0,
@@ -2022,7 +2027,7 @@ static var TREES := {
 			{
 				"name": "Radar",
 				"cost": 35,
-				"blurb": "Cloaked enemies inside the gunship's orbit (Phantom, Wraith) are revealed to every tower (owner), making it a mobile Radar Tower. The formula values it low since it only counts the gunship's own damage.",
+				"blurb": "Cloaked enemies inside the gunship's orbit (Phantom, Wraith) are revealed to every tower, making it a mobile Radar Tower.",
 				"set": {
 					"radar": true,
 				},
@@ -2032,10 +2037,10 @@ static var TREES := {
 				"name": "Extra Ammo",
 				"cost": 70,
 				"blurb": "+10% fire rate on every gun.",
-				"set": {
+				"set": {},
+				"add": {
 					"rate_mult": 1.1,
 				},
-				"add": {},
 			},
 			{
 				"name": "Wide Orbit",
@@ -2055,48 +2060,48 @@ static var TREES := {
 					{
 						"name": "Heavier Rounds",
 						"cost": 175,
-						"blurb": "Damage 12 to 15",
-						"set": {
-							"damage": 15.0,
+						"blurb": "+3 damage (15)",
+						"set": {},
+						"add": {
+							"damage": 3.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Faster Spin",
 						"cost": 350,
-						"blurb": "6 rounds/s",
-						"set": {
-							"rate": 6.0,
+						"blurb": "+1 round/s (6)",
+						"set": {},
+						"add": {
+							"rate": 1.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Hardened Rounds",
 						"cost": 1125,
-						"blurb": "19 damage",
-						"set": {
-							"damage": 19.0,
+						"blurb": "+4 damage (19)",
+						"set": {},
+						"add": {
+							"damage": 4.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Overdrive Motor",
 						"cost": 2670,
-						"blurb": "7.5 rounds/s",
-						"set": {
-							"rate": 7.5,
+						"blurb": "+1.5 rounds/s (7.5)",
+						"set": {},
+						"add": {
+							"rate": 1.5,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Twin Gatlings",
 					"cost": 5345,
-					"blurb": "9 rounds/s",
-					"set": {
-						"rate": 9.0,
+					"blurb": "+1.5 rounds/s (9)",
+					"set": {},
+					"add": {
+						"rate": 1.5,
 					},
-					"add": {},
 				},
 			},
 			{
@@ -2107,50 +2112,50 @@ static var TREES := {
 						"name": "Autocannon",
 						"cost": 1145,
 						"blurb": "Unlocks the autocannon: 40 damage, 1.5 shots/s, 25 px blast",
-						"set": {
+						"set": {},
+						"add": {
 							"ac_damage": 40.0,
 							"ac_rate": 1.5,
 							"ac_splash": 25.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Faster Feed",
 						"cost": 455,
-						"blurb": "1.8 shots/s",
-						"set": {
-							"ac_rate": 1.8,
+						"blurb": "+0.3 shots/s (1.8)",
+						"set": {},
+						"add": {
+							"ac_rate": 0.3,
 						},
-						"add": {},
 					},
 					{
 						"name": "HE Rounds",
 						"cost": 1645,
-						"blurb": "52 damage",
-						"set": {
-							"ac_damage": 52.0,
+						"blurb": "+12 damage (52)",
+						"set": {},
+						"add": {
+							"ac_damage": 12.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Twin Feed",
 						"cost": 3170,
-						"blurb": "2.2 shots/s",
-						"set": {
-							"ac_rate": 2.2,
+						"blurb": "+0.4 shots/s (2.2)",
+						"set": {},
+						"add": {
+							"ac_rate": 0.4,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Autocannon Battery",
 					"cost": 7015,
-					"blurb": "58 damage; 30 px blast",
-					"set": {
-						"ac_damage": 58.0,
-						"ac_splash": 30.0,
+					"blurb": "+6 damage (58); +5 px blast (30)",
+					"set": {},
+					"add": {
+						"ac_damage": 6.0,
+						"ac_splash": 5.0,
 					},
-					"add": {},
 				},
 			},
 			{
@@ -2161,49 +2166,49 @@ static var TREES := {
 						"name": "Missile Rack",
 						"cost": 1235,
 						"blurb": "Unlocks guided missiles: 150 damage, one every 3 s, 45 px blast",
-						"set": {
+						"set": {},
+						"add": {
 							"ms_damage": 150.0,
 							"ms_rate": 0.333,
 							"ms_splash": 45.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Quick Rack",
 						"cost": 525,
-						"blurb": "One every 2.5 s",
-						"set": {
-							"ms_rate": 0.4,
+						"blurb": "−0.5 s between missiles (2.5 s)",
+						"set": {},
+						"add": {
+							"ms_rate": 0.067,
 						},
-						"add": {},
 					},
 					{
 						"name": "Heavy Warheads",
 						"cost": 1595,
-						"blurb": "190 damage",
-						"set": {
-							"ms_damage": 190.0,
+						"blurb": "+40 damage (190)",
+						"set": {},
+						"add": {
+							"ms_damage": 40.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Auto-Rack",
 						"cost": 3785,
-						"blurb": "One every 2 s",
-						"set": {
-							"ms_rate": 0.5,
+						"blurb": "−0.5 s between missiles (2 s)",
+						"set": {},
+						"add": {
+							"ms_rate": 0.1,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Hellfire Volley",
 					"cost": 13250,
 					"blurb": "Every third volley fires two missiles",
-					"set": {
+					"set": {},
+					"add": {
 						"ms_volley": 2.0,
 					},
-					"add": {},
 				},
 			},
 		],
@@ -2213,6 +2218,7 @@ static var TREES := {
 		"class": "Defense",
 		"weapon": "Explosive",
 		"blurb": "Manufactures and tosses explosive mines onto the track that explode when an enemy passes over them. \"You know it's a party when the high-speed confetti start flying in every direction.\"",
+		"tagline": "Throws mines onto the track that burst under enemies.",
 		"air": false,
 		"ground": true,
 		"size": 1,
@@ -2225,7 +2231,7 @@ static var TREES := {
 		"base": {
 			"name": "Mine Layer",
 			"cost": 450,
-			"blurb": "450 credits; tosses a mine onto the track within 120 px every 1.5 s, up to 20 at once. Each mine blasts 85 damage in 40 px when a ground or burrowed enemy passes over. Mines spread along the track in range, nearest the entrance end first.",
+			"blurb": "450 credits; tosses a mine onto the track within 120 px every 1.5 s, up to 20 at once. Each mine blasts 85 damage in 40 px when a ground or burrowed enemy passes over. Mines land just ahead of the enemies in reach, or anywhere along the track in reach when there are none.",
 			"set": {
 				"damage": 85.0,
 				"splash": 40.0,
@@ -2240,11 +2246,11 @@ static var TREES := {
 				"name": "Adhesive Mines",
 				"cost": 40,
 				"blurb": "Each mine's blast leaves sticky gel on the track that slows enemies 20% for 2 s.",
-				"set": {
+				"set": {},
+				"add": {
 					"gel_slow": 0.2,
 					"gel_time": 2.0,
 				},
-				"add": {},
 			},
 			{
 				"name": "Shaped Charges",
@@ -2258,7 +2264,7 @@ static var TREES := {
 			{
 				"name": "Long Arm",
 				"cost": 150,
-				"blurb": "+20 toss range (140).",
+				"blurb": "+20 throw range (140).",
 				"set": {},
 				"add": {
 					"range": 20.0,
@@ -2273,49 +2279,49 @@ static var TREES := {
 					{
 						"name": "Heavier Charge",
 						"cost": 160,
-						"blurb": "100 damage",
-						"set": {
-							"damage": 100.0,
+						"blurb": "+15 damage (100)",
+						"set": {},
+						"add": {
+							"damage": 15.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Wider Charge",
 						"cost": 265,
-						"blurb": "50 px blast",
-						"set": {
-							"splash": 50.0,
+						"blurb": "+10 px blast (50)",
+						"set": {},
+						"add": {
+							"splash": 10.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "HE Mines",
 						"cost": 1190,
-						"blurb": "125 damage",
-						"set": {
-							"damage": 125.0,
+						"blurb": "+25 damage (125)",
+						"set": {},
+						"add": {
+							"damage": 25.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Fragmentation Casing",
 						"cost": 1325,
-						"blurb": "60 px blast",
-						"set": {
-							"splash": 60.0,
+						"blurb": "+10 px blast (60)",
+						"set": {},
+						"add": {
+							"splash": 10.0,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Anti-Tank Mines",
 					"cost": 6880,
-					"blurb": "150 damage, 65 px blast",
-					"set": {
-						"damage": 150.0,
-						"splash": 65.0,
+					"blurb": "+25 damage (150); +5 px blast (65)",
+					"set": {},
+					"add": {
+						"damage": 25.0,
+						"splash": 5.0,
 					},
-					"add": {},
 				},
 			},
 			{
@@ -2325,53 +2331,53 @@ static var TREES := {
 					{
 						"name": "Quick Assembly",
 						"cost": 110,
-						"blurb": "A mine every 1.33 s; cap 24",
-						"set": {
-							"rate": 0.752,
-							"cap": 24.0,
+						"blurb": "−0.17 s between mines (1.33 s); +4 mine cap (24)",
+						"set": {},
+						"add": {
+							"rate": 0.085,
+							"cap": 4.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Twin Press",
 						"cost": 270,
-						"blurb": "Every 1.2 s; cap 28",
-						"set": {
-							"rate": 0.833,
-							"cap": 28.0,
+						"blurb": "−0.13 s between mines (1.2 s); +4 mine cap (28)",
+						"set": {},
+						"add": {
+							"rate": 0.081,
+							"cap": 4.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Assembly Line",
 						"cost": 1080,
-						"blurb": "Every 0.95 s; cap 32",
-						"set": {
-							"rate": 1.053,
-							"cap": 32.0,
+						"blurb": "−0.25 s between mines (0.95 s); +4 mine cap (32)",
+						"set": {},
+						"add": {
+							"rate": 0.22,
+							"cap": 4.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Rapid Line",
 						"cost": 1620,
-						"blurb": "Every 0.85 s; cap 36",
-						"set": {
-							"rate": 1.176,
-							"cap": 36.0,
+						"blurb": "−0.1 s between mines (0.85 s); +4 mine cap (36)",
+						"set": {},
+						"add": {
+							"rate": 0.123,
+							"cap": 4.0,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Mine Factory",
 					"cost": 5395,
-					"blurb": "Every 0.7 s; cap 45",
-					"set": {
-						"rate": 1.4286,
-						"cap": 45.0,
+					"blurb": "−0.15 s between mines (0.7 s); +9 mine cap (45)",
+					"set": {},
+					"add": {
+						"rate": 0.2526,
+						"cap": 9.0,
 					},
-					"add": {},
 				},
 			},
 			{
@@ -2381,48 +2387,48 @@ static var TREES := {
 					{
 						"name": "Longer Arm",
 						"cost": 150,
-						"blurb": "140 px",
-						"set": {
-							"range": 140.0,
+						"blurb": "+20 throw range (140)",
+						"set": {},
+						"add": {
+							"range": 20.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Spring Launcher",
 						"cost": 300,
-						"blurb": "160 px",
-						"set": {
-							"range": 160.0,
+						"blurb": "+20 throw range (160)",
+						"set": {},
+						"add": {
+							"range": 20.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Mine Mortar",
 						"cost": 900,
-						"blurb": "190 px",
-						"set": {
-							"range": 190.0,
+						"blurb": "+30 throw range (190)",
+						"set": {},
+						"add": {
+							"range": 30.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Long Mortar",
 						"cost": 1800,
-						"blurb": "220 px",
-						"set": {
-							"range": 220.0,
+						"blurb": "+30 throw range (220)",
+						"set": {},
+						"add": {
+							"range": 30.0,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Minefield Launcher",
 					"cost": 4795,
-					"blurb": "260 px: covers a long stretch of track",
-					"set": {
-						"range": 260.0,
+					"blurb": "+40 throw range (260): covers a long stretch of track",
+					"set": {},
+					"add": {
+						"range": 40.0,
 					},
-					"add": {},
 				},
 			},
 		],
@@ -2432,6 +2438,7 @@ static var TREES := {
 		"class": "Support",
 		"weapon": "Chemical",
 		"blurb": "A chemical manufacturing facility that produces and sprays chemicals on nearby enemies. \"Known to cause cancer in the state of California.\"",
+		"tagline": "Sprays acid that strips armour, burns and slows.",
 		"air": true,
 		"ground": true,
 		"size": 1,
@@ -2450,7 +2457,6 @@ static var TREES := {
 				"rate": 0.667,
 				"soak_time": 4.0,
 				"armor_strip": 3.0,
-				"nozzles": 1.0,
 			},
 			"add": {},
 		},
@@ -2458,18 +2464,17 @@ static var TREES := {
 			{
 				"name": "Pressure Pump",
 				"cost": 150,
-				"blurb": "A spray every 1.33 s, and +20 range (150).",
-				"set": {
-					"rate": 0.75,
-				},
+				"blurb": "−0.17 s between sprays (1.33 s); +20 range (150).",
+				"set": {},
 				"add": {
+					"rate": 0.083,
 					"range": 20.0,
 				},
 			},
 			{
 				"name": "Mist Nozzle",
 				"cost": 300,
-				"blurb": "Each spray also soaks one more unsoaked enemy next to the target.",
+				"blurb": "Each spray also soaks one more unsoaked enemy next to the target; with Constant Spray the jet becomes a mist cloud.",
 				"set": {
 					"mist": true,
 				},
@@ -2478,11 +2483,11 @@ static var TREES := {
 			{
 				"name": "Bigger Tanks",
 				"cost": 60,
-				"blurb": "Soaks last 5 s.",
-				"set": {
-					"soak_time": 5.0,
+				"blurb": "+1 s soak (5 s).",
+				"set": {},
+				"add": {
+					"soak_time": 1.0,
 				},
-				"add": {},
 			},
 		],
 		"paths": [
@@ -2502,43 +2507,43 @@ static var TREES := {
 					{
 						"name": "Etching Acid",
 						"cost": 665,
-						"blurb": "4 armour per soak; acid burns 5 damage/s",
-						"set": {
-							"armor_strip": 4.0,
+						"blurb": "+1 armour stripped per soak (4); acid burns 5 damage/s",
+						"set": {},
+						"add": {
+							"armor_strip": 1.0,
 							"acid_dps": 5.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Fast-Acting Acid",
 						"cost": 1335,
-						"blurb": "5 armour, stripped faster; 10 damage/s",
-						"set": {
-							"armor_strip": 5.0,
-							"acid_dps": 10.0,
+						"blurb": "+1 armour stripped (5); +5 acid damage/s (10)",
+						"set": {},
+						"add": {
+							"armor_strip": 1.0,
+							"acid_dps": 5.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Concentrated Acid",
 						"cost": 2665,
-						"blurb": "6 armour; 15 damage/s",
-						"set": {
-							"armor_strip": 6.0,
-							"acid_dps": 15.0,
+						"blurb": "+1 armour stripped (6); +5 acid damage/s (15)",
+						"set": {},
+						"add": {
+							"armor_strip": 1.0,
+							"acid_dps": 5.0,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Dissolver",
 					"cost": 5335,
-					"blurb": "7 armour per soak; 20 damage/s",
-					"set": {
-						"armor_strip": 7.0,
-						"acid_dps": 20.0,
+					"blurb": "+1 armour stripped (7); +5 acid damage/s (20)",
+					"set": {},
+					"add": {
+						"armor_strip": 1.0,
+						"acid_dps": 5.0,
 					},
-					"add": {},
 				},
 			},
 			{
@@ -2548,51 +2553,51 @@ static var TREES := {
 					{
 						"name": "Quick Valve",
 						"cost": 100,
-						"blurb": "A spray every 1.25 s",
-						"set": {
-							"rate": 0.8,
+						"blurb": "−0.25 s between sprays (1.25 s)",
+						"set": {},
+						"add": {
+							"rate": 0.133,
 						},
-						"add": {},
 					},
 					{
 						"name": "Long-Lasting Mix",
 						"cost": 140,
-						"blurb": "The soak lasts 5 s",
-						"set": {
-							"soak_time": 5.0,
+						"blurb": "+1 s soak (5 s)",
+						"set": {},
+						"add": {
+							"soak_time": 1.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Twin Valves",
 						"cost": 990,
-						"blurb": "A spray every second; the soak lasts 6 s",
-						"set": {
-							"rate": 1.0,
-							"soak_time": 6.0,
+						"blurb": "−0.25 s between sprays (1 s); +1 s soak (6 s)",
+						"set": {},
+						"add": {
+							"rate": 0.2,
+							"soak_time": 1.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "High-Flow Pump",
 						"cost": 1470,
-						"blurb": "A spray every 0.83 s",
-						"set": {
-							"rate": 1.2,
+						"blurb": "−0.17 s between sprays (0.83 s)",
+						"set": {},
+						"add": {
+							"rate": 0.2,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
-					"name": "Twin Nozzles",
-					"cost": 7760,
-					"blurb": "Sprays two enemies at once (about 1.6 a second); the soak lasts 7 s",
+					"name": "Constant Spray",
+					"cost": 8810,
+					"blurb": "Sprays without stopping, sweeping a 40° fan centred on its target once every 0.83 s; every enemy the jet crosses is soaked or topped up. −2 s soak (4 s)",
 					"set": {
-						"rate": 0.8,
-						"nozzles": 2.0,
-						"soak_time": 7.0,
+						"constant_spray": true,
 					},
-					"add": {},
+					"add": {
+						"soak_time": -2.0,
+					},
 				},
 			},
 			{
@@ -2603,47 +2608,47 @@ static var TREES := {
 						"name": "Sticky Gel",
 						"cost": 250,
 						"blurb": "Soaked enemies are slowed 15%",
-						"set": {
+						"set": {},
+						"add": {
 							"gel_slow": 0.15,
 						},
-						"add": {},
 					},
 					{
 						"name": "Thick Gel",
 						"cost": 335,
-						"blurb": "25%",
-						"set": {
-							"gel_slow": 0.25,
+						"blurb": "+10% slow (25%)",
+						"set": {},
+						"add": {
+							"gel_slow": 0.1,
 						},
-						"add": {},
 					},
 					{
 						"name": "Glue",
 						"cost": 665,
-						"blurb": "35%",
-						"set": {
-							"gel_slow": 0.35,
+						"blurb": "+10% slow (35%)",
+						"set": {},
+						"add": {
+							"gel_slow": 0.1,
 						},
-						"add": {},
 					},
 					{
 						"name": "Setting Glue",
 						"cost": 1335,
-						"blurb": "45%",
-						"set": {
-							"gel_slow": 0.45,
+						"blurb": "+10% slow (45%)",
+						"set": {},
+						"add": {
+							"gel_slow": 0.1,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Quick-Set Foam",
 					"cost": 2665,
-					"blurb": "55%: nearly frozen",
-					"set": {
-						"gel_slow": 0.55,
+					"blurb": "+10% slow (55%): nearly frozen",
+					"set": {},
+					"add": {
+						"gel_slow": 0.1,
 					},
-					"add": {},
 				},
 			},
 		],
@@ -2653,6 +2658,7 @@ static var TREES := {
 		"class": "Support",
 		"weapon": "Field",
 		"blurb": "Produces a wave of sub-zero temperature gasses that stunt the mobility of enemies within range. \"The military had to put restrictions on these machines after a group of soldiers got caught having a snowball fight in the middle of a heatwave.\"",
+		"tagline": "Waves of cold that slow everything around it.",
 		"air": true,
 		"ground": true,
 		"size": 1,
@@ -2665,7 +2671,7 @@ static var TREES := {
 		"base": {
 			"name": "Cryo Tower",
 			"cost": 150,
-			"blurb": "A deeper slow, then permanent slowing; the mastery freezes. - Path 2 (Power/Range): frostbite damage and range. - Path 3 (Speed): faster waves and faster travel (the gas spreads faster). - Retrofit: a coolant tank (a longer slow).",
+			"blurb": "150 credits; every 2 s a wave of freezing mist fills 110 px, slowing every enemy inside by 20% for 1.5 s; air and ground.",
 			"set": {
 				"range": 110.0,
 				"rate": 0.5,
@@ -2678,29 +2684,29 @@ static var TREES := {
 			{
 				"name": "Coolant Tank",
 				"cost": 80,
-				"blurb": "The slow lasts 2.2 s.",
-				"set": {
-					"slow_time": 2.2,
+				"blurb": "+0.7 s slow (2.2 s).",
+				"set": {},
+				"add": {
+					"slow_time": 0.7,
 				},
-				"add": {},
 			},
 			{
 				"name": "Compressor",
 				"cost": 35,
-				"blurb": "A wave every 1.7 s.",
-				"set": {
-					"rate": 0.588,
+				"blurb": "−0.3 s between waves (1.7 s).",
+				"set": {},
+				"add": {
+					"rate": 0.088,
 				},
-				"add": {},
 			},
 			{
 				"name": "Deep Cold",
 				"cost": 75,
-				"blurb": "Slow 20% to 25%.",
-				"set": {
-					"slow": 0.25,
+				"blurb": "+5% slow (25%).",
+				"set": {},
+				"add": {
+					"slow": 0.05,
 				},
-				"add": {},
 			},
 		],
 		"paths": [
@@ -2711,52 +2717,52 @@ static var TREES := {
 					{
 						"name": "Colder Gas",
 						"cost": 120,
-						"blurb": "Slow 28%",
-						"set": {
-							"slow": 0.28,
+						"blurb": "+8% slow (28%)",
+						"set": {},
+						"add": {
+							"slow": 0.08,
 						},
-						"add": {},
 					},
 					{
 						"name": "Sub-Zero Gas",
 						"cost": 210,
-						"blurb": "Slow 35%",
-						"set": {
-							"slow": 0.35,
+						"blurb": "+7% slow (35%)",
+						"set": {},
+						"add": {
+							"slow": 0.07,
 						},
-						"add": {},
 					},
 					{
 						"name": "Permafrost",
 						"cost": 1705,
 						"blurb": "Enemies chilled by it keep a permanent 10% slow for the rest of their life, even outside its range",
-						"set": {
+						"set": {},
+						"add": {
 							"perm_slow": 0.1,
 						},
-						"add": {},
 					},
 					{
 						"name": "Deep Chill",
 						"cost": 2905,
-						"blurb": "Slow 45%; permanent 15%",
-						"set": {
-							"slow": 0.45,
-							"perm_slow": 0.15,
+						"blurb": "+10% slow (45%); +5% permanent slow (15%)",
+						"set": {},
+						"add": {
+							"slow": 0.1,
+							"perm_slow": 0.05,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Deep Freeze",
 					"cost": 8460,
-					"blurb": "Slow 50%; permanent 20%; every 4th wave freezes enemies solid for 1 s (bosses 0.3 s)",
-					"set": {
-						"slow": 0.5,
-						"perm_slow": 0.2,
+					"blurb": "+5% slow (50%); +5% permanent slow (20%); every 4th wave freezes enemies solid for 1 s (bosses 0.3 s)",
+					"set": {},
+					"add": {
+						"slow": 0.05,
+						"perm_slow": 0.05,
 						"freeze_every": 4.0,
 						"freeze_time": 1.0,
 					},
-					"add": {},
 				},
 			},
 			{
@@ -2766,52 +2772,52 @@ static var TREES := {
 					{
 						"name": "Frostbite",
 						"cost": 105,
-						"blurb": "Each wave does 5 damage; 120 px radius",
-						"set": {
+						"blurb": "Each wave does 5 damage; +10 px radius (120)",
+						"set": {},
+						"add": {
 							"damage": 5.0,
-							"range": 120.0,
+							"range": 10.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Hard Frost",
 						"cost": 230,
-						"blurb": "10 damage; 130 px",
-						"set": {
-							"damage": 10.0,
-							"range": 130.0,
+						"blurb": "+5 damage (10); +10 px radius (130)",
+						"set": {},
+						"add": {
+							"damage": 5.0,
+							"range": 10.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Ice Storm",
 						"cost": 790,
-						"blurb": "18 damage; 145 px",
-						"set": {
-							"damage": 18.0,
-							"range": 145.0,
+						"blurb": "+8 damage (18); +15 px radius (145)",
+						"set": {},
+						"add": {
+							"damage": 8.0,
+							"range": 15.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Biting Cold",
 						"cost": 695,
-						"blurb": "26 damage",
-						"set": {
-							"damage": 26.0,
+						"blurb": "+8 damage (26)",
+						"set": {},
+						"add": {
+							"damage": 8.0,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Blizzard",
 					"cost": 4870,
-					"blurb": "36 damage; 165 px",
-					"set": {
-						"damage": 36.0,
-						"range": 165.0,
+					"blurb": "+10 damage (36); +20 px radius (165)",
+					"set": {},
+					"add": {
+						"damage": 10.0,
+						"range": 20.0,
 					},
-					"add": {},
 				},
 			},
 			{
@@ -2821,38 +2827,38 @@ static var TREES := {
 					{
 						"name": "Faster Vents",
 						"cost": 25,
-						"blurb": "A wave every 1.75 s; the gas spreads faster",
-						"set": {
-							"rate": 0.571,
+						"blurb": "−0.25 s between waves (1.75 s); the gas spreads faster",
+						"set": {},
+						"add": {
+							"rate": 0.071,
 						},
-						"add": {},
 					},
 					{
 						"name": "Pressurised Gas",
 						"cost": 65,
-						"blurb": "Every 1.5 s",
-						"set": {
-							"rate": 0.667,
+						"blurb": "−0.25 s between waves (1.5 s)",
+						"set": {},
+						"add": {
+							"rate": 0.096,
 						},
-						"add": {},
 					},
 					{
 						"name": "Rapid Vents",
 						"cost": 185,
-						"blurb": "Every 1.2 s",
-						"set": {
-							"rate": 0.833,
+						"blurb": "−0.3 s between waves (1.2 s)",
+						"set": {},
+						"add": {
+							"rate": 0.166,
 						},
-						"add": {},
 					},
 					{
 						"name": "Turbo Vents",
 						"cost": 290,
-						"blurb": "Every second",
-						"set": {
-							"rate": 1.0,
+						"blurb": "−0.2 s between waves (1 s)",
+						"set": {},
+						"add": {
+							"rate": 0.167,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
@@ -2872,6 +2878,7 @@ static var TREES := {
 		"class": "Support",
 		"weapon": "None",
 		"blurb": "Towers in range of the Rally Beacon are amped up and given stat boosts. \"Are you feeling it now Mr. Krabs?\"",
+		"tagline": "Boosts the damage, fire rate and range of nearby towers.",
 		"air": true,
 		"ground": true,
 		"size": 1,
@@ -2884,7 +2891,7 @@ static var TREES := {
 		"base": {
 			"name": "Boost Tower",
 			"cost": 400,
-			"blurb": "400 credits; towers within 144 px (3 tiles) get +5% damage, +5% fire rate and +5% range (confirmed by the owner). Doesn't attack.",
+			"blurb": "400 credits; towers within 144 px (3 tiles) get +5% damage, +5% fire rate and +5% range. Doesn't attack.",
 			"set": {
 				"range": 144.0,
 				"buff_dmg": 0.05,
@@ -2897,30 +2904,30 @@ static var TREES := {
 			{
 				"name": "Signal Booster",
 				"cost": 1380,
-				"blurb": "The radius grows to 168 px, and +5% to all three boosts, stacking on top (+10% each).",
-				"set": {
-					"range": 168.0,
+				"blurb": "+24 px radius (168); +5% to all three boosts (10% each).",
+				"set": {},
+				"add": {
+					"range": 24.0,
 					"buff_extra": 0.05,
 				},
-				"add": {},
 			},
 			{
 				"name": "Crit Link",
 				"cost": 185,
 				"blurb": "Boosted towers gain a 3% crit chance (it adds to the Augmentation Tower's crits).",
-				"set": {
+				"set": {},
+				"add": {
 					"crit_link": 0.03,
 				},
-				"add": {},
 			},
 			{
 				"name": "Wide Mast",
 				"cost": 625,
-				"blurb": "The radius grows to 192 px (a 4-tile aura), with no boost change.",
-				"set": {
-					"range": 192.0,
+				"blurb": "+48 px radius (192, a 4-tile aura), with no boost change.",
+				"set": {},
+				"add": {
+					"range": 48.0,
 				},
-				"add": {},
 			},
 		],
 		"paths": [
@@ -2931,48 +2938,48 @@ static var TREES := {
 					{
 						"name": "Amplifier",
 						"cost": 615,
-						"blurb": "Damage boost +15%",
-						"set": {
-							"buff_dmg": 0.15,
+						"blurb": "+10% damage boost (15%)",
+						"set": {},
+						"add": {
+							"buff_dmg": 0.1,
 						},
-						"add": {},
 					},
 					{
 						"name": "Power Relay",
 						"cost": 860,
-						"blurb": "+22%",
-						"set": {
-							"buff_dmg": 0.22,
+						"blurb": "+7% damage boost (22%)",
+						"set": {},
+						"add": {
+							"buff_dmg": 0.07,
 						},
-						"add": {},
 					},
 					{
 						"name": "Overcharge Link",
 						"cost": 2460,
-						"blurb": "+32%",
-						"set": {
-							"buff_dmg": 0.32,
+						"blurb": "+10% damage boost (32%)",
+						"set": {},
+						"add": {
+							"buff_dmg": 0.1,
 						},
-						"add": {},
 					},
 					{
 						"name": "Surge Link",
 						"cost": 3940,
-						"blurb": "+40%",
-						"set": {
-							"buff_dmg": 0.4,
+						"blurb": "+8% damage boost (40%)",
+						"set": {},
+						"add": {
+							"buff_dmg": 0.08,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Battle Network",
 					"cost": 9845,
-					"blurb": "+50% damage",
-					"set": {
-						"buff_dmg": 0.5,
+					"blurb": "+10% damage boost (50%)",
+					"set": {},
+					"add": {
+						"buff_dmg": 0.1,
 					},
-					"add": {},
 				},
 			},
 			{
@@ -2982,48 +2989,48 @@ static var TREES := {
 					{
 						"name": "Clock Sync",
 						"cost": 615,
-						"blurb": "Fire-rate boost +15%",
-						"set": {
-							"buff_rate": 0.15,
+						"blurb": "+10% fire-rate boost (15%)",
+						"set": {},
+						"add": {
+							"buff_rate": 0.1,
 						},
-						"add": {},
 					},
 					{
 						"name": "Fast Sync",
 						"cost": 860,
-						"blurb": "+22%",
-						"set": {
-							"buff_rate": 0.22,
+						"blurb": "+7% fire-rate boost (22%)",
+						"set": {},
+						"add": {
+							"buff_rate": 0.07,
 						},
-						"add": {},
 					},
 					{
 						"name": "Overclock Link",
 						"cost": 2460,
-						"blurb": "+32%",
-						"set": {
-							"buff_rate": 0.32,
+						"blurb": "+10% fire-rate boost (32%)",
+						"set": {},
+						"add": {
+							"buff_rate": 0.1,
 						},
-						"add": {},
 					},
 					{
 						"name": "Turbo Link",
 						"cost": 3940,
-						"blurb": "+40%",
-						"set": {
-							"buff_rate": 0.4,
+						"blurb": "+8% fire-rate boost (40%)",
+						"set": {},
+						"add": {
+							"buff_rate": 0.08,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Rapid Network",
 					"cost": 9845,
-					"blurb": "+50% fire rate",
-					"set": {
-						"buff_rate": 0.5,
+					"blurb": "+10% fire-rate boost (50%)",
+					"set": {},
+					"add": {
+						"buff_rate": 0.1,
 					},
-					"add": {},
 				},
 			},
 			{
@@ -3033,48 +3040,48 @@ static var TREES := {
 					{
 						"name": "Spotting Relay",
 						"cost": 370,
-						"blurb": "Range boost +15%",
-						"set": {
-							"buff_range": 0.15,
+						"blurb": "+10% range boost (15%)",
+						"set": {},
+						"add": {
+							"buff_range": 0.1,
 						},
-						"add": {},
 					},
 					{
 						"name": "Wide Relay",
 						"cost": 515,
-						"blurb": "+22%",
-						"set": {
-							"buff_range": 0.22,
+						"blurb": "+7% range boost (22%)",
+						"set": {},
+						"add": {
+							"buff_range": 0.07,
 						},
-						"add": {},
 					},
 					{
 						"name": "Targeting Link",
 						"cost": 1475,
-						"blurb": "+32%",
-						"set": {
-							"buff_range": 0.32,
+						"blurb": "+10% range boost (32%)",
+						"set": {},
+						"add": {
+							"buff_range": 0.1,
 						},
-						"add": {},
 					},
 					{
 						"name": "Long Link",
 						"cost": 2365,
-						"blurb": "+40%",
-						"set": {
-							"buff_range": 0.4,
+						"blurb": "+8% range boost (40%)",
+						"set": {},
+						"add": {
+							"buff_range": 0.08,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Overwatch Network",
 					"cost": 5910,
-					"blurb": "+50% range",
-					"set": {
-						"buff_range": 0.5,
+					"blurb": "+10% range boost (50%)",
+					"set": {},
+					"add": {
+						"buff_range": 0.1,
 					},
-					"add": {},
 				},
 			},
 		],
@@ -3084,6 +3091,7 @@ static var TREES := {
 		"class": "Utility",
 		"weapon": "Energy",
 		"blurb": "Radar is able to detect and alert nearby towers of stealthy or otherwise hidden enemies. \"I've lost the bleeps, I've lost the sweeps, and I've lost the creeps.\"",
+		"tagline": "Pings to reveal cloaked and burrowed enemies.",
 		"air": true,
 		"ground": true,
 		"size": 1,
@@ -3108,7 +3116,7 @@ static var TREES := {
 			{
 				"name": "Bigger Dish",
 				"cost": 305,
-				"blurb": "+20 radius (180 px).",
+				"blurb": "+20 px radius (180).",
 				"set": {},
 				"add": {
 					"range": 20.0,
@@ -3117,11 +3125,11 @@ static var TREES := {
 			{
 				"name": "Signal Processor",
 				"cost": 575,
-				"blurb": "Each reveal lasts 1.5 s.",
-				"set": {
-					"reveal_time": 1.5,
+				"blurb": "+0.5 s per reveal (1.5 s).",
+				"set": {},
+				"add": {
+					"reveal_time": 0.5,
 				},
-				"add": {},
 			},
 			{
 				"name": "Early Warning",
@@ -3141,53 +3149,53 @@ static var TREES := {
 					{
 						"name": "Bigger Array",
 						"cost": 305,
-						"blurb": "180 px radius",
-						"set": {
-							"range": 180.0,
+						"blurb": "+20 px radius (180)",
+						"set": {},
+						"add": {
+							"range": 20.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Tall Mast",
 						"cost": 685,
-						"blurb": "200 px",
-						"set": {
-							"range": 200.0,
+						"blurb": "+20 px radius (200)",
+						"set": {},
+						"add": {
+							"range": 20.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Radiation Emitter",
 						"cost": 585,
 						"blurb": "Radiation circle: enemies within 60 px take 15 energy damage/s while inside",
-						"set": {
+						"set": {},
+						"add": {
 							"rad_dps": 15.0,
 							"rad_range": 60.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "High-Power Emitter",
 						"cost": 3995,
-						"blurb": "220 px radius; radiation 25/s within 70 px",
-						"set": {
-							"range": 220.0,
-							"rad_dps": 25.0,
-							"rad_range": 70.0,
+						"blurb": "+20 px radius (220); +10 radiation damage/s (25); +10 px radiation circle (70)",
+						"set": {},
+						"add": {
+							"range": 20.0,
+							"rad_dps": 10.0,
+							"rad_range": 10.0,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Microwave Array",
 					"cost": 6440,
-					"blurb": "230 px radius; radiation 40/s within 80 px",
-					"set": {
-						"range": 230.0,
-						"rad_dps": 40.0,
-						"rad_range": 80.0,
+					"blurb": "+10 px radius (230); +15 radiation damage/s (40); +10 px radiation circle (80)",
+					"set": {},
+					"add": {
+						"range": 10.0,
+						"rad_dps": 15.0,
+						"rad_range": 10.0,
 					},
-					"add": {},
 				},
 			},
 			{
@@ -3197,42 +3205,41 @@ static var TREES := {
 					{
 						"name": "Faster Sweep",
 						"cost": 255,
-						"blurb": "A ping every 2.7 s, revealing for 1.1 s",
-						"set": {
-							"ping_every": 2.7,
-							"reveal_time": 1.1,
+						"blurb": "−0.3 s between pings (2.7 s); +0.1 s per reveal (1.1 s)",
+						"set": {},
+						"add": {
+							"ping_every": -0.3,
+							"reveal_time": 0.1,
 						},
-						"add": {},
 					},
 					{
 						"name": "Pulse Compression",
 						"cost": 640,
-						"blurb": "Every 2.4 s, for 1.2 s",
-						"set": {
-							"ping_every": 2.4,
-							"reveal_time": 1.2,
+						"blurb": "−0.3 s between pings (2.4 s); +0.1 s per reveal (1.2 s)",
+						"set": {},
+						"add": {
+							"ping_every": -0.3,
+							"reveal_time": 0.1,
 						},
-						"add": {},
 					},
 					{
 						"name": "Rapid Sweep",
 						"cost": 2070,
-						"blurb": "Every 2 s, for 1.3 s",
-						"set": {
-							"ping_every": 2.0,
-							"reveal_time": 1.3,
+						"blurb": "−0.4 s between pings (2 s); +0.1 s per reveal (1.3 s)",
+						"set": {},
+						"add": {
+							"ping_every": -0.4,
+							"reveal_time": 0.1,
 						},
-						"add": {},
 					},
 					{
 						"name": "Phased Array",
 						"cost": 4485,
-						"blurb": "Every 1.6 s, for 1.3 s",
-						"set": {
-							"ping_every": 1.6,
-							"reveal_time": 1.3,
+						"blurb": "−0.4 s between pings (1.6 s)",
+						"set": {},
+						"add": {
+							"ping_every": -0.4,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
@@ -3270,16 +3277,16 @@ static var TREES := {
 					{
 						"name": "Track Lock",
 						"cost": 1930,
-						"blurb": "Reveals last 1.3 s",
-						"set": {
-							"reveal_time": 1.3,
+						"blurb": "+0.3 s per reveal (1.3 s)",
+						"set": {},
+						"add": {
+							"reveal_time": 0.3,
 						},
-						"add": {},
 					},
 					{
 						"name": "Illusion Filter",
 						"cost": 2390,
-						"blurb": "Pings mark Mirage holograms as fakes: towers in range stop shooting them",
+						"blurb": "Pings pop Mirage holograms in range",
 						"set": {
 							"unmask_mirage": true,
 						},
@@ -3290,10 +3297,10 @@ static var TREES := {
 					"name": "Total Exposure",
 					"cost": 3590,
 					"blurb": "Revealed enemies can't re-cloak, re-disguise or re-burrow for 5 s after leaving the radar's range",
-					"set": {
+					"set": {},
+					"add": {
 						"exposure": 5.0,
 					},
-					"add": {},
 				},
 			},
 		],
@@ -3303,6 +3310,7 @@ static var TREES := {
 		"class": "Assault",
 		"weapon": "Field",
 		"blurb": "Generates powerful shockwaves by creating small nuclear explosion. \"Radioactive fallout? What radioactive fallout?\"",
+		"tagline": "Blasts that hit every enemy around it, air and ground.",
 		"air": true,
 		"ground": true,
 		"size": 1,
@@ -3315,7 +3323,7 @@ static var TREES := {
 		"base": {
 			"name": "Shockwave Generator",
 			"cost": 450,
-			"blurb": "450 credits; a shockwave every 1.75 s hits every enemy within 100 px for 75 damage; air and ground; no aiming. Armour applies (proposed: it's a blast).",
+			"blurb": "450 credits; a shockwave every 1.75 s hits every enemy within 100 px for 75 damage; air and ground; no aiming. Armour applies.",
 			"set": {
 				"damage": 75.0,
 				"range": 100.0,
@@ -3345,11 +3353,11 @@ static var TREES := {
 			{
 				"name": "Reactor Venting",
 				"cost": 150,
-				"blurb": "A wave every 1.5 s.",
-				"set": {
-					"rate": 0.667,
+				"blurb": "−0.25 s between waves (1.5 s).",
+				"set": {},
+				"add": {
+					"rate": 0.096,
 				},
-				"add": {},
 			},
 		],
 		"paths": [
@@ -3360,53 +3368,53 @@ static var TREES := {
 					{
 						"name": "Hotter Core",
 						"cost": 210,
-						"blurb": "85 damage; 105 px",
-						"set": {
-							"damage": 85.0,
-							"range": 105.0,
+						"blurb": "+10 damage (85); +5 px radius (105)",
+						"set": {},
+						"add": {
+							"damage": 10.0,
+							"range": 5.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Dense Core",
 						"cost": 470,
-						"blurb": "95 damage; 110 px",
-						"set": {
-							"damage": 95.0,
-							"range": 110.0,
+						"blurb": "+10 damage (95); +5 px radius (110)",
+						"set": {},
+						"add": {
+							"damage": 10.0,
+							"range": 5.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Critical Mass",
 						"cost": 1870,
-						"blurb": "110 damage; 120 px",
-						"set": {
-							"damage": 110.0,
-							"range": 120.0,
+						"blurb": "+15 damage (110); +10 px radius (120)",
+						"set": {},
+						"add": {
+							"damage": 15.0,
+							"range": 10.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Overpressure",
 						"cost": 3200,
-						"blurb": "125 damage; 125 px",
-						"set": {
-							"damage": 125.0,
-							"range": 125.0,
+						"blurb": "+15 damage (125); +5 px radius (125)",
+						"set": {},
+						"add": {
+							"damage": 15.0,
+							"range": 5.0,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Megaton Wave",
 					"cost": 6690,
-					"blurb": "135 damage; 132 px",
-					"set": {
-						"damage": 135.0,
-						"range": 132.0,
+					"blurb": "+10 damage (135); +7 px radius (132)",
+					"set": {},
+					"add": {
+						"damage": 10.0,
+						"range": 7.0,
 					},
-					"add": {},
 				},
 			},
 			{
@@ -3416,48 +3424,48 @@ static var TREES := {
 					{
 						"name": "Quick Cycle",
 						"cost": 115,
-						"blurb": "A wave every 1.55 s",
-						"set": {
-							"rate": 0.645,
+						"blurb": "−0.2 s between waves (1.55 s)",
+						"set": {},
+						"add": {
+							"rate": 0.074,
 						},
-						"add": {},
 					},
 					{
 						"name": "Fast Cycle",
 						"cost": 220,
-						"blurb": "Every 1.4 s",
-						"set": {
-							"rate": 0.714,
+						"blurb": "−0.15 s between waves (1.4 s)",
+						"set": {},
+						"add": {
+							"rate": 0.069,
 						},
-						"add": {},
 					},
 					{
 						"name": "Pulse Core",
 						"cost": 980,
-						"blurb": "Every 1.15 s",
-						"set": {
-							"rate": 0.87,
+						"blurb": "−0.25 s between waves (1.15 s)",
+						"set": {},
+						"add": {
+							"rate": 0.156,
 						},
-						"add": {},
 					},
 					{
 						"name": "Rapid Core",
 						"cost": 1645,
-						"blurb": "Every second",
-						"set": {
-							"rate": 1.0,
+						"blurb": "−0.15 s between waves (1 s)",
+						"set": {},
+						"add": {
+							"rate": 0.13,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Chain Pulse",
 					"cost": 6310,
-					"blurb": "Every 0.8 s",
-					"set": {
-						"rate": 1.25,
+					"blurb": "−0.2 s between waves (0.8 s)",
+					"set": {},
+					"add": {
+						"rate": 0.25,
 					},
-					"add": {},
 				},
 			},
 			{
@@ -3468,37 +3476,37 @@ static var TREES := {
 						"name": "Disruptor Wave",
 						"cost": 45,
 						"blurb": "×1.5 damage to barriers",
-						"set": {
+						"set": {},
+						"add": {
 							"shield_mult": 1.5,
 						},
-						"add": {},
 					},
 					{
 						"name": "Harmonic Wave",
 						"cost": 55,
-						"blurb": "×2 to barriers",
-						"set": {
-							"shield_mult": 2.0,
+						"blurb": "+0.5 barrier multiplier (×2)",
+						"set": {},
+						"add": {
+							"shield_mult": 0.5,
 						},
-						"add": {},
 					},
 					{
 						"name": "Resonance",
 						"cost": 145,
-						"blurb": "×2.5 to barriers",
-						"set": {
-							"shield_mult": 2.5,
+						"blurb": "+0.5 barrier multiplier (×2.5)",
+						"set": {},
+						"add": {
+							"shield_mult": 0.5,
 						},
-						"add": {},
 					},
 					{
 						"name": "Breaker Wave",
 						"cost": 290,
-						"blurb": "×3 to barriers",
-						"set": {
-							"shield_mult": 3.0,
+						"blurb": "+0.5 barrier multiplier (×3)",
+						"set": {},
+						"add": {
+							"shield_mult": 0.5,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
@@ -3507,9 +3515,10 @@ static var TREES := {
 					"blurb": "Each wave shatters half of every barrier it hits, and barriers it hits can't regenerate for 5 s",
 					"set": {
 						"shatter_half": true,
+					},
+					"add": {
 						"regen_block": 5.0,
 					},
-					"add": {},
 				},
 			},
 		],
@@ -3519,6 +3528,7 @@ static var TREES := {
 		"class": "Utility",
 		"weapon": "None",
 		"blurb": "Various collections of scrap metal sold at a profit. \"One mans toxic waste is another mans potpourri\"",
+		"tagline": "Earns credits every round; its upgrades grow your economy.",
 		"air": false,
 		"ground": false,
 		"size": 2,
@@ -3542,7 +3552,7 @@ static var TREES := {
 			{
 				"name": "Hammer Mill",
 				"cost": 525,
-				"blurb": "+30 income per round.",
+				"blurb": "+30 income per round (130).",
 				"set": {},
 				"add": {
 					"income": 30.0,
@@ -3551,7 +3561,7 @@ static var TREES := {
 			{
 				"name": "Faster Loading",
 				"cost": 260,
-				"blurb": "+30 px to its fields (a second conveyor and a second crane feed the furnace). Its value depends on the paths, so the formula can't price it at stock; proposed at Surplus's price.",
+				"blurb": "+30 px to its fields (180): a second conveyor and a second crane feed the furnace.",
 				"set": {},
 				"add": {
 					"range": 30.0,
@@ -3561,10 +3571,10 @@ static var TREES := {
 				"name": "Surplus",
 				"cost": 260,
 				"blurb": "Towers sold within its field refund 15% more (two extra crates of surplus stock).",
-				"set": {
+				"set": {},
+				"add": {
 					"sell_field": 0.85,
 				},
-				"add": {},
 			},
 		],
 		"paths": [
@@ -3575,50 +3585,50 @@ static var TREES := {
 					{
 						"name": "Firebrick Lining",
 						"cost": 525,
-						"blurb": "130 per round",
-						"set": {
-							"income": 130.0,
+						"blurb": "+30 income per round (130)",
+						"set": {},
+						"add": {
+							"income": 30.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Forced Bellows",
 						"cost": 1225,
-						"blurb": "165 per round",
-						"set": {
-							"income": 165.0,
+						"blurb": "+35 income per round (165)",
+						"set": {},
+						"add": {
+							"income": 35.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Blast Furnace",
 						"cost": 3850,
-						"blurb": "220 per round",
-						"set": {
-							"income": 220.0,
+						"blurb": "+55 income per round (220)",
+						"set": {},
+						"add": {
+							"income": 55.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Arc Furnace",
 						"cost": 7000,
-						"blurb": "270 per round",
-						"set": {
-							"income": 270.0,
+						"blurb": "+50 income per round (270)",
+						"set": {},
+						"add": {
+							"income": 50.0,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Gold Foundry",
 					"cost": 27440,
-					"blurb": "320 per round, plus 3% interest on banked credits at each clear (up to 400)",
-					"set": {
-						"income": 320.0,
+					"blurb": "+50 income per round (320), plus 3% interest on banked credits at each clear (up to 400)",
+					"set": {},
+					"add": {
+						"income": 50.0,
 						"interest": 0.03,
 						"interest_cap": 400.0,
 					},
-					"add": {},
 				},
 			},
 			{
@@ -3628,54 +3638,54 @@ static var TREES := {
 					{
 						"name": "Tow Hook",
 						"cost": 345,
-						"blurb": "Enemies destroyed within 140 px pay 15% more",
-						"set": {
+						"blurb": "Enemies destroyed in its field pay 15% more; −10 px field (140)",
+						"set": {},
+						"add": {
 							"bounty_bonus": 0.15,
-							"range": 140.0,
+							"range": -10.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Magnet Crane",
 						"cost": 625,
-						"blurb": "+25%; 150 px",
-						"set": {
-							"bounty_bonus": 0.25,
-							"range": 150.0,
+						"blurb": "+10% bounty (25%); +10 px field (150)",
+						"set": {},
+						"add": {
+							"bounty_bonus": 0.1,
+							"range": 10.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Laser Cutter",
 						"cost": 2095,
-						"blurb": "+35%; 170 px",
-						"set": {
-							"bounty_bonus": 0.35,
-							"range": 170.0,
+						"blurb": "+10% bounty (35%); +20 px field (170)",
+						"set": {},
+						"add": {
+							"bounty_bonus": 0.1,
+							"range": 20.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Car Crusher",
 						"cost": 5720,
-						"blurb": "+45%; 190 px",
-						"set": {
-							"bounty_bonus": 0.45,
-							"range": 190.0,
+						"blurb": "+10% bounty (45%); +20 px field (190)",
+						"set": {},
+						"add": {
+							"bounty_bonus": 0.1,
+							"range": 20.0,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Breaker's Yard",
 					"cost": 28945,
-					"blurb": "+60%; 210 px; bosses pay double",
-					"set": {
-						"bounty_bonus": 0.6,
-						"range": 210.0,
+					"blurb": "+15% bounty (60%); +20 px field (210); bosses pay double",
+					"set": {},
+					"add": {
+						"bounty_bonus": 0.15,
+						"range": 20.0,
 						"boss_bounty": 2.0,
 					},
-					"add": {},
 				},
 			},
 			{
@@ -3685,56 +3695,56 @@ static var TREES := {
 					{
 						"name": "Parts Shelves",
 						"cost": 190,
-						"blurb": "Towers within 140 px upgrade for 5% less",
-						"set": {
+						"blurb": "Towers in its field upgrade for 5% less; −10 px field (140)",
+						"set": {},
+						"add": {
 							"discount": 0.05,
-							"range": 140.0,
+							"range": -10.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Pallet Racks",
 						"cost": 495,
-						"blurb": "10% off upgrades; 150 px",
-						"set": {
-							"discount": 0.1,
-							"range": 150.0,
+						"blurb": "+5% off upgrades (10%); +10 px field (150)",
+						"set": {},
+						"add": {
+							"discount": 0.05,
+							"range": 10.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Forklift Bay",
 						"cost": 2035,
-						"blurb": "15% off upgrades, 5% off builds; 160 px",
-						"set": {
-							"discount": 0.15,
+						"blurb": "+5% off upgrades (15%) and 5% off builds; +10 px field (160)",
+						"set": {},
+						"add": {
+							"discount": 0.05,
 							"build_discount": 0.05,
-							"range": 160.0,
+							"range": 10.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Loading Dock",
 						"cost": 3865,
-						"blurb": "20% off upgrades; 175 px",
-						"set": {
-							"discount": 0.2,
-							"range": 175.0,
+						"blurb": "+5% off upgrades (20%); +15 px field (175)",
+						"set": {},
+						"add": {
+							"discount": 0.05,
+							"range": 15.0,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Parts Exchange",
 					"cost": 20935,
-					"blurb": "25% off upgrades, 10% off builds; 190 px; towers in the field sell back for everything spent on them",
-					"set": {
-						"discount": 0.25,
-						"build_discount": 0.1,
-						"range": 190.0,
+					"blurb": "+5% off upgrades (25%); +5% off builds (10%); +15 px field (190); towers in the field sell back for everything spent on them",
+					"set": {},
+					"add": {
+						"discount": 0.05,
+						"build_discount": 0.05,
+						"range": 15.0,
 						"sell_field": 1.0,
 					},
-					"add": {},
 				},
 			},
 		],
@@ -3744,6 +3754,7 @@ static var TREES := {
 		"class": "Defense",
 		"weapon": "Field",
 		"blurb": "A massive electromagnet that magnetically pulls against enemies in range, slowing them down and pulling off armor. \"Yeah, science!\"",
+		"tagline": "A magnetic field that slows enemies and drags them back.",
 		"air": true,
 		"ground": true,
 		"size": 1,
@@ -3756,7 +3767,7 @@ static var TREES := {
 		"base": {
 			"name": "Magneto Tower",
 			"cost": 525,
-			"blurb": "525 credits; a constant magnetic field of 120 px. Every enemy inside, air and ground, is slowed 25% while inside, scaled by weight. The strongest slow applies, as today.",
+			"blurb": "525 credits; a constant magnetic field of 120 px. Every enemy inside, air and ground, is slowed 25% while inside, scaled by weight. Only the strongest slow on an enemy applies.",
 			"set": {
 				"range": 120.0,
 				"slow": 0.25,
@@ -3767,11 +3778,11 @@ static var TREES := {
 			{
 				"name": "Superconducting Coil",
 				"cost": 210,
-				"blurb": "Slow 25% to 30%; the coil frosts over.",
-				"set": {
-					"slow": 0.3,
+				"blurb": "+5% slow (30%); the coil frosts over.",
+				"set": {},
+				"add": {
+					"slow": 0.05,
 				},
-				"add": {},
 			},
 			{
 				"name": "Field Stabiliser",
@@ -3786,10 +3797,10 @@ static var TREES := {
 				"name": "Pole Shoes",
 				"cost": 135,
 				"blurb": "Heavy roles resist 30% less.",
-				"set": {
+				"set": {},
+				"add": {
 					"pole_shoes": 0.3,
 				},
-				"add": {},
 			},
 		],
 		"paths": [
@@ -3800,51 +3811,51 @@ static var TREES := {
 					{
 						"name": "Stronger Coil",
 						"cost": 295,
-						"blurb": "Slow 32%",
-						"set": {
-							"slow": 0.32,
+						"blurb": "+7% slow (32%)",
+						"set": {},
+						"add": {
+							"slow": 0.07,
 						},
-						"add": {},
 					},
 					{
 						"name": "Heavy Grip",
 						"cost": 565,
-						"blurb": "Slow 35%; heavy roles resist a quarter less",
-						"set": {
-							"slow": 0.35,
+						"blurb": "+3% slow (35%); heavy roles resist a quarter less",
+						"set": {},
+						"add": {
+							"slow": 0.03,
 							"grip_relief": 0.25,
 						},
-						"add": {},
 					},
 					{
 						"name": "Mass Lock",
 						"cost": 2060,
-						"blurb": "Slow 42%; heavy roles resist half as much",
-						"set": {
-							"slow": 0.42,
-							"grip_relief": 0.5,
+						"blurb": "+7% slow (42%); heavy roles resist half as much",
+						"set": {},
+						"add": {
+							"slow": 0.07,
+							"grip_relief": 0.25,
 						},
-						"add": {},
 					},
 					{
 						"name": "Dense Field",
 						"cost": 2450,
-						"blurb": "Slow 48%",
-						"set": {
-							"slow": 0.48,
+						"blurb": "+6% slow (48%)",
+						"set": {},
+						"add": {
+							"slow": 0.06,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Absolute Pull",
 					"cost": 13630,
-					"blurb": "Slow 55%; no role resists: Tanks and bosses are slowed fully",
-					"set": {
-						"slow": 0.55,
-						"grip_relief": 1.0,
+					"blurb": "+7% slow (55%); no role resists: Tanks and bosses are slowed fully",
+					"set": {},
+					"add": {
+						"slow": 0.07,
+						"grip_relief": 0.5,
 					},
-					"add": {},
 				},
 			},
 			{
@@ -3854,48 +3865,48 @@ static var TREES := {
 					{
 						"name": "Wider Coil",
 						"cost": 180,
-						"blurb": "130 px",
-						"set": {
-							"range": 130.0,
+						"blurb": "+10 px radius (130)",
+						"set": {},
+						"add": {
+							"range": 10.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Field Extender",
 						"cost": 395,
-						"blurb": "140 px",
-						"set": {
-							"range": 140.0,
+						"blurb": "+10 px radius (140)",
+						"set": {},
+						"add": {
+							"range": 10.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Broad Field",
 						"cost": 1290,
-						"blurb": "155 px",
-						"set": {
-							"range": 155.0,
+						"blurb": "+15 px radius (155)",
+						"set": {},
+						"add": {
+							"range": 15.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Great Field",
 						"cost": 2845,
-						"blurb": "170 px",
-						"set": {
-							"range": 170.0,
+						"blurb": "+15 px radius (170)",
+						"set": {},
+						"add": {
+							"range": 15.0,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Magnetosphere",
 					"cost": 10645,
-					"blurb": "195 px",
-					"set": {
-						"range": 195.0,
+					"blurb": "+25 px radius (195)",
+					"set": {},
+					"add": {
+						"range": 25.0,
 					},
-					"add": {},
 				},
 			},
 			{
@@ -3906,19 +3917,19 @@ static var TREES := {
 						"name": "Plate Puller",
 						"cost": 360,
 						"blurb": "Enemies in the field lose 2 armour while inside",
-						"set": {
+						"set": {},
+						"add": {
 							"armor_pull": 2.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Plate Ripper",
 						"cost": 720,
-						"blurb": "4 armour",
-						"set": {
-							"armor_pull": 4.0,
+						"blurb": "+2 armour pulled (4)",
+						"set": {},
+						"add": {
+							"armor_pull": 2.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Torn Plates",
@@ -3932,22 +3943,22 @@ static var TREES := {
 					{
 						"name": "Deep Pull",
 						"cost": 2160,
-						"blurb": "5 armour",
-						"set": {
-							"armor_pull": 5.0,
+						"blurb": "+1 armour pulled (5)",
+						"set": {},
+						"add": {
+							"armor_pull": 1.0,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Reverse Polarity",
 					"cost": 9600,
-					"blurb": "Every 4 s the field flips to repel: enemies are flung into each other for impact damage and a 0.3 s stun",
-					"set": {
+					"blurb": "Every 4 s the field flips to repel: enemies are flung into each other for 40 impact damage and a 0.3 s stun",
+					"set": {},
+					"add": {
 						"flip_every": 4.0,
 						"flip_damage": 40.0,
 					},
-					"add": {},
 				},
 			},
 		],
@@ -3957,6 +3968,7 @@ static var TREES := {
 		"class": "Defense",
 		"weapon": "Energy",
 		"blurb": "A dish-mounted emitter that locks a tractor beam onto a single enemy and hauls it back down the track before letting go. \"You're my friend now.\"",
+		"tagline": "Grabs one enemy and hauls it back along the track.",
 		"air": true,
 		"ground": true,
 		"size": 1,
@@ -3982,29 +3994,29 @@ static var TREES := {
 			{
 				"name": "Beam Sweep",
 				"cost": 175,
-				"blurb": "While holding, the beam slows every other enemy it crosses by 30%. It replaced Twin Emitter (a second beam at half the pull, 575), by the owner's choice of three ideas on 2026-10-19. Price (proposed): the formula's step-1 price for about a 15% gain on the stock effect (a 30% slow on the enemies crossing the beam during each 1.5 s hold); the balance probe checks it.",
-				"set": {
+				"blurb": "While holding, the beam slows every other enemy it crosses by 30%.",
+				"set": {},
+				"add": {
 					"beam_slow": 0.3,
 				},
-				"add": {},
 			},
 			{
 				"name": "Longer Hold",
 				"cost": 140,
-				"blurb": "Holds for 2 s.",
-				"set": {
-					"hold": 2.0,
+				"blurb": "+0.5 s hold (2 s).",
+				"set": {},
+				"add": {
+					"hold": 0.5,
 				},
-				"add": {},
 			},
 			{
 				"name": "Faster Recharge",
 				"cost": 230,
-				"blurb": "Recharges in 5 s.",
-				"set": {
-					"recharge": 5.0,
+				"blurb": "−1 s recharge (5 s).",
+				"set": {},
+				"add": {
+					"recharge": -1.0,
 				},
-				"add": {},
 			},
 		],
 		"paths": [
@@ -4015,50 +4027,51 @@ static var TREES := {
 					{
 						"name": "Longer Haul",
 						"cost": 185,
-						"blurb": "100 px pull",
-						"set": {
-							"pull": 100.0,
+						"blurb": "+20 px pull (100)",
+						"set": {},
+						"add": {
+							"pull": 20.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Stronger Beam",
 						"cost": 535,
-						"blurb": "120 px; holds 1.8 s",
-						"set": {
-							"pull": 120.0,
-							"hold": 1.8,
+						"blurb": "+20 px pull (120); +0.3 s hold (1.8 s)",
+						"set": {},
+						"add": {
+							"pull": 20.0,
+							"hold": 0.3,
 						},
-						"add": {},
 					},
 					{
 						"name": "Rewind",
 						"cost": 1840,
-						"blurb": "Sends the enemy back to where it was 3 s ago (by time, owner)",
-						"set": {
+						"blurb": "Sends the enemy back to where it was 3 s ago",
+						"set": {},
+						"add": {
 							"rewind": 3.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Long Rewind",
 						"cost": 2945,
-						"blurb": "Back 4 s",
-						"set": {
-							"rewind": 4.0,
+						"blurb": "+1 s rewind (4 s)",
+						"set": {},
+						"add": {
+							"rewind": 1.0,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Undo",
 					"cost": 9215,
-					"blurb": "Back 5 s; and once per round, sends one non-boss enemy back to the start of its current track segment (owner: weaker than to the entrance)",
+					"blurb": "+1 s rewind (5 s); once per round, sends one non-boss enemy back to the start of its current track segment",
 					"set": {
-						"rewind": 5.0,
 						"undo": true,
 					},
-					"add": {},
+					"add": {
+						"rewind": 1.0,
+					},
 				},
 			},
 			{
@@ -4068,48 +4081,48 @@ static var TREES := {
 					{
 						"name": "Quick Release",
 						"cost": 175,
-						"blurb": "Recharge 5.2 s",
-						"set": {
-							"recharge": 5.2,
+						"blurb": "−0.8 s recharge (5.2 s)",
+						"set": {},
+						"add": {
+							"recharge": -0.8,
 						},
-						"add": {},
 					},
 					{
 						"name": "Capacitor Bank",
 						"cost": 345,
-						"blurb": "4.6 s",
-						"set": {
-							"recharge": 4.6,
+						"blurb": "−0.6 s recharge (4.6 s)",
+						"set": {},
+						"add": {
+							"recharge": -0.6,
 						},
-						"add": {},
 					},
 					{
 						"name": "Rapid Lock",
 						"cost": 1265,
-						"blurb": "3.8 s",
-						"set": {
-							"recharge": 3.8,
+						"blurb": "−0.8 s recharge (3.8 s)",
+						"set": {},
+						"add": {
+							"recharge": -0.8,
 						},
-						"add": {},
 					},
 					{
 						"name": "Overclocked Emitter",
 						"cost": 2200,
-						"blurb": "3.3 s",
-						"set": {
-							"recharge": 3.3,
+						"blurb": "−0.5 s recharge (3.3 s)",
+						"set": {},
+						"add": {
+							"recharge": -0.5,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Supercapacitor",
 					"cost": 21745,
-					"blurb": "Recharge 2 s. It replaced Dual Beam (a second beam at a third of the pull, 10,035) on 2026-10-19, by the owner's choice; priced by the formula (the 3.3 s to 2 s rise in grab rate, ×32)",
-					"set": {
-						"recharge": 2.0,
+					"blurb": "−1.3 s recharge (2 s)",
+					"set": {},
+					"add": {
+						"recharge": -1.3,
 					},
-					"add": {},
 				},
 			},
 			{
@@ -4120,29 +4133,29 @@ static var TREES := {
 						"name": "Firm Grip",
 						"cost": 190,
 						"blurb": "Heavy roles resist half as much",
-						"set": {
+						"set": {},
+						"add": {
 							"grip_relief": 0.5,
 						},
-						"add": {},
 					},
 					{
 						"name": "Crushing Grip",
 						"cost": 270,
 						"blurb": "The held enemy takes 15 energy damage/s",
-						"set": {
+						"set": {},
+						"add": {
 							"grip_dps": 15.0,
 						},
-						"add": {},
 					},
 					{
 						"name": "Lift and Drop",
 						"cost": 1075,
 						"blurb": "Ground enemies are lifted, then slammed down, stunning everything within 50 px for 0.4 s",
-						"set": {
+						"set": {},
+						"add": {
 							"slam_radius": 50.0,
 							"slam_stun": 0.4,
 						},
-						"add": {},
 					},
 					{
 						"name": "Grip Lock",
@@ -4157,13 +4170,14 @@ static var TREES := {
 				"mastery": {
 					"name": "Gravity Hammer",
 					"cost": 5365,
-					"blurb": "The slam stuns everything within 80 px for 0.8 s and shatters barriers",
+					"blurb": "+30 px slam (80); +0.4 s stun (0.8 s); the slam shatters barriers",
 					"set": {
-						"slam_radius": 80.0,
-						"slam_stun": 0.8,
 						"slam_shatter": true,
 					},
-					"add": {},
+					"add": {
+						"slam_radius": 30.0,
+						"slam_stun": 0.4,
+					},
 				},
 			},
 		],
@@ -4173,9 +4187,10 @@ static var TREES := {
 		"class": "Support",
 		"weapon": "None",
 		"blurb": "Neighboring towers are given special augmentations to their weaponry through mysterious means. \"So my 12-guage shotgun shoots thermonuclear explosives now apparently.\"",
+		"tagline": "Gives nearby towers a chance of critical hits.",
 		"air": true,
 		"ground": true,
-		"size": 1,
+		"size": 2,
 		"damage_kind": "physical",
 		"beam": false,
 		"uncapped": false,
@@ -4197,20 +4212,20 @@ static var TREES := {
 			{
 				"name": "Wide Aura",
 				"cost": 170,
-				"blurb": "A 3-tile radius (144 px).",
-				"set": {
-					"range": 144.0,
+				"blurb": "+48 px radius (144, 3 tiles).",
+				"set": {},
+				"add": {
+					"range": 48.0,
 				},
-				"add": {},
 			},
 			{
 				"name": "Amplified Bonus",
 				"cost": 135,
-				"blurb": "The stock crit chance doubles to 10%.",
-				"set": {
-					"aug_crit": 0.1,
+				"blurb": "+5% crit chance (10%).",
+				"set": {},
+				"add": {
+					"aug_crit": 0.05,
 				},
-				"add": {},
 			},
 			{
 				"name": "Remote Link",
@@ -4231,48 +4246,47 @@ static var TREES := {
 						"name": "Charged Rounds",
 						"cost": 105,
 						"blurb": "25% of nearby towers' damage counts as energy",
-						"set": {
+						"set": {},
+						"add": {
 							"energy_conv": 0.25,
 						},
-						"add": {},
 					},
 					{
 						"name": "Plasma Coating",
 						"cost": 205,
-						"blurb": "50%",
-						"set": {
-							"energy_conv": 0.5,
+						"blurb": "+25% counted as energy (50%)",
+						"set": {},
+						"add": {
+							"energy_conv": 0.25,
 						},
-						"add": {},
 					},
 					{
 						"name": "Energy Weave",
 						"cost": 410,
-						"blurb": "75%",
-						"set": {
-							"energy_conv": 0.75,
+						"blurb": "+25% counted as energy (75%)",
+						"set": {},
+						"add": {
+							"energy_conv": 0.25,
 						},
-						"add": {},
 					},
 					{
 						"name": "Full Conversion",
 						"cost": 820,
-						"blurb": "100%: every nearby tower's damage is energy, so even Ballistic and Explosive towers can hurt the Wraith",
-						"set": {
-							"energy_conv": 1.0,
+						"blurb": "+25% counted as energy (100%): every nearby tower's damage is energy, so even Ballistic and Explosive towers can hurt the Wraith",
+						"set": {},
+						"add": {
+							"energy_conv": 0.25,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Overcharge",
 					"cost": 4375,
-					"blurb": "100% energy, plus +10% bonus energy damage",
-					"set": {
-						"energy_conv": 1.0,
+					"blurb": "+10% bonus energy damage",
+					"set": {},
+					"add": {
 						"energy_bonus": 0.1,
 					},
-					"add": {},
 				},
 			},
 			{
@@ -4282,50 +4296,50 @@ static var TREES := {
 					{
 						"name": "Targeting Assist",
 						"cost": 80,
-						"blurb": "8% crit chance",
-						"set": {
-							"aug_crit": 0.08,
+						"blurb": "+3% crit chance (8%)",
+						"set": {},
+						"add": {
+							"aug_crit": 0.03,
 						},
-						"add": {},
 					},
 					{
 						"name": "Weak-Point Scan",
 						"cost": 165,
-						"blurb": "11%",
-						"set": {
-							"aug_crit": 0.11,
+						"blurb": "+3% crit chance (11%)",
+						"set": {},
+						"add": {
+							"aug_crit": 0.03,
 						},
-						"add": {},
 					},
 					{
 						"name": "Precision Matrix",
 						"cost": 1260,
-						"blurb": "15%; crits do ×2.5",
-						"set": {
-							"aug_crit": 0.15,
-							"crit_mult": 2.5,
+						"blurb": "+4% crit chance (15%); +0.5 crit multiplier (×2.5)",
+						"set": {},
+						"add": {
+							"aug_crit": 0.04,
+							"crit_mult": 0.5,
 						},
-						"add": {},
 					},
 					{
 						"name": "Lethal Matrix",
 						"cost": 985,
-						"blurb": "18%",
-						"set": {
-							"aug_crit": 0.18,
+						"blurb": "+3% crit chance (18%)",
+						"set": {},
+						"add": {
+							"aug_crit": 0.03,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Executioner Link",
 					"cost": 7440,
-					"blurb": "22%; crits do ×3",
-					"set": {
-						"aug_crit": 0.22,
-						"crit_mult": 3.0,
+					"blurb": "+4% crit chance (22%); +0.5 crit multiplier (×3)",
+					"set": {},
+					"add": {
+						"aug_crit": 0.04,
+						"crit_mult": 0.5,
 					},
-					"add": {},
 				},
 			},
 			{
@@ -4336,50 +4350,51 @@ static var TREES := {
 						"name": "Deflector Rounds",
 						"cost": 135,
 						"blurb": "10% of hits bounce to another enemy within 60 px at 50% damage",
-						"set": {
+						"set": {},
+						"add": {
 							"ricochet": 0.1,
 							"ricochet_str": 0.5,
 						},
-						"add": {},
 					},
 					{
 						"name": "Bounce Coating",
 						"cost": 275,
-						"blurb": "20%",
-						"set": {
-							"ricochet": 0.2,
+						"blurb": "+10% bounce chance (20%)",
+						"set": {},
+						"add": {
+							"ricochet": 0.1,
 						},
-						"add": {},
 					},
 					{
 						"name": "Ricochet Field",
 						"cost": 1205,
-						"blurb": "30%; bounces at 70%",
-						"set": {
-							"ricochet": 0.3,
-							"ricochet_str": 0.7,
+						"blurb": "+10% bounce chance (30%); +20% bounce damage (70%)",
+						"set": {},
+						"add": {
+							"ricochet": 0.1,
+							"ricochet_str": 0.2,
 						},
-						"add": {},
 					},
 					{
 						"name": "Chain Bounce",
 						"cost": 1530,
-						"blurb": "40%",
-						"set": {
-							"ricochet": 0.4,
+						"blurb": "+10% bounce chance (40%)",
+						"set": {},
+						"add": {
+							"ricochet": 0.1,
 						},
-						"add": {},
 					},
 				],
 				"mastery": {
 					"name": "Pinball",
 					"cost": 7660,
-					"blurb": "50%; a bounce can bounce again",
+					"blurb": "+10% bounce chance (50%); a bounce can bounce again",
 					"set": {
-						"ricochet": 0.5,
 						"bounce_again": true,
 					},
-					"add": {},
+					"add": {
+						"ricochet": 0.1,
+					},
 				},
 			},
 		],

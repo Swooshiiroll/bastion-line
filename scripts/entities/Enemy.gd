@@ -50,6 +50,12 @@ var flee_timer := 0.0
 ## Mirage hologram: a 1-HP copy that never leaks or pays, and vanishes with the Mirage that projected it.
 var hologram := false
 var holo_owner = null
+## How far ahead of its Mirage (negative: behind) a hologram keeps along the track (#114).
+var holo_offset := 0.0
+## Radar Signal Analysis: a ping saw through this Decoy Beacon, so it ranks (and shows its role) as what it really is.
+var decoy_exposed := false
+## Radar Total Exposure: seconds left in which it can't re-cloak or re-burrow (kept full while inside that radar).
+var track_timer := 0.0
 ## The kind ("physical" or "energy") of the last hit it took.
 var last_hit_kind := ""
 var radius := 10.0
@@ -92,6 +98,9 @@ var alive := true
 var wave_id := 0
 var hit_flash := 0.0
 var armor_shred := 0.0
+## Seconds since its permanent shred last grew (the broken-shield mark fades over SHRED_MARK s, #116), and the shred then.
+var shred_age := 99.0
+var _shred_seen := 0.0
 ## Chemical Plant soak: time left, acid damage per second, gel slow, and the plant that soaked it. Cryo Tower permanent chill.
 var soak_timer := 0.0
 var soak_dps := 0.0
@@ -125,6 +134,10 @@ var blink_timer: float:
 		return float(trait_timers.get("blink", 0.0))
 	set(v):
 		trait_timers["blink"] = v
+## Where it stood when it last blinked (its after-image stays there), or INF if it never has.
+var blink_from := Vector2.INF
+## Which way it faced when it blinked, so its after-image stays as it was (#114).
+var blink_facing := 0.0
 ## Mender Hulk: seconds since it last took damage.
 var since_hit := 0.0
 ## Rally Beacon overdrive on this enemy (fraction of extra speed), refreshed every tick.
@@ -226,7 +239,7 @@ func retune(was: Dictionary) -> void:
 	bounty = int(def.bounty) * (2 if elite else 1)
 	lives_cost = int(def.lives) + (1 if elite else 0)
 	slow_resist = float(def.get("slow_resist", 0.0))
-	if not disguised and not def.has("fake_rank"):
+	if not disguised and (not def.has("fake_rank") or decoy_exposed):
 		rank = Enemies.rank_of(def)
 
 
@@ -252,6 +265,13 @@ func reveal_disguise() -> void:
 	rank = Enemies.rank_of(def)
 	speed = float(def.flee_speed) * spd_mult
 	flee_timer = float(def.flee_time)
+
+
+## Radar Signal Analysis: the Decoy Beacon is seen for what it is (its true rank and role), for good.
+func expose_decoy() -> void:
+	decoy_exposed = true
+	mark("analysed")
+	rank = Enemies.rank_of(def)
 
 
 ## Turns it into a Mirage's hologram: 1 HP, no armor, barrier or abilities, no bounty or leak cost, and its Mirage's rank.
@@ -312,7 +332,7 @@ func role() -> String:
 func shown_role() -> String:
 	if disguised:
 		return str(Enemies.ENEMIES[def.disguise].role)
-	return str(def.get("shown_role", role()))
+	return role() if decoy_exposed else str(def.get("shown_role", role()))
 
 
 ## The data it shows (name, blurb, role and tier): its disguise's while disguised.
@@ -343,6 +363,18 @@ func apply_slow(amount: float, duration: float) -> void:
 func set_distance(d: float) -> void:
 	distance = clampf(d, 0.0, path_len)
 	pos = curve.sample_baked(minf(distance, path_len))
+
+
+## A blink: it leaves an after-image where it stands and lands `dist` px further along its route, on the track and
+## facing along it (not along the jump, which cuts across a corner).
+func blink(dist: float) -> void:
+	blink_from = pos
+	blink_facing = facing.angle()
+	set_distance(distance + dist)
+	track_pos = pos
+	var ahead := curve.sample_baked(minf(distance + 4.0, path_len))
+	if ahead.distance_squared_to(pos) > 0.0001:
+		facing = (ahead - pos).normalized()
 
 
 ## Where the enemy was `seconds` ago along its route (its distance then), or 0 if it hasn't been alive that long.
@@ -394,9 +426,14 @@ func on_track() -> bool:
 	return not flying or bool(def.get("track", false))
 
 
-## Towers can't pick it as a target: burrowed, or cloaked and not revealed (a Radar Tower ping).
+## Towers can't pick it as a target: burrowed, or cloaked and not revealed (a Radar Tower ping or its Total Exposure).
 func is_hidden() -> bool:
-	return burrowed or (cloaked and reveal_timer <= 0.0 and disrupt_timer <= 0.0)
+	return burrowed or (cloaked and reveal_timer <= 0.0 and disrupt_timer <= 0.0 and track_timer <= 0.0)
+
+
+## Towers won't choose it as a target while it's hidden. Blasts and beams still hit whatever is in their way.
+func untargetable() -> bool:
+	return is_hidden()
 
 
 ## Can't be stunned (Rampart, Colossus).
@@ -433,6 +470,11 @@ func _reset_blink() -> void:
 
 func step(dt: float) -> void:
 	age += dt
+	if armor_shred > _shred_seen:
+		shred_age = 0.0
+	else:
+		shred_age += dt
+	_shred_seen = armor_shred
 	hit_flash = maxf(0.0, hit_flash - dt)
 	reveal_timer = maxf(0.0, reveal_timer - dt)
 	since_hit += dt
@@ -448,7 +490,7 @@ func step(dt: float) -> void:
 			soak_dps = 0.0
 			soak_slow = 0.0
 			soak_source = null
-	for f in ["suppress_timer", "jam_timer", "repair_block", "barrier_block", "grant_block", "expose_timer", "no_dig", "disrupt_timer", "armor_break_timer"]:
+	for f in ["suppress_timer", "jam_timer", "repair_block", "barrier_block", "grant_block", "expose_timer", "no_dig", "disrupt_timer", "armor_break_timer", "track_timer"]:
 		if float(get(f)) > 0.0:
 			set(f, maxf(0.0, float(get(f)) - dt))
 	if dot_timer > 0.0:
@@ -489,7 +531,11 @@ func step(dt: float) -> void:
 	# side-step slides rather than jumps. It faces along the track.
 	move_time += dt
 	var mt := move_time + float(id) * 0.37
-	distance += speed * (1.0 - slow_amount) * (1.0 + haste) * rush * (1.0 + wake) * EnemyMoves.pace(self, mt) * dt
+	if hologram and holo_owner != null and holo_owner.alive:
+		# A Mirage's pair keeps its place ahead of or behind it (#114).
+		distance = clampf(holo_owner.distance + holo_offset, 0.0, path_len)
+	else:
+		distance += speed * (1.0 - slow_amount) * (1.0 + haste) * rush * (1.0 + wake) * EnemyMoves.pace(self, mt) * dt
 	var np := curve.sample_baked(clampf(distance + EnemyMoves.ahead(self), 0.0, path_len))
 	if track_pos == Vector2.INF:
 		track_pos = np

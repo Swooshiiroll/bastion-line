@@ -230,6 +230,16 @@ func _edit_row(f: Dictionary, q: String) -> HBoxContainer:
 	lbl.tooltip_text = key
 	lbl.mouse_filter = Control.MOUSE_FILTER_PASS
 	row.add_child(lbl)
+	if Tuner.TOGGLES.has(key):
+		# An on/off switch: a checkbox for its 1 or 0.
+		var box := CheckBox.new()
+		box.text = "on"
+		box.button_pressed = float(Tuner.value(key)) >= 0.5
+		box.toggled.connect(func(on: bool):
+			Tuner.set_value(key, 1.0 if on else 0.0)
+			_after_edit())
+		row.add_child(box)
+		return row
 	var edit := LineEdit.new()
 	edit.custom_minimum_size = Vector2(84, 0)
 	edit.alignment = HORIZONTAL_ALIGNMENT_RIGHT

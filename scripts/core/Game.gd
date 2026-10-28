@@ -15,6 +15,11 @@ const Research = preload("res://scripts/core/Research.gd")
 const Tower = preload("res://scripts/entities/Tower.gd")
 const Enemy = preload("res://scripts/entities/Enemy.gd")
 const Projectile = preload("res://scripts/entities/Projectile.gd")
+## The Rocket Salvo's tube layout: each rocket leaves its own tube (#90). Pure geometry, no drawing.
+const RocketSalvoArt = preload("res://scripts/view/towers/RocketSalvoArt.gd")
+const RailgunArt = preload("res://scripts/view/towers/RailgunArt.gd")
+const MineLayerArt = preload("res://scripts/view/towers/MineLayerArt.gd")
+const MortarTowerArt = preload("res://scripts/view/towers/MortarTowerArt.gd")
 
 enum State { BUILD, WAVE, GAMEOVER }
 
@@ -30,6 +35,20 @@ const DPS_BUCKET := 0.25
 const DPS_BUCKETS := 20
 const AUTO_START_DELAY := 5.0
 const RETARGET_DELAY := 0.1
+## Mines are at least this far apart (px), and land up to MINE_SPREAD to either side of the lane's middle.
+const MINE_GAP := 18.0
+const MINE_SPREAD := 7.0
+## The Mine Layer throws where ground enemies will be in this many seconds, within MINE_NEAR px of it (#110).
+const MINE_LEAD := 1.0
+const MINE_NEAR := 24.0
+## The CAS Gunship's plane flies to a new orbit at this speed (px a second).
+static var CAS_SPEED := 180.0
+## Mortar shells lead a moving target (1) or land where it was when fired (0): a switch in the live tuner (#110).
+static var MORTAR_LEAD := 1
+## Constant Spray (the Chemical Plant's Speed mastery, #104): the fan its jet sweeps, in degrees (40, the owner, #112).
+static var SPRAY_FAN := 40.0
+## How fast Constant Spray's fan swings round to follow its target (rad a second).
+const SPRAY_TURN := 2.5
 const STAT_KEYS := ["kills", "gold_earned", "towers_built", "leaked", "waves_cleared"]
 static var BOSS_STUN_FACTOR := 0.3
 ## A critical hit does double damage (the Gun Turret's Range path; the Augmentation Tower's Precision Matrix raises it).
@@ -37,6 +56,12 @@ static var CRIT_MULT := 2.0
 const LASER_SECONDARY := 0.6
 const MISSILE_TURN := 7.0
 const MISSILE_MAX_LIFE := 3.0
+## A Rocket Salvo rocket flies this far straight out of its tube before it steers (px).
+const ROCKET_STRAIGHT := 12.0
+## The Laser Tower turns at this many radians a second, and its beams fire only once it faces its target (#90).
+static var LASER_TURN := 12.0
+## How close (radians) the Laser Tower's aim must be to its target for the beams to fire.
+const LASER_ON_ARC := 0.15
 const RAIL_WIDTH := 10.0
 static var SHIELD_EMP_MULT := 2.0
 static var RUBBLE_COST := 40
@@ -423,6 +448,7 @@ func place_tower(type: String, cell: Vector2i):
 		tower_at[c] = t
 	stats["towers_built"] += 1
 	_recompute_buffs()
+	t.load_up()
 	_emit({"type": "build", "pos": t.pos, "tower": type})
 	return t
 
@@ -498,6 +524,10 @@ func start_wave() -> bool:
 		var bonus := Waves.early_call_bonus(wave + 1)
 		_add_gold(bonus)
 		_emit({"type": "early_call", "bonus": bonus})
+	else:
+		# From the build phase every tower starts the round loading, at its current (perhaps just upgraded) rate (#85).
+		for t in towers:
+			t.load_up()
 	wave += 1
 	state = State.WAVE
 	auto_timer = 0.0
@@ -870,7 +900,7 @@ func _pick_target(t, exclude: Array, air: bool, ground: bool, preferred := false
 	var best_score := Vector3(-INF, -INF, -INF)
 	var swivel: bool = bool(t.stats().get("swivel", false))
 	for e in enemies:
-		if not e.alive or (e.flying and not air) or (not e.flying and not ground) or (e.is_hidden() and not _burrow_visible(t, e)) or exclude.has(e):
+		if not e.alive or (e.flying and not air) or (not e.flying and not ground) or (e.untargetable() and not _burrow_visible(t, e)) or exclude.has(e):
 			continue
 		if preferred and not _prefers(t, e):
 			continue
@@ -962,7 +992,8 @@ func _update_enemy(e, dt: float) -> void:
 			_leak(e)
 
 
-## Burrower: dives for burrow_time, then surfaces for the rest of the interval.
+## Burrower: dives for burrow_time, then surfaces for the rest of the interval. A Radar's Total Exposure keeps it from diving
+## again while it lasts.
 func _trait_burrow(e, d: Dictionary, dt: float) -> void:
 	var grounded: bool = e.silenced() or e.no_dig > 0.0 or e.disrupt_timer > 0.0
 	if grounded and e.burrowed:
@@ -972,7 +1003,7 @@ func _trait_burrow(e, d: Dictionary, dt: float) -> void:
 		_emit({"type": "burrow", "pos": e.pos, "down": false})
 	if not grounded:
 		e.burrow_timer -= dt
-	if not grounded and e.burrow_timer <= 0.0:
+	if not grounded and e.burrow_timer <= 0.0 and (e.burrowed or e.track_timer <= 0.0):
 		e.burrowed = not e.burrowed
 		e.mark("burrow")
 		e.burrow_timer = float(d.burrow_time) if e.burrowed else float(d.burrow_interval) - float(d.burrow_time)
@@ -983,8 +1014,7 @@ func _trait_burrow(e, d: Dictionary, dt: float) -> void:
 func _trait_blink(e, d: Dictionary) -> void:
 	var from: Vector2 = e.pos
 	e.mark("blink")
-	e.distance = minf(e.distance + float(d.blink_distance), e.path_len)
-	e.pos = e.curve.sample_baked(e.distance)
+	e.blink(float(d.blink_distance))
 	_emit({"type": "blink", "from": from, "pos": e.pos})
 	if e.has_trait("wake"):
 		# Shifter: where it lands, other non-boss enemies get a burst of speed (refreshed, never added).
@@ -1051,9 +1081,16 @@ func _cancel_charge(e) -> void:
 func _trait_holo(e, d: Dictionary) -> void:
 	e.mark("holo")
 	var n := int(d.holo_count)
+	# Each cast replaces the pair: never more than holo_count at once, one holo_gap ahead of it and one behind (#114).
+	for h in enemies + _new_enemies:
+		if h.alive and h.hologram and h.holo_owner == e:
+			_vanish(h)
+			_emit({"type": "hologram_pop", "pos": h.pos})
 	for k in n:
-		var h = spawn_enemy(e.type, e.path_index, maxf(0.0, e.distance - 14.0 * (k + 1)), 1.0, e.wave_id, speed_mult_for(e.wave_id) if e.wave_id > 0 else 1.0)
+		var off := float(d.get("holo_gap", 45.0)) * float(k / 2 + 1) * (1.0 if k % 2 == 0 else -1.0)
+		var h = spawn_enemy(e.type, e.path_index, clampf(e.distance + off, 0.0, e.path_len), 1.0, e.wave_id, speed_mult_for(e.wave_id) if e.wave_id > 0 else 1.0)
 		h.make_hologram(e)
+		h.holo_offset = off
 		_new_enemies.append(h)
 	if wave_remaining.has(e.wave_id):
 		wave_remaining[e.wave_id] += n
@@ -1182,10 +1219,21 @@ func _update_tower(t, dt: float) -> void:
 	if t.is_beam():
 		_update_laser_rework(t, s, dt)
 		return
+	if t.type == "chemical_plant" and bool(s.get("constant_spray", false)):
+		_sweep_spray(t, s, dt)
+		return
 	if t.target != null and not t.can_target(t.target):
 		t.target = null
-	t.cooldown -= dt
+	t.cooldown = maxf(t.cooldown - dt, 0.0)
 	if t.cooldown > 0.0:
+		# Reloading: keep a target to turn toward (looked for every RETARGET_DELAY), so the turret tracks between shots. The shot
+		# itself still picks afresh.
+		if t.target == null and time >= float(t.gun_cds.get("seek_t", 0.0)):
+			t.gun_cds["seek_t"] = time + RETARGET_DELAY
+			t.target = pick_target(t)
+		# The Mortar's tube tracks the point its next shell would land on, so it fires in line (#110).
+		if t.type == "mortar_tower" and t.target != null:
+			t.aim = (mortar_aim_point(t, t.target, s) - t.pos).angle()
 		return
 
 	match t.type:
@@ -1202,10 +1250,14 @@ func _update_tower(t, dt: float) -> void:
 			_fire_artillery(t, s)
 			return
 
+	# Loaded with nothing in range: it stays loaded (its reload dial steady, #110) and looks again every RETARGET_DELAY.
+	if time < float(t.gun_cds.get("seek_t", 0.0)) and t.target == null:
+		return
 	var target = pick_target(t)
 	t.target = target
 	if target == null:
-		t.cooldown = RETARGET_DELAY
+		t.cooldown = 0.0
+		t.gun_cds["seek_t"] = time + RETARGET_DELAY
 		return
 	t.cooldown = 1.0 / t.eff_rate()
 	t.fire_flash = 0.12
@@ -1278,7 +1330,7 @@ func _ricochet(source, from, dmg: float, depth := 0) -> void:
 	var best = null
 	var bd := 60.0 * 60.0
 	for e in enemies:
-		if e.alive and e != from and not e.is_hidden():
+		if e.alive and e != from and not e.untargetable():
 			var d2: float = e.pos.distance_squared_to(from.pos)
 			if d2 <= bd:
 				bd = d2
@@ -1361,6 +1413,10 @@ func _update_tractor(t, s: Dictionary, dt: float) -> void:
 		return
 	t.cooldown -= dt
 	if t.cooldown > 0.0:
+		# Recharging: keep a target to turn toward, like the other towers while they reload (#110).
+		if (t.target == null or not t.can_target(t.target)) and time >= float(cds.get("seek_t", 0.0)):
+			cds["seek_t"] = time + RETARGET_DELAY
+			t.target = pick_target(t)
 		return
 	var target = pick_target(t)
 	if target == null:
@@ -1378,6 +1434,7 @@ func _update_tractor(t, s: Dictionary, dt: float) -> void:
 		cds["undo_wave"] = wave
 		back = maxf(back, target.distance - _segment_start(target))
 	cds["hold_left"] = hold
+	cds["hold_total"] = hold
 	cds["pull_rate"] = back / maxf(hold, 0.1)
 	t.fire_flash = 0.2
 	_emit({"type": "tractor_lock", "from": t.pos, "to": target.pos, "look": t.look_key()})
@@ -1421,6 +1478,8 @@ func _update_boost_state() -> void:
 ## Radar Tower: every ping_every seconds it pings, and for reveal_time seconds the cloaked enemies in range are revealed and the burrowed ones
 ## show (towers that can hit underground may target them); the Constant Track keeps everything revealed. The radiation circle (Radiation
 ## Emitter and on) burns every enemy inside it that is revealed, for as long as it is in the circle. Several radars don't stack.
+## The Special Targeting path unmasks what a ping covers (_unmask); its mastery, Total Exposure, keeps what a ping found
+## revealed while it stays in range and for `exposure` s after it leaves.
 func _update_radar(t, s: Dictionary, dt: float) -> void:
 	var constant := bool(s.get("constant", false))
 	var left := float(t.gun_cds.get("ping", 0.0)) - dt
@@ -1434,15 +1493,34 @@ func _update_radar(t, s: Dictionary, dt: float) -> void:
 	t.gun_cds["ping"] = maxf(0.0, left)
 	var r: float = t.get_range()
 	var active: bool = constant or left > 0.0
-	if active:
+	var exposure := float(s.get("exposure", 0.0))
+	if active or exposure > 0.0:
 		var hold := 0.3 if constant else left
 		for e in _enemies_near(t.pos, r, true, true, true):
-			if e.cloaked:
-				e.reveal_timer = maxf(e.reveal_timer, hold)
+			if active:
+				if e.cloaked:
+					e.reveal_timer = maxf(e.reveal_timer, hold)
+				_unmask(e, s)
+			if exposure > 0.0 and (active or e.track_timer > 0.0):
+				e.track_timer = maxf(e.track_timer, exposure)
 	var dps := float(s.get("rad_dps", 0.0))
 	if dps > 0.0:
 		for e in _enemies_near(t.pos, float(s.get("rad_range", 60.0)), true, true, false):
 			damage_enemy(e, dps * dt, true, t, false)
+
+
+## The Radar's Special Targeting path, on an enemy a ping covers: Signal Analysis sees through a Decoy Beacon's fake rank,
+## Disguise Breaker uncovers a Masquerade, and Illusion Filter marks a Mirage's holograms as fakes that towers ignore.
+func _unmask(e, s: Dictionary) -> void:
+	if s.get("unmask_decoy", false) and e.def.has("fake_rank") and not e.decoy_exposed:
+		e.expose_decoy()
+	if s.get("unmask_mask", false) and e.disguised:
+		e.reveal_disguise()
+		_emit({"type": "unmask", "pos": e.pos, "enemy": e.type})
+	if s.get("unmask_mirage", false) and e.hologram and e.alive:
+		# Illusion Filter: a ping pops the hologram (#114).
+		_vanish(e)
+		_emit({"type": "hologram_pop", "pos": e.pos})
 
 
 ## Shockwave Generator: a wave every 1/rate seconds hits every enemy in its radius, air and ground, cloaked ones too (it needs no
@@ -1482,6 +1560,10 @@ func build_discount_at(pos: Vector2) -> float:
 ## never within 18 px of another mine.
 func _update_mine_layer(t, s: Dictionary, dt: float) -> void:
 	t.cooldown -= dt
+	# It keeps facing the spot it threw at until the mine lands, then turns to the next one (#110).
+	var nxt0 = t.gun_cds.get("next")
+	if nxt0 != null and time >= float(t.gun_cds.get("turn_at", 0.0)):
+		t.aim = (nxt0 - t.pos).angle()
 	if t.cooldown > 0.0:
 		return
 	var mine_count := 0
@@ -1491,35 +1573,68 @@ func _update_mine_layer(t, s: Dictionary, dt: float) -> void:
 	if mine_count >= int(s.get("cap", 20)):
 		t.cooldown = 0.2
 		return
-	var spot = _mine_spot(t, float(s.get("range", 120.0)))
+	var reach := float(s.get("range", 120.0))
+	# It throws at the spot it picked (and turned toward) after the last mine, if that's still free and in reach.
+	var spot = t.gun_cds.get("next")
+	if spot == null or not _mine_free(spot) or spot.distance_squared_to(t.pos) > reach * reach:
+		spot = _mine_spot(t, reach)
 	if spot == null:
 		t.cooldown = 0.3
 		return
-	mines.append({"pos": spot, "source": t})
 	t.pulse_count += 1
+	t.aim = (spot - t.pos).angle()
+	var k := 1.0 if t.size <= 1 else 1.8
+	mines.append({"pos": spot, "source": t, "t0": time, "from": MineLayerArt.muzzle(t.pos, t.aim, k, t.look_key(), t.pulse_count)})
 	t.cooldown = 1.0 / t.eff_rate()
 	t.fire_flash = 0.12
-	t.aim = (spot - t.pos).angle()
+	t.gun_cds["next"] = _mine_spot(t, reach)
+	t.gun_cds["turn_at"] = time + MineLayerArt.FLIGHT
 	_emit({"type": "mine_toss", "pos": t.pos, "to": spot, "look": t.look_key()})
 
 
-## The first free point along the lanes (nearest the entrance) inside reach of the tower; null if there is none.
+## A free point on the lanes inside reach of the tower, shifted a little to either side of the lane's middle; null if there is
+## none. Free means no mine within MINE_GAP. With ground enemies in reach it picks among the spots just ahead of them (where
+## they'll be in MINE_LEAD s, #110), otherwise anywhere. The pick is seeded by the run and the tower, so a replay lays the same.
 func _mine_spot(t, reach: float):
+	var ahead: Array = []
+	for e in enemies:
+		if e.alive and not e.flying and not e.hologram and e.pos.distance_squared_to(t.pos) <= (reach + 40.0) * (reach + 40.0):
+			ahead.append(lead_point(e, MINE_LEAD))
+	var near: Array = []
+	var spots: Array = []
+	var n := 0
 	for curve in grid.ground_paths:
 		var length: float = curve.get_baked_length()
 		var off := 0.0
 		while off <= length:
 			var p: Vector2 = curve.sample_baked(off)
 			if p.distance_squared_to(t.pos) <= reach * reach:
-				var free := true
-				for m in mines:
-					if m.pos.distance_squared_to(p) < 18.0 * 18.0:
-						free = false
-						break
-				if free:
-					return p
+				var side: Vector2 = (curve.sample_baked(minf(off + 2.0, length)) - curve.sample_baked(maxf(off - 2.0, 0.0))).normalized().orthogonal()
+				var q: Vector2 = p + side * (_mine_noise(t, n) * 2.0 - 1.0) * MINE_SPREAD
+				if _mine_free(q):
+					spots.append(q)
+					if ahead.any(func(a): return a.distance_squared_to(q) <= MINE_NEAR * MINE_NEAR):
+						near.append(q)
+			n += 1
 			off += 10.0
-	return null
+	if not near.is_empty():
+		spots = near
+	if spots.is_empty():
+		return null
+	return spots[mini(int(_mine_noise(t, -1) * float(spots.size())), spots.size() - 1)]
+
+
+func _mine_free(p: Vector2) -> bool:
+	for m in mines:
+		if m.pos.distance_squared_to(p) < MINE_GAP * MINE_GAP:
+			return false
+	return true
+
+
+## A number in [0, 1) from the run's seed, the tower's cell, the mines it has laid and `i` (its own stream, so laying mines
+## doesn't shift the crit rolls).
+func _mine_noise(t, i: int) -> float:
+	return float(hash([seed_value, t.cell.x, t.cell.y, t.pulse_count, i]) & 0xFFFFFF) / float(0x1000000)
 
 
 ## A mine goes off under any ground or burrowed enemy (flyers pass over; holograms aren't solid): its blast hits every ground and
@@ -1549,8 +1664,8 @@ func _update_mines(_dt: float) -> void:
 	mines = keep
 
 
-## Chemical Plant: sprays the best unsoaked enemy in range (one, or two with the Twin Nozzles); a soaked enemy is ignored until the
-## soak wears off. The soak strips armour (back when it ends, or for good with Corrosive Acid), burns with acid and slows with gel.
+## Chemical Plant: sprays the best unsoaked enemy in range (the Mist Nozzle soaks a neighbour too); a soaked enemy is ignored
+## until the soak wears off. Constant Spray sweeps instead (_sweep_spray).
 func _spray(t, s: Dictionary) -> void:
 	var cands: Array = []
 	for e in enemies:
@@ -1565,32 +1680,82 @@ func _spray(t, s: Dictionary) -> void:
 	t.cooldown = 1.0 / t.eff_rate()
 	t.fire_flash = 0.15
 	t.aim = (cands[0].pos - t.pos).angle()
-	t.shot_targets = cands.slice(0, 2)
-	var hit_n := int(s.get("nozzles", 1))
-	var soaked: Array = []
-	for i in mini(hit_n, cands.size()):
-		soaked.append(cands[i])
+	t.shot_targets = [cands[0]]
+	var soaked: Array = [cands[0]]
 	if bool(s.get("mist", false)):
-		var extra = null
 		for e in cands:
-			if not soaked.has(e) and e.pos.distance_squared_to(soaked[0].pos) <= 40.0 * 40.0:
-				extra = e
+			if e != cands[0] and e.pos.distance_squared_to(cands[0].pos) <= 40.0 * 40.0:
+				soaked.append(e)
 				break
-		if extra != null:
-			soaked.append(extra)
+	for i in soaked.size():
+		var e = soaked[i]
+		_soak(t, s, e)
+		# The spray from the nozzle; the Mist Nozzle's neighbour gets a mist.
+		_emit({"type": "spray", "from": t.pos, "to": e.pos, "enemy": e, "mist": i > 0, "look": t.look_key()})
+
+
+## Soaks `e`, or tops its soak up to full. The soak strips armour (back when it ends, or for good with Corrosive Acid), burns
+## with acid and slows with gel.
+func _soak(t, s: Dictionary, e) -> void:
 	var strip := float(s.get("armor_strip", 3.0))
 	var time_s := float(s.get("soak_time", 4.0))
-	for e in soaked:
-		e.soak_timer = time_s
-		e.soak_dps = float(s.get("acid_dps", 0.0))
-		e.soak_slow = float(s.get("gel_slow", 0.0))
-		e.soak_source = t
-		if bool(s.get("acid_perm", false)):
-			e.armor_shred = maxf(e.armor_shred, strip)
-		else:
-			e.armor_break = maxf(e.armor_break, strip)
-			e.armor_break_timer = maxf(e.armor_break_timer, time_s)
-		_emit({"type": "spray", "from": t.pos, "to": e.pos, "look": t.look_key()})
+	e.soak_timer = time_s
+	e.soak_dps = float(s.get("acid_dps", 0.0))
+	e.soak_slow = float(s.get("gel_slow", 0.0))
+	e.soak_source = t
+	if bool(s.get("acid_perm", false)):
+		e.armor_shred = maxf(e.armor_shred, strip)
+	else:
+		e.armor_break = maxf(e.armor_break, strip)
+		e.armor_break_timer = maxf(e.armor_break_timer, time_s)
+
+
+## Constant Spray (the Chemical Plant's Speed mastery, #104): the nozzle sprays without stopping, sweeping a fan (SPRAY_FAN degrees)
+## centred on the enemy its targeting picks, one pass across it per spray interval. Every enemy
+## the jet crosses in range (not a hologram) is soaked, or topped up to a full soak. With nothing in range the jet stops.
+## The sweep lives in gun_cds: spray_c (the fan's centre), spray_p (the pass, 0..2), spray_a (the jet's angle), spray_on.
+func _sweep_spray(t, s: Dictionary, dt: float) -> void:
+	var cands: Array = []
+	for e in enemies:
+		if t.can_target(e) and not e.hologram:
+			cands.append(e)
+	if cands.is_empty():
+		t.target = null
+		t.gun_cds["spray_on"] = 0.0
+		return
+	_rank_targets(t, cands, t.pos)
+	t.target = cands[0]
+	var want: float = (cands[0].pos - t.pos).angle()
+	var cen := float(t.gun_cds.get("spray_c", want))
+	cen += clampf(angle_difference(cen, want), -SPRAY_TURN * dt, SPRAY_TURN * dt)
+	var half := spray_half(s)
+	var phase: float = float(t.gun_cds.get("spray_p", 0.0)) + dt * t.eff_rate()
+	var a := spray_angle(cen, half, phase)
+	var prev := float(t.gun_cds.get("spray_a", a))
+	t.gun_cds["spray_c"] = cen
+	t.gun_cds["spray_p"] = fmod(phase, 2.0)
+	t.gun_cds["spray_a"] = a
+	t.gun_cds["spray_on"] = 1.0
+	# The plant faces the fan's centre; the jet has its own angle (spray_a), which the head and the particles follow (#112).
+	t.aim = cen
+	for e in cands:
+		var b: float = (e.pos - t.pos).angle()
+		if absf(angle_difference(cen, b)) > half + 0.05:
+			continue
+		var d0 := angle_difference(prev, b)
+		var d1 := angle_difference(a, b)
+		if d0 * d1 <= 0.0 or absf(d1) < 0.08:
+			_soak(t, s, e)
+
+
+## Half of Constant Spray's fan, in radians (the Mist Nozzle no longer widens it, #112).
+static func spray_half(_s: Dictionary) -> float:
+	return deg_to_rad(SPRAY_FAN) * 0.5
+
+
+## The jet's angle at `phase` of the sweep: one pass across the fan per unit of phase, easing at each edge.
+static func spray_angle(cen: float, half: float, phase: float) -> float:
+	return cen - half * cos(PI * phase)
 
 
 ## Every tick: acid burns soaked enemies, gel and chill slow them.
@@ -1637,8 +1802,40 @@ func _cryo_wave(t, s: Dictionary) -> void:
 
 ## Designates the point a CAS Gunship orbits (free, any time, anywhere on the map).
 func designate_orbit(t, pos: Vector2) -> void:
-	t.aim_point = pos.clamp(Vector2.ZERO, Grid.field_size())
+	var p := pos.clamp(Vector2.ZERO, Grid.field_size())
+	if not t.aim_set or p.distance_to(t.aim_point) > 1.0:
+		t.in_orbit = false
+	t.aim_point = p
 	t.aim_set = true
+
+
+## The CAS Gunship's plane: it takes off from the tower and flies straight to its orbit at CAS_SPEED, joining it along the
+## tangent (straight out when it starts inside the circle), then circles at 0.5 rad/s. A new orbit or a wider one sends it
+## flying again. The guns keep firing at the orbit while it flies, from wherever the plane is.
+func _fly_cas(t, radius: float, dt: float) -> void:
+	if t.plane_pos == Vector2.INF:
+		t.plane_pos = t.pos
+	if t.in_orbit and absf(t.plane_pos.distance_to(t.aim_point) - radius) > 1.0:
+		t.in_orbit = false
+	if t.in_orbit:
+		t.orbit_angle = fmod(t.orbit_angle + 0.5 * dt, TAU)
+		t.plane_pos = t.aim_point + Vector2.from_angle(t.orbit_angle) * radius
+		t.plane_heading = t.orbit_angle + PI / 2.0
+		return
+	var off: Vector2 = t.plane_pos - t.aim_point
+	var d := off.length()
+	var entry_angle: float = t.orbit_angle if d < 0.01 else off.angle() + (acos(radius / d) if d > radius else 0.0)
+	var entry: Vector2 = t.aim_point + Vector2.from_angle(entry_angle) * radius
+	var to: Vector2 = entry - t.plane_pos
+	var step := CAS_SPEED * dt
+	if to.length() <= step:
+		t.plane_pos = entry
+		t.orbit_angle = fposmod(entry_angle, TAU)
+		t.plane_heading = entry_angle + PI / 2.0
+		t.in_orbit = true
+	else:
+		t.plane_pos += to.normalized() * step
+		t.plane_heading = to.angle()
 
 
 ## CAS Gunship: the plane circles `aim_point` and its guns fire at enemies inside the orbit. The gatling takes the best target,
@@ -1648,8 +1845,8 @@ func _update_cas(t, s: Dictionary, dt: float) -> void:
 	if not t.aim_set:
 		designate_orbit(t, nearest_track_point(t.pos))
 	var radius := float(s.get("orbit", 90.0))
-	t.orbit_angle = fmod(t.orbit_angle + 0.5 * dt, TAU)
-	var plane: Vector2 = t.aim_point + Vector2.from_angle(t.orbit_angle) * radius
+	_fly_cas(t, radius, dt)
+	var plane: Vector2 = t.plane_pos
 	if bool(s.get("radar", false)):
 		for e in enemies:
 			if e.alive and e.cloaked and e.pos.distance_squared_to(t.aim_point) <= radius * radius:
@@ -1704,7 +1901,7 @@ func _update_cas(t, s: Dictionary, dt: float) -> void:
 func _cas_targets(t, radius: float, plane: Vector2) -> Array:
 	var out: Array = []
 	for e in enemies:
-		if e.alive and not e.is_hidden() and e.pos.distance_squared_to(t.aim_point) <= radius * radius:
+		if e.alive and not e.untargetable() and e.pos.distance_squared_to(t.aim_point) <= radius * radius:
 			out.append(e)
 	if t.priority != 0 and out.any(func(e): return _prefers(t, e)):
 		out = out.filter(func(e): return _prefers(t, e))
@@ -1762,7 +1959,7 @@ func _update_drone_bay(t, s: Dictionary, dt: float) -> void:
 	for i in t.wing.size():
 		var d: Dictionary = t.wing[i]
 		var tg = d.target
-		if tg == null or not tg.alive or tg.is_hidden() or (ground_only and tg.flying):
+		if tg == null or not tg.alive or tg.untargetable() or (ground_only and tg.flying):
 			d["target"] = _drone_target(t, s, ground_only)
 			tg = d.target
 		var goal: Vector2
@@ -1831,7 +2028,7 @@ func _fire_artillery(t, s: Dictionary) -> void:
 		var spot: Vector2 = t.aim_point + dir * (float(i) - float(n - 1) / 2.0) * 30.0 + _scatter(float(s.get("scatter", 30.0)))
 		var p = Projectile.new()
 		p.kind = t.type
-		p.pos = t.pos + dir * 18.0
+		p.pos = t.pos + dir * 27.0   # from the muzzle (ArtilleryCannonArt.muzzle), so it leaves along the barrel (#90)
 		p.start = p.pos
 		p.target_pos = spot
 		p.total = maxf(1.0, p.pos.distance_to(spot))
@@ -1878,7 +2075,7 @@ func _chain_rework(t, first, s: Dictionary) -> void:
 		var nxt = null
 		var nd := jump_r * jump_r
 		for e in enemies:
-			if not e.alive or hit.has(e) or e.is_hidden() or (e.flying and not t.hits_air()) or (not e.flying and not t.hits_ground()):
+			if not e.alive or hit.has(e) or e.untargetable() or (e.flying and not t.hits_air()) or (not e.flying and not t.hits_ground()):
 				continue
 			var d2: float = e.pos.distance_squared_to(cur.pos)
 			if d2 <= nd:
@@ -1901,8 +2098,10 @@ func _fire_railgun(t, target, s: Dictionary) -> void:
 	var dir: Vector2 = (target.pos - t.pos).normalized()
 	t.aim = dir.angle()
 	t.fire_flash = 0.15
-	var from: Vector2 = t.pos + dir * 26.0
-	var to: Vector2 = t.pos + dir * t.get_range()
+	t.gun_cds["shot_t"] = time
+	# From the muzzle of the rail whose turn it is (twin rails fire in turn), straight at the target, out to the range.
+	var from: Vector2 = RailgunArt.muzzle(t.pos, t.aim, 1.0 if t.size <= 1 else 1.8, t.look_key(), t.pulse_count - 1)
+	var to: Vector2 = from + (target.pos - from).normalized() * maxf(t.get_range() - t.pos.distance_to(from), 0.0)
 	var width := 4.0
 	var on_line: Array = []
 	for e in enemies:
@@ -1951,10 +2150,43 @@ func _update_trails(dt: float) -> void:
 ## (the art shows tubes firing in succession); the rate stat already is the total across the tubes.
 func _fire_mortar(t, target, s: Dictionary) -> void:
 	t.pulse_count += 1
+	# The tube turns to the shell's aim point, and the shell leaves the tube that fires, in line with it (#110).
+	var aim := mortar_aim_point(t, target, s)
+	t.aim = (aim - t.pos).angle()
 	_fire_projectile(t, target, s)
+	# A lobbed shell doesn't home (#85): it lands on its aim point, and an enemy that speeds up, turns back or blinks away
+	# dodges it.
+	var p = projectiles[projectiles.size() - 1]
+	p.fixed = true
+	p.pos = MortarTowerArt.muzzle(t.pos, t.aim, 1.0 if t.size <= 1 else 1.8, t.look_key(), t.pulse_count - 1)
+	p.start = p.pos
+	p.target_pos = aim
+	p.total = maxf(1.0, p.pos.distance_to(p.target_pos))
 	var every := int(s.get("smoke_every", 0))
 	if every > 0 and t.pulse_count % every == 0:
-		projectiles[projectiles.size() - 1].smoke = true
+		p.smoke = true
+
+
+## Where a Mortar shell is aimed: with the lead on (MORTAR_LEAD), where the target will be when the shell comes down along
+## its route at its current pace (a few passes settle the flight time); with it off, where the target is now.
+func mortar_aim_point(t, target, s: Dictionary) -> Vector2:
+	var aim: Vector2 = target.pos
+	if MORTAR_LEAD == 0:
+		return aim
+	var spd := maxf(1.0, float(s.get("proj_speed", 420.0)))
+	for i in 3:
+		aim = lead_point(target, t.pos.distance_to(aim) / spd)
+	return aim
+
+
+## Where enemy `e` will be in `secs` seconds at its current pace along its route (flyers too).
+func lead_point(e, secs: float) -> Vector2:
+	if e.curve == null:
+		return e.pos
+	var pace: float = e.speed * (1.0 - e.slow_amount) * (1.0 + e.haste)
+	if e.stun_timer > 0.0:
+		pace = 0.0
+	return e.curve.sample_baked(clampf(e.distance + pace * secs, 0.0, e.path_len))
 
 
 ## Slows ground enemies inside each smoke cloud, and retires the spent ones.
@@ -2107,7 +2339,7 @@ func _drone_target(t, s: Dictionary, bomber: bool):
 	for e in enemies:
 		if not e.alive or (bomber and e.flying):
 			continue
-		if e.is_hidden() and not (bomber and reach_burrowed and e.burrowed):
+		if e.untargetable() and not (bomber and reach_burrowed and e.burrowed):
 			continue
 		var score: float = e.progress()
 		if hunt and (e.type in HUNTED or (extra and e.type in HUNTED_EXTRA)):
@@ -2202,17 +2434,19 @@ func _fire_salvo(t, s: Dictionary) -> void:
 	t.cooldown = 1.0 / t.eff_rate()
 	t.fire_flash = 0.15
 	t.aim = (cands[0].pos - t.pos).angle()
+	t.gun_cds["salvo_t"] = time
 	var n := int(s.get("missiles", 3))
 	var dir := Vector2.from_angle(t.aim)
 	var ripple := bool(s.get("ripple", false))
+	var look: String = t.look_key()
 	for i in n:
 		var tgt = cands[i] if i < cands.size() else strongest
-		var side := 1.0 if i % 2 == 0 else -1.0
 		var p = Projectile.new()
 		p.kind = "rocket_salvo"
-		p.pos = t.pos + dir.orthogonal() * side * 7.0
+		# Each rocket leaves its own tube's mouth, straight out along the launcher, before it steers (#90).
+		p.pos = RocketSalvoArt.muzzle(t.pos, t.aim, 1.0 if t.size <= 1 else 1.8, look, i)
 		p.start = p.pos
-		p.vel = dir.orthogonal() * side * (150.0 + 15.0 * float(i)) + dir * 60.0
+		p.vel = dir * float(s.proj_speed)
 		p.target = tgt
 		p.target_pos = tgt.pos
 		p.speed = float(s.proj_speed)
@@ -2226,8 +2460,8 @@ func _fire_salvo(t, s: Dictionary) -> void:
 		p.smoke_time = float(s.get("smoke_time", 0.0))
 		p.ground_burn = float(s.get("ground_burn", 0.0))
 		p.ground_burn_time = float(s.get("ground_burn_time", 0.0))
-		p.hold = float(i) * 0.09 if ripple else 0.0
-		p.look = t.look_key()
+		p.hold = float(i) * RocketSalvoArt.RIPPLE_GAP if ripple else 0.0
+		p.look = look
 		p.tier = t.tier
 		p.source = t
 		projectiles.append(p)
@@ -2261,12 +2495,23 @@ func _update_laser_rework(t, s: Dictionary, dt: float) -> void:
 	if keep.is_empty():
 		t.beam_ramps.clear()
 		t.target = null
+		t.beam_on = false
 		t.ramp = 0.0
 		t.ramp_mult = 1.0
 		return
 	if keep[0] != t.target:
 		t.target = keep[0]
 		_emit({"type": "laser_lock", "pos": t.pos})
+	# It turns to face its target first; the beams fire only once it does (#90). Turning, nothing ramps.
+	var want: float = (keep[0].pos - t.pos).angle()
+	var turn := LASER_TURN * (2.0 if bool(s.get("turn_fast", false)) else 1.0) * dt
+	t.aim += clampf(angle_difference(t.aim, want), -turn, turn)
+	t.beam_on = absf(angle_difference(t.aim, want)) <= LASER_ON_ARC
+	if not t.beam_on:
+		t.beam_ramps = ramps
+		t.ramp = float(ramps[0])
+		t.ramp_mult = 1.0
+		return
 	var ramp_max := float(s.ramp)
 	var ramp_time := float(s.ramp_time)
 	var power := float(s.get("beam_power", 0.4))
@@ -2282,18 +2527,19 @@ func _update_laser_rework(t, s: Dictionary, dt: float) -> void:
 			t.ramp = ramps[0]
 			t.ramp_mult = mult
 	t.beam_ramps = ramps
-	t.aim = (keep[0].pos - t.pos).angle()
 	t.fire_flash = 0.05
 
 
 func _update_projectile(p, dt: float) -> void:
 	if p.hold > 0.0 and p.kind != "rocket_salvo":
 		p.hold -= dt
+		if p.hold <= 0.0 and p.kind == "artillery_cannon" and p.source != null:
+			p.source.fire_flash = 0.15   # each shell of a Rolling Barrage fires with its own recoil and flash (#90)
 		return
 	if p.kind == "rocket_salvo":
 		_update_rocket(p, dt)
 		return
-	if p.target != null and p.target.alive:
+	if p.target != null and p.target.alive and not p.fixed:
 		p.target_pos = p.target.pos
 	if p.kind == "missile":
 		_update_missile(p, dt)
@@ -2322,7 +2568,9 @@ func _update_rocket(p, dt: float) -> void:
 		if p.target != null and p.target.alive:
 			p.target_pos = p.target.pos
 	var to: Vector2 = p.target_pos - p.pos
-	p.vel = p.vel.lerp(to.normalized() * p.speed, clampf((40.0 if p.never_miss else MISSILE_TURN) * dt, 0.0, 1.0))
+	# Out of the tube straight, then it steers.
+	if p.traveled >= ROCKET_STRAIGHT:
+		p.vel = p.vel.lerp(to.normalized() * p.speed, clampf((40.0 if p.never_miss else MISSILE_TURN) * dt, 0.0, 1.0))
 	var step: Vector2 = p.vel * dt
 	p.traveled += step.length()
 	if p.smoke_slow > 0.0:
@@ -2344,7 +2592,7 @@ func _nearest_for(t, pos: Vector2, r: float):
 	var best = null
 	var bd := r * r
 	for e in enemies:
-		if e.alive and not e.is_hidden() and (not e.flying or t.hits_air()) and (e.flying or t.hits_ground()):
+		if e.alive and not e.untargetable() and (not e.flying or t.hits_air()) and (e.flying or t.hits_ground()):
 			var d: float = pos.distance_squared_to(e.pos)
 			if d <= bd:
 				bd = d
@@ -2437,7 +2685,7 @@ func _projectile_hit(p) -> void:
 						damage_enemy(e, float(s.get("bomblet_damage", 10.0)) * (1.0 + (p.source.buff_dmg if p.source != null else 0.0)), false, p.source, false)
 					_emit({"type": "bomblet", "pos": bp, "radius": br})
 			if p.smoke:
-				smokes.append({"pos": p.pos, "r": r, "t": float(s.get("smoke_time", 3.0)), "slow": float(s.get("smoke_slow", 0.15))})
+				smokes.append({"pos": p.pos, "r": r, "t": float(s.get("smoke_time", 3.0)), "slow": float(s.get("smoke_slow", 0.15)), "look": "smoke"})
 				_emit({"type": "smoke", "pos": p.pos, "radius": r})
 			_emit({"type": "splash", "pos": p.pos, "radius": r, "burn": false, "stun": false})
 		"missile":
@@ -2641,6 +2889,8 @@ func _pay_income(w: int) -> Array:
 			cap = float(s.get("interest_cap", 0.0))
 		if amount > 0:
 			paid.append([t.pos, amount])
+			# For the art: the Scrapyard's doors roll up and its furnace flares at each payout.
+			t.gun_cds["paid_t"] = time
 	var interest := mini(int(cap), int(floor(float(gold) * rate)))
 	for p in paid:
 		_add_gold(int(p[1]))
@@ -2684,8 +2934,6 @@ func _kill(e, source) -> void:
 	stats["kills"] += 1
 	if source != null:
 		source.kills += 1
-		if source is Tower and bool(source.stats().get("swivel", false)):
-			source.cooldown = 0.0   # Swivel Mount: a new target at once after a kill
 	_emit({"type": "kill", "pos": e.pos, "enemy": e.type, "bounty": gain, "boss": e.boss})
 	if e.has_trait("split"):
 		# Hydra Frame: the pieces keep walking from where it fell. Added after this tick's loops.
@@ -2745,13 +2993,14 @@ func _on_field_clear() -> void:
 	trails.clear()
 	warp_timer = 0.0
 	for t in towers:
-		t.cooldown = 0.0
+		t.load_up()   # the next round starts unloaded (#85)
 		t.target = null
 		t.fire_flash = 0.0
 		t.ramp = 0.0
 		t.ramp_mult = 1.0
 		t.beam_targets.clear()
 		t.disabled = 0.0
+		t.gun_cds.erase("spray_on")   # Constant Spray stops with the round (#112)
 	if sandbox and not endless and wave >= final_round():
 		# A test bench earns nothing: past the last round it just carries on, endless.
 		endless = true
@@ -2915,7 +3164,7 @@ func apply_save(data: Dictionary) -> String:
 		var cell := Vector2i(int(entry.get("col", -1)), int(entry.get("row", -1)))
 		var tiles := footprint(type, cell)
 		if size_of(type) > 1 and tiles.any(func(c): return not is_buildable(c) or tower_at.has(c)):
-			# A Scrapyard or Drone Bay from before they were 2x2 whose footprint doesn't fit: refund it.
+			# A Scrapyard, Drone Bay or Augmentation Tower from before they were 2x2 whose footprint doesn't fit: refund it.
 			gold += maxi(0, int(entry.get("spent", 0)))
 			continue
 		if not is_buildable(cell):

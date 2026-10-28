@@ -44,10 +44,12 @@ const FIELDS := [
 	["rules", "Enemies", ["LEAK_BANDS", "ROLE_RESIST"]],
 	["rules", "Enemy", ["MIN_DAMAGE_FRACTION", "SLOW_CAP", "STUN_GUARD", "SHOVE_BUDGET"]],
 	["rules", "Game", ["CRIT_MULT", "BOSS_STUN_FACTOR", "BOSS_PUSH_FACTOR", "DISABLE_GUARD", "GATE_COOLDOWN", "HIT_REVEAL_TIME",
-		"SHIELD_EMP_MULT", "SHOCK_PCT", "SHOCK_BOSS_PCT", "SLUDGE_SLOW"]],
+		"SHIELD_EMP_MULT", "SHOCK_PCT", "SHOCK_BOSS_PCT", "SLUDGE_SLOW", "LASER_TURN", "CAS_SPEED", "SPRAY_FAN", "MORTAR_LEAD"]],
 	["rules", "Tower", ["SECONDARY_CAP", "SITE_DAMAGE", "SITE_RANGE"]],
 ]
 const SKIP := {"ENEMIES": ["tier", "lives"]}
+## On/off switches: whole numbers the tuner shows as a checkbox (1 on, 0 off), e.g. the Mortar's lead (#110).
+const TOGGLES := {"Game:MORTAR_LEAD": true}
 const AREAS := ["enemies", "modifiers", "towers", "waves", "economy", "difficulty", "research", "abilities", "rules"]
 
 ## The run being tuned (null between runs). Edits made between runs still change the data; the next run is tuned.

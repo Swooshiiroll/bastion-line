@@ -80,6 +80,10 @@ with the owner before writing any code.
        working on fixes.
      - **Brimstone only when the owner asks:**
        `LX_HOST=chrisg@10.101.249.12 LX_DIR="/home/chrisg/Documents/BastionLine v4" tools/dev.sh lx`.
+     - **Which builds were played (#123):** a build with a BUILD.txt beside it marks its commit `true` in the
+       game's user data on launch, silently: `playtests.json` in `~/.local/share/godot/app_userdata/Bastion Line/`
+       (LX, Brimstone) or `%APPDATA%\Godot\app_userdata\Bastion Line\` (Apollyon). Pull it over SSH to see which
+       builds, and so which fixes, have been playtested.
      - **If LX is off,** it says so, and nothing else changes.
 6. **Merge only when the owner says so:** `gh pr merge --squash --delete-branch`.
 
