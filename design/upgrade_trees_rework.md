@@ -370,7 +370,7 @@ Radar is able to detect and alert nearby towers of stealthy or otherwise hidden 
 | 3 | c | Signal Analysis | 230 |  | Pings expose the Decoy Beacon's fake rank: towers in range rank it correctly | new |
 | 4 | c | Disguise Breaker | 460 |  | Pings unmask the Masquerade early | new |
 | 5 | c | Track Lock | 1930 |  | Reveals last 1.3 s | new |
-| 6 | c | Illusion Filter | 2390 |  | Pings mark Mirage holograms as fakes: towers in range stop shooting them | new |
+| 6 | c | Illusion Filter | 2390 |  | Pings pop Mirage holograms in range | new |
 | M | c | Total Exposure | 3590 |  | Revealed enemies can't re-cloak, re-disguise or re-burrow for 5 s after leaving the radar's range | new |
 
 ## Cryo Tower

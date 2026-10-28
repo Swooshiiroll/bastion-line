@@ -649,10 +649,10 @@ as the enemy's leak cost. Each enemy's round makeup (introduction round, threat 
 | blackout | Blackout Rig | 260 | 48 | 3 | 15 | 14 | emp_radius 130 · emp_duration 2.5 · emp_interval 4 | 179.7 | 3 |
 | capacitor | Capacitor | 420 | 44 | 4 | 20 | 15 | emp_radius 160 · emp_duration 3 · emp_interval 8 · emp_charge 2 | 325.2 | 3 |
 | shifter | Shifter | 200 | 68 | 2 | 13 | 11 | blink_interval 5 · blink_distance 60 · wake_radius 80 · wake_haste 0.2 · wake_time 2 | 185.0 | 3 |
-| wraith | Wraith | 260 | 74 | 2 | 18 | 11 | - | 284.8 | 3 |
+| wraith | Wraith | 260 | 74 | 2 | 18 | 16.5 | - | 284.8 | 3 |
 | masquerade | Masquerade | 320 | 60 | 3 | 14 | 11 | reveal_at 0.5 · flee_speed 80 · flee_time 3 | 345.6 | 3 |
 | decoy | Decoy Beacon | 400 | 36 | 6 | 10 | 14 | - | 311.0 | 3 |
-| mirage | Mirage | 140 | 55 | 1 | 12 | 11 | holo_interval 6 · holo_count 2 | 42.4 | 1 |
+| mirage | Mirage | 140 | 55 | 1 | 12 | 11 | holo_interval 6 · holo_count 2 · holo_gap 45 | 42.4 | 1 |
 | juggernaut | Dreadnought | 800 | 32 | 5 | 120 | 22 | slow_resist 0.5 | 409.6 | 20 |
 | warlord | Overmind | 1900 | 20 | 10 | 500 | 26 | slow_resist 0.6 · spawn_count 3 · spawn_interval 5 | 760.0 | 40 |
 | leviathan | Leviathan | 2600 | 24 | 6 | 400 | 30 | slow_resist 0.5 · spawn_count 6 · spawn_interval 6 | 898.6 | 60 |

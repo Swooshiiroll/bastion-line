@@ -68,7 +68,7 @@ static func enemy_abilities(d: Dictionary) -> Array:
 	if d.get("fake_rank", false):
 		out.append("Ranks above every non-boss (and shows as a %s), so Strongest towers aim at it, but it does nothing else. A Radar Tower with Signal Analysis sees through it." % str(d.get("shown_role", "tank")).capitalize())
 	if d.has("holo_interval"):
-		out.append("Every %s s projects %d holograms with 1 health that soak shots and walk to the core; they never leak and vanish when it dies. A Radar Tower with Illusion Filter marks them as fakes that towers ignore." % [_num(float(d.holo_interval)), int(d.holo_count)])
+		out.append("Every %s s projects %d holograms with 1 health that soak shots and walk to the core; they never leak and vanish when it dies. A Radar Tower with Illusion Filter pops them with each ping." % [_num(float(d.holo_interval)), int(d.holo_count)])
 	if d.has("siphon_radius"):
 		out.append("Towers within %s px fire %s slower and reach %s less far (the strongest Siphon applies)." % [_num(float(d.siphon_radius)), pct.call(d.siphon_rate), pct.call(d.siphon_range)])
 	if d.has("adrenaline"):

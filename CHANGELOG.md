@@ -64,6 +64,7 @@ so write for players.
   - **Augmentation Tower:** it takes 2×2 tiles, with the same reach.
   - **Other:** the Boost Tower (and the Tractor) no longer list stats twice. Boosted towers lose their chevrons. Artillery and CAS targets only show for the selected tower.
 - **Chemical Plant spray (#112):** the spray clears from an enemy as soon as it lands. Constant Spray narrows to a 40° sweep, and its jet and mist now fly out as their own drops and puffs, so they no longer swing with the nozzle. They also stop when the round ends instead of freezing in place.
+- **Enemies from the 26 Oct playtest (#114):** the Mirage keeps one pair of illusions, one ahead of it and one behind, moving with it, and each new pair replaces the old. A Radar Tower's Illusion Filter now pops illusions instead of marking them. The Wraith is 50% larger. Blink Stalker and Shifter after-images stay still where they blinked from and only fade.
 
 ### Behind the scenes
 - **Bot balance verdicts paused for the rework (#96):** the bot still plays every test game, but whether it wins, reaches endless or buys masteries no longer fails the tests until the tower rework is done; those results print as PAUSED.

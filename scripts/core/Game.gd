@@ -1081,9 +1081,16 @@ func _cancel_charge(e) -> void:
 func _trait_holo(e, d: Dictionary) -> void:
 	e.mark("holo")
 	var n := int(d.holo_count)
+	# Each cast replaces the pair: never more than holo_count at once, one holo_gap ahead of it and one behind (#114).
+	for h in enemies + _new_enemies:
+		if h.alive and h.hologram and h.holo_owner == e:
+			_vanish(h)
+			_emit({"type": "hologram_pop", "pos": h.pos})
 	for k in n:
-		var h = spawn_enemy(e.type, e.path_index, maxf(0.0, e.distance - 14.0 * (k + 1)), 1.0, e.wave_id, speed_mult_for(e.wave_id) if e.wave_id > 0 else 1.0)
+		var off := float(d.get("holo_gap", 45.0)) * float(k / 2 + 1) * (1.0 if k % 2 == 0 else -1.0)
+		var h = spawn_enemy(e.type, e.path_index, clampf(e.distance + off, 0.0, e.path_len), 1.0, e.wave_id, speed_mult_for(e.wave_id) if e.wave_id > 0 else 1.0)
 		h.make_hologram(e)
+		h.holo_offset = off
 		_new_enemies.append(h)
 	if wave_remaining.has(e.wave_id):
 		wave_remaining[e.wave_id] += n
@@ -1510,8 +1517,10 @@ func _unmask(e, s: Dictionary) -> void:
 	if s.get("unmask_mask", false) and e.disguised:
 		e.reveal_disguise()
 		_emit({"type": "unmask", "pos": e.pos, "enemy": e.type})
-	if s.get("unmask_mirage", false) and e.hologram:
-		e.fake_marked = true
+	if s.get("unmask_mirage", false) and e.hologram and e.alive:
+		# Illusion Filter: a ping pops the hologram (#114).
+		_vanish(e)
+		_emit({"type": "hologram_pop", "pos": e.pos})
 
 
 ## Shockwave Generator: a wave every 1/rate seconds hits every enemy in its radius, air and ground, cloaked ones too (it needs no
