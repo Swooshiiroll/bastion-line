@@ -2275,8 +2275,8 @@ func test_mine_scatter() -> void:
 	check(nxt != null and absf(angle_difference(t2.aim, (nxt - t2.pos).angle())) < 0.01, "then it turns to the next spot")
 
 
-## Chemical Plant (#90): its spray event says which nozzle and whether it's the Mist Nozzle's neighbour, so the view can draw the
-## lobbed stream (no tracer).
+## Chemical Plant (#90): its spray event says whether it's the Mist Nozzle's neighbour, so the view can draw the lobbed stream
+## (no tracer). There's one nozzle since Twin Nozzles went (#104), so the event no longer names it.
 func test_chem_spray_events() -> void:
 	var g = new_game()
 	g.gold = 900000
@@ -2291,7 +2291,7 @@ func test_chem_spray_events() -> void:
 	g.events.clear()
 	g._spray(t, t.stats())
 	var sprays: Array = g.events.filter(func(ev): return ev.type == "spray")
-	check(sprays.size() == 2 and sprays[0].enemy != null and not sprays[0].mist and int(sprays[0].nozzle) == 0, "the first spray: nozzle 1 at its enemy")
+	check(sprays.size() == 2 and sprays[0].enemy != null and not sprays[0].mist, "the first spray goes at its enemy")
 	check(sprays.size() == 2 and sprays[1].mist, "the Mist Nozzle's neighbour gets a mist")
 
 
@@ -4652,6 +4652,56 @@ func test_rework_shockwave_generator() -> void:
 	ef.cooldown = 0.0
 	g._update_shockwave(ef, ef.stats(), 0.0)
 	check(ag3.shield < ag3.max_shield * 0.5 and ag3.barrier_block >= 4.9, "the wave halves the barrier and stops it regenerating (%.1f of %.1f, block %.1f)" % [ag3.shield, ag3.max_shield, ag3.barrier_block])
+
+
+## The Megaton Wave's cloud (#120, the owner's pick: the Taller Cloud, seen from above): the smoke spreads out round the tower in
+## every direction, the cap's puffs land at random (not in order round a ring) at the Taller Cloud's height, and the cap is added
+## after the fireball, so it's drawn over it.
+func test_megaton_cloud_120() -> void:
+	var g = new_game()
+	g.gold = 90000
+	var t = g.place_tower("shockwave_generator", spot(g, "shockwave_generator", 0))
+	t.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, t, "a", 5)
+	check(t.mastered, "the Megaton Wave is bought")
+	var w = load("res://scripts/view/World.gd").new()
+	w.game = g
+	w.fx = FxLayer.new()
+	w.smoke_fx = FxLayer.new()
+	w._shockwave({"pos": t.pos, "radius": 132.0, "look": t.look_key()})
+	var ps: Array = w.smoke_fx.puffs
+	var sc := 1.0 + 0.28 * 5.0
+	var last_fire := -1
+	var first_cap := -1
+	var left := 0
+	var right := 0
+	var down := 0
+	var cap_angles: Array = []
+	var cap_y := true
+	for i in ps.size():
+		var q: Dictionary = ps[i]
+		var v: Vector2 = q.v
+		if q.fire:
+			last_fire = i
+		elif float(q.oy) < 0.0:
+			first_cap = i if first_cap < 0 else first_cap
+			cap_angles.append((v + Vector2(0.0, 2.0 * w.SMOKE_RISE) * sc).angle())
+			cap_y = cap_y and is_equal_approx(float(q.oy), w.MEGA_CAP_Y * w.SMOKE_RISE * sc)
+		else:
+			left += 1 if v.x < 0.0 else 0
+			right += 1 if v.x > 0.0 else 0
+			down += 1 if v.y > 0.0 else 0
+	check(left > 0 and right > 0 and down > 0, "seen from above, the billow spreads every way, some of it down the screen (%d left, %d right, %d down)" % [left, right, down])
+	check(last_fire >= 0 and first_cap > last_fire, "the cap's puffs come after the fireball's, so they're drawn over it")
+	check(cap_y, "the cap sits at the Taller Cloud's height")
+	# The old cap was a ring: each puff a sixteenth of a turn (give or take 0.3) round from the one before.
+	var even := 0
+	for i in range(1, cap_angles.size()):
+		even += 1 if absf(fposmod(float(cap_angles[i]) - float(cap_angles[i - 1]), TAU) - TAU / 16.0) < 0.31 else 0
+	check(cap_angles.size() >= 4 and even < (cap_angles.size() - 1) / 2, "the cap's puffs land at random, not in order round a ring (%d of %d steps even)" % [even, cap_angles.size() - 1])
+	w.fx.free()
+	w.smoke_fx.free()
+	w.free()
 
 
 func test_rework_scrapyard() -> void:
