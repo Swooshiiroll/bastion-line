@@ -2662,6 +2662,26 @@ func test_upgrades_add() -> void:
 	check(errors.is_empty(), "no upgrade sets a number, only flags: %s" % ", ".join(errors))
 
 
+## The playtest flag (#123): a playtest build's commit comes from its BUILD.txt, and marking a build played keeps the builds
+## already in the file. Tests run on an editor build, so launching never marks anything here.
+func test_playtest_flag_123() -> void:
+	var Playtest = load("res://scripts/dev/Playtest.gd")
+	check(Playtest.commit_of("Bastion Line test build\nBranch:  fix/120\nCommit:  472cf3c\nVersion: 3.6.0\n") == "472cf3c", "the commit comes from BUILD.txt")
+	check(Playtest.commit_of("Commit:  cea99c5 + uncommitted changes\r\n") == "cea99c5", "uncommitted changes and Windows line ends are dropped")
+	check(Playtest.commit_of("Bastion Line test build\n") == "", "no Commit line, no commit")
+	var path := "user://test_playtests.json"
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+	Playtest.mark(path, "cea99c5")
+	Playtest.mark(path, "472cf3c")
+	var played = JSON.parse_string(FileAccess.get_file_as_string(path))
+	check(played is Dictionary and played.get("cea99c5") == true and played.get("472cf3c") == true and played.size() == 2, "both builds are marked played (%s)" % str(played))
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(path))
+	var before: String = FileAccess.get_file_as_string(Playtest.PATH) if FileAccess.file_exists(Playtest.PATH) else "<none>"
+	Playtest.on_launch()
+	var after: String = FileAccess.get_file_as_string(Playtest.PATH) if FileAccess.file_exists(Playtest.PATH) else "<none>"
+	check(OS.has_feature("editor") and before == after, "a launch on an editor build (tests, the editor) marks nothing")
+
+
 ## Batch 5 of the 26 Oct list (#119): upgrade text reads "+x (total)", never "X to Y", and ships no design notes. The
 ## damage, range and fire-rate figures in it match the data: x is the node's own add, the total its path alone from stock.
 func test_upgrade_text_119() -> void:

@@ -73,6 +73,10 @@ with the owner before writing any code.
      - **Where:** each build gets its own folder inside
        `/home/swooshii/Documents/Bastion Line Testing`, named `<date> <time> <branch> (<commit>)`,
        with a BUILD.txt saying what it is. Older builds are kept.
+     - **Which builds were played (#123):** a build with a BUILD.txt beside it marks its commit `true` in the
+       game's user data on launch, silently: `playtests.json` in `~/.local/share/godot/app_userdata/Bastion Line/`
+       (LX, Brimstone) or `%APPDATA%\Godot\app_userdata\Bastion Line\` (Apollyon). Pull it over SSH to see which
+       builds, and so which fixes, have been playtested.
      - **If LX is off,** it says so, and nothing else changes.
 6. **Merge only when the owner says so:** `gh pr merge --squash --delete-branch`.
 
