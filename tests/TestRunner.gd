@@ -119,6 +119,7 @@ func _run() -> void:
 		"test_sandbox_dps",
 		"test_leviathan",
 		"test_blink_around_corners",
+		"test_smooth_drawing",
 		"test_colossus",
 		"test_v3_flyers",
 		"test_crowd_control_limits",
@@ -764,6 +765,26 @@ func test_blink_around_corners() -> void:
 	EnemyKit.begin(null, Vector2(100, 50), 1.1, 1.05, 0.95)
 	var p := Vector2(37, -12)
 	check(EnemyKit.W(EnemyKit.L(p)).distance_to(p) < 0.001, "the art maps a field point into its frame and back")
+
+
+## Issue #89: arcs and thin rings follow their radius (each chord within 1/16 px of the curve, so the Chrono Field's
+## ring and range circles stay round), and a turning turret fades between its baked aims instead of jumping.
+func test_smooth_drawing() -> void:
+	var worst := 0.0
+	for r in [1.5, 6.0, 20.0, 80.0, 150.0, 560.0]:
+		for span in [0.6, PI, TAU]:
+			var n := Draw.arc_segments_for(r, span)
+			worst = maxf(worst, r * (1.0 - cos(span / float(n) / 2.0)))
+	check(worst <= 1.0 / 16.0 + 1e-6, "every chord within 1/16 px of its arc (worst %.3f px)" % worst)
+	check(Draw.arc_segments_for(560.0, TAU) > 100, "a 560 px ring has over a hundred segments (%d)" % Draw.arc_segments_for(560.0, TAU))
+	var step := TAU / float(Draw.TURRET_BUCKETS)
+	var b: Array = Draw.turret_blend(step * 2.5)
+	check(b[0] == 2 and near(b[1], 0.5), "half-way between two baked aims, both show (%s)" % [b])
+	var lo: Array = Draw.turret_blend(step * 3.0 - 0.001)
+	var hi: Array = Draw.turret_blend(step * 3.0 + 0.001)
+	check(lo[0] == 2 and lo[1] > 0.99 and hi[0] == 3 and hi[1] < 0.01, "crossing a baked aim hands over from fully faded in, not a jump")
+	var neg: Array = Draw.turret_blend(-0.1)
+	check(neg[0] == Draw.TURRET_BUCKETS - 1 and near(neg[1], 1.0 - 0.1 / step), "negative aims wrap round")
 
 
 func test_colossus() -> void:
