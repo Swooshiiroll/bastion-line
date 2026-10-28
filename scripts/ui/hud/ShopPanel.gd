@@ -1,7 +1,8 @@
 extends "res://scripts/ui/PopOut.gd"
-## Tower shop pop-out: slides in from the right edge. Two columns of tower cards (name, cost,
-## reach tag, hotkey) and the hovered card's details. Picking a card closes the shop and starts
-## placing that tower; GameScreen reopens the shop once it is placed.
+## Tower shop pop-out: slides in from the right edge. Tower cards (name, cost, reach tag) in two columns, grouped by class
+## under a header (Assault, Support, Defense, Utility), cheapest first within each (#87); a card you can't afford is greyed
+## out. Below them, the hovered card's details. Picking a card closes the shop and starts placing that tower; GameScreen
+## reopens the shop once it is placed.
 
 const DrawControl = preload("res://scripts/ui/DrawControl.gd")
 const Draw = preload("res://scripts/view/Draw.gd")
@@ -10,6 +11,12 @@ const Towers = preload("res://data/towers.gd")
 const Tower = preload("res://scripts/entities/Tower.gd")
 
 const CARD := Vector2(136, 52)
+## The class sections, in shop order.
+const CLASSES := ["Assault", "Support", "Defense", "Utility"]
+## Room kept under the cards for the hovered tower's details.
+const DETAIL_H := 176.0
+## A card's tint while it can't be afforded.
+const GREYED := Color(0.55, 0.55, 0.55, 0.6)
 
 var hud
 var screen
@@ -25,22 +32,46 @@ func _init(owner_hud) -> void:
 
 
 func _build() -> void:
-	var all: Array = Towers.all_types()
-	for i in all.size():
-		var type: String = all[i]
-		var b := _card(type, "")
-		b.position = Vector2(10 + (i % 2) * (CARD.x + 8), 8 + (i / 2) * (CARD.y + 6))
-		body.add_child(b)
-		cards[type] = b
+	var scroll := ScrollContainer.new()
+	scroll.position = Vector2(0, 4)
+	scroll.size = Vector2(rect.size.x, body.size.y - DETAIL_H - 8)
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	body.add_child(scroll)
+	var grid := Control.new()
+	scroll.add_child(grid)
+	var y := 4.0
+	for cls in CLASSES:
+		var types: Array = sorted_types(cls, screen.game)
+		if types.is_empty():
+			continue
+		var head := UiKit.label(str(cls).to_upper(), 11, TowerInfo.CLASS_COLORS.get(cls, UiKit.DIM))
+		head.position = Vector2(12, y)
+		grid.add_child(head)
+		y += 18.0
+		for i in types.size():
+			var b := _card(types[i], "")
+			b.position = Vector2(10 + (i % 2) * (CARD.x + 8), y + (i / 2) * (CARD.y + 6))
+			grid.add_child(b)
+			cards[types[i]] = b
+		y += ceili(types.size() / 2.0) * (CARD.y + 6) + 4.0
+	grid.custom_minimum_size = Vector2(rect.size.x - 12, y)
 	var sep := ColorRect.new()
 	sep.color = UiKit.BORDER
-	sep.position = Vector2(12, 8 + ceili(all.size() / 2.0) * (CARD.y + 6) + 2)
+	sep.position = Vector2(12, scroll.position.y + scroll.size.y + 2)
 	sep.size = Vector2(rect.size.x - 24, 1)
 	body.add_child(sep)
 	_detail = UiKit.vbox(4)
-	_detail.position = Vector2(14, sep.position.y + 10)
-	_detail.size = Vector2(rect.size.x - 28, 150)
+	_detail.position = Vector2(14, sep.position.y + 8)
+	_detail.size = Vector2(rect.size.x - 28, DETAIL_H - 14)
 	body.add_child(_detail)
+
+
+## The towers of class `cls`, cheapest first (ties keep the roster order).
+static func sorted_types(cls: String, g) -> Array:
+	var all: Array = Towers.all_types()
+	var out: Array = all.filter(func(t): return str(Towers.def(t)["class"]) == cls)
+	out.sort_custom(func(a, b): return g.tower_cost(a) < g.tower_cost(b) or (g.tower_cost(a) == g.tower_cost(b) and all.find(a) < all.find(b)))
+	return out
 
 
 func _card(type: String, key: String) -> Button:
@@ -87,7 +118,9 @@ func _card(type: String, key: String) -> Button:
 func refresh(_delta: float) -> void:
 	var g = screen.game
 	for type in cards:
-		(cards[type] as Button).disabled = g.gold < g.tower_cost(type) or g.is_over()
+		var b: Button = cards[type]
+		b.disabled = g.gold < g.tower_cost(type) or g.is_over()
+		b.modulate = GREYED if b.disabled else Color.WHITE
 	var want: String = hud.hovered_build
 	if want == "":
 		want = "help"
