@@ -1272,6 +1272,42 @@ Each blast is one record drawn from its age; a new blast fades the last one out 
   a grey crown.
 - **The page:** `NUKE` in `data_p2_shock.js`; the store key is now `bl-tower-art-p2-shock-r13`.
 
+**Round 14 (the owner, 2026-10-27: "Reflip the red burst and the smoke again"):** round 11 is undone. C is the original
+cloud again, on the page and in the game: the red fireball stays low (it greys over 1.3 s), and the grey billow and
+rolling cap (13 px up, times the cloud's scale) rise over it and are drawn on top. D to M from round 13 stay on the page.
+The store key is now `bl-tower-art-p2-shock-r14`.
+
+**Round 15 (the owner, 2026-10-27: "Give me more ideas that are similar in idea to the original"):** round 13's blasts
+are off the page. The Megaton step shows C (the original cloud) beside twelve variations; each keeps its idea (a white
+flash, a low red fireball, a grey billow and rolling cap rising over it) and changes one thing (`CVAR` in
+`data_p2_shock.js`):
+- **D Bigger Billow:** more puffs, 1.35× the size, spreading 1.6× wider.
+- **E Taller Cloud:** the billow rises 1.4× as far, the cap sits at 19 px (not 13), and it all lives 1.3× longer.
+- **F Wide Cap:** the cap spreads 1.6× wider and half as deep.
+- **G Lingering Fireball:** the fireball greys over 2.6 s (not 1.3) and lives 1.7× longer.
+- **H Lit From Below:** each grey puff has an orange glow on its underside, fading over 1.6 s.
+- **I Dark Smoke:** charcoal puffs instead of pale grey.
+- **J White-Hot Billow:** the billow and cap stay white-hot for 1.8 s before cooling.
+- **K Rolling Cap:** the cap's puffs turn slowly round the cap as it spreads.
+- **L Flickering Fireball:** the fireball flickers brighter and dimmer under the grey, and lives 1.4× longer.
+- **M Double Billow:** a second billow (70% as many puffs) wells up 0.6 s later and climbs 1.45× as far, over the cap.
+- **N Dust Skirt:** a low ring of dust rolls out along the ground round the tower.
+- **O Rising Sparks:** ten sparks shoot up out of the fireball through the grey.
+- **Page fix:** round 14 had left the cap's spawn loop outside the blast, so the page added cap puffs every frame (a
+  denser cap than the original). The game was not affected. The store key is now `bl-tower-art-p2-shock-r15`.
+
+**Round 16 (the owner, 2026-10-27: "The angling is a little off"; asked which, they chose the camera perspective):**
+every cloud is now seen from above, as the game's camera sees it, at every Power step.
+- **The billow:** spreads out round the tower in every direction (the inner puffs 3-6 px/s, the outer 9-16, times the
+  cloud's scale) and drifts up the screen by only `RISE` (0.3) of its old climb.
+- **The cap:** a full ring round the tower, 1.4× wider than side-on, so it opens wider than the fireball; it sits
+  0.3 × 13 px up the screen.
+- **The fireball:** spreads a little in every direction, 1.3× bigger, and is still drawn over the billow and under
+  the cap, so from above it glows red in the middle of the grey, ringed by the cap.
+- **The extras follow:** the dust skirt is a full circle, the rolling cap turns round its full ring, and the sparks
+  are thrown out in every direction.
+- **P, Side-On (round 15):** the old side-on C, to compare. The store key is now `bl-tower-art-p2-shock-r16`.
+
 ### Scrapyard (third restart: a tower of three parts)
 
 **History.** Three Scrapyard designs have been rejected: (1) the Magnet Yard base with its first upgrade designs; (2) a from-scratch Smelting Works ("didn't like the overall design"); (3) the Armoured Vault Depot, whose base look was confirmed (with the Sparks and Sale animation) before its second-pass round 1, after which the owner said "Scrap the scrapyard design and start all over again". Its files (`data_scrap_looks.js`, `data_p2_scrap.js`, the p2 page) are deleted; git keeps them. The `sBuild`/`sCard` preview-scale hook in `pass2_engine.js` stays for the 2x2 second pass.
