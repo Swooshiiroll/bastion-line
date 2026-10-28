@@ -44,6 +44,26 @@ run() {
   return $code
 }
 
+# build_version <branch>: the v*-dev.* version a playtest build belongs to (issue #82). A dev branch
+# (or main) is its own; a feature branch takes its PR's base, else the dev branch it's closest to (ties go to
+# the newer one); anything else keeps its branch name.
+build_version() {
+  local branch=$1 base best="" bestd="" r ref mb d b
+  case "$branch" in v*-dev.*|main) echo "$branch"; return ;; esac
+  base=$(gh pr view "$branch" --json baseRefName -q .baseRefName 2>/dev/null || true)
+  case "$base" in v*-dev.*) echo "$base"; return ;; esac
+  for r in $(git for-each-ref --format='%(refname:short)' refs/heads refs/remotes/origin \
+      | sed -n 's#^\(origin/\)\{0,1\}\(v[0-9]*-dev\.[0-9]*\)$#\2#p' | sort -uV); do
+    for ref in "$r" "origin/$r"; do
+      mb=$(git merge-base HEAD "$ref" 2>/dev/null) || continue
+      d=$(git rev-list --count "$mb..HEAD")
+      if [ -z "$bestd" ] || [ "$d" -le "$bestd" ]; then best=$r; bestd=$d; fi
+    done
+  done
+  b=${branch:-HEAD}
+  echo "${best:-${b//\//-}}"
+}
+
 cmd=${1:-help}; shift || true
 case "$cmd" in
   import)
@@ -130,9 +150,11 @@ case "$cmd" in
 
   lx)
     # The owner playtests on Corundum-LX: every build gets its own folder inside the testing folder
-    # there, named "<date> <time> <branch> (<commit>)" so the folders sort oldest to newest, with a
-    # BUILD.txt saying what it is. Older builds are kept. LX is often off; then this says so and
-    # succeeds.
+    # there, named "<date> <version> (Build <n>)" (issue #82), with a BUILD.txt saying what it is.
+    # <version> comes from build_version (LX_VERSION overrides); <n> counts that version's builds
+    # that day on any machine, from the ledger out/builds.txt, and never reuses a name already on
+    # the target. Older builds are kept. LX is often off; then this says so and succeeds.
+    # LX_HOST and LX_DIR send a build elsewhere (Brimstone, when the owner asks).
     host=${LX_HOST:-swooshii@corundum-lx}
     root=${LX_DIR:-/home/swooshii/Documents/Bastion Line Testing}
     if ! ssh -o ConnectTimeout=8 -o BatchMode=yes "$host" true 2>/dev/null; then
@@ -143,17 +165,30 @@ case "$cmd" in
     branch=$(git branch --show-current)
     commit=$(git rev-parse --short HEAD)
     dirty=""; git diff --quiet HEAD -- . ':!playtest' 2>/dev/null || dirty=" + uncommitted changes"
-    name="$(date '+%Y-%m-%d %H%M') ${branch//\//-} ($commit)"
+    version=${LX_VERSION:-$(build_version "$branch")}
+    day=$(date '+%Y-%m-%d')
+    ledger=out/builds.txt; touch "$ledger"
+    n=$(awk -F'\t' -v d="$day" -v ver="$version" '$1 == d && $2 == ver { c++ } END { print c + 0 }' "$ledger")
+    there=$(ssh "$host" "ls -1 \"$root\" 2>/dev/null" | awk -v p="$day $version (Build " \
+      'index($0, p) == 1 { k = substr($0, length(p) + 1) + 0; if (k > m) m = k } END { print m + 0 }')
+    [ "$there" -gt "$n" ] && n=$there
+    name="$day $version (Build $((n + 1)))"
     rm -rf out/lx && mkdir -p out/lx
     cp build/linux/BastionLine.x86_64 out/lx/ && cp fonts/OFL.txt out/lx/FONT-LICENSE-Barlow.txt
-    printf 'Bastion Line test build\nBranch:  %s\nCommit:  %s%s\nVersion: %s\nBuilt:   %s\n\nRun ./BastionLine.x86_64, or "./Bastion Line (dev).sh" for the live tuner beside it (F8 hides it; design/live_tuner.md).\n' \
-      "$branch" "$commit" "$dirty" "$v" "$(date '+%Y-%m-%d %H:%M')" > out/lx/BUILD.txt
+    printf 'Bastion Line test build: %s\nBranch:  %s\nCommit:  %s%s\nVersion: %s\nBuilt:   %s\n\nRun ./BastionLine.x86_64, or "./Bastion Line (dev).sh" for the live tuner beside it (F8 hides it; design/live_tuner.md).\n' \
+      "$name" "$branch" "$commit" "$dirty" "$v" "$(date '+%Y-%m-%d %H:%M')" > out/lx/BUILD.txt
     # The live tuner (issue #80) opens when the game is launched with --dev.
     printf '#!/bin/sh\n# Bastion Line with the live tuner beside it (F8 hides it). Exports go to\n# ~/.local/share/godot/app_userdata/Bastion Line/tweaks/\ncd "$(dirname "$0")" && exec ./BastionLine.x86_64 -- --dev\n' > "out/lx/Bastion Line (dev).sh"
     # tar over ssh copes with the spaces in the folder names.
     tar -C out/lx -cf - . | ssh "$host" "mkdir -p \"$root/$name\" && cd \"$root/$name\" && tar --no-same-owner -xf - && chmod +x BastionLine.x86_64 'Bastion Line (dev).sh'" \
-      || { echo "copy to Corundum-LX failed"; exit 1; }
-    echo "On Corundum-LX: $root/$name"
+      || { echo "copy to $host failed"; exit 1; }
+    printf '%s\t%s\t%s\t%s\n' "$day" "$version" "${host#*@}" "$commit" >> "$ledger"
+    echo "On $host: $root/$name"
+    # Each dev version gets one folder for the owner's bug reports on the file server, "<version> Bugs"
+    # (e.g. "v4-dev.2 Bugs"), shared by all its builds (BUGS_DIR moves it). Skipped when the share isn't reachable.
+    bugs=${BUGS_DIR:-//Anode-FS/Anode/Bastion Line}
+    if [ -d "$bugs" ] && mkdir -p "$bugs/$version Bugs"; then echo "Bug reports: $bugs/$version Bugs"
+    else echo "Bug-report share $bugs isn't reachable: no bugs folder made"; fi
     sed 's/^/  /' out/lx/BUILD.txt | head -5 ;;
 
   *)

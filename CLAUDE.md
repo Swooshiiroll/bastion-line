@@ -71,8 +71,15 @@ with the owner before writing any code.
    - **After every build, run `tools/dev.sh lx`.** It puts the build on Corundum-LX, where the owner
      playtests.
      - **Where:** each build gets its own folder inside
-       `/home/swooshii/Documents/Bastion Line Testing`, named `<date> <time> <branch> (<commit>)`,
-       with a BUILD.txt saying what it is. Older builds are kept.
+       `/home/swooshii/Documents/Bastion Line Testing`, named `<date> <version> (Build <n>)` (e.g.
+       `2026-10-22 v4-dev.1 (Build 2)`), with a BUILD.txt naming the branch and commit. Older builds are kept.
+       - `<version>` is the `v*-dev.*` line the build belongs to; a feature branch uses the dev branch it targets.
+       - `<n>` counts that version's builds that day on any machine (ledger: `out/builds.txt`).
+     - **Bug reports:** each dev version gets one `\\Anode-FS\Anode\Bastion Line\<version> Bugs` folder (e.g.
+       `v4-dev.2 Bugs`), shared by all its builds, where the owner files bug reports. Read them from there when
+       working on fixes.
+     - **Brimstone only when the owner asks:**
+       `LX_HOST=chrisg@10.101.249.12 LX_DIR="/home/chrisg/Documents/BastionLine v4" tools/dev.sh lx`.
      - **Which builds were played (#123):** a build with a BUILD.txt beside it marks its commit `true` in the
        game's user data on launch, silently: `playtests.json` in `~/.local/share/godot/app_userdata/Bastion Line/`
        (LX, Brimstone) or `%APPDATA%\Godot\app_userdata\Bastion Line\` (Apollyon). Pull it over SSH to see which
