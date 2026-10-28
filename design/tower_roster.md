@@ -89,11 +89,11 @@ to the Pulse Turret's 18, in fewer, harder hits). Air and ground.
 
 | Step | Name | Cost | Effect (proposed) |
 |---|---|---|---|
-| 1 | Heavier Rounds | 55 | +6 damage |
-| 2 | Hardened Tips | 40 | Its hits ignore 2 points of armour |
-| 3 (primary) | AP Rounds | 405 | Ignores 50% of armour; +6 damage |
-| 4 | Tungsten Core | 1,085 | Ignores 75% of armour; +8 damage |
-| Mastery | Sabot Rounds | 2,475 | **Ignores armour fully**; 44 damage per hit |
+| 1 | Heavier Rounds | 55 | +6 damage (22) |
+| 2 | Hardened Tips | 165 | +6 damage (28); its hits ignore 2 points of armour |
+| 3 (primary) | AP Rounds | 530 | Ignores 50% of armour; +8 damage (36) |
+| 4 | Tungsten Core | 1,365 | Ignores 75% of armour; +10 damage (46) |
+| Mastery | Sabot Rounds | 3,555 | **Ignores armour fully**; +12 damage (58 per hit) |
 
 **Path 2, Range/Visibility (precision):**
 
@@ -109,11 +109,11 @@ to the Pulse Turret's 18, in fewer, harder hits). Air and ground.
 
 | Step | Name | Cost | Effect (proposed) |
 |---|---|---|---|
-| 1 | Swivel Mount | 15 | Switches to a new target instantly after a kill, and doesn't fire at enemies already about to die (no wasted rounds on swarms and holograms) |
-| 2 | Side Gun | 165 | A small side gun fires at a second target at 50% damage |
-| 3 (primary) | Twin Mount | 330 | **2 targets** at full damage |
-| 4 | Belt Feed | 660 | +0.3 shots/s on every barrel |
-| Mastery | Triple Mount | 3,300 | **3 targets**; the extra barrels go for the weakest enemies in range (swarms, holograms) |
+| 1 | Swivel Mount | 85 | +0.5 shots/s (1.7); turns onto a new target faster, and doesn't fire at enemies already about to die (no wasted rounds on swarms and holograms) |
+| 2 | Side Gun | 440 | +0.5 shots/s (2.2); a small side gun fires at a second target at 50% damage |
+| 3 (primary) | Twin Mount | 1,155 | +0.5 shots/s (2.7); **2 targets** at full damage |
+| 4 | Belt Feed | 1,100 | +0.5 shots/s on every barrel (3.2) |
+| Mastery | Triple Mount | 10,325 | +0.5 shots/s (3.7); **3 targets**; the extra barrels go for the weakest enemies in range (swarms, holograms) |
 
 **Combinations (primary + secondary capped at 2):**
 - **Power + 2 Multi:** an AP main gun with a side gun for the small stuff.
@@ -1322,6 +1322,15 @@ radiation circle priced as damage. This joins the Pricing section under the non-
 | 3 (primary) | Track Lock | 1,930 | Reveals last 1.3 s |
 | 4 | Illusion Filter | 2,390 | Pings mark **Mirage holograms** as fakes: towers in range stop shooting them |
 | Mastery | Total Exposure | 3,590 | Revealed enemies can't re-cloak, re-disguise or re-burrow for 5 s after leaving the radar's range |
+
+**How the game does it (#86, 2026-10-24):** each step acts on the enemies a ping covers.
+- **Signal Analysis:** the Decoy Beacon takes its true rank and role for good.
+- **Disguise Breaker:** the Masquerade drops its disguise at once, at any health, and flees as it would at half health.
+- **Illusion Filter:** holograms are marked (a red cross) for good. Towers stop choosing them as targets; blasts and beams
+  still pop the ones in their way.
+- **Total Exposure:** whatever a ping covered stays revealed while it stays in this radar's range, and for 5 s after it
+  leaves (gold brackets). A Burrower can't dive meanwhile. The Masquerade never re-disguises, so that part has nothing
+  to stop.
 
 **Combinations (primary + secondary capped at 2):**
 - **Frequency + 2 Power:** near-constant reveals over a bigger area.

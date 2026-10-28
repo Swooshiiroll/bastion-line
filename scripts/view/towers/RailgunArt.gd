@@ -4,8 +4,9 @@ extends RefCounted
 ##
 ## `look` is the tower's look key "r|a|b|c": the Retrofit (-1 none, 0 capacitor coils, 1 longer rails, 2 penetrator tips) and the
 ## depth of each path, 5 on the path that took its mastery. a = Power, b = Range/Speed, c = Special Effects. `extra[0]` is the
-## charge (0..1, how far the next shot has charged) and `extra[1]` the shots fired. The housing turns with the aim (baked); the
-## charge glows, the spinning reel and the arc pylons' sparks are live.
+## charge (0..1, how far the next shot has charged), `extra[1]` the shots fired and `extra[2]` the seconds since the last shot.
+## The housing turns with the aim (baked) and recoils as a whole (Draw.shift); the charge glows, the spinning reel and the arc
+## pylons' sparks are live.
 
 const Draw = preload("res://scripts/view/Draw.gd")
 const Gun = preload("res://scripts/view/towers/GunTurretArt.gd")
@@ -17,6 +18,9 @@ const RED := Color(0.85, 0.20, 0.18)
 const ORANGE := Color(1.0, 0.55, 0.20)
 const TUNG := Color(0.20, 0.21, 0.24)
 const BORE := Color(0.05, 0.05, 0.06)
+## The housing kicks back this far (px) on each shot and returns over RECOIL_TIME seconds; twin rails recoil together.
+const RECOIL := 2.5
+const RECOIL_TIME := 0.3
 
 # The owner's picks per step: Power, Range/Speed, Special Effects.
 const PICKS := [["C", "B", "C", "B", "B"], ["C", "A", "B", "A", "A"], ["C", "B", "B", "A", "C"]]
@@ -62,6 +66,7 @@ static func draw(ci: CanvasItem, c: Vector2, aim: float, s: float, t: float, fla
 	var k := s
 	var ch: float = clampf(float(extra[0]), 0.0, 1.0) if extra.size() > 0 and extra[0] != null else 1.0
 	var shots: int = int(extra[1]) if extra.size() > 1 and extra[1] != null else 0
+	var since: float = float(extra[2]) if extra.size() > 2 and extra[2] != null else 9.0
 	var T := rails(L)
 	var pos: Array = T.pos
 	var n := pos.size()
@@ -74,7 +79,11 @@ static func draw(ci: CanvasItem, c: Vector2, aim: float, s: float, t: float, fla
 	var fl := clampf(flash / 0.15, 0.0, 1.0)
 	var colr: Color = TUNG if L.P >= 1 else Draw.METAL_L
 	var ortho := Vector2.from_angle(aim).orthogonal()
-	# --- The housings (baked, turning with the aim) ---
+	var kick := -Vector2.from_angle(aim) * RECOIL * maxf(0.0, 1.0 - since / RECOIL_TIME) * k
+	Draw.dyn(true)
+	Draw.shift(ci, kick)
+	Draw.dyn(false)
+	# --- The housings (baked, turning with the aim, recoiling together) ---
 	for i in n:
 		var xo: float = pos[i].x
 		var y: float = pos[i].y
@@ -141,17 +150,8 @@ static func draw(ci: CanvasItem, c: Vector2, aim: float, s: float, t: float, fla
 	if L.S >= 5:
 		for x in [3.0, 10.0, 17.0]:
 			Draw.plate(ci, at(c, aim, k, x, 0.0), Draw.rect_pts(1.2, 3.5 + w * 0.62), colr, aim, k, 1.0)
-	# The capacitor drum above the housing.
-	var rd := 9.0 if n > 1 else 6.5
-	var dr := at(c, aim, k, -8.0, 0.0)
-	Draw.orb(ci, dr, rd * k, Draw.METAL_L, k)
-	Draw.ring(ci, dr, rd * 0.68 * k, Draw.METAL_D, 1.6 * k)
-	# --- Live: the charge, the glow along the housing, the reel, the pylons, the muzzle flash ---
+	# --- Live, on the recoiling housing: the glow along it, the charge lights, the mouth's glow and the muzzle flash ---
 	Draw.dyn(true)
-	Draw.arc(ci, dr, rd * 0.68 * k, -PI / 2.0, -PI / 2.0 + TAU * ch, 24, Color(GOLD if (gold or L.S >= 5) else col, 0.95), 1.4 * k)
-	if L.P >= 4:
-		Draw.arc(ci, dr, rd * 0.9 * k, -PI / 2.0, -PI / 2.0 + TAU * ch, 24, Color(tc, 0.8), 1.0 * k)
-	Draw.glow_dot(ci, dr, 1.4 * k, col)
 	for i in n:
 		var xo2: float = pos[i].x
 		var y2: float = pos[i].y
@@ -175,8 +175,29 @@ static func draw(ci: CanvasItem, c: Vector2, aim: float, s: float, t: float, fla
 			for x in [6.5, 13.5, 20.5]:
 				var q2 := at(c, aim, k, xo2 + x, y2)
 				Draw.line(ci, q2 + ortho * w * 0.56 * k, q2 - ortho * w * 0.56 * k, Color(tc, 0.3 + 0.7 * ch), 1.1 * k)
-		if fl > 0.0 and i == last:
-			Draw.glow_dot(ci, at(c, aim, k, xo2 + len + 1.5, y2), (1.2 + 5.0 * fl) * k, Color(tc, fl))
+		if L.r == 0:
+			for j in 5:
+				if ch * 5.0 > float(j):
+					var xx2 := xo2 + 2.0 + float(j) * 4.0
+					Draw.line(ci, at(c, aim, k, xx2, y2 - w * 0.34), at(c, aim, k, xx2 + 1.6, y2 + w * 0.34), COPPER.lerp(col, 0.7), 1.1 * k)
+		var ry := w * 0.5 * k * (0.7 if L.S >= 2 else 1.0)
+		var mf := fl if i == last else 0.0
+		Draw.oval(ci, at(c, aim, k, xo2 + len + 0.8, y2), ry * 0.22, ry * 0.5, aim, Color(tc, 0.3 + 0.7 * maxf(ch * 0.4, mf)))
+		if mf > 0.0:
+			Draw.glow_dot(ci, at(c, aim, k, xo2 + len + 1.5, y2), (1.2 + 5.0 * mf) * k, Color(tc, mf))
+	Draw.shift(ci, Vector2.ZERO)
+	Draw.dyn(false)
+	# The capacitor drum above the housing (it stays put).
+	var rd := 9.0 if n > 1 else 6.5
+	var dr := at(c, aim, k, -8.0, 0.0)
+	Draw.orb(ci, dr, rd * k, Draw.METAL_L, k)
+	Draw.ring(ci, dr, rd * 0.68 * k, Draw.METAL_D, 1.6 * k)
+	# --- Live: the charge ring, the reel, the pylons ---
+	Draw.dyn(true)
+	Draw.arc(ci, dr, rd * 0.68 * k, -PI / 2.0, -PI / 2.0 + TAU * ch, 24, Color(GOLD if (gold or L.S >= 5) else col, 0.95), 1.4 * k)
+	if L.P >= 4:
+		Draw.arc(ci, dr, rd * 0.9 * k, -PI / 2.0, -PI / 2.0 + TAU * ch, 24, Color(tc, 0.8), 1.0 * k)
+	Draw.glow_dot(ci, dr, 1.4 * k, col)
 	# The cable reel by the drum (Fast Capacitors), the arc pylons (Overcharge).
 	if L.S >= 1:
 		var rq := c + Vector2(-13.0, 10.5) * k

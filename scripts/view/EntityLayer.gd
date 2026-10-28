@@ -23,6 +23,8 @@ const ShockwaveGeneratorArt = preload("res://scripts/view/towers/ShockwaveGenera
 const ELITE_COLOR := Color(1.0, 0.82, 0.30)
 ## A Siphon's drain (its aura, and the tint on towers inside it).
 const SIPHON_COLOR := Color(0.72, 1.0, 0.25)
+## The cross on a hologram a Radar's Illusion Filter marked as a fake.
+const FAKE_MARK := Color(1.0, 0.3, 0.3, 0.8)
 ## How high Mortar and Artillery shells are lobbed at the middle of their flight, in tiles (as on the design pages, #90).
 const MORTAR_ARC := 0.85
 const ARTILLERY_ARC := 0.85
@@ -34,6 +36,8 @@ static var timing_on := false
 var _aim := {}
 ## Each extra gun's smoothed aim, per tower (the Gun Turret's flank guns turn on their own).
 var _extra_aim := {}
+## The CAS Gunship plane's eased heading, per tower.
+var _heading := {}
 var _font: Font
 
 
@@ -48,6 +52,9 @@ func _draw() -> void:
 	var t: float = world.anim_t
 	for pool in g.pools:
 		_pool(pool, t)
+	for c in g.smokes:
+		if c.get("look", "") == "smoke":
+			_smoke(c, t)
 	# Turrets' static layers come from Draw's sprite cache here (see Draw.dyn).
 	var t0 := Time.get_ticks_usec()
 	Draw.turret_cache = true
@@ -55,13 +62,18 @@ func _draw() -> void:
 		var key: int = tw.get_instance_id()
 		var cur: float = _aim.get(key, -PI / 2.0)
 		if tw.target != null and tw.target.alive:
-			cur = lerp_angle(cur, (tw.target.pos - tw.pos).angle(), 0.6 if bool(tw.stats().get("turn_fast", false)) else 0.35)
+			# Fast traverse and the Swivel Mount (#85) turn quicker; neither changes the fire rate.
+			var fast: bool = bool(tw.stats().get("turn_fast", false)) or bool(tw.stats().get("swivel", false))
+			cur = lerp_angle(cur, (tw.target.pos - tw.pos).angle(), 0.6 if fast else 0.35)
 		if tw.type == "artillery_cannon":
 			# It points at the spot it shells, not at an enemy.
 			cur = lerp_angle(cur, (tw.aim_point - tw.pos).angle(), 0.35)
 		elif tw.type == "laser_tower":
 			# The game turns it (its beams wait until it faces the target), so the lance and the beam agree (#90).
 			cur = tw.aim
+		elif tw.type == "mine_layer":
+			# It turns toward the spot it throws at next.
+			cur = lerp_angle(cur, tw.aim, 0.2)
 		_aim[key] = cur
 		var extra: Array = []
 		if tw.type == "gun_turret":
@@ -76,6 +88,8 @@ func _draw() -> void:
 			extra = [g.time - float(tw.gun_cds.get("wave_t", -9.0))]
 		elif tw.type == "radar_tower":
 			extra = [3.0 if tw.stats().get("constant", false) else float(tw.stats().get("ping_every", 3.0))]
+		elif tw.type == "scrapyard":
+			extra = [g.time - float(tw.gun_cds.get("paid_t", -99.0))]
 		elif tw.type == "cryo_tower":
 			extra = [clampf(tw.fire_flash / 0.3, 0.0, 1.0)]
 		elif tw.type == "chemical_plant":
@@ -90,7 +104,7 @@ func _draw() -> void:
 		elif tw.type == "tesla_tower":
 			extra = [clampf(1.0 - tw.cooldown * tw.eff_rate(), 0.0, 1.0)]
 		elif tw.type == "railgun":
-			extra = [clampf(1.0 - tw.cooldown * tw.eff_rate(), 0.0, 1.0), tw.pulse_count]
+			extra = [clampf(1.0 - tw.cooldown * tw.eff_rate(), 0.0, 1.0), tw.pulse_count, g.time - float(tw.gun_cds.get("shot_t", -99.0))]
 		elif tw.type == "artillery_cannon":
 			extra = [ArtilleryCannonArt.types(ArtilleryCannonArt.levels(tw.look_key())).find(tw.shell), tw.pulse_count]
 		elif tw.type == "anti_aircraft_turret":
@@ -117,19 +131,15 @@ func _draw() -> void:
 	if timing_on:
 		timing.towers = int(timing.get("towers", 0)) + t1 - t0
 
-	var ground: Array = []
-	var air: Array = []
-	for e in g.enemies:
-		if e.alive:
-			(air if e.flying else ground).append(e)
-	ground.sort_custom(func(a, b): return a.pos.y < b.pos.y)
+	var layers := draw_order(g.enemies)
+	var ground: Array = layers[0]
+	var air: Array = layers[1]
 	for i in g.mines.size():
 		var m: Dictionary = g.mines[i]
-		MineLayerArt.mine(self, m.pos, 1.0, t, m.source.spec, Draw.ACCENT.mine_layer, fmod(t * 1.6 + float(i) * 0.37, 1.0) < 0.25)
+		MineLayerArt.laid(self, m.pos, m.get("from", m.pos), g.time - float(m.get("t0", -99.0)), t, m.source.spec, Draw.ACCENT.mine_layer, fmod(t * 1.6 + float(i) * 0.37, 1.0) < 0.25)
 	for e in ground:
 		_enemy(e, t)
-		if e.cloaked and e.reveal_timer > 0.0:
-			RadarTowerArt.reveal_mark(self, e.pos, e.radius + 4.0, Draw.ACCENT.radar_tower, minf(1.0, e.reveal_timer * 2.0))
+		_radar_marks(e)
 		if e.soak_timer > 0.0:
 			_soak_fx(e, t)
 		if e.perm_slow > 0.0:
@@ -139,6 +149,7 @@ func _draw() -> void:
 			_projectile(p)
 	for e in air:
 		_enemy(e, t)
+		_radar_marks(e)
 	for tw in g.towers:
 		if not tw.wing.is_empty() or tw.type == "cas_gunship":
 			_wing(tw, t)
@@ -155,6 +166,25 @@ func _draw() -> void:
 		timing.frames = int(timing.get("frames", 0)) + 1
 
 
+## The living enemies in drawing order: [ground, sorted top to bottom; air, with bosses last so a Leviathan flies
+## over the Locusts it launches].
+static func draw_order(enemies: Array) -> Array:
+	var ground: Array = []
+	var air: Array = []
+	var air_bosses: Array = []
+	for e in enemies:
+		if e.alive:
+			(ground if not e.flying else (air_bosses if e.boss else air)).append(e)
+	ground.sort_custom(func(a, b): return a.pos.y < b.pos.y)
+	air.append_array(air_bosses)
+	return [ground, air]
+
+
+## The angle a tower is drawn at (it eases toward its target), so beams leave the part as drawn.
+func aim_of(tw) -> float:
+	return float(_aim.get(tw.get_instance_id(), tw.aim))
+
+
 func _pool(pool, t: float) -> void:
 	var r: float = pool.r
 	var k := clampf(float(pool.t) / 0.6, 0.0, 1.0)
@@ -165,6 +195,33 @@ func _pool(pool, t: float) -> void:
 	for i in 4:
 		var a := t * 1.5 + float(i) * 1.7
 		Draw.disc(self, pool.pos + Vector2(cos(a), sin(a * 1.3)) * r * 0.5, 2.5, Color(col, 0.5 * k))
+
+
+## What a Radar shows on an enemy: corner brackets while a cloaked one is revealed (gold while Total Exposure holds it), and a
+## red cross on a hologram the Illusion Filter marked as a fake.
+func _radar_marks(e) -> void:
+	if e.cloaked and (e.reveal_timer > 0.0 or e.track_timer > 0.0):
+		var col: Color = RadarTowerArt.GOLD if e.track_timer > 0.0 else Draw.ACCENT.radar_tower
+		RadarTowerArt.reveal_mark(self, e.pos, e.radius + 4.0, col, minf(1.0, maxf(e.reveal_timer, e.track_timer) * 2.0))
+	if e.fake_marked:
+		var k: float = e.radius * 0.7
+		Draw.line(self, e.pos + Vector2(-k, -k), e.pos + Vector2(k, k), FAKE_MARK, 2.0)
+		Draw.line(self, e.pos + Vector2(-k, k), e.pos + Vector2(k, -k), FAKE_MARK, 2.0)
+
+
+## A Mortar's Smoke Shell cloud (#85): drifting grey puffs over the area that slows, thinning out as it ends.
+func _smoke(c, t: float) -> void:
+	var r: float = c.r
+	var k := clampf(float(c.t) / 0.8, 0.0, 1.0)
+	var at: Vector2 = c.pos
+	var seed_a := at.x * 0.13 + at.y * 0.07
+	Draw.disc(self, at, r, Color(0.62, 0.64, 0.66, 0.16 * k))
+	for i in 7:
+		var a := seed_a + float(i) * TAU / 7.0 + t * 0.25
+		var off := Vector2(cos(a), sin(a)) * r * (0.45 + 0.12 * sin(t * 0.9 + float(i)))
+		var pr := r * (0.38 + 0.06 * sin(t * 1.3 + float(i) * 1.7))
+		Draw.disc(self, at + off, pr, Color(0.7, 0.72, 0.74, 0.2 * k))
+	Draw.disc(self, at, r * 0.45, Color(0.78, 0.8, 0.82, 0.22 * k))
 
 
 func _enemy(e, t: float) -> void:
@@ -198,9 +255,13 @@ func _enemy(e, t: float) -> void:
 func _wing(tw, t: float) -> void:
 	var acc := Draw.accent(tw.type, tw.spec)
 	if tw.type == "cas_gunship":
-		var orbit := float(tw.stats().get("orbit", 90.0))
-		var pose := CasGunshipArt.plane_pose(tw.aim_point, orbit, tw.orbit_angle)
-		CasGunshipArt.plane(self, pose.pos, pose.heading, 1.0 if tw.size <= 1 else 1.8, t, tw.spec, acc, tw.fire_flash > 0.0 and tw.disabled <= 0.0)
+		if tw.plane_pos == Vector2.INF:
+			return
+		# The heading eases round, so the plane banks into a new course rather than snapping to it.
+		var key: int = tw.get_instance_id()
+		var hd := lerp_angle(float(_heading.get(key, tw.plane_heading)), tw.plane_heading, 0.12)
+		_heading[key] = hd
+		CasGunshipArt.plane(self, tw.plane_pos, hd, 1.0 if tw.size <= 1 else 1.8, t, tw.spec, acc, tw.fire_flash > 0.0 and tw.disabled <= 0.0)
 		return
 	if tw.disabled > 0.0:
 		return

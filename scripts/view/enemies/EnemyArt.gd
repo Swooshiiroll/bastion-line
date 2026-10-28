@@ -253,6 +253,8 @@ static func state(e) -> Dictionary:
 	if e.trait_timers.has("blink"):
 		st.blink_in = float(e.trait_timers.blink)
 		st.blink_dist = float(d.get("blink_distance", 0.0))
+		if e.blink_from != Vector2.INF:
+			st.blink_from = e.blink_from
 	if e.has_trait("burrow"):
 		var u: float = minf(1.0, e.since("burrow") / 0.3)
 		st.under = u if e.burrowed else 1.0 - u

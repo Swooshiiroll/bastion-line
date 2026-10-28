@@ -45,11 +45,12 @@ static func at(c: Vector2, aim: float, k: float, x: float, y: float) -> Vector2:
 	return c + (Vector2.from_angle(aim) * x + Vector2.from_angle(aim).orthogonal() * y) * k
 
 
-## Where the first sprayer's nozzle ends (the spray starts here).
-static func muzzle(c: Vector2, aim: float, k: float, look: String) -> Vector2:
+## Where a sprayer's nozzle ends (the spray starts here): the first, or the second (`second`) of the Twin Nozzles, which sits on
+## the lower still.
+static func muzzle(c: Vector2, aim: float, k: float, look: String, second := false) -> Vector2:
 	var L := levels(look)
 	if L.S >= 3:
-		return c + Vector2(0, -3.4 * k) + Vector2.from_angle(aim) * 13.0 * k
+		return c + Vector2(0, (3.4 if second else -3.4) * k) + Vector2.from_angle(aim) * 13.0 * k
 	return at(c, aim, k, 13.5, 0.0)
 
 

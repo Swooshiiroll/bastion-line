@@ -210,7 +210,9 @@ func select_build(type: String) -> void:
 
 
 func cancel() -> void:
-	if world.ability_target != "":
+	if world.aim_tower != null:
+		world.aim_tower = null
+	elif world.ability_target != "":
 		world.ability_target = ""
 	elif world.build_type != "":
 		world.build_type = ""
@@ -253,13 +255,22 @@ func toggle_intel() -> void:
 		hud.open("intel")
 
 
+## The Research Lab, in Sandbox too (#87).
 func toggle_research() -> void:
-	if game.sandbox:
-		return
 	if hud.is_open("research"):
 		close_popout("research")
 	elif not _ended:
 		hud.open("research")
+		paused = true
+
+
+## The selected tower's upgrade tree (#87): its panel's Tree button, or E. Pauses the battle while open.
+func toggle_tree() -> void:
+	if hud.is_open("tree"):
+		close_popout("tree")
+	elif world.selected_tower != null and not _ended:
+		world.aim_tower = null
+		hud.open("tree")
 		paused = true
 
 
@@ -351,6 +362,8 @@ func _sync_side_panel() -> void:
 	var sel = world.selected_tower
 	if sel != null and not game.towers.has(sel):
 		sel = null
+	if world.aim_tower != null and world.aim_tower != sel:
+		world.aim_tower = null
 	if sel != null and hud.is_open("shop"):
 		if sel != _panel_tower:
 			hud.close("shop")
@@ -374,6 +387,7 @@ func close_popouts() -> void:
 	shop_return = false
 	world.build_type = ""
 	world.ability_target = ""
+	world.aim_tower = null
 	if had_research and modal == null:
 		paused = false
 
@@ -385,6 +399,9 @@ func _on_field_clicked(cell: Vector2i, button: int, shift: bool, pos: Vector2) -
 		cancel()
 		return
 	if button != MOUSE_BUTTON_LEFT:
+		return
+	if world.aim_tower != null:
+		_set_target(world.aim_tower, cell, pos)
 		return
 	# Clicking the field with nothing picked up closes the shop (the click still selects a tower).
 	if hud.is_open("shop") and world.build_type == "" and world.ability_target == "":
@@ -435,24 +452,37 @@ func _on_field_clicked(cell: Vector2i, button: int, shift: bool, pos: Vector2) -
 			hud.toast("The gate is recharging (%ds)" % ceili(float(game.gate_cd[gi])), UiKit.BAD)
 			Sfx.play("error", -6.0, 0.0)
 		return
-	# An Artillery Cannon selected: a click on the track aims it there.
-	var sel = world.selected_tower
-	if sel != null and sel.type == "artillery_cannon" and not game.tower_at.has(cell) and game.grid.path_cells.has(cell):
-		game.aim_artillery(sel, pos)
-		hud.toast("Aimed", UiKit.GOLD)
-		Sfx.play("click", -8.0, 0.0)
-		return
-	# A CAS Gunship selected: a click anywhere on the field designates the point it orbits.
-	if sel != null and sel.type == "cas_gunship" and not game.tower_at.has(cell):
-		game.designate_orbit(sel, pos)
-		hud.toast("Orbit set", UiKit.GOLD)
-		Sfx.play("click", -8.0, 0.0)
-		return
 	if game.tower_at.has(cell):
 		world.selected_tower = game.tower_at[cell]
 		Sfx.play("click", -8.0, 0.0)
 	else:
 		world.selected_tower = null
+
+
+## Artillery Cannon and CAS Gunship (#87): Move target (its panel button, or M) starts aim mode for the selected one, and
+## again stops it. A plain click on the field no longer moves a target.
+func start_aim() -> void:
+	var t = world.selected_tower
+	if t == null or not t.type in World.AIMABLE or game.is_over():
+		return
+	world.aim_tower = null if world.aim_tower == t else t
+
+
+## Aim mode's click: the Artillery's point snaps to the nearest track, the Gunship circles any open spot. Setting it ends
+## aim mode; a click on a tower (Gunship) keeps it so the player can try again.
+func _set_target(t, cell: Vector2i, pos: Vector2) -> void:
+	if t.type == "artillery_cannon":
+		game.aim_artillery(t, pos)
+		hud.toast("Aimed", UiKit.GOLD)
+	elif game.tower_at.has(cell):
+		hud.toast("Pick an open spot for the orbit", UiKit.BAD)
+		Sfx.play("error", -6.0, 0.0)
+		return
+	else:
+		game.designate_orbit(t, pos)
+		hud.toast("Orbit set", UiKit.GOLD)
+	world.aim_tower = null
+	Sfx.play("click", -8.0, 0.0)
 
 
 ## Opens the Retrofit pop-out for the selected tower (Y, or its card).
@@ -695,6 +725,12 @@ func _unhandled_input(event: InputEvent) -> void:
 		buy_retrofit(event.keycode - KEY_1)
 		get_viewport().set_input_as_handled()
 		return
+	if hud.is_open("tree"):
+		# The battle is paused behind the tree: only closing keys work (buying is by click).
+		if event.keycode in [KEY_ESCAPE, KEY_E]:
+			close_popout("tree")
+			get_viewport().set_input_as_handled()
+		return
 	if hud.is_open("research"):
 		# The battle is paused behind the lab: only closing keys work.
 		if event.keycode in [KEY_ESCAPE, KEY_R]:
@@ -725,6 +761,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			use_ability("warp")
 		KEY_Y:
 			open_retrofit()
+		KEY_M:
+			start_aim()
+		KEY_E:
+			toggle_tree()
 		KEY_U:
 			upgrade_selected(0)
 		KEY_I:
@@ -751,7 +791,7 @@ func _unhandled_input(event: InputEvent) -> void:
 			# The master close: pop-outs first, then build/aim/selection, then the pause menu.
 			if hud.any_open():
 				close_popouts()
-			elif world.build_type != "" or world.selected_tower != null or world.ability_target != "":
+			elif world.build_type != "" or world.selected_tower != null or world.ability_target != "" or world.aim_tower != null:
 				shop_return = false
 				cancel()
 			else:
