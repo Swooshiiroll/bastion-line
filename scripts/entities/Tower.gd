@@ -69,6 +69,8 @@ var ramp_mult := 1.0
 var beam_targets: Array = []
 ## Laser Tower (reworked): seconds each beam has held its target, parallel to beam_targets.
 var beam_ramps: Array = []
+## Laser Tower: the beams are firing (it faces its main target); false while it turns onto a new one (#90).
+var beam_on := false
 ## Artillery Cannon: the spot it shells (chosen by the player; set to the nearest track point when built) and the shell type loaded.
 var aim_point := Vector2.ZERO
 var aim_set := false
@@ -490,7 +492,7 @@ func _price(cost: int) -> int:
 func can_target(e) -> bool:
 	if e == null or not e.alive:
 		return false
-	if e.is_hidden() or (e.flying and not hits_air()) or (not e.flying and not hits_ground()):
+	if e.untargetable() or (e.flying and not hits_air()) or (not e.flying and not hits_ground()):
 		return false
 	var r := get_range()
 	return pos.distance_squared_to(e.pos) <= r * r

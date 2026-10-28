@@ -4,7 +4,8 @@ extends RefCounted
 ##
 ## `look` is the tower's look key "r|a|b|c": the Retrofit (-1 none, 0 beam sweep, 1 longer hold, 2 faster recharge) and the depth of each path,
 ## 5 on the path that took its mastery. a = Pull Distance (the emitter spike), b = Recharge (the base's cell ring), c = Grip (the dish's energy).
-## The armoured dish and the spike turn with the aim (baked); the cells' charge, the focus arcs and the rewind coil are live.
+## The armoured dish and the spike turn with the aim (baked); the cells' charge, the vents' glow, the focus arcs, the rewind coil and the
+## Retrofits' moving parts are live. The Retrofits are the owner's picks: Beam Sweep (sweep vanes), Hold Capacitor Ring, Fan Vent.
 ## `extra` is [charge 0..1 (how far the next grab has recharged), holding 0/1].
 
 const Draw = preload("res://scripts/view/Draw.gd")
@@ -55,6 +56,15 @@ static func draw(ci: CanvasItem, c: Vector2, aim: float, s: float, t: float, _fl
 	var base_r: float = BASER[L.R]
 	var gc: Color = GOLD if gr else col
 	var len: float = SLEN[L.P]
+	# Longer Hold (Hold Capacitor Ring): a glowing capacitor ring on the deck round the base.
+	if L.r == 1:
+		Draw.ring(ci, c, 13.0 * k, Draw.OUTLINE, 3.0 * k)
+		Draw.ring(ci, c, 13.0 * k, Draw.METAL_D, 2.0 * k)
+		Draw.dyn(true)
+		for i in 8:
+			var ah := float(i) * TAU / 8.0 + 0.08
+			Draw.arc(ci, c, 13.0 * k, ah, ah + TAU / 8.0 - 0.16, 6, Color(col, 0.35 + 0.3 * sin(t * 3.0 + float(i))), 1.0 * k)
+		Draw.dyn(false)
 	# --- The base: a round platform, a ring of recharge cells (lit live), the rams. ---
 	Draw.plate(ci, c, Draw.ngon(32, 1.0, 0.0), GOLD.darkened(0.08) if gr else Draw.METAL, aim, base_r * k, 1.3)
 	Draw.ring(ci, c, base_r * 0.72 * k, Color(Draw.OUTLINE, 0.35), 0.8 * k)
@@ -65,6 +75,10 @@ static func draw(ci: CanvasItem, c: Vector2, aim: float, s: float, t: float, _fl
 		for i in ncell:
 			var a: float = aim + PI + (float(i) / float(ncell - 1) - 0.5) * 2.7
 			Draw.plate(ci, c + Vector2.from_angle(a) * rr * k, Draw.rect_pts(0.8, 1.2 + 0.1 * float(L.R)), Draw.METAL_D, a, k, 0.8)
+	# Overclocked Emitter: two vents in the base (they glow live).
+	if L.R >= 4:
+		for sg in [-1.0, 1.0]:
+			Draw.plate(ci, at(c, aim, k, -base_r * 0.5, sg * base_r * 0.5), Draw.rect_pts(1.6, 0.5), Color(0.1, 0.1, 0.1), aim + sg * 0.6, k, 0.8)
 	for v in [-1.0, 1.0]:
 		var a0: Vector2 = at(c, aim, k, -6.5, 3.6 * v)
 		var a1: Vector2 = at(c, aim, k, 1.0, 4.4 * v)
@@ -87,11 +101,6 @@ static func draw(ci: CanvasItem, c: Vector2, aim: float, s: float, t: float, _fl
 	for a4 in [d0, d1]:
 		Draw.disc(ci, f + Vector2.from_angle(a4) * DR * k, (DW / 2.0 + 0.5) * k, Draw.OUTLINE)
 		Draw.disc(ci, f + Vector2.from_angle(a4) * DR * k, DW / 2.0 * k, arm)
-	# Beam Sweep: sweep vanes at the dish's ends.
-	if L.r == 0:
-		for a5 in [d0, d1]:
-			var vp: Vector2 = f + Vector2.from_angle(a5) * (DR + 1.8) * k
-			Draw.plate(ci, vp, Draw.rect_pts(1.6, 0.6), Draw.METAL_L, a5, k, 0.8)
 	# --- The spike: a slim rod from a hub to a feed head, with steel collars; longer each step, gold at Undo. ---
 	var sc := gl(Draw.METAL_L, gp, 0.75)
 	var mid := at(c, aim, k, SB + (len - 0.8 - SB) * 0.62, 0.0)
@@ -108,6 +117,17 @@ static func draw(ci: CanvasItem, c: Vector2, aim: float, s: float, t: float, _fl
 	var nib_gold: bool = gp or gg
 	Draw.disc(ci, tip, 1.7 * k, Draw.OUTLINE)
 	Draw.disc(ci, tip, 1.3 * k, GOLD if nib_gold else Draw.METAL)
+	# Beam Sweep: sweep vanes at the dish's ends.
+	if L.r == 0:
+		for sg in [-1.0, 1.0]:
+			var vane := PackedVector2Array([Vector2(0, -1), Vector2(3.4, 0), Vector2(0, 1)])
+			Draw.fill(ci, at(c, aim, k, 9.6, sg * 11.2), vane, Draw.METAL_L, aim, k)
+			Draw.outline(ci, at(c, aim, k, 9.6, sg * 11.2), vane, Draw.OUTLINE, 0.8, aim, k)
+	# Faster Recharge (Fan Vent): a fan vent on the base, its blades spinning live.
+	var fan := at(c, aim, k, -base_r + 3.0, 6.6)
+	if L.r == 2:
+		Draw.disc(ci, fan, 2.8 * k, Draw.OUTLINE)
+		Draw.disc(ci, fan, 2.4 * k, Draw.METAL_D)
 	# --- Live: the cells lighting as it recharges, the dish's focus arcs and rim, the rewind coil, the nib's glow. ---
 	Draw.dyn(true)
 	if L.R > 0:
@@ -135,4 +155,11 @@ static func draw(ci: CanvasItem, c: Vector2, aim: float, s: float, t: float, _fl
 			var a7 := -2.5 * t + float(i) * PI / 4.0
 			Draw.line(ci, q2 + Vector2.from_angle(a7) * rcoil * 0.55 * k, q2 + Vector2.from_angle(a7) * rcoil * 0.85 * k, HOTG if gp else col, 0.8 * k)
 	Draw.glow_dot(ci, tip, (0.6 + 0.8 * on) * k, GOLD if nib_gold else col)
+	if L.R >= 4:
+		for sg in [-1.0, 1.0]:
+			Draw.fill(ci, at(c, aim, k, -base_r * 0.5, sg * base_r * 0.5), Draw.rect_pts(1.2, 0.25), Color(gc, 0.6 + 0.4 * sin(t * 7.0 + sg)), aim + sg * 0.6, k)
+	if L.r == 2:
+		for j in 4:
+			Draw.fill(ci, fan, PackedVector2Array([Vector2(0.4, -0.4), Vector2(2.1, -0.9), Vector2(2.1, 0.9), Vector2(0.4, 0.4)]), Draw.METAL_L, t * 12.0 + float(j) * PI / 2.0, k)
+		Draw.disc(ci, fan, 0.7 * k, Draw.METAL)
 	Draw.dyn(false)

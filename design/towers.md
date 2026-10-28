@@ -125,6 +125,10 @@ towers, with prices **rounded to 5s and 0s**.
   - **Effect towers** (Augmentation Tower, 2026-10-15): when a tower's stock effect is too small for the non-damage
     rule, its upgrades are priced on the **Boost Tower's support scale**: each +1% of damage-equivalent bonus over the
     area costs the same as one Boost Tower point.
+  - **A sweeping spray** (Chemical Plant's Constant Spray, owner, 2026-10-26, #104):
+    - It's priced by the non-damage rule on soaks per second: passes per second × the enemies one pass catches.
+    - It counts 1.5 enemies a pass, about 1.8 soaks a second against High-Flow Pump's 1.2.
+    - That gives 8,810. The bot probe tunes it later.
   - **Exception, the CAS Gunship** (owner, 2026-10-15): each path upgrades one gun (light, medium, heavy; step 1
     unlocks it, the light gun is built in), and all three paths are uncapped up to their masteries. No primary/secondary.
   - **Owner overrides:** the owner can set a price directly when the formula undervalues something. So far: the Drone

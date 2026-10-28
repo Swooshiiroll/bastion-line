@@ -18,6 +18,10 @@ var texts: Array = []
 var meteors: Array = []
 var scorches: Array = []
 var sprays: Array = []
+var mists: Array = []
+var shocks: Array = []
+var puffs: Array = []
+var fountains: Array = []
 var warp_t := 0.0
 var warp_max := 1.0
 var _time := 0.0
@@ -90,6 +94,12 @@ func scorch(pos: Vector2, r: float) -> void:
 	scorches.append({"p": pos, "r": r, "life": 6.0, "max": 6.0})
 
 
+## The Cryo Tower's wave of creeping mist (its page, Creeping Mist): pale puffs spreading out to `radius` over 1.8 s behind a faint
+## front ring; with the Cold Front mastery the field is constant, the puffs filling the range at once with no front.
+func mist(pos: Vector2, radius: float, color: Color, constant := false) -> void:
+	mists.append({"p": pos, "r": radius, "c": color, "k": constant, "seed": randf() * 100.0, "life": 2.4, "max": 2.4})
+
+
 func warp(duration: float) -> void:
 	warp_t = duration
 	warp_max = duration
@@ -119,6 +129,14 @@ func _process(delta: float) -> void:
 		if q.e != null and is_instance_valid(q.e) and q.e.alive:
 			q["b"] = q.e.pos
 	sprays = _age(sprays, delta)
+	mists = _age(mists, delta)
+	shocks = _age(shocks, delta)
+	fountains = _age(fountains, delta)
+	var live: Array = []
+	for q in puffs:
+		if _time - float(q.t0) < float(q.max):
+			live.append(q)
+	puffs = live
 	queue_redraw()
 
 
@@ -159,6 +177,14 @@ func _draw() -> void:
 			Draw.arc(self, m.p, m.r * (0.35 + 0.1 * float(i)), a, a + 1.2, 10, Color(1.0, 0.7, 0.35, 0.6), 2.0, true)
 	for q in sprays:
 		_spray(q)
+	for m in mists:
+		_mist(m)
+	for q in puffs:
+		_puff(q)
+	for w in shocks:
+		_shock(w)
+	for f in fountains:
+		_fountain(f)
 	for f in flashes:
 		var k: float = f.life / f.max
 		Draw.disc(self, f.p, f.r * (0.6 + 0.4 * k), Color(f.c, f.c.a * k))
@@ -211,3 +237,93 @@ func _spray(q: Dictionary) -> void:
 			Draw.disc(self, p + Vector2(-0.4, -0.4), r * 0.35, Color(1, 1, 1, 0.55 * (1.0 - float(i) * 0.08)))
 		if q.bub and i % 3 == 0:
 			Draw.ring(self, p + Vector2(0, -2), 1.3, Color(col.lightened(0.4), 0.5), 0.6)
+
+
+func _mist(m: Dictionary) -> void:
+	var age: float = m.max - m.life
+	var travel := 1.0 if m.k else 1.8
+	var raw := age / travel
+	var u := minf(1.0, raw)
+	var fade := minf(1.0, m.life / 0.6)
+	var a := (0.55 + 0.45 * (1.0 - minf(1.0, raw / 2.0))) * fade
+	var r: float = m.r
+	if m.k:
+		Draw.disc(self, m.p, r, Color(m.c, 0.08 * fade))
+	for i in 22:
+		var sd: float = m.seed + float(i)
+		var ang := _rnd(sd) * TAU + _time * 0.1 * (1.0 if i % 2 == 1 else -1.0)
+		var rr := r * minf(1.0 if m.k else u, _rnd(sd + 9.0))
+		Draw.disc(self, m.p + Vector2.from_angle(ang) * rr, 5.8 + 1.9 * sin(_time * 1.5 + float(i)), Color(m.c, 0.16 * a))
+	if not m.k and raw < 1.2:
+		Draw.arc(self, m.p, r * u, 0.0, TAU, 48, Color(m.c, 0.35 * (1.0 - raw / 1.2)), 2.0, true)
+
+
+## The design pages' hash: a fixed pseudo-random 0..1 for x.
+static func _rnd(x: float) -> float:
+	var v := sin(x * 12.9898) * 43758.5453
+	return v - floor(v)
+
+
+## The Shockwave Generator's blast (its page, Mushroom Pulse): two rings roll out to `radius` in 0.6 s, each enemy they cross (`hits`)
+## flashes as the wave reaches it; the Megaton Wave adds a nuclear flash. `pw` thickens the rings with the Power path.
+func shock_wave(pos: Vector2, radius: float, color: Color, pw: float, hits: Array, mega: bool, sc: float) -> void:
+	shocks.append({"p": pos, "r": radius, "c": color, "pw": pw, "hits": hits, "mega": mega, "sc": sc, "life": 1.1, "max": 1.1})
+
+
+## One smoke puff with its own lifetime: it flies out along `vel` slowing with `drag`, grows by `grow` px, and cools from `hot` to `col`
+## over `hot_t` s (a fire puff, `fire`, burns amber to red first). `al` is its start alpha, `f2` how much faster it fades late.
+func puff(p0: Vector2, vel: Vector2, drag: float, r0: float, grow: float, col: Color, hot: Color, hot_t: float, al: float, life: float, delay := 0.0, oy := 0.0, f2 := 0.3, fire := false) -> void:
+	puffs.append({"p": p0, "v": vel, "d": drag, "r0": r0, "g": grow, "c": col, "h": hot, "ht": hot_t, "al": al, "t0": _time + delay, "max": life, "oy": oy, "f2": f2, "fire": fire})
+
+
+func _puff(q: Dictionary) -> void:
+	var age: float = _time - float(q.t0)
+	if age < 0.0:
+		return
+	var u: float = age / float(q.max)
+	var dr: float = (1.0 - exp(-float(q.d) * age)) / float(q.d)
+	var p: Vector2 = q.p + q.v * dr + Vector2(0, q.oy)
+	var col: Color = q.c
+	if q.fire:
+		col = Color(1.0, 0.7, 0.28).lerp(Color(0.95, 0.3, 0.1), minf(1.0, age / 0.7)).lerp(q.c, minf(1.0, age / 1.3))
+	elif float(q.ht) > 0.0:
+		col = q.c.lerp(q.h, maxf(0.0, 1.0 - age / float(q.ht)) * 0.8)
+	Draw.disc(self, p, float(q.r0) + float(q.g) * minf(1.0, u * 1.3), Color(col, float(q.al) * (1.0 - u) * (1.0 - u * float(q.f2))))
+
+
+func _shock(w: Dictionary) -> void:
+	var age: float = w.max - w.life
+	var raw := age / 0.6
+	var u := minf(1.0, raw)
+	var a := maxf(0.0, 1.0 - raw / 1.8)
+	var r: float = w.r
+	if w.mega and age < 0.4:
+		var fu := age / 0.4
+		Draw.disc(self, w.p, 29.8 * minf(1.0, fu * 3.0) * float(w.sc), Color(1, 0.97, 0.85, 0.8 * (1.0 - fu)))
+		Draw.disc(self, w.p, 14.4 * minf(1.0, fu * 3.0), Color(1, 1, 1, 0.9 * (1.0 - fu)))
+	for j in 2:
+		var q := u - float(j) * 0.2
+		if q > 0.0:
+			Draw.arc(self, w.p, r * q, 0.0, TAU, 48, Color(w.c, 0.7 * a * (1.0 - float(j) * 0.4)), 2.5 + float(w.pw) - float(j), true)
+	for e in w.hits:
+		var h: float = age - 0.6 * float(e.d) / maxf(r, 1.0)
+		if h >= 0.0 and h < 0.3:
+			var er: float = e.r
+			Draw.glow_dot(self, e.p, er * 0.6 * (1.0 - h / 0.3) * (0.9 + 0.2 * float(w.pw)), Color(1.0, 0.95, 0.8, 0.8))
+			Draw.arc(self, e.p, er + h * 14.0, 0.0, TAU, 20, Color(w.c, 1.0 - h / 0.3), 1.5, true)
+
+
+## The Scrapyard's payout (its page, Melt and Pour): a flare and a fan of six coins vented from the furnace's mouth, falling back.
+func fountain(pos: Vector2) -> void:
+	fountains.append({"p": pos, "life": 1.6, "max": 1.6})
+
+
+func _fountain(f: Dictionary) -> void:
+	var v: float = 1.0 - f.life / f.max
+	if v < 0.25:
+		Draw.glow_dot(self, f.p, 10.6 * (1.0 - v / 0.25), Color(1.0, 0.85, 0.45))
+	for i in 6:
+		var d := Vector2.from_angle(-PI / 2.0 + (float(i) - 2.5) * 0.35)
+		var p: Vector2 = f.p + d * 24.0 * minf(1.0, v * 2.0) + Vector2(0, v * v * 19.2)
+		Draw.disc(self, p, 3.2, Color(Draw.OUTLINE, 0.95 * (1.0 - v)))
+		Draw.disc(self, p, 2.2, Color(Draw.GOLD, 1.0 - v))
