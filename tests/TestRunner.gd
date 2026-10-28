@@ -2184,6 +2184,38 @@ func test_rocket_tubes() -> void:
 	check(near(RocketSalvoArt.loaded(rip, 3, 0.0, 0.1), 1.0) and near(RocketSalvoArt.loaded(rip, 3, 0.0, 0.3), 0.0), "a rippling salvo empties its tubes one after another")
 
 
+## The Ripple Salvo's Launch Cells (#104, the owner's pick): eight cells set in the deck, so nothing turns; each rocket rises
+## from its own cell, wherever the tower aims.
+func test_rocket_launch_cells() -> void:
+	var cells := "-1|0|0|5"
+	check(RocketSalvoArt.still(cells) and not RocketSalvoArt.still("-1|0|0|4"), "only the Payload mastery stays still")
+	check(not Draw.aimed("rocket_salvo", cells) and Draw.aimed("rocket_salvo", "-1|0|0|4") and Draw.aimed("gun_turret", "-1|0|0|5"), "the cache turns every aimed look but the Launch Cells")
+	var c := Vector2(100, 100)
+	var spots := {}
+	var fixed := true
+	var ring := true
+	for i in 8:
+		var p := RocketSalvoArt.muzzle(c, 0.0, 1.0, cells, i)
+		fixed = fixed and p.distance_to(RocketSalvoArt.muzzle(c, 2.1, 1.0, cells, i)) < 0.01
+		ring = ring and near(p.distance_to(c), RocketSalvoArt.CELL_R, 0.01)
+		spots[Vector2i(roundi(p.x * 10.0), roundi(p.y * 10.0))] = true
+	check(fixed and ring and spots.size() == 8, "eight cells round the deck, the same at any aim")
+	var g = new_game()
+	var e1 = put(g, "grunt", 100.0, 0, 5.0)
+	var t = g.place_tower("rocket_salvo", spot(g, "rocket_salvo", 0))
+	t.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	g.gold = 100000
+	buy_steps(g, t, "c", 5)
+	t.pos = e1.pos + Vector2(60, 20)
+	g.projectiles.clear()
+	g._fire_salvo(t, t.stats())
+	var rockets: Array = g.projectiles.filter(func(p): return p.kind == "rocket_salvo")
+	var from_cells: bool = rockets.size() == 8
+	for i in rockets.size():
+		from_cells = from_cells and rockets[i].pos.distance_to(RocketSalvoArt.muzzle(t.pos, 0.0, 1.0, t.look_key(), i)) < 0.01
+	check(t.mastered and from_cells, "a salvo's eight rockets each leave their own cell")
+
+
 ## The Laser Tower (#90) turns to face a new target before its beam fires.
 func test_laser_turns_first() -> void:
 	var g = new_game()
