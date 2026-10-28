@@ -1235,6 +1235,19 @@ D, E and F are dropped. The other picks stand (Power C, Speed C, Effect A, Retro
   setting how long a fire puff takes to grey. Lower Power steps are unchanged.
 - **The page:** the store key is now `bl-tower-art-p2-shock-r11`.
 
+**Round 12 (the owner asked for "a bunch" more Megaton ideas, 2026-10-27):** the Megaton Wave step shows C (round 11, in
+the game since #122) beside seventeen more. D to Q are C plus one extra; R, S and T combine four.
+- **The cloud:** D Rising Column (a grey stem under a higher fireball), E Smoke-Ring Cap (the fireball rolls into a
+  hollow ring), F Ember Rain, G Growing Plume (one fiery column fed by every blast, building while it fires; no separate
+  fireballs).
+- **The blast:** H Double Flash, I Condensation Dome, J Field Glow (the reach and the enemies in it lit orange),
+  K Charge-Up (sparks gather into the core before each blast).
+- **The ground and after:** L Ground Scorch (under the tower, ~3 s), M Dust Sweep (dust kicked up as the ring passes),
+  N Echo Rings, O Ash Fall, P Charred Enemies (hit enemies go dark ~1.4 s), Q Ground Cracks (glowing, cooling to dark).
+- **Combinations:** R = D + H + L + M, S = E + F + I + N, T = G + K + Q + J.
+- **The page:** ground marks are drawn from the model, under the tower; the rest from the agent, under or over the
+  cloud. The store key is now `bl-tower-art-p2-shock-r12`.
+
 ### Scrapyard (third restart: a tower of three parts)
 
 **History.** Three Scrapyard designs have been rejected: (1) the Magnet Yard base with its first upgrade designs; (2) a from-scratch Smelting Works ("didn't like the overall design"); (3) the Armoured Vault Depot, whose base look was confirmed (with the Sparks and Sale animation) before its second-pass round 1, after which the owner said "Scrap the scrapyard design and start all over again". Its files (`data_scrap_looks.js`, `data_p2_scrap.js`, the p2 page) are deleted; git keeps them. The `sBuild`/`sCard` preview-scale hook in `pass2_engine.js` stays for the 2x2 second pass.
