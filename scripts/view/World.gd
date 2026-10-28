@@ -43,6 +43,8 @@ var ground_fx
 var entities
 ## Smoke that rises over the towers (normal blend, above the entities): the Shockwave Generator's mushroom cloud and vent smoke.
 var smoke_fx
+## Counts Constant Spray's ticks so mist puffs go out every other one.
+var _jet_n := 0
 var beams
 var fx
 var overlay
@@ -123,6 +125,26 @@ func setup(g, clip := Rect2i()) -> void:
 	aim_tower = null
 
 
+## Constant Spray (#112): each tick, every spraying Chemical Plant sends a drop from its head along the jet's angle at that
+## moment (with the Mist Nozzle, a mist puff every other tick, on the smoke layer); the particles then fly on by themselves.
+func _emit_jets() -> void:
+	for t in game.towers:
+		if t.type != "chemical_plant" or t.disabled > 0.0 or float(t.gun_cds.get("spray_on", 0.0)) <= 0.0:
+			continue
+		var L := ChemicalPlantArt.levels(t.look_key())
+		var k := 1.0 if t.size <= 1 else 1.8
+		var d := Vector2.from_angle(float(t.gun_cds.get("spray_a", t.aim)))
+		var from: Vector2 = t.pos + d * ChemicalPlantArt.JET_START * k
+		var reach: float = t.get_range() - ChemicalPlantArt.JET_START * k
+		var ac := ChemicalPlantArt.acid_color(L, Draw.accent(t.type, t.spec))
+		if L.r == 1:
+			_jet_n += 1
+			if _jet_n % 2 == 0:
+				smoke_fx.jet(from, d, reach, ac, k, true, 0.9)
+		else:
+			fx.jet(from, d, reach, ac, k, false, ChemicalPlantArt.JET_FLIGHT)
+
+
 ## Advances the simulation by real time `delta` at the given speed and returns the drained events.
 func simulate(delta: float, speed: int) -> Array:
 	_accum += delta * float(speed)
@@ -130,6 +152,7 @@ func simulate(delta: float, speed: int) -> Array:
 	while _accum >= Game.TICK:
 		_accum -= Game.TICK
 		game.tick(Game.TICK)
+		_emit_jets()
 		steps += 1
 		if steps >= MAX_STEPS_PER_FRAME:
 			_accum = 0.0

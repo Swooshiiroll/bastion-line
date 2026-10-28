@@ -43,11 +43,10 @@ const MINE_LEAD := 1.0
 const MINE_NEAR := 24.0
 ## The CAS Gunship's plane flies to a new orbit at this speed (px a second).
 static var CAS_SPEED := 180.0
-## Constant Spray (the Chemical Plant's Speed mastery, #104): the fan its jet sweeps, in degrees, and with the Mist Nozzle.
 ## Mortar shells lead a moving target (1) or land where it was when fired (0): a switch in the live tuner (#110).
 static var MORTAR_LEAD := 1
-static var SPRAY_FAN := 120.0
-static var SPRAY_FAN_MIST := 160.0
+## Constant Spray (the Chemical Plant's Speed mastery, #104): the fan its jet sweeps, in degrees (40, the owner, #112).
+static var SPRAY_FAN := 40.0
 ## How fast Constant Spray's fan swings round to follow its target (rad a second).
 const SPRAY_TURN := 2.5
 const STAT_KEYS := ["kills", "gold_earned", "towers_built", "leaked", "waves_cleared"]
@@ -1702,8 +1701,8 @@ func _soak(t, s: Dictionary, e) -> void:
 		e.armor_break_timer = maxf(e.armor_break_timer, time_s)
 
 
-## Constant Spray (the Chemical Plant's Speed mastery, #104): the nozzle sprays without stopping, sweeping a fan (SPRAY_FAN degrees,
-## SPRAY_FAN_MIST with the Mist Nozzle) centred on the enemy its targeting picks, one pass across it per spray interval. Every enemy
+## Constant Spray (the Chemical Plant's Speed mastery, #104): the nozzle sprays without stopping, sweeping a fan (SPRAY_FAN degrees)
+## centred on the enemy its targeting picks, one pass across it per spray interval. Every enemy
 ## the jet crosses in range (not a hologram) is soaked, or topped up to a full soak. With nothing in range the jet stops.
 ## The sweep lives in gun_cds: spray_c (the fan's centre), spray_p (the pass, 0..2), spray_a (the jet's angle), spray_on.
 func _sweep_spray(t, s: Dictionary, dt: float) -> void:
@@ -1728,7 +1727,8 @@ func _sweep_spray(t, s: Dictionary, dt: float) -> void:
 	t.gun_cds["spray_p"] = fmod(phase, 2.0)
 	t.gun_cds["spray_a"] = a
 	t.gun_cds["spray_on"] = 1.0
-	t.aim = a
+	# The plant faces the fan's centre; the jet has its own angle (spray_a), which the head and the particles follow (#112).
+	t.aim = cen
 	for e in cands:
 		var b: float = (e.pos - t.pos).angle()
 		if absf(angle_difference(cen, b)) > half + 0.05:
@@ -1739,9 +1739,9 @@ func _sweep_spray(t, s: Dictionary, dt: float) -> void:
 			_soak(t, s, e)
 
 
-## Half of Constant Spray's fan, in radians (wider with the Mist Nozzle).
-static func spray_half(s: Dictionary) -> float:
-	return deg_to_rad(SPRAY_FAN_MIST if bool(s.get("mist", false)) else SPRAY_FAN) * 0.5
+## Half of Constant Spray's fan, in radians (the Mist Nozzle no longer widens it, #112).
+static func spray_half(_s: Dictionary) -> float:
+	return deg_to_rad(SPRAY_FAN) * 0.5
 
 
 ## The jet's angle at `phase` of the sweep: one pass across the fan per unit of phase, easing at each edge.
@@ -2991,6 +2991,7 @@ func _on_field_clear() -> void:
 		t.ramp_mult = 1.0
 		t.beam_targets.clear()
 		t.disabled = 0.0
+		t.gun_cds.erase("spray_on")   # Constant Spray stops with the round (#112)
 	if sandbox and not endless and wave >= final_round():
 		# A test bench earns nothing: past the last round it just carries on, endless.
 		endless = true

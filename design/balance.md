@@ -1036,8 +1036,7 @@ The global rules every tower and enemy follows.
 | `Game.CRIT_MULT` | 2 | A critical hit deals this many times the damage |
 | `Game.LASER_TURN` | 12 | The Laser Tower turns this many radians a second; its beams fire once it faces its target |
 | `Game.CAS_SPEED` | 180 | The CAS Gunship's plane flies to a new orbit at this speed (px a second); its guns keep firing on the way |
-| `Game.SPRAY_FAN` | 120 | Constant Spray's sweep covers this many degrees, centred on its target |
-| `Game.SPRAY_FAN_MIST` | 160 | ... and this many with the Mist Nozzle |
+| `Game.SPRAY_FAN` | 40 | Constant Spray's sweep covers this many degrees, centred on its target (the Mist Nozzle doesn't widen it) |
 | `Game.MORTAR_LEAD` | 1 | Mortar shells lead a moving target (1) or land where it was when fired (0); a checkbox in the live tuner |
 | `Game.SHIELD_EMP_MULT` | 2 | Tesla Tower arcs hit barriers this many times as hard |
 | `Game.DISABLE_GUARD` | 1 | Seconds after an EMP wears off before a tower can be knocked offline again |

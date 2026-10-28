@@ -1151,7 +1151,8 @@ func _rework_fire_check(g, type: String) -> int:
 		var worked: bool = t.damage_dealt > 0.0
 		match type:
 			"mine_layer":
-				worked = not g.mines.is_empty()
+				# Mines land just ahead of enemies now (#110), so the enemy may already have set one off: a throw counts.
+				worked = not g.mines.is_empty() or t.pulse_count > 0 or t.damage_dealt > 0.0
 			"chemical_plant":
 				worked = foe.soak_timer > 0.0 or foe.armor_shred > 0.0 or foe.armor_break_timer > 0.0
 			"cryo_tower":
