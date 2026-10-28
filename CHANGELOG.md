@@ -36,6 +36,12 @@ so write for players.
   - **Rocket Salvo:** each rocket leaves its own tube, straight out; the tubes empty when it fires and load again as it reloads.
   - **Laser Tower:** it turns to face a new target before its beam fires.
   - **Artillery Cannon:** shells leave the muzzle and fly an arc pointing the way they go; every shell of a Rolling Barrage fires with its own recoil; the Long Penetrator's yellow band fits on the shell, and a Shell Magazine's heavy round has a red band instead of a red ring.
+- **Tower art against the design pages, group 2 (#90):**
+  - Every turret keeps turning toward its next enemy while it reloads, instead of waiting for its next shot.
+  - Railgun: the housing recoils on every shot, the copper coils and the mouth glow as it charges, and each of the Twin Rails fires from its own barrel in turn.
+  - CAS Gunship: a slimmer fuselage; the plane takes off from the tower and flies to its orbit, and to each new one, instead of jumping there (its guns keep firing on the way).
+  - Mine Layer: the launcher turns to where it throws next; each mine flies on an arc and lands with a ring; mines land at random spots along the track in reach, a little either side of the middle, instead of in a row from the entrance.
+  - Chemical Plant: a lobbed stream of acid drops onto the enemy instead of a straight line (gel glints, bubbles in the Concentrated Acid, and a mist for the Mist Nozzle's neighbour); the Twin Nozzles' second sprayer sprays from its own nozzle.
 
 ### Behind the scenes
 - **Bot balance verdicts paused for the rework (#96):** the bot still plays every test game, but whether it wins, reaches endless or buys masteries no longer fails the tests until the tower rework is done; those results print as PAUSED.

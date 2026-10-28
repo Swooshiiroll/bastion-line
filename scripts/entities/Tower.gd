@@ -79,6 +79,11 @@ var shell := "he"
 var loadout := "gun"
 ## CAS Gunship: where the plane is on its orbit (radians) and each gun's cooldown. The orbit centre is `aim_point`.
 var orbit_angle := 0.0
+## CAS Gunship: the plane's position and heading, and whether it's circling (false while it flies to a new orbit). INF until
+## it takes off from the tower.
+var plane_pos := Vector2.INF
+var plane_heading := 0.0
+var in_orbit := false
 var gun_cds := {}
 ## Seconds left knocked offline by a Jammer's EMP.
 var disabled := 0.0

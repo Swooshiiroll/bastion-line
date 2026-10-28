@@ -17,6 +17,8 @@ const BLUE_T := Color(0.40, 0.65, 1.0)
 const BORE := Color(0.05, 0.05, 0.06)
 ## The plane is drawn this much bigger than the ground.
 const ZP := 2.0
+## The fuselage's width (the page's 5, thinned at the owner's note).
+const BODY_W := 4.0
 
 
 static func levels(look: String) -> Dictionary:
@@ -28,11 +30,6 @@ static func levels(look: String) -> Dictionary:
 
 static func at(p: Vector2, h: float, k: float, x: float, y: float) -> Vector2:
 	return p + (Vector2.from_angle(h) * x + Vector2.from_angle(h).orthogonal() * y) * k
-
-
-## The plane's position and heading for a tower's orbit.
-static func plane_pose(centre: Vector2, orbit: float, angle: float) -> Dictionary:
-	return {"pos": centre + Vector2.from_angle(angle) * orbit, "heading": angle + PI / 2.0}
 
 
 ## The tracer's look from the light gun's path: width, white core, double line (the gold at its mastery).
@@ -49,10 +46,10 @@ static func plane(ci: CanvasItem, p: Vector2, h: float, s: float, t: float, look
 	var o := d.orthogonal()
 	# The shadow, far below.
 	var q := p + Vector2(k * 10.0, k * 16.0)
-	Draw.fill(ci, q, Draw.rect_pts(13.0, 2.6), Color(0, 0, 0, 0.14), h, k)
+	Draw.fill(ci, q, Draw.rect_pts(13.0, BODY_W * 0.52), Color(0, 0, 0, 0.14), h, k)
 	Draw.fill(ci, q, Draw.rect_pts(2.4, w), Color(0, 0, 0, 0.14), h, k)
 	# Fuselage, tail, wing.
-	Draw.bar(ci, at(p, h, k, -12.0, 0.0), at(p, h, k, 13.0, 0.0), 5.0 * k, Draw.METAL_L)
+	Draw.bar(ci, at(p, h, k, -12.0, 0.0), at(p, h, k, 13.0, 0.0), BODY_W * k, Draw.METAL_L)
 	Draw.plate(ci, at(p, h, k, -11.0, 0.0), Draw.rect_pts(1.6, 6.5), Draw.METAL, h, k, 0.9)
 	Draw.plate(ci, at(p, h, k, 2.0, 0.0), Draw.rect_pts(2.4, w), Draw.METAL_L, h, k, 1.0)
 	if L.r == 2:

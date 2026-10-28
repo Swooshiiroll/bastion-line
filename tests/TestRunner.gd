@@ -23,6 +23,7 @@ const Waves = preload("res://data/waves.gd")
 const Maps = preload("res://data/maps.gd")
 const Abilities = preload("res://data/abilities.gd")
 const Research = preload("res://scripts/core/Research.gd")
+const RailgunArt = preload("res://scripts/view/towers/RailgunArt.gd")
 const ResearchData = preload("res://data/research.gd")
 const Difficulty = preload("res://data/difficulty.gd")
 const EnemyArt = preload("res://scripts/view/enemies/EnemyArt.gd")
@@ -131,6 +132,10 @@ func _run() -> void:
 		"test_artillery_from_muzzle",
 		"test_lobbed_shells",
 		"test_turret_bake_size",
+		"test_rail_muzzles",
+		"test_turn_while_reloading",
+		"test_mine_scatter",
+		"test_chem_spray_events",
 		"test_crowd_control_limits",
 		"test_no_towers_loses",
 		"test_bot_playthroughs",
@@ -2013,6 +2018,112 @@ func spot(g, type: String, n: int) -> Vector2i:
 	return Vector2i(-1, -1)
 
 
+## Railgun (#90): twin rails fire in turn from their own muzzles; the housing recoils (the art's live shift).
+func test_rail_muzzles() -> void:
+	var g = new_game()
+	g.gold = 900000
+	g.emit_events = true
+	var t = g.place_tower("railgun", spot(g, "railgun", 0))
+	var e = put(g, "grunt", 300.0, 0, 50.0)
+	e.hp = 1e9
+	e.max_hp = 1e9
+	var froms: Array = []
+	for i in 2:
+		g.events.clear()
+		g._fire_railgun(t, e, t.stats())
+		for ev in g.events:
+			if ev.type == "rail_shot":
+				froms.append(ev.from)
+	var k := 1.0 if t.size <= 1 else 1.8
+	var m0: Vector2 = RailgunArt.muzzle(t.pos, t.aim, k, t.look_key(), 0)
+	check(froms.size() == 2 and froms[0].distance_to(m0) < 0.5 and froms[0].distance_to(t.pos) > 20.0, "the slug leaves the rail's muzzle, not the centre")
+	var twin := "-1|0|5|0"
+	var a: Vector2 = RailgunArt.muzzle(t.pos, 0.0, 1.0, twin, 0)
+	var b: Vector2 = RailgunArt.muzzle(t.pos, 0.0, 1.0, twin, 1)
+	check(a.distance_to(b) > 6.0 and a.x > t.pos.x + 20.0 and b.x > t.pos.x + 20.0, "Twin Rails: the two rails' muzzles take turns, %.1f px apart" % a.distance_to(b))
+	check(near(float(t.gun_cds.get("shot_t", -1.0)), g.time), "the shot time is kept for the recoil")
+
+
+## Every turret keeps a target while it reloads, so it turns toward the next enemy between shots (#90, owner's note).
+func test_turn_while_reloading() -> void:
+	var g = new_game()
+	g.gold = 90000
+	var t = g.place_tower("railgun", spot(g, "railgun", 0))
+	g.enemies.clear()
+	t.cooldown = 2.0
+	t.target = null
+	var e = put(g, "grunt", 0.0, 0, 50.0)
+	e.pos = t.pos + Vector2(60, 0)
+	g._update_tower(t, 0.05)
+	check(t.target == e and t.cooldown > 1.5, "reloading, it takes a target to turn to (and doesn't fire)")
+	e.alive = false
+	var e2 = put(g, "grunt", 0.0, 0, 50.0)
+	e2.pos = t.pos + Vector2(0, 60)
+	g._update_tower(t, 0.05)
+	g.time += 0.2
+	g._update_tower(t, 0.05)
+	check(t.target == e2, "when its target dies mid-reload it turns to the next")
+
+
+## Mine Layer (#90): mines land at random spots along the lanes in reach, a little to either side of the middle, never in a row
+## from the entrance; the launcher turns to the next spot; each mine keeps where it was thrown from for its flight.
+func test_mine_scatter() -> void:
+	var g = new_game()
+	g.gold = 90000
+	g.enemies.clear()
+	var t = g.place_tower("mine_layer", spot(g, "mine_layer", 0))
+	var reach := float(t.stats().range)
+	for i in 30:
+		t.cooldown = 0.0
+		g._update_mine_layer(t, t.stats(), 0.01)
+	var mine_list: Array = g.mines.filter(func(m): return m.source == t)
+	var ok := mine_list.size() >= 4
+	var off_mid := 0
+	for m in mine_list:
+		var lane: Vector2 = g.nearest_track_point(m.pos)
+		ok = ok and m.pos.distance_to(lane) <= Game.MINE_SPREAD + 0.5 and m.pos.distance_to(t.pos) <= reach + Game.MINE_SPREAD + 0.5
+		ok = ok and m.has("t0") and m.has("from")
+		if m.pos.distance_to(lane) > 1.0:
+			off_mid += 1
+	check(ok, "every mine is on a lane in reach (within %d px of its middle) and remembers its throw" % int(Game.MINE_SPREAD))
+	check(off_mid * 2 >= mine_list.size(), "most land off the lane's middle (%d of %d)" % [off_mid, mine_list.size()])
+	# Not first-free from the entrance: the old rule laid them in order, each the next free 18 px along the lane.
+	var g2 = new_game()
+	g2.enemies.clear()
+	var t2 = g2.place_tower("mine_layer", spot(g2, "mine_layer", 0))
+	var order_ok := true
+	var prev := -1.0
+	for i in 4:
+		t2.cooldown = 0.0
+		g2._update_mine_layer(t2, t2.stats(), 0.01)
+		var d: float = g2.grid.ground_paths[0].get_closest_offset(g2.mines[g2.mines.size() - 1].pos)
+		order_ok = order_ok and d > prev
+		prev = d
+	check(not order_ok, "the spots aren't laid in order down the lane")
+	var nxt = t2.gun_cds.get("next")
+	check(nxt != null and absf(angle_difference(t2.aim, (nxt - t2.pos).angle())) < 0.01, "after a throw the launcher aims at the next spot")
+
+
+## Chemical Plant (#90): its spray event says which nozzle and whether it's the Mist Nozzle's neighbour, so the view can draw the
+## lobbed stream (no tracer).
+func test_chem_spray_events() -> void:
+	var g = new_game()
+	g.gold = 900000
+	g.emit_events = true
+	g.enemies.clear()
+	var t = g.place_tower("chemical_plant", spot(g, "chemical_plant", 0))
+	g.buy_retrofit(t, 1)
+	var a = put(g, "grunt", 0.0, 0, 50.0)
+	var b = put(g, "grunt", 0.0, 0, 50.0)
+	a.pos = t.pos + Vector2(40, 0)
+	b.pos = t.pos + Vector2(50, 10)
+	g.events.clear()
+	g._spray(t, t.stats())
+	var sprays: Array = g.events.filter(func(ev): return ev.type == "spray")
+	check(sprays.size() == 2 and sprays[0].enemy != null and not sprays[0].mist and int(sprays[0].nozzle) == 0, "the first spray: nozzle 1 at its enemy")
+	check(sprays.size() == 2 and sprays[1].mist, "the Mist Nozzle's neighbour gets a mist")
+
+
 ## Buys `n` steps on path `key` of a reworked tower (money is no object).
 ## The Rocket Salvo (#90): each rocket leaves its own tube straight out; the tubes empty with a salvo and load again.
 func test_rocket_tubes() -> void:
@@ -3514,7 +3625,28 @@ func test_rework_cas_gunship() -> void:
 	for i in 20:
 		g._update_cas(gun, gun.stats(), 0.05)
 	check(e1.hp < hp and near(far.hp, fhp), "the gatling hits enemies inside the orbit only")
-	check(absf(gun.orbit_angle - 0.5) < 0.01, "the plane circles at 0.5 rad/s")
+	for i in 200:
+		if gun.in_orbit:
+			break
+		g._update_cas(gun, gun.stats(), 0.05)
+	var a0: float = gun.orbit_angle
+	for i in 20:
+		g._update_cas(gun, gun.stats(), 0.05)
+	check(gun.in_orbit and absf(angle_difference(a0, gun.orbit_angle) - 0.5) < 0.01, "the plane circles at 0.5 rad/s")
+	# A new orbit: the plane flies there at CAS_SPEED instead of jumping, and joins the circle without a jump.
+	var was: Vector2 = gun.plane_pos
+	g.designate_orbit(gun, gun.aim_point + Vector2(300, 0))
+	g._update_cas(gun, gun.stats(), 0.1)
+	check(not gun.in_orbit and near(gun.plane_pos.distance_to(was), g.CAS_SPEED * 0.1, 0.5), "a new orbit: the plane flies to it (%.1f px in 0.1 s)" % gun.plane_pos.distance_to(was))
+	var hops := 0.0
+	var steps := 0
+	while not gun.in_orbit and steps < 400:
+		var before: Vector2 = gun.plane_pos
+		g._update_cas(gun, gun.stats(), 0.05)
+		hops = maxf(hops, before.distance_to(gun.plane_pos))
+		steps += 1
+	var radius := float(gun.stats().get("orbit", 90.0))
+	check(gun.in_orbit and hops <= g.CAS_SPEED * 0.05 + 0.5 and near(gun.plane_pos.distance_to(gun.aim_point), radius, 0.5), "it joins the new orbit without a jump (largest step %.1f px)" % hops)
 	# Guns spread over targets; missiles fly as projectiles.
 	var multi = g.place_tower("cas_gunship", spot(g, "cas_gunship", 100))
 	buy_steps(g, multi, "b", 1)

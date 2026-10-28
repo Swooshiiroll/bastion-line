@@ -252,18 +252,18 @@ static func spinning(ci: CanvasItem, key: String, c: Vector2, half: Vector2, rot
 		tex = _bake_sprite(half, painter)
 		_sprites[key] = tex
 	if tex == null:
-		ci.draw_set_transform(c, rot, Vector2.ONE)
+		ci.draw_set_transform(c + _shift, rot, Vector2.ONE)
 		painter.call(ci, Vector2.ZERO)
-		ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		ci.draw_set_transform(_shift, 0.0, Vector2.ONE)
 		return
 	_stamp_rotated(ci, tex, c, half, rot, Color(1, 1, 1))
 
 
 ## Stamps a cached sprite rotated by `rot` about `c`.
 static func _stamp_rotated(ci: CanvasItem, tex: Texture2D, c: Vector2, half: Vector2, rot: float, tint: Color) -> void:
-	ci.draw_set_transform(c, rot, Vector2.ONE)
+	ci.draw_set_transform(c + _shift, rot, Vector2.ONE)
 	ci.draw_texture_rect(tex, Rect2(-half, half * 2.0), false, tint)
-	ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	ci.draw_set_transform(_shift, 0.0, Vector2.ONE)
 
 
 ## --- Sprite cache: static artwork drawn once into a texture and stamped after that. ------------
@@ -495,6 +495,18 @@ static func dyn(on: bool) -> void:
 				_stamp_turret(_seg)
 
 
+## Moves everything drawn after it (static layers included) by `off`, for parts that slide as a whole, like a recoiling
+## barrel. Call it inside a live part; the static layer after that live part is stamped moved. Shift back with ZERO.
+static var _shift := Vector2.ZERO
+
+
+static func shift(ci: CanvasItem, off: Vector2) -> void:
+	if _mode == _BAKE or _mode == _COUNT:
+		return
+	_shift = off
+	ci.draw_set_transform(off, 0.0, Vector2.ONE)
+
+
 ## Called by every drawing leaf while _skip is set: never draws, but a dry run notes which static
 ## layers have something in them.
 static func _drawing() -> bool:
@@ -587,13 +599,13 @@ static func _stamp_turret(seg: int) -> void:
 		return
 	var ci: CanvasItem = _live.ci
 	var half: Vector2 = e.half
-	ci.draw_set_transform(_live.c, _live.rot, Vector2.ONE)
+	ci.draw_set_transform(_live.c + _shift, _live.rot, Vector2.ONE)
 	ci.draw_texture_rect(e.tex[seg], Rect2(-half, half * 2.0), false)
 	var e2 = _live.e2
 	if e2 != null and e2.tex.has(seg):
-		ci.draw_set_transform(_live.c, _live.rot2, Vector2.ONE)
+		ci.draw_set_transform(_live.c + _shift, _live.rot2, Vector2.ONE)
 		ci.draw_texture_rect(e2.tex[seg], Rect2(-half, half * 2.0), false, Color(1, 1, 1, _live.w))
-	ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	ci.draw_set_transform(_shift, 0.0, Vector2.ONE)
 
 
 static func outline(ci: CanvasItem, center: Vector2, pts: PackedVector2Array, color: Color, width: float, rot := 0.0, s := 1.0) -> void:
@@ -655,9 +667,11 @@ static func tower(ci: CanvasItem, type: String, tier: int, c: Vector2, aim: floa
 	if tier >= 4:
 		mastery_ring(ci, c, s, acc, t)
 	_pad(ci, c, s, acc, tier, t)
-	if turret_cache and _mode == _FULL and _cached_turret(ci, type, tier, c, aim, s, t, flash, spec, acc):
-		return
-	_turret(ci, type, tier, c, aim, s, t, flash, spec, acc)
+	if not (turret_cache and _mode == _FULL and _cached_turret(ci, type, tier, c, aim, s, t, flash, spec, acc)):
+		_turret(ci, type, tier, c, aim, s, t, flash, spec, acc)
+	if _shift != Vector2.ZERO:
+		_shift = Vector2.ZERO
+		ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
 static func _turret(ci: CanvasItem, type: String, tier: int, c: Vector2, aim: float, s: float, t: float, flash: float, spec: String, acc: Color) -> void:
