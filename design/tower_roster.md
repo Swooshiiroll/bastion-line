@@ -1323,6 +1323,15 @@ radiation circle priced as damage. This joins the Pricing section under the non-
 | 4 | Illusion Filter | 2,390 | Pings mark **Mirage holograms** as fakes: towers in range stop shooting them |
 | Mastery | Total Exposure | 3,590 | Revealed enemies can't re-cloak, re-disguise or re-burrow for 5 s after leaving the radar's range |
 
+**How the game does it (#86, 2026-10-24):** each step acts on the enemies a ping covers.
+- **Signal Analysis:** the Decoy Beacon takes its true rank and role for good.
+- **Disguise Breaker:** the Masquerade drops its disguise at once, at any health, and flees as it would at half health.
+- **Illusion Filter:** holograms are marked (a red cross) for good. Towers stop choosing them as targets; blasts and beams
+  still pop the ones in their way.
+- **Total Exposure:** whatever a ping covered stays revealed while it stays in this radar's range, and for 5 s after it
+  leaves (gold brackets). A Burrower can't dive meanwhile. The Masquerade never re-disguises, so that part has nothing
+  to stop.
+
 **Combinations (primary + secondary capped at 2):**
 - **Frequency + 2 Power:** near-constant reveals over a bigger area.
 - **Power + 2 Frequency:** a radiation field with faster pings.

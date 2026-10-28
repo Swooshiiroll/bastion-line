@@ -69,6 +69,8 @@ var ramp_mult := 1.0
 var beam_targets: Array = []
 ## Laser Tower (reworked): seconds each beam has held its target, parallel to beam_targets.
 var beam_ramps: Array = []
+## Laser Tower: the beams are firing (it faces its main target); false while it turns onto a new one (#90).
+var beam_on := false
 ## Artillery Cannon: the spot it shells (chosen by the player; set to the nearest track point when built) and the shell type loaded.
 var aim_point := Vector2.ZERO
 var aim_set := false
@@ -77,6 +79,11 @@ var shell := "he"
 var loadout := "gun"
 ## CAS Gunship: where the plane is on its orbit (radians) and each gun's cooldown. The orbit centre is `aim_point`.
 var orbit_angle := 0.0
+## CAS Gunship: the plane's position and heading, and whether it's circling (false while it flies to a new orbit). INF until
+## it takes off from the tower.
+var plane_pos := Vector2.INF
+var plane_heading := 0.0
+var in_orbit := false
 var gun_cds := {}
 ## Seconds left knocked offline by a Jammer's EMP.
 var disabled := 0.0
@@ -485,7 +492,7 @@ func _price(cost: int) -> int:
 func can_target(e) -> bool:
 	if e == null or not e.alive:
 		return false
-	if e.is_hidden() or (e.flying and not hits_air()) or (not e.flying and not hits_ground()):
+	if e.untargetable() or (e.flying and not hits_air()) or (not e.flying and not hits_ground()):
 		return false
 	var r := get_range()
 	return pos.distance_squared_to(e.pos) <= r * r

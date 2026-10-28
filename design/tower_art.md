@@ -575,6 +575,37 @@ Their prices are formula estimates (proposed), in `design/tower_roster.md`.
   - the central hub sits down between the banks, drawn under them (owner: "That central ball is also visible through
     the silos").
 
+**Round 4 (v4-dev.2 batch 7, #104):**
+- The owner's note on Build 2: "Path C Mastery needs a redesign to match the current design style of other towers."
+- The raised banks are dropped. The page shows three flat Ripple Salvo looks in the gold banding and glow the other
+  masteries use, and the owner picks one:
+  - A, Eight-Tube Grid: one wide gold-banded block with eight staggered, gold-rimmed tubes, and a row of ripple lights
+    that fills as the salvo goes out.
+  - B, Rotary Drum: eight tubes on a gold-capped drum that spins on a geared drive.
+  - C, Flush Twin Banks: two flat banks of four gold-rimmed tubes, with a sequencer light running down the spine
+    between them.
+- The stats are unchanged: 8 rockets per salvo, rippling out.
+- The page's store key is now `bl-tower-art-p2-rocket-r4`.
+
+**Round 5 ("More ideas"):** four more looks. Each rebuilds the launcher round a turret hub, the way the other towers'
+masteries do, with its rockets racked where they can be seen:
+- D, Launch Cells: an armoured octagonal deck of eight vertical launch cells round a turning fire-control turret. The
+  hatches flip open one after another, with a flash and smoke as each rocket leaves.
+- E, Revolver Carousel: eight rockets on a gold-rimmed carousel that turns one notch per launch, feeding each one onto a
+  single launch rail.
+- F, Wing Pod Turret: an octagonal turret with a gold-jointed wing arm each side, each carrying a round gold-banded pod
+  of 2 x 2 tubes. The pods take turns and kick back as they fire.
+- G, Rail Fan: eight open launch rails fanned out from a turret block under a gold yoke, a rocket on each. The salvo
+  ripples across the fan.
+- The page now tracks which rocket of the salvo went last from the shot count, so the ripple lights and the mouth flashes
+  follow all eight rockets. Before, they wrapped after three.
+
+**Picks and notes (owner, round 5):** Payload M **D, Launch Cells**, with the note "Just remove the spinning part in the
+middle". Every other pick is unchanged: Power 1 B, 2 B, 3 A, 4 A, M A; Range 1 A, 2 A, 3 A, 4 A, M C; Payload 1 A, 2 A,
+3 B, 4 C; Retrofits A, A, A.
+- **Round 6:** the turning fire-control turret is gone. A small fixed light stays at the centre, so nothing on the
+  mastery turns: rockets rise from the cells round the deck.
+
 ### Anti-Aircraft Turret (second pass)
 
 **Retrofits kept** (owner, 2026-10-17). Claude flagged that all three overlap a path:
@@ -1043,6 +1074,33 @@ something else by "tower frame" (the columns, say), tell me.
 - The Mist Nozzle's ribbed head now sits on the end of every sprayer (both sprayers at the Twin Nozzles mastery), pointing the way each one points, instead of
   floating off the first nozzle.
 - The stills are rounder: the twin stills stand on a capsule-shaped base (it was a square plate), and a single pump hall is an octagon.
+
+**Round 8 (v4-dev.2 batch 7, #104):** Constant Spray replaces the Twin Nozzles mastery (owner, Build 2: "Replace Twin
+Nozzles upgrade to Constant Spray"). The rules are in #104.
+- **On the page:**
+  - One head sprays without stopping. It sweeps a 120° fan (160° with the Mist Nozzle) centred on the nearest enemy,
+    one pass per spray interval.
+  - The jet is a stream of short-lived drops. Each drop flies out on the angle the head had when it left, so the stream
+    curves as it sweeps.
+  - The fan's edge shows faintly.
+  - Every enemy the jet crosses is soaked or topped up, for 4 s.
+- **The heads**, for the owner to pick:
+  - A, Gold Fan Nozzle: a wide gold fan nozzle on a turning head.
+  - B, Spray Boom: a gold boom across the still with five spouts.
+  - C, Sprinkler Turret: a gold turret with a spinning impeller and a long spray bar.
+- With the Twin Stills, both stills keep their gold rings and the single head turns on the hub between them.
+- The page's store key is now `bl-tower-art-p2-chem-r8`.
+
+**Picks and notes (owner, round 8):**
+- **Speed M: C, Sprinkler Turret.** Every other pick is unchanged: Acid 1 B, 2 C, 3 C, 4 A, M C; Speed 1 B, 2 C, 3 B,
+  4 A; Slowing 1 B, 2 A, 3 B, 4 C, M A; Retrofits A, A, A.
+- **Notes:** "remove the thin line around the outside. The mist head should turn the stream into a mist cloud".
+- **Round 9:**
+  - The fan's faint edge is gone.
+  - With the Mist Nozzle (the ribbed Fan Head on the sprayer's end), Constant Spray's jet leaves the head as a mist cloud
+    instead of a stream of drops. It's soft green puffs that billow out along the sweep, spread, rise a little and thin
+    as they go. Without the Mist Nozzle the jet stays a stream.
+  - The page's store key is `bl-tower-art-p2-chem-r9`.
 
 ### Boost Tower (second pass)
 
