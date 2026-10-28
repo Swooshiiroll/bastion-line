@@ -4,8 +4,8 @@ extends RefCounted
 ##
 ## `look` is the tower's look key "r|a|b|c" (Tower.look_key): the Retrofit (-1 none, 0 proximity noses, 1 smoke canisters,
 ## 2 fuel warheads) and the depth of each path, 5 on the path that took its mastery. a = Power, b = Range, c = Reload/Payload.
-## The launcher turns with the aim (baked, turned by the cache); the blinking lights, the loader arm and the muzzle flashes
-## are live.
+## The launcher turns with the aim (baked, turned by the cache); the loaded rockets, the blinking lights, the loader arm and
+## the muzzle flashes are live. `extra` is [reload look 0..1 (ready_of), seconds since the last salvo].
 
 const Draw = preload("res://scripts/view/Draw.gd")
 const Gun = preload("res://scripts/view/towers/GunTurretArt.gd")
@@ -20,6 +20,8 @@ const PALE := Color(0.86, 0.88, 0.92)
 const SMOKEC := Color(0.55, 0.57, 0.60)
 const BORE := Color(0.05, 0.05, 0.06)
 const TALL_H := 7.0
+## Seconds between the rockets of a rippling salvo (Payload mastery); the game holds each rocket this much longer.
+const RIPPLE_GAP := 0.09
 
 # The owner's picks per step: Power, Range, Reload/Payload.
 const PICKS := [["B", "B", "A", "A", "A"], ["A", "A", "A", "A", "C"], ["A", "A", "B", "C", "B"]]
@@ -64,13 +66,13 @@ static func layout(L: Dictionary) -> Dictionary:
 	return {"pods": [[-6.5, 5.2], [0.0, 5.2], [6.5, 5.2]], "mouths": [[11.5, -6.5, 2.1, 0], [11.5, 0.0, 2.1, 0], [11.5, 6.5, 2.1, 0]]}
 
 
-## Where rocket `i` leaves the launcher.
-static func muzzle(c: Vector2, aim: float, k: float, look: String, i: int) -> Vector2:
+## Where rocket `i` leaves the launcher: its tube's mouth, `fwd` in front of it. The game launches each rocket from here (#90).
+static func muzzle(c: Vector2, aim: float, k: float, look: String, i: int, fwd := 0.5) -> Vector2:
 	var L := levels(look)
 	var lay := layout(L)
 	var ms: Array = lay.mouths
 	var mo: Array = ms[i % ms.size()]
-	var p := at(c, aim, k, float(mo[0]) + 0.5, float(mo[1]))
+	var p := at(c, aim, k, float(mo[0]) + fwd, float(mo[1]))
 	if lay.get("tall", false):
 		p += Vector2(0, (-TALL_H * 0.78 if int(mo[3]) == 1 else -TALL_H * 0.28) * k)
 	return p
@@ -120,8 +122,24 @@ static func tall_box(ci: CanvasItem, c: Vector2, aim: float, k: float, x0: float
 				Draw.line(ci, pp, pp + up, Draw.GOLD, 1.1 * k)
 
 
-static func draw(ci: CanvasItem, c: Vector2, aim: float, s: float, t: float, flash: float, look: String, acc: Color) -> void:
+## How loaded tube `i` is (0 empty, 1 a full rocket) from `ready` (the reload: empty for its first quarter, then the rockets
+## slide back in) and `since` (seconds since the salvo; a rippling salvo empties its tubes one after another).
+static func loaded(L: Dictionary, i: int, ready: float, since: float) -> float:
+	if L.N >= 5 and since < float(i) * RIPPLE_GAP:
+		return 1.0
+	return ready
+
+
+## The reload's look from the tower's cooldown: 0 just after a salvo, 1 for its last quarter.
+static func ready_of(cooldown: float, period: float) -> float:
+	var since := period - cooldown
+	return clampf((since - 0.25 * period) / maxf(0.5 * period, 0.001), 0.0, 1.0)
+
+
+static func draw(ci: CanvasItem, c: Vector2, aim: float, s: float, t: float, flash: float, look: String, acc: Color, extra: Array = []) -> void:
 	var L := levels(look)
+	var ready: float = float(extra[0]) if extra.size() > 0 and extra[0] != null else 1.0
+	var since: float = float(extra[1]) if extra.size() > 1 and extra[1] != null else 99.0
 	var lay := layout(L)
 	var k := s
 	var tall: bool = lay.get("tall", false)
@@ -159,23 +177,18 @@ static func draw(ci: CanvasItem, c: Vector2, aim: float, s: float, t: float, fla
 					Draw.line(ci, at(c, aim, k, x, y - w * 0.5), at(c, aim, k, x, y + w * 0.5), Draw.GOLD, 1.1 * k)
 			if L.r == 1:
 				Draw.bar(ci, at(c, aim, k, -6.0, y + w * 0.35), at(c, aim, k, -1.0, y + w * 0.35), 1.2 * k, SMOKEC)
-	# The mouths, with the loaded rockets.
+	# The mouths (the loaded rockets in them are live, below).
 	var front := (not tall) or sin(aim) > 0.08
 	var rocket_body: Color = DARKR if L.P >= 4 else PALE
 	var nose: Color = SEEK if L.R >= 2 else (Draw.GOLD if L.P >= 5 else RED)
 	if front:
 		for i in lay.mouths.size():
-			var m: Array = lay.mouths[i]
-			var q := at(c, aim, k, float(m[0]), float(m[1]))
-			if tall:
-				q += Vector2(0, (-TALL_H * 0.78 if int(m[3]) == 1 else -TALL_H * 0.28) * k)
-			var mr: float = m[2]
+			var q := muzzle(c, aim, k, look, i, 0.0)
+			var mr: float = lay.mouths[i][2]
 			Draw.disc(ci, q, (mr + 0.4) * k, Draw.OUTLINE)
 			Draw.disc(ci, q, mr * k, BORE)
 			if L.r == 0:
 				Draw.line(ci, q, q + Vector2.from_angle(aim) * 1.8 * k, STEEL, 0.5 * k)
-			Draw.orb(ci, q, mr * 0.8 * k, rocket_body, k)
-			Draw.disc(ci, q + Vector2.from_angle(aim) * 0.4 * k, mr * 0.36 * k, nose)
 	# The Hunter Eye on top at the Range mastery; otherwise the hub.
 	if L.R >= 5:
 		var e := at(c, aim, k, -1.0, 0.0)
@@ -185,8 +198,17 @@ static func draw(ci: CanvasItem, c: Vector2, aim: float, s: float, t: float, fla
 	if not tall:
 		Draw.orb(ci, at(c, aim, k, -4.0, 0.0), 2.4 * k, Draw.METAL, k)
 		Draw.glow_dot(ci, at(c, aim, k, -4.0, 0.0), 1.0 * k, acc)
-	# Live: the seeker lights (Smart Seekers), the loader arm after each salvo, the muzzle flashes.
+	# Live: the loaded rockets (gone when fired, sliding back in as it reloads, #90), the seeker lights (Smart Seekers),
+	# the loader arm after each salvo, the muzzle flashes.
 	Draw.dyn(true)
+	if front:
+		for i in lay.mouths.size():
+			var f := loaded(L, i, ready, since)
+			if f > 0.05:
+				var q := muzzle(c, aim, k, look, i, 0.0)
+				var mr: float = lay.mouths[i][2]
+				Draw.orb(ci, q, mr * 0.8 * k * f, rocket_body, k)
+				Draw.disc(ci, q + Vector2.from_angle(aim) * 0.4 * k, mr * 0.36 * k * f, nose)
 	if L.R >= 3:
 		for pd in (pods if not tall else []):
 			Draw.glow_dot(ci, at(c, aim, k, -6.0, float(pd[0])), 0.6 * k, SEEK if fmod(t * 2.0 + float(pd[0]), 1.0) < 0.5 else Color(SEEK, 0.3))

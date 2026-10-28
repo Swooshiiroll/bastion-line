@@ -53,7 +53,7 @@ const ACCENT := {
 	"shockwave_generator": Color(1.00, 0.70, 0.28),
 	"scrapyard": Color(0.95, 0.72, 0.42),
 	"magneto_tower": Color(0.60, 0.45, 1.00),
-	"tractor_tower": Color(0.78, 0.71, 1.00),
+	"tractor_tower": Color(0.40, 0.95, 1.00),
 	"augmentation_tower": Color(0.32, 0.62, 1.00),
 }
 
@@ -252,18 +252,18 @@ static func spinning(ci: CanvasItem, key: String, c: Vector2, half: Vector2, rot
 		tex = _bake_sprite(half, painter)
 		_sprites[key] = tex
 	if tex == null:
-		ci.draw_set_transform(c, rot, Vector2.ONE)
+		ci.draw_set_transform(c + _shift, rot, Vector2.ONE)
 		painter.call(ci, Vector2.ZERO)
-		ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+		ci.draw_set_transform(_shift, 0.0, Vector2.ONE)
 		return
 	_stamp_rotated(ci, tex, c, half, rot, Color(1, 1, 1))
 
 
 ## Stamps a cached sprite rotated by `rot` about `c`.
 static func _stamp_rotated(ci: CanvasItem, tex: Texture2D, c: Vector2, half: Vector2, rot: float, tint: Color) -> void:
-	ci.draw_set_transform(c, rot, Vector2.ONE)
+	ci.draw_set_transform(c + _shift, rot, Vector2.ONE)
 	ci.draw_texture_rect(tex, Rect2(-half, half * 2.0), false, tint)
-	ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	ci.draw_set_transform(_shift, 0.0, Vector2.ONE)
 
 
 ## --- Sprite cache: static artwork drawn once into a texture and stamped after that. ------------
@@ -359,21 +359,29 @@ static func ring(ci: CanvasItem, center: Vector2, r: float, color: Color, width 
 	_stamp(ci, _rings[key], size, center, outer, outer, color)
 
 
-## draw_arc, fast: full circles become rings, partial arcs a few antialiased line segments.
-static func arc(ci: CanvasItem, c: Vector2, r: float, a0: float, a1: float, points: int, color: Color, width := -1.0, aa := false, as_lines := false) -> void:
+## draw_arc, fast: full circles become rings, partial arcs antialiased line segments. The segment count follows the
+## radius (`_points` is ignored): each chord strays at most 1/16 px from the true curve, so a big circle stays round
+## at full zoom (issue #89).
+static func arc(ci: CanvasItem, c: Vector2, r: float, a0: float, a1: float, _points: int, color: Color, width := -1.0, aa := false, as_lines := false) -> void:
 	if _skip and not _drawing():
 		return
 	var span := a1 - a0
 	if absf(span) >= TAU - 0.001 and not as_lines:
 		ring(ci, c, r, color, width if width > 0.0 else 1.0)
 		return
-	var n := clampi(ceili(absf(span) * r / 6.0), 1, maxi(points - 1, 1))
+	var n := arc_segments_for(r, span)
 	var prev := c + Vector2(cos(a0), sin(a0)) * r
 	for i in range(1, n + 1):
 		var a := a0 + span * float(i) / float(n)
 		var p := c + Vector2(cos(a), sin(a)) * r
 		ci.draw_line(prev, p, color, width, aa)
 		prev = p
+
+
+## Line segments for an arc of radius `r` spanning `span` radians: a chord of angle θ strays r·θ²/8 from the curve,
+## so θ = 1/√(2r) keeps that to 1/16 px.
+static func arc_segments_for(r: float, span: float) -> int:
+	return clampi(ceili(absf(span) * sqrt(2.0 * maxf(r, 0.0))), 1, 256)
 
 
 ## draw_colored_polygon, fast for convex shapes (drawn as quads); others fall back to the polygon.
@@ -437,7 +445,8 @@ static func rect(ci: CanvasItem, r: Rect2, color: Color, filled := true, width :
 # A turret is drawn as alternating static and live layers. Statements between dyn(true) and
 # dyn(false) (recoil, glows, spinning parts) are live; everything else is static, baked once per
 # look into one texture per layer, and stamped rotated to the aim. Baking happens at 8 aim angles
-# so the upper-left lighting stays close; the remainder of the aim is a rotation of the stamp.
+# so the upper-left lighting stays close; the remainder of the aim is a rotation of the stamp, with the next
+# bucket's bake faded in over it.
 # Only the battlefield turns this on (turret_cache); elsewhere towers draw in full.
 
 static var turret_cache := false
@@ -453,8 +462,15 @@ static var _live := {}
 const AIMED := ["gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "railgun", "mine_layer", "tractor_tower"]
 ## The aim of each extra gun of the tower being drawn (gun 0 is the main one); set by tower().
 static var _extra: Array = []
-const TURRET_BUCKETS := 8
+const TURRET_BUCKETS := 16
 const TURRET_SCALE := 2.5
+## How far a turret's static layers reach from its centre (in units of s), so the bake doesn't cut them off (#90). The
+## default fits most towers; the long lances and barrels are measured over every look and aim, with a little to spare.
+const TURRET_HALF := {"laser_tower": 44.0, "anti_aircraft_turret": 36.0, "railgun": 36.0}
+
+
+static func turret_half(type: String) -> float:
+	return float(TURRET_HALF.get(type, 32.0))
 
 
 ## Marks the start (true) or end (false) of a live part of a turret.
@@ -479,6 +495,18 @@ static func dyn(on: bool) -> void:
 				_stamp_turret(_seg)
 
 
+## Moves everything drawn after it (static layers included) by `off`, for parts that slide as a whole, like a recoiling
+## barrel. Call it inside a live part; the static layer after that live part is stamped moved. Shift back with ZERO.
+static var _shift := Vector2.ZERO
+
+
+static func shift(ci: CanvasItem, off: Vector2) -> void:
+	if _mode == _BAKE or _mode == _COUNT:
+		return
+	_shift = off
+	ci.draw_set_transform(off, 0.0, Vector2.ONE)
+
+
 ## Called by every drawing leaf while _skip is set: never draws, but a dry run notes which static
 ## layers have something in them.
 static func _drawing() -> bool:
@@ -489,16 +517,22 @@ static func _drawing() -> bool:
 
 static func _cached_turret(ci: CanvasItem, type: String, tier: int, c: Vector2, aim: float, s: float, t: float, flash: float, spec: String, acc: Color) -> bool:
 	var rot := aim if AIMED.has(type) else 0.0
-	var bucket := posmod(roundi(rot / TAU * float(TURRET_BUCKETS)), TURRET_BUCKETS)
-	var base_rot := float(bucket) * TAU / float(TURRET_BUCKETS)
-	var key := "%s|%d|%s|%s|%.2f|%d" % [type, tier, spec, acc.to_html(), s, bucket]
-	var e = _turrets.get(key)
-	if e == null:
-		e = _new_turret(ci, type, tier, base_rot, s, spec, acc)
-		_turrets[key] = e
+	# Between two baked aims, the next one fades in over the one below, so a turning turret's shading changes
+	# smoothly instead of jumping at each bucket (issue #89).
+	var blend := turret_blend(rot)
+	var bucket: int = blend[0]
+	var w: float = blend[1]
+	var e = _turret_bake(ci, type, tier, bucket, s, spec, acc)
 	if Engine.get_frames_drawn() < int(e.ready_at):
 		return false
-	_live = {"ci": ci, "e": e, "c": c, "rot": rot - base_rot}
+	var e2 = null
+	var next := (bucket + 1) % TURRET_BUCKETS
+	if w > 0.01:
+		e2 = _turret_bake(ci, type, tier, next, s, spec, acc)
+		if Engine.get_frames_drawn() < int(e2.ready_at):
+			e2 = null
+	_live = {"ci": ci, "e": e, "c": c, "rot": rot - float(bucket) * TAU / float(TURRET_BUCKETS),
+		"e2": e2, "w": w, "rot2": rot - float(next) * TAU / float(TURRET_BUCKETS)}
 	_mode = _LIVE
 	_seg = 0
 	_skip = true
@@ -508,6 +542,22 @@ static func _cached_turret(ci: CanvasItem, type: String, tier: int, c: Vector2, 
 	_skip = false
 	_live = {}
 	return true
+
+
+## For a turret turned `rot`: [the baked aim just below it, how far (0..1) it is toward the next one].
+static func turret_blend(rot: float) -> Array:
+	var at := fposmod(rot / TAU * float(TURRET_BUCKETS), float(TURRET_BUCKETS))
+	return [floori(at) % TURRET_BUCKETS, at - floorf(at)]
+
+
+## The baked layers of one look at one of the TURRET_BUCKETS aims (baked on first use).
+static func _turret_bake(ci: CanvasItem, type: String, tier: int, bucket: int, s: float, spec: String, acc: Color) -> Dictionary:
+	var key := "%s|%d|%s|%s|%.2f|%d" % [type, tier, spec, acc.to_html(), s, bucket]
+	var e = _turrets.get(key)
+	if e == null:
+		e = _new_turret(ci, type, tier, float(bucket) * TAU / float(TURRET_BUCKETS), s, spec, acc)
+		_turrets[key] = e
+	return e
 
 
 static func _new_turret(ci: CanvasItem, type: String, tier: int, base_rot: float, s: float, spec: String, acc: Color) -> Dictionary:
@@ -521,7 +571,7 @@ static func _new_turret(ci: CanvasItem, type: String, tier: int, base_rot: float
 	_mode = _FULL
 	_skip = false
 	_in_dyn = false
-	var half := Vector2.ONE * 32.0 * s
+	var half := Vector2.ONE * turret_half(type) * s
 	var texs := {}
 	var ready := Engine.get_frames_drawn() + 2
 	for k in used:
@@ -549,9 +599,13 @@ static func _stamp_turret(seg: int) -> void:
 		return
 	var ci: CanvasItem = _live.ci
 	var half: Vector2 = e.half
-	ci.draw_set_transform(_live.c, _live.rot, Vector2.ONE)
+	ci.draw_set_transform(_live.c + _shift, _live.rot, Vector2.ONE)
 	ci.draw_texture_rect(e.tex[seg], Rect2(-half, half * 2.0), false)
-	ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	var e2 = _live.e2
+	if e2 != null and e2.tex.has(seg):
+		ci.draw_set_transform(_live.c + _shift, _live.rot2, Vector2.ONE)
+		ci.draw_texture_rect(e2.tex[seg], Rect2(-half, half * 2.0), false, Color(1, 1, 1, _live.w))
+	ci.draw_set_transform(_shift, 0.0, Vector2.ONE)
 
 
 static func outline(ci: CanvasItem, center: Vector2, pts: PackedVector2Array, color: Color, width: float, rot := 0.0, s := 1.0) -> void:
@@ -613,9 +667,11 @@ static func tower(ci: CanvasItem, type: String, tier: int, c: Vector2, aim: floa
 	if tier >= 4:
 		mastery_ring(ci, c, s, acc, t)
 	_pad(ci, c, s, acc, tier, t)
-	if turret_cache and _mode == _FULL and _cached_turret(ci, type, tier, c, aim, s, t, flash, spec, acc):
-		return
-	_turret(ci, type, tier, c, aim, s, t, flash, spec, acc)
+	if not (turret_cache and _mode == _FULL and _cached_turret(ci, type, tier, c, aim, s, t, flash, spec, acc)):
+		_turret(ci, type, tier, c, aim, s, t, flash, spec, acc)
+	if _shift != Vector2.ZERO:
+		_shift = Vector2.ZERO
+		ci.draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
 static func _turret(ci: CanvasItem, type: String, tier: int, c: Vector2, aim: float, s: float, t: float, flash: float, spec: String, acc: Color) -> void:
@@ -625,7 +681,7 @@ static func _turret(ci: CanvasItem, type: String, tier: int, c: Vector2, aim: fl
 		"mortar_tower":
 			MortarTowerArt.draw(ci, c, aim, s, t, flash, spec, acc)
 		"rocket_salvo":
-			RocketSalvoArt.draw(ci, c, aim, s, t, flash, spec, acc)
+			RocketSalvoArt.draw(ci, c, aim, s, t, flash, spec, acc, _extra)
 		"laser_tower":
 			LaserTowerArt.draw(ci, c, aim, s, t, flash, spec, acc, _extra)
 		"anti_aircraft_turret":
@@ -727,10 +783,20 @@ static func bar(ci: CanvasItem, a: Vector2, b: Vector2, w: float, col: Color) ->
 	var n := d.orthogonal()
 	if n.dot(LIGHT) < 0.0:
 		n = -n
-	line(ci, a, b, OUTLINE, w + 1.6, true)
-	line(ci, a, b, col.darkened(0.25), w, true)
-	line(ci, a + n * w * 0.18, b + n * w * 0.18, col, w * 0.55, true)
-	line(ci, a + n * w * 0.3, b + n * w * 0.3, col.lightened(0.4), maxf(0.6, w * 0.16), true)
+	# Round ends, as the design pages draw every stroke (#90): a mortar tube's rounded back, a barrel's rounded breech.
+	# Under 2 px wide they wouldn't show, and a see-through bar would darken where an end overlaps it.
+	var caps := w >= 2.0 and col.a >= 0.99
+	_cap_line(ci, a, b, OUTLINE, w + 1.6, caps)
+	_cap_line(ci, a, b, col.darkened(0.25), w, caps)
+	_cap_line(ci, a + n * w * 0.18, b + n * w * 0.18, col, w * 0.55, caps)
+	_cap_line(ci, a + n * w * 0.3, b + n * w * 0.3, col.lightened(0.4), maxf(0.6, w * 0.16), caps)
+
+
+static func _cap_line(ci: CanvasItem, a: Vector2, b: Vector2, col: Color, w: float, caps: bool) -> void:
+	line(ci, a, b, col, w, true)
+	if caps:
+		disc(ci, a, w * 0.5, col)
+		disc(ci, b, w * 0.5, col)
 
 
 ## A glowing strip light.
@@ -747,10 +813,10 @@ static func rect_pts(hw: float, hh: float) -> PackedVector2Array:
 
 
 
-## The hex deck every tower stands on: bevelled armour, corner bolts, vents, status LEDs,
+## The hex deck every tower stands on: bevelled armour, corner bolts, status LEDs,
 ## an accent trim that breathes, and tier pips (gold from the specialization on).
 static func _pad(ci: CanvasItem, c: Vector2, s: float, acc: Color, tier: int, t: float) -> void:
-	# Static plating below the lit rim, the rim (a white stroke tinted live), then rivets and vents.
+	# Static plating below the lit rim, the rim (a white stroke tinted live), then the corner bolts.
 	var half := Vector2(24.0, 24.0) * s
 	var si := roundi(s * 100.0)
 	var ka := 1000000 + si
@@ -795,10 +861,6 @@ static func _pad_rivets(ci: CanvasItem, c: Vector2, s: float) -> void:
 	for q in xform(c, ngon(6, 1.0), 0.0, 17.6 * s):
 		disc(ci, q, 1.5 * s, OUTLINE)
 		disc(ci, q, 1.0 * s, METAL_L)
-	for k in 3:
-		var y := c.y - 13.0 * s + float(k) * 2.2 * s
-		line(ci, Vector2(c.x - 13.5 * s, y), Vector2(c.x - 10.0 * s, y), Color(0, 0, 0, 0.5), 1.0)
-		line(ci, Vector2(c.x + 10.0 * s, y), Vector2(c.x + 13.5 * s, y), Color(0, 0, 0, 0.5), 1.0)
 
 
 ## Distance from a Laser Lance's centre to the tip of its barrel, at drawing scale `s`.
@@ -923,13 +985,14 @@ static func enemy_status(ci: CanvasItem, e, t: float) -> void:
 		var bp: Vector2 = e.pos + Vector2(-r * 0.75, r * 0.55)
 		rect(ci, Rect2(bp - Vector2(3, 3), Vector2(6, 6)), Color(0.55, 0.55, 0.6, 0.9))
 		polyline(ci, PackedVector2Array([bp + Vector2(-2, -3), bp + Vector2(0.5, -0.5), bp + Vector2(-1, 1), bp + Vector2(2, 3)]), Color(1.0, 0.45, 0.2), 1.1, true)
-	# Burning: flickering flame tongues.
+	# Burning: flickering flame tongues licking up from its top edge, so they show above the body (#85).
 	if e.dot_timer > 0.0 and e.dot_dps > 0.0:
 		for i in 3:
-			var fx := (float(i) - 1.0) * r * 0.45
-			var h := 4.0 + 2.0 * sin(t * 14.0 + float(i) * 2.0)
-			var fb: Vector2 = e.pos + Vector2(fx, -r * 0.3)
-			poly(ci, PackedVector2Array([fb + Vector2(-1.8, 0), fb + Vector2(0, -h), fb + Vector2(1.8, 0)]), Color(1.0, 0.55, 0.15, 0.75))
+			var fx := (float(i) - 1.0) * r * 0.5
+			var h := 7.0 + 3.0 * sin(t * 14.0 + float(i) * 2.0)
+			var fb: Vector2 = e.pos + Vector2(fx, -r * 0.55)
+			poly(ci, PackedVector2Array([fb + Vector2(-2.8, 0), fb + Vector2(0, -h), fb + Vector2(2.8, 0)]), Color(1.0, 0.45, 0.1, 0.85))
+			poly(ci, PackedVector2Array([fb + Vector2(-1.3, 0), fb + Vector2(0, -h * 0.55), fb + Vector2(1.3, 0)]), Color(1.0, 0.85, 0.3, 0.9))
 
 
 # --- HUD glyphs ------------------------------------------------------------------------------

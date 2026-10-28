@@ -13,8 +13,9 @@ the way. Confirmed with the owner in the design question rounds.
   secondary cap, mastery needing research), but upgrades are free. Each buyable branch card in the
   tower panel has a Max button that buys the branch as far as the rules allow.
 - **Abilities:** Orbital Strike and Chrono Field have no cooldown.
-- **Research:** an All / Mine / None switch in the Spawner applies at once. The save is never touched,
-  and the Research Lab button is disabled.
+- **Research:** an All / Mine / None switch in the Spawner applies at once and never touches the save. The Research
+  Lab (R, beside the Spawner button) opens too and is the real Lab (owner, 2026-10-24, #87): buying or resetting spends
+  and saves real research points, and switches the run to Mine.
 - **Spawner** (key S, top-bar button; doesn't pause):
   - a grid of every enemy by role (rows) and tier (columns T1-T4), with the Specials and bosses in rows
     of their own; clicking one spawns it at base strength (round-1 scaling times the difficulty factor);
