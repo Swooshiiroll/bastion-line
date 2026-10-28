@@ -1248,6 +1248,30 @@ the game since #122) beside seventeen more. D to Q are C plus one extra; R, S an
 - **The page:** ground marks are drawn from the model, under the tower; the rest from the agent, under or over the
   cloud. The store key is now `bl-tower-art-p2-shock-r12`.
 
+**Round 13 (the owner, 2026-10-27: "Remake a bunch of ideas from scratch that would fit a nuclear blast"):** round 12's
+extras are dropped. The Megaton Wave step shows C (round 11, in the game) beside ten whole blasts made from scratch.
+Each blast is one record drawn from its age; a new blast fades the last one out over 0.5 s.
+- **D Seen From Above:** the blast as the top-down camera sees it: a churning fireball spreads flat over the tower, then
+  breaks into a ring of smoke rolling outward; a scorch mark under the tower.
+- **E Wilson Cloud:** a white condensation shell swells round the fireball and burns off; the fireball rises out of it
+  on a thin dust stem.
+- **F Rising Fireball:** a churning sphere, darker underneath, climbs slowly with a dirt stem and a dust skirt.
+- **G Thermonuclear:** the biggest flash, a short stem, a very wide flat cap with a fiery underside, and a pale ice cap
+  above it.
+- **H Base Surge:** a squat steam column and a thick ring of steam and dust rolling out along the ground to most of the
+  reach.
+- **I Plasma Burst:** a white-violet sphere crackling with lightning and rays collapses to a point and pops a last cyan
+  ring, throwing sparks; no smoke, clears in under 2 s.
+- **J Flash Shadows:** the flash whites out the reach and burns a shadow behind every enemy in it, pointing away from
+  the blast; a compact fireball over a low ring of smoke.
+- **K Fire Pillar:** a column of fire shoots up, blooms into a cap and cools from the bottom up; embers rain from the
+  cap.
+- **L Vortex Ring:** a glowing ring of fire rolls upward, and dust is sucked in along the ground and up through its
+  middle.
+- **M Classic Mushroom:** a dust skirt, a stem with a white condensation collar, and a cap with a glowing underside and
+  a grey crown.
+- **The page:** `NUKE` in `data_p2_shock.js`; the store key is now `bl-tower-art-p2-shock-r13`.
+
 ### Scrapyard (third restart: a tower of three parts)
 
 **History.** Three Scrapyard designs have been rejected: (1) the Magnet Yard base with its first upgrade designs; (2) a from-scratch Smelting Works ("didn't like the overall design"); (3) the Armoured Vault Depot, whose base look was confirmed (with the Sparks and Sale animation) before its second-pass round 1, after which the owner said "Scrap the scrapyard design and start all over again". Its files (`data_scrap_looks.js`, `data_p2_scrap.js`, the p2 page) are deleted; git keeps them. The `sBuild`/`sCard` preview-scale hook in `pass2_engine.js` stays for the 2x2 second pass.

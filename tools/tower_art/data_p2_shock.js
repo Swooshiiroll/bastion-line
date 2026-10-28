@@ -8,7 +8,7 @@
 //  - Path 3 (Effect) rebuilds the three violet resonance stations on the ring between the clamps (gold at the mastery).
 // Overlaps kept and stacking: Wave Focus's +15 px with the path-1 radius, Containment Coils' +10 damage with the path-1 damage,
 // Reactor Venting's 1.5 s wave with the path-2 wave rate.
-const PAGE = { title: "Shockwave Generator: paths and Retrofits (second pass)", store: "bl-tower-art-p2-shock-r12" };
+const PAGE = { title: "Shockwave Generator: paths and Retrofits (second pass)", store: "bl-tower-art-p2-shock-r13" };
 const GOLD = [1, 0.78, 0.3, 1], STEEL = [0.42, 0.45, 0.5, 1], AMB = [1, 0.7, 0.28, 1], VIOLET = [0.72, 0.48, 1, 1], HOT = [1, 0.95, 0.8, 1];
 const rnd = (x) => { const v = Math.sin(x * 12.9898) * 43758.5453; return v - Math.floor(v); };
 const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
@@ -18,71 +18,129 @@ const radOf = (B) => RADS[B.lv[0]] + (B.r === 0 ? 15 : 0);
 const dmgOf = (B) => DMG[B.lv[0]] + (B.r === 1 ? 10 : 0);
 const perOf = (B) => PERS[B.lv[1]] * (B.r === 2 ? 1.5 / 1.75 : 1);
 
-// ---- Round 12 (#120 follow-up, the owner asked for a bunch of Megaton ideas): each option is the round-11 cloud (C) plus one extra, or a combination ----------
-// Ground marks (scorch, cracks) are drawn under the tower, from the model; the rest by the agent, under the cloud (glow, dome, echo rings, dust, column) or over it.
-const MEGA_X = { C: [], D: ["column"], E: ["torus"], F: ["embers"], G: ["plume"], H: ["double"], I: ["dome"], J: ["glow"], K: ["charge"], L: ["scorch"], M: ["dust"], N: ["echo"], O: ["ash"], P: ["char"], Q: ["cracks"],
-  R: ["column", "double", "scorch", "dust"], S: ["torus", "embers", "dome", "echo"], T: ["plume", "charge", "cracks", "glow"] };
-const megaX = (B) => B.lv[0] >= 5 ? (MEGA_X[B.key("p0s4")] || []) : [];
-const DUST = [0.5, 0.45, 0.38, 1], ASH = [0.62, 0.6, 0.58, 1], CHAR = [0.06, 0.05, 0.05, 1], EMBER = [0.92, 0.3, 0.1, 1];
-const fireH = (a, kk, sc) => 22 * kk * sc * (1 - Math.exp(-1.1 * a)) / 1.1;   // how high the round-11 fireball has climbed at age a
-function megaGround(c, k, mm, t, X) {
-  for (const w of mm.megs || []) { const a = t - w; if (a < 0) continue;
-    if (X.includes("scorch") && a < 3.2) { const r = (14 + 18 * (1 - Math.exp(-6 * a))) * k, f = 1 - a / 3.2; disc(c, r, A(CHAR, 0.45 * f)); disc(c, r * 0.8, A(CHAR, 0.3 * f)); if (a < 0.9) ring(c, r, A(AMB, 0.7 * (1 - a / 0.9)), 1.5 * k); }
-    if (X.includes("cracks") && a < 2.5) for (let j = 0; j < 9; j++) { const th = j * TAU / 9 + rnd(j + 3) * 0.5, L = (22 + 14 * rnd(j + 7)) * k * Math.min(1, a / 0.15), p1 = add(c, mul(fa(th), 10 * k)),
-        mid = add(c, mul(fa(th + 0.15 * (rnd(j) - 0.5)), 10 * k + L * 0.55)), p2 = add(c, mul(fa(th + 0.25 * (rnd(j + 1) - 0.5)), 10 * k + L)), hot = Math.max(0, 1 - a / 0.8), cc = mix(CHAR, AMB, hot), f = 1 - a / 2.5;
-      line(p1, mid, A(cc, 0.85 * f), 1.6 * k); line(mid, p2, A(cc, 0.75 * f), 1.1 * k); if (hot > 0) line(p1, mid, A(HOT, 0.6 * hot), 0.6 * k); } } }
-function megaUnder(m, t, info, s, X, R, kk, sc, wc) { const c = info.c, has = (f) => X.includes(f);
-  for (const w of m.megs) { const a = t - w; if (a < 0) continue;
-    if (has("glow") && a < 0.7) { const f = 1 - a / 0.7; disc(c, R, A([1, 0.62, 0.25, 1], 0.14 * f)); for (const e of info.ens) if (dist(e.p, c) < R) glowDot(e.p, enemyR(s) * 1.1, A([1, 0.7, 0.35, 1], 0.6 * f)); }
-    if (has("dome") && a < 0.5) { const r = R * 0.42 * (1 - Math.exp(-9 * a)), f = 1 - a / 0.5, p = add(c, [0, -r * 0.12]); disc(p, r, A([0.9, 0.94, 1, 1], 0.4 * f)); ring(p, r, A([1, 1, 1, 1], 0.75 * f), 2 * kk); }
-    if (has("echo")) for (const d of [0.16, 0.32]) { const q = (a - d) / 0.6; if (q > 0 && q < 1.6) ring(c, R * Math.min(1, q), A(wc, 0.35 * (1 - q / 1.6) * (1 - d)), 1.4 * kk); }
-    if (has("dust")) for (let j = 0; j < 40; j++) { const f = 0.22 + 0.78 * rnd(j + 5), th = rnd(j * 3 + 1) * TAU, b = a - f * 0.6; if (b < 0 || b > 1.3) continue;
-      disc(add(c, add(mul(fa(th), R * f + b * 5 * kk), [0, -b * 5 * kk])), (2 + 4.5 * b) * kk, A(DUST, 0.6 * (1 - b / 1.3))); }
-  } }
-function megaColumn(m, t, c, kk, sc) {   // the rising column: a grey stem over the low cloud, under the (higher) fireball
-  for (const w of m.megs) { const a = t - w; if (a < 0 || a > 3) continue; const H = fireH(a, kk, sc) * 1.25, f = 1 - a / 3;
-    for (let j = 0; j < 9; j++) { const y = (j + 0.5) / 9; disc(add(c, [Math.sin(a * 2 + j) * 0.8 * kk, -y * H * 0.9]), (1.3 + 1.6 * y * y) * kk * sc * (0.5 + 0.3 * Math.min(1, a)), A(mix([0.55, 0.5, 0.46, 1], [0.36, 0.32, 0.3, 1], y), 0.85 * f)); } } }
-function megaOver(m, t, info, s, X, R, kk, sc, per) { const c = info.c, has = (f) => X.includes(f);
-  for (const w of m.megs) { const a = t - w; if (a < 0) continue;
-    if (has("double")) { const b = Math.max(a < 0.1 ? 1 - a / 0.1 : 0, a > 0.2 && a < 0.55 ? Math.sin(Math.PI * (a - 0.2) / 0.35) : 0); if (b > 0) { disc(c, s * 0.4 * sc, A([1, 0.98, 0.9, 1], 0.45 * b)); disc(c, s * 0.18 * sc, A([1, 1, 1, 1], 0.75 * b)); } }
-    if (has("torus") && a < 2.6) { const H = fireH(a, kk, sc) + 4 * kk, rr = (3 + 9 * (1 - Math.exp(-1.6 * a))) * kk * sc * 0.75, rt = (1.6 + 1.6 * Math.min(1, a)) * kk * sc * 0.8, f = 1 - a / 2.6,
-        cl = mix(mix(AMB, EMBER, Math.min(1, a / 0.7)), [0.4, 0.36, 0.33, 1], Math.min(1, a / 2));
-      for (const front of [false, true]) for (let j = 0; j < 16; j++) { const th = j * TAU / 16 + a * 0.6; if ((Math.sin(th) > 0) !== front) continue; const ph = j * 1.3 - a * 3, up = Math.sin(ph);
-        disc(add(c, [Math.cos(th) * (rr + rt * 0.4 * Math.cos(ph)), -H + Math.sin(th) * rr * 0.35 - rt * 0.4 * up]), rt, A(up > 0 ? lt(cl, 0.15) : cl, 0.85 * f)); } }
-    if (has("embers")) for (let j = 0; j < 16; j++) { const t1 = 0.25 + rnd(j + 9) * 1.1, b = a - t1; if (b < 0 || b > 1.3) continue; const th = rnd(j * 5 + 2) * TAU, sp = (4 + 8 * rnd(j + 4)) * kk;
-      glowDot(add(c, [Math.cos(th) * sp * (0.6 + b), -fireH(t1, kk, sc) + Math.sin(th) * sp * 0.4 + 14 * kk * b * b]), 0.9 * kk, A(mix([1, 0.8, 0.35, 1], EMBER, b / 1.3), 1 - b / 1.3)); }
-    if (has("ash") && a < 3.6) for (let j = 0; j < 20; j++) { const b = a - 0.4 - rnd(j + 1) * 0.8; if (b < 0) continue; const f = Math.min(1, b / 0.3) * Math.max(0, 1 - b / 2.6); if (f <= 0) continue;
-      disc(add(c, [(rnd(j * 7) - 0.5) * R * 0.9 + b * 12 * kk + Math.sin(b * 3 + j) * 2 * kk, -(10 + 30 * rnd(j * 3 + 2)) * kk + b * 9 * kk]), 0.8 * kk, A(ASH, 0.75 * f)); } }
-  if (has("char")) for (const e of info.ens) { const h = t - (m.hit[e.i] ?? -9); if (h >= 0 && h < 1.4) disc(e.p, enemyR(s) * 0.95, A(CHAR, 0.6 * (1 - h / 1.4))); }
-  if (has("charge")) { const q = Math.max(0, 1 - (per - (t - m.wave)) / 0.6); if (q > 0) { for (let j = 0; j < 12; j++) glowDot(add(c, mul(fa(j * TAU / 12 + rnd(j)), (5 + 22 * (1 - q) * (0.7 + 0.3 * rnd(j + 2))) * kk)), 0.8 * kk, A(HOT, q)); disc(c, (2 + 5 * q) * kk, A(HOT, 0.55 * q)); } } }
-function megaPlume(m, t, c, kk, sc, dt, fresh) { if (!m.plume) { m.plume = []; m.heat = 0; m.pt = 0; }   // one column fed by every blast: it builds while the tower fires and dies down when it stops
-  if (fresh) m.heat = Math.min(1.4, m.heat + 0.45);
-  m.heat = Math.max(0, m.heat - dt * 0.14); m.pt += dt;
-  while (m.pt > 0.07) { m.pt -= 0.07; if (m.heat > 0.05) m.plume.push({ t0: t, x: (rnd(t * 13) - 0.5) * 3 * kk, v: (26 + 10 * rnd(t * 7)) * kk * (0.6 + 0.4 * m.heat), h: m.heat, tone: rnd(t * 3) }); }
-  m.plume = m.plume.filter((q) => t - q.t0 < 2);
-  for (const q of m.plume) { const a = t - q.t0, u = a / 2, cl = mix(mix(AMB, EMBER, Math.min(1, u * 2)), [0.38, 0.34, 0.31, 1], Math.min(1, u * 1.6));
-    disc(add(c, [q.x + Math.sin(a * 2 + q.tone * 6) * 2 * kk * u, -q.v * a * (1 - 0.25 * u) - 4 * kk]), (2.2 + 5.5 * u) * kk * sc * 0.6 * (0.6 + 0.4 * q.h), A(cl, 0.7 * (1 - u) * Math.min(1, q.h))); } }
+// ---- Round 13 (#120, the owner: "Remake a bunch of ideas from scratch that would fit a nuclear blast") -----------------------------------------------------
+// C stays (round 11's cloud, in the game); D to M are whole new blasts, each drawn from its age. A new blast fades the last one out over 0.5 s, since the
+// Megaton fires every 0.8-1.75 s. Sizes are game px (the cloud is drawn at the Megaton's size); ground marks are drawn under the tower, from the model.
+const e1 = (x, k) => x <= 0 ? 0 : 1 - Math.exp(-k * x);
+const FIRE = [1, 0.55, 0.15, 1], RED = [0.92, 0.3, 0.1, 1], SMOKE = [0.38, 0.34, 0.31, 1], DUSTC = [0.52, 0.45, 0.36, 1], STEAM = [0.86, 0.88, 0.9, 1], CHAR = [0.06, 0.05, 0.05, 1], CYAN = [0.55, 0.85, 1, 1];
+function heat(x) { x = Math.max(0, x); return x < 0.2 ? mix(HOT, FIRE, x / 0.2) : x < 0.5 ? mix(FIRE, RED, (x - 0.2) / 0.3) : mix(RED, SMOKE, Math.min(1, (x - 0.5) / 0.5)); }
+function nFlash(d, a, r, dur) { if (a < dur) { const f = 1 - a / dur; d(0, 0, r * (0.5 + 0.5 * Math.min(1, a / 0.05)), [1, 0.97, 0.85, 1], 0.7 * f); d(0, 0, r * 0.45, WHITE, 0.95 * f); } }
+// a ring of n puffs on an ellipse (rx, ry = rx * sq) round (0, y): its back half or its front half, so a stem or a fireball can sit between them
+function nRing(d, n, rx, sq, y, size, col, al, front, seed, jit = 0.25) { for (let j = 0; j < n; j++) { const th = j * TAU / n + rnd(j + seed) * jit; if ((Math.sin(th) > 0) !== front) continue;
+  d(Math.cos(th) * rx * (0.9 + 0.2 * rnd(j * 3 + seed)), y + Math.sin(th) * rx * sq, size * (0.8 + 0.4 * rnd(j + 7 + seed)), typeof col === "function" ? col(j, th) : col, al); } }
+const NUKE = {
+  D: { life: 2.6,   // Seen From Above: the blast as the top-down camera would see it
+    ground(d, a) { if (a < 2.6) d(0, 0, 4 + 30 * e1(a, 6), CHAR, 0.45 * (1 - a / 2.6)); },
+    draw(d, a, z) { nFlash(d, a, 30, 0.14);
+      if (a < 0.5) d(0, 0, z.Rg * 0.62 * e1(a, 5), [0.85, 0.92, 1, 1], 0.22 * (1 - a / 0.5));                                       // the shock haze
+      const fr = 22 * e1(a, 7), fb = Math.max(0, 1 - Math.max(0, a - 0.45) / 0.6);                                                     // the fireball grows, churns, then breaks up
+      if (fb > 0) { d(0, 0, fr + 2, [0.25, 0.08, 0.04, 1], 0.7 * fb); d(0, 0, fr, heat(a / 1.3), 0.95 * fb);
+        for (let j = 0; j < 9; j++) { const th = j * TAU / 9 + a * 2.2 + z.seed; d(Math.cos(th) * fr * 0.5, Math.sin(th) * fr * 0.5, fr * 0.32, heat(a / 1.3 - 0.15), 0.8 * fb); }
+        d(0, 0, fr * 0.35, HOT, 0.9 * fb * Math.max(0, 1 - a / 0.6)); }
+      if (a > 0.35) { const b = a - 0.35, rs = 18 + 42 * e1(b, 1.6), f = Math.max(0, 1 - b / 2.2);                                       // it rolls out as a ring of smoke
+        for (let j = 0; j < 26; j++) { const th = j * TAU / 26 + rnd(j + z.seed) * 0.2, rj = rs * (0.9 + 0.2 * rnd(j * 3 + z.seed)); d(Math.cos(th) * rj, Math.sin(th) * rj, (4 + 5 * e1(b, 1.5)) * (0.8 + 0.4 * rnd(j + 7)), heat(0.35 + b / 1.2), 0.7 * f); } } } },
+  E: { life: 3,     // Wilson Cloud: a white condensation shell swells round the fireball, burns off, and the fireball rises out of it
+    draw(d, a, z) { nFlash(d, a, 26, 0.15);
+      const y = -30 * e1(a, 0.9), fr = 10 + 6 * e1(a, 2), f = 1 - a / 3, fc = heat(a / 2.4);
+      if (a > 0.3) for (let j = 0; j < 6; j++) { const q = (j + 0.5) / 6; d(Math.sin(a + j) * 0.6, y * q * 0.85, 2.5 + 1.2 * q, DUSTC, 0.55 * Math.min(1, (a - 0.3) / 0.4) * f); }
+      for (let j = 0; j < 8; j++) { const th = j * TAU / 8 + a * 1.5; d(Math.cos(th) * fr * 0.45, y + Math.sin(th) * fr * 0.35, fr * 0.6, fc, 0.85 * f); }
+      d(0, y, fr * 0.55, a < 1.2 ? lt(fc, 0.25) : fc, 0.7 * f);
+      if (a > 0.08 && a < 1.3) { const w = (a - 0.08) / 1.22, rw = 14 + 22 * e1(a - 0.08, 3), al = Math.sin(Math.PI * Math.min(1, w * 1.6)) * (1 - w);
+        d(0, y * 0.6, rw, STEAM, 0.5 * al); z.rg(0, y * 0.6, rw, WHITE, 0.75 * al, 1.2);
+        for (let j = 0; j < 16; j++) { const th = j * TAU / 16 + rnd(j + z.seed); d(Math.cos(th) * rw * 0.85, y * 0.6 + Math.sin(th) * rw * 0.85, 3.5, STEAM, 0.35 * al); } } } },
+  F: { life: 3.2,   // Rising Fireball: a churning sphere that climbs slowly, darker underneath, dragging a dirt stem and a dust skirt
+    draw(d, a, z) { nFlash(d, a, 24, 0.12);
+      const y = -6 - 36 * e1(a, 0.7), fr = 9 + 8 * e1(a, 1.8), f = Math.min(1, (3.2 - a) / 0.8);
+      nRing(d, 12, 6 + 16 * e1(a, 1.4), 0.4, 0, 3 + 2 * e1(a, 1), DUSTC, 0.45 * f * (1 - a / 3.2), false, z.seed, 0);
+      for (let j = 0; j < 8; j++) { const q = (j + 0.5) / 8; if (a < q * 0.6) continue; d(Math.sin(a * 1.5 + j * 2) * 1.2, (y + fr * 0.6) * q, 2 + 2.5 * q * e1(a, 1), mix(DUSTC, SMOKE, q), 0.65 * f); }
+      nRing(d, 12, 6 + 16 * e1(a, 1.4), 0.4, 0, 3 + 2 * e1(a, 1), DUSTC, 0.45 * f * (1 - a / 3.2), true, z.seed, 0);
+      d(0, y, fr * 0.8, heat(a / 2.2 - 0.1), 0.95 * f);
+      for (let j = 0; j < 16; j++) { const ph = j * TAU / 16 - a * 1.8; d(Math.cos(ph) * fr * 0.72, y + Math.sin(ph) * fr * 0.72, fr * 0.36, heat(a / 2.2 + (Math.sin(ph) > 0 ? 0.18 : 0)), 0.9 * f); }
+      d(0, y - fr * 0.15, fr * 0.4, HOT, 0.8 * Math.max(0, 1 - a / 0.9)); } },
+  G: { life: 3.4,   // Thermonuclear: the biggest flash, a short stem and a very wide, flat cap with a fiery underside, and a pale ice cap above it
+    draw(d, a, z) { nFlash(d, a, 44, 0.22);
+      const f = Math.min(1, (3.4 - a) / 0.8), H = 18 + 8 * e1(a, 1), Rc = 8 + 36 * e1(a, 1.3), cool = a / 2.6;
+      for (let j = 0; j < 6; j++) { const q = (j + 0.5) / 6; d(Math.sin(a + j) * 0.5, -H * q, 3 + q, mix(heat(cool + 0.2), DUSTC, 0.4), 0.8 * f); }
+      const cap = (front) => nRing(d, 30, Rc, 0.28, -H, 6 + 3 * e1(a, 2), (j) => heat(cool + 0.1 * rnd(j)), 0.85 * f, front, z.seed);
+      cap(false); d(0, -H + 2, Rc * 0.75, FIRE, 0.35 * Math.max(0, 1 - cool)); cap(true);
+      nRing(d, 14, Rc * 0.6, 0.25, -H - 5, 5, heat(cool + 0.3), 0.8 * f, false, z.seed + 5); nRing(d, 14, Rc * 0.6, 0.25, -H - 5, 5, heat(cool + 0.3), 0.8 * f, true, z.seed + 5);
+      if (a > 0.4 && a < 1.6) { const al = Math.sin(Math.PI * (a - 0.4) / 1.2) * 0.5; for (let j = 0; j < 20; j++) { const th = j * TAU / 20; d(Math.cos(th) * Rc * 0.55, -H - 13 + Math.sin(th) * Rc * 0.12, 2.4, STEAM, al); } } } },
+  H: { life: 3.2,   // Base Surge: a squat column of steam, and a thick ring of steam and dust rolling out along the ground nearly to the reach
+    draw(d, a, z) { nFlash(d, a, 22, 0.12);
+      const f = Math.min(1, (3.2 - a) / 0.9), Rs = z.Rg * 0.85 * e1(a, 1.8), H = 22 * e1(a, 3), sc2 = (j) => mix(STEAM, DUSTC, Math.min(1, a / 1.5) * (0.6 + 0.4 * rnd(j)));
+      nRing(d, 34, Rs, 0.42, 0, 4 + 6 * e1(a, 1.2), sc2, 0.55 * f, false, z.seed);
+      for (let j = 0; j < 8; j++) { const q = (j + 0.5) / 8; d(Math.sin(a * 2 + j) * 0.8, -H * q, 5 + 2 * q, mix(STEAM, SMOKE, a / 3), 0.75 * f); }
+      for (let j = 0; j < 6; j++) { const th = j * TAU / 6 + z.seed; d(Math.cos(th) * 5, -H - 2 + Math.sin(th) * 3, 6, mix(STEAM, SMOKE, a / 3), 0.75 * f); }
+      nRing(d, 34, Rs, 0.42, 0, 4 + 6 * e1(a, 1.2), sc2, 0.55 * f, true, z.seed); } },
+  I: { life: 1.6,   // Plasma Burst: the reactor lets go: a white-violet sphere crackling with arcs and rays, then it collapses to a point and pops a last ring
+    draw(d, a, z) { const sp = a < 0.6 ? 22 * e1(a, 8) : Math.max(0, 22 * (1 - (a - 0.6) / 0.3));
+      if (sp > 0) { d(0, 0, sp + 4, VIOLET, 0.35); d(0, 0, sp, mix(HOT, CYAN, 0.3), 0.85); d(0, 0, sp * 0.5, WHITE, 0.9); }
+      if (a < 0.9) { const k0 = Math.floor(a / 0.06), al = 1 - a / 0.9; for (let j = 0; j < 7; j++) { let p = [0, 0]; const th = j * TAU / 7 + rnd(k0 + j) * 0.6, L = 30 + 14 * rnd(k0 * 3 + j);
+          for (let s2 = 1; s2 <= 5; s2++) { const q = s2 / 5, n = [Math.cos(th) * L * q + (rnd(k0 + j * 9 + s2) - 0.5) * 7, Math.sin(th) * L * q + (rnd(k0 * 5 + j + s2) - 0.5) * 7]; z.ln(p, n, s2 === 1 ? WHITE : CYAN, al, 1.3); p = n; } } }
+      if (a < 0.7) for (let j = 0; j < 12; j++) { const th = j * TAU / 12 + 0.13; z.ln([Math.cos(th) * 10, Math.sin(th) * 10], [Math.cos(th) * (10 + 60 * e1(a, 4)), Math.sin(th) * (10 + 60 * e1(a, 4))], HOT, 0.6 * (1 - a / 0.7), 1); }
+      if (a > 0.85 && a < 1.05) d(0, 0, 7 * (1 - Math.abs(a - 0.95) / 0.1), WHITE, 1);
+      if (a > 0.9) z.rg(0, 0, 50 * e1(a - 0.9, 6), CYAN, Math.max(0, 1 - (a - 0.9) / 0.7), 2);
+      for (let j = 0; j < 18; j++) { const th = rnd(j + z.seed) * TAU, r = (40 + 50 * rnd(j * 3 + z.seed)) * e1(a, 2.5); d(Math.cos(th) * r, Math.sin(th) * r + 6 * a * a, 0.9, mix(WHITE, CYAN, rnd(j)), 1 - a / 1.6); } } },
+  J: { life: 2.4,   // Flash Shadows: the flash whites out the reach and burns a long shadow behind every enemy, away from the blast; a compact fireball rises
+    draw(d, a, z) { if (a < 0.35) disc(z.c, z.R, A([1, 0.98, 0.9, 1], 0.45 * (1 - a / 0.35))); nFlash(d, a, 26, 0.15);
+      for (const p of z.snap) { const dx = p[0] - z.c[0], dy = p[1] - z.c[1], L = Math.hypot(dx, dy) || 1; line(p, [p[0] + dx / L * 34 * z.kk, p[1] + dy / L * 34 * z.kk], A(CHAR, 0.5 * (1 - a / 2.4)), z.er * 1.6); }
+      nRing(d, 10, 12 + 8 * e1(a, 1.5), 0.4, -4, 5, SMOKE, 0.6 * (1 - a / 2.4), false, z.seed);
+      const y = -34 * e1(a, 1); for (let j = 0; j < 6; j++) { const th = j * TAU / 6 + a; d(Math.cos(th) * 5, y + Math.sin(th) * 4, 7 + 2 * e1(a, 1), heat(a / 2), 0.85 * (1 - a / 2.4)); }
+      nRing(d, 10, 12 + 8 * e1(a, 1.5), 0.4, -4, 5, SMOKE, 0.6 * (1 - a / 2.4), true, z.seed); } },
+  K: { life: 3,     // Fire Pillar: a column of fire shoots straight up, blooms into a grey cap and cools from the bottom up, embers raining from the cap
+    draw(d, a, z) { nFlash(d, a, 24, 0.12);
+      const top = 48 * e1(a, 5), f = Math.min(1, (3 - a) / 0.8);
+      for (let j = 0; j < 12; j++) { const q = (j + 0.5) / 12; d(Math.sin(a * 3 + j) * 0.8, -top * q, 3.5 + 1.5 * q, heat(a / 1.6 + (1 - q) * 0.4), 0.85 * f); }
+      if (a > 0.3) { const b = a - 0.3, rc = 4 + 14 * e1(b, 2), col2 = (j) => heat(0.25 + b / 1.6 + 0.1 * rnd(j));
+        nRing(d, 14, rc, 0.4, -top, 4 + 3 * e1(b, 2), col2, 0.85 * f, false, z.seed); d(0, -top - 2, rc * 0.6, heat(0.2 + b / 1.6), 0.85 * f); nRing(d, 14, rc, 0.4, -top, 4 + 3 * e1(b, 2), col2, 0.85 * f, true, z.seed);
+        for (let j = 0; j < 14; j++) { const c0 = 0.3 + rnd(j + z.seed) * 1.2, e = b - c0 + 0.3; if (e < 0 || e > 1.2) continue; const th = rnd(j * 5 + z.seed) * TAU;
+          d(Math.cos(th) * rc, -top + Math.sin(th) * rc * 0.4 + 18 * e * e, 0.8, mix([1, 0.8, 0.35, 1], RED, e / 1.2), 1 - e / 1.2); } } } },
+  L: { life: 3.2,   // Vortex Ring: a glowing ring of fire rolls upward, and dust is sucked in along the ground and up through its middle
+    draw(d, a, z) { nFlash(d, a, 22, 0.12);
+      const y = -8 - 34 * e1(a, 0.8), rr = 10 + 18 * e1(a, 1.5), rt = 2.5 + 2.5 * e1(a, 2), f = Math.min(1, (3.2 - a) / 0.8);
+      for (let j = 0; j < 16; j++) { const p = (((a * 0.8 + j / 16) % 1) + 1) % 1, th = j * TAU / 16 + p * 1.5; const al = 0.45 * f * Math.min(1, a / 0.4);
+        if (p < 0.6) { const r = 40 * (1 - p / 0.6) + 2; d(Math.cos(th) * r, Math.sin(th) * r * 0.42, 2.5, DUSTC, al); } else d(Math.sin(j) * 1.5, y * (p - 0.6) / 0.4, 2.2, DUSTC, al); }
+      const tor = (front) => { for (let j = 0; j < 28; j++) { const th = j * TAU / 28; if ((Math.sin(th) > 0) !== front) continue; const ph = j * 1.7 - a * 3.2;
+        d(Math.cos(th) * (rr + rt * Math.cos(ph)), y + Math.sin(th) * rr * 0.4 - rt * Math.sin(ph), rt * 0.8, heat(a / 2.4 + (Math.sin(ph) < 0 ? 0.1 : 0)), 0.9 * f); } };
+      tor(false); d(0, y, rr * 0.35, HOT, 0.5 * Math.max(0, 1 - a / 1.2)); tor(true); } },
+  M: { life: 3.4,   // Classic Mushroom: a dust skirt, a stem with a white condensation collar, a cap with a glowing underside and a grey crown
+    draw(d, a, z) { nFlash(d, a, 26, 0.15);
+      const H = 12 + 30 * e1(a, 1.1), Rc = 6 + 14 * e1(a, 1.4), f = Math.min(1, (3.4 - a) / 0.9), cool = a / 2.4, sk = 6 + 18 * e1(a, 1.6);
+      nRing(d, 14, sk, 0.4, 0, 3 + 2 * e1(a, 1), DUSTC, 0.5 * f, false, z.seed);
+      for (let j = 0; j < 9; j++) { const q = (j + 0.5) / 9; d(Math.sin(a * 2 + j * 1.7) * 0.6, -q * H * 0.92, 2.2 + 1.5 * q * q * (1 + e1(a, 1)), mix(heat(cool + 0.25 + (1 - q) * 0.2), DUSTC, 0.3), 0.8 * f); }
+      nRing(d, 14, sk, 0.4, 0, 3 + 2 * e1(a, 1), DUSTC, 0.5 * f, true, z.seed);
+      if (a > 0.3 && a < 2.2) { const al = 0.5 * Math.min(1, (a - 0.3) / 0.3) * (1 - (a - 0.3) / 1.9); nRing(d, 12, 5 + 4 * e1(a, 1.5), 0.3, -H * 0.55, 2.4, STEAM, al, false, z.seed); nRing(d, 12, 5 + 4 * e1(a, 1.5), 0.3, -H * 0.55, 2.4, STEAM, al, true, z.seed); }
+      const cap = (front) => nRing(d, 20, Rc, 0.3, -H, 5 + 3 * e1(a, 2), (j) => front ? heat(cool) : heat(cool + 0.15), 0.85 * f, front, z.seed);
+      cap(false); d(0, -H + 3, Rc * 0.7, FIRE, 0.4 * Math.max(0, 1 - cool)); cap(true);
+      for (let j = 0; j < 6; j++) d((j - 2.5) * Rc * 0.22, -H - 4 - 2 * Math.cos(j), 5 + 2 * e1(a, 2), heat(cool + 0.3), 0.85 * f); } },
+};
+const nukeKey = (B) => B.lv[0] >= 5 && NUKE[B.key("p0s4")] ? B.key("p0s4") : "";
+// draws every live blast of look `key` (or its ground marks) from the records in `mm.nukes`
+function drawNukes(mm, t, key, z, ground) { const N = NUKE[key];
+  for (const r of mm.nukes || []) { const a = t - r.t0; if (a < 0 || a > N.life) continue; const fm = r.cut === undefined ? 1 : Math.max(0, 1 - (t - r.cut) / 0.5); if (fm <= 0) continue;
+    const P = (x, y) => add(z.c, [x * z.kk, y * z.kk]), zz = Object.assign({}, z, { seed: r.seed, snap: r.snap || [],
+      rg: (x, y, rr, col, al, w) => ring(P(x, y), rr * z.kk, A(col, al * fm), w * z.kk), ln: (p, q, col, al, w) => line(P(p[0], p[1]), P(q[0], q[1]), A(col, al * fm), w * z.kk) });
+    const d = (x, y, rr, col, al) => { if (al > 0.003 && rr > 0) disc(P(x, y), rr * z.kk, A(col, Math.min(1, al) * fm)); };
+    if (ground) { if (N.ground) N.ground(d, a, zz); } else N.draw(d, a, zz); } }
 
 // ---- The agent: a wave rolls out every period; enemies it crosses flash; barrier enemies (every third) lose their barrier faster with the Effect path -------
 function shockAgent(B) { return (m, t, info, s, col) => { if (!m.hit) { m.hit = {}; m.bar = {}; m.noRegen = {}; m.wave = t; m.tt = t; }
   const dt = Math.min(0.1, Math.max(0, t - m.tt)); m.tt = t; const L1 = B.lv[0], L3 = B.lv[2], gold1 = L1 >= 5, per = perOf(B), c = info.c;
   if (t - m.wave >= per) m.wave = t;
   { const kk = G(s), sc = 1 + 0.28 * L1; if (!m.cloud) { m.cloud = []; m.cspawn = -1; m.megs = []; }                                                     // the mushroom cloud: puffs with their own lifetimes; a bigger cloud with every Power step
-    const X = megaX(B), R0 = s * radOf(B) / 48; let fresh = false;                                                                                         // round 12: the Megaton option's extras
-    if (m.cspawn !== m.wave && L1 >= 5) { fresh = true; m.megs = m.megs.filter((w) => t - w < 4); m.megs.push(t); }
+    const nk = nukeKey(B), z = { c, kk, R: s * radOf(B) / 48, Rg: radOf(B), er: enemyR(s) };                                                         // round 13: a from-scratch blast replaces the cloud
+    if (!m.nukes) m.nukes = [];
+    if (m.cspawn !== m.wave && nk) { m.cspawn = m.wave; for (const r of m.nukes) if (r.cut === undefined) r.cut = t; m.nukes = m.nukes.filter((r) => t - r.t0 < 4); m.nukes.push({ t0: t, seed: rnd(m.wave) * 100, snap: info.ens.filter((e) => dist(e.p, c) < z.R).map((e) => [e.p[0], e.p[1]]) }); }
     if (m.cspawn !== m.wave) { m.cspawn = m.wave; const n = 8 + 4 * L1; for (let q = 0; q < n; q++) { const cap = q > n * 0.45; m.cloud.push({ t0: t + rnd(q + m.wave) * 0.04, vx: (rnd(m.wave * 5 + q) - 0.5) * (cap ? 16 : 5) * kk * sc, vy: -(12 + 9 * rnd(m.wave * 2 + q + 3)) * kk * sc * (L1 >= 5 ? 0.55 : 1), life: 2.4 + 1.2 * rnd(q + m.wave * 3), r0: (0.8 + 0.8 * rnd(q + 7)) * kk * sc, tone: rnd(q + 19) }); }
       if (L1 >= 5) { m.cloud.push({ kind: "flash", t0: t, life: 0.4, vx: 0, vy: 0, r0: 0, tone: 0 });                                                                                  // Megaton Wave: a nuclear flash, a fireball and a rolling cap
         // round 11 (owner's note on C): the grey billow and cap stay low (above), the red fireball climbs high over them and is drawn on top
         for (let q = 0; q < 16; q++) { const fi = q * TAU / 16 + rnd(q) * 0.3; m.cloud.push({ kind: "cap", t0: t + 0.2 + rnd(q + 51) * 0.08, oy: -8 * kk * sc, vx: Math.cos(fi) * (13 + 7 * rnd(q + 61)) * kk * sc, vy: Math.sin(fi) * 4 * kk * sc - 2 * kk * sc, life: 3 + 0.8 * rnd(q + 71), r0: (1.6 + 1.2 * rnd(q + 81)) * kk * sc, tone: rnd(q + 91) }); }
-        if (!X.includes("torus") && !X.includes("plume")) for (let q = 0; q < 7; q++) m.cloud.push({ kind: "fire", t0: t + rnd(q + m.wave) * 0.05, d: 1.1, vx: (rnd(q + 31 + m.wave) - 0.5) * 7 * kk * sc, vy: -(18 + 8 * rnd(q + 41)) * kk * sc * (X.includes("column") ? 1.25 : 1), life: 2 + 0.4 * rnd(q + 5), r0: (2.2 + 1.4 * rnd(q + 13)) * kk * sc, tone: rnd(q + 3) }); } }
+        for (let q = 0; q < 7; q++) m.cloud.push({ kind: "fire", t0: t + rnd(q + m.wave) * 0.05, d: 1.1, vx: (rnd(q + 31 + m.wave) - 0.5) * 7 * kk * sc, vy: -(18 + 8 * rnd(q + 41)) * kk * sc, life: 2 + 0.4 * rnd(q + 5), r0: (2.2 + 1.4 * rnd(q + 13)) * kk * sc, tone: rnd(q + 3) }); } }
     m.cloud = m.cloud.filter((q) => t - q.t0 < q.life);
-    if (X.length) megaUnder(m, t, info, s, X, R0, kk, sc, gold1 ? HOT : col);
-    for (const pass of [0, 1]) { if (pass === 1 && X.includes("column")) megaColumn(m, t, c, kk, sc);
-    for (const q of m.cloud) { const age = t - q.t0; if (age < 0 || (q.kind === "fire") !== (pass === 1)) continue; if (q.kind === "flash") { const fu = age / q.life; disc(c, s * 0.62 * Math.min(1, fu * 3) * sc, A([1, 0.97, 0.85, 1], 0.8 * (1 - fu))); disc(c, s * 0.3 * Math.min(1, fu * 3), A([1, 1, 1, 1], 0.9 * (1 - fu))); continue; } const u = age / q.life, dd = q.d || 1.4, dr = (1 - Math.exp(-dd * age)) / dd, hot = Math.max(0, 1 - age / 0.7), sm = [0.34 + 0.16 * q.tone, 0.31 + 0.15 * q.tone, 0.28 + 0.14 * q.tone, 1];
+    for (const q of m.cloud) { const age = t - q.t0; if (age < 0) continue; if (q.kind === "flash") { const fu = age / q.life; disc(c, s * 0.62 * Math.min(1, fu * 3) * sc, A([1, 0.97, 0.85, 1], 0.8 * (1 - fu))); disc(c, s * 0.3 * Math.min(1, fu * 3), A([1, 1, 1, 1], 0.9 * (1 - fu))); continue; } const u = age / q.life, dd = q.d || 1.4, dr = (1 - Math.exp(-dd * age)) / dd, hot = Math.max(0, 1 - age / 0.7), sm = [0.34 + 0.16 * q.tone, 0.31 + 0.15 * q.tone, 0.28 + 0.14 * q.tone, 1];
       const fireC = q.kind === "fire" ? mix(mix(AMB, [0.95, 0.3, 0.1, 1], Math.min(1, age / 0.7)), sm, Math.min(1, age / 2)) : mix(sm, (L1 >= 5 ? HOT : col), (q.kind === "cap" ? Math.max(0, 1 - age / 1.1) : hot) * 0.8);
-      disc(add(c, [q.vx * dr, q.vy * dr + (q.oy || 0)]), q.r0 + (1 + 3.2 * Math.min(1, u * 1.3)) * kk * sc, A(fireC, (q.kind === "fire" ? 0.85 : 0.7) * (1 - u) * (1 - u * 0.3))); } }
-    if (X.includes("plume")) megaPlume(m, t, c, kk, sc, dt, fresh);
-    if (X.length) megaOver(m, t, info, s, X, R0, kk, sc, per); }
+      disc(add(c, [q.vx * dr, q.vy * dr + (q.oy || 0)]), q.r0 + (1 + 3.2 * Math.min(1, u * 1.3)) * kk * sc, A(fireC, (q.kind === "fire" ? 0.85 : 0.7) * (1 - u) * (1 - u * 0.3))); }
+    if (nk) drawNukes(m, t, nk, z, false); }
   if (B.r === 2 && B.key("r2") === "C") { if (!m.puffs) { m.puffs = []; m.spawned = -1; } const kk = G(s);                        // Reactor Venting (stack and blast vent): smoke particles live on their own clock, not the wave's
     if (m.spawned !== m.wave && t - m.wave < 0.2) { m.spawned = m.wave; for (const [sx, sy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) { const p0 = add(c, [sx * 10.8 * kk, sy * 10.8 * kk]), a0 = Math.atan2(sy, sx); for (let q = 0; q < 9; q++) m.puffs.push({ t0: t, p0, a: a0 + (rnd(m.wave * 7 + q + sx * 3) - 0.5) * 0.9, v: (34 + 22 * rnd(m.wave * 3 + q + sy)) * kk, life: 2.4 + 1.2 * rnd(q + m.wave * 5), r0: (1 + rnd(q + 11)) * kk, tone: rnd(q + sx + sy) }); } }
     m.puffs = m.puffs.filter((q) => t - q.t0 < q.life);
@@ -108,13 +166,13 @@ function core(c, k, t, L, ix, fl) { const g = false, br = L >= 5, rc = [0, 3.4, 
 // ---- The model -----------------------------------------------------------------------------------------------------------------------------------------------
 const P2 = {
   tower: "shock", look: "B", anim: "B", sBuild: 110,                                    // round 11: a smaller build preview, so the whole cloud fits above the tower
-  intro: "Round 12 (you asked for a bunch more Megaton ideas): set Power / Range to the Megaton Wave and pick from eighteen. C is the current cloud from round 11; D to Q each add one extra to it (a rising column, a smoke-ring cap, ember rain, a growing plume, a double flash, a condensation dome, a field glow, a charge-up, a ground scorch, a dust sweep, echo rings, ash fall, charred enemies, ground cracks); R, S and T are combinations of four. Pick one, or note several to combine. Every other step stays as picked. Round 11 (your pick for the Megaton Wave's cloud: C, \"but have the red smoke rise higher, and put the grey smoke underneath\"): the red fireball now climbs well above the cloud and stays red longer as it rises, drawn over the grey; the grey billow and the rolling cap stay low beneath it. Set Power / Range to the Megaton Wave to see it. Round 10 showed three mushroom clouds beside C (not picked). Round 9: the Path 3 band is much springier (your note): it opens in under 0.2 s, then swings in and out more than twice as fast with far less damping, so it reciprocates several times before settling; the stretch and bend are stronger too. Round 8: on every blast the Path 3 band now expands outward (quickly, over about 0.3 s) with the wave, then springs back and rings, overshooting; the expansion grows with every step (your note). Round 7: the Path 3 band is a thin line with a gentle, smooth ripple; the sporadic steps (T4 slightly, the mastery strongly) add chaos to the ripple; and every burst stretches the band harder and more elastically (it overshoots and rings back like a spring) (your notes). Round 6: every stage is picked and drawn as one model, nothing left to choose. Path 3 follows your spec to the letter: one white band (faint, then brighter, then bright, then slightly sporadic, then gold and strong) whose ripple strengthens and turns sporadic, and every burst bends and stretches it more; the Megaton Wave burst adds a nuclear explosion to the billow (a white flash, a fireball, a stem and a rolling cap). Round 5: the Power cloud now leaves in one larger burst at once (every puff at the same moment, only more and bigger) instead of over a longer period; Path 3 starts fresh (your note): nothing is added to the tower, the tower itself resonates. Five ways: the ring's edges ripple in a standing wave, the deck hums with ripples, the ring sings with travelling bright lobes, the whole tower shakes, or the ring turns to glass with light running round it, all harder at every step and gold at the mastery. Round 4: the mushroom cloud is a particle system with its own lifetimes, and each Power step makes it bigger; the Reactor Venting smoke is thrown out farther; Path 3 shows five all-new directions per step (your notes): heavy hammers on arms, sonic horns, a fractured ring, a starburst of rods and a prism lens. Round 3: Path 1 uses the gyro rings at every step (my reading of your note \"Move all paths the gyro rings\": tell me if you meant something else), Path 2 is the Turbine Ring throughout, and Path 3 is a completely new direction that modifies the tower itself (a cage, a shield dome or a halo of spikes built round the ring); Wave Focus and Containment Coils are picked (the collar and the toroid coils), and the Reactor Venting smoke is a real particle system: stronger jets, each puff living about three seconds on its own clock instead of the wave cycle. Round 2: your Path 1 picks are drawn, brighter instead of gold at the mastery (your note); Path 2 and Path 3 are redesigned as big visual changes instead of little additions: Speed rebuilds the containment ring itself (turning segments, a flywheel or a turbine that spins faster at each step), and Effect rebuilds the three clamps as big violet resonators (forks, ripple drums or crystals); Reactor Venting merges the stacks with the blast vents and smoke billows out with every burst. Wave Focus and Containment Coils show their options again. Round 1: every step rebuilds a part. Path 1 (Power/Range) rebuilds the core inside the containment ring: rods, a plasma sphere or spinning rings that get bigger, denser and whiter, and turn gold at the Megaton Wave. Path 2 (Speed) builds pulsing emitters round the outside of the ring (two, four, six, eight, then twelve gold ones) and the wave comes faster. Path 3 (Effect) rebuilds the three violet resonance stations on the ring between the clamps; barrier enemies (every third one) show a blue barrier that the waves chew through faster at each step, and at the mastery each wave shatters half of it and it cannot grow back for 5 s. The Retrofits add a focusing ring, containment coils or exhaust vents. Overlapping Retrofits are kept and stack (the carpet rule). Unpicked steps show option A.",
+  intro: "Round 13 (your note: \"Remake a bunch of ideas from scratch that would fit a nuclear blast\"): set Power / Range to the Megaton Wave and pick from eleven. C is the current cloud (round 11, in the game); D to M are whole new blasts, each made from scratch: Seen From Above, Wilson Cloud, Rising Fireball, Thermonuclear, Base Surge, Plasma Burst, Flash Shadows, Fire Pillar, Vortex Ring and Classic Mushroom. Round 12 (you asked for a bunch more Megaton ideas): set Power / Range to the Megaton Wave and pick from eighteen. C is the current cloud from round 11; D to Q each add one extra to it (a rising column, a smoke-ring cap, ember rain, a growing plume, a double flash, a condensation dome, a field glow, a charge-up, a ground scorch, a dust sweep, echo rings, ash fall, charred enemies, ground cracks); R, S and T are combinations of four. Pick one, or note several to combine. Every other step stays as picked. Round 11 (your pick for the Megaton Wave's cloud: C, \"but have the red smoke rise higher, and put the grey smoke underneath\"): the red fireball now climbs well above the cloud and stays red longer as it rises, drawn over the grey; the grey billow and the rolling cap stay low beneath it. Set Power / Range to the Megaton Wave to see it. Round 10 showed three mushroom clouds beside C (not picked). Round 9: the Path 3 band is much springier (your note): it opens in under 0.2 s, then swings in and out more than twice as fast with far less damping, so it reciprocates several times before settling; the stretch and bend are stronger too. Round 8: on every blast the Path 3 band now expands outward (quickly, over about 0.3 s) with the wave, then springs back and rings, overshooting; the expansion grows with every step (your note). Round 7: the Path 3 band is a thin line with a gentle, smooth ripple; the sporadic steps (T4 slightly, the mastery strongly) add chaos to the ripple; and every burst stretches the band harder and more elastically (it overshoots and rings back like a spring) (your notes). Round 6: every stage is picked and drawn as one model, nothing left to choose. Path 3 follows your spec to the letter: one white band (faint, then brighter, then bright, then slightly sporadic, then gold and strong) whose ripple strengthens and turns sporadic, and every burst bends and stretches it more; the Megaton Wave burst adds a nuclear explosion to the billow (a white flash, a fireball, a stem and a rolling cap). Round 5: the Power cloud now leaves in one larger burst at once (every puff at the same moment, only more and bigger) instead of over a longer period; Path 3 starts fresh (your note): nothing is added to the tower, the tower itself resonates. Five ways: the ring's edges ripple in a standing wave, the deck hums with ripples, the ring sings with travelling bright lobes, the whole tower shakes, or the ring turns to glass with light running round it, all harder at every step and gold at the mastery. Round 4: the mushroom cloud is a particle system with its own lifetimes, and each Power step makes it bigger; the Reactor Venting smoke is thrown out farther; Path 3 shows five all-new directions per step (your notes): heavy hammers on arms, sonic horns, a fractured ring, a starburst of rods and a prism lens. Round 3: Path 1 uses the gyro rings at every step (my reading of your note \"Move all paths the gyro rings\": tell me if you meant something else), Path 2 is the Turbine Ring throughout, and Path 3 is a completely new direction that modifies the tower itself (a cage, a shield dome or a halo of spikes built round the ring); Wave Focus and Containment Coils are picked (the collar and the toroid coils), and the Reactor Venting smoke is a real particle system: stronger jets, each puff living about three seconds on its own clock instead of the wave cycle. Round 2: your Path 1 picks are drawn, brighter instead of gold at the mastery (your note); Path 2 and Path 3 are redesigned as big visual changes instead of little additions: Speed rebuilds the containment ring itself (turning segments, a flywheel or a turbine that spins faster at each step), and Effect rebuilds the three clamps as big violet resonators (forks, ripple drums or crystals); Reactor Venting merges the stacks with the blast vents and smoke billows out with every burst. Wave Focus and Containment Coils show their options again. Round 1: every step rebuilds a part. Path 1 (Power/Range) rebuilds the core inside the containment ring: rods, a plasma sphere or spinning rings that get bigger, denser and whiter, and turn gold at the Megaton Wave. Path 2 (Speed) builds pulsing emitters round the outside of the ring (two, four, six, eight, then twelve gold ones) and the wave comes faster. Path 3 (Effect) rebuilds the three violet resonance stations on the ring between the clamps; barrier enemies (every third one) show a blue barrier that the waves chew through faster at each step, and at the mastery each wave shatters half of it and it cannot grow back for 5 s. The Retrofits add a focusing ring, containment coils or exhaust vents. Overlapping Retrofits are kept and stack (the carpet rule). Unpicked steps show option A.",
   mods(B) { return { period: 1, flight: 1, multi: false, persist: shockAgent(B) }; },
   muzzleAt(B, m, kk, c) { return c; },
   model(c, aim, s, fx, t, col, info, B) {
     const k = G(s), mm = fx.mem || {}, fl = decay(t - (mm.wave ?? -9), 0.4), L1 = B.lv[0], L2 = B.lv[1], L3 = B.lv[2], S = (x, y) => add(c, [x * k, y * k]), R = B.r >= 0 ? B.key("r" + B.r) : null, g1 = L1 >= 5, g2 = L2 >= 5, g3 = L3 >= 5;
     { const k3 = L3 > 0 ? B.key("p2s" + (L3 - 1)) : null; if (k3 === "D") { const am = (0.22 + 0.18 * L3) * (1 + 0.8 * fl); c = add(c, [Math.sin(t * 47) * am * k, Math.cos(t * 59 + 1) * am * k]); } }   // Path 3, Shaking Tower: the whole tower vibrates
-    megaGround(c, k, mm, t, megaX(B));                                                     // round 12: the scorch and the cracks, under the tower
+    { const nk = nukeKey(B); if (nk) drawNukes(mm, t, nk, { c, kk: k }, true); }               // round 13: a blast's ground marks, under the tower
     deck(c, k, col, t);
     // ---- Path 2: the containment ring itself is rebuilt at every step (segments, a flywheel or a turbine) and spins faster, so the waves come faster -------------------
     { const mm2 = mm; const dt2 = Math.min(0.1, Math.max(0, t - (mm2.rT ?? t))); mm2.rT = t; mm2.ra = (mm2.ra || 0) + dt2 * [0, 0.8, 1.2, 1.7, 2.4, 3.4][L2] * (fl > 0.3 ? 1.6 : 1);
@@ -166,23 +224,16 @@ P2.paths = [
     { name: "Critical Mass", cost: 1870, effect: "110 damage; 120 px (primary)", options: T(["Gyro Rings", "The core is rebuilt with four spinning gyro rings, whiter and brighter."], ["Corona Sphere", "The core is rebuilt as a white-hot sphere with a corona of rays."], ["Orbit Rings", "The core is rebuilt with four spinning rings, whiter."]) },
     { name: "Overpressure", cost: 3200, effect: "125 damage; 125 px", options: T(["Pressure Rods", "The core is rebuilt as twelve rods in a tight pressure ring."], ["Overpressure Sphere", "The core is rebuilt as a bigger sphere with a longer corona."], ["Gyro Rings", "The core is rebuilt with five spinning gyro rings."]) },
     { name: "Megaton Wave", cost: 6690, effect: "135 damage; 132 px (mastery)", options: T(["White-Hot Rods", "The twelve rods turn white-hot with a bloom; the waves and the ring glow white-hot."], ["White-Hot Sphere", "The sphere and its corona turn white-hot with a bloom; the waves and the ring glow white-hot."], ["White-Hot Gyro Rings", "The gyro rings turn white-hot with a bloom; the waves and the ring glow white-hot. Each blast flashes white, and a red fireball climbs high above a low grey billow and rolling cap."]).concat([
-      ["D", "Rising Column", "The current cloud on a grey stem: the stem climbs under the red fireball, so the cloud stands on a column like a mushroom."],
-      ["E", "Smoke-Ring Cap", "The fireball rolls into a ring with a hollow middle as it rises, turning over its top, red cooling to grey."],
-      ["F", "Ember Rain", "The current cloud, and the fireball sheds glowing embers that fall through the grey and wink out."],
-      ["G", "Growing Plume", "No separate fireballs: every blast feeds one fiery column that builds while the tower keeps firing (most with the Speed path) and dies down when it stops."],
-      ["H", "Double Flash", "The current cloud with a double flash: a bright white flash, a dip, then a second flash, as real nuclear flashes do."],
-      ["I", "Condensation Dome", "The current cloud, and a pale white dome swells round the tower for a moment, then vanishes."],
-      ["J", "Field Glow", "The current cloud, and everything in reach catches a warm orange glow for a moment, as if lit by the fireball."],
-      ["K", "Charge-Up", "The current cloud, and sparks gather into the core as it brightens in the half second before each blast, so you see it coming."],
-      ["L", "Ground Scorch", "The current cloud, and each blast leaves a dark scorched ring on the ground, glowing at its edge at first, fading over about 3 s."],
-      ["M", "Dust Sweep", "The current cloud, and the shock ring kicks up dust as it passes, so you see it sweep the ground."],
-      ["N", "Echo Rings", "The current cloud, and two fainter rings follow the main one out."],
-      ["O", "Ash Fall", "The current cloud, and grey flakes drift across the field on a breeze for a few seconds after each blast."],
-      ["P", "Charred Enemies", "The current cloud, and the enemies the wave hits go dark, as if charred, recovering over about a second."],
-      ["Q", "Ground Cracks", "The current cloud, and glowing cracks split out from the tower across the ground, cooling to dark lines."],
-      ["R", "Column, Flash and Scorch", "A combination: D + H + L + M, the rising column, the double flash, the ground scorch and the dust sweep."],
-      ["S", "Ring and Rain", "A combination: E + F + I + N, the smoke-ring cap, the ember rain, the condensation dome and the echo rings."],
-      ["T", "Fire Column", "A combination: G + K + Q + J, the growing plume, the charge-up, the ground cracks and the field glow."]].map(([key, name, desc]) => ({ key, name, desc }))) },
+      ["D","Seen From Above","The blast as the camera sees it, from straight above: a white flash, a churning fireball that spreads flat over the tower, then breaks into a ring of smoke rolling outward, leaving a scorch mark under the tower."],
+      ["E","Wilson Cloud","A white condensation shell swells round the fireball for a moment and burns off; the red fireball rises out of it on a thin dust stem and cools to smoke."],
+      ["F","Rising Fireball","A churning sphere of fire, its surface rolling, darker underneath, climbs slowly; it drags a dirt stem up behind it and kicks out a dust skirt."],
+      ["G","Thermonuclear","The biggest flash, then a short stem under a very wide, flat cap with a fiery underside and a grey top, and a pale ice cap that forms above it and fades."],
+      ["H","Base Surge","A squat column of steam, and a thick ring of steam and dust that rolls out along the ground almost to the edge of the reach, browning as it goes."],
+      ["I","Plasma Burst","The reactor lets go: a white-violet sphere crackling with lightning and rays, then it collapses to a point and pops a last cyan ring, throwing sparks. No smoke; it clears in under 2 s."],
+      ["J","Flash Shadows","The flash whites out the whole reach and burns a long shadow behind every enemy, pointing away from the blast; a compact fireball rises over a low ring of smoke."],
+      ["K","Fire Pillar","A column of fire shoots straight up, blooms into a cap at the top, and cools to grey from the bottom up while embers rain from the cap."],
+      ["L","Vortex Ring","A glowing ring of fire rolls upward like a smoke ring, and dust is sucked in along the ground and up through its middle."],
+      ["M","Classic Mushroom","The textbook cloud: a dust skirt, a stem with a white condensation collar, and a cap with a glowing underside and a grey crown."]].map(([key, name, desc]) => ({ key, name, desc }))) },
   ] },
   { name: "Speed", theme: "the ring itself: rebuilt at every step as a bigger, faster-spinning ring (segments, a flywheel or a turbine)", steps: [
     { name: "Quick Cycle", cost: 115, effect: "A wave every 1.55 s", options: T(["Segmented Ring", "The ring is rebuilt as five turning segments with glowing rims."], ["Flywheel", "The ring is rebuilt as a flywheel with four spokes to the core."], ["Turbine Ring", "The ring is rebuilt as a turbine ring with blades on both edges."]) },
@@ -207,7 +258,7 @@ P2.retrofits = [
 
 // ---- Round 2 (owner's picks, 2026-10-19). Path 2, Path 3, Wave Focus and Containment Coils are unpicked: they show their options again.
 P2.picks = { p0s0: "C", p0s1: "C", p0s2: "C", p0s3: "C", p0s4: "C", p1s0: "C", p1s1: "C", p1s2: "C", p1s3: "C", p1s4: "C", p2s0: "A", p2s1: "A", p2s2: "A", p2s3: "A", p2s4: "A", r0: "C", r1: "C", r2: "C" };
-// Round 12: the Megaton Wave shows its pick (C) beside seventeen extras and combinations.
-const OPEN = { p0s4: "CDEFGHIJKLMNOPQRST".split("") };
+// Round 13: the Megaton Wave shows its pick (C) beside ten blasts made from scratch.
+const OPEN = { p0s4: "CDEFGHIJKLM".split("") };
 P2.paths.forEach((pa, pi) => pa.steps.forEach((st, k) => { const id = "p" + pi + "s" + k, pk = P2.picks[id]; if (pk) st.options = st.options.filter((o) => (OPEN[id] || [pk]).includes(o.key)); }));
 P2.retrofits.forEach((rf, ri) => { const pk = P2.picks["r" + ri]; if (pk) rf.options = rf.options.filter((o) => o.key === pk); });
