@@ -61,6 +61,9 @@ var interactive := true
 var damage_numbers := true
 var build_type := ""
 var ability_target := ""
+## Towers whose target the player places (#87), and the one in aim mode (Move target): the next field click sets it.
+const AIMABLE := ["artillery_cannon", "cas_gunship"]
+var aim_tower = null
 var selected_tower = null
 var hover_cell := Vector2i(-1, -1)
 var hover_pos := Vector2(-1000, -1000)
@@ -112,6 +115,7 @@ func setup(g, clip := Rect2i()) -> void:
 	selected_tower = null
 	build_type = ""
 	ability_target = ""
+	aim_tower = null
 
 
 ## Advances the simulation by real time `delta` at the given speed and returns the drained events.

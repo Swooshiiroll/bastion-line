@@ -50,6 +50,12 @@ var flee_timer := 0.0
 ## Mirage hologram: a 1-HP copy that never leaks or pays, and vanishes with the Mirage that projected it.
 var hologram := false
 var holo_owner = null
+## Radar Illusion Filter: a ping marked this hologram as a fake, so towers stop choosing it as a target.
+var fake_marked := false
+## Radar Signal Analysis: a ping saw through this Decoy Beacon, so it ranks (and shows its role) as what it really is.
+var decoy_exposed := false
+## Radar Total Exposure: seconds left in which it can't re-cloak or re-burrow (kept full while inside that radar).
+var track_timer := 0.0
 ## The kind ("physical" or "energy") of the last hit it took.
 var last_hit_kind := ""
 var radius := 10.0
@@ -125,6 +131,8 @@ var blink_timer: float:
 		return float(trait_timers.get("blink", 0.0))
 	set(v):
 		trait_timers["blink"] = v
+## Where it stood when it last blinked (its after-image stays there), or INF if it never has.
+var blink_from := Vector2.INF
 ## Mender Hulk: seconds since it last took damage.
 var since_hit := 0.0
 ## Rally Beacon overdrive on this enemy (fraction of extra speed), refreshed every tick.
@@ -226,7 +234,7 @@ func retune(was: Dictionary) -> void:
 	bounty = int(def.bounty) * (2 if elite else 1)
 	lives_cost = int(def.lives) + (1 if elite else 0)
 	slow_resist = float(def.get("slow_resist", 0.0))
-	if not disguised and not def.has("fake_rank"):
+	if not disguised and (not def.has("fake_rank") or decoy_exposed):
 		rank = Enemies.rank_of(def)
 
 
@@ -252,6 +260,13 @@ func reveal_disguise() -> void:
 	rank = Enemies.rank_of(def)
 	speed = float(def.flee_speed) * spd_mult
 	flee_timer = float(def.flee_time)
+
+
+## Radar Signal Analysis: the Decoy Beacon is seen for what it is (its true rank and role), for good.
+func expose_decoy() -> void:
+	decoy_exposed = true
+	mark("analysed")
+	rank = Enemies.rank_of(def)
 
 
 ## Turns it into a Mirage's hologram: 1 HP, no armor, barrier or abilities, no bounty or leak cost, and its Mirage's rank.
@@ -312,7 +327,7 @@ func role() -> String:
 func shown_role() -> String:
 	if disguised:
 		return str(Enemies.ENEMIES[def.disguise].role)
-	return str(def.get("shown_role", role()))
+	return role() if decoy_exposed else str(def.get("shown_role", role()))
 
 
 ## The data it shows (name, blurb, role and tier): its disguise's while disguised.
@@ -343,6 +358,17 @@ func apply_slow(amount: float, duration: float) -> void:
 func set_distance(d: float) -> void:
 	distance = clampf(d, 0.0, path_len)
 	pos = curve.sample_baked(minf(distance, path_len))
+
+
+## A blink: it leaves an after-image where it stands and lands `dist` px further along its route, on the track and
+## facing along it (not along the jump, which cuts across a corner).
+func blink(dist: float) -> void:
+	blink_from = pos
+	set_distance(distance + dist)
+	track_pos = pos
+	var ahead := curve.sample_baked(minf(distance + 4.0, path_len))
+	if ahead.distance_squared_to(pos) > 0.0001:
+		facing = (ahead - pos).normalized()
 
 
 ## Where the enemy was `seconds` ago along its route (its distance then), or 0 if it hasn't been alive that long.
@@ -394,9 +420,15 @@ func on_track() -> bool:
 	return not flying or bool(def.get("track", false))
 
 
-## Towers can't pick it as a target: burrowed, or cloaked and not revealed (a Radar Tower ping).
+## Towers can't pick it as a target: burrowed, or cloaked and not revealed (a Radar Tower ping or its Total Exposure).
 func is_hidden() -> bool:
-	return burrowed or (cloaked and reveal_timer <= 0.0 and disrupt_timer <= 0.0)
+	return burrowed or (cloaked and reveal_timer <= 0.0 and disrupt_timer <= 0.0 and track_timer <= 0.0)
+
+
+## Towers won't choose it as a target: hidden, or a hologram a Radar's Illusion Filter marked as a fake. Blasts and beams
+## still hit whatever is in their way.
+func untargetable() -> bool:
+	return is_hidden() or fake_marked
 
 
 ## Can't be stunned (Rampart, Colossus).
@@ -448,7 +480,7 @@ func step(dt: float) -> void:
 			soak_dps = 0.0
 			soak_slow = 0.0
 			soak_source = null
-	for f in ["suppress_timer", "jam_timer", "repair_block", "barrier_block", "grant_block", "expose_timer", "no_dig", "disrupt_timer", "armor_break_timer"]:
+	for f in ["suppress_timer", "jam_timer", "repair_block", "barrier_block", "grant_block", "expose_timer", "no_dig", "disrupt_timer", "armor_break_timer", "track_timer"]:
 		if float(get(f)) > 0.0:
 			set(f, maxf(0.0, float(get(f)) - dt))
 	if dot_timer > 0.0:
