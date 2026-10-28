@@ -1115,6 +1115,9 @@ func _rework_fire_check(g, type: String) -> int:
 	if foe != null:
 		g.enemies.append(foe)
 		g.state = Game.State.WAVE
+		# A new tower loads before its first shot (#85); skip that here, or the enemy walks away from an Artillery's aim
+		# point before its first shell (4 s reload) lands.
+		t.cooldown = 0.0
 		await _wait(3.2)
 		await _shot("rework_e_" + type)
 		var worked: bool = t.damage_dealt > 0.0

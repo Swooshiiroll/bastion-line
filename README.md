@@ -408,7 +408,8 @@ each. Edit a number there and run `node tools/balance.mjs` (it writes the number
 ### Live tuner
 
 Launch the game with `--dev` (`godot --path . -- --dev`, or `./Bastion Line (dev).sh` in an LX build folder) and the
-live tuner opens in its own window beside the game's, following it (its Dock switch frees it; F8 hides it). It edits
+live tuner opens in its own window beside the game's. It starts undocked, so it can be dragged anywhere; its Dock switch
+keeps it beside the game, following it (F8 hides it). It edits
 every number `design/balance.md` owns while the game runs (design/live_tuner.md, issue #80):
 
 - a tab per area (enemies, modifiers, towers, waves, economy, difficulty, research, abilities, rules) lists its groups;
@@ -454,8 +455,9 @@ The commands below assume the console build is on PATH as `godot_console` (winge
    - v1 through v4 save migration, and rejection of tier-4 towers without research
    - generated music (length, level, clipping, seamless loop)
    - full bot playthroughs of Easy (40 rounds) on every map into endless mode, and a full-research
-     Medium run, the bot playing the reworked towers (these fail on the 4.0.0 line until the new roster's
-     balance lands; see Current tuning below)
+     Medium run, the bot playing the reworked towers. On the 4.0.0 line their verdicts (medal, endless,
+     masteries) are paused until the rework is done (#96): the games still run, and a lost verdict prints as
+     PAUSED instead of failing. `BOT_BALANCE_PAUSED` in `tests/TestRunner.gd` turns them back on.
 
    ```
    godot_console --headless --path . res://tests/TestRunner.tscn

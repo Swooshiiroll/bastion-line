@@ -79,7 +79,8 @@ Confirmed by the owner (2026-10-21).
 - **Field count:** 1,578, the same keys `balance.mjs --keys` lists. Two kinds of number aren't fields:
   - leak costs, which are derived;
   - arrays inside an entry, such as the Colossus's phases, which `balance.md` doesn't own either.
-- **Docking:** when the game window leaves no room on its right, the tuner docks inside the screen's right edge.
+- **Docking:** the tuner opens beside the game's window but starts undocked (owner, 2026-10-24, #94); the Dock switch
+  makes it follow the game. When the game window leaves no room on its right, it docks inside the screen's right edge.
 - **Editing:** numbers are typed into a box, with − and + buttons (a step of the number's own size).
 - **Exports:** `tweaks-<date>-<time>.json`, saved as `{game, made, changes: [{key, old, new}]}`.
 - **Tests:** `test_live_tuner` and `test_live_tuner_panel`. The panel test holds the derived values to balance.md's `=` cells.
@@ -123,5 +124,5 @@ Confirmed by the owner (2026-10-21).
   - export Drone HP 70→300 and apply it: `balance.md` and `enemies.gd` show 300 with leak 2, and `check` passes;
   - a stale `old` value is skipped and reported;
   - revert and confirm `git diff` is clean.
-- **Manual:** launch with `--dev`, check the window docks and follows, change a Siege Mech's armor mid-wave and watch the field update, then export.
+- **Manual:** launch with `--dev`, check the window opens beside the game undocked, and docks and follows with Dock on, change a Siege Mech's armor mid-wave and watch the field update, then export.
 - Push the build to LX with `tools/dev.sh lx`. The owner tests it with the dev launcher.
