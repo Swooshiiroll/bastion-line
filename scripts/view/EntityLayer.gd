@@ -47,6 +47,9 @@ func _draw() -> void:
 	var t: float = world.anim_t
 	for pool in g.pools:
 		_pool(pool, t)
+	for c in g.smokes:
+		if c.get("look", "") == "smoke":
+			_smoke(c, t)
 	# Turrets' static layers come from Draw's sprite cache here (see Draw.dyn).
 	var t0 := Time.get_ticks_usec()
 	Draw.turret_cache = true
@@ -54,7 +57,9 @@ func _draw() -> void:
 		var key: int = tw.get_instance_id()
 		var cur: float = _aim.get(key, -PI / 2.0)
 		if tw.target != null and tw.target.alive:
-			cur = lerp_angle(cur, (tw.target.pos - tw.pos).angle(), 0.6 if bool(tw.stats().get("turn_fast", false)) else 0.35)
+			# Fast traverse and the Swivel Mount (#85) turn quicker; neither changes the fire rate.
+			var fast: bool = bool(tw.stats().get("turn_fast", false)) or bool(tw.stats().get("swivel", false))
+			cur = lerp_angle(cur, (tw.target.pos - tw.pos).angle(), 0.6 if fast else 0.35)
 		if tw.type == "artillery_cannon":
 			# It points at the spot it shells, not at an enemy.
 			cur = lerp_angle(cur, (tw.aim_point - tw.pos).angle(), 0.35)
@@ -171,6 +176,21 @@ func _radar_marks(e) -> void:
 		var k: float = e.radius * 0.7
 		Draw.line(self, e.pos + Vector2(-k, -k), e.pos + Vector2(k, k), FAKE_MARK, 2.0)
 		Draw.line(self, e.pos + Vector2(-k, k), e.pos + Vector2(k, -k), FAKE_MARK, 2.0)
+
+
+## A Mortar's Smoke Shell cloud (#85): drifting grey puffs over the area that slows, thinning out as it ends.
+func _smoke(c, t: float) -> void:
+	var r: float = c.r
+	var k := clampf(float(c.t) / 0.8, 0.0, 1.0)
+	var at: Vector2 = c.pos
+	var seed_a := at.x * 0.13 + at.y * 0.07
+	Draw.disc(self, at, r, Color(0.62, 0.64, 0.66, 0.16 * k))
+	for i in 7:
+		var a := seed_a + float(i) * TAU / 7.0 + t * 0.25
+		var off := Vector2(cos(a), sin(a)) * r * (0.45 + 0.12 * sin(t * 0.9 + float(i)))
+		var pr := r * (0.38 + 0.06 * sin(t * 1.3 + float(i) * 1.7))
+		Draw.disc(self, at + off, pr, Color(0.7, 0.72, 0.74, 0.2 * k))
+	Draw.disc(self, at, r * 0.45, Color(0.78, 0.8, 0.82, 0.22 * k))
 
 
 func _enemy(e, t: float) -> void:
