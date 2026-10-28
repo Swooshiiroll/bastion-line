@@ -13,8 +13,9 @@ const ResearchPopOut = preload("res://scripts/ui/hud/ResearchPopOut.gd")
 const KnowledgePopOut = preload("res://scripts/ui/hud/KnowledgePopOut.gd")
 const SpawnerPanel = preload("res://scripts/ui/hud/SpawnerPanel.gd")
 const RetrofitPanel = preload("res://scripts/ui/hud/RetrofitPanel.gd")
+const TreePopOut = preload("res://scripts/ui/hud/TreePopOut.gd")
 ## Pop-outs that pause the battle while open.
-const PAUSING := ["research", "codex"]
+const PAUSING := ["research", "codex", "tree"]
 ## The tower panel follows the selection (GameScreen._sync_side_panel), so "close everything" and
 ## "is anything open" leave it out: Esc closes the other pop-outs first, then deselects.
 const FOLLOWS_SELECTION := ["tower"]
@@ -113,6 +114,11 @@ func open(kind: String, arg := "") -> void:
 			if rt == null or rt.retrofit >= 0:
 				return
 			p = RetrofitPanel.new(self, rt)
+		"tree":
+			var tt = screen.world.selected_tower
+			if tt == null:
+				return
+			p = TreePopOut.new(self, tt)
 		"intel":
 			p = IntelPanel.new(self)
 		"research":
@@ -131,7 +137,7 @@ func open(kind: String, arg := "") -> void:
 	p.close_requested.connect(func(): screen.close_popout(kind))
 	popouts[kind] = p
 	_pop_root.add_child(p)
-	_dim.visible = is_open("research") or is_open("codex")
+	_dim.visible = pausing_open()
 
 
 func close(kind: String) -> void:
@@ -142,7 +148,7 @@ func close(kind: String) -> void:
 	p.dismiss()
 	if kind == "shop" and not is_open("shop"):
 		hovered_build = ""
-	_dim.visible = is_open("research") or is_open("codex")
+	_dim.visible = pausing_open()
 
 
 ## True while a pop-out that pauses the battle is open.
