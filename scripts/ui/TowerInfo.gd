@@ -56,7 +56,7 @@ const FLAG_ROWS := [
 	["Stops burrowing and blinking", "disrupt"], ["Stops repairs", "block_repair"], ["Stops barrier recharge", "block_barrier"],
 	["Blocks Bulwark barriers", "block_grants"], ["Ignores barriers", "bypass_shield"], ["Hunts specialists", "hunt"],
 	["Suppresses targets", "suppress_hit"], ["Jams support", "jam"],
-	["Tracer rounds", "tracers"], ["Instant retarget, no overkill", "swivel"], ["Extra barrels hit the weakest", "weakest_extra"],
+	["Tracer rounds", "tracers"], ["Fast turn, no overkill", "swivel"], ["Extra barrels hit the weakest", "weakest_extra"],
 	["Homing", "homing"], ["Re-targets", "retarget"], ["Never misses", "never_miss"], ["Rippling salvo", "ripple"],
 	["Overloads disruptors", "overload"], ["Incendiary shells", "incendiary"], ["Shrapnel shells", "shrapnel"],
 	["Concussion shells", "concussion"], ["Combined shell", "combined"], ["Fast traverse", "turn_fast"],

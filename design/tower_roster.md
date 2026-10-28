@@ -109,7 +109,7 @@ to the Pulse Turret's 18, in fewer, harder hits). Air and ground.
 
 | Step | Name | Cost | Effect (proposed) |
 |---|---|---|---|
-| 1 | Swivel Mount | 15 | Switches to a new target instantly after a kill, and doesn't fire at enemies already about to die (no wasted rounds on swarms and holograms) |
+| 1 | Swivel Mount | 15 | Turns onto a new target faster, and doesn't fire at enemies already about to die (no wasted rounds on swarms and holograms) |
 | 2 | Side Gun | 165 | A small side gun fires at a second target at 50% damage |
 | 3 (primary) | Twin Mount | 330 | **2 targets** at full damage |
 | 4 | Belt Feed | 660 | +0.3 shots/s on every barrel |
