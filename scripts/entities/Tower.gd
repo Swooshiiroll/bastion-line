@@ -485,7 +485,7 @@ func _price(cost: int) -> int:
 func can_target(e) -> bool:
 	if e == null or not e.alive:
 		return false
-	if e.is_hidden() or (e.flying and not hits_air()) or (not e.flying and not hits_ground()):
+	if e.untargetable() or (e.flying and not hits_air()) or (not e.flying and not hits_ground()):
 		return false
 	var r := get_range()
 	return pos.distance_squared_to(e.pos) <= r * r

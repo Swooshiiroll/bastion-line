@@ -47,6 +47,7 @@ const STAT_ROWS := [
 	["Crushing damage/s", "grip_dps", "%d"], ["Slam radius", "slam_radius", "%d"], ["Slam stun", "slam_stun", "%.1fs"], ["Heavy roles resist less", "grip_relief", "pct"],
 	["Armour pulled", "armor_pull", "%d"], ["Repel every", "flip_every", "%.0fs"], ["Repel damage", "flip_damage", "%d"],
 	["Ping every", "ping_every", "%.1fs"], ["Reveal lasts", "reveal_time", "%.1fs"], ["Radiation damage/s", "rad_dps", "%d"], ["Radiation radius", "rad_range", "%d"],
+	["Stays exposed after leaving", "exposure", "%.0fs"],
 	["Build discount in field", "build_discount", "pct"], ["Barrier damage", "shield_mult", "x%.1f"], ["Crit chance given", "aug_crit", "pct"], ["Crit damage", "crit_mult", "x%.1f"],
 	["Energy conversion", "energy_conv", "pct"], ["Ricochet chance", "ricochet", "pct"], ["Bounce strength", "ricochet_str", "pct"],
 ]
@@ -62,7 +63,8 @@ const FLAG_ROWS := [
 	["Concussion shells", "concussion"], ["Combined shell", "combined"], ["Fast traverse", "turn_fast"],
 	["Pulled armour is gone for good", "pull_perm"], ["Grip lock", "grip_lock"], ["Slam shatters barriers", "slam_shatter"], ["Undo once a round", "undo"],
 	["Wave halves barriers", "shatter_half"], ["Constant reveal", "constant"], ["Early warning", "early_warning"], ["Remote link", "remote_link"], ["Bounces can bounce", "bounce_again"],
-	["Radar: reveals cloaked", "radar"], ["Mist soaks a neighbour", "mist"], ["Acid strips for good", "acid_perm"], ["Constant cold field", "cold_front"], ["Missiles loadout", "lo_missiles"], ["Bombs loadout", "lo_bombs"],
+	["Radar: reveals cloaked", "radar"], ["Sees through decoys", "unmask_decoy"], ["Breaks disguises", "unmask_mask"],
+	["Marks holograms as fakes", "unmask_mirage"], ["Mist soaks a neighbour", "mist"], ["Acid strips for good", "acid_perm"], ["Constant cold field", "cold_front"], ["Missiles loadout", "lo_missiles"], ["Bombs loadout", "lo_bombs"],
 	["Laser loadout", "lo_laser"], ["Full kit loadout", "lo_full"],
 ]
 ## Short keys for the one-line summary.
