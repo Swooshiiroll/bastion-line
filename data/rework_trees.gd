@@ -74,7 +74,7 @@ static var TREES := {
 					{
 						"name": "Heavier Rounds",
 						"cost": 55,
-						"blurb": "+6 damage",
+						"blurb": "+6 damage (22)",
 						"set": {},
 						"add": {
 							"damage": 6.0,
@@ -82,42 +82,43 @@ static var TREES := {
 					},
 					{
 						"name": "Hardened Tips",
-						"cost": 40,
-						"blurb": "Its hits ignore 2 points of armour",
+						"cost": 165,
+						"blurb": "+6 damage (28); its hits ignore 2 points of armour",
 						"set": {},
 						"add": {
 							"armor_flat": 2.0,
-						},
-					},
-					{
-						"name": "AP Rounds",
-						"cost": 405,
-						"blurb": "Ignores 50% of armour; +6 damage",
-						"set": {},
-						"add": {
-							"armor_pct": 0.5,
 							"damage": 6.0,
 						},
 					},
 					{
+						"name": "AP Rounds",
+						"cost": 530,
+						"blurb": "Ignores 50% of armour; +8 damage (36)",
+						"set": {},
+						"add": {
+							"armor_pct": 0.5,
+							"damage": 8.0,
+						},
+					},
+					{
 						"name": "Tungsten Core",
-						"cost": 1085,
-						"blurb": "Ignores 75% of armour; +8 damage",
+						"cost": 1365,
+						"blurb": "Ignores 75% of armour; +10 damage (46)",
 						"set": {},
 						"add": {
 							"armor_pct": 0.25,
-							"damage": 8.0,
+							"damage": 10.0,
 						},
 					},
 				],
 				"mastery": {
 					"name": "Sabot Rounds",
-					"cost": 2475,
-					"blurb": "Ignores armour fully; 44 damage per hit",
+					"cost": 3555,
+					"blurb": "Ignores armour fully; +12 damage (58 per hit)",
 					"set": {},
 					"add": {
 						"armor_pct": 0.25,
-						"damage": 8.0,
+						"damage": 12.0,
 					},
 				},
 			},
@@ -184,51 +185,56 @@ static var TREES := {
 				"nodes": [
 					{
 						"name": "Swivel Mount",
-						"cost": 15,
-						"blurb": "Turns onto a new target faster, and doesn't fire at enemies already about to die (no wasted rounds on swarms and holograms)",
+						"cost": 85,
+						"blurb": "+0.5 shots/s (1.7); turns onto a new target faster, and doesn't fire at enemies already about to die (no wasted rounds on swarms and holograms)",
 						"set": {
 							"swivel": true,
 						},
-						"add": {},
+						"add": {
+							"rate": 0.5,
+						},
 					},
 					{
 						"name": "Side Gun",
-						"cost": 165,
-						"blurb": "A small side gun fires at a second target at 50% damage",
+						"cost": 440,
+						"blurb": "+0.5 shots/s (2.2); a small side gun fires at a second target at 50% damage",
 						"set": {},
 						"add": {
 							"side_gun": 0.5,
+							"rate": 0.5,
 						},
 					},
 					{
 						"name": "Twin Mount",
-						"cost": 330,
-						"blurb": "2 targets at full damage",
+						"cost": 1155,
+						"blurb": "+0.5 shots/s (2.7); 2 targets at full damage",
 						"set": {},
 						"add": {
 							"multishot": 2.0,
 							"side_gun": -0.5,
+							"rate": 0.5,
 						},
 					},
 					{
 						"name": "Belt Feed",
-						"cost": 660,
-						"blurb": "+0.3 shots/s on every barrel",
+						"cost": 1100,
+						"blurb": "+0.5 shots/s on every barrel (3.2)",
 						"set": {},
 						"add": {
-							"rate": 0.3,
+							"rate": 0.5,
 						},
 					},
 				],
 				"mastery": {
 					"name": "Triple Mount",
-					"cost": 3300,
-					"blurb": "3 targets; the extra barrels go for the weakest enemies in range (swarms, holograms)",
+					"cost": 10325,
+					"blurb": "+0.5 shots/s (3.7); 3 targets; the extra barrels go for the weakest enemies in range (swarms, holograms)",
 					"set": {
 						"weakest_extra": true,
 					},
 					"add": {
 						"multishot": 1.0,
+						"rate": 0.5,
 					},
 				},
 			},

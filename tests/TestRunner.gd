@@ -1009,7 +1009,7 @@ func test_economy() -> void:
 	check(not g.upgrade_tower(t, "b"), "upgrade needs credits")
 	g.gold = 1000
 	check(not g.upgrade_tower(t, "bogus"), "an unknown path is refused")
-	check(t.upgrade_cost("b") == 25 and t.upgrade_cost() == 40, "path costs reported (the primary's next step without a key)")
+	check(t.upgrade_cost("b") == 25 and t.upgrade_cost() == 165, "path costs reported (the primary's next step without a key)")
 	check(g.upgrade_tower(t, "b") and t.started == ["a", "b"], "a second path can be started")
 	check(not g.upgrade_tower(t, "c"), "the third path is locked once two are started")
 	check(g.gold == 1000 - 25, "the step's cost is deducted")
@@ -2298,26 +2298,26 @@ func test_rework_paths() -> void:
 	g.gold = 10000
 	var t = g.place_tower("gun_turret", Vector2i(2, 3))
 	check(t.can_buy("a") and t.can_buy("b") and t.can_buy("c"), "the paths open from stock, no Retrofit needed")
-	check(t.upgrade_cost("a") == 55 and t.upgrade_cost("b") == 25 and t.upgrade_cost("c") == 15, "step 1 prices 55 / 25 / 15")
+	check(t.upgrade_cost("a") == 55 and t.upgrade_cost("b") == 25 and t.upgrade_cost("c") == 85, "step 1 prices 55 / 25 / 85")
 	buy_steps(g, t, "a", 1)
 	check(near(t.stats().damage, 22.0), "Heavier Rounds: +6 damage")
 	buy_steps(g, t, "a", 1)
-	check(near(t.stats().armor_flat, 2.0), "Hardened Tips: ignore 2 armour")
-	check(t.upgrade_cost("a") == 405, "step 3 costs 405")
+	check(near(t.stats().armor_flat, 2.0) and near(t.stats().damage, 28.0), "Hardened Tips: ignore 2 armour, +6 damage")
+	check(t.upgrade_cost("a") == 530, "step 3 costs 530")
 	buy_steps(g, t, "a", 1)
-	check(t.primary() == "a" and near(t.stats().armor_pct, 0.5) and near(t.stats().damage, 28.0), "AP Rounds: the primary locks in")
+	check(t.primary() == "a" and near(t.stats().armor_pct, 0.5) and near(t.stats().damage, 36.0), "AP Rounds: the primary locks in")
 	buy_steps(g, t, "b", 3)
 	check(t.depth.b == 2 and not t.can_buy("b") and t.block_reason("b").contains("secondary"), "the secondary stops at 2")
 	check(near(t.stats().crit, 0.10) and near(t.stats().range, 160.0), "its two steps still count (crit 10%, range +30)")
 	check(not t.can_buy("c") and t.block_reason("c").contains("two"), "the third path is locked")
 	buy_steps(g, t, "a", 1)
-	check(near(t.stats().armor_pct, 0.75) and near(t.stats().damage, 36.0), "Tungsten Core: 75% and +8")
+	check(near(t.stats().armor_pct, 0.75) and near(t.stats().damage, 46.0), "Tungsten Core: 75% and +10")
 	check(t.block_reason("a").contains("Mastery"), "the mastery needs the tower's research (%s)" % t.block_reason("a"))
 	t.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
 	t.invalidate()
-	check(t.can_buy("a") and t.upgrade_cost("a") == 2475, "with the research the mastery opens at 2,475")
+	check(t.can_buy("a") and t.upgrade_cost("a") == 3555, "with the research the mastery opens at 3,555")
 	buy_steps(g, t, "a", 1)
-	check(t.mastered and near(t.stats().armor_pct, 1.0) and near(t.stats().damage, 44.0), "Sabot Rounds: full armour piercing, 44 damage")
+	check(t.mastered and near(t.stats().armor_pct, 1.0) and near(t.stats().damage, 58.0), "Sabot Rounds: full armour piercing, 58 damage")
 	check(t.display_name() == "Sabot Rounds" and t.tier == 4, "it takes the mastery's name")
 
 
@@ -2333,7 +2333,30 @@ func test_rework_range_path_and_multi_path() -> void:
 	buy_steps(g, m, "c", 3)
 	check(int(m.stats().multishot) == 2, "Twin Mount: 2 targets")
 	buy_steps(g, m, "c", 2)
-	check(int(m.stats().multishot) == 3 and bool(m.stats().weakest_extra) and near(m.stats().rate, 1.5), "Triple Mount: 3 targets (+0.3 shots/s from Belt Feed)")
+	check(int(m.stats().multishot) == 3 and bool(m.stats().weakest_extra) and near(m.stats().rate, 3.7), "Triple Mount: 3 targets at 3.7 shots/s (every step adds rate)")
+
+
+## Owner's Build 2 list, batch 7 (#104): every Power step adds shot damage and every Multi-Target step adds fire rate, priced
+## by the value formula.
+func test_gun_turret_steps_add() -> void:
+	var g = new_game()
+	var a = g.place_tower("gun_turret", spot(g, "gun_turret", 72))
+	var dmg := []
+	var rate := []
+	for d in range(1, 6):
+		var depth := mini(d, 4)
+		dmg.append(a.compose(-1, {"a": depth, "b": 0, "c": 0}, ["a"], d == 5).damage)
+		rate.append(a.compose(-1, {"a": 0, "b": 0, "c": depth}, ["c"], d == 5).rate)
+	check(dmg == [22.0, 28.0, 36.0, 46.0, 58.0], "Power: every step adds damage, 22 / 28 / 36 / 46 / 58 (%s)" % [dmg])
+	var want := [1.7, 2.2, 2.7, 3.2, 3.7]
+	check(range(5).all(func(i): return near(rate[i], want[i])), "Multi-Target: every step adds rate, 1.7 / 2.2 / 2.7 / 3.2 / 3.7 (%s)" % [rate])
+	var tr: Dictionary = load("res://data/rework_trees.gd").TREES["gun_turret"]
+	var costs := []
+	for p in [tr.paths[0], tr.paths[2]]:
+		for n in p.nodes:
+			costs.append(int(n.cost))
+		costs.append(int(p.mastery.cost))
+	check(costs == [55, 165, 530, 1365, 3555, 85, 440, 1155, 1100, 10325], "the formula's prices (%s)" % [costs])
 
 
 func test_rework_armour_piercing() -> void:
@@ -2446,13 +2469,13 @@ func test_upgrades_add() -> void:
 	g.gold = 100000
 	var a = g.place_tower("gun_turret", spot(g, "gun_turret", 70))
 	var ab: Dictionary = a.compose(-1, {"a": 4, "b": 0, "c": 0}, ["a"], true)
-	check(near(ab.damage, 44.0) and near(ab.armor_pct, 1.0), "path A alone keeps its old totals: 44 damage, all armour (%s, %s)" % [ab.damage, ab.armor_pct])
+	check(near(ab.damage, 58.0) and near(ab.armor_pct, 1.0), "path A alone adds up to its total: 58 damage, all armour (%s, %s)" % [ab.damage, ab.armor_pct])
 	var bb: Dictionary = a.compose(-1, {"a": 0, "b": 4, "c": 0}, ["b"], true)
 	check(near(bb.range, 230.0) and near(bb.crit, 0.3), "and path B its range 230 and 30% crits")
 	var c = g.place_tower("gun_turret", spot(g, "gun_turret", 71))
 	g.buy_retrofit(c, 0)
 	buy_steps(g, c, "c", 4)
-	check(near(c.stats().rate, 1.8), "Water-Cooled Barrel (+0.3) and Belt Feed (+0.3) stack: 1.2 to 1.8, not overwritten (%.2f)" % c.stats().rate)
+	check(near(c.stats().rate, 3.5), "Water-Cooled Barrel (+0.3) and path C's rate (+2.0 up to Belt Feed) stack: 1.2 to 3.5, not overwritten (%.2f)" % c.stats().rate)
 	check(int(c.stats().multishot) == 2 and near(c.stats().side_gun, 0.0), "Twin Mount: two barrels, the side gun folded in")
 	var errors := []
 	var Rework = load("res://data/rework_trees.gd")
