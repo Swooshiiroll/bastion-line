@@ -405,7 +405,8 @@ each. Edit a number there and run `node tools/balance.mjs` (it writes the number
 ### Live tuner
 
 Launch the game with `--dev` (`godot --path . -- --dev`, or `./Bastion Line (dev).sh` in an LX build folder) and the
-live tuner opens in its own window beside the game's, following it (its Dock switch frees it; F8 hides it). It edits
+live tuner opens in its own window beside the game's. It starts undocked, so it can be dragged anywhere; its Dock switch
+keeps it beside the game, following it (F8 hides it). It edits
 every number `design/balance.md` owns while the game runs (design/live_tuner.md, issue #80):
 
 - a tab per area (enemies, modifiers, towers, waves, economy, difficulty, research, abilities, rules) lists its groups;
