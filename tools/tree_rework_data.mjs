@@ -52,8 +52,8 @@ const text = `extends RefCounted
 ## (names and blurbs). Edit those and re-run the generator; don't edit this file by hand.
 ##
 ## The reworked towers (issue #59). Per tower: \`base\`, \`retrofits\` (the player picks one of up to three), and \`paths\`
-## (a, b, c), each with four \`nodes\` and a \`mastery\`. A node's \`set\` values replace the stat and its \`add\` values add to it;
-## nodes apply in order on top of the base (the Retrofit, then each path's steps).
+## (a, b, c), each with four \`nodes\` and a \`mastery\`. A node's \`add\` values add to the stat and its \`set\` values replace it
+## (upgrades only set flags; issue #85); nodes apply in order on top of the base (the Retrofit, then each path's steps).
 
 const ORDER := [${order.map(q).join(", ")}]
 

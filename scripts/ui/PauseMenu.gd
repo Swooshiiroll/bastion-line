@@ -34,7 +34,7 @@ func _ready() -> void:
 	v.add_child(_status)
 	v.add_child(UiKit.button("Settings", Callable(screen, "open_settings"), Vector2(0, 42), true))
 	v.add_child(UiKit.button("Quit to Main Menu", Callable(screen, "quit_to_menu"), Vector2(0, 42), true))
-	var help := UiKit.wrap_label("B shop  -  Y Retrofit (then 1-3)  -  U / I / O upgrade\nX sell  -  T targeting  -  G air/ground priority  -  R research  -  N intel  -  K Codex\nSpace launch / call round  -  Q orbital  -  W chrono  -  F speed  -  A auto\nWheel zoom  -  middle-drag / arrows pan  -  Home reset view  -  F3 FPS\nEsc closes every open menu", 380, 12, UiKit.DIM)
+	var help := UiKit.wrap_label("B shop  -  Y Retrofit (then 1-3)  -  U / I / O upgrade  -  E tree\nM move target  -  X sell  -  T targeting  -  G air/ground priority  -  R research  -  N intel  -  K Codex\nSpace launch / call round  -  Q orbital  -  W chrono  -  F speed  -  A auto\nWheel zoom  -  middle-drag / arrows pan  -  Home reset view  -  F3 FPS\nEsc closes every open menu", 380, 12, UiKit.DIM)
 	help.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	v.add_child(help)
 	resume.grab_focus.call_deferred()

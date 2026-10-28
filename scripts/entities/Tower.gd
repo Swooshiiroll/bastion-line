@@ -422,6 +422,29 @@ func eff_rate() -> float:
 	return float(stats().get("rate", 1.0)) * (1.0 + float(stats().get("rate_pct", 0.0))) * (1.0 + buff_rate) * (1.0 - debuff_rate)
 
 
+## Starts its weapons on a full reload (#85): a new tower, and every tower at the start of a round, has to load before
+## its first shot. The Magneto's flip and the Tractor's recharge count as its reload; a Radar's ping is a sensor, not a
+## shot, so it pings at once.
+func load_up() -> void:
+	var s := stats()
+	match type:
+		"magneto_tower":
+			cooldown = float(s.get("flip_every", 0.0))
+		"tractor_tower":
+			cooldown = float(s.get("recharge", 0.0))
+		"radar_tower":
+			pass
+		_:
+			cooldown = 1.0 / maxf(0.01, eff_rate())
+	if type == "cas_gunship":
+		var mult: float = float(s.get("rate_mult", 1.0)) * (1.0 + buff_rate)
+		gun_cds["gat"] = 1.0 / maxf(0.01, float(s.get("rate", 1.0)) * mult)
+		if s.has("ac_rate"):
+			gun_cds["ac"] = 1.0 / maxf(0.01, float(s.ac_rate) * mult)
+		if s.has("ms_rate"):
+			gun_cds["ms"] = 1.0 / maxf(0.01, float(s.ms_rate) * mult)
+
+
 func get_range() -> float:
 	return float(stats().get("range", 100.0)) * (1.0 + buff_range) * (1.0 + (SITE_RANGE if site == "H" else 0.0)) * (1.0 - debuff_range)
 
@@ -464,7 +487,7 @@ func _price(cost: int) -> int:
 func can_target(e) -> bool:
 	if e == null or not e.alive:
 		return false
-	if e.is_hidden() or (e.flying and not hits_air()) or (not e.flying and not hits_ground()):
+	if e.untargetable() or (e.flying and not hits_air()) or (not e.flying and not hits_ground()):
 		return false
 	var r := get_range()
 	return pos.distance_squared_to(e.pos) <= r * r

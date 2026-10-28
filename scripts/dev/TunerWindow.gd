@@ -1,7 +1,8 @@
 extends Window
-## The live tuner's window (issue #80, design/live_tuner.md): a native window docked to the right of the game's, as tall
-## as it, following it as it moves. Its Dock switch frees it (to drag it to another monitor); if the game fills the
-## screen it docks inside the screen's right edge. Boot opens it when the game is launched with --dev; F8 shows or hides it.
+## The live tuner's window (issue #80, design/live_tuner.md): a native window that opens to the right of the game's, as tall
+## as it, and starts undocked (#94) so it can be dragged anywhere. Its Dock switch keeps it beside the game, following it as
+## it moves; if the game fills the screen it docks inside the screen's right edge. Boot opens it when the game is launched
+## with --dev; F8 shows or hides it.
 
 const TunerPanel = preload("res://scripts/dev/TunerPanel.gd")
 const UiKit = preload("res://scripts/ui/UiKit.gd")
@@ -9,7 +10,7 @@ const UiKit = preload("res://scripts/ui/UiKit.gd")
 const WIDTH := 640
 
 var panel: Panel
-var docked := true
+var docked := false
 
 
 func _init() -> void:
@@ -25,7 +26,7 @@ func _init() -> void:
 	add_child(panel)
 	var dock := CheckBox.new()
 	dock.text = "Dock"
-	dock.button_pressed = true
+	dock.button_pressed = docked
 	dock.focus_mode = Control.FOCUS_NONE
 	dock.tooltip_text = "Keep the tuner beside the game's window"
 	dock.toggled.connect(func(on: bool): docked = on)
