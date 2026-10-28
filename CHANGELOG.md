@@ -42,6 +42,7 @@ so write for players.
   - **Rocket Salvo:** each rocket leaves its own tube, straight out; the tubes empty when it fires and load again as it reloads.
   - **Laser Tower:** it turns to face a new target before its beam fires.
   - **Artillery Cannon:** shells leave the muzzle and fly an arc pointing the way they go; every shell of a Rolling Barrage fires with its own recoil; the Long Penetrator's yellow band fits on the shell, and a Shell Magazine's heavy round has a red band instead of a red ring.
+- **Upgrades add, and towers start unloaded (#85):** every upgrade now adds to the stat it improves instead of replacing it, so a Retrofit and a second path stack with the main path (a Water-Cooled Barrel and Belt Feed take the Gun Turret from 1.2 to 1.8 shots a second instead of the path undoing the Retrofit); each path alone ends where it did. A new tower, and every tower when a round starts, loads before its first shot. The Swivel Mount turns onto a new target faster instead of skipping its reload after a kill, so the Gun Turret's fire rate no longer jumps when it switches. Mortar shells land where they were aimed (ahead of a walking target) instead of following it, Smoke Shells leave a visible cloud over the area they slow, burning enemies show bigger flames, and the Drone Bay takes 2×2 tiles.
 - **Tower art against the design pages, group 2 (#90):**
   - Every turret keeps turning toward its next enemy while it reloads, instead of waiting for its next shot.
   - Railgun: the housing recoils on every shot, the copper coils and the mouth glow as it charges, and each of the Twin Rails fires from its own barrel in turn.
@@ -50,6 +51,10 @@ so write for players.
   - Chemical Plant: a lobbed stream of acid drops onto the enemy instead of a straight line (gel glints, bubbles in the Concentrated Acid, and a mist for the Mist Nozzle's neighbour); the Twin Nozzles' second sprayer sprays from its own nozzle.
 - **Gun Turret paths (#104):** every Power step adds shot damage (+6, +6, +8, +10, +12: Sabot Rounds hit for 58, up from 44), and every Multi-Target step adds fire rate (+0.5 a step: Triple Mount fires 3.7 shots a second, up from 1.5). Their prices follow the pricing formula.
 - **Ripple Salvo's new look (#104):** the Rocket Salvo's Payload mastery is rebuilt as Launch Cells: an armoured deck of eight launch cells that never turns. The hatches slide open one after another as the salvo ripples out, each with a flash and a puff of smoke, and close again as it reloads; each rocket rises from its own cell.
+- **Constant Spray replaces Twin Nozzles (#104):**
+  - **The spray:** the Chemical Plant's Speed mastery now sprays without stopping. It sweeps a 120° fan centred on its target, one pass per spray interval (every 0.83 s), soaking every enemy the jet crosses and topping up ones already soaked. The soak lasts 4 s.
+  - **With the Mist Nozzle:** the fan widens to 160° and the jet leaves as a billowing mist cloud.
+  - **Look and price:** the plant gets a gold sprinkler turret whose spray bar follows the sweep. It costs 8,810.
 
 ### Behind the scenes
 - **Bot balance verdicts paused for the rework (#96):** the bot still plays every test game, but whether it wins, reaches endless or buys masteries no longer fails the tests until the tower rework is done; those results print as PAUSED.
