@@ -4,7 +4,7 @@ extends RefCounted
 ##
 ## `look` is the tower's look key "r|a|b|c": the Retrofit (-1 none, 0 bigger dish, 1 signal processor, 2 early warning) and the depth of
 ## each path, 5 on the path that took its mastery. a = Power/Range, b = Speed/Frequency, c = Special Targeting. The station is cached
-## (it never turns); the dish and its sweep, the radiation circle, the panels' lights and the turrets are live. `extra[0]` is the
+## (it never turns); the dish, the radiation circle, the panels' lights and the turrets are live. `extra[0]` is the
 ## time one sweep takes (the ping period; the dish turns once per sweep).
 
 const Draw = preload("res://scripts/view/Draw.gd")
@@ -43,6 +43,25 @@ static func reveal_mark(ci: CanvasItem, p: Vector2, r: float, col: Color, a: flo
 		Draw.line(ci, c0, c0 + d.rotated(-PI * 0.75) * r * 0.6, Color(col, a), 1.5)
 
 
+## The sweep's angle at time `t` for a ping every `period` s (the dish turns once per sweep).
+static func sweep_angle(t: float, period: float) -> float:
+	return t * TAU / maxf(0.4, period)
+
+
+## The beam sweeping out to the tower's whole reach `r` (#126), drawn on the field under the towers: a fading wedge behind a
+## bright leading line, and the gold back beam with the Frequency mastery. Same angle and colour as the dish.
+static func world_sweep(ci: CanvasItem, c: Vector2, r: float, t: float, period: float, look: String, acc: Color) -> void:
+	var L := levels(look)
+	var col: Color = GOLD if L.F >= 5 else acc
+	var ang := sweep_angle(t, period)
+	for i in 6:
+		var a0 := ang - float(i) * 0.08
+		Draw.poly(ci, PackedVector2Array([c, c + Vector2.from_angle(a0 - 0.08) * r, c + Vector2.from_angle(a0) * r]), Color(col, 0.16 * (1.0 - float(i) / 6.0)))
+	Draw.line(ci, c, c + Vector2.from_angle(ang) * r, Color(col, 0.7), 1.3)
+	if L.F >= 5:
+		Draw.line(ci, c, c + Vector2.from_angle(ang + PI) * r, Color(GOLD, 0.6), 1.0)
+
+
 static func rotated(c: Vector2, k: float, v: Vector2, rt: float) -> Vector2:
 	return c + v.rotated(rt) * k
 
@@ -52,7 +71,7 @@ static func draw(ci: CanvasItem, c: Vector2, _aim: float, s: float, t: float, _f
 	var k := s
 	var col := acc
 	var period: float = maxf(0.4, float(extra[0])) if extra.size() > 0 and extra[0] != null else 3.0
-	var ang := t * TAU / period
+	var ang := sweep_angle(t, period)
 	var gold1: bool = L.P >= 5
 	var gold2: bool = L.F >= 5
 	var gold3: bool = L.U >= 5
@@ -146,13 +165,7 @@ static func draw(ci: CanvasItem, c: Vector2, _aim: float, s: float, t: float, _f
 		var pulse := 0.5 + 0.5 * sin(t * 3.0)
 		Draw.disc(ci, c, rad_px, Color(rc, 0.07 + 0.05 * pulse))
 		Draw.ring(ci, c, rad_px * 0.92, Color(rc, 0.3), 1.0)
-	var span := 24.0 * k
-	for i in 6:
-		var a0 := ang - float(i) * 0.08
-		Draw.poly(ci, PackedVector2Array([c, c + Vector2.from_angle(a0 - 0.08) * span, c + Vector2.from_angle(a0) * span]), Color(lc2 if L.F >= 5 else col, 0.16 * (1.0 - float(i) / 6.0)))
-	Draw.line(ci, c, c + Vector2.from_angle(ang) * span, Color(lc2 if L.F >= 5 else col, 0.7), 1.3)
-	if L.F >= 5:
-		Draw.line(ci, c, c + Vector2.from_angle(ang + PI) * span, Color(GOLD, 0.6), 1.0)
+	# The sweep itself reaches the whole range, so it's drawn on the field (world_sweep, #126), not here.
 	for sg in [-1.0, 0.0, 1.0]:
 		Draw.bar(ci, c, c + Vector2.from_angle(ang + sg * 0.85) * (rd - 0.2) * k, 1.1 * k, Draw.METAL_L)
 	if L.F >= 5:

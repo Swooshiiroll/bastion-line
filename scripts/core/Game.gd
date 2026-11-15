@@ -38,9 +38,6 @@ const RETARGET_DELAY := 0.1
 ## Mines are at least this far apart (px), and land up to MINE_SPREAD to either side of the lane's middle.
 const MINE_GAP := 18.0
 const MINE_SPREAD := 7.0
-## The Mine Layer throws where ground enemies will be in this many seconds, within MINE_NEAR px of it (#110).
-const MINE_LEAD := 1.0
-const MINE_NEAR := 24.0
 ## The CAS Gunship's plane flies to a new orbit at this speed (px a second).
 static var CAS_SPEED := 180.0
 ## Mortar shells lead a moving target (1) or land where it was when fired (0): a switch in the live tuner (#110).
@@ -1593,14 +1590,9 @@ func _update_mine_layer(t, s: Dictionary, dt: float) -> void:
 
 
 ## A free point on the lanes inside reach of the tower, shifted a little to either side of the lane's middle; null if there is
-## none. Free means no mine within MINE_GAP. With ground enemies in reach it picks among the spots just ahead of them (where
-## they'll be in MINE_LEAD s, #110), otherwise anywhere. The pick is seeded by the run and the tower, so a replay lays the same.
+## none. Free means no mine within MINE_GAP. It lays mindlessly: enemies never steer the pick (#126). The pick is seeded by the
+## run and the tower, so a replay lays the same.
 func _mine_spot(t, reach: float):
-	var ahead: Array = []
-	for e in enemies:
-		if e.alive and not e.flying and not e.hologram and e.pos.distance_squared_to(t.pos) <= (reach + 40.0) * (reach + 40.0):
-			ahead.append(lead_point(e, MINE_LEAD))
-	var near: Array = []
 	var spots: Array = []
 	var n := 0
 	for curve in grid.ground_paths:
@@ -1613,12 +1605,8 @@ func _mine_spot(t, reach: float):
 				var q: Vector2 = p + side * (_mine_noise(t, n) * 2.0 - 1.0) * MINE_SPREAD
 				if _mine_free(q):
 					spots.append(q)
-					if ahead.any(func(a): return a.distance_squared_to(q) <= MINE_NEAR * MINE_NEAR):
-						near.append(q)
 			n += 1
 			off += 10.0
-	if not near.is_empty():
-		spots = near
 	if spots.is_empty():
 		return null
 	return spots[mini(int(_mine_noise(t, -1) * float(spots.size())), spots.size() - 1)]
@@ -2446,7 +2434,6 @@ func _fire_salvo(t, s: Dictionary) -> void:
 		# Each rocket leaves its own tube's mouth, straight out along the launcher, before it steers (#90).
 		p.pos = RocketSalvoArt.muzzle(t.pos, t.aim, 1.0 if t.size <= 1 else 1.8, look, i)
 		p.start = p.pos
-		p.vel = dir * float(s.proj_speed)
 		p.target = tgt
 		p.target_pos = tgt.pos
 		p.speed = float(s.proj_speed)
@@ -2456,6 +2443,9 @@ func _fire_salvo(t, s: Dictionary) -> void:
 		p.homing = bool(s.get("homing", false))
 		p.retarget = bool(s.get("retarget", false))
 		p.never_miss = bool(s.get("never_miss", false))
+		# A dumb rocket (no Seeker Heads) flies one straight line at where its target was (#126); a seeker leaves along the
+		# launcher and steers.
+		p.vel = dir * p.speed if p.homing or p.never_miss else (tgt.pos - p.pos).normalized() * p.speed
 		p.smoke_slow = float(s.get("smoke_slow", 0.0))
 		p.smoke_time = float(s.get("smoke_time", 0.0))
 		p.ground_burn = float(s.get("ground_burn", 0.0))
@@ -2555,8 +2545,9 @@ func _update_projectile(p, dt: float) -> void:
 		p.pos += to.normalized() * step
 
 
-## A Rocket Salvo rocket: waits out its hold (a rippling salvo), then flies. Without seekers it goes to where its target was;
-## homing curves onto it, re-targeting steers onto the nearest enemy if it dies, never-miss turns fast enough to always arrive.
+## A Rocket Salvo rocket: waits out its hold (a rippling salvo), then flies. Without seekers it flies a straight line to where its
+## target was (#126); homing curves onto it, re-targeting steers onto the nearest enemy if it dies, never-miss turns fast enough
+## to always arrive.
 func _update_rocket(p, dt: float) -> void:
 	if p.hold > 0.0:
 		p.hold -= dt
@@ -2568,8 +2559,8 @@ func _update_rocket(p, dt: float) -> void:
 		if p.target != null and p.target.alive:
 			p.target_pos = p.target.pos
 	var to: Vector2 = p.target_pos - p.pos
-	# Out of the tube straight, then it steers.
-	if p.traveled >= ROCKET_STRAIGHT:
+	# Out of the tube straight, then a seeker steers; a dumb rocket never turns.
+	if (p.homing or p.never_miss) and p.traveled >= ROCKET_STRAIGHT:
 		p.vel = p.vel.lerp(to.normalized() * p.speed, clampf((40.0 if p.never_miss else MISSILE_TURN) * dt, 0.0, 1.0))
 	var step: Vector2 = p.vel * dt
 	p.traveled += step.length()
