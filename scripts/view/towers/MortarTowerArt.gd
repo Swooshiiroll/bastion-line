@@ -92,7 +92,7 @@ static func bore(ci: CanvasItem, p: Vector2, k: float, f0: float, col: Color, L:
 	var p2 := kp(L, 0, 1)
 	var s2 := kp(L, 1, 1)
 	Draw.oval(ci, p, 3.9 * RX * k * f, 6.9 * k * f, aim, Draw.METAL_L, 1.2)
-	Draw.oval(ci, p + Draw.LIGHT * 0.4 * k, 3.5 * k * f, 6.2 * k * f, aim, Draw.METAL_L.lightened(0.12))
+	Draw.oval(ci, p + Draw.light() * 0.4 * k, 3.5 * k * f, 6.2 * k * f, aim, Draw.METAL_L.lightened(0.12))
 	if x1 == "A":
 		ell(ci, p, 3.6 * RX * k * f, 6.4 * k * f, aim, STEEL, 1.6 * k)
 	if s2 == "C":

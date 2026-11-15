@@ -9,14 +9,14 @@
   ],
   "scenarios": {
     "meadow medium r40": {
-      "draw_calls": 1681,
-      "primitives": 59938,
-      "slow_calls": 0
+      "draw_calls": 1239,
+      "primitives": 38266,
+      "slow_calls": 4
     },
     "canyon hard r70": {
-      "draw_calls": 1134,
-      "primitives": 37912,
-      "slow_calls": 0
+      "draw_calls": 1194,
+      "primitives": 37531,
+      "slow_calls": 4
     }
   }
 }
