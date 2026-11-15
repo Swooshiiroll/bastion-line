@@ -15,6 +15,7 @@ const Tower = preload("res://scripts/entities/Tower.gd")
 const Research = preload("res://scripts/core/Research.gd")
 const Enemies = preload("res://data/enemies.gd")
 const Modifiers = preload("res://data/modifiers.gd")
+const WaveBuilder = preload("res://scripts/core/WaveBuilder.gd")
 const Waves = preload("res://data/waves.gd")
 const Difficulty = preload("res://data/difficulty.gd")
 const Tuner = preload("res://scripts/dev/Tuner.gd")
@@ -39,6 +40,8 @@ var call_round := 1
 ## Sandbox Spawner: the modifiers its cards spawn elites with (empty: plain enemies).
 var spawn_mods: Array = []
 var sandbox_research_mode := "mine"
+## Sandbox wave builder (#118): the wave being built, remembered in the profile on every edit.
+var wave_groups: Array = []
 
 ## RP the medal paid this run (shown again on the end screen).
 var _medal_rp := 0
@@ -48,6 +51,8 @@ func setup_new(map_id: String, difficulty := "medium", sandbox := false) -> void
 	game = Game.new(map_id, 0, difficulty, SaveManager.research_owned())
 	if sandbox:
 		game.make_sandbox()
+		wave_groups = SaveManager.sandbox_wave()
+		game.built_wave = wave_groups.duplicate(true)
 
 
 func setup_with(g) -> void:
@@ -286,6 +291,89 @@ func toggle_spawner() -> void:
 		hud.open("spawner")
 
 
+## V: the wave builder beside the Spawner (opening the Spawner too); V again closes the builder.
+func toggle_builder() -> void:
+	if not game.sandbox or _ended:
+		return
+	if hud.is_open("builder"):
+		hud.close("builder")
+		return
+	if not hud.is_open("spawner"):
+		hud.open("spawner")
+	hud.open("builder")
+
+
+## Adds a group of `type` at the bottom: the Spawner's count, with its toggled modifiers the enemy can take.
+func builder_add(type: String) -> void:
+	if wave_groups.size() >= WaveBuilder.MAX_GROUPS:
+		hud.toast("A wave holds at most %d groups" % WaveBuilder.MAX_GROUPS, UiKit.BAD)
+		return
+	var skipped: Array = spawn_mods.filter(func(m): return not Modifiers.allowed(type, m))
+	if not skipped.is_empty():
+		hud.toast("%s can't be %s" % [Enemies.ENEMIES[type].name, Modifiers.label(skipped)], UiKit.DIM)
+	wave_groups.append(WaveBuilder.group(type, spawn_count, spawn_mods))
+	_builder_changed()
+
+
+func builder_step(i: int, field: String, dir: int) -> void:
+	if i < wave_groups.size():
+		wave_groups[i] = WaveBuilder.stepped(wave_groups[i], field, dir, Input.is_key_pressed(KEY_SHIFT))
+		_builder_changed()
+
+
+func builder_move(i: int, d: int) -> void:
+	var j := i + d
+	if i < wave_groups.size() and j >= 0 and j < wave_groups.size():
+		var g = wave_groups[i]
+		wave_groups[i] = wave_groups[j]
+		wave_groups[j] = g
+		_builder_changed()
+
+
+func builder_copy(i: int) -> void:
+	if i < wave_groups.size() and wave_groups.size() < WaveBuilder.MAX_GROUPS:
+		wave_groups.insert(i + 1, wave_groups[i].duplicate(true))
+		_builder_changed()
+
+
+func builder_remove(i: int) -> void:
+	if i < wave_groups.size():
+		wave_groups.remove_at(i)
+		_builder_changed()
+
+
+func builder_remove_mod(i: int, m: String) -> void:
+	if i < wave_groups.size():
+		wave_groups[i].mods.erase(m)
+		_builder_changed()
+
+
+func builder_clear() -> void:
+	wave_groups.clear()
+	_builder_changed()
+
+
+func builder_send() -> void:
+	if game.sandbox_send_wave(wave_groups) >= 0:
+		Sfx.play("wave", -6.0, 0.0)
+
+
+## Loop on: the wave goes now if no copy is running, then again each time its enemies are all gone.
+func builder_loop() -> void:
+	game.built_loop = not game.built_loop and not wave_groups.is_empty()
+
+
+func builder_stop() -> void:
+	game.sandbox_stop_built()
+	hud.toast("Built waves stopped", UiKit.DIM)
+
+
+## Every edit is saved to the profile, and Loop sends the wave as it now stands.
+func _builder_changed() -> void:
+	game.built_wave = wave_groups.duplicate(true)
+	SaveManager.set_sandbox_wave(wave_groups)
+
+
 func set_spawn_count(n: int) -> void:
 	spawn_count = n
 
@@ -302,6 +390,10 @@ func toggle_spawn_mod(m: String) -> void:
 
 
 func sandbox_spawn(type: String) -> void:
+	# With the wave builder open, a card adds a group instead (#118).
+	if hud.is_open("builder"):
+		builder_add(type)
+		return
 	var skipped: Array = game.sandbox_spawn(type, spawn_count, spawn_mods)
 	if not skipped.is_empty():
 		hud.toast("%s can't be %s" % [Enemies.ENEMIES[type].name, Modifiers.label(skipped)], UiKit.DIM)
@@ -767,6 +859,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			toggle_shop()
 		KEY_S:
 			toggle_spawner()
+		KEY_V:
+			toggle_builder()
 		KEY_R:
 			toggle_research()
 		KEY_K, KEY_F1:

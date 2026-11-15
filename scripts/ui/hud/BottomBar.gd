@@ -228,7 +228,7 @@ func _rebuild(key: String) -> void:
 		var ht = g.tower_at[w.hover_cell]
 		_hint(["%s: %d kills." % [ht.display_name(), ht.kills], "Click to select it."])
 	else:
-		_hint(["B  open the shop", "Space  launch the round", "Click a tower for its details and upgrades", "Esc  menu"] + (["S  Spawner (Sandbox)"] if screen.game.sandbox else []))
+		_hint(["B  open the shop", "Space  launch the round", "Click a tower for its details and upgrades", "Esc  menu"] + (["S  Spawner", "V  Wave builder"] if screen.game.sandbox else []))
 
 
 func _hint(parts: Array) -> void:

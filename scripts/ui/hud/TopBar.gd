@@ -31,6 +31,8 @@ var shop_btn: Button
 var research_btn: Button
 ## Sandbox only: the Spawner's button, beside Research (#87).
 var spawner_btn: Button
+## A small gold dot on the Spawner button while a built wave loops (#118), even with the panels closed.
+var loop_dot: ColorRect
 var _next_key := ""
 var _lit := {}
 var _lit_style: StyleBoxFlat
@@ -107,7 +109,15 @@ func _ready() -> void:
 	if g.sandbox:
 		research_btn.tooltip_text = "Research Lab (pauses the battle). Purchases spend your real research points and are saved; the run switches to your research (Mine)."
 		spawner_btn = UiKit.button("Spawner  [S]", Callable(screen, "toggle_spawner"), Vector2(108, 30))
-		spawner_btn.tooltip_text = "Sandbox Spawner: spawn enemies, call rounds, switch research"
+		spawner_btn.tooltip_text = "Sandbox Spawner: spawn enemies, call rounds, switch research, build waves (V)"
+		loop_dot = ColorRect.new()
+		loop_dot.color = UiKit.GOLD
+		loop_dot.size = Vector2(6, 6)
+		loop_dot.position = Vector2(98, 4)
+		loop_dot.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		loop_dot.visible = false
+		loop_dot.tooltip_text = "A built wave is looping"
+		spawner_btn.add_child(loop_dot)
 	var codex_btn := UiKit.button("Codex  [K]", Callable(screen, "toggle_codex"), Vector2(92, 30))
 	codex_btn.tooltip_text = "Codex: every tower, enemy, effect and rule (pauses the battle). Opens on your selection."
 	var menu_btn := UiKit.button("Menu  [Esc]", Callable(screen, "open_pause"), Vector2(96, 30))
@@ -141,6 +151,8 @@ func refresh(_delta: float) -> void:
 	if fps_label.visible:
 		fps_label.text = "%d FPS" % roundi(Engine.get_frames_per_second())
 	tuned_label.visible = g.tuned
+	if loop_dot != null and loop_dot.visible != g.built_loop:
+		loop_dot.visible = g.built_loop
 	lives_label.text = "∞" if g.sandbox else str(g.lives)
 	lives_label.modulate = Color(1, 1, 1).lerp(Color(1, 0.3, 0.3), clampf(hud.lives_flash / 0.3, 0.0, 1.0))
 	gold_label.text = "∞" if g.sandbox else str(g.gold)

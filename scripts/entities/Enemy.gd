@@ -32,6 +32,8 @@ var rank := 0.0
 ## An elite carries modifiers (data/modifiers.gd), merged into its `def`; it pays double bounty and costs a shield more.
 var elite := false
 var mods: Array = []
+## Sandbox wave builder (#118): which sent copy of a built wave this enemy came from; -1 for none.
+var built := -1
 ## Its modifiers' names in capitals, for the label over an elite ("HASTY PLATED").
 var elite_label := ""
 ## The round's speed multiplier it spawned with (a speed change from its data is scaled by it).
