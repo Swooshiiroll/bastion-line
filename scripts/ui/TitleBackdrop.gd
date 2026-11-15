@@ -118,9 +118,18 @@ func _draw() -> void:
 				flash = maxf(flash, 0.15 * (1.0 - float(s.age) / SHOT_LIFE))
 		var aim := (lp - p).angle()
 		Draw.tower(self, LINE[i][0], 4, p, aim, 2.3, t + float(i) * 0.7, flash, LINE[i][1])
-	# Ground haze along the horizon, so the planet reads as a surface.
+	# Ground haze on the planet, so it reads as a surface: only on the planet itself (the old full-width band darkened the
+	# sky past its curve, a dark block at the bottom of a wide window), fading in from clear with no hard edge (#128).
 	var haze_y := CREST_Y + 40.0
-	draw_rect(Rect2(full.position.x, haze_y, full.size.x, full.end.y - haze_y), Color(0.0, 0.01, 0.03, 0.35))
+	var body := PackedVector2Array()
+	for i in 96:
+		body.append(PLANET_C + Vector2.from_angle(TAU * float(i) / 96.0) * PLANET_R)
+	var band := PackedVector2Array([Vector2(full.position.x, haze_y), Vector2(full.end.x, haze_y), Vector2(full.end.x, full.end.y), Vector2(full.position.x, full.end.y)])
+	for piece in Geometry2D.intersect_polygons(band, body):
+		var cols := PackedColorArray()
+		for q in piece:
+			cols.append(Color(0.0, 0.01, 0.03, 0.35 * clampf((q.y - haze_y) / maxf(full.end.y - haze_y, 1.0), 0.0, 1.0)))
+		draw_polygon(piece, cols)
 
 
 func _tower_pos(i: int) -> Vector2:

@@ -395,6 +395,11 @@ func _tower_card(t) -> void:
 	ctx.add_child(row)
 
 
+## The line under a shop tower's stats: only its quote (#128). Its description is in the shop tooltip, its paths in the tree.
+static func card_quote(type: String) -> String:
+	return TowerInfo.blurb_parts(str(Towers.def(type).blurb))[1]
+
+
 func _build_card(type: String) -> void:
 	var g = screen.game
 	var d: Dictionary = Towers.def(type)
@@ -412,14 +417,13 @@ func _build_card(type: String) -> void:
 	var right := UiKit.vbox(2)
 	right.position = Vector2(326, 8)
 	right.add_child(UiKit.label(TowerInfo.summary(g.level_stats(type, 1), bool(d.get("beam", false))), 13, Color(0.72, 0.81, 0.88)))
-	var bl := UiKit.label(d.blurb, 12, UiKit.DIM)
+	var quote := card_quote(type)
+	var bl := UiKit.label(quote, 12, UiKit.DIM)
 	bl.clip_text = true
 	bl.custom_minimum_size = Vector2(840, 0)
-	bl.tooltip_text = d.blurb
+	bl.tooltip_text = quote
 	bl.mouse_filter = Control.MOUSE_FILTER_PASS
 	right.add_child(bl)
-	var specs: Array = Towers.Rework.TREES[type].paths.map(func(p): return str(p.name))
-	right.add_child(UiKit.label("%s: %s%s" % ["Paths", " / ".join(PackedStringArray(specs)), "   ·   masteries unlocked" if g.mastery_unlocked(type) else ""], 12, UiKit.GOLD))
 	_status_label = UiKit.label("", 12, UiKit.GOOD)
 	right.add_child(_status_label)
 	ctx.add_child(right)
