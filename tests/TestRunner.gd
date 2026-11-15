@@ -2100,7 +2100,7 @@ func test_tower_fixes_110() -> void:
 	var ml_reach := float(ml.stats().get("range", 120.0))
 	var alone = g._mine_spot(ml, ml_reach)
 	for k in 6:
-		put(g, "grunt", 60.0 + 30.0 * k, k % 2, 50.0)
+		put(g, "grunt", 60.0 + 30.0 * k, 0, 50.0)
 	var crowded = g._mine_spot(ml, ml_reach)
 	check(alone != null and crowded == alone, "mine spots are the same with or without enemies near")
 	# The shock ring is still moving as it fades.
@@ -2740,6 +2740,13 @@ func test_dev3_towers_126() -> void:
 	buy_steps(g, rad, "a", 3)
 	check(Overlay.radiation_reach(rad) > 0.0 and near(Overlay.radiation_reach(rad), float(rad.stats().rad_range)), "the Radiation Emitter adds a ring at its reach (%.0f)" % Overlay.radiation_reach(rad))
 	check(near(RadarTowerArt.sweep_angle(1.5, 3.0), PI) and near(RadarTowerArt.sweep_angle(3.0, 3.0), TAU), "the field sweep turns once per ping, like the dish")
+	# The broken-shield mark is drawn as triangles that cover each half exactly (no slow concave polygon call).
+	var whole := 0.0
+	for half in Draw.SHRED_SHARDS:
+		check(half[0].size() == 5, "each broken-shield half is 5 triangles")
+		for tri in half[0]:
+			whole += absf((tri[1] - tri[0]).cross(tri[2] - tri[0])) * 0.5
+	check(absf(whole - 30.05) < 0.05, "and together they cover both halves (%.2f px²)" % whole)
 
 
 ## Batch 5 of the 26 Oct list (#119): upgrade text reads "+x (total)", never "X to Y", and ships no design notes. The
