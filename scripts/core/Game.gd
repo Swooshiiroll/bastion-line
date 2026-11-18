@@ -6,6 +6,7 @@ extends RefCounted
 const Towers = preload("res://data/towers.gd")
 const Enemies = preload("res://data/enemies.gd")
 const Modifiers = preload("res://data/modifiers.gd")
+const WaveBuilder = preload("res://scripts/core/WaveBuilder.gd")
 const Waves = preload("res://data/waves.gd")
 const Maps = preload("res://data/maps.gd")
 const Abilities = preload("res://data/abilities.gd")
@@ -101,6 +102,12 @@ var medal := false
 ## Sandbox: a test bench. Infinite credits and shields, free upgrades, no ability cooldowns, nothing
 ## saved or earned. Set by the creator right after construction. See design/sandbox.md.
 var sandbox := false
+## Sandbox wave builder (#118, design/sandbox.md): Loop sends `built_wave` again once the last copy's enemies are all gone.
+var built_loop := false
+var built_wave: Array = []
+## The id of the last built-wave copy sent (each copy's queue entries and enemies carry it); -1 before the first.
+var built_last := -1
+var _built_copies := 0
 ## Live tuner (issue #80, scripts/dev/Tuner.gd): balance numbers were changed during this run. Nothing is saved or earned.
 var tuned := false
 var _dps_clock := 0.0
@@ -604,6 +611,75 @@ func sandbox_spawn(type: String, n: int, mods: Array = []) -> Array:
 	return mods.filter(func(m): return not ok.has(m))
 
 
+## Sends a built wave (WaveBuilder groups) at round-1 strength, like the Spawner's cards, stacking with the field: each group
+## `n` of its enemy `gap` s apart, the next group starting after its last spawn plus its `delay`, lanes alternating, each
+## enemy carrying the group's mods it can take. Returns the copy's id (every entry and enemy of it carries it).
+func sandbox_send_wave(groups: Array) -> int:
+	if not sandbox or is_over() or WaveBuilder.total(groups) == 0:
+		return -1
+	var copy := _built_copies
+	_built_copies += 1
+	built_last = copy
+	var n_groups: int = grid.groups.size()
+	var starts: Array = WaveBuilder.starts(groups)
+	for gi in groups.size():
+		var g: Dictionary = groups[gi]
+		var type: String = g.t
+		var is_boss := bool(Enemies.ENEMIES[type].get("boss", false))
+		var ok: Array = Array(g.get("mods", [])).filter(func(m): return Modifiers.allowed(type, m))
+		for k in int(g.n):
+			spawn_queue.append({
+				"time": time + float(starts[gi]) + float(k) * float(g.gap),
+				"type": type,
+				"wave": -1,
+				"group": _spawn_counter % n_groups,
+				"hp_mult": hp_mult_for(1),
+				"speed_mult": speed_mult_for(1, is_boss),
+				"mods": ok.duplicate(),
+				"built": copy,
+				"bg": gi,
+			})
+			_spawn_counter += 1
+	spawn_queue.sort_custom(func(a, b): return a.time < b.time)
+	state = State.WAVE
+	return copy
+
+
+## Stop wave: every built copy's spawns still to come are cancelled and Loop turns off. Enemies already out stay.
+func sandbox_stop_built() -> void:
+	built_loop = false
+	spawn_queue = spawn_queue.filter(func(s): return int(s.get("built", -1)) < 0)
+
+
+## The last built copy's progress: {"group": the group spawning now (0-based, -1 when done), "to_come": its spawns left}.
+func built_progress() -> Dictionary:
+	var group := -1
+	var to_come := 0
+	for s in spawn_queue:
+		if int(s.get("built", -1)) == built_last and built_last >= 0:
+			to_come += 1
+			group = int(s.bg) if group < 0 else mini(group, int(s.bg))
+	return {"group": group, "to_come": to_come}
+
+
+## Loop: once nothing of the last copy is queued or alive, the wave goes again.
+func _built_loop_tick() -> void:
+	if WaveBuilder.total(built_wave) == 0:
+		built_loop = false
+		return
+	if built_last >= 0:
+		for s in spawn_queue:
+			if int(s.get("built", -1)) == built_last:
+				return
+		for e in enemies:
+			if e.alive and e.built == built_last:
+				return
+		for e in _new_enemies:
+			if e.alive and e.built == built_last:
+				return
+	sandbox_send_wave(built_wave)
+
+
 ## Sends round `n`'s real wave without touching the round counter. Stacks with the field.
 func sandbox_call_round(n: int) -> void:
 	if not sandbox or is_over():
@@ -616,6 +692,7 @@ func sandbox_call_round(n: int) -> void:
 func sandbox_clear_field() -> void:
 	if not sandbox:
 		return
+	built_loop = false
 	spawn_queue.clear()
 	_new_enemies.clear()
 	for e in enemies:
@@ -708,6 +785,8 @@ func tick(dt: float) -> void:
 	if sandbox:
 		gold = SANDBOX_GOLD
 		_sample_dps(dt)
+		if built_loop:
+			_built_loop_tick()
 	if state == State.BUILD:
 		for t in towers:
 			t.sweep_angles = []
@@ -719,7 +798,9 @@ func tick(dt: float) -> void:
 
 	while not spawn_queue.is_empty() and float(spawn_queue[0].time) <= time:
 		var s: Dictionary = spawn_queue.pop_front()
-		enemies.append(spawn_enemy(s.type, _pick_route(int(s.get("group", 0))), 0.0, float(s.hp_mult), int(s.wave), float(s.get("speed_mult", 1.0)), s.get("mods", [])))
+		var se = spawn_enemy(s.type, _pick_route(int(s.get("group", 0))), 0.0, float(s.hp_mult), int(s.wave), float(s.get("speed_mult", 1.0)), s.get("mods", []))
+		se.built = int(s.get("built", -1))
+		enemies.append(se)
 
 	_update_abilities(dt)
 	_update_pools(dt)

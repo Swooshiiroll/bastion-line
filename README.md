@@ -88,6 +88,7 @@ Workflow).
 | `F3` | Show or hide the FPS counter |
 | `K` or `F1`, or the Codex button | The Codex: every tower, enemy, effect and rule. In battle it pauses and opens on the selected tower (or the enemy under the cursor) |
 | `R` | Research Lab in battle (pauses; purchases and resets apply at once). In Sandbox too, beside the Spawner: it's your real research, and the run switches to Mine |
+| `V` or the Spawner's Wave builder button | Sandbox: the wave builder beside the Spawner. A wave is a list of groups (an enemy, how many, the gap between them, the delay before the next group, modifiers); while it's open, Spawner cards add groups. Send, Loop, Stop; the last wave is remembered |
 | `N` or click NEXT | Intel on the next round: enemies, counts, traits, HP and speed scale, bonuses |
 | `Space` or the Launch button (bottom right) | Launch the next round, or call it early for bonus credits once the current round has finished spawning |
 | `Q` then click | Orbital Strike: armor-piercing blast at the clicked spot after 0.9 s (45 s cooldown) |

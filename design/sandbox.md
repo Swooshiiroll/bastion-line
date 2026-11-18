@@ -26,6 +26,22 @@ the way. Confirmed with the owner in the design question rounds.
     counter;
   - Clear field: removes every enemy and pending spawn, with no bounty and no leak;
   - spawns and calls stack with whatever is on the field.
+- **Wave builder** (#118; key V or the Spawner's header button; opens beside the Spawner and closes with it):
+  - a wave is a list of up to 30 groups, in a scrolling list; each group is one enemy, a count (1-100), a gap between its
+    enemies (0.1-5 s), a delay before the next group (0-30 s) and elite modifiers;
+  - while it's open, clicking a Spawner card adds a group at the bottom (the Spawner's count; its toggled modifiers the
+    enemy can take, shown as chips you click to drop) instead of spawning; a new group's gap is 0.4 s, its delay 1.0 s;
+  - each row: up/down to reorder, the enemy's still icon, name and tier, -/+ steppers for count, gap and delay (Shift steps
+    5x), copy and remove;
+  - group i+1 starts when group i's last enemy has spawned, plus group i's delay; counts are single enemies (packs aren't
+    multiplied); round-1 strength like the cards; lanes alternate;
+  - the foot: the wave's groups, enemies and length (while a copy spawns, "Group 3 of 5, 14 to come"), then Send wave (stacks
+    with the field; again while one spawns sends another copy), Loop (sends again once the last copy's enemies are all
+    gone; with nothing running it sends at once; keeps going with the panels closed, a gold dot on the Spawner button),
+    Stop wave (cancels the built copies' spawns still to come and turns Loop off) and Clear (empties the list);
+  - Clear field also stops built waves and turns Loop off; the top bar's NEXT strip is unchanged;
+  - the wave is saved to the profile on every edit and comes back in any Sandbox run (Loop starts off); groups whose enemy
+    no longer exists are dropped. Only the last wave, no library.
 - **Launch button:** next round works as normal. After the mode's final round, the run carries on
   with endless rules and no medal.
 - **DPS meter:** the tower panel shows live DPS (last 5 s), total damage and kills. Sandbox only.

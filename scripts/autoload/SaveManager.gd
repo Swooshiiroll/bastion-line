@@ -5,6 +5,7 @@ extends Node
 const SaveCodec = preload("res://scripts/core/SaveCodec.gd")
 const Difficulty = preload("res://data/difficulty.gd")
 const Research = preload("res://scripts/core/Research.gd")
+const WaveBuilder = preload("res://scripts/core/WaveBuilder.gd")
 
 const RUN_FILE := "savegame.json"
 const PROFILE_FILE := "profile.json"
@@ -95,7 +96,7 @@ func delete_run() -> void:
 # --- Profile ---------------------------------------------------------------------------------
 
 func load_profile() -> void:
-	profile = {"version": PROFILE_VERSION, "maps": {}, "research": [], "legacy_rp": 0, "settings": DEFAULT_SETTINGS.duplicate()}
+	profile = {"version": PROFILE_VERSION, "maps": {}, "research": [], "legacy_rp": 0, "settings": DEFAULT_SETTINGS.duplicate(), "sandbox_wave": []}
 	var d = read_json(profile_path())
 	if d is Dictionary:
 		var version := int(d.get("version", 1))
@@ -111,6 +112,8 @@ func load_profile() -> void:
 		var owned := Research.sanitize(d.get("research", []))
 		if Research.spent(owned) <= research_earned():
 			profile["research"] = owned
+		# The Sandbox wave builder's last wave (#118); an older profile simply has none.
+		profile["sandbox_wave"] = WaveBuilder.sanitize(d.get("sandbox_wave", []))
 		if d.get("settings") is Dictionary:
 			for k in DEFAULT_SETTINGS:
 				if d["settings"].has(k):
@@ -213,6 +216,16 @@ func buy_research(id: String) -> String:
 ## Refunds every node. Research is free to reassign.
 func reset_research() -> void:
 	profile["research"] = []
+	save_profile()
+
+
+## The Sandbox wave builder's remembered wave (#118): saved on every edit, so it comes back in any Sandbox run.
+func sandbox_wave() -> Array:
+	return Array(profile.get("sandbox_wave", [])).duplicate(true)
+
+
+func set_sandbox_wave(groups: Array) -> void:
+	profile["sandbox_wave"] = WaveBuilder.sanitize(groups)
 	save_profile()
 
 

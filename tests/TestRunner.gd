@@ -657,6 +657,79 @@ func test_sandbox_resources() -> void:
 	check(g.cast_warp() and g.ability_cd["warp"] == 0.0, "a cast leaves no cooldown")
 
 
+## The Sandbox wave builder (#118, design/sandbox.md): groups send at round-1 strength, each starting after the last one's final
+## spawn plus its delay, with lanes alternating and allowed mods; sends stack; Stop and Clear field cancel only built spawns and
+## stop Loop; Loop resends once the last copy's enemies are gone; the limits hold; the wave is remembered, minus unknown enemies.
+func test_wave_builder_118() -> void:
+	var WB = load("res://scripts/core/WaveBuilder.gd")
+	var g0: Dictionary = WB.group("grunt", 5)
+	check(g0.n == 5 and near(g0.gap, 0.4) and near(g0.delay, 1.0) and g0.mods.is_empty(), "a new group: the count given, 0.4 s gap, 1.0 s delay")
+	var hi: Dictionary = WB.stepped(WB.clamp_group({"t": "grunt", "n": 98, "gap": 4.95, "delay": 29.5, "mods": []}), "n", 1, true)
+	check(hi.n == WB.COUNT_MAX and near(WB.stepped(hi, "gap", 1).gap, WB.GAP_MAX) and near(WB.stepped(hi, "delay", 1, true).delay, WB.DELAY_MAX), "steppers stop at 100, 5 s and 30 s")
+	var lo: Dictionary = WB.stepped(WB.stepped(WB.group("grunt", 1), "n", -1), "gap", -1, true)
+	check(lo.n == WB.COUNT_MIN and near(lo.gap, WB.GAP_MIN) and near(WB.stepped(lo, "delay", -1, true).delay, 0.0), "and at 1, 0.1 s and 0 s")
+	check(near(WB.stepped(WB.group("grunt", 1), "gap", 1).gap, 0.5) and near(WB.stepped(WB.group("grunt", 1), "delay", 1).delay, 1.5), "one click steps 0.1 s of gap or 0.5 s of delay")
+	var many: Array = []
+	for i in 40:
+		many.append(WB.group("grunt", 1))
+	many.append({"t": "no_such_enemy", "n": 3})
+	check(WB.sanitize(many).size() == WB.MAX_GROUPS and WB.sanitize([{"t": "no_such_enemy", "n": 3}, g0]).size() == 1, "a loaded wave keeps at most 30 groups and drops unknown enemies")
+	var wave := [{"t": "grunt", "n": 3, "gap": 0.5, "delay": 2.0, "mods": []}, {"t": "brute", "n": 2, "gap": 1.0, "delay": 1.0, "mods": []}]
+	check(WB.starts(wave) == [0.0, 3.0] and near(WB.duration(wave), 4.0) and WB.total(wave) == 5, "group 2 starts after group 1's last spawn plus its delay (3 s); the wave lasts 4 s")
+	var g = sandbox_game()
+	var t0: float = g.time
+	var copy: int = g.sandbox_send_wave(wave)
+	var q: Array = g.spawn_queue.filter(func(e): return int(e.get("built", -1)) == copy)
+	var times: Array = q.map(func(e): return snappedf(float(e.time) - t0, 0.01))
+	check(q.size() == 5 and times == [0.0, 0.5, 1.0, 3.0, 4.0], "it queues each group's enemies at their times (%s)" % [times])
+	check(q.slice(0, 3).all(func(e): return e.type == "grunt") and q.slice(3).all(func(e): return e.type == "brute"), "in group order")
+	var lanes := true
+	for i in range(1, q.size()):
+		lanes = lanes and int(q[i].group) != int(q[i - 1].group)
+	check(g.grid.groups.size() < 2 or lanes, "lanes alternate")
+	check(q.all(func(e): return near(float(e.hp_mult), g.hp_mult_for(1))) and g.state == Game.State.WAVE, "at round-1 strength, and the field goes live")
+	var plated := "plated" if Modifiers.MODIFIERS.has("plated") else str(Modifiers.ORDER[0])
+	var mixed: Array = []
+	for et in Enemies.ORDER:
+		mixed.append({"t": et, "n": 1, "gap": 0.4, "delay": 0.0, "mods": [plated]})
+	var c2: int = g.sandbox_send_wave(mixed)
+	var mods_ok := true
+	for e in g.spawn_queue.filter(func(e): return int(e.get("built", -1)) == c2):
+		mods_ok = mods_ok and (e.mods.has(plated) == Modifiers.allowed(e.type, plated))
+	check(c2 == copy + 1 and mods_ok, "a second send stacks as its own copy, each enemy with the mods it can take")
+	g.sandbox_spawn("grunt", 2)
+	g.built_loop = true
+	g.sandbox_stop_built()
+	check(not g.built_loop and g.spawn_queue.size() == 2 and g.spawn_queue.all(func(e): return int(e.get("built", -1)) < 0), "Stop wave cancels only the built spawns and turns Loop off")
+	g.built_loop = true
+	g.sandbox_clear_field()
+	check(not g.built_loop, "Clear field turns Loop off too")
+	# Loop: with nothing running it sends at once, then waits for the copy's enemies to be gone.
+	var h = sandbox_game()
+	h.built_wave = [{"t": "grunt", "n": 2, "gap": 0.4, "delay": 0.0, "mods": []}]
+	h.built_loop = true
+	h.tick(SIM_DT)
+	var first: int = h.built_last
+	check(first >= 0 and h.spawn_queue.size() + h.enemies.size() >= 1, "Loop sends the wave at once when none is running")
+	for i in 60:
+		h.tick(SIM_DT)
+	check(h.built_last == first, "it doesn't resend while the copy's enemies are alive")
+	for e in h.enemies:
+		e.alive = false
+	h.enemies.clear()
+	h.spawn_queue.clear()
+	h.tick(SIM_DT)
+	check(h.built_last == first + 1, "once they're gone, it sends the next copy")
+	var pr: Dictionary = h.built_progress()
+	check(int(pr.group) == 0 and int(pr.to_come) >= 1, "progress names the group spawning and how many are to come")
+	# Remembered in the profile, unknown enemies dropped.
+	SaveManager.set_sandbox_wave(wave + [{"t": "no_such_enemy", "n": 4}])
+	SaveManager.load_profile()
+	var back: Array = SaveManager.sandbox_wave()
+	check(back.size() == 2 and back[0].t == "grunt" and back[1].n == 2, "the wave is saved and comes back, minus unknown enemies")
+	SaveManager.set_sandbox_wave([])
+
+
 func test_sandbox_spawn() -> void:
 	var g = sandbox_game()
 	g.sandbox_spawn("grunt", 5)

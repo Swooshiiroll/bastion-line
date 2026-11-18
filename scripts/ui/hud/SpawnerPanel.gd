@@ -33,6 +33,9 @@ func _init(owner_hud) -> void:
 
 
 func _build() -> void:
+	var wb := _fit(UiKit.button("Wave builder  [V]", Callable(screen, "toggle_builder"), Vector2(140, 28)), 12)
+	wb.tooltip_text = "Build a wave of groups beside the Spawner; while it's open, cards add groups instead of spawning"
+	header.add_child(wb)
 	var y := 6.0
 	y = _row_label("Research (this run only)", y)
 	var rrow := UiKit.hbox(6)

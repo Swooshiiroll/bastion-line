@@ -12,6 +12,7 @@ const IntelPanel = preload("res://scripts/ui/hud/IntelPanel.gd")
 const ResearchPopOut = preload("res://scripts/ui/hud/ResearchPopOut.gd")
 const KnowledgePopOut = preload("res://scripts/ui/hud/KnowledgePopOut.gd")
 const SpawnerPanel = preload("res://scripts/ui/hud/SpawnerPanel.gd")
+const WaveBuilderPanel = preload("res://scripts/ui/hud/WaveBuilderPanel.gd")
 const RetrofitPanel = preload("res://scripts/ui/hud/RetrofitPanel.gd")
 const TreePopOut = preload("res://scripts/ui/hud/TreePopOut.gd")
 ## Pop-outs that pause the battle while open.
@@ -132,6 +133,10 @@ func open(kind: String, arg := "") -> void:
 			if tp != null and tp.side == "left":
 				screen.close_popout("tower")
 			p = SpawnerPanel.new(self)
+		"builder":
+			if not screen.game.sandbox or not is_open("spawner"):
+				return
+			p = WaveBuilderPanel.new(self)
 		_:
 			return
 	p.close_requested.connect(func(): screen.close_popout(kind))
@@ -146,6 +151,9 @@ func close(kind: String) -> void:
 	var p = popouts[kind]
 	popouts.erase(kind)
 	p.dismiss()
+	# The wave builder lives beside the Spawner and goes with it (#118).
+	if kind == "spawner":
+		close("builder")
 	if kind == "shop" and not is_open("shop"):
 		hovered_build = ""
 	_dim.visible = pausing_open()
