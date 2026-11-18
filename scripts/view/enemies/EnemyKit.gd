@@ -4,9 +4,9 @@ extends RefCounted
 ##
 ## A look draws in its own frame, in the page's pixels: x forward, y to the right of the heading. `begin` maps that
 ## frame onto the battlefield (position, facing, the animation's offset, turn and stretch), and every primitive maps
-## its points through it. Shading is worked out after the mapping, so the light stays fixed on the screen (upper
-## left), as on the pages. `push`/`pop` nest a turned sub-frame (the pages' `at`), and `push_alpha`/`pop_alpha`
-## fade everything drawn in between (the pages' `withAlpha`).
+## its points through it. The light is the look's own upper left at rest (heading right) and turns with its heading, so
+## highlights stay on the same side of it as it turns (#127). `push`/`pop` nest a turned sub-frame (the pages' `at`),
+## and `push_alpha`/`pop_alpha` fade everything drawn in between (the pages' `withAlpha`).
 
 const Draw = preload("res://scripts/view/Draw.gd")
 
@@ -21,6 +21,8 @@ const LIGHT := Vector2(-0.6, -0.8)
 static var ci: CanvasItem
 static var _o := Vector2.ZERO
 static var _r := 0.0
+## The look's own heading at begin(): its light turns with it (#127), so highlights stay on the same side as it turns.
+static var _r0 := 0.0
 static var _sx := 1.0
 static var _sy := 1.0
 static var _alpha := 1.0
@@ -33,6 +35,7 @@ static func begin(canvas: CanvasItem, origin: Vector2, rot: float, sx: float, sy
 	ci = canvas
 	_o = origin
 	_r = rot
+	_r0 = rot
 	_sx = sx
 	_sy = sy
 	_alpha = alpha
@@ -80,9 +83,14 @@ static func _c(col: Color) -> Color:
 	return Color(col, col.a * _alpha)
 
 
-## The screen's light direction seen from inside the frame.
+## The look's light seen from inside the current frame: upper left of the look at rest (heading right), turning with it.
 static func light() -> Vector2:
-	return LIGHT.rotated(-_r)
+	return LIGHT.rotated(_r0 - _r)
+
+
+## The look's light on the screen.
+static func world_light() -> Vector2:
+	return LIGHT.rotated(_r0)
 
 
 static func _map(pts: PackedVector2Array) -> PackedVector2Array:
@@ -285,7 +293,7 @@ static func orb(p: Vector2, r: float, col: Color) -> void:
 	disc(p, r + 1.1, OUTLINE)
 	disc(p, r, dk(col, 0.3))
 	disc(p + l * r * 0.12, r * 0.8, col)
-	arc(p, r * 0.72, PI * 1.05 - _r, PI * 1.6 - _r, lt(col, 0.35), maxf(0.8, r * 0.16))
+	arc(p, r * 0.72, PI * 1.05 + _r0 - _r, PI * 1.6 + _r0 - _r, lt(col, 0.35), maxf(0.8, r * 0.16))
 	disc(p + l * r * 0.45, maxf(0.6, r * 0.13), Color(1, 1, 1, 0.55))
 
 
@@ -308,7 +316,7 @@ static func plate(c: Vector2, pts: PackedVector2Array, col: Color, r := 0.0, s :
 	for i in n:
 		var a := p[i]
 		var b := p[(i + 1) % n]
-		var d := ((a + b) * 0.5 - ce).normalized().dot(LIGHT)
+		var d := ((a + b) * 0.5 - ce).normalized().dot(world_light())
 		if d > 0.15:
 			Draw.line(ci, a + (ce - a) * 0.1, b + (ce - b) * 0.1, _c(lt(col, 0.45)), ew)
 		elif d < -0.15:
@@ -331,7 +339,7 @@ static func bar(a: Vector2, b: Vector2, w: float, col: Color) -> void:
 	var k := _k()
 	var d := (B - A).normalized()
 	var n := Vector2(d.y, -d.x)
-	if n.dot(LIGHT) < 0.0:
+	if n.dot(world_light()) < 0.0:
 		n = -n
 	var wk := w * k
 	Draw.line(ci, A, B, _c(OUTLINE), wk + 1.6 * k)

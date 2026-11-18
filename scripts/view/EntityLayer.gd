@@ -261,7 +261,10 @@ func _wing(tw, t: float) -> void:
 		var key: int = tw.get_instance_id()
 		var hd := lerp_angle(float(_heading.get(key, tw.plane_heading)), tw.plane_heading, 0.12)
 		_heading[key] = hd
+		# Its shading turns with it (#127), from a rest pose flying up.
+		Draw.light_turn(hd + PI / 2.0)
 		CasGunshipArt.plane(self, tw.plane_pos, hd, 1.0 if tw.size <= 1 else 1.8, t, tw.spec, acc, tw.fire_flash > 0.0 and tw.disabled <= 0.0)
+		Draw.light_reset()
 		return
 	if tw.disabled > 0.0:
 		return
@@ -273,7 +276,9 @@ func _wing(tw, t: float) -> void:
 			face = (tg.pos - dr.pos).angle()
 		var lift := sin(t * 5.0 + float(i)) * 1.5
 		Draw.ellipse(self, dr.pos + Vector2(0, 9), 4.0, 1.6, Color(0, 0, 0, 0.22))
+		Draw.light_turn(face + PI / 2.0)
 		DroneBayArt.drone(self, dr.pos + Vector2(0, lift), face, 1.25, t + float(i), tw.spec, acc)
+		Draw.light_reset()
 
 
 ## Turns each extra gun toward the enemy its shots go at (the main aim when it has none).

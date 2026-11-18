@@ -170,7 +170,7 @@ static func draw(ci: CanvasItem, c: Vector2, aim: float, s: float, t: float, fla
 		Draw.plate(ci, c, Draw.ngon(6, 1.0, 0.0), Draw.METAL_L, aim, 5.6 * k, 1.0)
 		Draw.outline(ci, c, Draw.ngon(6, 1.0, 0.0), GOLD, 1.2 * k, aim, 5.6 * k)
 		Draw.disc(ci, c, 3.4 * k, Color(acc, 0.55))
-		Draw.disc(ci, c + Draw.LIGHT * 1.2 * k, 1.2 * k, Color(1, 1, 1, 0.6))
+		Draw.disc(ci, c + Draw.light() * 1.2 * k, 1.2 * k, Color(1, 1, 1, 0.6))
 	if L.P >= 5:
 		Draw.ring(ci, c, 7.6 * k, GOLD, 1.2 * k)
 		Draw.glow_dot(ci, c, 1.8 * k, Color(1.0, 0.6, 0.3))

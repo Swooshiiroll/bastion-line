@@ -170,7 +170,9 @@ static func fill(ci: CanvasItem, center: Vector2, pts: PackedVector2Array, color
 # frame. These draw the same shapes from cached disc and ring textures, quad primitives and line
 # segments instead (0.5-2 µs). Use them for anything drawn every frame.
 
-const _TEX_SIZES := [8, 16, 32, 64, 128, 256]
+## Up to 1024, so a big thin ring (a 230 px range ring, 2 px wide) still gets enough texels to stay a texture instead of
+## falling back to line segments, whose overlapping joints show as dots (#127).
+const _TEX_SIZES := [8, 16, 32, 64, 128, 256, 512, 1024]
 static var _discs := {}
 static var _rings := {}
 static var _glows := {}
@@ -191,7 +193,8 @@ static func _tex_size(r: float) -> int:
 
 
 ## A white disc, or a ring `width` texels wide, filling a size×size texture with 1-texel soft edges.
-## Solid runs are filled a row span at a time; only edge texels are computed one by one.
+## Solid runs are filled a row span at a time; only edge texels are computed one by one. A ring's empty middle is
+## skipped, so the big ring textures stay quick to make.
 static func _shape_texture(size: int, width := 0) -> Texture2D:
 	var img := Image.create(size, size, false, Image.FORMAT_LA8)
 	var half := float(size) * 0.5
@@ -208,7 +211,12 @@ static func _shape_texture(size: int, width := 0) -> Texture2D:
 		# Opaque spans: inside outer - 0.5 and (for rings) outside inner + 0.5.
 		var so := sqrt(maxf(0.0, (outer - 0.5) * (outer - 0.5) - dy * dy)) if absf(dy) < outer - 0.5 else -1.0
 		var si := sqrt(maxf(0.0, (inner + 0.5) * (inner + 0.5) - dy * dy)) if inner >= 0.0 and absf(dy) < inner + 0.5 else -1.0
-		for x in range(x0, x1 + 1):
+		# Texels well inside the hole (beyond inner - 0.5) stay clear, so the row only visits its two edge bands.
+		var hole := sqrt(maxf(0.0, (inner - 0.5) * (inner - 0.5) - dy * dy)) if inner >= 0.5 and absf(dy) < inner - 0.5 else -1.0
+		var cols: Array = range(x0, x1 + 1)
+		if hole > 1.0:
+			cols = range(x0, floori(half - hole) + 2) + range(ceili(half + hole) - 2, x1 + 1)
+		for x in cols:
 			var dx := float(x) + 0.5 - half
 			var ax := absf(dx)
 			if so >= 0.0 and ax < so - 1.0 and (si < 0.0 or ax > si + 1.0):
@@ -341,13 +349,13 @@ static func disc(ci: CanvasItem, c: Vector2, r: float, color: Color, filled := t
 static func ring(ci: CanvasItem, center: Vector2, r: float, color: Color, width := 1.5) -> void:
 	if _skip and not _drawing():
 		return
+	if not ring_is_texture(r, width):
+		arc(ci, center, r, 0.0, TAU, 32, color, width, true, true)
+		return
 	var w := maxf(width, 1.0)
 	var outer := r + w * 0.5
 	var size := _tex_size(outer)
 	var want := w / outer * (float(size) * 0.5 - 1.0)
-	if want < 1.5:
-		arc(ci, center, r, 0.0, TAU, 32, color, width, true, true)
-		return
 	var texels: int = _RING_TEXELS[-1]
 	for q in _RING_TEXELS:
 		if float(q) >= want * 0.92:
@@ -357,6 +365,18 @@ static func ring(ci: CanvasItem, center: Vector2, r: float, color: Color, width 
 	if not _rings.has(key):
 		_rings[key] = _shape_texture(size, texels)
 	_stamp(ci, _rings[key], size, center, outer, outer, color)
+
+
+## Whether a ring of radius `r`, `width` wide, is stamped from a texture (at least 1.5 texels of stroke); thinner ones are
+## drawn as a line loop.
+static func ring_is_texture(r: float, width: float) -> bool:
+	var w := maxf(width, 1.0)
+	var outer := r + w * 0.5
+	return w / outer * (float(_tex_size(outer)) * 0.5 - 1.0) >= 1.5
+
+
+## Arcs more see-through than this draw as one joined line (#127).
+const SEE_THROUGH := 0.85
 
 
 ## draw_arc, fast: full circles become rings, partial arcs antialiased line segments. The segment count follows the
@@ -370,6 +390,17 @@ static func arc(ci: CanvasItem, c: Vector2, r: float, a0: float, a1: float, _poi
 		ring(ci, c, r, color, width if width > 0.0 else 1.0)
 		return
 	var n := arc_segments_for(r, span)
+	if color.a < SEE_THROUGH and n > 1:
+		# See-through: one polyline, whose joints don't overlap, instead of segments that darken each other's ends into
+		# dots (#127). Nearly opaque arcs keep the cheap segments: their overlaps don't show.
+		var pts := PackedVector2Array()
+		pts.resize(n + 1)
+		for i in n + 1:
+			var a2 := a0 + span * float(i) / float(n)
+			pts[i] = c + Vector2(cos(a2), sin(a2)) * r
+		slow_calls += 1
+		ci.draw_polyline(pts, color, width, aa)  # raw-draw-ok: see-through arcs need joined segments
+		return
 	var prev := c + Vector2(cos(a0), sin(a0)) * r
 	for i in range(1, n + 1):
 		var a := a0 + span * float(i) / float(n)
@@ -444,9 +475,8 @@ static func rect(ci: CanvasItem, r: Rect2, color: Color, filled := true, width :
 # --- Turret cache --------------------------------------------------------------------------------
 # A turret is drawn as alternating static and live layers. Statements between dyn(true) and
 # dyn(false) (recoil, glows, spinning parts) are live; everything else is static, baked once per
-# look into one texture per layer, and stamped rotated to the aim. Baking happens at 8 aim angles
-# so the upper-left lighting stays close; the remainder of the aim is a rotation of the stamp, with the next
-# bucket's bake faded in over it.
+# look into one texture per layer, and stamped rotated to the aim. The shading light turns with an aimed turret
+# (light_turn, #127), so one bake per look, turned to the aim, matches the full drawing at every aim.
 # Only the battlefield turns this on (turret_cache); elsewhere towers draw in full.
 
 static var turret_cache := false
@@ -462,7 +492,6 @@ static var _live := {}
 const AIMED := ["gun_turret", "mortar_tower", "rocket_salvo", "laser_tower", "anti_aircraft_turret", "railgun", "mine_layer", "tractor_tower"]
 ## The aim of each extra gun of the tower being drawn (gun 0 is the main one); set by tower().
 static var _extra: Array = []
-const TURRET_BUCKETS := 16
 const TURRET_SCALE := 2.5
 ## How long the permanent-shred mark (a broken shield) shows after the shred last grew, fading over its last second (#116).
 const SHRED_MARK := 3.0
@@ -525,22 +554,10 @@ static func aimed(type: String, spec: String) -> bool:
 
 static func _cached_turret(ci: CanvasItem, type: String, tier: int, c: Vector2, aim: float, s: float, t: float, flash: float, spec: String, acc: Color) -> bool:
 	var rot := aim if aimed(type, spec) else 0.0
-	# Between two baked aims, the next one fades in over the one below, so a turning turret's shading changes
-	# smoothly instead of jumping at each bucket (issue #89).
-	var blend := turret_blend(rot)
-	var bucket: int = blend[0]
-	var w: float = blend[1]
-	var e = _turret_bake(ci, type, tier, bucket, s, spec, acc)
+	var e = _turret_bake(ci, type, tier, s, spec, acc)
 	if Engine.get_frames_drawn() < int(e.ready_at):
 		return false
-	var e2 = null
-	var next := (bucket + 1) % TURRET_BUCKETS
-	if w > 0.01:
-		e2 = _turret_bake(ci, type, tier, next, s, spec, acc)
-		if Engine.get_frames_drawn() < int(e2.ready_at):
-			e2 = null
-	_live = {"ci": ci, "e": e, "c": c, "rot": rot - float(bucket) * TAU / float(TURRET_BUCKETS),
-		"e2": e2, "w": w, "rot2": rot - float(next) * TAU / float(TURRET_BUCKETS)}
+	_live = {"ci": ci, "e": e, "c": c, "rot": rot}
 	_mode = _LIVE
 	_seg = 0
 	_skip = true
@@ -552,18 +569,12 @@ static func _cached_turret(ci: CanvasItem, type: String, tier: int, c: Vector2, 
 	return true
 
 
-## For a turret turned `rot`: [the baked aim just below it, how far (0..1) it is toward the next one].
-static func turret_blend(rot: float) -> Array:
-	var at := fposmod(rot / TAU * float(TURRET_BUCKETS), float(TURRET_BUCKETS))
-	return [floori(at) % TURRET_BUCKETS, at - floorf(at)]
-
-
-## The baked layers of one look at one of the TURRET_BUCKETS aims (baked on first use).
-static func _turret_bake(ci: CanvasItem, type: String, tier: int, bucket: int, s: float, spec: String, acc: Color) -> Dictionary:
-	var key := "%s|%d|%s|%s|%.2f|%d" % [type, tier, spec, acc.to_html(), s, bucket]
+## The baked layers of one look, aimed at 0 (baked on first use, then turned to each aim).
+static func _turret_bake(ci: CanvasItem, type: String, tier: int, s: float, spec: String, acc: Color) -> Dictionary:
+	var key := "%s|%d|%s|%s|%.2f" % [type, tier, spec, acc.to_html(), s]
 	var e = _turrets.get(key)
 	if e == null:
-		e = _new_turret(ci, type, tier, float(bucket) * TAU / float(TURRET_BUCKETS), s, spec, acc)
+		e = _new_turret(ci, type, tier, 0.0, s, spec, acc)
 		_turrets[key] = e
 	return e
 
@@ -609,10 +620,6 @@ static func _stamp_turret(seg: int) -> void:
 	var half: Vector2 = e.half
 	ci.draw_set_transform(_live.c + _shift, _live.rot, Vector2.ONE)
 	ci.draw_texture_rect(e.tex[seg], Rect2(-half, half * 2.0), false)
-	var e2 = _live.e2
-	if e2 != null and e2.tex.has(seg):
-		ci.draw_set_transform(_live.c + _shift, _live.rot2, Vector2.ONE)
-		ci.draw_texture_rect(e2.tex[seg], Rect2(-half, half * 2.0), false, Color(1, 1, 1, _live.w))
 	ci.draw_set_transform(_shift, 0.0, Vector2.ONE)
 
 
@@ -683,6 +690,14 @@ static func tower(ci: CanvasItem, type: String, tier: int, c: Vector2, aim: floa
 
 
 static func _turret(ci: CanvasItem, type: String, tier: int, c: Vector2, aim: float, s: float, t: float, flash: float, spec: String, acc: Color) -> void:
+	# An aimed turret's light turns with it, from its rest pose pointing up (how the shop and the Codex show it).
+	if aimed(type, spec):
+		light_turn(aim + PI / 2.0)
+	_turret_art(ci, type, tier, c, aim, s, t, flash, spec, acc)
+	light_reset()
+
+
+static func _turret_art(ci: CanvasItem, type: String, tier: int, c: Vector2, aim: float, s: float, t: float, flash: float, spec: String, acc: Color) -> void:
 	match type:
 		"gun_turret":
 			GunTurretArt.draw(ci, c, aim, s, t, flash, spec, acc, _extra)
@@ -726,9 +741,27 @@ static func _turret(ci: CanvasItem, type: String, tier: int, c: Vector2, aim: fl
 			AugmentationTowerArt.draw(ci, c, aim, s, t, flash, spec, acc, _extra)
 
 
-## --- Shading helpers: light comes from the upper left. ------------------------------------
+## --- Shading helpers: light comes from the upper left of the thing drawn. --------------------
 
 const LIGHT := Vector2(-0.6, -0.8)
+## The light the helpers shade by. It turns with whatever is being drawn (an aimed turret, a plane, a drone, a rocket), so
+## highlights stay on the same side of it as it turns instead of jumping across (#127). Set with light_turn, back with
+## light_reset.
+static var _light := LIGHT
+
+
+## The light the helpers shade by right now.
+static func light() -> Vector2:
+	return _light
+
+
+## Turns the light by `angle`: the light of a thing drawn turned `angle` from its rest pose.
+static func light_turn(angle: float) -> void:
+	_light = LIGHT.rotated(angle)
+
+
+static func light_reset() -> void:
+	_light = LIGHT
 
 
 ## A shaded ball or dome: outline, base, a lit face offset toward the light, a rim highlight
@@ -738,9 +771,9 @@ static func orb(ci: CanvasItem, p: Vector2, r: float, col: Color, s := 1.0) -> v
 		return
 	disc(ci, p, r + 1.1 * s, OUTLINE)
 	disc(ci, p, r, col.darkened(0.3))
-	disc(ci, p + LIGHT * r * 0.12, r * 0.8, col)
+	disc(ci, p + _light * r * 0.12, r * 0.8, col)
 	arc(ci, p, r * 0.72, PI * 1.05, PI * 1.6, 10, col.lightened(0.35), maxf(0.8, r * 0.16), true)
-	disc(ci, p + LIGHT * r * 0.45, maxf(0.6, r * 0.13), Color(1, 1, 1, 0.55))
+	disc(ci, p + _light * r * 0.45, maxf(0.6, r * 0.13), Color(1, 1, 1, 0.55))
 
 
 ## A bevelled plate: outlined polygon, a lighter inset face, lit edges toward the light and
@@ -764,8 +797,8 @@ static func plate(ci: CanvasItem, c: Vector2, pts: PackedVector2Array, col: Colo
 		var a := p[i]
 		var b := p[(i + 1) % p.size()]
 		var m := (a + b) * 0.5 - centre
-		var lit := m.normalized().dot(LIGHT) > 0.15
-		var dark := m.normalized().dot(LIGHT) < -0.15
+		var lit := m.normalized().dot(_light) > 0.15
+		var dark := m.normalized().dot(_light) < -0.15
 		if lit:
 			line(ci, a.lerp(centre, 0.1), b.lerp(centre, 0.1), col.lightened(0.45), maxf(0.8, line_w * 0.8), true)
 		elif dark:
@@ -783,14 +816,17 @@ static func rivets(ci: CanvasItem, c: Vector2, pts: PackedVector2Array, rot: flo
 		disc(ci, p, r, METAL_L.lightened(0.15))
 
 
+## The side of a bar from a to b that faces the light (a unit normal).
+static func bar_lit_side(a: Vector2, b: Vector2) -> Vector2:
+	var n := (b - a).normalized().orthogonal()
+	return -n if n.dot(_light) < 0.0 else n
+
+
 ## A thick shaded bar from a to b (barrels, rails, struts).
 static func bar(ci: CanvasItem, a: Vector2, b: Vector2, w: float, col: Color) -> void:
 	if _skip and not _drawing():
 		return
-	var d := (b - a).normalized()
-	var n := d.orthogonal()
-	if n.dot(LIGHT) < 0.0:
-		n = -n
+	var n := bar_lit_side(a, b)
 	# Round ends, as the design pages draw every stroke (#90): a mortar tube's rounded back, a barrel's rounded breech.
 	# Under 2 px wide they wouldn't show, and a see-through bar would darken where an end overlaps it.
 	var caps := w >= 2.0 and col.a >= 0.99
@@ -931,8 +967,8 @@ static func shaded_oval(ci: CanvasItem, c: Vector2, rx: float, ry: float, rot: f
 	if _skip and not _drawing():
 		return
 	oval(ci, c, rx, ry, rot, col.darkened(0.3), 1.3 * s)
-	oval(ci, c + LIGHT * minf(rx, ry) * 0.12, rx * 0.8, ry * 0.78, rot, col)
-	disc(ci, c + LIGHT * minf(rx, ry) * 0.5, maxf(0.6, minf(rx, ry) * 0.14), Color(1, 1, 1, 0.45))
+	oval(ci, c + _light * minf(rx, ry) * 0.12, rx * 0.8, ry * 0.78, rot, col)
+	disc(ci, c + _light * minf(rx, ry) * 0.5, maxf(0.6, minf(rx, ry) * 0.14), Color(1, 1, 1, 0.45))
 
 
 ## A jointed limb: segments with a joint dot at each bend.

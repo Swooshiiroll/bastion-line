@@ -789,7 +789,8 @@ func test_blink_around_corners() -> void:
 
 
 ## Issue #89: arcs and thin rings follow their radius (each chord within 1/16 px of the curve, so the Chrono Field's
-## ring and range circles stay round), and a turning turret fades between its baked aims instead of jumping.
+## ring and range circles stay round). #127: big thin rings stay on the texture path (no dotted joints), and the shading
+## light turns with a turret, plane or enemy, so a barrel's highlight stays on the same side of it as it turns.
 func test_smooth_drawing() -> void:
 	var worst := 0.0
 	for r in [1.5, 6.0, 20.0, 80.0, 150.0, 560.0]:
@@ -798,14 +799,30 @@ func test_smooth_drawing() -> void:
 			worst = maxf(worst, r * (1.0 - cos(span / float(n) / 2.0)))
 	check(worst <= 1.0 / 16.0 + 1e-6, "every chord within 1/16 px of its arc (worst %.3f px)" % worst)
 	check(Draw.arc_segments_for(560.0, TAU) > 100, "a 560 px ring has over a hundred segments (%d)" % Draw.arc_segments_for(560.0, TAU))
-	var step := TAU / float(Draw.TURRET_BUCKETS)
-	var b: Array = Draw.turret_blend(step * 2.5)
-	check(b[0] == 2 and near(b[1], 0.5), "half-way between two baked aims, both show (%s)" % [b])
-	var lo: Array = Draw.turret_blend(step * 3.0 - 0.001)
-	var hi: Array = Draw.turret_blend(step * 3.0 + 0.001)
-	check(lo[0] == 2 and lo[1] > 0.99 and hi[0] == 3 and hi[1] < 0.01, "crossing a baked aim hands over from fully faded in, not a jump")
-	var neg: Array = Draw.turret_blend(-0.1)
-	check(neg[0] == Draw.TURRET_BUCKETS - 1 and near(neg[1], 1.0 - 0.1 / step), "negative aims wrap round")
+	check(Draw.ring_is_texture(230.0, 2.0) and Draw.ring_is_texture(320.0, 2.0), "a 2 px range ring of 230 or 320 px is one texture, not segments")
+	Draw.light_turn(0.0)
+	check(Draw.light().is_equal_approx(Draw.LIGHT), "at rest the light is the upper left")
+	Draw.light_turn(PI / 2.0)
+	check(Draw.light().is_equal_approx(Draw.LIGHT.rotated(PI / 2.0)), "light_turn turns it")
+	var same := true
+	var flips := 0
+	var rest_side := 0.0
+	for i in 24:
+		var aim := -PI / 2.0 + float(i) * TAU / 24.0
+		var d := Vector2.from_angle(aim)
+		Draw.light_turn(aim + PI / 2.0)
+		var side := signf(Draw.bar_lit_side(Vector2.ZERO, d * 10.0).dot(d.orthogonal()))
+		if i == 0:
+			rest_side = side
+		same = same and side == rest_side
+		Draw.light_reset()
+		if i > 0 and signf(Draw.bar_lit_side(Vector2.ZERO, d * 10.0).dot(d.orthogonal())) != signf(Draw.bar_lit_side(Vector2.ZERO, Vector2.from_angle(aim - TAU / 24.0) * 10.0).dot(Vector2.from_angle(aim - TAU / 24.0).orthogonal())):
+			flips += 1
+	check(same, "with the light turning, a barrel's lit side never changes as it turns")
+	check(flips > 0, "(with a fixed light it would flip, %d times a turn)" % flips)
+	check(Draw.light().is_equal_approx(Draw.LIGHT), "light_reset puts it back")
+	EnemyKit.begin(null, Vector2(100, 50), 1.1, 1.0, 1.0)
+	check(EnemyKit.light().is_equal_approx(EnemyKit.LIGHT) and EnemyKit.world_light().is_equal_approx(EnemyKit.LIGHT.rotated(1.1)), "an enemy's light is its own upper left, turned with its heading")
 
 
 func test_colossus() -> void:
