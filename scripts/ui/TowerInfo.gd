@@ -144,6 +144,15 @@ static func stats_grid(cur: Dictionary, nxt: Dictionary, beam: bool, size := 12,
 
 
 ## "DMG 30 · RNG 177 · 3.21/s · shred 8" for the bottom bar.
+## A tower blurb split into [its description, its quote]: the quote is the part in double quotes at the end (with the
+## quote marks), "" if there's none (#128).
+static func blurb_parts(blurb: String) -> Array:
+	var q := blurb.find("\"")
+	if q < 0:
+		return [blurb.strip_edges(), ""]
+	return [blurb.substr(0, q).strip_edges(), blurb.substr(q).strip_edges()]
+
+
 static func summary(cur: Dictionary, beam: bool) -> String:
 	var parts: Array = []
 	if cur.has("damage"):

@@ -1,8 +1,8 @@
 extends "res://scripts/ui/PopOut.gd"
-## Tower shop pop-out: slides in from the right edge. Tower cards (name, cost, reach tag) in two columns, grouped by class
-## under a header (Assault, Support, Defense, Utility), cheapest first within each (#87); a card you can't afford is greyed
-## out. Below them, the hovered card's details. Picking a card closes the shop and starts placing that tower; GameScreen
-## reopens the shop once it is placed.
+## Tower shop pop-out: slides in from the right edge. Tower cards (name, cost, reach tag) in two columns, by class
+## (Assault, Defense, Support, Utility; each a new row, tinted, with no title, #128), cheapest first within each (#87);
+## a card you can't afford is greyed out. Below them, the hovered card's details. Picking a card closes the shop and
+## starts placing that tower; GameScreen reopens the shop once it is placed.
 
 const DrawControl = preload("res://scripts/ui/DrawControl.gd")
 const Draw = preload("res://scripts/view/Draw.gd")
@@ -11,8 +11,9 @@ const Towers = preload("res://data/towers.gd")
 const Tower = preload("res://scripts/entities/Tower.gd")
 
 const CARD := Vector2(136, 52)
-## The class sections, in shop order.
-const CLASSES := ["Assault", "Support", "Defense", "Utility"]
+## The classes in shop order (owner, #128). Each starts a new row of tiles; there are no class titles, the tile colours tell
+## them apart.
+const CLASSES := ["Assault", "Defense", "Support", "Utility"]
 ## Room kept under the cards for the hovered tower's details.
 const DETAIL_H := 176.0
 ## A card's tint while it can't be afforded.
@@ -44,10 +45,6 @@ func _build() -> void:
 		var types: Array = sorted_types(cls, screen.game)
 		if types.is_empty():
 			continue
-		var head := UiKit.label(str(cls).to_upper(), 11, TowerInfo.CLASS_COLORS.get(cls, UiKit.DIM))
-		head.position = Vector2(12, y)
-		grid.add_child(head)
-		y += 18.0
 		for i in types.size():
 			var b := _card(types[i], "")
 			b.position = Vector2(10 + (i % 2) * (CARD.x + 8), y + (i / 2) * (CARD.y + 6))
@@ -74,12 +71,19 @@ static func sorted_types(cls: String, g) -> Array:
 	return out
 
 
+## A card's hover tooltip: the name, its key or class, and the tower's full description (#128); the bottom bar shows the
+## quote.
+static func card_tooltip(type: String, key := "") -> String:
+	var d: Dictionary = Towers.def(type)
+	return "%s%s
+%s" % [d.name, "  [%s]" % key if key != "" else "  (%s)" % d["class"], TowerInfo.blurb_parts(str(d.blurb))[0]]
+
+
 func _card(type: String, key: String) -> Button:
 	var d: Dictionary = Towers.def(type)
 	var b := UiKit.button("", Callable(screen, "shop_pick").bind(type), CARD)
 	b.size = CARD
-	b.tooltip_text = "%s%s
-%s" % [d.name, "  [%s]" % key if key != "" else "  (%s)" % d["class"], _tagline(type, d)]
+	b.tooltip_text = card_tooltip(type, key)
 	if d.has("class"):
 		# Reworked towers: the tile is tinted by class (Assault, Support, Defense, Utility).
 		var cc: Color = TowerInfo.CLASS_COLORS.get(d["class"], UiKit.ACCENT)
@@ -129,7 +133,7 @@ func refresh(_delta: float) -> void:
 		_show(want)
 
 
-## The one-line tagline the shop shows (#116): the full blurb, with its flavour quote, stays in the Codex.
+## The one-line tagline the shop's detail section shows (#116); the tooltip has the full description (#128).
 func _tagline(type: String, d: Dictionary) -> String:
 	var tr: Dictionary = Towers.Rework.TREES.get(type, {})
 	var tag: String = str(tr.get("tagline", ""))

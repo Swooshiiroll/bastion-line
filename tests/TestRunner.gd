@@ -37,6 +37,7 @@ const Tuner = preload("res://scripts/dev/Tuner.gd")
 const TunerPanel = preload("res://scripts/dev/TunerPanel.gd")
 const TunerWindow = preload("res://scripts/dev/TunerWindow.gd")
 const ShopPanel = preload("res://scripts/ui/hud/ShopPanel.gd")
+const BottomBar = preload("res://scripts/ui/hud/BottomBar.gd")
 const TreePopOut = preload("res://scripts/ui/hud/TreePopOut.gd")
 const RocketSalvoArt = preload("res://scripts/view/towers/RocketSalvoArt.gd")
 const LaserTowerArt = preload("res://scripts/view/towers/LaserTowerArt.gd")
@@ -609,7 +610,6 @@ func test_is_boss_round() -> void:
 
 
 func test_launch_view() -> void:
-	var BottomBar = load("res://scripts/ui/hud/BottomBar.gd")
 	var g = new_game()
 	var v: Dictionary = BottomBar.launch_view(g, false)
 	check(v.counter == "ROUND 1 / %d" % g.final_round(), "round 0 shows the first round: %s" % v.counter)
@@ -4662,7 +4662,7 @@ func test_tuner_starts_undocked() -> void:
 	w.free()
 
 
-## The shop lists every tower once, by class (Assault, Support, Defense, Utility), cheapest first within each (#87).
+## The shop lists every tower once, by class (Assault, Defense, Support, Utility since #128), cheapest first within each (#87).
 func test_shop_by_class_then_price() -> void:
 	var g = new_game()
 	var seen: Array = []
@@ -4677,6 +4677,22 @@ func test_shop_by_class_then_price() -> void:
 		seen.append_array(types)
 	check(seen.size() == Towers.all_types().size() and Towers.all_types().all(func(t): return seen.has(t)), "every tower appears once")
 	check(ShopPanel.sorted_types("Assault", g)[0] == "gun_turret", "the Gun Turret (75) leads Assault")
+
+
+## dev.3 batch 3 (#128): the shop runs Assault, Defense, Support, Utility with no class titles; its tooltip holds the full
+## description and the bottom bar only the quote, with no paths line.
+func test_dev3_ui_128() -> void:
+	check(ShopPanel.CLASSES == ["Assault", "Defense", "Support", "Utility"], "the shop's class order is the owner's")
+	var bad: Array = []
+	for t in Towers.all_types():
+		var parts: Array = TowerInfo.blurb_parts(str(Towers.def(t).blurb))
+		var tip := ShopPanel.card_tooltip(t)
+		var quote: String = BottomBar.card_quote(t)
+		if str(parts[0]) == "" or tip.contains("\"") or not tip.contains(str(parts[0])) or not quote.begins_with("\"") or not quote.ends_with("\"") or quote.contains("Paths"):
+			bad.append(t)
+	check(bad.is_empty(), "each tooltip has the description and no quote; each bottom bar line is just the quote (wrong: %s)" % [bad])
+	check(TowerInfo.blurb_parts("Just words.") == ["Just words.", ""], "a blurb with no quote has no quote")
+	check(not FileAccess.get_file_as_string("res://scripts/ui/hud/ShopPanel.gd").contains("str(cls).to_upper()"), "the shop draws no class titles")
 
 
 ## The tree viewer's hover text names a step's stat changes in words (#87).
