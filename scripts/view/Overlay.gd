@@ -12,6 +12,8 @@ const Tower = preload("res://scripts/entities/Tower.gd")
 const OK_COLOR := Color(0.35, 0.95, 0.45)
 const BAD_COLOR := Color(1.0, 0.35, 0.3)
 const SELECT_COLOR := Color(0.98, 0.82, 0.4)
+## The Radar's radiation ring (#126): the owner's orange-green radiation colour.
+const RADIATION := Color(0.72, 0.86, 0.2)
 
 var world
 var _ghost: Node2D
@@ -87,12 +89,14 @@ func _draw() -> void:
 	var sel = world.selected_tower
 	if sel != null:
 		_range(sel.pos, _reach(sel), SELECT_COLOR)
+		_radiation(sel)
 		draw_rect(_footprint_rect(sel.type, sel.cell).grow(-1.0), Color(SELECT_COLOR, 0.9), false, 2.0)
 	elif build == "" and world.mouse_in_field:
 		var hc: Vector2i = world.hover_cell
 		if g.tower_at.has(hc):
 			var ht = g.tower_at[hc]
 			_range(ht.pos, _reach(ht), Color(1, 1, 1))
+			_radiation(ht)
 		elif g.has_rubble(hc):
 			var can: bool = g.rubble_error(hc) == ""
 			draw_rect(Grid.cell_rect(hc).grow(-1.0), Color(1.0, 0.6, 0.3, 0.9), false, 2.0)
@@ -177,6 +181,19 @@ func _tag(p: Vector2, text: String, col: Color) -> void:
 ## A tower's reach for its ring; 0 (no ring) for towers that reach the whole map.
 func _reach(t) -> float:
 	return t.get_range() if t.stats().has("range") else 0.0
+
+
+## The Radar's radiation circle as a second ring, in RADIATION, once it does radiation damage (#126).
+func _radiation(t) -> void:
+	var r := radiation_reach(t)
+	if r > 0.0:
+		Draw.arc(self, t.pos, r, 0.0, TAU, 72, Color(RADIATION, 0.85), 2.0, true)
+
+
+## How far a tower's radiation reaches: the Radar's rad_range once it has radiation damage, else 0.
+static func radiation_reach(t) -> float:
+	var s: Dictionary = t.stats()
+	return float(s.get("rad_range", 60.0)) if float(s.get("rad_dps", 0.0)) > 0.0 else 0.0
 
 
 func _range(center: Vector2, r: float, col: Color) -> void:

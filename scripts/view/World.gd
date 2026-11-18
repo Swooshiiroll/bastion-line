@@ -393,14 +393,14 @@ func _visual(ev: Dictionary) -> void:
 			# Smoke Shells: a grey cloud that hangs where the shell landed.
 			ground_fx.burst(ev.pos, SMOKE, 14, 36.0, 7.0, 2.4)
 		"rail_shot":
-			# The Railgun slug: a thin bright line through everything on it; it thickens and tints with Power.
+			# The Railgun slug: a thin bright line through everything on it, with no dim outer glow (#126); it thickens with
+			# Power, and from Power 2 a red stripe runs down its middle.
 			var rl := RailgunArt.levels(str(ev.look))
 			var rc: Color = Draw.GOLD if rl.P >= 5 else Draw.ACCENT.railgun
 			var rw := 2.2 + 0.45 * float(rl.P)
-			fx.tracer(ev.from, ev.to, Color(rc, 0.35), 0.3, rw * 2.4)
 			fx.tracer(ev.from, ev.to, rc, 0.2, rw)
 			if rl.P >= 2:
-				fx.tracer(ev.from, ev.to, Color(0.85, 0.2, 0.18, 0.5), 0.15, rw * 1.8)
+				fx.tracer(ev.from, ev.to, Color(0.95, 0.25, 0.2, 0.9), 0.15, rw * 0.45)
 			if rl.P >= 4:
 				fx.tracer(ev.from, ev.to, Color(1, 1, 1, 0.8), 0.12, 1.0)
 			fx.flash(ev.from, 12.0, rc, 0.1)

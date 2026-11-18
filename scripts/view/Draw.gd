@@ -962,6 +962,25 @@ static func enemy(ci: CanvasItem, type: String, c: Vector2, facing: Vector2, r: 
 		disc(ci, c, rr, Color(1, 1, 1, clampf(flash * 8.0, 0.0, 0.6)))
 
 
+## The broken shield's two halves, each as [its triangles, its offset]: worked out once from their outlines.
+static var SHRED_SHARDS: Array = _shards([
+	[PackedVector2Array([Vector2(-3.0, -3.5), Vector2(-0.3, -3.5), Vector2(0.6, -1.5), Vector2(-0.6, 0.5), Vector2(0.3, 2.2), Vector2(0.0, 4.0), Vector2(-3.0, 0.5)]), Vector2(-0.8, 0.3)],
+	[PackedVector2Array([Vector2(0.4, -3.5), Vector2(3.0, -3.5), Vector2(3.0, 0.5), Vector2(0.4, 3.6), Vector2(1.1, 2.2), Vector2(0.0, 0.5), Vector2(1.2, -1.5)]), Vector2(0.8, -0.3)],
+])
+
+
+static func _shards(halves: Array) -> Array:
+	var out: Array = []
+	for h in halves:
+		var pts: PackedVector2Array = h[0]
+		var idx := Geometry2D.triangulate_polygon(pts)
+		var tris: Array = []
+		for i in range(0, idx.size(), 3):
+			tris.append([pts[idx[i]], pts[idx[i + 1]], pts[idx[i + 2]]])
+		out.append([tris, h[1]])
+	return out
+
+
 ## Small status markers: armor shred, vulnerability, stun.
 static func enemy_status(ci: CanvasItem, e, t: float) -> void:
 	var r: float = e.radius
@@ -975,14 +994,12 @@ static func enemy_status(ci: CanvasItem, e, t: float) -> void:
 		var p: Vector2 = e.pos + Vector2(r * 0.7, -r * 0.7)
 		var sa := clampf(SHRED_MARK - float(e.shred_age), 0.0, 1.0)
 		var sc := Color(1.0, 0.4, 0.35, 0.95 * sa)
-		var left := PackedVector2Array([Vector2(-3.0, -3.5), Vector2(-0.3, -3.5), Vector2(0.6, -1.5), Vector2(-0.6, 0.5), Vector2(0.3, 2.2), Vector2(0.0, 4.0), Vector2(-3.0, 0.5)])
-		var right := PackedVector2Array([Vector2(0.4, -3.5), Vector2(3.0, -3.5), Vector2(3.0, 0.5), Vector2(0.4, 3.6), Vector2(1.1, 2.2), Vector2(0.0, 0.5), Vector2(1.2, -1.5)])
-		for i in left.size():
-			left[i] = p + left[i] + Vector2(-0.8, 0.3)
-		for i in right.size():
-			right[i] = p + right[i] + Vector2(0.8, -0.3)
-		poly(ci, left, sc)
-		poly(ci, right, sc)
+		# Each half's cracked edge makes it concave, so it's drawn as its triangles: a concave poly() falls back to the slow
+		# raw polygon call, and a few shredded enemies on screen went over the perf budget (#126).
+		for half in SHRED_SHARDS:
+			var off: Vector2 = p + half[1]
+			for tri in half[0]:
+				poly(ci, PackedVector2Array([off + tri[0], off + tri[1], off + tri[2]]), sc)
 	if e.vuln_timer > 0.0:
 		arc_segments(ci, e.pos, r + 4.0, 4, 0.9, t * 2.0, Color(0.85, 0.6, 1.0, 0.8), 1.4)
 	if e.stun_timer > 0.0:

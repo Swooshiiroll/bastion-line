@@ -26,6 +26,7 @@ const Maps = preload("res://data/maps.gd")
 const Abilities = preload("res://data/abilities.gd")
 const Research = preload("res://scripts/core/Research.gd")
 const RailgunArt = preload("res://scripts/view/towers/RailgunArt.gd")
+const RadarTowerArt = preload("res://scripts/view/towers/RadarTowerArt.gd")
 const ResearchData = preload("res://data/research.gd")
 const Difficulty = preload("res://data/difficulty.gd")
 const EnemyArt = preload("res://scripts/view/enemies/EnemyArt.gd")
@@ -2094,16 +2095,14 @@ func test_tower_fixes_110() -> void:
 		g._update_tower(r, 1.0 / 60.0)
 		steady = steady and r.cooldown == 0.0
 	check(steady, "an idle loaded Railgun keeps its cooldown at 0 (no flicker)")
-	# Mines are thrown just ahead of the enemies in reach.
+	# The Mine Layer lays mindlessly (#126, undoing #110's aim): enemies in reach don't change where its mines go.
 	var ml = g.place_tower("mine_layer", spot(g, "mine_layer", 0))
-	var walker = put(g, "grunt", 150.0, 0, 50.0)
-	ml.pos = walker.pos + Vector2(0, 50)
-	var ahead: Vector2 = g.lead_point(walker, Game.MINE_LEAD)
-	var near_all := true
-	for i in 5:
-		var q = g._mine_spot(ml, float(ml.stats().get("range", 120.0)))
-		near_all = near_all and q != null and q.distance_to(ahead) <= Game.MINE_NEAR + 0.01
-	check(near_all, "mine spots are picked just ahead of the enemy")
+	var ml_reach := float(ml.stats().get("range", 120.0))
+	var alone = g._mine_spot(ml, ml_reach)
+	for k in 6:
+		put(g, "grunt", 60.0 + 30.0 * k, 0, 50.0)
+	var crowded = g._mine_spot(ml, ml_reach)
+	check(alone != null and crowded == alone, "mine spots are the same with or without enemies near")
 	# The shock ring is still moving as it fades.
 	check(FxLayer.shock_front(0.6, 1.1) < 0.95 and FxLayer.shock_front(0.9, 1.1) > FxLayer.shock_front(0.6, 1.1) and near(FxLayer.shock_front(1.1, 1.1), 1.0), "the blast ring expands over its whole life")
 	# The Tractor: its meter drains over the hold, and it turns toward a target while recharging.
@@ -2296,7 +2295,8 @@ func test_chem_spray_events() -> void:
 
 
 ## Buys `n` steps on path `key` of a reworked tower (money is no object).
-## The Rocket Salvo (#90): each rocket leaves its own tube straight out; the tubes empty with a salvo and load again.
+## The Rocket Salvo (#90): each rocket leaves its own tube; a dumb rocket flies straight at where its target was (#126), a
+## Seeker Heads rocket straight out along the launcher before it steers. The tubes empty with a salvo and load again.
 func test_rocket_tubes() -> void:
 	var g = new_game()
 	var e1 = put(g, "grunt", 100.0, 0, 5.0)
@@ -2305,14 +2305,23 @@ func test_rocket_tubes() -> void:
 	g.projectiles.clear()
 	g._fire_salvo(t, t.stats())
 	var rockets: Array = g.projectiles.filter(func(p): return p.kind == "rocket_salvo")
-	var dir := Vector2.from_angle(t.aim)
 	var at_mouth: bool = rockets.size() == 3
-	var straight := true
+	var at_target := true
 	for i in rockets.size():
 		at_mouth = at_mouth and rockets[i].pos.distance_to(RocketSalvoArt.muzzle(t.pos, t.aim, 1.0, t.look_key(), i)) < 0.01
-		straight = straight and rockets[i].vel.normalized().dot(dir) > 0.999
+		at_target = at_target and rockets[i].vel.normalized().dot((rockets[i].target_pos - rockets[i].pos).normalized()) > 0.999
 	check(at_mouth, "each rocket starts at its own tube's mouth")
-	check(straight, "and leaves straight out along the launcher")
+	check(at_target, "a dumb rocket leaves straight at where its target was")
+	t.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, t, "b", 2)
+	g.projectiles.clear()
+	g._fire_salvo(t, t.stats())
+	rockets = g.projectiles.filter(func(p): return p.kind == "rocket_salvo")
+	var dir := Vector2.from_angle(t.aim)
+	var straight: bool = rockets.size() >= 1
+	for r in rockets:
+		straight = straight and r.vel.normalized().dot(dir) > 0.999
+	check(straight, "a Seeker Heads rocket leaves straight out along the launcher")
 	var r0 = rockets[0]
 	g._update_rocket(r0, Game.ROCKET_STRAIGHT * 0.5 / maxf(r0.speed, 1.0))
 	check(r0.vel.normalized().dot(dir) > 0.999, "it doesn't steer until it's %d px out" % int(Game.ROCKET_STRAIGHT))
@@ -2680,6 +2689,64 @@ func test_playtest_flag_123() -> void:
 	Playtest.on_launch()
 	var after: String = FileAccess.get_file_as_string(Playtest.PATH) if FileAccess.file_exists(Playtest.PATH) else "<none>"
 	check(OS.has_feature("editor") and before == after, "a launch on an editor build (tests, the editor) marks nothing")
+
+
+## dev.3 batch 1 (#126): the Railgun blast has no dim outer glow, dumb Rocket Salvo rockets fly straight, the Radar shows a
+## radiation ring once it does radiation damage, and its sweep keeps the dish's clock. (The mindless Mine Layer is checked in
+## test_tower_fixes_110.)
+func test_dev3_towers_126() -> void:
+	var g = new_game()
+	g.gold = 90000
+	# Railgun: every layer of the blast is the bright core or narrower, none of it dim.
+	var w = load("res://scripts/view/World.gd").new()
+	w.game = g
+	w.fx = FxLayer.new()
+	var core := 2.2 + 0.45 * 2.0
+	w._visual({"type": "rail_shot", "from": Vector2(100, 100), "to": Vector2(400, 100), "look": "-1|2|0|0"})
+	var thin: bool = w.fx.tracers.size() >= 2
+	for tr in w.fx.tracers:
+		thin = thin and float(tr.w) <= core + 0.001 and Color(tr.c).a >= 0.85
+	check(thin, "the Railgun blast is only its bright core (%d layers)" % w.fx.tracers.size())
+	w.free()
+	# Rocket Salvo: without Seeker Heads a rocket keeps one heading; with them it turns after a moving target.
+	var rs = g.place_tower("rocket_salvo", spot(g, "rocket_salvo", 0))
+	var foe = put(g, "grunt", 150.0, 0, 50.0)
+	rs.pos = foe.pos + Vector2(0, 90)
+	g._fire_salvo(rs, rs.stats())
+	var dumb = g.projectiles.filter(func(p): return p.kind == "rocket_salvo").front()
+	var v0: Vector2 = dumb.vel
+	var aimed := absf(angle_difference(v0.angle(), (foe.pos - dumb.pos).angle())) < 0.01
+	foe.pos += Vector2(60, 0)
+	var straight := true
+	for i in 20:
+		g._update_rocket(dumb, 1.0 / 60.0)
+		straight = straight and dumb.vel.is_equal_approx(v0)
+	check(aimed and straight, "a dumb rocket flies one straight line at where its target was")
+	g.projectiles.clear()
+	rs.mods = {"mult": {}, "add": {}, "cost": 0.0, "mastery": true}
+	buy_steps(g, rs, "b", 2)
+	foe.pos -= Vector2(60, 0)
+	g._fire_salvo(rs, rs.stats())
+	var seeker = g.projectiles.filter(func(p): return p.kind == "rocket_salvo").front()
+	var s0: Vector2 = seeker.vel
+	foe.pos += Vector2(60, 0)
+	for i in 20:
+		g._update_rocket(seeker, 1.0 / 60.0)
+	check(seeker.homing and not seeker.vel.is_equal_approx(s0), "a Seeker Heads rocket turns after its target")
+	# Radar: no radiation ring until the Radiation Emitter, then one at its radiation reach.
+	var rad = g.place_tower("radar_tower", spot(g, "radar_tower", 0))
+	var Overlay = load("res://scripts/view/Overlay.gd")
+	check(Overlay.radiation_reach(rad) == 0.0, "a stock Radar has no radiation ring")
+	buy_steps(g, rad, "a", 3)
+	check(Overlay.radiation_reach(rad) > 0.0 and near(Overlay.radiation_reach(rad), float(rad.stats().rad_range)), "the Radiation Emitter adds a ring at its reach (%.0f)" % Overlay.radiation_reach(rad))
+	check(near(RadarTowerArt.sweep_angle(1.5, 3.0), PI) and near(RadarTowerArt.sweep_angle(3.0, 3.0), TAU), "the field sweep turns once per ping, like the dish")
+	# The broken-shield mark is drawn as triangles that cover each half exactly (no slow concave polygon call).
+	var whole := 0.0
+	for half in Draw.SHRED_SHARDS:
+		check(half[0].size() == 5, "each broken-shield half is 5 triangles")
+		for tri in half[0]:
+			whole += absf((tri[1] - tri[0]).cross(tri[2] - tri[0])) * 0.5
+	check(absf(whole - 30.05) < 0.05, "and together they cover both halves (%.2f px²)" % whole)
 
 
 ## Batch 5 of the 26 Oct list (#119): upgrade text reads "+x (total)", never "X to Y", and ships no design notes. The

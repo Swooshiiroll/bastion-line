@@ -53,6 +53,11 @@ func _draw() -> void:
 	for c in g.smokes:
 		if c.get("look", "") == "smoke":
 			_smoke(c, t)
+	# Radar sweeps reach the tower's whole range, under every tower (#126); same clock and period as the dish.
+	for tw in g.towers:
+		if tw.type == "radar_tower" and tw.disabled <= 0.0:
+			var per := 3.0 if tw.stats().get("constant", false) else float(tw.stats().get("ping_every", 3.0))
+			RadarTowerArt.world_sweep(self, tw.pos, tw.get_range(), t + float(tw.cell.x) * 0.3, per, tw.look_key(), Draw.accent(tw.type, tw.spec))
 	# Turrets' static layers come from Draw's sprite cache here (see Draw.dyn).
 	var t0 := Time.get_ticks_usec()
 	Draw.turret_cache = true
